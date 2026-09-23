@@ -32,6 +32,7 @@ const completed = new Map([
   ['B7', 'Slider Rating'],
   ['B8', 'InputMask'],
   ['B9', 'Splitter ScrollArea'],
+  ['B5', 'Compare CompareHandle CompareIndicator CompareItem'],
 ].flatMap(([phase, names]) => names.split(' ').map((name) => [name, phase])));
 
 const groups = [
@@ -315,7 +316,7 @@ const audit = `# N2 — Component portfolio audit (planning only)\n\n## Executiv
 
 const currentAudit = audit
   .replace('The 24 Signal Forms controls are migration evidence, but InputMask, Slider and Rating still have explicit P2 work (N2-027/N2-026) and remain pending.', 'The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2.')
-  .replace('Completed rows require the named component report/contract gate, not a passing incidental test.', 'B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. Completed rows require the named component report/contract gate, not a passing incidental test.')
+  .replace('Completed rows require the named component report/contract gate, not a passing incidental test.', 'B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. B5 certifies the controlled Compare family and presentation-only children. Completed rows require the named component report/contract gate, not a passing incidental test.')
   .replace('(98/98)', `(${actual.length}/${found.size})`)
   .replace('**101 public entrypoints** including root, **100** secondary source entrypoints, **86** component-bearing secondary entrypoints and **14** non-component secondary entrypoints', `**${snapshot.entrypoints.length} public entrypoints** including root, **${bars.length}** secondary source entrypoints, **${summary.componentEntrypoints}** component-bearing secondary entrypoints and **${bars.length - summary.componentEntrypoints}** non-component secondary entrypoints`)
   .replace('Thus **102 − 6 + 2 = 98**', `Thus **${old.length} − ${removedIds.length} + ${addedIds.length} = ${actual.length}**`)
@@ -381,7 +382,7 @@ for (const group of groups.filter((candidate) => phaseCount(candidate) === 0)) {
   currentRoadmap = currentRoadmap.replace(new RegExp(`^- \\*\\*${group.id} —[^\\n]*\\n`, 'm'), '');
 }
 currentRoadmap = currentRoadmap
-  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'No-icons lane: **A3/A5/D1 and B7/B8/B9 completed**; A1 remains blocked by the separate icons lane.')
+  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'No-icons lane: **A3/A5/D1 and B7/B8/B9/B5 completed**; A1 remains blocked by the separate icons lane.')
   .replace('planned removals', `current removals; ${summary.physicallyRemovedHistorical} products physically retired in D1`)
   .replace(`## WAVE D — removals (${summary.remove} actual components; 1 phase, execute before dependent B/C work)`, `## WAVE D — D1 completed (${summary.physicallyRemovedHistorical} historical products removed)`)
   .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt');

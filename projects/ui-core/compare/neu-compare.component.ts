@@ -1,4 +1,4 @@
-import { Component, ElementRef, InjectionToken, ViewEncapsulation, computed, forwardRef, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, InjectionToken, ViewEncapsulation, computed, forwardRef, inject, input, output, signal } from '@angular/core';
 
 export type NeuCompareOrientation = 'horizontal' | 'vertical';
 export interface NeuCompareValueChangeEvent { originalEvent: Event; value: number; }
@@ -8,7 +8,7 @@ export const NEU_COMPARE_INSTANCE = new InjectionToken<NeuCompareComponent>('NEU
   selector: 'neu-compare',
   encapsulation: ViewEncapsulation.None,
   providers: [{ provide: NEU_COMPARE_INSTANCE, useExisting: forwardRef(() => NeuCompareComponent) }],
-  host: { '[class]': 'hostClasses()', '(pointerdown)': 'onRootPointerDown($event)', '(pointermove)': 'onRootPointerMove($event)', '(pointerup)': 'onRootPointerUp($event)', '(pointercancel)': 'onRootPointerUp($event)' },
+  host: { '[class]': 'hostClasses()', '(pointerdown)': 'onRootPointerDown($event)', '(pointermove)': 'onRootPointerMove($event)', '(pointerup)': 'onRootPointerUp($event)', '(pointercancel)': 'onRootPointerCancel($event)', '(lostpointercapture)': 'onRootPointerCancel($event)' },
   template: '<ng-content />',
   styleUrl: './neu-compare.component.scss',
 })
@@ -23,40 +23,102 @@ export class NeuCompareComponent {
   readonly disabled = input<boolean>(false);
   readonly valueChange = output<NeuCompareValueChangeEvent>();
   readonly valueChangeEnd = output<NeuCompareValueChangeEvent>();
-  readonly internalValue = signal(50);
+  // defaultValue remains a parent-provided fallback, not an uncontrolled value owner.
   readonly dragging = signal(false);
-  readonly currentValue = computed(() => this.normalizeValue(this.value() ?? this.internalValue()));
+  readonly currentValue = computed(() => this.normalizeValue(this.value() ?? this.defaultValue()));
+  readonly valuePercent = computed(() => {
+    const span = this.normalizedMax() - this.normalizedMin();
+    return span ? ((this.currentValue() - this.normalizedMin()) / span) * 100 : 0;
+  });
   readonly hostClasses = computed(() => ({ 'neu-compare': true, 'neu-compare--vertical': this.orientation() === 'vertical', 'neu-compare--disabled': this.disabled(), 'neu-compare--dragging': this.dragging() }));
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private lastInteractionValue = 50;
+  private activePointerId: number | null = null;
+  private lastInteractionValue: number | null = null;
 
-  constructor() { this.internalValue.set(this.normalizeValue(this.defaultValue())); }
+  constructor() { inject(DestroyRef).onDestroy(() => this.finishPointer(null, false)); }
 
-  getItemStyle(position: 'before' | 'after'): { clipPath: string } {
-    const percent = this.valuePercent();
-    if (this.orientation() === 'vertical') return { clipPath: position === 'before' ? `inset(0 0 ${100 - percent}% 0)` : `inset(${percent}% 0 0 0)` };
-    return { clipPath: position === 'before' ? `inset(0 ${100 - percent}% 0 0)` : `inset(0 0 0 ${percent}%)` };
+  onRootPointerDown(event: PointerEvent): void {
+    if (this.disabled() || this.activePointerId !== null || (event.button !== undefined && event.button !== 0)) return;
+    this.activePointerId = event.pointerId;
+    this.lastInteractionValue = this.currentValue();
+    this.dragging.set(true);
+    try { this.host.nativeElement.setPointerCapture?.(event.pointerId); } catch { /* Synthetic events have no active browser pointer. */ }
+    this.updateFromPointer(event);
   }
-  getHandleStyle(): { top?: string; left?: string } { const percent = `${this.valuePercent()}%`; return this.orientation() === 'vertical' ? { top: percent } : { left: percent }; }
-  onRootPointerDown(event: PointerEvent): void { if (this.disabled()) return; this.dragging.set(true); this.host.nativeElement.setPointerCapture?.(event.pointerId); this.updateFromPointer(event, true); }
-  onRootPointerMove(event: PointerEvent): void { if (this.disabled() || (!this.dragging() && !this.slideOnHover())) return; this.updateFromPointer(event, true); }
-  onRootPointerUp(event: PointerEvent): void { if (!this.dragging()) return; this.dragging.set(false); this.host.nativeElement.releasePointerCapture?.(event.pointerId); this.valueChangeEnd.emit({ originalEvent: event, value: this.lastInteractionValue }); }
-  onThumbPointerDown(event: PointerEvent): void { event.stopPropagation(); this.onRootPointerDown(event); }
-  onInputChange(event: Event): void { if (this.disabled()) return; const value = Number((event.target as HTMLInputElement).value); this.updateValue(event, value, true); this.valueChangeEnd.emit({ originalEvent: event, value: this.lastInteractionValue }); }
-
-  private updateFromPointer(event: PointerEvent, emit: boolean): void { const rect = this.host.nativeElement.getBoundingClientRect(); const ratio = this.orientation() === 'vertical' ? 1 - (event.clientY - rect.top) / Math.max(rect.height, 1) : (event.clientX - rect.left) / Math.max(rect.width, 1); this.updateValue(event, this.normalizedMin() + Math.min(1, Math.max(0, ratio)) * (this.normalizedMax() - this.normalizedMin()), emit); }
-  private updateValue(event: Event, value: number, emit: boolean): void { const next = this.normalizeValue(value); this.lastInteractionValue = next; if (next === this.currentValue()) return; if (this.value() === undefined) this.internalValue.set(next); if (emit) this.valueChange.emit({ originalEvent: event, value: next }); }
-  private valuePercent(): number { const span = this.normalizedMax() - this.normalizedMin(); return span ? ((this.currentValue() - this.normalizedMin()) / span) * 100 : 0; }
+  onRootPointerMove(event: PointerEvent): void {
+    if (this.disabled()) return;
+    if (this.activePointerId !== null) {
+      if (event.pointerId === this.activePointerId) this.updateFromPointer(event);
+    } else if (this.slideOnHover()) this.updateFromPointer(event);
+  }
+  onRootPointerUp(event: PointerEvent): void { if (event.pointerId === this.activePointerId) this.finishPointer(event, true); }
+  onRootPointerCancel(event: PointerEvent): void { if (event.pointerId === this.activePointerId) this.finishPointer(event, false); }
+  onInputChange(event: Event): void {
+    if (this.disabled()) return;
+    const next = this.propose(event, Number((event.target as HTMLInputElement).value));
+    if (next !== null) this.valueChangeEnd.emit({ originalEvent: event, value: next });
+  }
+  onHandleKeyDown(event: KeyboardEvent): void {
+    if (this.disabled()) return;
+    const step = this.normalizedStep();
+    const rtl = this.isRtl();
+    let next: number;
+    switch (event.key) {
+      case 'Home': next = this.normalizedMin(); break;
+      case 'End': next = this.normalizedMax(); break;
+      case 'ArrowRight': if (this.orientation() !== 'horizontal') return; next = this.currentValue() + (rtl ? -step : step); break;
+      case 'ArrowLeft': if (this.orientation() !== 'horizontal') return; next = this.currentValue() + (rtl ? step : -step); break;
+      case 'ArrowUp': if (this.orientation() !== 'vertical') return; next = this.currentValue() + step; break;
+      case 'ArrowDown': if (this.orientation() !== 'vertical') return; next = this.currentValue() - step; break;
+      default: return;
+    }
+    event.preventDefault();
+    const proposed = this.propose(event, next);
+    if (proposed !== null) this.valueChangeEnd.emit({ originalEvent: event, value: proposed });
+  }
+  private finishPointer(event: PointerEvent | null, completed: boolean): void {
+    if (this.activePointerId === null) return;
+    const pointerId = this.activePointerId;
+    const last = this.lastInteractionValue;
+    this.activePointerId = null;
+    this.lastInteractionValue = null;
+    this.dragging.set(false);
+    try { this.host.nativeElement.releasePointerCapture?.(pointerId); } catch { /* Capture can already be lost. */ }
+    if (completed && event && last !== null) this.valueChangeEnd.emit({ originalEvent: event, value: last });
+  }
+  private updateFromPointer(event: PointerEvent): void {
+    const rect = this.host.nativeElement.getBoundingClientRect();
+    const position = this.orientation() === 'vertical' ? 1 - (event.clientY - rect.top) / Math.max(rect.height, 1) : (event.clientX - rect.left) / Math.max(rect.width, 1);
+    const ratio = this.orientation() === 'horizontal' && this.isRtl() ? 1 - position : position;
+    this.propose(event, this.normalizedMin() + Math.min(1, Math.max(0, ratio)) * (this.normalizedMax() - this.normalizedMin()));
+  }
+  private propose(event: Event, value: number): number | null {
+    const next = this.normalizeValue(value);
+    if (next === (this.activePointerId === null ? this.currentValue() : this.lastInteractionValue)) return null;
+    if (this.activePointerId !== null) this.lastInteractionValue = next;
+    this.valueChange.emit({ originalEvent: event, value: next });
+    return next;
+  }
+  private isRtl(): boolean {
+    const explicit = this.host.nativeElement.closest('[dir]')?.getAttribute('dir');
+    return explicit ? explicit.toLowerCase() === 'rtl' : this.host.nativeElement.ownerDocument.defaultView?.getComputedStyle(this.host.nativeElement).direction === 'rtl';
+  }
   private normalizedMin(): number { const value = Number(this.min()); return Number.isFinite(value) ? value : 0; }
   private normalizedMax(): number { const min = this.normalizedMin(); const value = Number(this.max()); return Number.isFinite(value) ? Math.max(min, value) : min; }
-  private normalizeValue(value: number): number { const min = this.normalizedMin(); const max = this.normalizedMax(); const step = Number(this.step()); const snapped = Number.isFinite(step) && step > 0 ? min + Math.round((value - min) / step) * step : value; return Math.min(max, Math.max(min, Number.isFinite(snapped) ? snapped : min)); }
+  private normalizedStep(): number { const value = Number(this.step()); return Number.isFinite(value) && value > 0 ? value : 1; }
+  private normalizeValue(value: number): number { const min = this.normalizedMin(); const max = this.normalizedMax(); const step = this.normalizedStep(); const snapped = min + Math.round((value - min) / step) * step; return Math.min(max, Math.max(min, Number.isFinite(snapped) ? snapped : min)); }
 }
 
-@Component({ selector: 'neu-compare-item', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__item', '[style.clip-path]': 'clipPath()', '[attr.data-position]': 'position()' }, template: '<ng-content />' })
-export class NeuCompareItemComponent { readonly position = input<'before' | 'after'>('before'); private readonly compare = inject(NEU_COMPARE_INSTANCE); readonly clipPath = computed(() => this.compare.getItemStyle(this.position()).clipPath); }
+@Component({ selector: 'neu-compare-item', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__item', '[style.--neu-compare-percent]': 'percent()', '[attr.data-position]': 'position()' }, template: '<ng-content />' })
+export class NeuCompareItemComponent { readonly position = input<'before' | 'after'>('before'); private readonly compare = inject(NEU_COMPARE_INSTANCE); readonly percent = computed(() => `${this.compare.valuePercent()}%`); }
 
-@Component({ selector: 'neu-compare-handle', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__handle', '[style]': 'handleStyle()', '(pointerdown)': 'onPointerDown($event)' }, template: '<ng-content />' })
-export class NeuCompareHandleComponent { private readonly compare = inject(NEU_COMPARE_INSTANCE); readonly handleStyle = computed(() => this.compare.getHandleStyle()); onPointerDown(event: PointerEvent): void { this.compare.onThumbPointerDown(event); } }
+@Component({ selector: 'neu-compare-handle', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__handle', '[style.--neu-compare-percent]': 'percent()' }, template: '<input class="neu-compare__input" type="range" [min]="compare.min()" [max]="compare.max()" [step]="compare.step()" [value]="compare.currentValue()" [disabled]="compare.disabled()" [attr.aria-label]="ariaLabel() || null" [attr.aria-labelledby]="ariaLabelledBy() || null" [attr.aria-orientation]="compare.orientation()" (keydown)="compare.onHandleKeyDown($event)" (input)="compare.onInputChange($event)" /><ng-content />' })
+export class NeuCompareHandleComponent {
+  readonly ariaLabel = input<string>('Compare position');
+  readonly ariaLabelledBy = input<string>('');
+  protected readonly compare = inject(NEU_COMPARE_INSTANCE);
+  readonly percent = computed(() => `${this.compare.valuePercent()}%`);
+}
 
-@Component({ selector: 'neu-compare-indicator', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__indicator' }, template: '<input class="neu-compare__input" type="range" [min]="compare.min()" [max]="compare.max()" [step]="compare.step()" [value]="compare.currentValue()" [disabled]="compare.disabled()" [attr.aria-label]="ariaLabel() || null" [attr.aria-labelledby]="ariaLabelledBy() || null" [attr.aria-orientation]="compare.orientation()" (input)="compare.onInputChange($event)" /><ng-content />' })
-export class NeuCompareIndicatorComponent { readonly ariaLabel = input<string>('Compare position'); readonly ariaLabelledBy = input<string>(''); protected readonly compare = inject(NEU_COMPARE_INSTANCE); }
+@Component({ selector: 'neu-compare-indicator', encapsulation: ViewEncapsulation.None, host: { class: 'neu-compare__indicator', '[style.--neu-compare-percent]': 'percent()' }, template: '<ng-content />' })
+export class NeuCompareIndicatorComponent { private readonly compare = inject(NEU_COMPARE_INSTANCE); readonly percent = computed(() => `${this.compare.valuePercent()}%`); }

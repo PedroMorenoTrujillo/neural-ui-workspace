@@ -18,7 +18,7 @@ describe('NeuCompareComponent', () => {
     fixture.detectChanges();
   });
 
-  it('normalizes default, bounds and step values while emitting live and final changes', () => {
+  it('uses parent-owned fallback, bounds and step while emitting proposals', () => {
     fixture.componentRef.setInput('min', 10);
     fixture.componentRef.setInput('max', 90);
     fixture.componentRef.setInput('step', 10);
@@ -27,7 +27,7 @@ describe('NeuCompareComponent', () => {
     const changed = vi.spyOn(component.valueChange, 'emit');
     const ended = vi.spyOn(component.valueChangeEnd, 'emit');
     component.onInputChange({ target: { value: '57' } } as unknown as Event);
-    expect(component.currentValue()).toBe(60);
+    expect(component.currentValue()).toBe(50);
     expect(changed).toHaveBeenCalledWith(expect.objectContaining({ value: 60 }));
     expect(ended).toHaveBeenCalledWith(expect.objectContaining({ value: 60 }));
   });
@@ -42,10 +42,10 @@ describe('NeuCompareComponent', () => {
     const event = { clientX: 50, clientY: 50, pointerId: 1 } as PointerEvent;
     component.onRootPointerDown(event);
     expect(component.dragging()).toBe(true);
-    expect(component.currentValue()).toBe(25);
+    expect(component.currentValue()).toBe(50);
     component.onRootPointerMove({ ...event, clientX: 150 } as PointerEvent);
     component.onRootPointerUp(event);
-    expect(component.currentValue()).toBe(75);
+    expect(component.currentValue()).toBe(50);
     expect(component.dragging()).toBe(false);
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
@@ -53,14 +53,15 @@ describe('NeuCompareComponent', () => {
     expect(component.dragging()).toBe(false);
   });
 
-  it('calculates horizontal and vertical clipping and handle placement', () => {
-    component.onInputChange({ target: { value: '25' } } as unknown as Event);
-    expect(component.getItemStyle('before').clipPath).toContain('75%');
-    expect(component.getHandleStyle().left).toBe('25%');
+  it('derives placement from applied value, not the proposed value', () => {
+    fixture.componentRef.setInput('value', 25);
+    fixture.detectChanges();
+    expect(component.valuePercent()).toBe(25);
+    component.onInputChange({ target: { value: '75' } } as unknown as Event);
+    expect(component.valuePercent()).toBe(25);
     fixture.componentRef.setInput('orientation', 'vertical');
     fixture.detectChanges();
-    expect(component.getItemStyle('after').clipPath).toContain('25%');
-    expect(component.getHandleStyle().top).toBe('25%');
+    expect(component.valuePercent()).toBe(25);
   });
 
   it('keeps a controlled value external while reporting the requested interaction and edge policies', () => {
@@ -98,12 +99,13 @@ describe('NeuCompareComponent', () => {
       pointerId: 2,
       stopPropagation: stop,
     } as unknown as PointerEvent;
-    component.onThumbPointerDown(event);
-    expect(stop).toHaveBeenCalled();
-    expect(component.currentValue()).toBe(75);
+    const changed = vi.spyOn(component.valueChange, 'emit');
+    component.onRootPointerDown(event);
+    expect(stop).not.toHaveBeenCalled();
+    expect(changed).toHaveBeenCalledWith(expect.objectContaining({ value: 75 }));
     component.onRootPointerUp(event);
     component.onRootPointerMove({ ...event, clientY: 150 } as PointerEvent);
-    expect(component.currentValue()).toBe(25);
+    expect(changed).toHaveBeenCalledWith(expect.objectContaining({ value: 25 }));
     component.onRootPointerUp(event);
     expect(component.dragging()).toBe(false);
   });
@@ -131,13 +133,13 @@ describe('NeuCompareComponent', () => {
     component.onRootPointerUp({ pointerId: 1 } as PointerEvent);
     component.onInputChange({ target: { value: '50' } } as unknown as Event);
     expect(changed).not.toHaveBeenCalled();
-    expect(component.getItemStyle('after').clipPath).toContain('50%');
+    expect(component.valuePercent()).toBe(50);
 
     fixture.componentRef.setInput('orientation', 'vertical');
-    expect(component.getItemStyle('before').clipPath).toContain('50%');
+    expect(component.valuePercent()).toBe(50);
     fixture.componentRef.setInput('min', 10);
     fixture.componentRef.setInput('max', 10);
-    expect(component.getHandleStyle().top).toBe('0%');
+    expect(component.valuePercent()).toBe(0);
 
     fixture.componentRef.setInput('disabled', true);
     component.onInputChange({ target: { value: '10' } } as unknown as Event);
@@ -154,7 +156,7 @@ describe('NeuCompareComponent', () => {
         NeuCompareIndicatorComponent,
       ],
       template:
-        '<neu-compare><neu-compare-item position="before"><div>Before</div></neu-compare-item><neu-compare-item position="after"><div>After</div></neu-compare-item><neu-compare-handle /><neu-compare-indicator ariaLabel="Comparison" /></neu-compare>',
+        '<neu-compare><neu-compare-item position="before"><div>Before</div></neu-compare-item><neu-compare-item position="after"><div>After</div></neu-compare-item><neu-compare-handle ariaLabel="Comparison" /><neu-compare-indicator /></neu-compare>',
     })
     class Host {}
     await TestBed.resetTestingModule()

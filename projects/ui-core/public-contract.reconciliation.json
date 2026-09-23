@@ -621,11 +621,11 @@
     },
     {
       "oldToken": "compare/neu-compare.component.ts#input:ariaLabel",
-      "newId": "./compare#NeuCompareIndicatorComponent.input:ariaLabel"
+      "newId": "./compare#NeuCompareHandleComponent.input:ariaLabel"
     },
     {
       "oldToken": "compare/neu-compare.component.ts#input:ariaLabelledBy",
-      "newId": "./compare#NeuCompareIndicatorComponent.input:ariaLabelledBy"
+      "newId": "./compare#NeuCompareHandleComponent.input:ariaLabelledBy"
     },
     {
       "oldToken": "compare/neu-compare.component.ts#input:defaultValue",

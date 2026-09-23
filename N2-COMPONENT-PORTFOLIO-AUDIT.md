@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 96 |
-| COMPLETED | 47 |
-| PENDING | 49 |
+| COMPLETED | 51 |
+| PENDING | 45 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
-| 🟢 LIGHT | 19 |
-| 🟡 MEDIUM | 22 |
+| 🟢 LIGHT | 16 |
+| 🟡 MEDIUM | 21 |
 | 🟠 HEAVY | 7 |
 | 🔴 VERY HEAVY | 1 |
-| XS | 13 |
+| XS | 10 |
 | S | 6 |
-| M | 22 |
+| M | 21 |
 | L | 7 |
 | XL | 1 |
 
-The partition is **47 + 49 + 0 = 96**. The merged/replaced number describes retired historical identities, not another current-status bucket. 48 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **51 + 45 + 0 = 96**. The merged/replaced number describes retired historical identities, not another current-status bucket. 44 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
 
 ## Method and taxonomy
 
@@ -33,7 +33,7 @@ N2-PHASE-2 used **98 canonical component source files** before removing Chart; t
 
 ## Product decisions and evidence standard
 
-Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, Timeline remains pending visual/semantic certification. OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components. There is **no separate public Gantt or Scheduler component/entrypoint**; both concepts reside in the one SchedulerGantt runtime, so removal counts once. Generic Charts already left Core and future neural-charts is not an active Core component. N2-023's visual-axis edits alone never certify a component: rows marked “transverse only” remain pending. The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2. B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. Completed rows require the named component report/contract gate, not a passing incidental test.
+Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, Timeline remains pending visual/semantic certification. OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components. There is **no separate public Gantt or Scheduler component/entrypoint**; both concepts reside in the one SchedulerGantt runtime, so removal counts once. Generic Charts already left Core and future neural-charts is not an active Core component. N2-023's visual-axis edits alone never certify a component: rows marked “transverse only” remain pending. The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2. B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. B5 certifies the controlled Compare family and presentation-only children. Completed rows require the named component report/contract gate, not a passing incidental test.
 
 ## Complete public-component matrix
 
@@ -59,10 +59,10 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuCodeBlockComponent | @neural-ui/core/code-block | PENDING (transverse only) | B10 | REFACTOR | • Audit copy fallback, timer cleanup and security<br>• Verify language label and accessible feedback | MEDIUM | M | MEDIUM | independent | REVIEW | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | MEDIUM | LOW | LOW | LOW | GPT-6 SOL MEDIUM | yes | content and temporal display | 59 | content and temporal display; 261 source lines; no overlay in component source. |
 | NeuColorPickerComponent | @neural-ui/core/color-picker | COMPLETED | N2-024 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-024; do not reopen for a transverse smoke test. |
 | NeuCommandPaletteComponent | @neural-ui/core/command-palette | PENDING | C4 | DEEP REFACTOR | • Audit command registry and Router coupling<br>• Design overlay search/focus/request lifecycle before refactor | HEAVY | L | HIGH | independent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | command overlay | 20 | command overlay; 298 source lines; overlay present. |
-| NeuCompareComponent | @neural-ui/core/compare | PENDING | B5 | REFACTOR | • Audit controlled value and pointer/keyboard normalization<br>• Verify orientation, min/max and drag lifecycle | MEDIUM | M | MEDIUM | independent | REVIEW | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | comparison interaction | 59 | comparison interaction; 63 source lines; no overlay in component source. |
-| NeuCompareHandleComponent | @neural-ui/core/compare | PENDING | B5 | AUDIT ONLY | • Audit handle ARIA/keyboard semantics<br>• Use Compare parent proposal without child state mirror | LIGHT | XS | MEDIUM | independent | NONE | SSR import/render smoke; hydration if changed DOM | semantic/keyboard smoke | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | comparison interaction | 91 | comparison interaction; 63 source lines; no overlay in component source. |
-| NeuCompareIndicatorComponent | @neural-ui/core/compare | PENDING | B5 | AUDIT ONLY | • Audit decorative versus informative label<br>• Keep derived position presentation-only | LIGHT | XS | MEDIUM | independent | NONE | SSR import/render smoke; hydration if changed DOM | semantic/keyboard smoke | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | comparison interaction | 91 | comparison interaction; 63 source lines; no overlay in component source. |
-| NeuCompareItemComponent | @neural-ui/core/compare | PENDING | B5 | AUDIT ONLY | • Audit item projection and accessible alternative<br>• Avoid a second value owner | LIGHT | XS | MEDIUM | independent | NONE | SSR import/render smoke; hydration if changed DOM | semantic/keyboard smoke | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | comparison interaction | 91 | comparison interaction; 63 source lines; no overlay in component source. |
+| NeuCompareComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |
+| NeuCompareHandleComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |
+| NeuCompareIndicatorComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |
+| NeuCompareItemComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |
 | NeuConfirmDialogComponent | @neural-ui/core/confirm-dialog | PENDING | B4 | REFACTOR | • Audit confirm/cancel ownership and dialog focus<br>• Verify SSR-safe lifecycle | MEDIUM | M | MEDIUM | independent | REVIEW | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | overlay feedback | 59 | overlay feedback; 112 source lines; no overlay in component source. |
 | NeuConfirmPopupComponent | @neural-ui/core/confirm-popup | PENDING | B4 | REFACTOR | • Audit anchored overlay guards and focus return<br>• Verify outside/Escape exactly once | MEDIUM | M | MEDIUM | independent | REVIEW | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | overlay feedback | 59 | overlay feedback; 151 source lines; no overlay in component source. |
 | NeuDashboardGridComponent | @neural-ui/core/dashboard-grid | PENDING | B6 | REFACTOR | • Audit tile identity and immutable reorder proposal<br>• Verify CDK drag, SSR projection and destroy cleanup | MEDIUM | M | MEDIUM | independent | REVIEW | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | data layout | 59 | data layout; 187 source lines; no overlay in component source. |

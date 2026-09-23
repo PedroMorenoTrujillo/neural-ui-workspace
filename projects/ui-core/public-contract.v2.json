@@ -8434,20 +8434,12 @@
           "signature": "readonly value: _angular_core.InputSignal<number | undefined>;"
         },
         {
-          "id": "./compare#NeuCompareComponent.method:getHandleStyle",
-          "name": "getHandleStyle",
+          "id": "./compare#NeuCompareComponent.method:onHandleKeyDown",
+          "name": "onHandleKeyDown",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "getHandleStyle(): {\n    top?: string;\n    left?: string;\n};"
-        },
-        {
-          "id": "./compare#NeuCompareComponent.method:getItemStyle",
-          "name": "getItemStyle",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "getItemStyle(position: 'before' | 'after'): {\n    clipPath: string;\n};"
+          "signature": "onHandleKeyDown(event: KeyboardEvent): void;"
         },
         {
           "id": "./compare#NeuCompareComponent.method:onInputChange",
@@ -8456,6 +8448,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onInputChange(event: Event): void;"
+        },
+        {
+          "id": "./compare#NeuCompareComponent.method:onRootPointerCancel",
+          "name": "onRootPointerCancel",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onRootPointerCancel(event: PointerEvent): void;"
         },
         {
           "id": "./compare#NeuCompareComponent.method:onRootPointerDown",
@@ -8480,14 +8480,6 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onRootPointerUp(event: PointerEvent): void;"
-        },
-        {
-          "id": "./compare#NeuCompareComponent.method:onThumbPointerDown",
-          "name": "onThumbPointerDown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onThumbPointerDown(event: PointerEvent): void;"
         },
         {
           "id": "./compare#NeuCompareComponent.output:valueChange",
@@ -8534,14 +8526,6 @@
           "signature": "readonly hostClasses: _angular_core.Signal<{\n    'neu-compare': boolean;\n    'neu-compare--vertical': boolean;\n    'neu-compare--disabled': boolean;\n    'neu-compare--dragging': boolean;\n}>;"
         },
         {
-          "id": "./compare#NeuCompareComponent.property:internalValue",
-          "name": "internalValue",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly internalValue: _angular_core.WritableSignal<number>;"
-        },
-        {
           "id": "./compare#NeuCompareComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
@@ -8556,6 +8540,14 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuCompareComponent, never>;"
+        },
+        {
+          "id": "./compare#NeuCompareComponent.property:valuePercent",
+          "name": "valuePercent",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly valuePercent: _angular_core.Signal<number>;"
         }
       ]
     },
@@ -8569,20 +8561,24 @@
       "signature": "declare class NeuCompareHandleComponent {\n}",
       "members": [
         {
-          "id": "./compare#NeuCompareHandleComponent.method:onPointerDown",
-          "name": "onPointerDown",
-          "kind": "method",
+          "id": "./compare#NeuCompareHandleComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onPointerDown(event: PointerEvent): void;"
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./compare#NeuCompareHandleComponent.property:handleStyle",
-          "name": "handleStyle",
-          "kind": "property",
+          "id": "./compare#NeuCompareHandleComponent.input:ariaLabelledBy",
+          "name": "ariaLabelledBy",
+          "kind": "input",
+          "publicName": "ariaLabelledBy",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly handleStyle: _angular_core.Signal<{\n    top?: string;\n    left?: string;\n}>;"
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./compare#NeuCompareHandleComponent.property:ɵcmp",
@@ -8590,7 +8586,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCompareHandleComponent, \"neu-compare-handle\", never, {}, {}, never, [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCompareHandleComponent, \"neu-compare-handle\", never, {\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./compare#NeuCompareHandleComponent.property:ɵfac",
@@ -8599,6 +8595,14 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuCompareHandleComponent, never>;"
+        },
+        {
+          "id": "./compare#NeuCompareHandleComponent.property:percent",
+          "name": "percent",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly percent: _angular_core.Signal<string>;"
         }
       ]
     },
@@ -8612,32 +8616,12 @@
       "signature": "declare class NeuCompareIndicatorComponent {\n}",
       "members": [
         {
-          "id": "./compare#NeuCompareIndicatorComponent.input:ariaLabel",
-          "name": "ariaLabel",
-          "kind": "input",
-          "publicName": "ariaLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./compare#NeuCompareIndicatorComponent.input:ariaLabelledBy",
-          "name": "ariaLabelledBy",
-          "kind": "input",
-          "publicName": "ariaLabelledBy",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
-        },
-        {
           "id": "./compare#NeuCompareIndicatorComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCompareIndicatorComponent, \"neu-compare-indicator\", never, {\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCompareIndicatorComponent, \"neu-compare-indicator\", never, {}, {}, never, [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./compare#NeuCompareIndicatorComponent.property:ɵfac",
@@ -8646,6 +8630,14 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuCompareIndicatorComponent, never>;"
+        },
+        {
+          "id": "./compare#NeuCompareIndicatorComponent.property:percent",
+          "name": "percent",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly percent: _angular_core.Signal<string>;"
         }
       ]
     },
@@ -8669,14 +8661,6 @@
           "signature": "readonly position: _angular_core.InputSignal<\"before\" | \"after\">;"
         },
         {
-          "id": "./compare#NeuCompareItemComponent.property:clipPath",
-          "name": "clipPath",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly clipPath: _angular_core.Signal<string>;"
-        },
-        {
           "id": "./compare#NeuCompareItemComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
@@ -8691,6 +8675,14 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuCompareItemComponent, never>;"
+        },
+        {
+          "id": "./compare#NeuCompareItemComponent.property:percent",
+          "name": "percent",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly percent: _angular_core.Signal<string>;"
         }
       ]
     },
@@ -51137,10 +51129,10 @@
       "signature": "readonly valueChangeEnd: _angular_core.OutputEmitterRef<NeuCompareValueChangeEvent>;"
     },
     {
-      "id": "./compare#NeuCompareIndicatorComponent.input:ariaLabel",
+      "id": "./compare#NeuCompareHandleComponent.input:ariaLabel",
       "entrypoint": "./compare",
-      "declaration": "NeuCompareIndicatorComponent",
-      "selector": "neu-compare-indicator",
+      "declaration": "NeuCompareHandleComponent",
+      "selector": "neu-compare-handle",
       "propertyName": "ariaLabel",
       "publicName": "ariaLabel",
       "kind": "input",
@@ -51149,10 +51141,10 @@
       "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./compare#NeuCompareIndicatorComponent.input:ariaLabelledBy",
+      "id": "./compare#NeuCompareHandleComponent.input:ariaLabelledBy",
       "entrypoint": "./compare",
-      "declaration": "NeuCompareIndicatorComponent",
-      "selector": "neu-compare-indicator",
+      "declaration": "NeuCompareHandleComponent",
+      "selector": "neu-compare-handle",
       "propertyName": "ariaLabelledBy",
       "publicName": "ariaLabelledBy",
       "kind": "input",
@@ -65936,12 +65928,12 @@
       "type": 187,
       "variable": 1
     },
-    "publicSymbols": 5231,
+    "publicSymbols": 5230,
     "statuses": {
       "SUPPORTED": 3304,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1927,
+      "INTERNAL/UNSUPPORTED": 1926,
       "REVIEW": 0
     },
     "bindings": {

@@ -316,6 +316,7 @@ No queda ninguna ambigüedad P1 que bloquee implementación. Estas decisiones so
 | Splitter controlled resize | APPROVED TARGET B9 | `panes` owns applied percentage sizes; `sizesChange` proposes immutable percentages; pane min/max remain pixels; logical pane order and physical RTL interactions; persistence external | B9 normative resolution |
 | Splitter collapse/restore | DEFERRED P3 | no collapse API or hidden restoration state in B9 | future measured need |
 | ScrollArea horizontal coordinate | APPROVED TARGET B9 | public `left` is normalized logical `[0,max]`: zero at inline-start and max at inline-end; native `scrollLeft` remains private; horizontal arrows move physically, Home/End go to logical start/end; observer follows `enhanced` lifecycle | B9 normative resolution |
+| Compare controlled position | APPROVED TARGET B5 | `value` is parent-applied in the existing numeric `min`/`max` domain; `defaultValue` is only a parent-provided fallback. `valueChange`/`valueChangeEnd` propose; Handle owns the accessible range interaction, while Indicator and Item derive presentation only. Horizontal RTL uses inline-start as minimum. | B5 certification |
 | Gallery/ImageGallery merge | NEEDS REVIEW P2 | no retirar ImageGallery hasta equivalencia | N2-029 |
 | EyeDropper | NEEDS REVIEW P2 | color editor funciona sin API browser | N2-024 |
 | VirtualList 2D/variable | REJECTED para P1; revisión futura P3 | lista vertical fixed-size | N2-036 |

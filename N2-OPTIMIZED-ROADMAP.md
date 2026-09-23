@@ -2,7 +2,7 @@
 
 ## Decision and counts
 
-**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **96** = 47 completed + 49 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 19, MEDIUM 22, HEAVY 7, VERY HEAVY 1. Pending effort: XS 13, S 6, M 22, L 7, XL 1. One-by-one active work would require **48 component/removal tasks**; the proposal is **16 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
+**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **96** = 51 completed + 45 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 16, MEDIUM 21, HEAVY 7, VERY HEAVY 1. Pending effort: XS 10, S 6, M 21, L 7, XL 1. One-by-one active work would require **44 component/removal tasks**; the proposal is **15 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
 
 ## Top 10 next best targets
 
@@ -17,7 +17,7 @@
 
 ## Dependency-aware execution
 
-No-icons lane: **A3/A5/D1 and B7/B8/B9 completed**; A1 remains blocked by the separate icons lane. D1 is labelled Wave D by work type but should run before TimelineGrid and Tree to avoid preserving removed consumers. A1 gives Icon/Button first; A2 can then safely audit consumers. N2-031 native improvements are directed within affected batches, not a mass rewrite. N2-032 package/bundle measurements run per batch and are consolidated in E.
+No-icons lane: **A3/A5/D1 and B7/B8/B9/B5 completed**; A1 remains blocked by the separate icons lane. D1 is labelled Wave D by work type but should run before TimelineGrid and Tree to avoid preserving removed consumers. A1 gives Icon/Button first; A2 can then safely audit consumers. N2-031 native improvements are directed within affected batches, not a mass rewrite. N2-032 package/bundle measurements run per batch and are consolidated in E.
 
 ## WAVE A — quick wins (15 components; 3 batches remaining)
 
@@ -25,13 +25,12 @@ No-icons lane: **A3/A5/D1 and B7/B8/B9 completed**; A1 remains blocked by the se
 - **A2 — feedback/status (5):** NeuAlertComponent, NeuBadgeComponent, NeuChipComponent, NeuEmptyStateComponent, NeuToastContainerComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 - **A4 — metrics/form shell (5):** NeuFormFieldComponent, NeuInputGroupComponent, NeuMeterGroupComponent, NeuProgressBarComponent, NeuStatsCardComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 
-## WAVE B — medium (25 components; 10 batches)
+## WAVE B — medium (21 components; 10 batches)
 
 - **B1 — navigation state (4):** NeuBreadcrumbComponent, NeuDockComponent, NeuNavComponent, NeuStepperComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B2 — menu family (4):** NeuMenubarComponent, NeuMenuButtonComponent, NeuMenuComponent, NeuTieredMenuComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B3 — action navigation (3):** NeuCarouselComponent, NeuSpeedDialComponent, NeuSplitButtonComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B4 — overlay feedback (4):** NeuBlockUIComponent, NeuConfirmDialogComponent, NeuConfirmPopupComponent, NeuNotificationCenterComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
-- **B5 — comparison interaction (4):** NeuCompareComponent, NeuCompareHandleComponent, NeuCompareIndicatorComponent, NeuCompareItemComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B6 — data layout (2):** NeuDashboardGridComponent, NeuDataViewComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B10 — content and temporal display (4):** NeuCodeBlockComponent, NeuTerminalComponent, NeuTimelineComponent, NeuTimelineGridComponent. GPT-6 SOL MEDIUM; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 
@@ -95,4 +94,4 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 | InputMask (B8) | No other pending component | N2-003 Forms base already certified |
 | Splitter/ScrollArea (B9) | No other pending component | N2-001 controlled-state contract |
 
-A3, A5 and D1 are complete. A1 remains blocked by the separate neural-icons lane. The plan saves **32** active component/removal task slots versus one-by-one execution (48 → 16); this is a phase count, not a calendar or token-cost guarantee.
+A3, A5 and D1 are complete. A1 remains blocked by the separate neural-icons lane. The plan saves **29** active component/removal task slots versus one-by-one execution (44 → 15); this is a phase count, not a calendar or token-cost guarantee.

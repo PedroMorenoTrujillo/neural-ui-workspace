@@ -20,8 +20,8 @@ The reference release introduced Compare as a current before/after comparison fa
 | Comparison root | `NeuCompareComponent` |
 | Before/after content | `NeuCompareItemComponent` with `position` |
 | Draggable handle | `NeuCompareHandleComponent` |
-| Accessible range control | `NeuCompareIndicatorComponent` |
-| Controlled/uncontrolled value | `value` and `defaultValue` |
+| Accessible range control | `NeuCompareHandleComponent` |
+| Controlled value | `value`; `defaultValue` is a parent-applied fallback when `value` is absent, not an internal owner |
 | Range semantics | `min`, `max`, `step` |
 | Horizontal and vertical clipping | `orientation` |
 | Hover and drag updates | `slideOnHover`, pointer capture and live `valueChange` |
