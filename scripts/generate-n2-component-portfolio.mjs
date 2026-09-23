@@ -34,6 +34,8 @@ const completed = new Map([
   ['B9', 'Splitter ScrollArea'],
   ['B5', 'Compare CompareHandle CompareIndicator CompareItem'],
   ['A1', 'Button ButtonGroup Tag Toolbar'],
+  ['A2', 'Alert Badge Chip EmptyState ToastContainer'],
+  ['A4', 'MeterGroup ProgressBar StatsCard FormField InputGroup'],
 ].flatMap(([phase, names]) => names.split(' ').map((name) => [name, phase])));
 
 const groups = [
@@ -69,10 +71,10 @@ const changes = {
   Tag: ['Verify presentational semantics and semantic tone classes', 'Audit accessible content, canonical icon and immutable inputs; removal belongs to Chip'],
   Toolbar: ['Audit projected action order and responsive semantics', 'Check keyboard traversal and visual tokens'],
   Alert: ['Audit status/live-region policy and dismiss ownership', 'Verify button/icon dependencies and visual tones'],
-  Badge: ['Audit count/overflow announcement and tone mapping', 'Measure cost for navigation consumers'],
+  Badge: ['Certify presentational content/dot semantics without invented count/max API', 'Measure cost for navigation consumers'],
   Chip: ['Audit remove gesture, disabled semantics and tone contract', 'Keep content/close action keyboard-accessible'],
-  EmptyState: ['Audit content/action projection and optional CTA semantics', 'Verify no implicit routing or state owner'],
-  ToastContainer: ['Audit live-region timing and service cleanup', 'Verify exactly-once dismiss and SSR silence'],
+  EmptyState: ['Certify title/description/icon and existing actionLabel/action contract', 'Verify no implicit routing or state owner'],
+  ToastContainer: ['Audit live-region timing and service cleanup', 'Verify exactly-once dismiss and SSR-safe timer behavior'],
   Avatar: ['Audit alt/fallback and image failure behavior', 'Verify dimension/token contract'],
   AvatarGroup: ['Audit grouped overflow and child labelling', 'Keep Avatar dependency explicit'],
   Card: ['Audit header/body/footer projection and landmarks', 'Verify presentational-only ownership'],
@@ -386,13 +388,13 @@ for (const group of groups.filter((candidate) => phaseCount(candidate) === 0)) {
   currentRoadmap = currentRoadmap.replace(new RegExp(`^- \\*\\*${group.id} —[^\\n]*\\n`, 'm'), '');
 }
 currentRoadmap = currentRoadmap
-  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'A3/A5/D1, B7/B8/B9/B5 and A1 are complete. A0.2 externalized Icon to neural-icons; A2/A4 are the next light batches.')
-  .replace('A1 gives Icon/Button first; A2 can then safely audit consumers.', 'A0.2 externalized Icon, and A1 certified Button, ButtonGroup, presentational Tag, and Toolbar; A2 can now audit consumers.')
+  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'A3/A5/D1, B7/B8/B9/B5, A1, A2 and A4 are complete. A0.2 externalized Icon to neural-icons; continue with approved medium batches.')
+  .replace('A1 gives Icon/Button first; A2 can then safely audit consumers.', 'A0.2 externalized Icon; A1/A2/A4 certified the dependent action, feedback and metrics/form-shell surfaces.')
   .replace('planned removals', `current removals; ${summary.physicallyRemovedHistorical} products physically retired in D1`)
   .replace(`## WAVE D — removals (${summary.remove} actual components; 1 phase, execute before dependent B/C work)`, `## WAVE D — D1 completed (${summary.physicallyRemovedHistorical} historical products removed)`)
   .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt');
 const currentDependencySection = dependencySection
-  .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5, D1 and A1 are complete; A2/A4 remain independent next batches.')
+  .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch.')
   .replace('(65 → 22)', `(${summary.activePending + summary.remove} → ${summary.implementationBatches})`);
 
 if (process.argv.includes('--write')) {

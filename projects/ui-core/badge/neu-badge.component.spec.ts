@@ -68,6 +68,14 @@ describe('NeuBadgeComponent', () => {
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.querySelector('.neu-badge__dot')).toBeTruthy();
+    expect(df.nativeElement.querySelector('.neu-badge__dot').getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('keeps readable projected text without forcing a live announcement', () => {
+    const el = fixture.nativeElement.querySelector('neu-badge');
+    expect(el.textContent).toContain('Label');
+    expect(el.getAttribute('role')).toBeNull();
+    expect(el.getAttribute('aria-live')).toBeNull();
   });
 
   it('should NOT render dot element when dot=false', () => {

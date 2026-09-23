@@ -1,9 +1,4 @@
-import {
-  Component,
-  ViewEncapsulation,
-  computed,
-  input,
-} from '@angular/core';
+import { Component, ViewEncapsulation, input } from '@angular/core';
 import { NeuralIcon } from '@neural-icons/angular';
 import type { NeuralIconName } from '@neural-icons/core';
 import { iconMinus } from '@neural-icons/core/icons/minus';
@@ -13,7 +8,7 @@ import { iconTrendingUp } from '@neural-icons/core/icons/trending-up';
 export type NeuStatsTrend = 'up' | 'down' | 'neutral';
 
 /**
- * NeuStatsCard — Card de métrica con título, valor, tendencia y sparkline.
+ * NeuStatsCard — Card de métrica con título, valor y tendencia.
  *
  * Uso:
  *   <neu-stats-card
@@ -22,7 +17,6 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
  *     change="+12.5%"
  *     trend="up"
  *     icon="dollar-sign"
- *     [sparkData]="[30,45,38,52,60,55,70]"
  *   />
  */
 @Component({
@@ -36,7 +30,7 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
       <div class="neu-stats-card__header">
         @if (icon()) {
           <span class="neu-stats-card__icon">
-            <neural-icon [icon]="icon()!" size="1.125rem" />
+            <neural-icon [icon]="icon()!" size="1.125rem" aria-hidden="true" />
           </span>
         }
         <span class="neu-stats-card__title">{{ title() }}</span>
@@ -45,16 +39,16 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
       <!-- Valor principal -->
       <div class="neu-stats-card__value">{{ value() }}</div>
 
-      <!-- Footer: cambio + sparkline -->
+      <!-- Footer: cambio y contenido adicional proyectado por el consumer -->
       <div class="neu-stats-card__footer">
         @if (change()) {
           <span class="neu-stats-card__change neu-stats-card__change--{{ trend() }}">
             @if (trend() === 'up') {
-              <neural-icon [icon]="iconTrendingUp" size="0.875rem" />
+              <neural-icon [icon]="iconTrendingUp" size="0.875rem" aria-hidden="true" />
             } @else if (trend() === 'down') {
-              <neural-icon [icon]="iconTrendingDown" size="0.875rem" />
+              <neural-icon [icon]="iconTrendingDown" size="0.875rem" aria-hidden="true" />
             } @else {
-              <neural-icon [icon]="iconMinus" size="0.875rem" />
+              <neural-icon [icon]="iconMinus" size="0.875rem" aria-hidden="true" />
             }
             {{ change() }}
           </span>
@@ -63,23 +57,7 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
           <span class="neu-stats-card__label">{{ label() }}</span>
         }
 
-        @if (sparkData().length > 1) {
-          <svg
-            class="neu-stats-card__sparkline"
-            viewBox="0 0 100 30"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <polyline
-              class="neu-stats-card__spark-line"
-              [attr.points]="sparkPoints()"
-              fill="none"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        }
+        <ng-content />
       </div>
     </div>
   `,
@@ -99,21 +77,6 @@ export class NeuStatsCardComponent {
   trend = input<NeuStatsTrend>('neutral');
   /** Texto auxiliar bajo el cambio (p.ej. "vs. mes anterior"). / Auxiliary text below the change (e.g. "vs. previous month"). */
   label = input<string>('');
-  /** Nombre del icono Lucide para el encabezado. / Lucide icon name for the header. */
+  /** Nombre del icono Neural para el encabezado. / Neural icon name for the header. */
   icon = input<NeuralIconName | null>(null);
-  /** Array de valores numéricos para la sparkline. Mín. 2 puntos. / Array of numeric values for the sparkline. Min. 2 points. */
-  sparkData = input<number[]>([]);
-
-  /** @internal Genera los puntos SVG de la sparkline / Generates the SVG sparkline points */
-  protected readonly sparkPoints = computed(() => {
-    const data = this.sparkData();
-    if (data.length < 2) return '';
-    const min = Math.min(...data);
-    const max = Math.max(...data);
-    const range = max - min || 1;
-    const step = 100 / (data.length - 1);
-    return data
-      .map((v, i) => `${(i * step).toFixed(1)},${(30 - ((v - min) / range) * 25 + 2.5).toFixed(1)}`)
-      .join(' ');
-  });
 }

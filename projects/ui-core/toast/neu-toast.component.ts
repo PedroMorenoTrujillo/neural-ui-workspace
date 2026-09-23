@@ -67,7 +67,7 @@ const TOAST_ICONS: Record<NeuToastTone, NeuralIconDefinition> = {
           [attr.aria-label]="'Cerrar'"
           (click)="toastService.dismiss(toast.id)"
         >
-          <neural-icon [icon]="iconX" size="1rem" />
+          <neural-icon [icon]="iconX" size="1rem" aria-hidden="true" />
         </button>
       </div>
     }

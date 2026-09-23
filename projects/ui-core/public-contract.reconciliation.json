@@ -4,11 +4,11 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
-    "mapped": 630,
+    "declarationBindings": 1481,
+    "bindingDelta": 314,
+    "mapped": 629,
     "aliasCorrections": 3,
-    "missingOldEntries": 531,
+    "missingOldEntries": 532,
     "newlyDiscovered": 846,
     "ambiguities": 6,
     "discoveryReasons": {
@@ -2127,10 +2127,6 @@
       "newId": "./stats-card#NeuStatsCardComponent.input:label"
     },
     {
-      "oldToken": "stats-card/neu-stats-card.component.ts#input:sparkData",
-      "newId": "./stats-card#NeuStatsCardComponent.input:sparkData"
-    },
-    {
       "oldToken": "stats-card/neu-stats-card.component.ts#input:title",
       "newId": "./stats-card#NeuStatsCardComponent.input:title"
     },
@@ -2780,6 +2776,7 @@
     "spinner/neu-spinner.component.ts#input:severity",
     "splitter/neu-splitter.component.ts#input:direction",
     "splitter/neu-splitter.component.ts#output:sizeChange",
+    "stats-card/neu-stats-card.component.ts#input:sparkData",
     "table-core/neu-table-core.component.ts#input:bordered",
     "table-core/neu-table-core.component.ts#input:columns",
     "table-core/neu-table-core.component.ts#input:data",

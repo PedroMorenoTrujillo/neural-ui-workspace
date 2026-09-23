@@ -74,6 +74,7 @@ describe('NeuAlertComponent', () => {
     expect(close).toBeTruthy();
     expect(close.classList).toContain('neu-button');
     expect(close.getAttribute('aria-label')).toBe('Close alert');
+    expect(close.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should not show close button when closable=false', async () => {
@@ -93,6 +94,7 @@ describe('NeuAlertComponent', () => {
     const emitted: unknown[] = [];
     f.componentInstance.closed.subscribe(() => emitted.push(true));
 
+    f.componentInstance.dismiss();
     f.componentInstance.dismiss();
     f.detectChanges();
     await f.whenStable();

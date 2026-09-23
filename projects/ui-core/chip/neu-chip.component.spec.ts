@@ -88,12 +88,31 @@ describe('NeuChipComponent', () => {
     expect(removed).toBe(true);
   });
 
+  it('emits one removal intent without hiding itself and labels its native control', async () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.componentRef.setInput('removable', true);
+    df.componentRef.setInput('removeAriaLabel', 'Remove filter');
+    df.detectChanges();
+    await df.whenStable();
+    const button = df.nativeElement.querySelector('.neu-chip__remove') as HTMLButtonElement;
+    const events: unknown[] = [];
+    df.componentInstance.removed.subscribe(() => events.push(true));
+    expect(button.type).toBe('button');
+    expect(button.getAttribute('aria-label')).toBe('Remove filter');
+    expect(button.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    button.click();
+    df.detectChanges();
+    expect(events).toHaveLength(1);
+    expect(df.nativeElement.querySelector('.neu-chip__remove')).toBe(button);
+  });
+
   it('should apply disabled class when disabled', async () => {
     const df = TestBed.createComponent(NeuChipComponent);
     df.componentRef.setInput('disabled', true);
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.className).toContain('disabled');
+    expect(df.nativeElement.getAttribute('aria-disabled')).toBe('true');
   });
 
   it('onToggle should NOT emit when disabled', () => {

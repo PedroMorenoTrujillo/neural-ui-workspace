@@ -151,4 +151,17 @@ describe('NeuProgressBarComponent', () => {
     df.detectChanges();
     expect(df.componentInstance.clampedValue()).toBe(0);
   });
+
+  it('indeterminate omits numeric progress and NaN cannot enter ARIA', () => {
+    const df = TestBed.createComponent(NeuProgressBarComponent);
+    df.componentRef.setInput('value', Number.NaN);
+    df.detectChanges();
+    const bar = df.nativeElement.querySelector('[role="progressbar"]');
+    expect(bar.getAttribute('aria-valuenow')).toBe('0');
+    expect(bar.getAttribute('aria-valuetext')).toBe('0%');
+    df.componentRef.setInput('indeterminate', true);
+    df.detectChanges();
+    expect(bar.hasAttribute('aria-valuenow')).toBe(false);
+    expect(bar.getAttribute('aria-valuetext')).toBe('Cargando...');
+  });
 });

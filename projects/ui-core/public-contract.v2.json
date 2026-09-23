@@ -34202,16 +34202,6 @@
           "signature": "label: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./stats-card#NeuStatsCardComponent.input:sparkData",
-          "name": "sparkData",
-          "kind": "input",
-          "publicName": "sparkData",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "sparkData: _angular_core.InputSignal<number[]>;"
-        },
-        {
           "id": "./stats-card#NeuStatsCardComponent.input:title",
           "name": "title",
           "kind": "input",
@@ -34247,7 +34237,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuStatsCardComponent, \"neu-stats-card\", never, {\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"change\": {\n        \"alias\": \"change\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trend\": {\n        \"alias\": \"trend\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"icon\": {\n        \"alias\": \"icon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sparkData\": {\n        \"alias\": \"sparkData\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuStatsCardComponent, \"neu-stats-card\", never, {\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"change\": {\n        \"alias\": \"change\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trend\": {\n        \"alias\": \"trend\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"icon\": {\n        \"alias\": \"icon\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, [\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./stats-card#NeuStatsCardComponent.property:ɵfac",
@@ -61752,18 +61742,6 @@
       "signature": "label: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./stats-card#NeuStatsCardComponent.input:sparkData",
-      "entrypoint": "./stats-card",
-      "declaration": "NeuStatsCardComponent",
-      "selector": "neu-stats-card",
-      "propertyName": "sparkData",
-      "publicName": "sparkData",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "sparkData: _angular_core.InputSignal<number[]>;"
-    },
-    {
       "id": "./stats-card#NeuStatsCardComponent.input:title",
       "entrypoint": "./stats-card",
       "declaration": "NeuStatsCardComponent",
@@ -65757,19 +65735,19 @@
       "type": 187,
       "variable": 1
     },
-    "publicSymbols": 5219,
+    "publicSymbols": 5218,
     "statuses": {
-      "SUPPORTED": 3296,
+      "SUPPORTED": 3295,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
       "INTERNAL/UNSUPPORTED": 1923,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1227,
+      "input": 1226,
       "output": 231,
       "model": 24,
-      "total": 1482
+      "total": 1481
     },
     "designTokens": 251
   }

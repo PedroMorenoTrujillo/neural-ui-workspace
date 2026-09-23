@@ -127,4 +127,32 @@ describe('NeuMeterGroupComponent', () => {
     expect(f.nativeElement.querySelectorAll('.neu-meter-group__segment')).toHaveLength(2);
     expect(f.nativeElement.querySelector('.neu-meter-group__legend').getAttribute('aria-hidden')).toBeNull();
   });
+
+  it('bounds aggregate and segment widths for overflowing and non-finite values', () => {
+    const f = TestBed.createComponent(NeuMeterGroupComponent);
+    const items = Object.freeze([
+      Object.freeze({ label: 'A', value: 80 }),
+      Object.freeze({ label: 'B', value: 80 }),
+      Object.freeze({ label: 'C', value: Number.NaN }),
+    ]);
+    f.componentRef.setInput('items', items);
+    f.componentRef.setInput('total', 100);
+    f.detectChanges();
+    const meter = f.nativeElement.querySelector('[role="meter"]');
+    expect(meter.getAttribute('aria-valuenow')).toBe('100');
+    const widths = [...f.nativeElement.querySelectorAll('.neu-meter-group__segment')]
+      .map((segment: Element) => Number.parseFloat((segment as HTMLElement).style.width));
+    expect(widths).toEqual([80, 20, 0]);
+    expect(items[0].value).toBe(80);
+  });
+
+  it('preserves meaningful legend labels without treating segments as separate live controls', () => {
+    const f = TestBed.createComponent(NeuMeterGroupComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.componentRef.setInput('ariaLabel', 'Capacity');
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('[role="meter"]')?.getAttribute('aria-label')).toBe('Capacity');
+    expect(f.nativeElement.querySelectorAll('.neu-meter-group__legend-item')).toHaveLength(3);
+    expect(f.nativeElement.querySelectorAll('.neu-meter-group__segment[role]')).toHaveLength(0);
+  });
 });

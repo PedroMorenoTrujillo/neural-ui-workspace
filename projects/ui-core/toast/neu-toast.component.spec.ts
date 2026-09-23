@@ -83,6 +83,9 @@ describe('NeuToastContainerComponent', () => {
     const id = service.show({ message: 'Para descartar', tone: 'warning', duration: 0 });
     f.detectChanges();
     const closeBtn: HTMLButtonElement = f.nativeElement.querySelector('.neu-toast__close');
+    expect(closeBtn.type).toBe('button');
+    expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar');
+    expect(closeBtn.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
     closeBtn.click();
     f.detectChanges();
     expect(service.toasts().find((t) => t.id === id)).toBeUndefined();

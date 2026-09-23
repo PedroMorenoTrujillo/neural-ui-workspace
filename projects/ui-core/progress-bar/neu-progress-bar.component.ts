@@ -75,7 +75,10 @@ export class NeuProgressBarComponent {
   /** Altura de la barra / Bar height */
   size = input<'sm' | 'md' | 'lg'>('md');
 
-  readonly clampedValue = computed(() => Math.min(100, Math.max(0, this.value())));
+  readonly clampedValue = computed(() => {
+    const value = this.value();
+    return Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
+  });
 
   readonly hostClasses = computed(() =>
     [`neu-progress--${this.tone()}`, `neu-progress--${this.size()}`].join(' '),

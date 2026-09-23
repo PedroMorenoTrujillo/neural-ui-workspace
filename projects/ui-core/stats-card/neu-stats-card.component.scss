@@ -86,16 +86,4 @@
     color: var(--neu-text-muted);
   }
 
-  // Sparkline
-  &__sparkline {
-    margin-inline-start: auto;
-    width: 80px;
-    height: 30px;
-    flex-shrink: 0;
-  }
-
-  &__spark-line {
-    stroke: var(--neu-primary);
-    opacity: 0.8;
-  }
 }

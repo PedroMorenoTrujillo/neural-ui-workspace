@@ -1,3 +1,4 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuToastService } from './neu-toast.service';
 
@@ -116,6 +117,24 @@ describe('NeuToastService', () => {
     vi.useRealTimers();
   });
 
+  it('manual dismissal cancels its only timer and cannot emit late work', () => {
+    vi.useFakeTimers();
+    const id = service.show({ message: 'Temp', duration: 100 });
+    expect(vi.getTimerCount()).toBe(1);
+    service.dismiss(id);
+    expect(vi.getTimerCount()).toBe(0);
+    vi.advanceTimersByTime(200);
+    expect(service.toasts()).toEqual([]);
+  });
+
+  it('destroy clears pending timers', () => {
+    vi.useFakeTimers();
+    service.show({ message: 'Temp', duration: 100 });
+    expect(vi.getTimerCount()).toBe(1);
+    TestBed.resetTestingModule();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('show with title sets title on the toast', () => {
     service.show({ message: 'Msg', title: 'Title', tone: 'info', duration: 0 });
     expect(service.toasts()[0].title).toBe('Title');
@@ -136,5 +155,18 @@ describe('NeuToastService', () => {
 
     expect(service.toasts()).toHaveLength(1);
     expect(service.toasts()[0].message).toBe('A');
+  });
+});
+
+describe('NeuToastService SSR', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('does not schedule auto-dismiss on the server', () => {
+    vi.useFakeTimers();
+    TestBed.configureTestingModule({ providers: [{ provide: PLATFORM_ID, useValue: 'server' }] });
+    const service = TestBed.inject(NeuToastService);
+    service.show({ message: 'SSR', duration: 100 });
+    expect(service.toasts()).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

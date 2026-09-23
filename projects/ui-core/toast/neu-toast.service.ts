@@ -1,4 +1,5 @@
-import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { DestroyRef, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.types';
 
@@ -16,6 +17,7 @@ import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.typ
 @Injectable({ providedIn: 'root' })
 export class NeuToastService {
   private readonly ids = inject(NeuIdGenerator);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   /** Lista reactiva de toasts activos / Reactive list of active toasts */
   readonly toasts = signal<NeuToastItem[]>([]);
 
@@ -46,7 +48,7 @@ export class NeuToastService {
 
     this.toasts.update((list) => [...list, item]);
 
-    if (duration > 0) {
+    if (this.isBrowser && duration > 0) {
       const timer = setTimeout(() => this.dismiss(id), duration);
       this.timers.set(id, timer);
     }

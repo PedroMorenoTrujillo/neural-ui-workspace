@@ -2,7 +2,6 @@ import {
   Component,
   ViewEncapsulation,
   computed,
-  inject,
   input,
   output,
   signal,
@@ -15,7 +14,6 @@ import { iconCircleX } from '@neural-icons/core/icons/circle-x';
 import { iconInfo } from '@neural-icons/core/icons/info';
 import { iconWarning } from '@neural-icons/core/icons/warning';
 import { iconX } from '@neural-icons/core/icons/x';
-import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuAlertTone = 'info' | 'success' | 'warning' | 'danger';
 export type NeuAlertVariant = 'soft' | 'outline';
@@ -76,7 +74,7 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuralIconDefinition> = {
           [ariaLabel]="closeLabel()"
           [attr.aria-label]="closeLabel()"
           (neuClick)="dismiss()"
-        ><neural-icon [icon]="iconX" size="14px" /></button>
+        ><neural-icon [icon]="iconX" size="14px" aria-hidden="true" /></button>
       }
     }
   `,
@@ -107,7 +105,6 @@ export class NeuAlertComponent {
   /** Emitido cuando se descarta la alerta / Emitted when the alert is dismissed */
   readonly closed = output<void>();
 
-  private readonly _id = inject(NeuIdGenerator).getId('neu-alert-');
   protected readonly _dismissed = signal(false);
 
   protected readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.tone()]);
@@ -128,6 +125,7 @@ export class NeuAlertComponent {
   }));
 
   dismiss(): void {
+    if (this._dismissed()) return;
     this._dismissed.set(true);
     this.closed.emit();
   }

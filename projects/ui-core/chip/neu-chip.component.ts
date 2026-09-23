@@ -28,6 +28,7 @@ export type NeuChipSize = 'sm' | 'md';
     '[class]': 'hostClasses()',
     '[attr.role]': '_hostRole()',
     '[attr.aria-pressed]': '_hostAriaPressed()',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.tabindex]': '_hostTabindex()',
     '(keydown.space)': 'onToggle()',
     '(keydown.enter)': 'onToggle()',

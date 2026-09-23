@@ -15,6 +15,10 @@ export interface NeuMeterItem {
   color?: string;
 }
 
+function meterValue(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
 /**
  * NeuralUI MeterGroup Component
  *
@@ -91,19 +95,21 @@ export class NeuMeterGroupComponent {
   }));
 
   protected readonly _usedSum = computed(() => {
-    const used = this.items().reduce((sum, item) => sum + Math.max(0, item.value), 0);
-    return this.total() > 0 ? Math.min(this.total(), used) : used;
+    const used = this.items().reduce((sum, item) => sum + meterValue(item.value), 0);
+    return Number.isFinite(this.total()) && this.total() > 0 ? Math.min(this.total(), used) : used;
   });
 
   protected readonly _effectiveTotal = computed(() =>
-    this.total() > 0 ? this.total() : this._usedSum() || 1,
+    Number.isFinite(this.total()) && this.total() > 0 ? this.total() : this._usedSum() || 1,
   );
 
   protected readonly _segments = computed(() => {
     const total = this._effectiveTotal();
-    return this.items().map((item) => ({
-      ...item,
-      pct: Math.max(0, Math.min(100, (Math.max(0, item.value) / total) * 100)),
-    }));
+    let remaining = total;
+    return this.items().map((item) => {
+      const value = Math.min(remaining, meterValue(item.value));
+      remaining -= value;
+      return { ...item, pct: (value / total) * 100 };
+    });
   });
 }

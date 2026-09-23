@@ -36,6 +36,8 @@ describe('NeuEmptyStateComponent', () => {
 
   it('should render title', () => {
     expect(fixture.nativeElement.textContent).toContain('No hay datos');
+    expect(fixture.nativeElement.querySelector('neural-icon svg')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should show description when provided', async () => {
@@ -61,17 +63,19 @@ describe('NeuEmptyStateComponent', () => {
     expect(df.nativeElement.textContent).toContain('Recargar');
   });
 
-  it('should emit actionClick when button is clicked', async () => {
+  it('emits one action from its native button without owning navigation', async () => {
     const df = TestBed.createComponent(NeuEmptyStateComponent);
     df.componentRef.setInput('title', 'No hay datos');
     df.componentRef.setInput('actionLabel', 'Recargar');
     df.detectChanges();
     await df.whenStable();
-    let clicked = false;
+    let clicked = 0;
     df.componentInstance.action.subscribe(() => {
-      clicked = true;
+      clicked += 1;
     });
-    df.nativeElement.querySelector('button').click();
-    expect(clicked).toBe(true);
+    const button = df.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.type).toBe('button');
+    button.click();
+    expect(clicked).toBe(1);
   });
 });

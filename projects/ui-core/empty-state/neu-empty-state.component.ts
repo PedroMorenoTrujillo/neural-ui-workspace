@@ -14,7 +14,7 @@ export type NeuEmptyStateSize = 'sm' | 'md' | 'lg';
 export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'success';
 
 /**
- * NeuEmptyState — Estado vacío con icono Lucide, título, descripción y acción.
+ * NeuEmptyState — Estado vacío con icono Neural, título, descripción y acción.
  *
  * Uso:
  *   <neu-empty-state
@@ -34,7 +34,7 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
     <div class="neu-empty-state__inner">
       @if (icon()) {
         <span class="neu-empty-state__icon">
-          <neural-icon [icon]="icon() === 'inbox' ? iconInbox : icon()!" [size]="iconSize()" />
+          <neural-icon [icon]="icon() === 'inbox' ? iconInbox : icon()!" [size]="iconSize()" aria-hidden="true" />
         </span>
       }
 
