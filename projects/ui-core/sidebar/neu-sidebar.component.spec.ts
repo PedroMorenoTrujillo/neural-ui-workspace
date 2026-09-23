@@ -2,8 +2,8 @@ import { Component, provideZonelessChangeDetection, signal } from '@angular/core
 import { TestBed } from '@angular/core/testing';
 import { NeuCloseRequest } from '@neural-ui/core/foundation';
 import { NeuSidebarComponent } from './neu-sidebar.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 
 // ── Host Component ─────────────────────────────────────────────────────────────
 
@@ -63,7 +63,7 @@ describe('NeuSidebarComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
   });
 

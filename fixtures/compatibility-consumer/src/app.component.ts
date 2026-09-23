@@ -1,5 +1,8 @@
 import { H9EventContractComponent } from './h9-event-contract.component';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import type { NeuralIconName } from '@neural-icons/core';
+import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuAlertComponent } from '@neural-ui/core/alert';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
@@ -28,11 +31,21 @@ import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
     NeuTableComponent,
     NeuTreeTableComponent,
     NeuNavComponent,
+    NeuButtonComponent,
+    NeuAlertComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <h9-event-contract />
     <neu-nav [items]="navItems"></neu-nav>
+    <neu-alert tone="success">Icons are available without global internal registration.</neu-alert>
+    <button neu-button id="icon-save" icon="save" (neuClick)="incrementActions()">Save</button>
+    <button neu-button id="icon-download" icon="download" iconPosition="end">Download</button>
+    <button neu-button id="icon-only" icon="save" [iconOnly]="true" ariaLabel="Save item"></button>
+    <button neu-button id="icon-dynamic" [icon]="dynamicIcon()">Dynamic</button>
+    <button id="icon-switch" type="button" (click)="dynamicIcon.set('download')">Switch icon</button>
+    <button neu-button id="icon-missing" icon="trash" [iconOnly]="true" ariaLabel="Missing icon"></button>
+    <span id="icon-actions">{{ actions() }}</span>
     <neu-input [formControl]="name" label="Name"></neu-input>
     <neu-checkbox [formControl]="accepted" label="Accepted"></neu-checkbox>
     <neu-dialog [open]="false" title="Compatibility dialog"></neu-dialog>
@@ -51,10 +64,13 @@ import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
   `,
 })
 export class AppComponent {
+  readonly actions = signal(0);
+  readonly dynamicIcon = signal<NeuralIconName>('save');
+  incrementActions(): void { this.actions.update((count) => count + 1); }
   readonly name = new FormControl('', { nonNullable: true });
   readonly accepted = new FormControl(false, { nonNullable: true });
   readonly navItems: NeuNavItem[] = [
-    { id: 'home', label: 'Home', icon: 'lucideHouse', route: '/' },
+    { id: 'home', label: 'Home', icon: 'home', route: '/' },
   ];
   readonly rows: readonly CompatibilityRow[] = [
     { id: 1, name: 'Neural UI' },

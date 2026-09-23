@@ -21,7 +21,8 @@ import {
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconPlus } from '@neural-icons/core/icons/plus';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
@@ -121,7 +122,7 @@ export class NeuSpeedDialTriggerDirective {
     RouterLink,
     RouterLinkActive,
     NeuBadgeComponent,
-    NeuIconComponent,
+    NeuralIcon,
     NeuTooltipDirective,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -255,10 +256,10 @@ export class NeuSpeedDialTriggerDirective {
             [ngTemplateOutletContext]="triggerContext()"
           />
         } @else {
-          <neu-icon
+          <neural-icon
             class="neu-speed-dial__trigger-icon"
             [class.neu-speed-dial__trigger-icon--rotate]="rotateTrigger() && isOpen()"
-            name="lucidePlus"
+            [icon]="iconPlus"
             size="1.35rem"
             aria-hidden="true"
           />
@@ -268,7 +269,7 @@ export class NeuSpeedDialTriggerDirective {
 
     <ng-template #defaultItem let-item let-index="index">
       @if (item.icon) {
-        <neu-icon [name]="item.icon" size="1.2rem" aria-hidden="true" />
+        <neural-icon [icon]="item.icon" size="1.2rem" aria-hidden="true" />
       }
       <span class="neu-speed-dial__label">{{ item.label }}</span>
       @if (item.badge != null) {
@@ -279,6 +280,7 @@ export class NeuSpeedDialTriggerDirective {
   styleUrl: './neu-speed-dial.component.scss',
 })
 export class NeuSpeedDialComponent {
+  protected readonly iconPlus = iconPlus;
   private readonly platformId = inject(PLATFORM_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');

@@ -14,7 +14,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 import { InternalNeuOverlayStack, NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NEU_OVERLAY_DISMISS_GUARD,
@@ -41,7 +42,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
  */
 @Component({
   selector: 'neu-dialog',
-  imports: [NeuFocusTrapDirective, NeuIconComponent],
+  imports: [NeuFocusTrapDirective, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class.neu-dialog--open]': 'open()',
@@ -114,7 +115,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
                   aria-label="Close dialog"
                   (click)="requestClose('action', $event)"
                 >
-                  <neu-icon name="lucideX" size="1.125rem" />
+                  <neural-icon [icon]="iconX" size="1.125rem" />
                 </button>
               }
             </div>
@@ -143,6 +144,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
   styleUrl: './neu-modal.component.scss',
 })
 export class NeuDialogComponent {
+  protected readonly iconX = iconX;
   /** Controla la visibilidad del diálogo. / Controls dialog visibility. */
   open = input<boolean>(false);
   /** Título que aparece en el header. / Title shown in the header. */

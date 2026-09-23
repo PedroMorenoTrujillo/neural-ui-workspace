@@ -3,8 +3,10 @@ import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { NeuNavComponent, NeuNavItem } from './neu-nav.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideChevronRight, lucideExternalLink, lucideChevronLeft } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconExternalLink } from '@neural-icons/core/icons/external-link';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
 import { Router } from '@angular/router';
 
 @Component({ template: '' })
@@ -13,20 +15,20 @@ class DummyRouteComponent {}
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const SIMPLE_ITEMS: NeuNavItem[] = [
-  { id: 'home', label: 'Inicio', icon: 'lucideChevronRight', route: '/' },
-  { id: 'comp', label: 'Componentes', icon: 'lucideChevronRight', route: '/components' },
-  { id: 'docs', label: 'Documentación', icon: 'lucideChevronRight', route: '/docs' },
+  { id: 'home', label: 'Inicio', icon: 'chevron-right', route: '/' },
+  { id: 'comp', label: 'Componentes', icon: 'chevron-right', route: '/components' },
+  { id: 'docs', label: 'Documentación', icon: 'chevron-right', route: '/docs' },
 ];
 
 const HREF_ITEMS: NeuNavItem[] = [
-  { id: 'gh', label: 'GitHub', icon: 'lucideExternalLink', href: 'https://github.com' },
+  { id: 'gh', label: 'GitHub', icon: 'external-link', href: 'https://github.com' },
 ];
 
 const BADGE_ITEMS: NeuNavItem[] = [
   {
     id: 'notif',
     label: 'Notificaciones',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     route: '/notifs',
     badge: '9',
         badgeTone: 'danger',
@@ -34,21 +36,21 @@ const BADGE_ITEMS: NeuNavItem[] = [
 ];
 
 const DISABLED_ITEMS: NeuNavItem[] = [
-  { id: 'dis', label: 'Deshabilitado', icon: 'lucideChevronRight', route: '/dis', disabled: true },
+  { id: 'dis', label: 'Deshabilitado', icon: 'chevron-right', route: '/dis', disabled: true },
 ];
 
 const GROUP_ITEMS: NeuNavItem[] = [
   {
     id: 'grp',
     label: 'Grupo',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     children: [
-      { id: 'c1', label: 'Hijo Ruta', icon: 'lucideChevronRight', route: '/child1' },
-      { id: 'c2', label: 'Hijo Externo', icon: 'lucideExternalLink', href: 'https://ext.com' },
+      { id: 'c1', label: 'Hijo Ruta', icon: 'chevron-right', route: '/child1' },
+      { id: 'c2', label: 'Hijo Externo', icon: 'external-link', href: 'https://ext.com' },
       {
         id: 'c3',
         label: 'Hijo Deshabilitado',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         route: '/child3',
         disabled: true,
       },
@@ -60,18 +62,18 @@ const NESTED_GROUP: NeuNavItem[] = [
   {
     id: 'parent',
     label: 'Padre',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     children: [
       {
         id: 'subgrp',
         label: 'Subgrupo',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
-          { id: 'grand1', label: 'Nieto Ruta', icon: 'lucideChevronRight', route: '/grand1' },
+          { id: 'grand1', label: 'Nieto Ruta', icon: 'chevron-right', route: '/grand1' },
           {
             id: 'grand2',
             label: 'Nieto Externo',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://grand.com',
           },
         ],
@@ -85,10 +87,10 @@ const FLYOUT_MIXED: NeuNavItem[] = [
   {
     id: 'fgrp',
     label: 'FlyoutGrupo',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     children: [
-      { id: 'fl1', label: 'FL Ruta', icon: 'lucideChevronRight', route: '/fl1' },
-      { id: 'fl2', label: 'FL Externo', icon: 'lucideExternalLink', href: 'https://fl.com' },
+      { id: 'fl1', label: 'FL Ruta', icon: 'chevron-right', route: '/fl1' },
+      { id: 'fl2', label: 'FL Externo', icon: 'external-link', href: 'https://fl.com' },
     ],
   },
 ];
@@ -96,7 +98,7 @@ const FLYOUT_MIXED: NeuNavItem[] = [
 function mkProviders() {
   return [
     provideRouter([{ path: '**', component: DummyRouteComponent }]),
-    provideIcons({ lucideChevronRight, lucideExternalLink, lucideChevronLeft }),
+    provideNeuralIcons(iconChevronRight, iconExternalLink, iconChevronLeft),
   ];
 }
 
@@ -168,10 +170,10 @@ describe('NeuNavComponent', () => {
       {
         id: 'group-badge',
         label: 'Grupo con badge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         badge: 'Beta',
         badgeTone: 'info',
-        children: [{ id: 'child', label: 'Child', icon: 'lucideChevronRight', route: '/child' }],
+        children: [{ id: 'child', label: 'Child', icon: 'chevron-right', route: '/child' }],
       },
     ]);
     f.detectChanges();
@@ -187,20 +189,20 @@ describe('NeuNavComponent', () => {
       {
         id: 'group-default-badge',
         label: 'Grupo',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         badge: 'New',
         children: [
           {
             id: 'child-default-badge',
             label: 'Child',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             route: '/child',
             badge: '2',
           },
           {
             id: 'child-href-default-badge',
             label: 'Child href',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://example.com',
             badge: '3',
           },
@@ -222,7 +224,7 @@ describe('NeuNavComponent', () => {
       {
         id: 'gh-badge',
         label: 'GitHub',
-        icon: 'lucideExternalLink',
+        icon: 'external-link',
         href: 'https://github.com',
         badge: 'New',
         badgeTone: 'info',
@@ -241,19 +243,19 @@ describe('NeuNavComponent', () => {
       {
         id: 'disabled-external',
         label: 'Disabled external',
-        icon: 'lucideExternalLink',
+        icon: 'external-link',
         href: 'https://example.com',
         disabled: true,
       },
       {
         id: 'group',
         label: 'Group',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'disabled-child-external',
             label: 'Disabled child external',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://example.com/child',
             disabled: true,
           },
@@ -281,7 +283,7 @@ describe('NeuNavComponent', () => {
       {
         id: 'home-badge',
         label: 'Inicio',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         route: '/',
         badge: '4',
         badgeTone: 'warning',
@@ -470,12 +472,12 @@ describe('NeuNavComponent', () => {
       {
         id: 'grp-badge-child',
         label: 'Grupo',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'child-external-badge',
             label: 'Child External',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://example.com',
             badge: 'Hot',
         badgeTone: 'warning',
@@ -752,20 +754,20 @@ describe('NeuNavComponent', () => {
       {
         id: 'nf',
         label: 'Nested Flyout',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'nf-sub',
             label: 'Subgrupo',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
               {
                 id: 'nf-g1',
                 label: 'Nieto Externo',
-                icon: 'lucideExternalLink',
+                icon: 'external-link',
                 href: 'https://example.com',
               },
-              { id: 'nf-g2', label: 'Nieto Ruta', icon: 'lucideChevronRight', route: '/grand2' },
+              { id: 'nf-g2', label: 'Nieto Ruta', icon: 'chevron-right', route: '/grand2' },
             ],
           },
         ],
@@ -792,17 +794,17 @@ describe('NeuNavComponent', () => {
       {
         id: 'parent-ext',
         label: 'Parent',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'sub-ext',
             label: 'Sub',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
               {
                 id: 'grand-ext',
                 label: 'Grand External',
-                icon: 'lucideExternalLink',
+                icon: 'external-link',
                 href: 'https://example.com',
               },
             ],
@@ -839,10 +841,10 @@ describe('NeuNavComponent', () => {
       {
         id: 'fh',
         label: 'Flyout Href',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
-          { id: 'fh-l', label: 'External', icon: 'lucideExternalLink', href: 'https://ext.com' },
-          { id: 'fh-r', label: 'Route', icon: 'lucideChevronRight', route: '/route' },
+          { id: 'fh-l', label: 'External', icon: 'external-link', href: 'https://ext.com' },
+          { id: 'fh-r', label: 'Route', icon: 'chevron-right', route: '/route' },
         ],
       },
     ];
@@ -890,9 +892,9 @@ describe('NeuNavComponent', () => {
       {
         id: 'fh',
         label: 'Flyout Href',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
-          { id: 'fh-l', label: 'External', icon: 'lucideExternalLink', href: 'https://ext.com' },
+          { id: 'fh-l', label: 'External', icon: 'external-link', href: 'https://ext.com' },
         ],
       },
     ];
@@ -921,17 +923,17 @@ describe('NeuNavComponent', () => {
       {
         id: 'parent',
         label: 'Parent',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'sub',
             label: 'Sub',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
               {
                 id: 'grand-route',
                 label: 'Grand Route',
-                icon: 'lucideChevronRight',
+                icon: 'chevron-right',
                 route: '/grand-route',
               },
             ],
@@ -982,17 +984,17 @@ describe('NeuNavComponent', () => {
       {
         id: 'parent',
         label: 'Padre',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'mid',
             label: 'Medio',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
-              { id: 'grand', label: 'Nieto', icon: 'lucideChevronRight', route: '/grand' },
+              { id: 'grand', label: 'Nieto', icon: 'chevron-right', route: '/grand' },
             ],
           },
-          { id: 'child', label: 'Hijo', icon: 'lucideChevronRight', route: '/child' },
+          { id: 'child', label: 'Hijo', icon: 'chevron-right', route: '/child' },
         ],
       },
     ];
@@ -1076,16 +1078,16 @@ describe('NeuNavComponent', () => {
       {
         id: 'bg',
         label: 'GrupoBadge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'bc1',
             label: 'Con Badge',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             route: '/bc1',
             badge: '5',
           },
-          { id: 'bc2', label: 'Sin Badge', icon: 'lucideChevronRight', route: '/bc2' },
+          { id: 'bc2', label: 'Sin Badge', icon: 'chevron-right', route: '/bc2' },
         ],
       },
     ];
@@ -1106,18 +1108,18 @@ describe('NeuNavComponent', () => {
       {
         id: 'bn-parent',
         label: 'PadreBadge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'bn-sub',
             label: 'SubgrupoBadge',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             badge: '7',
             children: [
               {
                 id: 'bn-grand',
                 label: 'NietoBadge',
-                icon: 'lucideChevronRight',
+                icon: 'chevron-right',
                 route: '/grand',
                 badge: '3',
               },
@@ -1158,13 +1160,13 @@ describe('NeuNavComponent', () => {
     const DEEP_ITEM: any = {
       id: 'deep',
       label: 'Deep',
-      icon: 'lucideChevronRight',
+      icon: 'chevron-right',
       children: [
         {
           id: 'mid',
           label: 'Mid',
-          icon: 'lucideChevronRight',
-          children: [{ id: 'leaf', label: 'Leaf', icon: 'lucideChevronRight', route: '/target' }],
+          icon: 'chevron-right',
+          children: [{ id: 'leaf', label: 'Leaf', icon: 'chevron-right', route: '/target' }],
         },
       ],
     };
@@ -1200,12 +1202,12 @@ describe('NeuNavComponent', () => {
       {
         id: 'fbg',
         label: 'FlyoutBadge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'fbc1',
             label: 'FlyoutItemBadge',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             route: '/fbc1',
             badge: '8',
           },

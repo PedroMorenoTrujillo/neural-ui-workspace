@@ -1,12 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { NeuStatsCardComponent } from './neu-stats-card.component';
-import { provideIcons } from '@ng-icons/core';
-import {
-  lucideTrendingUp,
-  lucideTrendingDown,
-  lucideMinus,
-  lucideDollarSign,
-} from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconTrendingUp } from '@neural-icons/core/icons/trending-up';
+import { iconTrendingDown } from '@neural-icons/core/icons/trending-down';
+import { iconMinus } from '@neural-icons/core/icons/minus';
+import { iconDollarSign } from '@neural-icons/core/icons/dollar-sign';
 
 function mk(inputs: Record<string, unknown> = {}) {
   const f = TestBed.createComponent(NeuStatsCardComponent);
@@ -21,7 +19,7 @@ describe('NeuStatsCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
-        provideIcons({ lucideTrendingUp, lucideTrendingDown, lucideMinus, lucideDollarSign }),
+        provideNeuralIcons(iconTrendingUp, iconTrendingDown, iconMinus, iconDollarSign),
       ],
     }).compileComponents();
   });
@@ -80,7 +78,7 @@ describe('NeuStatsCardComponent', () => {
   // ── Icon ──────────────────────────────────────────────────────────────────
 
   it('should render icon when icon input is provided', () => {
-    const f = mk({ title: 'T', value: 'V', icon: 'lucideDollarSign' });
+    const f = mk({ title: 'T', value: 'V', icon: 'dollar-sign' });
     expect(f.nativeElement.querySelector('.neu-stats-card__icon')).toBeTruthy();
   });
 
@@ -168,7 +166,7 @@ describe('NeuStatsCardComponent', () => {
   });
 
   it('icon input renders the icon component', async () => {
-    const f = mk({ title: 'T', value: 'V', icon: 'lucideDollarSign' });
+    const f = mk({ title: 'T', value: 'V', icon: 'dollar-sign' });
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-stats-card__icon')).toBeTruthy();

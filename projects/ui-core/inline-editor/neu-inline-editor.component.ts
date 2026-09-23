@@ -13,7 +13,10 @@ import {
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconEdit } from '@neural-icons/core/icons/edit';
+import { iconCheck } from '@neural-icons/core/icons/check';
+import { iconX } from '@neural-icons/core/icons/x';
 
 export type NeuInlineMode = 'text' | 'number';
 export type NeuInlineEditorType = NeuInlineMode | 'select' | 'textarea' | 'date';
@@ -34,7 +37,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
 
 @Component({
   selector: 'neu-inline-editor',
-  imports: [NeuButtonComponent, NeuIconComponent],
+  imports: [NeuButtonComponent, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
@@ -66,23 +69,21 @@ interface NeuInlineEditorValueCommitEvent<V> {
             type="button"
             tone="brand" variant="solid"
             [size]="size()"
-            icon="lucideCheck"
             [iconOnly]="true"
             [ariaLabel]="saveLabel()"
             [disabled]="disabled() || readonly() || !draftValid()"
             (click)="commit()"
-          ></button>
+          ><neural-icon [icon]="iconCheck" size="1em" /></button>
           <button
             neu-button
             type="button"
             tone="neutral" variant="ghost"
             [size]="size()"
-            icon="lucideX"
             [iconOnly]="true"
             [ariaLabel]="cancelLabel()"
             [disabled]="disabled()"
             (click)="cancel()"
-          ></button>
+          ><neural-icon [icon]="iconX" size="1em" /></button>
         </div>
       </div>
     } @else {
@@ -101,7 +102,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
           {{ displayValue() }}
         </span>
         @if (!readonly()) {
-          <neu-icon name="lucidePencil" size="14px" aria-hidden="true" />
+          <neural-icon [icon]="iconEdit" size="14px" aria-hidden="true" />
         }
       </button>
     }
@@ -109,6 +110,9 @@ interface NeuInlineEditorValueCommitEvent<V> {
   styleUrl: './neu-inline-editor.component.scss',
 })
 export class NeuInlineEditorControl<V = string | number | null> implements FormValueControl<V> {
+  protected readonly iconCheck = iconCheck;
+  protected readonly iconEdit = iconEdit;
+  protected readonly iconX = iconX;
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly editorControl = viewChild<ElementRef<HTMLInputElement>>('editorControl');
 

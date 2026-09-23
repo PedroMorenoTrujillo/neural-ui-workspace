@@ -13,7 +13,9 @@ import {
   viewChild,
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
+import { iconCircleAlert } from '@neural-icons/core/icons/circle-alert';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'search';
@@ -32,7 +34,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
  */
 @Component({
   selector: 'neu-input',
-  imports: [NeuIconComponent],
+  imports: [NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   // Los atributos del host (class, style, data-*) no deben llegar al <input> nativo
   // — se gestionan de forma explícita con los inputs del componente.
@@ -77,7 +79,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
       <!-- Icono izquierdo (por nombre) -->
       @if (_hasIconLeft()) {
         <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
-          <neu-icon [name]="icon()" size="16px" />
+          <neural-icon [icon]="icon()!" size="16px" />
         </span>
       }
 
@@ -129,7 +131,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
       <!-- Icono derecho (por nombre) -->
       @if (_hasIconRight()) {
         <span class="neu-input__icon neu-input__icon--end" aria-hidden="true">
-          <neu-icon [name]="icon()" size="16px" />
+          <neural-icon [icon]="icon()!" size="16px" />
         </span>
       }
     </div>
@@ -137,7 +139,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
     <!-- Mensajes de ayuda / error -->
     @if (hasVisibleError()) {
       <p class="neu-input__error" [id]="inputId() + '-error'" role="alert">
-        <neu-icon name="lucideAlertCircle" size="13px" aria-hidden="true" />
+        <neural-icon [icon]="iconCircleAlert" size="13px" aria-hidden="true" />
         {{ errorMessage() }}
       </p>
     } @else if (hint()) {
@@ -147,6 +149,7 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
   styleUrl: './neu-input.component.scss',
 })
 export class NeuInputComponent implements FormValueControl<string> {
+  protected readonly iconCircleAlert = iconCircleAlert;
   /** Editable value. `model()` also exposes the public `valueChange` output. */
   readonly value = model<string>('');
 
@@ -193,7 +196,7 @@ export class NeuInputComponent implements FormValueControl<string> {
   readonly endIcon = input<boolean>(false);
 
   /** Nombre del icono lucide a renderizar dentro del campo / Lucide icon name to render inside the field */
-  readonly icon = input<string>('');
+  readonly icon = input<NeuralIconName | null>(null);
 
   /** Posición del icono cuando se usa `icon` / Icon position when using `icon` */
   readonly iconPosition = input<'left' | 'right'>('left');

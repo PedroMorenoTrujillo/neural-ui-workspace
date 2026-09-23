@@ -9,48 +9,8 @@ import {
 } from '@angular/core';
 import { NEURAL_LOCALE, NEURAL_NOW, NEURAL_TIME_ZONE, NeuNow } from '@neural-ui/core/foundation';
 import { ɵNEU_PRESET_INSTALL, type NeuPresetDefinition } from './foundation/neu-preset';
-import { provideIcons, provideNgIconsConfig } from '@ng-icons/core';
-import {
-  lucideBold,
-  lucideCheck,
-  lucideChevronLeft,
-  lucideChevronRight,
-  lucideChevronUp,
-  lucideCircleAlert,
-  lucideCircleCheck,
-  lucideCircleX,
-  lucideDownload,
-  lucideExternalLink,
-  lucideEraser,
-  lucideFlipHorizontal2,
-  lucideFlipVertical2,
-  lucideImage,
-  lucideInbox,
-  lucideInfo,
-  lucideItalic,
-  lucideLink,
-  lucideList,
-  lucideListOrdered,
-  lucideMinus,
-  lucidePencil,
-  lucidePlus,
-  lucideRotateCcw,
-  lucideRotateCw,
-  lucideTriangleAlert,
-  lucideTrendingDown,
-  lucideTrendingUp,
-  lucideUnderline,
-  lucideUpload,
-  lucideX,
-  lucideZoomIn,
-  lucideZoomOut,
-} from '@ng-icons/lucide';
 
 export interface NeuralUIConfig {
-  /** Tamaño por defecto de los iconos. Por defecto: '1.25rem' / Default icon size. Default: '1.25rem' */
-  iconSize?: string;
-  /** Grosor de trazo de los iconos. Por defecto: '2' / Icon stroke width. Default: '2' */
-  iconStrokeWidth?: string;
   /** Locale determinista por defecto. Si se omite, usa LOCALE_ID. / Deterministic default locale. Falls back to LOCALE_ID. */
   locale?: string;
   /** Zona horaria IANA opcional para superficies con formato horario. / Optional IANA timezone for time formatting surfaces. */
@@ -67,11 +27,9 @@ export interface NeuralUIThemeConfig {
 }
 
 /**
- * Registra los providers necesarios para NeuralUI.
- *
- * Incluye los iconos internos de la librería y la configuración
- * por defecto de @ng-icons.
- *
+ * Registra los providers de configuración de Neural UI.
+ * Los iconos internos usan definiciones directas; los nombres elegidos por la aplicación
+ * se registran selectivamente con provideNeuralIcons de @neural-icons/angular.
  * @example
  * // app.config.ts
  * export const appConfig: ApplicationConfig = {
@@ -80,12 +38,8 @@ export interface NeuralUIThemeConfig {
  *   ],
  * };
  *
- * @example
- * // Con opciones personalizadas
- * provideNeuralUI({ iconSize: '1rem', iconStrokeWidth: '1.5' })
  */
 export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProviders {
-  const { iconSize = '1.25rem', iconStrokeWidth = '2' } = config;
   const preset = config.theme?.preset;
   const deterministicProviders: Provider[] = [];
   if (config.locale)
@@ -95,54 +49,6 @@ export function provideNeuralUI(config: NeuralUIConfig = {}): EnvironmentProvide
   if (config.now) deterministicProviders.push({ provide: NEURAL_NOW, useValue: config.now });
 
   return makeEnvironmentProviders([
-    provideIcons({
-      // Input validation
-      lucideAlertCircle: lucideCircleAlert,
-      // Toast severity icons
-      lucideCheckCircle: lucideCircleCheck,
-      lucideXCircle: lucideCircleX,
-      lucideAlertTriangle: lucideTriangleAlert,
-      lucideInfo,
-      // Close buttons (sidebar, modal, toast)
-      lucideX,
-      // Nav chevrons + collapse toggle
-      lucideChevronRight,
-      lucideChevronLeft,
-      lucideChevronUp,
-      // Gallery and image viewer controls
-      lucideZoomIn,
-      lucideZoomOut,
-      lucideRotateCcw,
-      lucideRotateCw,
-      lucideFlipHorizontal2,
-      lucideFlipVertical2,
-      lucideDownload,
-      // Nav external link
-      lucideExternalLink,
-      // EmptyState default icon
-      lucideInbox,
-      // StatsCard trend icons
-      lucideTrendingUp,
-      lucideTrendingDown,
-      lucideMinus,
-      // Uploader picker-only trigger
-      lucideUpload,
-      // InlineEditor defaults
-      lucideCheck,
-      lucidePencil,
-      // SpeedDial default trigger
-      lucidePlus,
-      // RichTextEditor default toolbar
-      lucideBold,
-      lucideItalic,
-      lucideUnderline,
-      lucideList,
-      lucideListOrdered,
-      lucideLink,
-      lucideImage,
-      lucideEraser,
-    }),
-    provideNgIconsConfig({ size: iconSize, strokeWidth: iconStrokeWidth }),
     ...deterministicProviders,
     ...(preset
       ? [

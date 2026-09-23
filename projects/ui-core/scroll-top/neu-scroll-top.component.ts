@@ -15,7 +15,9 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
+import { iconChevronUp } from '@neural-icons/core/icons/chevron-up';
 
 export type NeuScrollTopTarget = 'window' | 'parent';
 export type NeuScrollTopBehavior = 'auto' | 'smooth';
@@ -29,7 +31,7 @@ export class NeuScrollTopIconDirective {
 /** A browser-safe button that returns either the window or its parent scroller to the top. */
 @Component({
   selector: 'neu-scroll-top',
-  imports: [NeuIconComponent, NgTemplateOutlet],
+  imports: [NeuralIcon, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: { '[class]': 'hostClasses()' },
   template: `
@@ -39,7 +41,7 @@ export class NeuScrollTopIconDirective {
         @if (iconTemplate) {
           <ng-container [ngTemplateOutlet]="iconTemplate.templateRef" />
         } @else {
-          <neu-icon [name]="icon()" size="1.125rem" aria-hidden="true" />
+          <neural-icon [icon]="icon() === 'chevron-up' ? iconChevronUp : icon()" size="1.125rem" aria-hidden="true" />
         }
       </button>
     }
@@ -47,6 +49,7 @@ export class NeuScrollTopIconDirective {
   styleUrl: './neu-scroll-top.component.scss',
 })
 export class NeuScrollTopComponent {
+  protected readonly iconChevronUp = iconChevronUp;
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly element = inject(ElementRef<HTMLElement>);
@@ -62,7 +65,7 @@ export class NeuScrollTopComponent {
   /** Requested scroll behavior; smooth is reduced to auto for reduced-motion users. */
   behavior = input<NeuScrollTopBehavior>('smooth');
   /** Registered Neural icon name. */
-  icon = input<string>('lucideChevronUp');
+  icon = input<NeuralIconName>('chevron-up');
   /** Accessible action label on the native button. */
   buttonAriaLabel = input<string>('Scroll to top');
 

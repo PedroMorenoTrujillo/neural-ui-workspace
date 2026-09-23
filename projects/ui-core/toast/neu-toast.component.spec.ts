@@ -1,13 +1,11 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import {
-  lucideAlertTriangle,
-  lucideCheckCircle,
-  lucideInfo,
-  lucideX,
-  lucideXCircle,
-} from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconWarning } from '@neural-icons/core/icons/warning';
+import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
+import { iconInfo } from '@neural-icons/core/icons/info';
+import { iconX } from '@neural-icons/core/icons/x';
+import { iconCircleX } from '@neural-icons/core/icons/circle-x';
 import { NeuToastContainerComponent } from './neu-toast.component';
 import { NeuToastService } from './neu-toast.service';
 import { NeuToastTone } from './neu-toast.types';
@@ -17,13 +15,7 @@ describe('NeuToastContainerComponent', () => {
     await TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideIcons({
-          lucideCheckCircle,
-          lucideXCircle,
-          lucideAlertTriangle,
-          lucideInfo,
-          lucideX,
-        }),
+        provideNeuralIcons(iconCircleCheck, iconCircleX, iconWarning, iconInfo, iconX),
       ],
     }).compileComponents();
     // Limpia toasts entre tests / Clear toasts between tests
@@ -161,13 +153,13 @@ describe('NeuToastContainerComponent', () => {
     const { f } = setup();
     const comp = f.componentInstance;
     const cases: [NeuToastTone, string][] = [
-      ['success', 'lucideCheckCircle'],
-      ['danger', 'lucideXCircle'],
-      ['warning', 'lucideAlertTriangle'],
-      ['info', 'lucideInfo'],
+      ['success', 'circle-check'],
+      ['danger', 'circle-x'],
+      ['warning', 'warning'],
+      ['info', 'info'],
     ];
     for (const [type, icon] of cases) {
-      expect(comp.getIcon(type)).toBe(icon);
+      expect(comp.getIcon(type).name).toBe(icon);
     }
   });
 

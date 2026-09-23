@@ -6,7 +6,11 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
 import { provideNeuralUI } from '@neural-ui/core';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconHome } from '@neural-icons/core/icons/home';
+import { iconSave } from '@neural-icons/core/icons/save';
+import { iconDownload } from '@neural-icons/core/icons/download';
 
 bootstrapApplication(AppComponent, {
-  providers: [provideZonelessChangeDetection(), provideRouter([]), provideNeuralUI()],
+  providers: [provideZonelessChangeDetection(), provideRouter([]), provideNeuralUI(), provideNeuralIcons(iconHome, iconSave, iconDownload)],
 });

@@ -9,7 +9,7 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const candidate = join(root, 'dist/neural-ui/core');
 const temporary = mkdtempSync(join(root, '.n2-forms-baseline-'));
 const baseline = join(temporary, 'dist/neural-ui/core');
-const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
+const external = ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'];
 
 function compressed(bytes) {
   return {

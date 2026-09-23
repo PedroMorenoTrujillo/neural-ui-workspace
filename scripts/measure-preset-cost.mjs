@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { gzipSync, brotliCompressSync } from 'node:zlib';
 const foundation = resolve('dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs');
-const external = ['@angular/*','@angular/cdk/*','@ng-icons/*','rxjs','rxjs/*'];
+const external = ['@angular/*','@angular/cdk/*','rxjs','rxjs/*'];
 async function measure(contents) {
   const output = await build({stdin:{contents,resolveDir:process.cwd(),loader:'ts'},bundle:true,minify:true,format:'esm',write:false,external});
   const data=Buffer.concat(output.outputFiles.map(f=>f.contents));

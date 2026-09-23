@@ -1,7 +1,7 @@
 import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 import { NeuSidebarComponent } from './neu-sidebar.component';
 
 @Component({
@@ -21,7 +21,7 @@ describe('NeuSidebarComponent stress contracts', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FocusHostComponent],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
   });
 

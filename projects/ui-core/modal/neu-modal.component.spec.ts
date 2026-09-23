@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DialogModule } from '@angular/cdk/dialog';
 import { NeuDialogComponent } from './neu-modal.component';
 import { NeuDialogService } from './neu-dialog.service';
-import { provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 import { provideNeuOverlayDismissGuard } from '@neural-ui/core/foundation';
 
 // ── Hosts ─────────────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ class NoFocusableHostComponent {}
 async function mkDialog(inputs: Record<string, unknown> = {}) {
   await TestBed.configureTestingModule({
     imports: [OpenHostComponent, DialogModule, FakeContentComponent],
-    providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+    providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
   }).compileComponents();
   const f = TestBed.createComponent(NeuDialogComponent);
   f.componentRef.setInput('open', true);
@@ -71,7 +71,7 @@ describe('NeuDialogComponent', () => {
   it('should not render panel when open=false', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideIcons({ lucideX })],
+      providers: [provideNeuralIcons(iconX)],
     }).compileComponents();
     const f = TestBed.createComponent(NeuDialogComponent);
     f.componentRef.setInput('open', false);
@@ -92,7 +92,7 @@ describe('NeuDialogComponent', () => {
   it('should render projected content when open', async () => {
     await TestBed.configureTestingModule({
       imports: [OpenHostComponent, DialogModule],
-      providers: [provideIcons({ lucideX })],
+      providers: [provideNeuralIcons(iconX)],
     }).compileComponents();
     const df = TestBed.createComponent(OpenHostComponent);
     df.detectChanges();
@@ -253,7 +253,7 @@ describe('NeuDialogComponent', () => {
   it('host should have aria-hidden="true" when open=false', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideIcons({ lucideX })],
+      providers: [provideNeuralIcons(iconX)],
     }).compileComponents();
     const f = TestBed.createComponent(NeuDialogComponent);
     f.componentRef.setInput('open', false);
@@ -280,7 +280,7 @@ describe('NeuDialogComponent', () => {
   it('should focus the first visible focusable element when opened', async () => {
     await TestBed.configureTestingModule({
       imports: [FocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(FocusableHostComponent);
@@ -295,7 +295,7 @@ describe('NeuDialogComponent', () => {
   it('should focus the panel when no visible focusable elements exist', async () => {
     await TestBed.configureTestingModule({
       imports: [NoFocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(NoFocusableHostComponent);
@@ -310,7 +310,7 @@ describe('NeuDialogComponent', () => {
   it('keeps focus on the panel when tabbing with no available focusable children', async () => {
     await TestBed.configureTestingModule({
       imports: [NoFocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
     const f = TestBed.createComponent(NoFocusableHostComponent);
     f.detectChanges();
@@ -325,7 +325,7 @@ describe('NeuDialogComponent', () => {
   it('returns focus to the element active before an open dialog is closed declaratively', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
     const opener = document.createElement('button');
     document.body.appendChild(opener);
@@ -356,7 +356,7 @@ describe('NeuDialogComponent', () => {
   it('should return early on Tab when panel is unavailable', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(NeuDialogComponent);
@@ -371,7 +371,7 @@ describe('NeuDialogComponent', () => {
   it('should keep focus trapped when tabbing forward from the last focusable element', async () => {
     await TestBed.configureTestingModule({
       imports: [FocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(FocusableHostComponent);
@@ -394,7 +394,7 @@ describe('NeuDialogComponent', () => {
   it('should keep focus trapped when shift-tabbing from the first focusable element', async () => {
     await TestBed.configureTestingModule({
       imports: [FocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(FocusableHostComponent);
@@ -422,7 +422,7 @@ describe('NeuDialogComponent', () => {
   it('should keep focus trapped when shift-tabbing from the panel itself', async () => {
     await TestBed.configureTestingModule({
       imports: [FocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(FocusableHostComponent);
@@ -449,7 +449,7 @@ describe('NeuDialogComponent', () => {
   it('should let focus continue when tabbing inside the focusable range', async () => {
     await TestBed.configureTestingModule({
       imports: [FocusableHostComponent, DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(FocusableHostComponent);
@@ -484,7 +484,7 @@ describe('NeuDialogComponent', () => {
   it('focus initial guard should be safe before the panel exists', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
 
     const f = TestBed.createComponent(NeuDialogComponent);
@@ -497,7 +497,7 @@ describe('NeuDialogComponent', () => {
   it('locks background scrolling only while a declarative dialog is open', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
     const f = TestBed.createComponent(NeuDialogComponent);
     f.componentRef.setInput('open', true);
@@ -514,7 +514,7 @@ describe('NeuDialogComponent', () => {
   it('preserves the original focus target across a close-open race', async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
     const origin = document.createElement('button');
     document.body.append(origin);
@@ -778,7 +778,7 @@ describe('NeuDialogComponent', () => {
         imports: [DialogModule],
         providers: [
           provideZonelessChangeDetection(),
-          provideIcons({ lucideX }),
+          provideNeuralIcons(iconX),
           provideNeuOverlayDismissGuard(guard),
         ],
       })
@@ -803,7 +803,7 @@ describe('NeuDialogComponent', () => {
         imports: [DialogModule],
         providers: [
           provideZonelessChangeDetection(),
-          provideIcons({ lucideX }),
+          provideNeuralIcons(iconX),
           provideNeuOverlayDismissGuard(guard),
         ],
       })
@@ -839,7 +839,7 @@ describe('NeuDialogService', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DialogModule, FakeContentComponent],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
   });
 

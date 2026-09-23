@@ -1,9 +1,11 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuAlertComponent } from './neu-alert.component';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconBell } from '@neural-icons/core/icons/bell';
 
 function mk() {
-  return TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+  return TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconBell)] });
 }
 
 describe('NeuAlertComponent', () => {
@@ -43,16 +45,16 @@ describe('NeuAlertComponent', () => {
     await f.whenStable();
     const icon = f.nativeElement.querySelector('.neu-alert__icon');
     expect(icon).toBeTruthy();
-    expect(icon.querySelector('neu-icon')).toBeTruthy();
+    expect(icon.querySelector('neural-icon')).toBeTruthy();
   });
 
   it('should use custom icon when provided', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
     f.componentRef.setInput('tone', 'info');
-    f.componentRef.setInput('icon', '🔔');
+    f.componentRef.setInput('icon', 'bell');
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-alert__icon').textContent.trim()).toBe('🔔');
+    expect(f.nativeElement.querySelector('.neu-alert__icon neural-icon svg')).toBeTruthy();
   });
 
   it('should hide icon when showIcon=false', async () => {

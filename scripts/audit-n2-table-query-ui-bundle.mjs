@@ -19,7 +19,7 @@ const artifactPath = join(root, 'baselines/n2-table/query-ui-e-bundle.json');
 const graphPath = join(root, 'baselines/n2-table/query-ui-e-dependency-graph.json');
 const baselinePath = join(root, 'baselines/n2-table/layout-selection-d-bundle.json');
 const temporary = mkdtempSync(join(root, '.n2-table-query-ui-'));
-const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
+const external = ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'];
 
 function compressed(bytes) {
   return {

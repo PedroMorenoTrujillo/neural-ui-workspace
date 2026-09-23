@@ -15,7 +15,8 @@ import {
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { DOCUMENT } from '@angular/common';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 import { NeuCloseRequest } from '@neural-ui/core/foundation';
 import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
 
@@ -37,7 +38,7 @@ import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
  */
 @Component({
   selector: 'neu-sidebar',
-  imports: [NeuFocusTrapDirective, NeuIconComponent],
+  imports: [NeuFocusTrapDirective, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   template: `
     <!-- Overlay de fondo — solo visible en modo overlay -->
@@ -78,7 +79,7 @@ import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
               [attr.aria-label]="closeLabel()"
               type="button"
             >
-              <neu-icon name="lucideX" size="18px" aria-hidden="true" />
+              <neural-icon [icon]="iconX" size="18px" aria-hidden="true" />
             </button>
           }
         </div>
@@ -98,6 +99,7 @@ import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
   styleUrl: './neu-sidebar.component.scss',
 })
 export class NeuSidebarComponent {
+  protected readonly iconX = iconX;
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);

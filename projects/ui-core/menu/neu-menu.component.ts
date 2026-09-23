@@ -16,7 +16,8 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
 import {
   NEU_OVERLAY_DISMISS_GUARD,
@@ -27,7 +28,7 @@ import {
 export interface NeuMenuItem {
   key: string;
   label: string;
-  icon?: string;
+  icon?: NeuralIconName;
   badge?: string | number;
   active?: boolean;
   command?: (event: { originalEvent: Event; item: NeuMenuItem }) => void;
@@ -52,7 +53,7 @@ export class NeuMenuItemDirective {
 
 @Component({
   selector: 'neu-menu',
-  imports: [NeuButtonComponent, NeuIconComponent, NgTemplateOutlet],
+  imports: [NeuButtonComponent, NeuralIcon, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-menu' },
   template: `
@@ -86,9 +87,9 @@ export class NeuMenuItemDirective {
               </span>
             } @else {
               @if (item.icon) {
-                <neu-icon
+                <neural-icon
                   class="neu-menu__icon"
-                  [name]="item.icon"
+                  [icon]="item.icon"
                   size="1rem"
                   aria-hidden="true"
                 />

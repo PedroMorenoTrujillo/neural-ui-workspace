@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import { lucidePlus } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconPlus } from '@neural-icons/core/icons/plus';
 import { provideRouter } from '@angular/router';
 import {
   NeuSpeedDialComponent,
@@ -46,7 +46,7 @@ describe('NeuSpeedDialComponent', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
-        provideIcons({ lucidePlus }),
+        provideNeuralIcons(iconPlus),
         provideRouter([{ path: 'home', component: SpeedDialRouteComponent }]),
       ],
     }).compileComponents(),
@@ -199,7 +199,7 @@ describe('NeuSpeedDialComponent', () => {
     fixture.componentRef.setInput('animation', { itemDelay: 42, rotateTrigger: false });
     fixture.componentRef.setInput('tooltip', { position: 'left' });
     fixture.componentRef.setInput('items', [
-      { key: 'route', label: 'Route', icon: 'lucidePlus', routerLink: ['/home'] },
+      { key: 'route', label: 'Route', icon: 'plus', routerLink: ['/home'] },
       { key: 'docs', label: 'Docs', url: 'https://example.test' },
     ]);
     fixture.detectChanges();

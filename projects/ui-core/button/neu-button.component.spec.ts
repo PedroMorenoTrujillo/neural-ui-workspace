@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { NeuButtonComponent } from './neu-button.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideSave, lucidePlus } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconSave } from '@neural-icons/core/icons/save';
+import { iconPlus } from '@neural-icons/core/icons/plus';
 
 describe('NeuButtonComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NeuButtonComponent],
-      providers: [provideIcons({ lucideSave, lucidePlus })],
+      providers: [provideNeuralIcons(iconSave, iconPlus)],
     }).compileComponents();
   });
 
@@ -77,7 +78,7 @@ describe('NeuButtonComponent', () => {
 
   it('should apply icon-only class when iconOnly=true', () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('icon', 'lucideSave');
+    fixture.componentRef.setInput('icon', 'save');
     fixture.componentRef.setInput('iconOnly', true);
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain('neu-button--icon-only');
@@ -85,14 +86,14 @@ describe('NeuButtonComponent', () => {
 
   it('should render only the icon content when iconOnly=true', async () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('icon', 'lucidePlus');
+    fixture.componentRef.setInput('icon', 'plus');
     fixture.componentRef.setInput('iconOnly', true);
     fixture.componentRef.setInput('ariaLabel', 'Crear');
     fixture.detectChanges();
     await fixture.whenStable();
 
     const host: HTMLButtonElement = fixture.nativeElement;
-    const icon = host.querySelector('neu-icon');
+    const icon = host.querySelector('neural-icon');
 
     expect(host.classList).toContain('neu-button--icon-only');
     expect(host.getAttribute('aria-label')).toBe('Crear');
@@ -100,17 +101,17 @@ describe('NeuButtonComponent', () => {
     expect(host.textContent?.trim()).toBe('');
   });
 
-  it('should pass the expected icon size to ng-icons in iconOnly mode', async () => {
+  it('should pass the expected icon size to neural-icons in iconOnly mode', async () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('icon', 'lucidePlus');
+    fixture.componentRef.setInput('icon', 'plus');
     fixture.componentRef.setInput('iconOnly', true);
     fixture.componentRef.setInput('size', 'md');
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const ngIcon = fixture.nativeElement.querySelector('ng-icon');
+    const neuralIcon = fixture.nativeElement.querySelector('neural-icon svg');
 
-    expect(ngIcon?.getAttribute('style')).toContain('--ng-icon__size: 16px');
+    expect(neuralIcon?.getAttribute('width')).toBe('16px');
   });
 
   it('should emit neuClick when clicked and not disabled', () => {
@@ -139,15 +140,21 @@ describe('NeuButtonComponent', () => {
     expect(fixture.componentInstance.isDisabled()).toBe(true);
   });
 
-  it('icon with iconPosition=right should render icon after content', async () => {
-    // icono en posición derecha debe renderizarse después del contenido
-    // icon with iconPosition=right must render after content
+  it('icon with iconPosition=end should render icon after content', async () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('icon', 'lucideSave');
-    fixture.componentRef.setInput('iconPosition', 'right');
+    fixture.componentRef.setInput('icon', 'save');
+    fixture.componentRef.setInput('iconPosition', 'end');
     fixture.detectChanges();
     await fixture.whenStable();
-    const icon = fixture.nativeElement.querySelector('neu-icon');
+    const icon = fixture.nativeElement.querySelector('neural-icon');
     expect(icon).toBeTruthy();
+  });
+
+  it('does not render geometry for an unregistered canonical name', async () => {
+    const fixture = TestBed.createComponent(NeuButtonComponent);
+    fixture.componentRef.setInput('icon', 'trash');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('neural-icon svg')).toBeNull();
   });
 });

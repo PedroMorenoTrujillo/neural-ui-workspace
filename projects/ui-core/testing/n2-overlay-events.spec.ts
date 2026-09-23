@@ -1,7 +1,7 @@
 import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 import { NeuBottomSheetComponent } from '@neural-ui/core/bottom-sheet';
 import { NeuCloseRequest } from '@neural-ui/core/foundation';
 import { NeuDialogComponent } from '@neural-ui/core/modal';
@@ -103,7 +103,7 @@ describe('N2-022 overlay event integration', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [OverlayHostComponent, ExternalUrlAdapterFixture],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
   });
 

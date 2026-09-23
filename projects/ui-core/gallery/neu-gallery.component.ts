@@ -15,7 +15,17 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { Overlay } from '@angular/cdk/overlay';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconDownload } from '@neural-icons/core/icons/download';
+import { iconFlipHorizontal } from '@neural-icons/core/icons/flip-horizontal';
+import { iconFlipVertical } from '@neural-icons/core/icons/flip-vertical';
+import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
+import { iconRotateCw } from '@neural-icons/core/icons/rotate-cw';
+import { iconX } from '@neural-icons/core/icons/x';
+import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
+import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
 
 export interface NeuGalleryItem {
   src: string;
@@ -47,7 +57,7 @@ export class NeuGalleryCaptionDirective {
 /** An image gallery with typed content templates, preview controls, and touch/keyboard navigation. */
 @Component({
   selector: 'neu-gallery',
-  imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective, NeuIconComponent],
+  imports: [NgTemplateOutlet, NeuFocusTrapDirective, NeuModalFocusDirective, NeuralIcon],
   host: { class: 'neu-gallery', '[class.neu-gallery--fullscreen]': 'isPreviewOpen()' },
   template: `
     @if (items().length) {
@@ -69,7 +79,7 @@ export class NeuGalleryCaptionDirective {
               [attr.aria-label]="previousLabel()"
               (click)="previous()"
             >
-              <neu-icon name="lucideChevronLeft" size="1.25rem" />
+              <neural-icon [icon]="iconChevronLeft" size="1.25rem" />
             </button>
           }
           <button
@@ -102,7 +112,7 @@ export class NeuGalleryCaptionDirective {
               [attr.aria-label]="nextLabel()"
               (click)="next()"
             >
-              <neu-icon name="lucideChevronRight" size="1.25rem" />
+              <neural-icon [icon]="iconChevronRight" size="1.25rem" />
             </button>
           }
           @if (captionTemplate) {
@@ -171,7 +181,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="zoomOutLabel()"
                 [attr.title]="zoomOutLabel()"
               >
-                <neu-icon name="lucideZoomOut" size="1.25rem" />
+                <neural-icon [icon]="iconZoomOut" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -181,7 +191,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="zoomInLabel()"
                 [attr.title]="zoomInLabel()"
               >
-                <neu-icon name="lucideZoomIn" size="1.25rem" />
+                <neural-icon [icon]="iconZoomIn" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -190,7 +200,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="rotateLeftLabel()"
                 [attr.title]="rotateLeftLabel()"
               >
-                <neu-icon name="lucideRotateCcw" size="1.25rem" />
+                <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -199,7 +209,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="rotateRightLabel()"
                 [attr.title]="rotateRightLabel()"
               >
-                <neu-icon name="lucideRotateCw" size="1.25rem" />
+                <neural-icon [icon]="iconRotateCw" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -208,7 +218,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="flipHorizontalLabel()"
                 [attr.title]="flipHorizontalLabel()"
               >
-                <neu-icon name="lucideFlipHorizontal2" size="1.25rem" />
+                <neural-icon [icon]="iconFlipHorizontal" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -217,7 +227,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="flipVerticalLabel()"
                 [attr.title]="flipVerticalLabel()"
               >
-                <neu-icon name="lucideFlipVertical2" size="1.25rem" />
+                <neural-icon [icon]="iconFlipVertical" size="1.25rem" />
               </button>
               <button
                 type="button"
@@ -226,7 +236,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="resetLabel()"
                 [attr.title]="resetLabel()"
               >
-                <neu-icon name="lucideRotateCcw" size="1.25rem" />
+                <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
               </button>
               <a
                 class="neu-gallery__download neu-gallery__tool"
@@ -235,7 +245,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="downloadLabel()"
                 [attr.title]="downloadLabel()"
               >
-                <neu-icon name="lucideDownload" size="1.25rem" />
+                <neural-icon [icon]="iconDownload" size="1.25rem" />
               </a>
               <button
                 type="button"
@@ -244,7 +254,7 @@ export class NeuGalleryCaptionDirective {
                 [attr.aria-label]="closeLabel()"
                 [attr.title]="closeLabel()"
               >
-                <neu-icon name="lucideX" size="1.25rem" />
+                <neural-icon [icon]="iconX" size="1.25rem" />
               </button>
             </div>
           </div>
@@ -263,7 +273,7 @@ export class NeuGalleryCaptionDirective {
               (click)="previous()"
               [attr.aria-label]="previousLabel()"
             >
-              <neu-icon name="lucideChevronLeft" size="1.25rem" />
+              <neural-icon [icon]="iconChevronLeft" size="1.25rem" />
             </button>
             <button
               type="button"
@@ -272,7 +282,7 @@ export class NeuGalleryCaptionDirective {
               (click)="next()"
               [attr.aria-label]="nextLabel()"
             >
-              <neu-icon name="lucideChevronRight" size="1.25rem" />
+              <neural-icon [icon]="iconChevronRight" size="1.25rem" />
             </button>
           }
         </div>
@@ -282,6 +292,16 @@ export class NeuGalleryCaptionDirective {
   styleUrl: './neu-gallery.component.scss',
 })
 export class NeuGalleryComponent {
+  protected readonly iconChevronLeft = iconChevronLeft;
+  protected readonly iconChevronRight = iconChevronRight;
+  protected readonly iconDownload = iconDownload;
+  protected readonly iconFlipHorizontal = iconFlipHorizontal;
+  protected readonly iconFlipVertical = iconFlipVertical;
+  protected readonly iconRotateCcw = iconRotateCcw;
+  protected readonly iconRotateCw = iconRotateCw;
+  protected readonly iconX = iconX;
+  protected readonly iconZoomIn = iconZoomIn;
+  protected readonly iconZoomOut = iconZoomOut;
   readonly items = input<readonly NeuGalleryItem[]>([]);
   readonly activeIndexInput = input<number | null>(null, { alias: 'activeIndex' });
   readonly initialIndex = input(0);

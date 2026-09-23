@@ -16,7 +16,13 @@ import {
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
+import { iconX } from '@neural-icons/core/icons/x';
+import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
+import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
 
 export interface NeuImageViewerItem {
   src: string;
@@ -42,7 +48,7 @@ interface _NeuIvData {
  */
 @Component({
   selector: 'neu-image-viewer-overlay',
-  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NeuIconComponent],
+  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NeuralIcon],
   hostDirectives: [NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -61,13 +67,13 @@ interface _NeuIvData {
         <span class="neu-iv__counter">{{ _index() + 1 }} / {{ _data.items.length }}</span>
         <div class="neu-iv__toolbar-actions">
           <button type="button" class="neu-iv__btn" aria-label="Zoom in" title="Zoom in" (click)="_zoom(0.25)">
-            <neu-icon name="lucideZoomIn" size="1.25rem" />
+            <neural-icon [icon]="iconZoomIn" size="1.25rem" />
           </button>
           <button type="button" class="neu-iv__btn" aria-label="Zoom out" title="Zoom out" (click)="_zoom(-0.25)">
-            <neu-icon name="lucideZoomOut" size="1.25rem" />
+            <neural-icon [icon]="iconZoomOut" size="1.25rem" />
           </button>
           <button type="button" class="neu-iv__btn" aria-label="Reset zoom" title="Reset zoom" (click)="_resetZoom()">
-            <neu-icon name="lucideRotateCcw" size="1.25rem" />
+            <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
           </button>
           <button
             type="button"
@@ -76,7 +82,7 @@ interface _NeuIvData {
             title="Close image viewer"
             (click)="_data.close()"
           >
-            <neu-icon name="lucideX" size="1.25rem" />
+            <neural-icon [icon]="iconX" size="1.25rem" />
           </button>
         </div>
       </div>
@@ -106,7 +112,7 @@ interface _NeuIvData {
           [disabled]="_index() === 0"
           (click)="_navigate(-1)"
         >
-          <neu-icon name="lucideChevronLeft" size="1.25rem" />
+          <neural-icon [icon]="iconChevronLeft" size="1.25rem" />
         </button>
         <button
           type="button"
@@ -115,7 +121,7 @@ interface _NeuIvData {
           [disabled]="_index() === _data.items.length - 1"
           (click)="_navigate(1)"
         >
-          <neu-icon name="lucideChevronRight" size="1.25rem" />
+          <neural-icon [icon]="iconChevronRight" size="1.25rem" />
         </button>
       }
     </div>
@@ -123,6 +129,12 @@ interface _NeuIvData {
   styleUrl: './neu-image-viewer.component.scss',
 })
 export class NeuImageViewerOverlayComponent {
+  protected readonly iconChevronLeft = iconChevronLeft;
+  protected readonly iconChevronRight = iconChevronRight;
+  protected readonly iconRotateCcw = iconRotateCcw;
+  protected readonly iconX = iconX;
+  protected readonly iconZoomIn = iconZoomIn;
+  protected readonly iconZoomOut = iconZoomOut;
   readonly _data = inject(NEU_IV_DATA);
   readonly _index = signal(this._data.initialIndex);
   readonly _scale = signal(1);

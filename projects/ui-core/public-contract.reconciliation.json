@@ -4,11 +4,11 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1487,
-    "bindingDelta": 320,
-    "mapped": 635,
+    "declarationBindings": 1482,
+    "bindingDelta": 315,
+    "mapped": 630,
     "aliasCorrections": 3,
-    "missingOldEntries": 526,
+    "missingOldEntries": 531,
     "newlyDiscovered": 846,
     "ambiguities": 6,
     "discoveryReasons": {
@@ -953,26 +953,6 @@
     {
       "oldToken": "form-field/neu-form-field.component.ts#input:suffix",
       "newId": "./form-field#NeuFormFieldComponent.input:suffix"
-    },
-    {
-      "oldToken": "icon/neu-icon.component.ts#input:ariaLabel",
-      "newId": "./icon#NeuIconComponent.input:ariaLabel"
-    },
-    {
-      "oldToken": "icon/neu-icon.component.ts#input:decorative",
-      "newId": "./icon#NeuIconComponent.input:decorative"
-    },
-    {
-      "oldToken": "icon/neu-icon.component.ts#input:name",
-      "newId": "./icon#NeuIconComponent.input:name"
-    },
-    {
-      "oldToken": "icon/neu-icon.component.ts#input:size",
-      "newId": "./icon#NeuIconComponent.input:size"
-    },
-    {
-      "oldToken": "icon/neu-icon.component.ts#input:strokeWidth",
-      "newId": "./icon#NeuIconComponent.input:strokeWidth"
     },
     {
       "oldToken": "image-gallery/neu-image-gallery.component.ts#input:initialIndex",
@@ -2614,6 +2594,11 @@
     "date-input/neu-date-input.component.ts#input:type",
     "date-input/neu-date-input.component.ts#output:rangeChange",
     "empty-state/neu-empty-state.component.ts#input:compact",
+    "icon/neu-icon.component.ts#input:ariaLabel",
+    "icon/neu-icon.component.ts#input:decorative",
+    "icon/neu-icon.component.ts#input:name",
+    "icon/neu-icon.component.ts#input:size",
+    "icon/neu-icon.component.ts#input:strokeWidth",
     "inline-editor/neu-inline-editor.component.ts#input:max",
     "inline-editor/neu-inline-editor.component.ts#input:min",
     "inline-editor/neu-inline-editor.component.ts#input:rows",

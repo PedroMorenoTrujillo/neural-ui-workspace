@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 import { NeuCalendarComponent } from '@neural-ui/core/calendar';
 import { NeuDialogComponent } from '@neural-ui/core/modal';
 
@@ -17,7 +17,7 @@ describe('N2-022 focused performance baselines', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NeuDialogComponent, NeuCalendarComponent],
-      providers: [provideZonelessChangeDetection(), provideIcons({ lucideX })],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
   });
 

@@ -18,7 +18,7 @@ const update = process.argv.includes('--update');
 const artifactPath = join(root, 'baselines/n2-table/renderer-b.json');
 const graphPath = join(root, 'baselines/n2-table/renderer-b-dependency-graph.json');
 const temporary = mkdtempSync(join(root, '.n2-table-renderer-'));
-const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
+const external = ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'];
 
 function compressed(bytes) {
   return {

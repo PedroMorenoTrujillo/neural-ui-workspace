@@ -19,7 +19,7 @@ for (const [name, contents] of Object.entries(cases)) {
   const bundle = await build({
     stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'ts' },
     bundle: true, format: 'esm', platform: 'browser', minify: true, write: false,
-    external: ['@angular/*', 'rxjs', '@ng-icons/*'],
+    external: ['@angular/*', 'rxjs'],
     plugins: [{ name: 'n2-b5-private-internal', setup(plugin) {
       plugin.onResolve({ filter: /^@neural-ui\/core\/internal$/ }, () => ({ path: internal }));
     } }],

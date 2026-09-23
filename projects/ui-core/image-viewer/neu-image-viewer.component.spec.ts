@@ -1,15 +1,13 @@
 import { Overlay } from '@angular/cdk/overlay';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import {
-  lucideChevronLeft,
-  lucideChevronRight,
-  lucideRotateCcw,
-  lucideX,
-  lucideZoomIn,
-  lucideZoomOut,
-} from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
+import { iconX } from '@neural-icons/core/icons/x';
+import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
+import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
 import {
   NEU_IV_DATA,
   NeuImageViewerDirective,
@@ -43,14 +41,7 @@ beforeEach(() =>
     providers: [
       provideZonelessChangeDetection(),
       Overlay,
-      provideIcons({
-        lucideChevronLeft,
-        lucideChevronRight,
-        lucideRotateCcw,
-        lucideX,
-        lucideZoomIn,
-        lucideZoomOut,
-      }),
+      provideNeuralIcons(iconChevronLeft, iconChevronRight, iconRotateCcw, iconX, iconZoomIn, iconZoomOut),
     ],
   }).compileComponents(),
 );
@@ -363,12 +354,12 @@ describe('NeuImageViewerDirective', () => {
       ),
     );
     expect(controls).toHaveLength(6);
-    expect(controls.every((control) => control.querySelector('neu-icon'))).toBe(true);
+    expect(controls.every((control) => control.querySelector('neural-icon'))).toBe(true);
     expect(controls.every((control) => !control.textContent?.trim())).toBe(true);
     expect(
       controls.every(
         (control) =>
-          control.querySelector('ng-icon')?.getAttribute('style')?.includes('1.25rem') ?? false,
+          control.querySelector('neural-icon svg')?.getAttribute('width') === '1.25rem',
       ),
     ).toBe(true);
   });

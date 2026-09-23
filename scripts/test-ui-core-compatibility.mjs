@@ -51,8 +51,8 @@ packageJson.dependencies = {
   '@angular/router': frameworkVersion,
   '@angular/ssr': toolingVersion,
   '@neural-ui/core': `file:${join(fixture, packageTarball)}`,
-  '@ng-icons/core': workspacePackageJson.dependencies['@ng-icons/core'],
-  '@ng-icons/lucide': workspacePackageJson.dependencies['@ng-icons/lucide'],
+  '@neural-icons/core': workspacePackageJson.dependencies['@neural-icons/core'],
+  '@neural-icons/angular': workspacePackageJson.dependencies['@neural-icons/angular'],
   rxjs: workspacePackageJson.dependencies.rxjs,
   tslib: workspacePackageJson.dependencies.tslib,
 };
@@ -119,6 +119,7 @@ try {
     ],
     ['npm', ['run', 'build']],
     ['node', ['src/ssr-tree-table.mjs']],
+    ['node', ['src/ssr-icons.mjs']],
     ['node', ['src/ssr-h9-events.mjs']],
     ['node', ['src/ssr-n2-forms.mjs']],
     [

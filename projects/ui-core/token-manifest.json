@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "projects/ui-core/styles/_tokens.scss",
-  "tokenCount": 282,
-  "publicTokenCount": 262,
+  "tokenCount": 280,
+  "publicTokenCount": 259,
   "tokens": [
     {
       "token": "--neu-accent",
@@ -1003,6 +1003,23 @@
       "status": "canonical"
     },
     {
+      "token": "--neu-compare-percent",
+      "category": "internal",
+      "owner": "runtime",
+      "description": "Private runtime geometry; not a public theming token.",
+      "default": null,
+      "fallback": [],
+      "declaredIn": [],
+      "defaultSource": null,
+      "consumedIn": [
+        "projects/ui-core/compare/neu-compare.component.scss",
+        "projects/ui-core/compare/neu-compare.component.ts"
+      ],
+      "public": false,
+      "documented": false,
+      "status": "internal-runtime"
+    },
+    {
       "token": "--neu-context-menu-bg",
       "category": "component",
       "owner": "context-menu",
@@ -2001,61 +2018,6 @@
         "projects/ui-core/sidebar/neu-sidebar.component.scss",
         "projects/ui-core/styles/_tokens.scss",
         "projects/ui-core/toast/neu-toast.component.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-icon-size",
-      "category": "foundation",
-      "owner": "global",
-      "description": "Foundation token for icon size.",
-      "default": "1.25rem",
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/icon/neu-icon.component.ts",
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-icon-size-lg",
-      "category": "foundation",
-      "owner": "global",
-      "description": "Foundation token for icon size lg.",
-      "default": "1.5rem",
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "public": true,
-      "documented": true,
-      "status": "canonical"
-    },
-    {
-      "token": "--neu-icon-size-sm",
-      "category": "foundation",
-      "owner": "global",
-      "description": "Foundation token for icon size sm.",
-      "default": "1rem",
-      "fallback": [],
-      "declaredIn": [
-        "projects/ui-core/styles/_tokens.scss"
-      ],
-      "defaultSource": "root",
-      "consumedIn": [
-        "projects/ui-core/styles/_tokens.scss"
       ],
       "public": true,
       "documented": true,

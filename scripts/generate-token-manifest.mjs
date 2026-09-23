@@ -9,6 +9,7 @@ const OUTPUT = `${SOURCE}/token-manifest.json`;
 // These properties carry per-instance geometry from Angular to CSS. They were
 // never documented as consumer theme API and intentionally stay private.
 const INTERNAL_RUNTIME_TOKENS = new Set([
+  '--neu-compare-percent',
   '--neu-cp-check-a',
   '--neu-cp-check-b',
   '--neu-cp-color',

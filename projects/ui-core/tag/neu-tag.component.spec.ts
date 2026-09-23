@@ -54,11 +54,11 @@ describe('NeuTagComponent', () => {
   it('uses the registered icon and an explicit accessible name', () => {
     const direct = TestBed.createComponent(NeuTagComponent);
     direct.componentRef.setInput('value', 'Deploying');
-    direct.componentRef.setInput('icon', 'lucideCheck');
+    direct.componentRef.setInput('icon', 'check');
     direct.componentRef.setInput('ariaLabel', 'Deployment status');
     direct.detectChanges();
 
-    expect(direct.nativeElement.querySelector('neu-icon')).toBeTruthy();
+    expect(direct.nativeElement.querySelector('neural-icon')).toBeTruthy();
     expect(direct.nativeElement.getAttribute('aria-label')).toBe('Deployment status');
     expect(direct.componentInstance.iconTemplate).toBeUndefined();
   });

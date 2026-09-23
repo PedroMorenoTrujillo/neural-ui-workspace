@@ -4,7 +4,11 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
+import { iconMinus } from '@neural-icons/core/icons/minus';
+import { iconTrendingDown } from '@neural-icons/core/icons/trending-down';
+import { iconTrendingUp } from '@neural-icons/core/icons/trending-up';
 
 export type NeuStatsTrend = 'up' | 'down' | 'neutral';
 
@@ -17,13 +21,13 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
  *     value="$12,450"
  *     change="+12.5%"
  *     trend="up"
- *     icon="lucideDollarSign"
+ *     icon="dollar-sign"
  *     [sparkData]="[30,45,38,52,60,55,70]"
  *   />
  */
 @Component({
   selector: 'neu-stats-card',
-  imports: [NeuIconComponent],
+  imports: [NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-stats-card' },
   template: `
@@ -32,7 +36,7 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
       <div class="neu-stats-card__header">
         @if (icon()) {
           <span class="neu-stats-card__icon">
-            <neu-icon [name]="icon()" size="1.125rem" />
+            <neural-icon [icon]="icon()!" size="1.125rem" />
           </span>
         }
         <span class="neu-stats-card__title">{{ title() }}</span>
@@ -46,11 +50,11 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
         @if (change()) {
           <span class="neu-stats-card__change neu-stats-card__change--{{ trend() }}">
             @if (trend() === 'up') {
-              <neu-icon name="lucideTrendingUp" size="0.875rem" />
+              <neural-icon [icon]="iconTrendingUp" size="0.875rem" />
             } @else if (trend() === 'down') {
-              <neu-icon name="lucideTrendingDown" size="0.875rem" />
+              <neural-icon [icon]="iconTrendingDown" size="0.875rem" />
             } @else {
-              <neu-icon name="lucideMinus" size="0.875rem" />
+              <neural-icon [icon]="iconMinus" size="0.875rem" />
             }
             {{ change() }}
           </span>
@@ -82,6 +86,9 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
   styleUrl: './neu-stats-card.component.scss',
 })
 export class NeuStatsCardComponent {
+  protected readonly iconMinus = iconMinus;
+  protected readonly iconTrendingDown = iconTrendingDown;
+  protected readonly iconTrendingUp = iconTrendingUp;
   /** Título o etiqueta de la métrica. / Metric title or label. */
   title = input<string>('');
   /** Valor principal formateado (p.ej. "$12,450" o "98.2%"). / Main formatted value (e.g. "$12,450" or "98.2%"). */
@@ -93,7 +100,7 @@ export class NeuStatsCardComponent {
   /** Texto auxiliar bajo el cambio (p.ej. "vs. mes anterior"). / Auxiliary text below the change (e.g. "vs. previous month"). */
   label = input<string>('');
   /** Nombre del icono Lucide para el encabezado. / Lucide icon name for the header. */
-  icon = input<string>('');
+  icon = input<NeuralIconName | null>(null);
   /** Array de valores numéricos para la sparkline. Mín. 2 puntos. / Array of numeric values for the sparkline. Min. 2 points. */
   sparkData = input<number[]>([]);
 

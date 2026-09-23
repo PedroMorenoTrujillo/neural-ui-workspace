@@ -14,7 +14,8 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonSize } from '@neural-ui/core/button';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
 import {
   NeuOptionDisabledAccessor,
   NeuOptionLabelAccessor,
@@ -32,7 +33,7 @@ export interface NeuToggleOption<T = unknown> {
   /** Valor asociado a esta opción / Value associated with this option */
   value: T;
   /** Nombre de icono Lucide (opcional) / Lucide icon name (optional) */
-  icon?: string;
+  icon?: NeuralIconName;
   /** Deshabilita solo esta opción / Disables this option only */
   disabled?: boolean;
 }
@@ -71,7 +72,7 @@ export class NeuToggleButtonItemDirective<T = unknown, V = NeuToggleValueNotProv
  */
 @Component({
   selector: 'neu-toggle-button-group',
-  imports: [NeuIconComponent, NgTemplateOutlet],
+  imports: [NeuralIcon, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-toggle-group-host', '[hidden]': 'hidden()', '(focusout)': 'onFocusOut($event)' },
   template: `
@@ -97,7 +98,7 @@ export class NeuToggleButtonItemDirective<T = unknown, V = NeuToggleValueNotProv
             <ng-container [ngTemplateOutlet]="itemTpl()!.templateRef" [ngTemplateOutletContext]="{ $implicit: opt, selected: isSelected(optionValueOf(opt)) }" />
           } @else {
             @if (optionIconOf(opt)) {
-              <neu-icon [name]="optionIconOf(opt)!" size="16px" strokeWidth="2" />
+              <neural-icon [icon]="optionIconOf(opt)!" size="16px" [strokeWidth]="2" />
             }
             {{ optionLabelOf(opt) }}
           }
@@ -214,10 +215,10 @@ export class NeuToggleButtonGroupComponent<
     return resolveNeuOptionDisabled(option, this.optionDisabled());
   }
 
-  optionIconOf(option: NeuToggleOptionModel<T, V>): string | null {
+  optionIconOf(option: NeuToggleOptionModel<T, V>): NeuralIconName | null {
     if (typeof option !== 'object' || option === null || !('icon' in option)) return null;
     const icon = (option as { icon?: unknown }).icon;
-    return typeof icon === 'string' ? icon : null;
+    return typeof icon === 'string' ? (icon as NeuralIconName) : null;
   }
 
   tabIndexFor(option: NeuToggleOptionModel<T, V>): number {

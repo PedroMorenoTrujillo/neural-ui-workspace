@@ -8,18 +8,24 @@ import {
   signal,
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconDefinition, NeuralIconName } from '@neural-icons/core';
+import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
+import { iconCircleX } from '@neural-icons/core/icons/circle-x';
+import { iconInfo } from '@neural-icons/core/icons/info';
+import { iconWarning } from '@neural-icons/core/icons/warning';
+import { iconX } from '@neural-icons/core/icons/x';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuAlertTone = 'info' | 'success' | 'warning' | 'danger';
 export type NeuAlertVariant = 'soft' | 'outline';
 
 /** Icono por defecto para cada tipo */
-const DEFAULT_ICON_NAMES: Record<NeuAlertTone, string> = {
-  info: 'lucideInfo',
-  success: 'lucideCheckCircle',
-  warning: 'lucideAlertTriangle',
-  danger: 'lucideXCircle',
+const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuralIconDefinition> = {
+  info: iconInfo,
+  success: iconCircleCheck,
+  warning: iconWarning,
+  danger: iconCircleX,
 };
 
 /**
@@ -32,7 +38,7 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, string> = {
  */
 @Component({
   selector: 'neu-alert',
-  imports: [NeuButtonComponent, NeuIconComponent],
+  imports: [NeuButtonComponent, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
@@ -44,9 +50,9 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, string> = {
       @if (showIcon()) {
         <span class="neu-alert__icon" aria-hidden="true">
           @if (icon()) {
-            {{ icon() }}
+            <neural-icon [icon]="icon()!" size="1.1em" />
           } @else {
-            <neu-icon [name]="_defaultIconName()" size="1.1em" />
+            <neural-icon [icon]="_defaultIconName()" size="1.1em" />
           }
         </span>
       }
@@ -66,12 +72,11 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, string> = {
           type="button"
           tone="neutral" variant="ghost"
           size="sm"
-          icon="lucideX"
           [iconOnly]="true"
           [ariaLabel]="closeLabel()"
           [attr.aria-label]="closeLabel()"
           (neuClick)="dismiss()"
-        ></button>
+        ><neural-icon [icon]="iconX" size="14px" /></button>
       }
     }
   `,
@@ -85,7 +90,7 @@ export class NeuAlertComponent {
   readonly title = input<string>('');
 
   /** Icono personalizado. Vacío = usa el icono por defecto del tipo / Custom icon. Empty = use default type icon */
-  readonly icon = input<string>('');
+  readonly icon = input<NeuralIconName | null>(null);
 
   /** Muestra el icono / Shows the icon */
   readonly showIcon = input<boolean>(true);
@@ -106,6 +111,7 @@ export class NeuAlertComponent {
   protected readonly _dismissed = signal(false);
 
   protected readonly _defaultIconName = computed(() => DEFAULT_ICON_NAMES[this.tone()]);
+  protected readonly iconX = iconX;
 
   readonly liveRegion = computed(() => (this.tone() === 'danger' ? 'assertive' : 'polite'));
 

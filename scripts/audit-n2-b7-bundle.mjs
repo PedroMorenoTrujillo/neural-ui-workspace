@@ -27,7 +27,7 @@ for (const [name, contents] of Object.entries(cases)) {
     platform: 'browser',
     minify: true,
     write: false,
-    external: ['@angular/*', 'rxjs', '@ng-icons/*'],
+    external: ['@angular/*', 'rxjs'],
     plugins: [{
       name: 'n2-b7-private-internal',
       setup(plugin) {

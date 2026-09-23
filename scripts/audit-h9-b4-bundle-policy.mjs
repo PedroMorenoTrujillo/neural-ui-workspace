@@ -31,7 +31,7 @@ const baselineRoot = baselineArgument
   : undefined;
 
 const compression = { gzip: { level: 9 }, brotli: { quality: 11 } };
-const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
+const external = ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'];
 const scenarios = {
   'root-unused': { source: "import { provideNeuralUI } from '@neural-ui/core';" },
   provider: { imports: [['provideNeuralUI', '']] },

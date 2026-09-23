@@ -21,7 +21,7 @@ const physicalReplacementGraphPath = join(
 const graphPath = join(root, 'baselines/n2-table/export-i-dependency-graph.json');
 const baselinePath = join(root, 'baselines/n2-table/interactions-h-bundle.json');
 const temporary = mkdtempSync(join(root, '.n2-table-export-'));
-const external = ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'];
+const external = ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'];
 
 function compressed(bytes) {
   return {

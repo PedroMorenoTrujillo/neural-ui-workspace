@@ -17,7 +17,7 @@ describe('menu action resolver', () => {
     const action = resolveNeuMenuAction({
       key: 'docs',
       label: 'Docs',
-      icon: 'book',
+      icon: 'bookmark',
       badge: 3,
       active: true,
       url: 'https://example.test',
@@ -27,7 +27,7 @@ describe('menu action resolver', () => {
     expect(action).toMatchObject({
       key: 'docs',
       label: 'Docs',
-      icon: 'book',
+      icon: 'bookmark',
       badge: 3,
       active: true,
       kind: 'external',

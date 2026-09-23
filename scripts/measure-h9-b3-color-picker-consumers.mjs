@@ -40,7 +40,7 @@ function packagePlugin(root) {
 async function measureConsumer(root) {
   const result = await build({
     bundle: true,
-    external: ['@angular/*', '@angular/cdk/*', '@ng-icons/*', 'rxjs', 'rxjs/*'],
+    external: ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'],
     format: 'esm',
     minify: true,
     platform: 'browser',

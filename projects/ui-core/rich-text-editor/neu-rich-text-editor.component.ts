@@ -15,6 +15,15 @@ import {
 import { DOCUMENT } from '@angular/common';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconBold } from '@neural-icons/core/icons/bold';
+import { iconItalic } from '@neural-icons/core/icons/italic';
+import { iconUnderline } from '@neural-icons/core/icons/underline';
+import { iconList } from '@neural-icons/core/icons/list';
+import { iconListOrdered } from '@neural-icons/core/icons/list-ordered';
+import { iconLink } from '@neural-icons/core/icons/link';
+import { iconImage } from '@neural-icons/core/icons/image';
+import { iconEraser } from '@neural-icons/core/icons/eraser';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   escapeRichTextAttribute,
@@ -85,7 +94,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
 
 @Component({
   selector: 'neu-rich-text-editor',
-  imports: [NeuButtonComponent],
+  imports: [NeuButtonComponent, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-rich-text-editor-host',
@@ -123,37 +132,34 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideBold"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().bold"
               [title]="mergedLabels().bold"
               [disabled]="isInteractionBlocked()"
               (click)="format('bold')"
-            ></button>
+            ><neural-icon [icon]="iconBold" size="1em" /></button>
             <button
               neu-button
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideItalic"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().italic"
               [title]="mergedLabels().italic"
               [disabled]="isInteractionBlocked()"
               (click)="format('italic')"
-            ></button>
+            ><neural-icon [icon]="iconItalic" size="1em" /></button>
             <button
               neu-button
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideUnderline"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().underline"
               [title]="mergedLabels().underline"
               [disabled]="isInteractionBlocked()"
               (click)="format('underline')"
-            ></button>
+            ><neural-icon [icon]="iconUnderline" size="1em" /></button>
           </div>
 
           <div
@@ -166,25 +172,23 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideList"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().unorderedList"
               [title]="mergedLabels().unorderedList"
               [disabled]="isInteractionBlocked()"
               (click)="format('insertUnorderedList')"
-            ></button>
+            ><neural-icon [icon]="iconList" size="1em" /></button>
             <button
               neu-button
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideListOrdered"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().orderedList"
               [title]="mergedLabels().orderedList"
               [disabled]="isInteractionBlocked()"
               (click)="format('insertOrderedList')"
-            ></button>
+            ><neural-icon [icon]="iconListOrdered" size="1em" /></button>
           </div>
 
           <div
@@ -197,25 +201,23 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideLink"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().addLink"
               [title]="mergedLabels().addLink"
               [disabled]="isInteractionBlocked()"
               (click)="addLink()"
-            ></button>
+            ><neural-icon [icon]="iconLink" size="1em" /></button>
             <button
               neu-button
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideImage"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().addImageUrl"
               [title]="mergedLabels().addImageUrl"
               [disabled]="isInteractionBlocked()"
               (click)="addImageUrl()"
-            ></button>
+            ><neural-icon [icon]="iconImage" size="1em" /></button>
           </div>
 
           <div
@@ -228,13 +230,12 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               type="button"
               tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideEraser"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().clearFormat"
               [title]="mergedLabels().clearFormat"
               [disabled]="isInteractionBlocked()"
               (click)="format('removeFormat')"
-            ></button>
+            ><neural-icon [icon]="iconEraser" size="1em" /></button>
           </div>
         </div>
 
@@ -296,6 +297,14 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
   styleUrl: './neu-rich-text-editor.component.scss',
 })
 export class NeuRichTextEditorComponent implements FormValueControl<string> {
+  protected readonly iconBold = iconBold;
+  protected readonly iconItalic = iconItalic;
+  protected readonly iconUnderline = iconUnderline;
+  protected readonly iconList = iconList;
+  protected readonly iconListOrdered = iconListOrdered;
+  protected readonly iconLink = iconLink;
+  protected readonly iconImage = iconImage;
+  protected readonly iconEraser = iconEraser;
   readonly value = model<string>('');
   readonly label = input<string>('');
   readonly placeholder = input<string>('Write here...');

@@ -19,7 +19,7 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
 import {
   NeuIdGenerator,
   NeuResponsiveState,
@@ -78,7 +78,7 @@ interface ProcessedMegaRoot extends ProcessedMegaItem {
 
 @Component({
   selector: 'neu-mega-menu',
-  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, NeuBadgeComponent, NeuIconComponent],
+  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, NeuBadgeComponent, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-mega-menu',
@@ -323,7 +323,7 @@ interface ProcessedMegaRoot extends ProcessedMegaItem {
 
     <ng-template #defaultItem let-item let-level="level">
       @if (item.icon) {
-        <neu-icon class="neu-mega-menu__icon" [name]="item.icon" size="1rem" aria-hidden="true" />
+        <neural-icon class="neu-mega-menu__icon" [icon]="item.icon" size="1rem" aria-hidden="true" />
       }
       <span class="neu-mega-menu__label">{{ item.label }}</span>
       @if (item.badge != null) {

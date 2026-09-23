@@ -4,7 +4,9 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
+import { iconInbox } from '@neural-icons/core/icons/inbox';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import type { NeuDensity } from '@neural-ui/core';
 
@@ -16,7 +18,7 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
  *
  * Uso:
  *   <neu-empty-state
- *     icon="lucideInbox"
+ *     icon="inbox"
  *     title="Sin resultados"
  *     description="Prueba con otros filtros."
  *     actionLabel="Limpiar filtros"
@@ -25,14 +27,14 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
  */
 @Component({
   selector: 'neu-empty-state',
-  imports: [NeuIconComponent, NeuButtonComponent],
+  imports: [NeuralIcon, NeuButtonComponent],
   encapsulation: ViewEncapsulation.None,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-empty-state__inner">
       @if (icon()) {
         <span class="neu-empty-state__icon">
-          <neu-icon [name]="icon()" [size]="iconSize()" />
+          <neural-icon [icon]="icon() === 'inbox' ? iconInbox : icon()!" [size]="iconSize()" />
         </span>
       }
 
@@ -52,8 +54,9 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
   styleUrl: './neu-empty-state.component.scss',
 })
 export class NeuEmptyStateComponent {
-  /** Nombre del icono Lucide registrado con provideIcons(). / Lucide icon name registered with provideIcons(). */
-  icon = input<string>('lucideInbox');
+  protected readonly iconInbox = iconInbox;
+  /** Canonical Neural icon name; the built-in inbox icon needs no registration. */
+  icon = input<NeuralIconName | null>('inbox');
   /** Tamaño del icono. Por defecto 3rem. / Icon size. Default 3rem. */
   iconSize = input<string>('3rem');
   /** Título principal del estado vacío. / Main title of the empty state. */

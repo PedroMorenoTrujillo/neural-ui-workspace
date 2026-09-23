@@ -6,8 +6,8 @@ import {
   NeuToggleButtonItemDirective,
   NeuToggleOption,
 } from './neu-toggle-button-group.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideCalendar } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconCalendar } from '@neural-icons/core/icons/calendar';
 
 const OPTIONS: NeuToggleOption<string>[] = [
   { label: 'Día', value: 'day' },
@@ -33,7 +33,7 @@ function mk(inputs: Record<string, unknown> = {}): {
 describe('NeuToggleButtonGroupComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideIcons({ lucideCalendar })],
+      providers: [provideNeuralIcons(iconCalendar)],
     }).compileComponents();
   });
 
@@ -54,10 +54,10 @@ describe('NeuToggleButtonGroupComponent', () => {
 
   it('should render icon when option has icon', () => {
     const opts: NeuToggleOption<string>[] = [
-      { label: 'Cal', value: 'cal', icon: 'lucideCalendar' },
+      { label: 'Cal', value: 'cal', icon: 'calendar' },
     ];
     const { f } = mk({ options: opts });
-    expect(f.nativeElement.querySelector('neu-icon')).toBeTruthy();
+    expect(f.nativeElement.querySelector('neural-icon')).toBeTruthy();
   });
 
   // ── Single selection ──────────────────────────────────────────────────────
@@ -468,8 +468,8 @@ describe('NeuToggleButtonGroupComponent', () => {
     expect(comp.optionIconOf(null as never)).toBeNull();
     expect(comp.optionIconOf({ label: 'No icon', value: 'none' })).toBeNull();
     expect(comp.optionIconOf({ label: 'Bad icon', value: 'bad', icon: 1 } as never)).toBeNull();
-    expect(comp.optionIconOf({ label: 'Icon', value: 'icon', icon: 'lucideCalendar' })).toBe(
-      'lucideCalendar',
+    expect(comp.optionIconOf({ label: 'Icon', value: 'icon', icon: 'calendar' })).toBe(
+      'calendar',
     );
 
     const buttons = Array.from(

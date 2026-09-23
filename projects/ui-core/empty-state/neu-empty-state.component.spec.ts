@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { provideIcons } from '@ng-icons/core';
-import { lucideInbox } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconInbox } from '@neural-icons/core/icons/inbox';
 import { NeuEmptyStateComponent } from './neu-empty-state.component';
 
 @Component({
@@ -27,7 +27,7 @@ describe('NeuEmptyStateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [provideIcons({ lucideInbox })],
+      providers: [provideNeuralIcons(iconInbox)],
     }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
     host = fixture.componentInstance;

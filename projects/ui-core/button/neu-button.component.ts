@@ -5,26 +5,27 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
 
 export type NeuButtonTone = 'neutral' | 'brand' | 'danger';
 export type NeuButtonVariant = 'solid' | 'outline' | 'ghost';
 export type NeuButtonSize = 'sm' | 'md' | 'lg';
-export type NeuButtonIconPosition = 'left' | 'right';
+export type NeuButtonIconPosition = 'start' | 'end';
 
 /**
  * NeuralUI Button Component
  *
  * Uso: <button neu-button tone="brand" variant="solid" size="md">Texto</button>
- * Con icono: <button neu-button icon="lucideSave">Guardar</button>
- * Solo icono: <button neu-button icon="lucideTrash2" [iconOnly]="true" />
+ * Con icono: <button neu-button icon="save">Guardar</button>
+ * Solo icono: <button neu-button icon="trash" [iconOnly]="true" ariaLabel="Eliminar" />
  *
  * Signals: tone, variant, size, disabled, loading, fullWidth, icon, iconPosition, iconOnly
  * son inputs reactivos. El estado se computa automáticamente con computed().
  */
 @Component({
   selector: 'button[neu-button]',
-  imports: [NeuIconComponent],
+  imports: [NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
@@ -51,12 +52,12 @@ export type NeuButtonIconPosition = 'left' | 'right';
         </svg>
       </span>
     }
-    @if (hasIcon() && iconPosition() === 'left') {
-      <neu-icon [name]="icon()" [size]="iconSize()" strokeWidth="2" aria-hidden="true" />
+    @if (hasIcon() && iconPosition() === 'start') {
+      <neural-icon [icon]="icon()!" [size]="iconSize()" [strokeWidth]="2" aria-hidden="true" />
     }
     <ng-content />
-    @if (hasIcon() && iconPosition() === 'right') {
-      <neu-icon [name]="icon()" [size]="iconSize()" strokeWidth="2" aria-hidden="true" />
+    @if (hasIcon() && iconPosition() === 'end') {
+      <neural-icon [icon]="icon()!" [size]="iconSize()" [strokeWidth]="2" aria-hidden="true" />
     }
   `,
   styleUrl: './neu-button.component.scss',
@@ -80,11 +81,11 @@ export class NeuButtonComponent {
   /** Ocupa el 100% del ancho de su contenedor / Takes up 100% of its container width */
   fullWidth = input<boolean>(false);
 
-  /** Nombre del icono Lucide (ej: 'lucideSave', 'lucidePlus') / Lucide icon name (e.g. 'lucideSave', 'lucidePlus') */
-  icon = input<string>('');
+  /** Canonical registered Neural icon name. Project custom icon content as an escape hatch. */
+  icon = input<NeuralIconName | null>(null);
 
   /** Posición del icono respecto al texto */
-  iconPosition = input<NeuButtonIconPosition>('left');
+  iconPosition = input<NeuButtonIconPosition>('start');
 
   /** Modo solo-icono: aplica padding cuadrado y oculta el ng-content / Icon-only mode: applies square padding and hides ng-content */
   iconOnly = input<boolean>(false);

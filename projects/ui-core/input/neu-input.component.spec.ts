@@ -2,8 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NeuInputComponent } from './neu-input.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideAlertCircle, lucideSearch, lucideUser } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconCircleAlert } from '@neural-icons/core/icons/circle-alert';
+import { iconSearch } from '@neural-icons/core/icons/search';
+import { iconUser } from '@neural-icons/core/icons/user';
 
 function mk(inputs: Record<string, unknown> = {}) {
   const f = TestBed.createComponent(NeuInputComponent);
@@ -44,7 +46,7 @@ class NgModelInitialValueHost {
 describe('NeuInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [provideIcons({ lucideAlertCircle, lucideSearch, lucideUser })],
+      providers: [provideNeuralIcons(iconCircleAlert, iconSearch, iconUser)],
     }).compileComponents();
   });
 
@@ -79,7 +81,7 @@ describe('NeuInputComponent', () => {
     const { f } = mk({
       label: 'Buscar',
       floatingLabel: false,
-      icon: 'lucideSearch',
+      icon: 'search',
       iconPosition: 'left',
     });
 
@@ -308,12 +310,12 @@ describe('NeuInputComponent', () => {
   // ── Icon ──────────────────────────────────────────────────────────────────
 
   it('should render icon on the left when icon + iconPosition=left', () => {
-    const { f } = mk({ label: 'Test', icon: 'lucideSearch', iconPosition: 'left' });
+    const { f } = mk({ label: 'Test', icon: 'search', iconPosition: 'left' });
     expect(f.nativeElement.querySelector('.neu-input__icon--start')).toBeTruthy();
   });
 
   it('should render icon on the right when iconPosition=right', () => {
-    const { f } = mk({ label: 'Test', icon: 'lucideSearch', iconPosition: 'right' });
+    const { f } = mk({ label: 'Test', icon: 'search', iconPosition: 'right' });
     expect(f.nativeElement.querySelector('.neu-input__icon--end')).toBeTruthy();
   });
 
@@ -423,7 +425,7 @@ describe('NeuInputComponent', () => {
 
   it('icon with iconPosition=left renders .neu-input__icon--start', async () => {
     const f = TestBed.createComponent(NeuInputComponent);
-    f.componentRef.setInput('icon', 'lucideUser');
+    f.componentRef.setInput('icon', 'user');
     f.componentRef.setInput('iconPosition', 'left');
     f.detectChanges();
     await f.whenStable();
@@ -432,7 +434,7 @@ describe('NeuInputComponent', () => {
 
   it('icon with iconPosition=right renders .neu-input__icon--end', async () => {
     const f = TestBed.createComponent(NeuInputComponent);
-    f.componentRef.setInput('icon', 'lucideUser');
+    f.componentRef.setInput('icon', 'user');
     f.componentRef.setInput('iconPosition', 'right');
     f.detectChanges();
     await f.whenStable();

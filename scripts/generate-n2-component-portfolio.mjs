@@ -36,7 +36,7 @@ const completed = new Map([
 ].flatMap(([phase, names]) => names.split(' ').map((name) => [name, phase])));
 
 const groups = [
-  ['A1', 'A', 'foundation/actions', 'Icon Button ButtonGroup Tag Toolbar', 'LIGHT', 'LOW', 'GPT-6 SOL MEDIUM'],
+  ['A1', 'A', 'foundation/actions', 'Button ButtonGroup Tag Toolbar', 'LIGHT', 'LOW', 'GPT-6 SOL MEDIUM'],
   ['A2', 'A', 'feedback/status', 'Alert Badge Chip EmptyState ToastContainer', 'LIGHT', 'LOW', 'GPT-6 SOL MEDIUM'],
   ['A3', 'A', 'simple display', 'Avatar AvatarGroup Card Divider Skeleton Spinner', 'LIGHT', 'LOW', 'GPT-6 SOL MEDIUM'],
   ['A4', 'A', 'metrics/form shell', 'MeterGroup ProgressBar StatsCard FormField InputGroup', 'LIGHT', 'LOW', 'GPT-6 SOL MEDIUM'],
@@ -63,7 +63,6 @@ const groups = [
 
 // Every pending component has a concrete, source/roadmap-backed change plan.
 const changes = {
-  Icon: ['Audit icon naming and decorative-vs-labelled semantics', 'Verify SSR-safe icon rendering and root-unused cost'],
   Button: ['Verify native button type/disabled/loading and exactly-once action', 'Close icon/visual-axis contract and keyboard smoke'],
   ButtonGroup: ['Audit group semantics and child disabled state', 'Check roving/selected behavior without duplicating Button state'],
   Tag: ['Verify dismiss proposal and semantic tone classes', 'Audit accessible removal label and immutable inputs'],
@@ -141,18 +140,18 @@ const special = {
   VirtualList: 'N2-036 (P3 deferred)',
 };
 const deps = {
-  Button: ['NeuIconComponent'], Alert: ['NeuButtonComponent', 'NeuIconComponent'],
-  EmptyState: ['NeuButtonComponent', 'NeuIconComponent'], AvatarGroup: ['NeuAvatarComponent'],
-  Tag: ['NeuIconComponent'], ProgressBar: [], StatsCard: ['NeuIconComponent'],
-  DataView: ['NeuButtonComponent'], Dock: ['NeuBadgeComponent', 'NeuIconComponent'],
-  Menu: ['NeuButtonComponent', 'NeuIconComponent'], MenuButton: ['NeuButtonComponent'],
+  Button: [], Alert: ['NeuButtonComponent'],
+  EmptyState: ['NeuButtonComponent'], AvatarGroup: ['NeuAvatarComponent'],
+  Tag: [], ProgressBar: [], StatsCard: [],
+  DataView: ['NeuButtonComponent'], Dock: ['NeuBadgeComponent'],
+  Menu: ['NeuButtonComponent'], MenuButton: ['NeuButtonComponent'],
   Menubar: ['NeuMenuComponent'], TieredMenu: ['NeuMenuComponent'],
-  MegaMenu: ['NeuBadgeComponent', 'NeuIconComponent'], SpeedDial: ['NeuBadgeComponent', 'NeuIconComponent'],
-  SplitButton: ['NeuButtonComponent'], Gallery: ['NeuIconComponent'],
+  MegaMenu: ['NeuBadgeComponent'], SpeedDial: ['NeuBadgeComponent'],
+  SplitButton: ['NeuButtonComponent'], Gallery: [],
   ImageGallery: ['NeuGalleryComponent'], TimelineGrid: [], SchedulerGantt: [],
   OrganizationChart: [],
 };
-const unlocks = { Icon: 10, Button: 9, Badge: 5, Gallery: 3, TimelineGrid: 2 };
+const unlocks = { Button: 9, Badge: 5, Gallery: 3, TimelineGrid: 2 };
 const action = {
   StatsCard: 'REFACTOR', InputMask: 'DEEP REFACTOR', DataView: 'DEEP REFACTOR',
   Menu: 'DEEP REFACTOR', Menubar: 'DEEP REFACTOR', TieredMenu: 'DEEP REFACTOR',
@@ -161,7 +160,7 @@ const action = {
   Kanban: 'DEEP REFACTOR', Tree: 'REWRITE', VirtualList: 'AUDIT ONLY',
   OrganizationChart: 'REMOVE', SchedulerGantt: 'REMOVE',
 };
-const audits = new Set('Icon ButtonGroup Tag Toolbar Badge Chip ToastContainer Avatar AvatarGroup Card Divider Skeleton Spinner FormField InputGroup Fieldset ScrollTop CompareHandle CompareIndicator CompareItem VirtualList'.split(' '));
+const audits = new Set('ButtonGroup Tag Toolbar Badge Chip ToastContainer Avatar AvatarGroup Card Divider Skeleton Spinner FormField InputGroup Fieldset ScrollTop CompareHandle CompareIndicator CompareItem VirtualList'.split(' '));
 const transverse = new Set('Alert Avatar Badge BlockUI Button Chip CodeBlock EmptyState NotificationCenter Nav ProgressBar SchedulerGantt Skeleton Spinner SplitButton Tag Timeline TimelineGrid ToastContainer Toolbar ScrollArea'.split(' '));
 
 function declarationInventory() {
@@ -295,7 +294,10 @@ const portfolio = {
   schemaVersion: 1,
   generatedFrom: ['projects/ui-core/public-contract.v2.json', 'projects/ui-core/*/public_api.ts', '@Component decorators', 'N2 reports through D1'],
   summary,
-  historicalIdentityDelta: { from: 'fbe9e5c^', oldPublicComponents: old.length, removedIds, addedIds },
+  historicalIdentityDelta: {
+    from: 'fbe9e5c^', oldPublicComponents: old.length, removedIds, addedIds,
+    externalized: [{ component: 'NeuIconComponent', destination: '@neural-icons/angular', phase: 'A0.2' }],
+  },
   batches: activeGroups.map((g) => ({ id: g.id, wave: g.wave, family: g.family, components: phaseCount(g), model: g.model })),
   components: records,
 };
@@ -327,7 +329,7 @@ const currentAudit = audit
   .replace('No runtime, SCSS, token or product contract was changed by this audit.', 'Runtime, token, contract and package changes belong to the separate D1 execution report.');
 
 const whyNow = {
-  A1: 'Icon/Button unblock feedback, menu and data consumers',
+  A1: 'Button, ButtonGroup, Tag and Toolbar follow the completed neural-icons integration',
   A2: 'Five low-risk feedback surfaces share tone/a11y checks',
   A3: 'Six nearly-finished display components need audit, not rewrite',
   A4: 'Closes P1 StatsCard chart scope while auditing form shells',
@@ -363,7 +365,7 @@ const roadmap = `# N2 — Optimized component execution roadmap (proposal only)\
 ])}\n## Gate and model policy\n\nLIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM and HEAVY implementation: GPT-6 SOL HIGH. GPT-6 ASTRA only for high-impact design review before C1/C3/C4/C5/C6 or any unexpected public contract ambiguity. Each batch gets pure/integration/type/contract tests proportional to change, SSR/hydration for DOM or lifecycle, a11y for interaction, bundle/root-unused and regression of actual consumers. Full suite/global coverage belong to E, not every batch. No component runtime work occurs in this planning task.\n`;
 
 const dependencySection = `\n## Blocking graph and phase economy\n\n${table(['Provider / decision', 'BLOCKS', 'BLOCKED BY / order'], [
-  ['Icon + Button (A1)', 'Alert, EmptyState, Menu, SplitButton, DataView', 'A1 first; Icon before Button'],
+  ['Neural-icons + Button (A1)', 'Alert, EmptyState, Menu, SplitButton, DataView', 'A0.2 complete; A1 ready'],
   ['Badge (A2)', 'Dock, MegaMenu, SpeedDial', 'A1 icon semantics'],
   ['Gallery (C1)', 'ImageGallery merge', 'Media capability parity and ImageViewer directive audit'],
   ['D1 physical removals', 'Safe Tree and TimelineGrid modernization', 'Classify active consumers; no runtime compatibility'],
@@ -382,12 +384,12 @@ for (const group of groups.filter((candidate) => phaseCount(candidate) === 0)) {
   currentRoadmap = currentRoadmap.replace(new RegExp(`^- \\*\\*${group.id} —[^\\n]*\\n`, 'm'), '');
 }
 currentRoadmap = currentRoadmap
-  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'No-icons lane: **A3/A5/D1 and B7/B8/B9/B5 completed**; A1 remains blocked by the separate icons lane.')
+  .replace('No-icons lane: **A3 completed → A5 → D1**; A1 remains blocked by the separate icons lane. B7/B8/B9 require the requested high-capability model after D1.', 'A3/A5/D1 and B7/B8/B9/B5 are complete. A0.2 externalized Icon to neural-icons; A1 is ready with Button, ButtonGroup, Tag and Toolbar.')
   .replace('planned removals', `current removals; ${summary.physicallyRemovedHistorical} products physically retired in D1`)
   .replace(`## WAVE D — removals (${summary.remove} actual components; 1 phase, execute before dependent B/C work)`, `## WAVE D — D1 completed (${summary.physicallyRemovedHistorical} historical products removed)`)
   .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt');
 const currentDependencySection = dependencySection
-  .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5 and D1 are complete. A1 remains blocked by the separate neural-icons lane.')
+  .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5 and D1 are complete. A1 is ready after the npm neural-icons integration.')
   .replace('(65 → 22)', `(${summary.activePending + summary.remove} → ${summary.implementationBatches})`);
 
 if (process.argv.includes('--write')) {

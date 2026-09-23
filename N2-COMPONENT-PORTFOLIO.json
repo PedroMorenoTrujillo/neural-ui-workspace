@@ -9,28 +9,28 @@
   "summary": {
     "historicalCatalogFiles": 98,
     "historicalPublicComponents": 102,
-    "currentPublicComponents": 96,
-    "componentEntrypoints": 84,
-    "secondaryEntrypoints": 98,
+    "currentPublicComponents": 95,
+    "componentEntrypoints": 83,
+    "secondaryEntrypoints": 97,
     "completed": 51,
-    "pending": 45,
+    "pending": 44,
     "remove": 0,
     "physicallyRemovedHistorical": 2,
     "mergedReplacedHistorical": 4,
     "pendingByDifficulty": {
-      "LIGHT": 16,
+      "LIGHT": 15,
       "MEDIUM": 21,
       "HEAVY": 7,
       "VERY HEAVY": 1
     },
     "pendingByEffort": {
-      "XS": 10,
+      "XS": 9,
       "S": 6,
       "M": 21,
       "L": 7,
       "XL": 1
     },
-    "activePending": 44,
+    "activePending": 43,
     "implementationBatches": 15
   },
   "historicalIdentityDelta": {
@@ -39,6 +39,7 @@
     "removedIds": [
       "./chart#NeuChartComponent",
       "./date-input#NeuDateInputComponent",
+      "./icon#NeuIconComponent",
       "./inline-editor#NeuInlineEditorComponent",
       "./multiselect#NeuMultiselectComponent",
       "./organization-chart#NeuOrganizationChartComponent",
@@ -49,6 +50,13 @@
     "addedIds": [
       "./date-input#NeuDateInputControl",
       "./inline-editor#NeuInlineEditorControl"
+    ],
+    "externalized": [
+      {
+        "component": "NeuIconComponent",
+        "destination": "@neural-icons/angular",
+        "phase": "A0.2"
+      }
     ]
   },
   "batches": [
@@ -56,7 +64,7 @@
       "id": "A1",
       "wave": "A",
       "family": "foundation/actions",
-      "components": 5,
+      "components": 4,
       "model": "GPT-6 SOL MEDIUM"
     },
     {
@@ -202,14 +210,13 @@
       "effort": "S",
       "risk": "LOW",
       "dependencies": [
-        "NeuButtonComponent",
-        "NeuIconComponent"
+        "NeuButtonComponent"
       ],
       "roadmapPhase": "A2",
       "recommendedModel": "GPT-6 SOL MEDIUM",
       "batch": "A2",
       "batchFamily": "feedback/status",
-      "reason": "feedback/status; 129 source lines; no overlay in component source.",
+      "reason": "feedback/status; 135 source lines; no overlay in component source.",
       "expectedChanges": [
         "Audit status/live-region policy and dismiss ownership",
         "Verify button/icon dependencies and visual tones"
@@ -221,7 +228,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "LOW",
-      "priorityScore": 101,
+      "priorityScore": 103,
       "sourceFile": "projects/ui-core/alert/neu-alert.component.ts"
     },
     {
@@ -426,14 +433,12 @@
       "difficulty": "LIGHT",
       "effort": "S",
       "risk": "LOW",
-      "dependencies": [
-        "NeuIconComponent"
-      ],
+      "dependencies": [],
       "roadmapPhase": "A1",
       "recommendedModel": "GPT-6 SOL MEDIUM",
       "batch": "A1",
       "batchFamily": "foundation/actions",
-      "reason": "foundation/actions; 124 source lines; no overlay in component source.",
+      "reason": "foundation/actions; 125 source lines; no overlay in component source.",
       "expectedChanges": [
         "Verify native button type/disabled/loading and exactly-once action",
         "Close icon/visual-axis contract and keyboard smoke"
@@ -445,7 +450,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "LOW",
-      "priorityScore": 112,
+      "priorityScore": 114,
       "sourceFile": "projects/ui-core/button/neu-button.component.ts"
     },
     {
@@ -1007,8 +1012,7 @@
       "effort": "M",
       "risk": "MEDIUM",
       "dependencies": [
-        "NeuBadgeComponent",
-        "NeuIconComponent"
+        "NeuBadgeComponent"
       ],
       "roadmapPhase": "B1",
       "recommendedModel": "GPT-6 SOL HIGH",
@@ -1026,7 +1030,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "LOW",
-      "priorityScore": 55,
+      "priorityScore": 57,
       "sourceFile": "projects/ui-core/dock/neu-dock.component.ts"
     },
     {
@@ -1039,14 +1043,13 @@
       "effort": "S",
       "risk": "LOW",
       "dependencies": [
-        "NeuButtonComponent",
-        "NeuIconComponent"
+        "NeuButtonComponent"
       ],
       "roadmapPhase": "A2",
       "recommendedModel": "GPT-6 SOL MEDIUM",
       "batch": "A2",
       "batchFamily": "feedback/status",
-      "reason": "feedback/status; 84 source lines; no overlay in component source.",
+      "reason": "feedback/status; 87 source lines; no overlay in component source.",
       "expectedChanges": [
         "Audit content/action projection and optional CTA semantics",
         "Verify no implicit routing or state owner"
@@ -1058,7 +1061,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "LOW",
-      "priorityScore": 101,
+      "priorityScore": 103,
       "sourceFile": "projects/ui-core/empty-state/neu-empty-state.component.ts"
     },
     {
@@ -1154,14 +1157,12 @@
       "difficulty": "HEAVY",
       "effort": "L",
       "risk": "HIGH",
-      "dependencies": [
-        "NeuIconComponent"
-      ],
+      "dependencies": [],
       "roadmapPhase": "N2-029",
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "C1",
       "batchFamily": "media consolidation",
-      "reason": "media consolidation; 483 source lines; overlay present.",
+      "reason": "media consolidation; 503 source lines; overlay present.",
       "expectedChanges": [
         "Consolidate ImageGallery-only counter/viewer capabilities",
         "Audit preview overlay, zoom/rotate/focus and media errors"
@@ -1173,37 +1174,8 @@
       "bundleRisk": "MEDIUM",
       "rewriteProbability": "MEDIUM",
       "designReviewProbability": "HIGH",
-      "priorityScore": 21,
+      "priorityScore": 23,
       "sourceFile": "projects/ui-core/gallery/neu-gallery.component.ts"
-    },
-    {
-      "component": "NeuIconComponent",
-      "entrypoint": "@neural-ui/core/icon",
-      "status": "PENDING",
-      "evidenceStatus": "STILL PENDING",
-      "action": "AUDIT ONLY",
-      "difficulty": "LIGHT",
-      "effort": "XS",
-      "risk": "LOW",
-      "dependencies": [],
-      "roadmapPhase": "A1",
-      "recommendedModel": "GPT-6 SOL MEDIUM",
-      "batch": "A1",
-      "batchFamily": "foundation/actions",
-      "reason": "foundation/actions; 63 source lines; no overlay in component source.",
-      "expectedChanges": [
-        "Audit icon naming and decorative-vs-labelled semantics",
-        "Verify SSR-safe icon rendering and root-unused cost"
-      ],
-      "apiImpact": "NONE",
-      "ssrHydrationWork": "SSR import/render smoke; hydration if changed DOM",
-      "a11yKeyboardWork": "semantic/keyboard smoke",
-      "lifecycleComplexity": "LOW",
-      "bundleRisk": "LOW",
-      "rewriteProbability": "LOW",
-      "designReviewProbability": "LOW",
-      "priorityScore": 118,
-      "sourceFile": "projects/ui-core/icon/neu-icon.component.ts"
     },
     {
       "component": "NeuImageGalleryComponent",
@@ -1457,8 +1429,7 @@
       "effort": "L",
       "risk": "HIGH",
       "dependencies": [
-        "NeuBadgeComponent",
-        "NeuIconComponent"
+        "NeuBadgeComponent"
       ],
       "roadmapPhase": "C3",
       "recommendedModel": "GPT-6 SOL HIGH",
@@ -1476,7 +1447,7 @@
       "bundleRisk": "MEDIUM",
       "rewriteProbability": "MEDIUM",
       "designReviewProbability": "HIGH",
-      "priorityScore": 16,
+      "priorityScore": 18,
       "sourceFile": "projects/ui-core/mega-menu/neu-mega-menu.component.ts"
     },
     {
@@ -1495,7 +1466,7 @@
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "B2",
       "batchFamily": "menu family",
-      "reason": "menu family; 579 source lines; overlay present.",
+      "reason": "menu family; 580 source lines; overlay present.",
       "expectedChanges": [
         "Audit horizontal/RTL/Home/End and submenu focus",
         "Share menu state without wrapper aliases"
@@ -1526,7 +1497,7 @@
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "B2",
       "batchFamily": "menu family",
-      "reason": "menu family; 579 source lines; overlay present.",
+      "reason": "menu family; 580 source lines; overlay present.",
       "expectedChanges": [
         "Audit trigger/expanded ARIA and exactly-once open",
         "Share the menu family focus model"
@@ -1551,14 +1522,13 @@
       "effort": "M",
       "risk": "MEDIUM",
       "dependencies": [
-        "NeuButtonComponent",
-        "NeuIconComponent"
+        "NeuButtonComponent"
       ],
       "roadmapPhase": "B2",
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "B2",
       "batchFamily": "menu family",
-      "reason": "menu family; 579 source lines; overlay present.",
+      "reason": "menu family; 580 source lines; overlay present.",
       "expectedChanges": [
         "Audit menu open/focus ownership and nested keyboard",
         "Resolve existing NG8102 only with behavior-preserving proof"
@@ -1570,7 +1540,7 @@
       "bundleRisk": "MEDIUM",
       "rewriteProbability": "MEDIUM",
       "designReviewProbability": "LOW",
-      "priorityScore": 55,
+      "priorityScore": 57,
       "sourceFile": "projects/ui-core/menu/neu-menu.component.ts"
     },
     {
@@ -1589,7 +1559,7 @@
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "B2",
       "batchFamily": "menu family",
-      "reason": "menu family; 579 source lines; overlay present.",
+      "reason": "menu family; 580 source lines; overlay present.",
       "expectedChanges": [
         "Audit submenu hover/keyboard and overlay cleanup",
         "Prevent duplicate event ownership"
@@ -1673,7 +1643,7 @@
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "B1",
       "batchFamily": "navigation state",
-      "reason": "navigation state; 604 source lines; no overlay in component source.",
+      "reason": "navigation state; 611 source lines; no overlay in component source.",
       "expectedChanges": [
         "Audit controlled active item and nested keyboard path",
         "Keep Router adapter optional and tooltip focus safe"
@@ -2204,14 +2174,13 @@
       "effort": "M",
       "risk": "MEDIUM",
       "dependencies": [
-        "NeuBadgeComponent",
-        "NeuIconComponent"
+        "NeuBadgeComponent"
       ],
       "roadmapPhase": "B3",
       "recommendedModel": "GPT-6 SOL HIGH",
       "batch": "B3",
       "batchFamily": "action navigation",
-      "reason": "action navigation; 611 source lines; no overlay in component source.",
+      "reason": "action navigation; 613 source lines; no overlay in component source.",
       "expectedChanges": [
         "Audit expanded state, action order and Router isolation",
         "Verify keyboard/reduced-motion cleanup"
@@ -2223,7 +2192,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "LOW",
-      "priorityScore": 55,
+      "priorityScore": 57,
       "sourceFile": "projects/ui-core/speed-dial/neu-speed-dial.component.ts"
     },
     {
@@ -2318,14 +2287,12 @@
       "difficulty": "LIGHT",
       "effort": "S",
       "risk": "LOW",
-      "dependencies": [
-        "NeuIconComponent"
-      ],
+      "dependencies": [],
       "roadmapPhase": "N2-030",
       "recommendedModel": "GPT-6 SOL MEDIUM",
       "batch": "A4",
       "batchFamily": "metrics/form shell",
-      "reason": "metrics/form shell; 113 source lines; no overlay in component source.",
+      "reason": "metrics/form shell; 120 source lines; no overlay in component source.",
       "expectedChanges": [
         "Remove sparkData/sparkline from Core per N2-030",
         "Preserve metric/trend text and composition slot"
@@ -2337,7 +2304,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "MEDIUM",
-      "priorityScore": 103,
+      "priorityScore": 105,
       "sourceFile": "projects/ui-core/stats-card/neu-stats-card.component.ts"
     },
     {
@@ -2482,14 +2449,12 @@
       "difficulty": "LIGHT",
       "effort": "XS",
       "risk": "LOW",
-      "dependencies": [
-        "NeuIconComponent"
-      ],
+      "dependencies": [],
       "roadmapPhase": "A1",
       "recommendedModel": "GPT-6 SOL MEDIUM",
       "batch": "A1",
       "batchFamily": "foundation/actions",
-      "reason": "foundation/actions; 77 source lines; no overlay in component source.",
+      "reason": "foundation/actions; 78 source lines; no overlay in component source.",
       "expectedChanges": [
         "Verify dismiss proposal and semantic tone classes",
         "Audit accessible removal label and immutable inputs"
@@ -2501,7 +2466,7 @@
       "bundleRisk": "LOW",
       "rewriteProbability": "LOW",
       "designReviewProbability": "LOW",
-      "priorityScore": 106,
+      "priorityScore": 108,
       "sourceFile": "projects/ui-core/tag/neu-tag.component.ts"
     },
     {
@@ -2631,7 +2596,7 @@
       "recommendedModel": "GPT-6 SOL MEDIUM",
       "batch": "A2",
       "batchFamily": "feedback/status",
-      "reason": "feedback/status; 78 source lines; no overlay in component source.",
+      "reason": "feedback/status; 85 source lines; no overlay in component source.",
       "expectedChanges": [
         "Audit live-region timing and service cleanup",
         "Verify exactly-once dismiss and SSR silence"

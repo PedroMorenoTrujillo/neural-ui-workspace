@@ -24,8 +24,8 @@
     "@angular/forms": ">=22.0.0 <23.0.0",
     "@angular/router": ">=22.0.0 <23.0.0",
     "@schematics/angular": ">=22.0.0 <23.0.0",
-    "@ng-icons/core": ">=31.4.0 <34.0.0",
-    "@ng-icons/lucide": ">=31.4.0 <34.0.0"
+    "@neural-icons/angular": "0.0.1-next.1",
+    "@neural-icons/core": "0.0.1-next.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

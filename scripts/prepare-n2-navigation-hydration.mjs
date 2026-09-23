@@ -26,10 +26,10 @@ writeFileSync(
   `import {provideZonelessChangeDetection} from '@angular/core';
 import {bootstrapApplication,provideClientHydration} from '@angular/platform-browser';
 import {provideRouter} from '@angular/router';
-import {provideIcons} from '@ng-icons/core';
-import {lucideX} from '@ng-icons/lucide';
+import {provideNeuralIcons} from '@neural-icons/angular';
+import {iconX} from '@neural-icons/core/icons/x';
 import {N2NavigationHydrationComponent} from './n2-navigation-hydration.component';
-bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideRouter([]),provideIcons({lucideX})]});\n`,
+bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideRouter([]),provideNeuralIcons(iconX)]});\n`,
 );
 writeFileSync(
   join(fixture, 'src/main.server.ts'),
@@ -37,10 +37,10 @@ writeFileSync(
 import {bootstrapApplication,provideClientHydration,BootstrapContext} from '@angular/platform-browser';
 import {provideServerRendering} from '@angular/platform-server';
 import {provideRouter} from '@angular/router';
-import {provideIcons} from '@ng-icons/core';
-import {lucideX} from '@ng-icons/lucide';
+import {provideNeuralIcons} from '@neural-icons/angular';
+import {iconX} from '@neural-icons/core/icons/x';
 import {N2NavigationHydrationComponent} from './n2-navigation-hydration.component';
-export default (context:BootstrapContext) => bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideRouter([]),provideIcons({lucideX})]},context);\n`,
+export default (context:BootstrapContext) => bootstrapApplication(N2NavigationHydrationComponent,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideRouter([]),provideNeuralIcons(iconX)]},context);\n`,
 );
 writeFileSync(
   join(fixture, 'src/server.ts'),

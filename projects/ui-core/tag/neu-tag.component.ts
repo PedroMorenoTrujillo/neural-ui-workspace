@@ -8,7 +8,8 @@ import {
   input,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
 
 export type NeuTagTone = 'neutral' | 'success' | 'info' | 'warning' | 'danger';
 export type NeuTagVariant = 'soft' | 'solid';
@@ -26,7 +27,7 @@ export class NeuTagIconDirective {
  */
 @Component({
   selector: 'neu-tag',
-  imports: [NeuIconComponent, NgTemplateOutlet],
+  imports: [NeuralIcon, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
@@ -37,7 +38,7 @@ export class NeuTagIconDirective {
       @if (iconTemplate) {
         <ng-container [ngTemplateOutlet]="iconTemplate.templateRef" />
       } @else if (icon()) {
-        <neu-icon class="neu-tag__icon" [name]="icon()" size="1em" aria-hidden="true" />
+        <neural-icon class="neu-tag__icon" [icon]="icon()!" size="1em" aria-hidden="true" />
       }
       <span class="neu-tag__label">{{ value() }}</span>
     } @else {
@@ -56,7 +57,7 @@ export class NeuTagComponent {
   /** Visible label. `0` and `''` render faithfully. */
   value = input<string | number | null | undefined>(null);
   /** Registered Neural icon name displayed before `value`. */
-  icon = input<string>('');
+  icon = input<NeuralIconName | null>(null);
   /** Gives the tag fully rounded corners. */
   rounded = input<boolean>(false);
   /** Optional accessible name, useful for custom icon-only projected content. */

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import { lucidePencil } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconEdit } from '@neural-icons/core/icons/edit';
 import {
   NeuMenuButtonComponent,
   NeuMenuComponent,
@@ -52,7 +52,7 @@ describe('NeuMenuComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NeuMenuComponent, CustomMenuItemHostComponent],
-      providers: [provideIcons({ lucidePencil })],
+      providers: [provideNeuralIcons(iconEdit)],
     }).compileComponents();
     fixture = TestBed.createComponent(NeuMenuComponent);
     fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit' }]);
@@ -70,12 +70,12 @@ describe('NeuMenuComponent', () => {
   });
 
   it('renders registered item icons instead of their names', () => {
-    fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit', icon: 'lucidePencil' }]);
+    fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit', icon: 'edit' }]);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('.neu-menu__icon svg')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.neu-menu__icon')?.textContent).not.toContain(
-      'lucidePencil',
+      'edit',
     );
   });
 

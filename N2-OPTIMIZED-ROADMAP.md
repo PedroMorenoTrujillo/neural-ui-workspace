@@ -2,13 +2,13 @@
 
 ## Decision and counts
 
-**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **96** = 51 completed + 45 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 16, MEDIUM 21, HEAVY 7, VERY HEAVY 1. Pending effort: XS 10, S 6, M 21, L 7, XL 1. One-by-one active work would require **44 component/removal tasks**; the proposal is **15 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
+**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **95** = 51 completed + 44 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 15, MEDIUM 21, HEAVY 7, VERY HEAVY 1. Pending effort: XS 9, S 6, M 21, L 7, XL 1. One-by-one active work would require **43 component/removal tasks**; the proposal is **15 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
 
 ## Top 10 next best targets
 
 | # | Component/batch | Difficulty | Effort | Why now | Recommended model |
 | --- | --- | --- | --- | --- | --- |
-| 1 | A1 foundation/actions (5) | LIGHT | XS/S | Icon/Button unblock feedback, menu and data consumers | GPT-6 SOL MEDIUM |
+| 1 | A1 foundation/actions (4) | LIGHT | XS/S | Button, ButtonGroup, Tag and Toolbar follow the completed neural-icons integration | GPT-6 SOL MEDIUM |
 | 2 | A2 feedback/status (5) | LIGHT | XS/S | Five low-risk feedback surfaces share tone/a11y checks | GPT-6 SOL MEDIUM |
 | 3 | A4 metrics/form shell (5) | LIGHT | XS/S | Closes P1 StatsCard chart scope while auditing form shells | GPT-6 SOL MEDIUM |
 | 4 | B2 menu family (4) | MEDIUM | M | Menu family has shared nested keyboard and overlay debt | GPT-6 SOL HIGH |
@@ -17,11 +17,11 @@
 
 ## Dependency-aware execution
 
-No-icons lane: **A3/A5/D1 and B7/B8/B9/B5 completed**; A1 remains blocked by the separate icons lane. D1 is labelled Wave D by work type but should run before TimelineGrid and Tree to avoid preserving removed consumers. A1 gives Icon/Button first; A2 can then safely audit consumers. N2-031 native improvements are directed within affected batches, not a mass rewrite. N2-032 package/bundle measurements run per batch and are consolidated in E.
+A3/A5/D1 and B7/B8/B9/B5 are complete. A0.2 externalized Icon to neural-icons; A1 is ready with Button, ButtonGroup, Tag and Toolbar. D1 is labelled Wave D by work type but should run before TimelineGrid and Tree to avoid preserving removed consumers. A1 gives Icon/Button first; A2 can then safely audit consumers. N2-031 native improvements are directed within affected batches, not a mass rewrite. N2-032 package/bundle measurements run per batch and are consolidated in E.
 
-## WAVE A — quick wins (15 components; 3 batches remaining)
+## WAVE A — quick wins (14 components; 3 batches remaining)
 
-- **A1 — foundation/actions (5):** NeuButtonComponent, NeuButtonGroupComponent, NeuIconComponent, NeuTagComponent, NeuToolbarComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
+- **A1 — foundation/actions (4):** NeuButtonComponent, NeuButtonGroupComponent, NeuTagComponent, NeuToolbarComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 - **A2 — feedback/status (5):** NeuAlertComponent, NeuBadgeComponent, NeuChipComponent, NeuEmptyStateComponent, NeuToastContainerComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 - **A4 — metrics/form shell (5):** NeuFormFieldComponent, NeuInputGroupComponent, NeuMeterGroupComponent, NeuProgressBarComponent, NeuStatsCardComponent. GPT-6 SOL MEDIUM; directed contracts/a11y, proportional SSR and bundle gates.
 
@@ -86,7 +86,7 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 
 | Provider / decision | BLOCKS | BLOCKED BY / order |
 | --- | --- | --- |
-| Icon + Button (A1) | Alert, EmptyState, Menu, SplitButton, DataView | A1 first; Icon before Button |
+| Neural-icons + Button (A1) | Alert, EmptyState, Menu, SplitButton, DataView | A0.2 complete; A1 ready |
 | Badge (A2) | Dock, MegaMenu, SpeedDial | A1 icon semantics |
 | Gallery (C1) | ImageGallery merge | Media capability parity and ImageViewer directive audit |
 | D1 physical removals | Safe Tree and TimelineGrid modernization | Classify active consumers; no runtime compatibility |
@@ -94,4 +94,4 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 | InputMask (B8) | No other pending component | N2-003 Forms base already certified |
 | Splitter/ScrollArea (B9) | No other pending component | N2-001 controlled-state contract |
 
-A3, A5 and D1 are complete. A1 remains blocked by the separate neural-icons lane. The plan saves **29** active component/removal task slots versus one-by-one execution (44 → 15); this is a phase count, not a calendar or token-cost guarantee.
+A3, A5 and D1 are complete. A1 is ready after the npm neural-icons integration. The plan saves **28** active component/removal task slots versus one-by-one execution (43 → 15); this is a phase count, not a calendar or token-cost guarantee.

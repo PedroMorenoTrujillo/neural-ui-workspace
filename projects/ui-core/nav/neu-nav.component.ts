@@ -12,7 +12,11 @@ import {
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
+import { iconExternalLink } from '@neural-icons/core/icons/external-link';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
 
 // ---- Tipos públicos / Public types ----
@@ -31,7 +35,7 @@ import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
 export interface NeuNavItem {
   id: string;
   label: string;
-  icon: string;
+  icon: NeuralIconName;
   /** Ruta Angular interna (RouterLink). Excluye `href`. / Internal Angular route (RouterLink). Excludes `href`. */
   route?: string;
   /** URL externa. Se abre en nueva pestaña. Excluye `route`. / External URL. Opens in a new tab. Excludes `route`. */
@@ -45,7 +49,7 @@ export interface NeuNavItem {
 
 @Component({
   selector: 'neu-nav',
-  imports: [RouterLink, RouterLinkActive, NeuIconComponent, NeuTooltipDirective],
+  imports: [RouterLink, RouterLinkActive, NeuralIcon, NeuTooltipDirective],
   encapsulation: ViewEncapsulation.None,
   template: `
     <div class="neu-nav-wrapper" [class.neu-nav-wrapper--collapsed]="isCollapsed()">
@@ -90,8 +94,8 @@ export interface NeuNavItem {
                   neuTooltipPosition="right"
                   (click)="!isCollapsed() && toggleGroup(item.id)"
                 >
-                  <neu-icon
-                    [name]="item.icon"
+                  <neural-icon
+                    [icon]="item.icon"
                     size="18px"
                     class="neu-nav__item-icon"
                     aria-hidden="true"
@@ -105,8 +109,8 @@ export interface NeuNavItem {
                       >{{ item.badge }}</span
                     >
                   }
-                  <neu-icon
-                    name="lucideChevronRight"
+                  <neural-icon
+                    [icon]="iconChevronRight"
                     size="14px"
                     class="neu-nav__group-chevron"
                     aria-hidden="true"
@@ -134,8 +138,8 @@ export interface NeuNavItem {
                             [attr.disabled]="child.disabled ? '' : null"
                             (click)="toggleGroup(child.id)"
                           >
-                            <neu-icon
-                              [name]="child.icon"
+                            <neural-icon
+                              [icon]="child.icon"
                               size="15px"
                               class="neu-nav__item-icon"
                               aria-hidden="true"
@@ -149,8 +153,8 @@ export interface NeuNavItem {
                                 >{{ child.badge }}</span
                               >
                             }
-                            <neu-icon
-                              name="lucideChevronRight"
+                            <neural-icon
+                              [icon]="iconChevronRight"
                               size="13px"
                               class="neu-nav__group-chevron"
                               aria-hidden="true"
@@ -172,15 +176,15 @@ export interface NeuNavItem {
                                     [attr.aria-disabled]="grand.disabled ? 'true' : null"
                                     role="listitem"
                                   >
-                                    <neu-icon
-                                      [name]="grand.icon"
+                                    <neural-icon
+                                      [icon]="grand.icon"
                                       size="14px"
                                       class="neu-nav__item-icon"
                                       aria-hidden="true"
                                     />
                                     <span class="neu-nav__item-label">{{ grand.label }}</span>
-                                    <neu-icon
-                                      name="lucideExternalLink"
+                                    <neural-icon
+                                      [icon]="iconExternalLink"
                                       size="11px"
                                       class="neu-nav__external-icon"
                                       aria-hidden="true"
@@ -199,8 +203,8 @@ export interface NeuNavItem {
                                     "
                                     role="listitem"
                                   >
-                                    <neu-icon
-                                      [name]="grand.icon"
+                                    <neural-icon
+                                      [icon]="grand.icon"
                                       size="14px"
                                       class="neu-nav__item-icon"
                                       aria-hidden="true"
@@ -231,8 +235,8 @@ export interface NeuNavItem {
                           [attr.aria-disabled]="child.disabled ? 'true' : null"
                           role="listitem"
                         >
-                          <neu-icon
-                            [name]="child.icon"
+                          <neural-icon
+                            [icon]="child.icon"
                             size="15px"
                             class="neu-nav__item-icon"
                             aria-hidden="true"
@@ -246,8 +250,8 @@ export interface NeuNavItem {
                               >{{ child.badge }}</span
                             >
                           }
-                          <neu-icon
-                            name="lucideExternalLink"
+                          <neural-icon
+                            [icon]="iconExternalLink"
                             size="12px"
                             class="neu-nav__external-icon"
                             aria-hidden="true"
@@ -264,8 +268,8 @@ export interface NeuNavItem {
                           [attr.aria-current]="isCurrentRoute(child.route ?? '') ? 'page' : null"
                           role="listitem"
                         >
-                          <neu-icon
-                            [name]="child.icon"
+                          <neural-icon
+                            [icon]="child.icon"
                             size="15px"
                             class="neu-nav__item-icon"
                             aria-hidden="true"
@@ -298,8 +302,8 @@ export interface NeuNavItem {
                 neuTooltipPosition="right"
                 role="listitem"
               >
-                <neu-icon
-                  [name]="item.icon"
+                <neural-icon
+                  [icon]="item.icon"
                   size="18px"
                   class="neu-nav__item-icon"
                   aria-hidden="true"
@@ -313,8 +317,8 @@ export interface NeuNavItem {
                     >{{ item.badge }}</span
                   >
                 }
-                <neu-icon
-                  name="lucideExternalLink"
+                <neural-icon
+                  [icon]="iconExternalLink"
                   size="13px"
                   class="neu-nav__external-icon"
                   aria-hidden="true"
@@ -333,8 +337,8 @@ export interface NeuNavItem {
                 neuTooltipPosition="right"
                 role="listitem"
               >
-                <neu-icon
-                  [name]="item.icon"
+                <neural-icon
+                  [icon]="item.icon"
                   size="18px"
                   class="neu-nav__item-icon"
                   aria-hidden="true"
@@ -384,10 +388,10 @@ export interface NeuNavItem {
                       rel="noopener noreferrer"
                       (click)="flyoutState.set(null)"
                     >
-                      <neu-icon [name]="grand.icon" size="13px" aria-hidden="true" />
+                      <neural-icon [icon]="grand.icon" size="13px" aria-hidden="true" />
                       <span>{{ grand.label }}</span>
-                      <neu-icon
-                        name="lucideExternalLink"
+                      <neural-icon
+                        [icon]="iconExternalLink"
                         size="10px"
                         class="neu-nav__external-icon"
                       />
@@ -400,7 +404,7 @@ export interface NeuNavItem {
                       routerLinkActive="neu-nav__flyout-item--active"
                       (click)="flyoutState.set(null)"
                     >
-                      <neu-icon [name]="grand.icon" size="13px" aria-hidden="true" />
+                      <neural-icon [icon]="grand.icon" size="13px" aria-hidden="true" />
                       <span>{{ grand.label }}</span>
                     </a>
                   }
@@ -415,9 +419,9 @@ export interface NeuNavItem {
                 rel="noopener noreferrer"
                 (click)="flyoutState.set(null)"
               >
-                <neu-icon [name]="child.icon" size="13px" aria-hidden="true" />
+                <neural-icon [icon]="child.icon" size="13px" aria-hidden="true" />
                 <span>{{ child.label }}</span>
-                <neu-icon name="lucideExternalLink" size="10px" class="neu-nav__external-icon" />
+                <neural-icon [icon]="iconExternalLink" size="10px" class="neu-nav__external-icon" />
               </a>
             } @else {
               <a
@@ -427,7 +431,7 @@ export interface NeuNavItem {
                 routerLinkActive="neu-nav__flyout-item--active"
                 (click)="flyoutState.set(null)"
               >
-                <neu-icon [name]="child.icon" size="13px" aria-hidden="true" />
+                <neural-icon [icon]="child.icon" size="13px" aria-hidden="true" />
                 <span>{{ child.label }}</span>
               </a>
             }
@@ -444,8 +448,8 @@ export interface NeuNavItem {
           [attr.aria-expanded]="!isCollapsed()"
           (click)="toggleCollapse()"
         >
-          <neu-icon
-            [name]="isCollapsed() ? 'lucideChevronRight' : 'lucideChevronLeft'"
+          <neural-icon
+            [icon]="isCollapsed() ? iconChevronRight : iconChevronLeft"
             size="12px"
             aria-hidden="true"
           />
@@ -456,6 +460,9 @@ export interface NeuNavItem {
   styleUrl: './neu-nav.component.scss',
 })
 export class NeuNavComponent {
+  protected readonly iconChevronLeft = iconChevronLeft;
+  protected readonly iconChevronRight = iconChevronRight;
+  protected readonly iconExternalLink = iconExternalLink;
   private readonly router = inject(Router);
 
   // ---- Señal reactiva de ruta activa / Reactive active route signal ----

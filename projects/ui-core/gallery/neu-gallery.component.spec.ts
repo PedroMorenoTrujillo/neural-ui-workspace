@@ -1,18 +1,16 @@
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideIcons } from '@ng-icons/core';
-import {
-  lucideChevronLeft,
-  lucideChevronRight,
-  lucideDownload,
-  lucideFlipHorizontal2,
-  lucideFlipVertical2,
-  lucideRotateCcw,
-  lucideRotateCw,
-  lucideX,
-  lucideZoomIn,
-  lucideZoomOut,
-} from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconDownload } from '@neural-icons/core/icons/download';
+import { iconFlipHorizontal } from '@neural-icons/core/icons/flip-horizontal';
+import { iconFlipVertical } from '@neural-icons/core/icons/flip-vertical';
+import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
+import { iconRotateCw } from '@neural-icons/core/icons/rotate-cw';
+import { iconX } from '@neural-icons/core/icons/x';
+import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
+import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
 import {
   NeuGalleryCaptionDirective,
   NeuGalleryComponent,
@@ -45,18 +43,7 @@ describe('NeuGalleryComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
-        provideIcons({
-          lucideChevronLeft,
-          lucideChevronRight,
-          lucideDownload,
-          lucideFlipHorizontal2,
-          lucideFlipVertical2,
-          lucideRotateCcw,
-          lucideRotateCw,
-          lucideX,
-          lucideZoomIn,
-          lucideZoomOut,
-        }),
+        provideNeuralIcons(iconChevronLeft, iconChevronRight, iconDownload, iconFlipHorizontal, iconFlipVertical, iconRotateCcw, iconRotateCw, iconX, iconZoomIn, iconZoomOut),
       ],
     }).compileComponents(),
   );
@@ -296,7 +283,7 @@ describe('NeuGalleryComponent', () => {
     expect(controls.map((control) => control.getAttribute('title'))).toEqual(
       controls.map((control) => control.getAttribute('aria-label')),
     );
-    expect(controls.every((control) => control.querySelector('neu-icon'))).toBe(true);
+    expect(controls.every((control) => control.querySelector('neural-icon'))).toBe(true);
     expect(controls.every((control) => !control.textContent?.trim())).toBe(true);
   });
 
