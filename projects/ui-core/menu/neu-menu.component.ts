@@ -1,9 +1,11 @@
 import {
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   TemplateRef,
   ViewEncapsulation,
+  afterNextRender,
   afterRenderEffect,
   computed,
   contentChild,
@@ -12,13 +14,16 @@ import {
   output,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuralIcon } from '@neural-icons/angular';
 import type { NeuralIconName } from '@neural-icons/core';
-import { NeuRovingMenuController } from '@neural-ui/core/internal';
+import { NeuIdGenerator, NeuRovingMenuController } from '@neural-ui/core/internal';
+import { NeuTieredLevelComponent, type NeuTieredOwner } from './neu-tiered-level.component';
+import { closeTieredBranch, deepestTieredBranch, openTieredPath } from './neu-tiered-state';
 import {
   NEU_OVERLAY_DISMISS_GUARD,
   allowsNeuOverlayDismissal,
@@ -106,7 +111,7 @@ export class NeuMenuItemDirective {
           @if (item.children?.length && isExpanded(item)) {
             <div class="neu-menu__child">
               <neu-menu
-                [items]="item.children ?? []"
+                [items]="item.children"
                 [ariaLabel]="item.label"
                 [itemTemplate]="itemTemplateRef()"
                 [expandedKeys]="effectiveExpandedKeys()"
@@ -144,6 +149,7 @@ export class NeuMenuComponent {
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly controller = new NeuRovingMenuController({ orientation: 'vertical' });
+  private lastItems: readonly NeuMenuItem[] | null = null;
 
   tabIndexFor(index: number): 0 | -1 {
     this.reconcileItems();
@@ -235,8 +241,11 @@ export class NeuMenuComponent {
   }
 
   private reconcileItems(): void {
+    const items = this.items();
+    if (items === this.lastItems) return;
+    this.lastItems = items;
     this.controller.setItems(
-      this.items().map((item) => ({
+      items.map((item) => ({
         key: item.key,
         label: item.label,
         disabled: item.disabled,
@@ -271,6 +280,7 @@ export class NeuMenuComponent {
       tone="neutral" variant="ghost"
       size="sm"
       [attr.aria-expanded]="open()"
+      [attr.aria-controls]="panelId"
       aria-haspopup="menu"
       [disabled]="disabled()"
       (click)="toggle()"
@@ -291,6 +301,7 @@ export class NeuMenuComponent {
     >
       <neu-menu
         class="neu-menu-button__panel"
+        [id]="panelId"
         [items]="items()"
         [itemTemplate]="itemTpl()?.templateRef ?? null"
         (itemClick)="onItemClick($event)"
@@ -314,6 +325,8 @@ export class NeuMenuButtonComponent {
   private readonly trigger = viewChild('trigger', { read: ElementRef<HTMLButtonElement> });
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   /* v8 ignore stop */
+  protected readonly panelId = inject(NeuIdGenerator).getId('neu-menu-button-panel-');
+  private readonly destroyRef = inject(DestroyRef);
   private focusLastOnAttach = false;
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
 
@@ -330,7 +343,9 @@ export class NeuMenuButtonComponent {
     if (this.open()) {
       this.open.set(false);
       this.openChange.emit(false);
-      queueMicrotask(() => this.trigger()?.nativeElement.focus({ preventScroll: true }));
+      queueMicrotask(() => {
+        if (!this.destroyRef.destroyed) this.trigger()?.nativeElement.focus({ preventScroll: true });
+      });
     }
   }
 
@@ -354,6 +369,7 @@ export class NeuMenuButtonComponent {
 
   onOverlayAttach(): void {
     queueMicrotask(() => {
+      if (this.destroyRef.destroyed || !this.open()) return;
       const items = Array.from(
         this.connectedOverlay()?.overlayRef.overlayElement.querySelectorAll<HTMLElement>(
           '[role="menuitem"]:not([disabled])',
@@ -403,11 +419,14 @@ export class NeuMenuButtonComponent {
           <span class="neu-menubar__separator" role="separator"></span>
         } @else if (item.visible !== false && item.children?.length) {
           <neu-menu-button
+            #branchButton
             role="none"
             [attr.data-neu-menubar-index]="index"
-            [items]="item.children ?? []"
+            [items]="item.children"
             [label]="item.label"
             [disabled]="!!item.disabled"
+            (pointerenter)="onBranchHover(branchButton)"
+            (openChange)="onBranchOpenChange(branchButton, $event)"
             (itemClick)="itemClick.emit($event)"
           >
             @if (itemTpl(); as itemTemplate) {
@@ -461,6 +480,22 @@ export class NeuMenubarComponent {
   readonly itemClick = output<NeuMenuItem>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly controller = new NeuRovingMenuController({ orientation: 'horizontal' });
+  private readonly branchButtons = viewChildren(NeuMenuButtonComponent);
+
+  protected onBranchHover(target: NeuMenuButtonComponent): void {
+    if (target.disabled() || target.open()) return;
+    const opened = this.branchButtons().find((button) => button.open());
+    if (!opened) return;
+    opened.close();
+    target.toggle();
+  }
+
+  protected onBranchOpenChange(target: NeuMenuButtonComponent, open: boolean): void {
+    if (!open) return;
+    for (const button of this.branchButtons()) {
+      if (button !== target && button.open()) button.close();
+    }
+  }
 
   constructor() {
     afterRenderEffect(() => {
@@ -544,16 +579,19 @@ export class NeuMenubarComponent {
 
 @Component({
   selector: 'neu-tiered-menu',
-  imports: [NeuMenuComponent],
+  imports: [NeuTieredLevelComponent],
   encapsulation: ViewEncapsulation.None,
-  host: { class: 'neu-tiered-menu' },
-  template: `<neu-menu
+  host: {
+    class: 'neu-tiered-menu',
+    '(document:pointerdown)': 'onDocumentPointerDown($event)',
+  },
+  template: `<neu-tiered-level
+    [owner]="rendererOwner"
     [items]="items()"
-    [ariaLabel]="ariaLabel()"
-    [expandedKeys]="expandedKeys()"
-    (expandedKeysChange)="expandedKeysChange.emit($event)"
-    (itemClick)="itemClick.emit($event)"
-  />`,
+    [label]="ariaLabel()"
+    [levelId]="rendererOwner.id"
+    [itemTemplate]="itemTpl()?.templateRef ?? null"
+  /><ng-content select="ng-template[neuMenuItem]" />`,
   styleUrl: './neu-menu.component.scss',
 })
 export class NeuTieredMenuComponent {
@@ -562,6 +600,62 @@ export class NeuTieredMenuComponent {
   readonly expandedKeys = input<readonly string[] | undefined>(undefined);
   readonly expandedKeysChange = output<string[]>();
   readonly itemClick = output<NeuMenuItem>();
+  protected readonly itemTpl = contentChild(NeuMenuItemDirective);
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly localExpandedKeys = signal<readonly string[]>([]);
+  private readonly overlayReady = signal(false);
+  private readonly appliedKeys = computed(() => this.expandedKeys() ?? this.localExpandedKeys());
+  private readonly appliedSet = computed(() => new Set(this.appliedKeys()));
+  private readonly id = inject(NeuIdGenerator).getId('neu-tiered-menu-');
+
+  protected readonly rendererOwner: NeuTieredOwner = {
+    id: this.id,
+    overlayReady: () => this.overlayReady(),
+    isExpanded: (key) => this.appliedSet().has(key),
+    openBranch: (ancestors, key) => this.propose(openTieredPath(ancestors, key)),
+    closeBranch: (key) => this.propose(closeTieredBranch(this.appliedKeys(), this.items(), key)),
+    closeDeepest: () => {
+      const key = deepestTieredBranch(this.items(), this.appliedSet());
+      if (key) this.propose(closeTieredBranch(this.appliedKeys(), this.items(), key));
+    },
+    activateLeaf: (item, event) => {
+      if (item.disabled) return;
+      item.command?.({ originalEvent: event, item });
+      this.itemClick.emit(item);
+      if (this.appliedKeys().length) this.propose([]);
+    },
+    direction: () => this.direction(),
+  };
+
+  constructor() {
+    afterNextRender(() => this.overlayReady.set(true));
+  }
+
+  protected onDocumentPointerDown(event: PointerEvent): void {
+    if (!this.appliedKeys().length) return;
+    const withinOwner = event.composedPath().some((node) =>
+      node instanceof Element &&
+      (this.host.contains(node) || node.getAttribute('data-neu-tiered-owner') === this.id),
+    );
+    if (!withinOwner) this.propose([]);
+  }
+
+  private propose(keys: string[]): void {
+    if (sameMenuKeys(this.appliedKeys(), keys)) return;
+    if (this.expandedKeys() === undefined) this.localExpandedKeys.set(keys);
+    this.expandedKeysChange.emit(keys);
+  }
+
+  private direction(): 'ltr' | 'rtl' {
+    return this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction === 'rtl'
+      ? 'rtl'
+      : 'ltr';
+  }
+}
+
+function sameMenuKeys(current: readonly string[], next: readonly string[]): boolean {
+  return current.length === next.length && current.every((key, index) => key === next[index]);
 }
 
 function collectMenuBranchKeys(items: readonly NeuMenuItem[]): string[] {

@@ -23172,7 +23172,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTieredMenuComponent, \"neu-tiered-menu\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"itemClick\": \"itemClick\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTieredMenuComponent, \"neu-tiered-menu\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTpl\"\n], [\n    \"ng-template[neuMenuItem]\"\n], true, never>;"
         },
         {
           "id": "./menu#NeuTieredMenuComponent.property:ɵfac",

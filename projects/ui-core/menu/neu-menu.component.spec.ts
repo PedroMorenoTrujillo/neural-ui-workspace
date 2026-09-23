@@ -352,6 +352,15 @@ describe('NeuMenuButtonComponent', () => {
     expect(changes).toHaveBeenLastCalledWith(false);
   });
 
+  it('relates its trigger to a deterministic popup ID', () => {
+    const trigger = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    const id = trigger.getAttribute('aria-controls');
+    expect(id).toMatch(/^neu-menu-button-panel-\d+$/);
+    trigger.click();
+    fixture.detectChanges();
+    expect(document.getElementById(id!)).not.toBeNull();
+  });
+
   it('keeps a disabled trigger closed for pointer and keyboard requests', () => {
     const component = fixture.componentInstance;
     const changes = vi.spyOn(component.openChange, 'emit');
@@ -528,6 +537,41 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     expect(document.activeElement).toBe(buttons[1]);
   });
 
+  it('switches an already open menubar popup on branch hover', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', [
+      { key: 'file', label: 'File', children: [{ key: 'new', label: 'New' }] },
+      { key: 'edit', label: 'Edit', children: [{ key: 'copy', label: 'Copy' }] },
+    ]);
+    fixture.detectChanges();
+    const branches = Array.from(fixture.nativeElement.querySelectorAll('neu-menu-button')) as HTMLElement[];
+    (branches[0].querySelector('button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    branches[1].dispatchEvent(new Event('pointerenter'));
+    fixture.detectChanges();
+    expect((branches[0].querySelector('button') as HTMLButtonElement).getAttribute('aria-expanded')).toBe('false');
+    expect((branches[1].querySelector('button') as HTMLButtonElement).getAttribute('aria-expanded')).toBe('true');
+    fixture.destroy();
+  });
+
+  it('keeps only one root popup open after keyboard or click activation', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', [
+      { key: 'file', label: 'File', children: [{ key: 'new', label: 'New' }] },
+      { key: 'edit', label: 'Edit', children: [{ key: 'copy', label: 'Copy' }] },
+    ]);
+    fixture.detectChanges();
+    const triggers = Array.from(fixture.nativeElement.querySelectorAll('neu-menu-button button')) as HTMLButtonElement[];
+    triggers[0].click();
+    fixture.detectChanges();
+    triggers[1].click();
+    fixture.detectChanges();
+    expect(triggers.map((button) => button.getAttribute('aria-expanded'))).toEqual(['false', 'true']);
+    fixture.destroy();
+  });
+
   it('tracks focus, ignores unrelated targets, and activates the focused LTR item', async () => {
     await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
     const fixture = TestBed.createComponent(NeuMenubarComponent);
@@ -551,7 +595,7 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     direct.dispatchEvent(new KeyboardEvent('keydown', { key: 'Shift', bubbles: true }));
   });
 
-  it('forwards the tiered menu label and item clicks', async () => {
+  it('keeps the tiered root inline and initially closes its floating children', async () => {
     await TestBed.configureTestingModule({ imports: [NeuTieredMenuComponent] }).compileComponents();
     const fixture = TestBed.createComponent(NeuTieredMenuComponent);
     fixture.componentRef.setInput('items', items);
@@ -563,7 +607,11 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     expect(fixture.nativeElement.querySelector('[role="menu"]')?.getAttribute('aria-label')).toBe(
       'Tree actions',
     );
-    (fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[1].click();
+    expect(fixture.nativeElement.querySelectorAll('button')).toHaveLength(3);
+    expect(document.querySelector('.neu-tiered-menu__panel')).toBeNull();
+    (fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)[0].click();
+    fixture.detectChanges();
+    (document.querySelector('.neu-tiered-menu__panel button') as HTMLButtonElement).click();
     expect(clicked).toHaveBeenCalledWith(expect.objectContaining({ key: 'new' }));
   });
 });

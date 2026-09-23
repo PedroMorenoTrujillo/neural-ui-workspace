@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 95 |
-| COMPLETED | 65 |
-| PENDING | 30 |
+| COMPLETED | 69 |
+| PENDING | 26 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
 | 🟢 LIGHT | 1 |
-| 🟡 MEDIUM | 21 |
+| 🟡 MEDIUM | 17 |
 | 🟠 HEAVY | 7 |
 | 🔴 VERY HEAVY | 1 |
 | XS | 1 |
 | S | 0 |
-| M | 21 |
+| M | 17 |
 | L | 7 |
 | XL | 1 |
 
-The partition is **65 + 30 + 0 = 95**. The merged/replaced number describes retired historical identities, not another current-status bucket. 29 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **69 + 26 + 0 = 95**. The merged/replaced number describes retired historical identities, not another current-status bucket. 25 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
 
 ## Method and taxonomy
 
@@ -85,10 +85,10 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuKnobComponent | @neural-ui/core/knob | COMPLETED | N2-005 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-005; do not reopen for a transverse smoke test. |
 | NeuListboxComponent | @neural-ui/core/listbox | COMPLETED | N2-007 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-007; do not reopen for a transverse smoke test. |
 | NeuMegaMenuComponent | @neural-ui/core/mega-menu | PENDING | C3 | DEEP REFACTOR | • Audit nested menu/Router ownership and keyboard tree<br>• Verify badges, hover and SSR-safe navigation | HEAVY | L | HIGH | NeuBadgeComponent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | hierarchical menu | 18 | hierarchical menu; 591 source lines; no overlay in component source. |
-| NeuMenubarComponent | @neural-ui/core/menu | PENDING | B2 | DEEP REFACTOR | • Audit horizontal/RTL/Home/End and submenu focus<br>• Share menu state without wrapper aliases | MEDIUM | M | MEDIUM | NeuMenuComponent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | LOW | GPT-6 SOL HIGH | yes | menu family | 57 | menu family; 580 source lines; overlay present. |
-| NeuMenuButtonComponent | @neural-ui/core/menu | PENDING | B2 | REFACTOR | • Audit trigger/expanded ARIA and exactly-once open<br>• Share the menu family focus model | MEDIUM | M | MEDIUM | NeuButtonComponent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | LOW | LOW | GPT-6 SOL HIGH | yes | menu family | 57 | menu family; 580 source lines; overlay present. |
-| NeuMenuComponent | @neural-ui/core/menu | PENDING | B2 | DEEP REFACTOR | • Audit menu open/focus ownership and nested keyboard<br>• Resolve existing NG8102 only with behavior-preserving proof | MEDIUM | M | MEDIUM | NeuButtonComponent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | LOW | GPT-6 SOL HIGH | yes | menu family | 57 | menu family; 580 source lines; overlay present. |
-| NeuTieredMenuComponent | @neural-ui/core/menu | PENDING | B2 | DEEP REFACTOR | • Audit submenu hover/keyboard and overlay cleanup<br>• Prevent duplicate event ownership | MEDIUM | M | MEDIUM | NeuMenuComponent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | LOW | GPT-6 SOL HIGH | yes | menu family | 57 | menu family; 580 source lines; overlay present. |
+| NeuMenubarComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuMenuComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
+| NeuMenuButtonComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuButtonComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
+| NeuMenuComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuButtonComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
+| NeuTieredMenuComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuMenuComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
 | NeuMeterGroupComponent | @neural-ui/core/meter-group | COMPLETED | A4 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in A4; do not reopen for a transverse smoke test. |
 | NeuDialogComponent | @neural-ui/core/modal | COMPLETED | N2-022 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-022; do not reopen for a transverse smoke test. |
 | NeuNavComponent | @neural-ui/core/nav | PENDING (transverse only) | B1 | REFACTOR | • Audit controlled active item and nested keyboard path<br>• Keep Router adapter optional and tooltip focus safe | MEDIUM | M | MEDIUM | independent | REVIEW | SSR import/render smoke; hydration if changed DOM | directed keyboard/focus + semantics | LOW | LOW | LOW | LOW | GPT-6 SOL HIGH | yes | navigation state | 59 | navigation state; 611 source lines; no overlay in component source. |

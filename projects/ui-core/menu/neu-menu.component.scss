@@ -17,6 +17,20 @@
   min-width: 12rem;
 }
 
+.neu-tiered-menu__panel {
+  display: block;
+  min-width: 12rem;
+}
+
+.neu-tiered-menu__chevron {
+  margin-inline-start: auto;
+}
+
+[dir='rtl'] .neu-tiered-menu__chevron,
+.neu-tiered-menu:dir(rtl) .neu-tiered-menu__chevron {
+  transform: scaleX(-1);
+}
+
 .neu-menu__item,
 .neu-menubar__item,
 .neu-menu-button__trigger {

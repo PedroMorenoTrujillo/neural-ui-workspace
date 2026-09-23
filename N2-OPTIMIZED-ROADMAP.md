@@ -2,15 +2,14 @@
 
 ## Decision and counts
 
-**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **95** = 65 completed + 30 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 1, MEDIUM 21, HEAVY 7, VERY HEAVY 1. Pending effort: XS 1, S 0, M 21, L 7, XL 1. One-by-one active work would require **29 component/removal tasks**; the proposal is **12 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
+**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **95** = 69 completed + 26 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 1, MEDIUM 17, HEAVY 7, VERY HEAVY 1. Pending effort: XS 1, S 0, M 17, L 7, XL 1. One-by-one active work would require **25 component/removal tasks**; the proposal is **11 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
 
 ## Top 10 next best targets
 
 | # | Component/batch | Difficulty | Effort | Why now | Recommended model |
 | --- | --- | --- | --- | --- | --- |
-| 1 | B2 menu family (4) | MEDIUM | M | Menu family has shared nested keyboard and overlay debt | GPT-6 SOL HIGH |
-| 2 | B1 navigation state (4) | MEDIUM | M | Navigation state needs an explicit controlled/focus contract | GPT-6 SOL HIGH |
-| 3 | B3 action navigation (3) | MEDIUM | M | Action navigation should follow shared interaction contracts | GPT-6 SOL HIGH |
+| 1 | B1 navigation state (4) | MEDIUM | M | Navigation state needs an explicit controlled/focus contract | GPT-6 SOL HIGH |
+| 2 | B3 action navigation (3) | MEDIUM | M | Action navigation should follow shared interaction contracts | GPT-6 SOL HIGH |
 
 ## Dependency-aware execution
 
@@ -19,10 +18,9 @@ A3/A5/D1, B7/B8/B9/B5, A1, A2 and A4 are complete. A0.2 externalized Icon to neu
 ## WAVE A — quick wins (0 components; 0 batches remaining)
 
 
-## WAVE B — medium (21 components; 10 batches)
+## WAVE B — medium (17 components; 10 batches)
 
 - **B1 — navigation state (4):** NeuBreadcrumbComponent, NeuDockComponent, NeuNavComponent, NeuStepperComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
-- **B2 — menu family (4):** NeuMenubarComponent, NeuMenuButtonComponent, NeuMenuComponent, NeuTieredMenuComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B3 — action navigation (3):** NeuCarouselComponent, NeuSpeedDialComponent, NeuSplitButtonComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B4 — overlay feedback (4):** NeuBlockUIComponent, NeuConfirmDialogComponent, NeuConfirmPopupComponent, NeuNotificationCenterComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
 - **B6 — data layout (2):** NeuDashboardGridComponent, NeuDataViewComponent. GPT-6 SOL HIGH; controlled state, keyboard/focus, SSR/hydration and lifecycle gates where relevant.
@@ -88,4 +86,4 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 | InputMask (B8) | No other pending component | N2-003 Forms base already certified |
 | Splitter/ScrollArea (B9) | No other pending component | N2-001 controlled-state contract |
 
-A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch. The plan saves **17** active component/removal task slots versus one-by-one execution (29 → 12); this is a phase count, not a calendar or token-cost guarantee.
+A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch. The plan saves **14** active component/removal task slots versus one-by-one execution (25 → 11); this is a phase count, not a calendar or token-cost guarantee.

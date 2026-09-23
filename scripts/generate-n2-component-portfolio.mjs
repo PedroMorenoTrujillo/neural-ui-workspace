@@ -33,6 +33,7 @@ const completed = new Map([
   ['B8', 'InputMask'],
   ['B9', 'Splitter ScrollArea'],
   ['B5', 'Compare CompareHandle CompareIndicator CompareItem'],
+  ['B2', 'Menu MenuButton Menubar TieredMenu'],
   ['A1', 'Button ButtonGroup Tag Toolbar'],
   ['A2', 'Alert Badge Chip EmptyState ToastContainer'],
   ['A4', 'MeterGroup ProgressBar StatsCard FormField InputGroup'],
