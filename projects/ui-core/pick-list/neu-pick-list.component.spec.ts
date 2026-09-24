@@ -57,7 +57,7 @@ describe('NeuPickListComponent', () => {
     expect(buttons[3].disabled).toBe(true);
   });
 
-  it('toggles source selection, moves selected items and emits every change event', () => {
+  it('toggles source selection and retains it until the transfer proposal is applied', () => {
     const component = fixture.componentInstance;
     const source = vi.spyOn(component.sourceChange, 'emit');
     const target = vi.spyOn(component.targetChange, 'emit');
@@ -70,7 +70,7 @@ describe('NeuPickListComponent', () => {
     component.toggleSource('a');
     component.moveToTarget();
 
-    expect(component.sourceSelection().size).toBe(0);
+    expect(component.sourceSelection().size).toBe(1);
     expect(source).toHaveBeenCalledWith([beta]);
     expect(target).toHaveBeenCalledWith([{ value: 'd', label: 'Disabled', disabled: true }, alpha]);
     expect(items).toHaveBeenCalledWith({
@@ -79,7 +79,7 @@ describe('NeuPickListComponent', () => {
     });
   });
 
-  it('moves target items back to source and exercises template selection actions', () => {
+  it('keeps action selection after an unapplied transfer proposal', () => {
     const component = fixture.componentInstance;
     component.toggleTarget('d');
     component.moveToSource();
@@ -92,25 +92,26 @@ describe('NeuPickListComponent', () => {
     (
       fixture.nativeElement.querySelector('.neu-pick-list__actions button') as HTMLButtonElement
     ).click();
-    expect(component.sourceSelection().size).toBe(0);
+    expect(component.sourceSelection().size).toBe(1);
   });
 
   it('uses the rendered target item and reverse action buttons', () => {
-    fixture.componentRef.setInput('target', [alpha]);
+    const gamma = { value: 'c', label: 'Gamma' };
+    fixture.componentRef.setInput('target', [gamma]);
     fixture.detectChanges();
     const component = fixture.componentInstance;
     const targetItem = fixture.nativeElement
       .querySelectorAll('section')[1]
       .querySelector('button') as HTMLButtonElement;
     targetItem.click();
-    expect(component.targetSelection().has(alpha.value)).toBe(true);
+    expect(component.targetSelection().has(gamma.value)).toBe(true);
     fixture.detectChanges();
 
     const actions = fixture.nativeElement.querySelectorAll(
       '.neu-pick-list__actions button',
     ) as NodeListOf<HTMLButtonElement>;
     actions[1].click();
-    expect(component.targetSelection().size).toBe(0);
+    expect(component.targetSelection().size).toBe(1);
   });
 
   it('supports domain models with key accessors, numeric values including zero, and disabled options', () => {
@@ -279,6 +280,7 @@ describe('NeuPickListComponent', () => {
         effect: 'move',
         interaction: 'keyboard',
         originalEvent: null,
+        currentIndex: 1,
       },
       'target',
     );
@@ -286,6 +288,7 @@ describe('NeuPickListComponent', () => {
     expect(targets.at(-1)).toEqual(['d', 'a']);
 
     fixture.componentRef.setInput('target', [alpha]);
+    fixture.detectChanges();
     component.onDrop(
       {
         data: component.dragData(alpha, 'source'),
@@ -294,13 +297,14 @@ describe('NeuPickListComponent', () => {
         effect: 'move',
         interaction: 'keyboard',
         originalEvent: null,
+        currentIndex: 0,
       },
       'target',
     );
     expect(drops).toHaveLength(1);
   });
 
-  it('filters and reorders a 10k source with one linear projection per state change', () => {
+  it('does not reorder a single visible item in a 10k filtered source', () => {
     const items = Array.from({ length: 10_000 }, (_, index) => ({
       value: `item-${index}`,
       label: `Item ${index}`,
@@ -317,8 +321,8 @@ describe('NeuPickListComponent', () => {
     fixture.componentInstance.setFilter('source', 'Item 9999');
     expect(fixture.componentInstance.visibleSource()).toEqual([items[9999]]);
     fixture.componentInstance.reorderSelection('source', 'top');
-    expect(sources.at(-1)?.[0]).toBe('item-9999');
-    expect(sources.at(-1)).toHaveLength(10_000);
+    expect(sources).toEqual([]);
+    expect(fixture.componentInstance.source()).toBe(items);
   });
 
   it('routes every rendered filter, reorder, transfer and drop control through its canonical API', () => {
@@ -422,8 +426,8 @@ describe('NeuPickListComponent', () => {
     component.reorderSelection('source', 'bottom');
     component.reorderSelection('target', 'top');
 
-    expect(component.hasMovableSourceItems()).toBe(true);
-    expect(component.hasMovableTargetItems()).toBe(true);
+    expect(component.hasMovableSourceItems()).toBe(false);
+    expect(component.hasMovableTargetItems()).toBe(false);
     expect(component.dragData({ value: 'missing', label: 'Missing' }, 'source').index).toBe(-1);
 
     fixture.destroy();
@@ -569,7 +573,7 @@ describe('NeuOrderListComponent', () => {
     expect(selections.at(-1)).toEqual(['a', 'c']);
     expect(fixture.componentInstance.isSelected(items[2])).toBe(true);
     fixture.componentInstance.moveSelection('top');
-    expect(orders.at(-1)).toEqual(['c', 'a', 'b']);
+    expect(orders).toEqual([]);
   });
 
   it('emits typed OrderList drop detail alongside the immutable order proposal', async () => {
@@ -618,8 +622,7 @@ describe('NeuOrderListComponent', () => {
     fixture.componentInstance.setFilter('Item 9999');
     expect(fixture.componentInstance.visibleItems()).toEqual([items[9999]]);
     fixture.componentInstance.moveSelection('top');
-    expect(orders.at(-1)?.[0]).toBe('item-9999');
-    expect(orders.at(-1)).toHaveLength(10_000);
+    expect(orders).toEqual([]);
     expect(fixture.componentInstance.items()).toBe(items);
   });
 

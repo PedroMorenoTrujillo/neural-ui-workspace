@@ -353,10 +353,11 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     expect(closed).toHaveLength(1);
   });
 
-  it('PickList publishes domain selection snapshots for toggles and transfer, never source/target writes', () => {
+  it('PickList publishes selection toggles without clearing selection for transfer proposals', () => {
     const a = { value: 'a', label: 'A' },
-      b = { value: 'b', label: 'B', disabled: true };
-    const f = mount(NeuPickListComponent, { source: [a, b], target: [a] });
+      b = { value: 'b', label: 'B', disabled: true },
+      other = { value: 'other', label: 'Other' };
+    const f = mount(NeuPickListComponent, { source: [a, b], target: [other] });
     const c = f.componentInstance;
     const source = capture(c.sourceSelectionChange),
       target = capture(c.targetSelectionChange);
@@ -365,21 +366,21 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     c.toggleSource('b');
     expect(source).toHaveLength(1);
     c.moveToTarget();
-    expect(source).toEqual([[a], []]);
+    expect(source).toEqual([[a]]);
     c.moveToTarget();
-    expect(source).toHaveLength(2);
-    c.toggleTarget('a');
-    expect(target).toEqual([[a]]);
+    expect(source).toHaveLength(1);
+    c.toggleTarget('other');
+    expect(target).toEqual([[other]]);
     c.moveToSource();
-    expect(target).toEqual([[a], []]);
+    expect(target).toEqual([[other]]);
     f.componentRef.setInput('source', []);
     f.detectChanges();
-    expect(source).toHaveLength(2);
+    expect(source).toHaveLength(1);
     f.destroy();
     c.toggleSource('a');
-    c.toggleTarget('a');
-    expect(source).toHaveLength(2);
-    expect(target).toHaveLength(2);
+    c.toggleTarget('other');
+    expect(source).toHaveLength(1);
+    expect(target).toHaveLength(1);
   });
 
   it('Splitter publishes live proposals during pointer drag and keyboard proposals without a local commit', async () => {

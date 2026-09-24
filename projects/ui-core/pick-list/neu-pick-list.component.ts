@@ -1,25 +1,45 @@
 import { NgTemplateOutlet } from '@angular/common';
+import { NeuralIcon } from '@neural-icons/angular';
+import { iconArrowDown } from '@neural-icons/core/icons/arrow-down';
+import { iconArrowLeft } from '@neural-icons/core/icons/arrow-left';
+import { iconArrowRight } from '@neural-icons/core/icons/arrow-right';
+import { iconArrowUp } from '@neural-icons/core/icons/arrow-up';
+import { iconDrag } from '@neural-icons/core/icons/drag';
 import {
   Component,
   DestroyRef,
   Directive,
+  ElementRef,
+  Injector,
+  type SimpleChanges,
   TemplateRef,
   ViewEncapsulation,
+  afterNextRender,
   computed,
   contentChild,
   inject,
   input,
+  isDevMode,
   output,
   signal,
 } from '@angular/core';
 import {
   NeuDragDropGroupDirective,
+  NeuDragHandleDirective,
   NeuDraggableDirective,
   NeuDropZoneDirective,
   type NeuDropEvent,
-  neuReorder,
 } from '@neural-ui/core/drag-drop';
+import {
+  findOrderedDuplicate,
+  moveSelectedVisible,
+  pruneSelectedKeys,
+  reorderVisible,
+  transferSelected,
+  visibleAnchorIndex,
+} from './neu-ordered-list.engine';
 import { filterNeuOptions } from '@neural-ui/core/internal';
+import { NeuButtonComponent } from '@neural-ui/core/button';
 import {
   type NeuOptionDisabledAccessor,
   type NeuOptionFilterConfig,
@@ -45,6 +65,7 @@ export type NeuPickListMoveAllScope = 'filtered' | 'all';
 type NeuPickAction = 'to-target' | 'to-source' | 'all-to-target' | 'all-to-source';
 
 const NEU_LIST_MOVES: readonly NeuListMove[] = ['top', 'up', 'down', 'bottom'];
+const NEU_LIST_LOCATIONS: readonly NeuListLocation[] = ['source', 'target'];
 const NEU_PICK_ACTIONS: readonly NeuPickAction[] = [
   'to-target',
   'to-source',
@@ -56,7 +77,9 @@ export interface NeuPickListDropEvent<T> {
   readonly item: T;
   readonly from: NeuListLocation;
   readonly to: NeuListLocation;
+  /** Index in the visible source projection; equals the applied index without a filter. */
   readonly previousIndex: number;
+  /** Index in the visible destination projection; full-array proposals are authoritative. */
   readonly currentIndex: number;
   readonly interaction: 'pointer' | 'keyboard';
   readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;
@@ -110,7 +133,10 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
   selector: 'neu-pick-list',
   imports: [
     NgTemplateOutlet,
+    NeuralIcon,
+    NeuButtonComponent,
     NeuDragDropGroupDirective,
+    NeuDragHandleDirective,
     NeuDraggableDirective,
     NeuDropZoneDirective,
   ],
@@ -118,7 +144,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
   host: { class: 'neu-pick-list' },
   template: `
     <div neuDragDropGroup [neuDragDropGroupDisabled]="!dragDrop()" class="neu-pick-list__layout">
-      <ng-template #listColumn let-location>
+      @for (location of listLocations; track location) {
         <section class="neu-pick-list__column" [attr.aria-label]="columnHeader(location)">
           <h3>{{ columnHeader(location) }}</h3>
           @if (filter()) {
@@ -142,88 +168,108 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
             neuDropRole="listbox"
             (drop)="onDrop($event, location)"
           >
-            @for (item of columnItems(location); track optionValueOf(item)) {
-              <button
-                type="button"
-                role="option"
+            @for (item of columnItems(location); track identityTrackKey(item, $index)) {
+              <div
+                class="neu-pick-list__item"
                 [neuDraggable]="dragData(item, location)"
                 neuDragScope="neu-pick-list"
                 [neuDraggableDisabled]="isOptionDisabled(item)"
                 [neuDragPointer]="dragDrop()"
-                [neuDragKeyboard]="dragDrop()"
-                neuDragRole="option"
-                [neuDragAriaLabel]="'Move ' + optionLabelOf(item)"
-                [class.is-selected]="isLocationSelected(item, location)"
-                [disabled]="isOptionDisabled(item)"
-                [attr.aria-selected]="isLocationSelected(item, location)"
-                (click)="toggleLocationFromTemplate(location, optionValueOf(item))"
+                [neuDragKeyboard]="false"
+                [neuDragTabIndex]="-1"
+                neuDragRole="presentation"
               >
-                @if (itemTpl()) {
-                  <ng-container
-                    [ngTemplateOutlet]="itemTpl()!.templateRef"
-                    [ngTemplateOutletContext]="{
-                      $implicit: item,
-                      selected: isLocationSelected(item, location),
-                      location,
-                    }"
-                  />
-                } @else {
-                  {{ optionLabelOf(item) }}
+                <button
+                  type="button"
+                  role="option"
+                  [class.is-selected]="isLocationSelected(item, location)"
+                  [disabled]="isOptionDisabled(item)"
+                  [attr.aria-selected]="isLocationSelected(item, location)"
+                  (click)="toggleLocationFromTemplate(location, optionValueOf(item))"
+                >
+                  @if (itemTpl()) {
+                    <ng-container
+                      [ngTemplateOutlet]="itemTpl()!.templateRef"
+                      [ngTemplateOutletContext]="{
+                        $implicit: item,
+                        selected: isLocationSelected(item, location),
+                        location,
+                      }"
+                    />
+                  } @else {
+                    {{ optionLabelOf(item) }}
+                  }
+                </button>
+                @if (dragDrop()) {
+                  <button
+                    neu-button
+                    neuDragHandle
+                    class="neu-pick-list__drag-handle"
+                    type="button"
+                    tone="neutral"
+                    variant="ghost"
+                    size="sm"
+                    [iconOnly]="true"
+                    [ariaLabel]="'Drag ' + optionLabelOf(item)"
+                    [disabled]="isOptionDisabled(item)"
+                  ><neural-icon [icon]="iconDrag" size="1em" aria-hidden="true" /></button>
                 }
-              </button>
+              </div>
             } @empty {
               <div class="neu-pick-list__empty" role="status">{{ emptyFilterLabel() }}</div>
             }
           </div>
-          <ng-container
-            [ngTemplateOutlet]="reorderToolbar"
-            [ngTemplateOutletContext]="{ $implicit: location }"
-          />
+          <div class="neu-pick-list__toolbar" [attr.aria-label]="reorderToolbarLabel(location)">
+            @for (move of listMoves; track move) {
+              <button
+                neu-button
+                type="button"
+                tone="neutral"
+                variant="ghost"
+                size="sm"
+                [iconOnly]="true"
+                [ariaLabel]="reorderActionLabel(location, move)"
+                [disabled]="!hasLocationSelection(location)"
+                (click)="reorderSelection(location, move)"
+              >
+                <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+                @if (move === 'top' || move === 'bottom') {
+                  <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+                }
+              </button>
+            }
+          </div>
         </section>
-      </ng-template>
-
-      <ng-container
-        [ngTemplateOutlet]="listColumn"
-        [ngTemplateOutletContext]="{ $implicit: 'source' }"
-      />
-
-      <div class="neu-pick-list__actions">
-        @for (action of pickActions; track action) {
-          <button
-            type="button"
-            [attr.aria-label]="pickActionLabel(action)"
-            [disabled]="!pickActionEnabled(action)"
-            (click)="runPickAction(action)"
-          >
-            {{ pickActionIcon(action) }}
-          </button>
+        @if (location === 'source') {
+          <div class="neu-pick-list__actions">
+            @for (action of pickActions; track action) {
+              <button
+                neu-button
+                type="button"
+                tone="neutral"
+                variant="ghost"
+                size="sm"
+                [iconOnly]="true"
+                [ariaLabel]="pickActionLabel(action)"
+                [disabled]="!pickActionEnabled(action)"
+                (click)="runPickAction(action)"
+              >
+                <neural-icon [icon]="pickActionIcon(action)" size="1em" aria-hidden="true" />
+                @if (action === 'all-to-target' || action === 'all-to-source') {
+                  <neural-icon [icon]="pickActionIcon(action)" size="1em" aria-hidden="true" />
+                }
+              </button>
+            }
+          </div>
         }
-      </div>
-
-      <ng-container
-        [ngTemplateOutlet]="listColumn"
-        [ngTemplateOutletContext]="{ $implicit: 'target' }"
-      />
+      }
     </div>
-
-    <ng-template #reorderToolbar let-location>
-      <div class="neu-pick-list__toolbar" [attr.aria-label]="reorderToolbarLabel(location)">
-        @for (move of listMoves; track move) {
-          <button
-            type="button"
-            [attr.aria-label]="reorderActionLabel(location, move)"
-            [disabled]="!hasLocationSelection(location)"
-            (click)="reorderSelection(location, move)"
-          >
-            {{ moveIcon(move) }}
-          </button>
-        }
-      </div>
-    </ng-template>
   `,
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
+  protected readonly iconDrag = iconDrag;
+  protected readonly listLocations = NEU_LIST_LOCATIONS;
   protected readonly listMoves = NEU_LIST_MOVES;
   protected readonly pickActions = NEU_PICK_ACTIONS;
   readonly itemTpl = contentChild(NeuPickListItemDirective<T>);
@@ -259,6 +305,8 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   readonly itemsChange = output<{ source: T[]; target: T[] }>();
 
   private readonly eventDestroyRef = inject(DestroyRef);
+  private readonly hostElement = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
   readonly sourceSelection = signal(new Set<V>());
   readonly targetSelection = signal(new Set<V>());
   private readonly sourceFilter = signal('');
@@ -281,6 +329,49 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
       this.optionLabel(),
     ),
   );
+  private readonly duplicate = computed(() =>
+    findOrderedDuplicate<T, V>(
+      [
+        ['source', this.source()],
+        ['target', this.target()],
+      ],
+      (item) => this.optionValueOf(item),
+    ),
+  );
+  private lastDuplicateDiagnostic = '';
+
+  protected ngOnChanges(changes: SimpleChanges): void {
+    this.validIdentity();
+    if (changes['source'] || changes['optionValue']) {
+      const next = pruneSelectedKeys(this.sourceSelection(), this.source(), (item) =>
+        this.optionValueOf(item),
+      );
+      if (next) this.sourceSelection.set(next);
+    }
+    if (changes['target'] || changes['optionValue']) {
+      const next = pruneSelectedKeys(this.targetSelection(), this.target(), (item) =>
+        this.optionValueOf(item),
+      );
+      if (next) this.targetSelection.set(next);
+    }
+  }
+
+  protected identityTrackKey(item: T, index: number): unknown {
+    return this.duplicate() ? index : this.optionValueOf(item);
+  }
+
+  private validIdentity(): boolean {
+    const duplicate = this.duplicate();
+    if (!duplicate) {
+      this.lastDuplicateDiagnostic = '';
+      return true;
+    }
+    const signature = `${duplicate.firstList}:${duplicate.firstIndex}:${duplicate.list}:${duplicate.index}:${String(duplicate.key)}`;
+    if (isDevMode() && this.lastDuplicateDiagnostic !== signature)
+      console.warn(`NeuPickList: duplicate semantic key ${String(duplicate.key)} at ${duplicate.firstList}[${duplicate.firstIndex}] and ${duplicate.list}[${duplicate.index}]; ordered interactions disabled.`);
+    this.lastDuplicateDiagnostic = signature;
+    return false;
+  }
 
   protected columnHeader(location: NeuListLocation): string {
     return location === 'source' ? this.sourceHeader() : this.targetHeader();
@@ -327,7 +418,8 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   }
 
   protected hasLocationSelection(location: NeuListLocation): boolean {
-    return location === 'source' ? this.hasSourceSelection() : this.hasTargetSelection();
+    return !this.duplicate() &&
+      (location === 'source' ? this.hasSourceSelection() : this.hasTargetSelection());
   }
   protected reorderToolbarLabel(location: NeuListLocation): string {
     return `${location === 'source' ? 'Source' : 'Target'} reorder controls`;
@@ -335,8 +427,8 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   protected reorderActionLabel(location: NeuListLocation, move: NeuListMove): string {
     return `Move ${location} selection ${move === 'top' ? 'to top' : move === 'bottom' ? 'to bottom' : move}`;
   }
-  protected moveIcon(move: NeuListMove): string {
-    return move === 'top' ? '⇈' : move === 'up' ? '↑' : move === 'down' ? '↓' : '⇊';
+  protected moveIcon(move: NeuListMove) {
+    return move === 'top' || move === 'up' ? iconArrowUp : iconArrowDown;
   }
   protected pickActionLabel(action: NeuPickAction): string {
     return action === 'to-target'
@@ -344,19 +436,16 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
       : action === 'to-source'
         ? 'Move selected items to source'
         : action === 'all-to-target'
-          ? 'Move all visible items to target'
-          : 'Move all visible items to source';
+          ? `Move all ${this.moveAllScope() === 'filtered' ? 'visible ' : ''}items to target`
+          : `Move all ${this.moveAllScope() === 'filtered' ? 'visible ' : ''}items to source`;
   }
-  protected pickActionIcon(action: NeuPickAction): string {
-    return action === 'to-target'
-      ? '›'
-      : action === 'to-source'
-        ? '‹'
-        : action === 'all-to-target'
-          ? '»'
-          : '«';
+  protected pickActionIcon(action: NeuPickAction) {
+    return action === 'to-target' || action === 'all-to-target'
+      ? iconArrowRight
+      : iconArrowLeft;
   }
   protected pickActionEnabled(action: NeuPickAction): boolean {
+    if (this.duplicate()) return false;
     return action === 'to-target'
       ? this.hasMovableSourceSelection()
       : action === 'to-source'
@@ -384,9 +473,18 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   }
 
   reorderSelection(location: NeuListLocation, move: NeuListMove): void {
+    if (!this.validIdentity()) return;
     const items = location === 'source' ? this.source() : this.target();
-    const next = this.reorderSelected(items, this.selectedSet(location), move);
-    if (next.every((item, index) => item === items[index])) return;
+    const visible = location === 'source' ? this.visibleSource() : this.visibleTarget();
+    const next = moveSelectedVisible(
+      items,
+      visible,
+      [...this.selectedSet(location)],
+      move,
+      (item) => this.optionValueOf(item),
+      (item) => this.isOptionDisabled(item),
+    );
+    if (!next) return;
     this.commit(
       location === 'source' ? next : [...this.source()],
       location === 'target' ? next : [...this.target()],
@@ -396,40 +494,66 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   onDrop(event: NeuDropEvent<unknown, string>, target: NeuListLocation): void {
     const payload = event.data as NeuPickListDragData<T> | null;
     if (
+      !this.validIdentity() ||
       !payload ||
       (payload.location !== 'source' && payload.location !== 'target') ||
-      this.isOptionDisabled(payload.item)
+      event.currentIndex === undefined ||
+      !Number.isInteger(event.currentIndex) ||
+      event.currentIndex < 0
     )
       return;
     const sourceItems = payload.location === 'source' ? this.source() : this.target();
     const targetItems = target === 'source' ? this.source() : this.target();
-    const previousIndex = this.indexOf(sourceItems, payload.item);
-    if (previousIndex < 0) return;
+    const sourceVisible = payload.location === 'source' ? this.visibleSource() : this.visibleTarget();
+    const targetVisible = target === 'source' ? this.visibleSource() : this.visibleTarget();
+    const draggedKey = this.optionValueOf(payload.item);
+    const previousIndex = sourceVisible.findIndex((item) =>
+      neuOptionValuesEqual(this.optionValueOf(item), draggedKey),
+    );
+    const appliedIndex = this.indexOf(sourceItems, payload.item);
+    if (previousIndex < 0 || appliedIndex < 0 || this.isOptionDisabled(sourceItems[appliedIndex]!))
+      return;
     let nextSource: T[];
     let nextTarget: T[];
-    const currentIndex = Math.min(event.currentIndex ?? targetItems.length, targetItems.length);
+    const currentIndex = Math.min(
+      event.currentIndex,
+      payload.location === target ? Math.max(0, targetVisible.length - 1) : targetVisible.length,
+    );
     if (payload.location === target) {
-      const reordered = [
-        ...neuReorder(
-          sourceItems,
-          previousIndex,
-          Math.min(currentIndex, Math.max(0, sourceItems.length - 1)),
-        ),
-      ];
+      const reordered = reorderVisible(
+        sourceItems,
+        sourceVisible,
+        draggedKey,
+        currentIndex,
+        (item) => this.optionValueOf(item),
+        (item) => this.isOptionDisabled(item),
+      );
+      if (!reordered) return;
       nextSource = target === 'source' ? reordered : [...this.source()];
       nextTarget = target === 'target' ? reordered : [...this.target()];
     } else {
-      if (this.containsValue(targetItems, this.optionValueOf(payload.item))) return;
-      const remaining = [...sourceItems];
-      const [item] = remaining.splice(previousIndex, 1);
+      const insertionIndex = visibleAnchorIndex(
+        targetItems,
+        targetVisible,
+        currentIndex,
+        (item) => this.optionValueOf(item),
+      );
+      if (insertionIndex === null) return;
+      const item = sourceItems[appliedIndex]!;
+      const remaining = sourceItems.filter((candidate) =>
+        !neuOptionValuesEqual(this.optionValueOf(candidate), draggedKey),
+      );
       const inserted = [...targetItems];
-      inserted.splice(currentIndex, 0, item!);
+      inserted.splice(insertionIndex, 0, item);
       nextSource = payload.location === 'source' ? remaining : inserted;
       nextTarget = payload.location === 'target' ? remaining : inserted;
     }
+    const focusedBefore = this.hostElement.nativeElement.ownerDocument.activeElement;
     this.commit(nextSource, nextTarget);
+    if (payload.location !== target)
+      this.restoreTransferFocus(target, draggedKey, focusedBefore);
     this.itemDrop.emit({
-      item: payload.item,
+      item: sourceItems[appliedIndex]!,
       from: payload.location,
       to: target,
       previousIndex,
@@ -462,39 +586,36 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
     return this.hasValue(this.selectedSet('target'), this.optionValueOf(option));
   }
   hasSourceSelection(): boolean {
-    return this.selectedSet('source').size > 0;
+    const selected = this.selectedSet('source');
+    return this.source().some((item) => this.hasValue(selected, this.optionValueOf(item)));
   }
   hasTargetSelection(): boolean {
-    return this.selectedSet('target').size > 0;
+    const selected = this.selectedSet('target');
+    return this.target().some((item) => this.hasValue(selected, this.optionValueOf(item)));
   }
   hasMovableSourceSelection(): boolean {
+    const selected = this.selectedSet('source');
     return this.source().some(
-      (item) => this.isSourceSelected(item) && !this.isOptionDisabled(item),
+      (item) => this.hasValue(selected, this.optionValueOf(item)) && !this.isOptionDisabled(item),
     );
   }
   hasMovableTargetSelection(): boolean {
+    const selected = this.selectedSet('target');
     return this.target().some(
-      (item) => this.isTargetSelected(item) && !this.isOptionDisabled(item),
+      (item) => this.hasValue(selected, this.optionValueOf(item)) && !this.isOptionDisabled(item),
     );
   }
   hasMovableSourceItems(): boolean {
-    return this.allCandidates('source').some(
-      (item) =>
-        !this.isOptionDisabled(item) &&
-        !this.containsValue(this.target(), this.optionValueOf(item)),
-    );
+    return !this.duplicate() && this.allCandidates('source').some((item) => !this.isOptionDisabled(item));
   }
   hasMovableTargetItems(): boolean {
-    return this.allCandidates('target').some(
-      (item) =>
-        !this.isOptionDisabled(item) &&
-        !this.containsValue(this.source(), this.optionValueOf(item)),
-    );
+    return !this.duplicate() && this.allCandidates('target').some((item) => !this.isOptionDisabled(item));
   }
 
   private toggleLocation(location: NeuListLocation, value: V): void {
     const items = location === 'source' ? this.source() : this.target();
-    if (this.eventDestroyRef.destroyed || this.isValueDisabled(items, value)) return;
+    if (this.eventDestroyRef.destroyed || !this.validIdentity() || this.isValueDisabled(items, value))
+      return;
     const next = this.toggleSet(this.selectedSet(location), value);
     if (location === 'source') {
       if (this.sourceSelectionKeys() === undefined) this.sourceSelection.set(next);
@@ -510,71 +631,50 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   }
 
   private transfer(from: NeuListLocation, selected: Set<V>): void {
+    if (!this.validIdentity()) return;
     const sourceItems = from === 'source' ? this.source() : this.target();
     const targetItems = from === 'source' ? this.target() : this.source();
-    const moved = sourceItems.filter(
-      (item) =>
-        this.hasValue(selected, this.optionValueOf(item)) &&
-        !this.isOptionDisabled(item) &&
-        !this.containsValue(targetItems, this.optionValueOf(item)),
+    const proposal = transferSelected(
+      sourceItems,
+      targetItems,
+      [...selected],
+      (item) => this.optionValueOf(item),
+      (item) => this.isOptionDisabled(item),
     );
-    const eligibleSelection = sourceItems.some(
-      (item) => this.hasValue(selected, this.optionValueOf(item)) && !this.isOptionDisabled(item),
+    if (!proposal) return;
+    const movedKey = this.optionValueOf(proposal.target[targetItems.length]!);
+    const focusedBefore = this.hostElement.nativeElement.ownerDocument.activeElement;
+    this.commit(
+      from === 'source' ? proposal.source : proposal.target,
+      from === 'target' ? proposal.source : proposal.target,
     );
-    if (!eligibleSelection) return;
-    if (moved.length) {
-      const remaining = sourceItems.filter((item) => !moved.includes(item));
-      this.commit(
-        from === 'source' ? remaining : [...targetItems, ...moved],
-        from === 'target' ? remaining : [...targetItems, ...moved],
-      );
-    }
-    if (from === 'source') {
-      if (this.sourceSelectionKeys() === undefined) this.sourceSelection.set(new Set());
-      this.sourceSelectionChange.emit([]);
-    } else {
-      if (this.targetSelectionKeys() === undefined) this.targetSelection.set(new Set());
-      this.targetSelectionChange.emit([]);
-    }
+    this.restoreTransferFocus(from === 'source' ? 'target' : 'source', movedKey, focusedBefore);
   }
-
-  private reorderSelected(items: readonly T[], selected: Set<V>, move: NeuListMove): T[] {
-    const next = [...items];
-    const isSelected = (item: T) =>
-      this.hasValue(selected, this.optionValueOf(item)) && !this.isOptionDisabled(item);
-    if (move === 'up') {
-      for (let index = 1; index < next.length; index++)
-        if (
-          isSelected(next[index]!) &&
-          !isSelected(next[index - 1]!) &&
-          !this.isOptionDisabled(next[index - 1]!)
-        )
-          [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
-    } else if (move === 'down') {
-      for (let index = next.length - 2; index >= 0; index--)
-        if (
-          isSelected(next[index]!) &&
-          !isSelected(next[index + 1]!) &&
-          !this.isOptionDisabled(next[index + 1]!)
-        )
-          [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
-    } else {
-      let start = 0;
-      while (start < next.length) {
-        let end = start;
-        while (end < next.length && !this.isOptionDisabled(next[end]!)) end++;
-        const segment = next.slice(start, end);
-        const chosen = segment.filter(isSelected);
-        const rest = segment.filter((item) => !isSelected(item));
-        next.splice(
-          start,
-          segment.length,
-          ...(move === 'top' ? [...chosen, ...rest] : [...rest, ...chosen]),
-        );
-        start = end + 1;
-      }
-    }
-    return next;
+  private restoreTransferFocus(
+    destination: NeuListLocation,
+    movedKey: V,
+    focusedBefore: Element | null,
+  ): void {
+    const host = this.hostElement.nativeElement as HTMLElement;
+    if (!focusedBefore || !host.contains(focusedBefore)) return;
+    afterNextRender(() => {
+      if (this.eventDestroyRef.destroyed) return;
+      const prior = focusedBefore as HTMLButtonElement;
+      if (prior.isConnected && !prior.disabled) return;
+      const columns = host.querySelectorAll<HTMLElement>('.neu-pick-list__column');
+      const column = columns[destination === 'source' ? 0 : 1];
+      if (!column) return;
+      const visible = destination === 'source' ? this.visibleSource() : this.visibleTarget();
+      const index = visible.findIndex((item) =>
+        neuOptionValuesEqual(this.optionValueOf(item), movedKey),
+      );
+      const options = column.querySelectorAll<HTMLButtonElement>('button[role="option"]');
+      const preferred = index < 0 ? null : options[index];
+      const fallback = column.querySelector<HTMLElement>(
+        'button[role="option"]:not([disabled]), input:not([disabled]), button:not([disabled])',
+      );
+      (preferred && !preferred.disabled ? preferred : fallback)?.focus({ preventScroll: true });
+    }, { injector: this.injector });
   }
 
   private selectedSet(location: NeuListLocation): Set<V> {
@@ -607,9 +707,6 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   private hasValue(values: Set<V>, value: V): boolean {
     return [...values].some((candidate) => neuOptionValuesEqual(candidate, value));
   }
-  private containsValue(items: readonly T[], value: V): boolean {
-    return items.some((item) => neuOptionValuesEqual(this.optionValueOf(item), value));
-  }
   private indexOf(items: readonly T[], item: T): number {
     const value = this.optionValueOf(item);
     return items.findIndex((candidate) =>
@@ -628,7 +725,10 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   selector: 'neu-order-list',
   imports: [
     NgTemplateOutlet,
+    NeuralIcon,
+    NeuButtonComponent,
     NeuDragDropGroupDirective,
+    NeuDragHandleDirective,
     NeuDraggableDirective,
     NeuDropZoneDirective,
   ],
@@ -657,17 +757,18 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
         neuDropRole="group"
         (drop)="onDrop($event)"
       >
-        @for (item of visibleItems(); track optionValueOf(item); let index = $index) {
+        @for (item of visibleItems(); track identityTrackKey(item, $index); let index = $index) {
           <div
             class="neu-order-list__item"
             [class.is-selected]="isSelected(item)"
+            [class.neu-order-list__item--draggable]="dragDrop()"
             [neuDraggable]="item"
             neuDragScope="neu-order-list"
             neuDragRole="group"
             [neuDraggableDisabled]="isOptionDisabled(item)"
             [neuDragPointer]="dragDrop()"
-            [neuDragKeyboard]="dragDrop()"
-            [neuDragAriaLabel]="'Move ' + optionLabelOf(item)"
+            [neuDragKeyboard]="false"
+            [neuDragTabIndex]="-1"
           >
             <button
               class="neu-order-list__option"
@@ -689,14 +790,33 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
                 <span>{{ optionLabelOf(item) }}</span>
               }
             </button>
+            @if (dragDrop()) {
+              <button
+                neu-button
+                neuDragHandle
+                class="neu-order-list__drag-handle"
+                type="button"
+                tone="neutral"
+                variant="ghost"
+                size="sm"
+                [iconOnly]="true"
+                [ariaLabel]="'Drag ' + optionLabelOf(item)"
+                [disabled]="isOptionDisabled(item)"
+              ><neural-icon [icon]="iconDrag" size="1em" aria-hidden="true" /></button>
+            }
             @for (direction of directions; track direction) {
               <button
+                neu-button
                 type="button"
-                [attr.aria-label]="itemMoveLabel(item, direction)"
-                [disabled]="!canMove(dataIndex(item), direction)"
-                (click)="$event.stopPropagation(); move(dataIndex(item), direction)"
+                tone="neutral"
+                variant="ghost"
+                size="sm"
+                [iconOnly]="true"
+                [ariaLabel]="itemMoveLabel(item, direction)"
+                [disabled]="!canMove(index, direction)"
+                (click)="$event.stopPropagation(); move(index, direction)"
               >
-                {{ direction === -1 ? '↑' : '↓' }}
+                <neural-icon [icon]="direction === -1 ? iconArrowUp : iconArrowDown" size="1em" aria-hidden="true" />
               </button>
             }
           </div>
@@ -709,11 +829,19 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
       <div class="neu-order-list__toolbar" aria-label="Reorder selected items">
         @for (move of listMoves; track move) {
           <button
+            neu-button
             type="button"
-            [attr.aria-label]="orderActionLabel(move)"
+            tone="neutral"
+            variant="ghost"
+            size="sm"
+            [iconOnly]="true"
+            [ariaLabel]="orderActionLabel(move)"
             (click)="moveSelection(move)"
           >
-            {{ moveIcon(move) }}
+            <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+            @if (move === 'top' || move === 'bottom') {
+              <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+            }
           </button>
         }
       </div>
@@ -722,6 +850,9 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
+  protected readonly iconArrowUp = iconArrowUp;
+  protected readonly iconArrowDown = iconArrowDown;
+  protected readonly iconDrag = iconDrag;
   protected readonly listMoves = NEU_LIST_MOVES;
   protected readonly directions = [-1, 1] as const;
   readonly itemTpl = contentChild(NeuOrderListItemDirective<T>);
@@ -748,6 +879,37 @@ export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   readonly visibleItems = computed(() =>
     filterNeuOptions(this.items(), this.effectiveFilter(), this.filterConfig(), this.optionLabel()),
   );
+  private readonly duplicate = computed(() =>
+    findOrderedDuplicate<T, V>([['items', this.items()]], (item) => this.optionValueOf(item)),
+  );
+  private lastDuplicateDiagnostic = '';
+
+  protected ngOnChanges(changes: SimpleChanges): void {
+    this.validIdentity();
+    if (changes['items'] || changes['optionValue']) {
+      const next = pruneSelectedKeys(this.internalSelection(), this.items(), (item) =>
+        this.optionValueOf(item),
+      );
+      if (next) this.internalSelection.set(next);
+    }
+  }
+
+  protected identityTrackKey(item: T, index: number): unknown {
+    return this.duplicate() ? index : this.optionValueOf(item);
+  }
+
+  private validIdentity(): boolean {
+    const duplicate = this.duplicate();
+    if (!duplicate) {
+      this.lastDuplicateDiagnostic = '';
+      return true;
+    }
+    const signature = `${duplicate.firstIndex}:${duplicate.index}:${String(duplicate.key)}`;
+    if (isDevMode() && this.lastDuplicateDiagnostic !== signature)
+      console.warn(`NeuOrderList: duplicate semantic key ${String(duplicate.key)} at items[${duplicate.firstIndex}] and items[${duplicate.index}]; ordered interactions disabled.`);
+    this.lastDuplicateDiagnostic = signature;
+    return false;
+  }
 
   protected orderActionLabel(move: NeuListMove): string {
     return `Move selected items ${move === 'top' ? 'to top' : move === 'bottom' ? 'to bottom' : move}`;
@@ -755,26 +917,37 @@ export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   protected itemMoveLabel(item: T, direction: -1 | 1): string {
     return `Move ${this.optionLabelOf(item)} ${direction === -1 ? 'up' : 'down'}`;
   }
-  protected moveIcon(move: NeuListMove): string {
-    return move === 'top' ? '⇈' : move === 'up' ? '↑' : move === 'down' ? '↓' : '⇊';
+  protected moveIcon(move: NeuListMove) {
+    return move === 'top' || move === 'up' ? iconArrowUp : iconArrowDown;
   }
 
   move(index: number, direction: -1 | 1): void {
     if (!this.canMove(index, direction)) return;
-    this.orderChange.emit([...neuReorder(this.items(), index, index + direction)]);
+    const visible = this.visibleItems();
+    const next = reorderVisible(
+      this.items(),
+      visible,
+      this.optionValueOf(visible[index]!),
+      index + direction,
+      (item) => this.optionValueOf(item),
+      (item) => this.isOptionDisabled(item),
+    );
+    if (next) this.orderChange.emit(next);
   }
   canMove(index: number, direction: -1 | 1): boolean {
+    if (this.duplicate()) return false;
+    const visible = this.visibleItems();
     const target = index + direction;
     return (
       index >= 0 &&
       target >= 0 &&
-      target < this.items().length &&
-      !this.isOptionDisabled(this.items()[index]!) &&
-      !this.isOptionDisabled(this.items()[target]!)
+      target < visible.length &&
+      !this.isOptionDisabled(visible[index]!) &&
+      !this.isOptionDisabled(visible[target]!)
     );
   }
   toggle(item: T): void {
-    if (this.isOptionDisabled(item)) return;
+    if (!this.validIdentity() || this.isOptionDisabled(item)) return;
     const next = new Set(this.selectedSet());
     const value = this.optionValueOf(item);
     const existing = [...next].find((key) => neuOptionValuesEqual(key, value));
@@ -785,12 +958,16 @@ export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
     );
   }
   moveSelection(move: NeuListMove): void {
-    const helper = new NeuPickListReorderHelper<T, V>(
+    if (!this.validIdentity()) return;
+    const next = moveSelectedVisible(
+      this.items(),
+      this.visibleItems(),
+      [...this.selectedSet()],
+      move,
       (item) => this.optionValueOf(item),
       (item) => this.isOptionDisabled(item),
     );
-    const next = helper.move(this.items(), this.selectedSet(), move);
-    if (!next.every((item, index) => item === this.items()[index])) this.orderChange.emit(next);
+    if (next) this.orderChange.emit(next);
   }
   setFilter(event: Event | string): void {
     const value = typeof event === 'string' ? event : (event.target as HTMLInputElement).value;
@@ -798,17 +975,32 @@ export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
     this.filterChange.emit(value);
   }
   onDrop(event: NeuDropEvent<unknown, string>): void {
+    if (
+      !this.validIdentity() ||
+      event.currentIndex === undefined ||
+      !Number.isInteger(event.currentIndex) ||
+      event.currentIndex < 0
+    ) return;
     const item = event.data as T;
-    const previousIndex = this.dataIndex(item);
-    if (previousIndex < 0 || this.isOptionDisabled(item)) return;
-    const currentIndex = Math.min(
-      event.currentIndex ?? this.items().length - 1,
-      this.items().length - 1,
+    const key = this.optionValueOf(item);
+    const visible = this.visibleItems();
+    const previousIndex = visible.findIndex((candidate) =>
+      neuOptionValuesEqual(this.optionValueOf(candidate), key),
     );
-    const next = [...neuReorder(this.items(), previousIndex, currentIndex)];
+    if (previousIndex < 0) return;
+    const currentIndex = Math.min(event.currentIndex, visible.length - 1);
+    const next = reorderVisible(
+      this.items(),
+      visible,
+      key,
+      currentIndex,
+      (candidate) => this.optionValueOf(candidate),
+      (candidate) => this.isOptionDisabled(candidate),
+    );
+    if (!next) return;
     this.orderChange.emit(next);
     this.itemDrop.emit({
-      item,
+      item: visible[previousIndex]!,
       from: 'source',
       to: 'source',
       previousIndex,
@@ -818,7 +1010,7 @@ export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
     });
   }
   hasSelection(): boolean {
-    return this.selectedSet().size > 0;
+    return this.items().some((item) => this.isSelected(item));
   }
   isSelected(item: T): boolean {
     return this.hasValue(this.selectedSet(), this.optionValueOf(item));
@@ -845,43 +1037,5 @@ export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   }
   private hasValue(values: Set<V>, value: V): boolean {
     return [...values].some((candidate) => neuOptionValuesEqual(candidate, value));
-  }
-}
-
-class NeuPickListReorderHelper<T, V> {
-  constructor(
-    private readonly valueOf: (item: T) => V,
-    private readonly disabled: (item: T) => boolean,
-  ) {}
-  move(items: readonly T[], selected: Set<V>, move: NeuListMove): T[] {
-    const next = [...items];
-    const chosen = (item: T) =>
-      !this.disabled(item) &&
-      [...selected].some((value) => neuOptionValuesEqual(value, this.valueOf(item)));
-    if (move === 'up') {
-      for (let index = 1; index < next.length; index++)
-        if (chosen(next[index]!) && !chosen(next[index - 1]!) && !this.disabled(next[index - 1]!))
-          [next[index - 1], next[index]] = [next[index]!, next[index - 1]!];
-    } else if (move === 'down') {
-      for (let index = next.length - 2; index >= 0; index--)
-        if (chosen(next[index]!) && !chosen(next[index + 1]!) && !this.disabled(next[index + 1]!))
-          [next[index], next[index + 1]] = [next[index + 1]!, next[index]!];
-    } else {
-      let start = 0;
-      while (start < next.length) {
-        let end = start;
-        while (end < next.length && !this.disabled(next[end]!)) end++;
-        const segment = next.slice(start, end);
-        const selectedItems = segment.filter(chosen);
-        const rest = segment.filter((item) => !chosen(item));
-        next.splice(
-          start,
-          segment.length,
-          ...(move === 'top' ? [...selectedItems, ...rest] : [...rest, ...selectedItems]),
-        );
-        start = end + 1;
-      }
-    }
-    return next;
   }
 }
