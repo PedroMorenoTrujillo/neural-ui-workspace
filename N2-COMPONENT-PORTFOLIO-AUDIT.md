@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 94 |
-| COMPLETED | 89 |
-| PENDING | 5 |
+| COMPLETED | 90 |
+| PENDING | 4 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
 | 🟢 LIGHT | 1 |
 | 🟡 MEDIUM | 0 |
-| 🟠 HEAVY | 3 |
+| 🟠 HEAVY | 2 |
 | 🔴 VERY HEAVY | 1 |
 | XS | 1 |
 | S | 0 |
 | M | 0 |
-| L | 3 |
+| L | 2 |
 | XL | 1 |
 
-The partition is **89 + 5 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 4 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **90 + 4 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 3 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
 
 ## Method and taxonomy
 
@@ -33,7 +33,7 @@ N2-PHASE-2 used **98 canonical component source files** before removing Chart; t
 
 ## Product decisions and evidence standard
 
-Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, Timeline remains pending visual/semantic certification. OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components. There is **no separate public Gantt or Scheduler component/entrypoint**; both concepts reside in the one SchedulerGantt runtime, so removal counts once. Generic Charts already left Core and future neural-charts is not an active Core component. N2-023's visual-axis edits alone never certify a component: rows marked “transverse only” remain pending. The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2. B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. B5 certifies the controlled Compare family and presentation-only children. C2 certifies PickList and OrderList controlled ordered DnD. A1 certifies Button, ButtonGroup, presentational Tag, and Toolbar; removal belongs to Chip. Completed rows require the named component report/contract gate, not a passing incidental test.
+Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, Timeline remains pending visual/semantic certification. OrganizationChart and the sole SchedulerGantt component were physically removed in D1, not modernized or retained as current components. There is **no separate public Gantt or Scheduler component/entrypoint**; both concepts reside in the one SchedulerGantt runtime, so removal counts once. Generic Charts already left Core and future neural-charts is not an active Core component. N2-023's visual-axis edits alone never certify a component: rows marked “transverse only” remain pending. The 24 Signal Forms controls are migration evidence; B7 certified Slider/Rating P2 and B8 certified InputMask P2. B9 certifies Splitter controlled resizing and ScrollArea logical scrolling; collapse/restore is deferred P3. B5 certifies the controlled Compare family and presentation-only children. A1 certifies Button, ButtonGroup, presentational Tag, and Toolbar; removal belongs to Chip. Completed rows require the named component report/contract gate, not a passing incidental test.
 
 ## Complete public-component matrix
 
@@ -83,7 +83,7 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuKanbanComponent | @neural-ui/core/kanban | PENDING | C5 | DEEP REFACTOR | • Audit board/column/card identity and controlled DnD<br>• Design cross-column move proposals and SSR/lifecycle gates | HEAVY | L | HIGH | independent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | board DnD | 20 | board DnD; 659 source lines; no overlay in component source. |
 | NeuKnobComponent | @neural-ui/core/knob | COMPLETED | N2-005 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-005; do not reopen for a transverse smoke test. |
 | NeuListboxComponent | @neural-ui/core/listbox | COMPLETED | N2-007 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-007; do not reopen for a transverse smoke test. |
-| NeuMegaMenuComponent | @neural-ui/core/mega-menu | PENDING | C3 | DEEP REFACTOR | • Audit nested menu/Router ownership and keyboard tree<br>• Verify badges, hover and SSR-safe navigation | HEAVY | L | HIGH | NeuBadgeComponent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | hierarchical menu | 18 | hierarchical menu; 591 source lines; no overlay in component source. |
+| NeuMegaMenuComponent | @neural-ui/core/mega-menu | COMPLETED | C3 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuBadgeComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C3; do not reopen for a transverse smoke test. |
 | NeuMenubarComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuMenuComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
 | NeuMenuButtonComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuButtonComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
 | NeuMenuComponent | @neural-ui/core/menu | COMPLETED | B2 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuButtonComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B2; do not reopen for a transverse smoke test. |
@@ -98,8 +98,8 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuPanelComponent | @neural-ui/core/panel | COMPLETED | N2-021 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-021; do not reopen for a transverse smoke test. |
 | NeuScrollAreaComponent | @neural-ui/core/panel | COMPLETED | B9 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B9; do not reopen for a transverse smoke test. |
 | NeuPasswordComponent | @neural-ui/core/password | COMPLETED | N2-003/004 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-003/004; do not reopen for a transverse smoke test. |
-| NeuOrderListComponent | @neural-ui/core/pick-list | COMPLETED | C2 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C2; controlled visible-slot reorder and real Chromium DnD/hydration verified. |
-| NeuPickListComponent | @neural-ui/core/pick-list | COMPLETED | C2 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C2; controlled transfer, selection ownership, filtered anchor DnD and real Chromium hydration verified. |
+| NeuOrderListComponent | @neural-ui/core/pick-list | COMPLETED | C2 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C2; do not reopen for a transverse smoke test. |
+| NeuPickListComponent | @neural-ui/core/pick-list | COMPLETED | C2 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C2; do not reopen for a transverse smoke test. |
 | NeuProgressBarComponent | @neural-ui/core/progress-bar | COMPLETED | A4 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in A4; do not reopen for a transverse smoke test. |
 | NeuRadioComponent | @neural-ui/core/radio | COMPLETED | N2-003/004 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-003/004; do not reopen for a transverse smoke test. |
 | NeuRadioGroupComponent | @neural-ui/core/radio | COMPLETED | N2-003/004 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-003/004; do not reopen for a transverse smoke test. |

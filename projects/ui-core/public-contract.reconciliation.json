@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1475,
-    "bindingDelta": 308,
+    "declarationBindings": 1473,
+    "bindingDelta": 306,
     "mapped": 621,
     "aliasCorrections": 3,
     "missingOldEntries": 540,
-    "newlyDiscovered": 848,
+    "newlyDiscovered": 846,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 431,
+      "declaration-or-selector-was-not-recorded": 429,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 387
     }
@@ -4604,14 +4604,6 @@
     },
     {
       "id": "./mega-menu#NeuMegaMenuComponent.input:scrollHeight",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./mega-menu#NeuMegaMenuComponent.input:tabindex",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./mega-menu#NeuMegaMenuComponent.output:activeItemChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

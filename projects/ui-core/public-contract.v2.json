@@ -662,12 +662,16 @@
       "entrypoint": "./mega-menu",
       "types": "./types/neural-ui-core-mega-menu.d.ts",
       "exports": [
+        "./mega-menu#NeuMegaMenuColumn",
         "./mega-menu#NeuMegaMenuComponent",
         "./mega-menu#NeuMegaMenuEndDirective",
+        "./mega-menu#NeuMegaMenuGroup",
         "./mega-menu#NeuMegaMenuItem",
         "./mega-menu#NeuMegaMenuItemDirective",
         "./mega-menu#NeuMegaMenuItemTemplateContext",
+        "./mega-menu#NeuMegaMenuLeaf",
         "./mega-menu#NeuMegaMenuOrientation",
+        "./mega-menu#NeuMegaMenuPanel",
         "./mega-menu#NeuMegaMenuStartDirective"
       ]
     },
@@ -22138,6 +22142,32 @@
       "members": []
     },
     {
+      "id": "./mega-menu#NeuMegaMenuColumn",
+      "entrypoint": "./mega-menu",
+      "name": "NeuMegaMenuColumn",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuMegaMenuColumn {\n}",
+      "members": [
+        {
+          "id": "./mega-menu#NeuMegaMenuColumn.property:groups",
+          "name": "groups",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly groups: readonly NeuMegaMenuGroup[];"
+        },
+        {
+          "id": "./mega-menu#NeuMegaMenuColumn.property:key",
+          "name": "key",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly key: string;"
+        }
+      ]
+    },
+    {
       "id": "./mega-menu#NeuMegaMenuComponent",
       "entrypoint": "./mega-menu",
       "name": "NeuMegaMenuComponent",
@@ -22214,7 +22244,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<NeuMegaMenuItem[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<readonly NeuMegaMenuItem[]>;"
         },
         {
           "id": "./mega-menu#NeuMegaMenuComponent.input:menuButtonAriaLabel",
@@ -22247,88 +22277,12 @@
           "signature": "readonly scrollHeight: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./mega-menu#NeuMegaMenuComponent.input:tabindex",
-          "name": "tabindex",
-          "kind": "input",
-          "publicName": "tabindex",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly tabindex: _angular_core.InputSignalWithTransform<number, unknown>;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:activate",
-          "name": "activate",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "activate(event: Event, action: NeuResolvedMenuAction<NeuMegaMenuItem>): void;"
-        },
-        {
           "id": "./mega-menu#NeuMegaMenuComponent.method:close",
           "name": "close",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "close(restoreFocus?: boolean, rootIndex?: number): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:onDocumentPointerDown",
-          "name": "onDocumentPointerDown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onDocumentPointerDown(event: PointerEvent): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:onPanelKeydown",
-          "name": "onPanelKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onPanelKeydown(event: KeyboardEvent, root: ProcessedMegaRoot, rootIndex: number): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:onRootKeydown",
-          "name": "onRootKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onRootKeydown(event: KeyboardEvent, root: ProcessedMegaRoot, index: number): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:onRootMouseenter",
-          "name": "onRootMouseenter",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onRootMouseenter(root: ProcessedMegaRoot, index: number): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:toggleMobile",
-          "name": "toggleMobile",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "toggleMobile(event: Event): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.method:toggleRoot",
-          "name": "toggleRoot",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "toggleRoot(event: Event, root: ProcessedMegaRoot, index: number): void;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.output:activeItemChange",
-          "name": "activeItemChange",
-          "kind": "output",
-          "publicName": "activeItemChange",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly activeItemChange: _angular_core.OutputEmitterRef<NeuMegaMenuItem | null>;"
+          "signature": "close(restoreFocus?: boolean): void;"
         },
         {
           "id": "./mega-menu#NeuMegaMenuComponent.output:itemClick",
@@ -22338,7 +22292,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMegaMenuItem>;"
+          "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMegaMenuItem | NeuMegaMenuLeaf>;"
         },
         {
           "id": "./mega-menu#NeuMegaMenuComponent.output:mobileActiveChange",
@@ -22351,44 +22305,12 @@
           "signature": "readonly mobileActiveChange: _angular_core.OutputEmitterRef<boolean>;"
         },
         {
-          "id": "./mega-menu#NeuMegaMenuComponent.property:activeRootKey",
-          "name": "activeRootKey",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly activeRootKey: _angular_core.WritableSignal<string | null>;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.property:focusedRootIndex",
-          "name": "focusedRootIndex",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly focusedRootIndex: _angular_core.WritableSignal<number>;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.property:mobile",
-          "name": "mobile",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly mobile: _angular_core.WritableSignal<boolean>;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.property:mobileActive",
-          "name": "mobileActive",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly mobileActive: _angular_core.WritableSignal<boolean>;"
-        },
-        {
           "id": "./mega-menu#NeuMegaMenuComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMegaMenuComponent, \"neu-mega-menu\", never, {\n    \"id\": {\n        \"alias\": \"id\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"orientation\": {\n        \"alias\": \"orientation\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"breakpoint\": {\n        \"alias\": \"breakpoint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"scrollHeight\": {\n        \"alias\": \"scrollHeight\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabindex\": {\n        \"alias\": \"tabindex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"menuButtonAriaLabel\": {\n        \"alias\": \"menuButtonAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n    \"activeItemChange\": \"activeItemChange\";\n    \"mobileActiveChange\": \"mobileActiveChange\";\n}, [\n    \"itemTemplate\",\n    \"startTemplate\",\n    \"endTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMegaMenuComponent, \"neu-mega-menu\", never, {\n    \"id\": {\n        \"alias\": \"id\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"orientation\": {\n        \"alias\": \"orientation\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"breakpoint\": {\n        \"alias\": \"breakpoint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"scrollHeight\": {\n        \"alias\": \"scrollHeight\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"menuButtonAriaLabel\": {\n        \"alias\": \"menuButtonAriaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"direction\": {\n        \"alias\": \"direction\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n    \"mobileActiveChange\": \"mobileActiveChange\";\n}, [\n    \"itemTemplate\",\n    \"startTemplate\",\n    \"endTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./mega-menu#NeuMegaMenuComponent.property:ɵfac",
@@ -22397,22 +22319,6 @@
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuMegaMenuComponent, never>;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.property:processedRoots",
-          "name": "processedRoots",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly processedRoots: _angular_core.Signal<ProcessedMegaRoot[]>;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuComponent.property:rootListId",
-          "name": "rootListId",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly rootListId: _angular_core.Signal<string>;"
         }
       ]
     },
@@ -22452,46 +22358,47 @@
       ]
     },
     {
-      "id": "./mega-menu#NeuMegaMenuItem",
+      "id": "./mega-menu#NeuMegaMenuGroup",
       "entrypoint": "./mega-menu",
-      "name": "NeuMegaMenuItem",
+      "name": "NeuMegaMenuGroup",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuMegaMenuItem extends NeuMenuActionLike<NeuMegaMenuItem> {\n}",
+      "signature": "interface NeuMegaMenuGroup {\n}",
       "members": [
         {
-          "id": "./mega-menu#NeuMegaMenuItem.property:data",
-          "name": "data",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "data?: unknown;"
-        },
-        {
-          "id": "./mega-menu#NeuMegaMenuItem.property:items",
+          "id": "./mega-menu#NeuMegaMenuGroup.property:items",
           "name": "items",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "items?: NeuMegaMenuItem[] | NeuMegaMenuItem[][];"
+          "signature": "readonly items: readonly NeuMegaMenuLeaf[];"
         },
         {
-          "id": "./mega-menu#NeuMegaMenuItem.property:key",
+          "id": "./mega-menu#NeuMegaMenuGroup.property:key",
           "name": "key",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "key: string;"
+          "signature": "readonly key: string;"
         },
         {
-          "id": "./mega-menu#NeuMegaMenuItem.property:label",
+          "id": "./mega-menu#NeuMegaMenuGroup.property:label",
           "name": "label",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "label: string;"
+          "signature": "readonly label?: string;"
         }
       ]
+    },
+    {
+      "id": "./mega-menu#NeuMegaMenuItem",
+      "entrypoint": "./mega-menu",
+      "name": "NeuMegaMenuItem",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuMegaMenuItem = (NeuMegaMenuEntry & NeuMegaMenuDestination & {\n    readonly kind: 'link';\n    readonly command?: never;\n    readonly panel?: never;\n}) | (NeuMegaMenuEntry & {\n    readonly kind: 'command';\n    readonly command: NeuMegaMenuCommand;\n    readonly url?: never;\n    readonly routerLink?: never;\n    readonly panel?: never;\n}) | (NeuMegaMenuEntry & {\n    readonly kind: 'panel';\n    readonly panel: NeuMegaMenuPanel;\n    readonly url?: never;\n    readonly routerLink?: never;\n    readonly command?: never;\n});",
+      "members": []
     },
     {
       "id": "./mega-menu#NeuMegaMenuItemDirective",
@@ -22542,7 +22449,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: NeuMegaMenuItem;"
+          "signature": "$implicit: NeuMegaMenuItem | NeuMegaMenuLeaf;"
         },
         {
           "id": "./mega-menu#NeuMegaMenuItemTemplateContext.property:active",
@@ -22566,9 +22473,18 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "level: number;"
+          "signature": "level: 0 | 3;"
         }
       ]
+    },
+    {
+      "id": "./mega-menu#NeuMegaMenuLeaf",
+      "entrypoint": "./mega-menu",
+      "name": "NeuMegaMenuLeaf",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuMegaMenuLeaf = (NeuMegaMenuEntry & NeuMegaMenuDestination & {\n    readonly kind: 'link';\n    readonly command?: never;\n    readonly panel?: never;\n}) | (NeuMegaMenuEntry & {\n    readonly kind: 'command';\n    readonly command: NeuMegaMenuCommand;\n    readonly url?: never;\n    readonly routerLink?: never;\n    readonly panel?: never;\n});",
+      "members": []
     },
     {
       "id": "./mega-menu#NeuMegaMenuOrientation",
@@ -22578,6 +22494,24 @@
       "status": "SUPPORTED",
       "signature": "type NeuMegaMenuOrientation = 'horizontal' | 'vertical';",
       "members": []
+    },
+    {
+      "id": "./mega-menu#NeuMegaMenuPanel",
+      "entrypoint": "./mega-menu",
+      "name": "NeuMegaMenuPanel",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuMegaMenuPanel {\n}",
+      "members": [
+        {
+          "id": "./mega-menu#NeuMegaMenuPanel.property:columns",
+          "name": "columns",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly columns: readonly NeuMegaMenuColumn[];"
+        }
+      ]
     },
     {
       "id": "./mega-menu#NeuMegaMenuStartDirective",
@@ -56549,7 +56483,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<NeuMegaMenuItem[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<readonly NeuMegaMenuItem[]>;"
     },
     {
       "id": "./mega-menu#NeuMegaMenuComponent.input:menuButtonAriaLabel",
@@ -56588,30 +56522,6 @@
       "signature": "readonly scrollHeight: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./mega-menu#NeuMegaMenuComponent.input:tabindex",
-      "entrypoint": "./mega-menu",
-      "declaration": "NeuMegaMenuComponent",
-      "selector": "neu-mega-menu",
-      "propertyName": "tabindex",
-      "publicName": "tabindex",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly tabindex: _angular_core.InputSignalWithTransform<number, unknown>;"
-    },
-    {
-      "id": "./mega-menu#NeuMegaMenuComponent.output:activeItemChange",
-      "entrypoint": "./mega-menu",
-      "declaration": "NeuMegaMenuComponent",
-      "selector": "neu-mega-menu",
-      "propertyName": "activeItemChange",
-      "publicName": "activeItemChange",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly activeItemChange: _angular_core.OutputEmitterRef<NeuMegaMenuItem | null>;"
-    },
-    {
       "id": "./mega-menu#NeuMegaMenuComponent.output:itemClick",
       "entrypoint": "./mega-menu",
       "declaration": "NeuMegaMenuComponent",
@@ -56621,7 +56531,7 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMegaMenuItem>;"
+      "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMegaMenuItem | NeuMegaMenuLeaf>;"
     },
     {
       "id": "./mega-menu#NeuMegaMenuComponent.output:mobileActiveChange",
@@ -65759,32 +65669,32 @@
   ],
   "summary": {
     "entrypoints": 97,
-    "exportedDeclarations": 795,
+    "exportedDeclarations": 799,
     "declarationKinds": {
       "class": 15,
       "component": 94,
       "directive": 117,
       "function": 53,
-      "interface": 264,
+      "interface": 266,
       "reexport": 48,
       "service": 11,
       "token": 4,
-      "type": 188,
+      "type": 190,
       "variable": 1
     },
-    "publicSymbols": 5233,
+    "publicSymbols": 5224,
     "statuses": {
-      "SUPPORTED": 3286,
+      "SUPPORTED": 3290,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1947,
+      "INTERNAL/UNSUPPORTED": 1934,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1221,
-      "output": 230,
+      "input": 1220,
+      "output": 229,
       "model": 24,
-      "total": 1475
+      "total": 1473
     },
     "designTokens": 251
   }

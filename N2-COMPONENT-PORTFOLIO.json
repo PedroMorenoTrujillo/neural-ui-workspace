@@ -12,26 +12,26 @@
     "currentPublicComponents": 94,
     "componentEntrypoints": 82,
     "secondaryEntrypoints": 96,
-    "completed": 89,
-    "pending": 5,
+    "completed": 90,
+    "pending": 4,
     "remove": 0,
     "physicallyRemovedHistorical": 2,
     "mergedReplacedHistorical": 4,
     "pendingByDifficulty": {
       "LIGHT": 1,
       "MEDIUM": 0,
-      "HEAVY": 3,
+      "HEAVY": 2,
       "VERY HEAVY": 1
     },
     "pendingByEffort": {
       "XS": 1,
       "S": 0,
       "M": 0,
-      "L": 3,
+      "L": 2,
       "XL": 1
     },
-    "activePending": 4,
-    "implementationBatches": 4
+    "activePending": 3,
+    "implementationBatches": 3
   },
   "historicalIdentityDelta": {
     "from": "fbe9e5c^",
@@ -61,13 +61,6 @@
     ]
   },
   "batches": [
-    {
-      "id": "C3",
-      "wave": "C",
-      "family": "hierarchical menu",
-      "components": 1,
-      "model": "GPT-6 SOL HIGH"
-    },
     {
       "id": "C4",
       "wave": "C",
@@ -1261,32 +1254,29 @@
     {
       "component": "NeuMegaMenuComponent",
       "entrypoint": "@neural-ui/core/mega-menu",
-      "status": "PENDING",
-      "evidenceStatus": "STILL PENDING",
-      "action": "DEEP REFACTOR",
-      "difficulty": "HEAVY",
-      "effort": "L",
-      "risk": "HIGH",
+      "status": "COMPLETED",
+      "evidenceStatus": "FULLY COMPLETED",
+      "action": "KEEP AS-IS",
+      "difficulty": "CLOSED",
+      "effort": "—",
+      "risk": "CLOSED",
       "dependencies": [
         "NeuBadgeComponent"
       ],
       "roadmapPhase": "C3",
-      "recommendedModel": "GPT-6 SOL HIGH",
-      "batch": "C3",
-      "batchFamily": "hierarchical menu",
-      "reason": "hierarchical menu; 591 source lines; no overlay in component source.",
-      "expectedChanges": [
-        "Audit nested menu/Router ownership and keyboard tree",
-        "Verify badges, hover and SSR-safe navigation"
-      ],
-      "apiImpact": "REVIEW",
-      "ssrHydrationWork": "real SSR + Chromium hydration",
-      "a11yKeyboardWork": "directed keyboard/focus + semantics",
-      "lifecycleComplexity": "HIGH",
-      "bundleRisk": "MEDIUM",
-      "rewriteProbability": "MEDIUM",
-      "designReviewProbability": "HIGH",
-      "priorityScore": 18,
+      "recommendedModel": "—",
+      "batch": "—",
+      "batchFamily": "—",
+      "reason": "Certified in C3; do not reopen for a transverse smoke test.",
+      "expectedChanges": [],
+      "apiImpact": "NONE",
+      "ssrHydrationWork": "certified",
+      "a11yKeyboardWork": "certified",
+      "lifecycleComplexity": "certified",
+      "bundleRisk": "certified",
+      "rewriteProbability": "N/A",
+      "designReviewProbability": "NONE",
+      "priorityScore": null,
       "sourceFile": "projects/ui-core/mega-menu/neu-mega-menu.component.ts"
     },
     {
@@ -1675,7 +1665,7 @@
       "recommendedModel": "—",
       "batch": "—",
       "batchFamily": "—",
-      "reason": "Certified in C2; controlled visible-slot reorder and real Chromium DnD/hydration verified.",
+      "reason": "Certified in C2; do not reopen for a transverse smoke test.",
       "expectedChanges": [],
       "apiImpact": "NONE",
       "ssrHydrationWork": "certified",
@@ -1701,7 +1691,7 @@
       "recommendedModel": "—",
       "batch": "—",
       "batchFamily": "—",
-      "reason": "Certified in C2; controlled transfer, selection ownership, filtered anchor DnD and real Chromium hydration verified.",
+      "reason": "Certified in C2; do not reopen for a transverse smoke test.",
       "expectedChanges": [],
       "apiImpact": "NONE",
       "ssrHydrationWork": "certified",
