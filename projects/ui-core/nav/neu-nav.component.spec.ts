@@ -31,7 +31,7 @@ const BADGE_ITEMS: NeuNavItem[] = [
     icon: 'chevron-right',
     route: '/notifs',
     badge: '9',
-        badgeTone: 'danger',
+    badgeTone: 'danger',
   },
 ];
 
@@ -480,7 +480,7 @@ describe('NeuNavComponent', () => {
             icon: 'external-link',
             href: 'https://example.com',
             badge: 'Hot',
-        badgeTone: 'warning',
+            badgeTone: 'warning',
           },
         ],
       },
@@ -864,6 +864,76 @@ describe('NeuNavComponent', () => {
     expect(f.nativeElement.textContent).toContain('External');
   });
 
+  it('keeps disabled child and grandchild flyout links inert and unfocusable', async () => {
+    const items: NeuNavItem[] = [
+      {
+        id: 'root',
+        label: 'Root',
+        icon: 'chevron-right',
+        children: [
+          {
+            id: 'child-external',
+            label: 'Child external',
+            icon: 'external-link',
+            href: 'https://example.com',
+            disabled: true,
+          },
+          {
+            id: 'child-route',
+            label: 'Child route',
+            icon: 'chevron-right',
+            route: '/child',
+            disabled: true,
+          },
+          {
+            id: 'nested',
+            label: 'Nested',
+            icon: 'chevron-right',
+            children: [
+              {
+                id: 'grand-external',
+                label: 'Grand external',
+                icon: 'external-link',
+                href: 'https://example.com/grand',
+                disabled: true,
+              },
+              {
+                id: 'grand-route',
+                label: 'Grand route',
+                icon: 'chevron-right',
+                route: '/grand',
+                disabled: true,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', items);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    f.componentInstance.onGroupMouseEnter(items[0], {
+      currentTarget: { getBoundingClientRect: () => ({ top: 30, right: 60 }) },
+    } as unknown as MouseEvent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const disabled = Array.from(
+      f.nativeElement.querySelectorAll('.neu-nav__flyout-item--disabled'),
+    ) as HTMLAnchorElement[];
+    expect(disabled).toHaveLength(4);
+    for (const link of disabled) {
+      expect(link.hasAttribute('href'), `${link.textContent}: ${link.getAttribute('href')}`).toBe(
+        false,
+      );
+      expect(link.getAttribute('aria-disabled')).toBe('true');
+      expect(link.tabIndex).toBe(-1);
+      link.click();
+      expect(f.componentInstance.flyoutState()).not.toBeNull();
+    }
+  });
+
   it('clicking a flyout route item should close the flyout from the template', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', FLYOUT_MIXED);
@@ -979,7 +1049,7 @@ describe('NeuNavComponent', () => {
     expect(f.componentInstance.flyoutState()).toBeNull();
   });
 
-  it('_openActiveGroup should open groups when a grandchild route matches', async () => {
+  it('does not mutate disclosure when a grandchild is applied active', async () => {
     const DEEP_ACTIVE: NeuNavItem[] = [
       {
         id: 'parent',
@@ -991,7 +1061,7 @@ describe('NeuNavComponent', () => {
             label: 'Medio',
             icon: 'chevron-right',
             children: [
-              { id: 'grand', label: 'Nieto', icon: 'chevron-right', route: '/grand' },
+              { id: 'grand', label: 'Nieto', icon: 'chevron-right', route: '/grand', active: true },
             ],
           },
           { id: 'child', label: 'Hijo', icon: 'chevron-right', route: '/child' },
@@ -1002,11 +1072,12 @@ describe('NeuNavComponent', () => {
     f.componentRef.setInput('items', DEEP_ACTIVE);
     f.detectChanges();
     await f.whenStable();
-    // Manually call _openActiveGroup as afterNextRender doesn't run in unit tests
-    // Simulate router url by overriding the private router and calling _openActiveGroup
-    const comp = f.componentInstance as any;
-    comp.router = { url: '/grand', events: { pipe: () => ({ subscribe: () => ({}) }) } };
-    comp._openActiveGroup();
+    const comp = f.componentInstance;
+    expect(comp.isGroupActive(DEEP_ACTIVE[0])).toBe(true);
+    expect(comp.isGroupOpen('parent')).toBe(false);
+    expect(comp.isGroupOpen('mid')).toBe(false);
+    comp.toggleGroup('parent');
+    comp.toggleGroup('mid');
     expect(comp.isGroupOpen('parent')).toBe(true);
     expect(comp.isGroupOpen('mid')).toBe(true);
   });
@@ -1024,48 +1095,35 @@ describe('NeuNavComponent', () => {
     expect(f.componentInstance.isCollapsed()).toBe(true);
   });
 
-  it('isCurrentRoute returns true when router URL matches exactly', () => {
-    // isCurrentRoute debe devolver true cuando la URL del router coincide exactamente
-    // isCurrentRoute must return true when the router URL matches exactly
+  it('isCurrentRoute reads only consumer-applied active state', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', SIMPLE_ITEMS);
+    f.componentRef.setInput(
+      'items',
+      SIMPLE_ITEMS.map((item) => ({ ...item, active: item.route === '/components' })),
+    );
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    // Override router with mock URL
-    comp['router'] = {
-      url: '/components',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
+    const comp = f.componentInstance;
     expect(comp.isCurrentRoute('/components')).toBe(true);
   });
 
-  it('isCurrentRoute returns true when URL starts with route + query string', () => {
-    // isCurrentRoute debe devolver true cuando la URL empieza con ruta + query string
-    // isCurrentRoute must return true when URL starts with route + query string
+  it('does not infer active state from a query-string URL', () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', SIMPLE_ITEMS);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = {
-      url: '/docs?tab=api',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    expect(comp.isCurrentRoute('/docs')).toBe(true);
+    expect(f.componentInstance.isCurrentRoute('/docs')).toBe(false);
   });
 
-  it('isGroupActive returns true when a child route matches current URL', () => {
-    // isGroupActive debe devolver true cuando la ruta de un hijo coincide con la URL actual
-    // isGroupActive must return true when a child route matches the current URL
+  it('isGroupActive reads an applied active child', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', GROUP_ITEMS);
+    const applied = [
+      {
+        ...GROUP_ITEMS[0],
+        children: GROUP_ITEMS[0].children?.map((child, i) => ({ ...child, active: i === 0 })),
+      },
+    ];
+    f.componentRef.setInput('items', applied);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = {
-      url: '/child1',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    // GROUP_ITEMS[0] has a child with route '/child1'
-    const result = comp.isGroupActive(GROUP_ITEMS[0]);
+    const result = f.componentInstance.isGroupActive(applied[0]);
     expect(result).toBe(true);
   });
 
@@ -1140,23 +1198,24 @@ describe('NeuNavComponent', () => {
     expect(f.nativeElement.textContent).toContain('7');
   });
 
-  it('isGroupActive returns true when a grandchild route matches current URL', () => {
-    // isGroupActive debe devolver true cuando la ruta de un nieto coincide con la URL
-    // isGroupActive must return true when a grandchild route matches current URL
+  it('isGroupActive reads an applied active grandchild', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', NESTED_GROUP);
+    const applied = [
+      {
+        ...NESTED_GROUP[0],
+        children: NESTED_GROUP[0].children?.map((child) => ({
+          ...child,
+          children: child.children?.map((grand, i) => ({ ...grand, active: i === 0 })),
+        })),
+      },
+    ];
+    f.componentRef.setInput('items', applied);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    // Override the router URL to match a grandchild route
-    comp['router'] = { url: '/grand1', events: { pipe: () => ({ subscribe: () => ({}) }) } };
-    // NESTED_GROUP[0] (parent) has child[0] (subgrp) which has children with route '/grand1'
-    const result = comp.isGroupActive(NESTED_GROUP[0]);
+    const result = f.componentInstance.isGroupActive(applied[0]);
     expect(result).toBe(true);
   });
 
-  it('isGroupActive should check c.children (grandchild) routes via some()', () => {
-    // isGroupActive debe verificar las rutas de los hijos de segundo nivel (nietos)
-    // isGroupActive must verify grandchild routes via some()
+  it('isGroupActive checks applied grandchild state', () => {
     const DEEP_ITEM: any = {
       id: 'deep',
       label: 'Deep',
@@ -1166,16 +1225,16 @@ describe('NeuNavComponent', () => {
           id: 'mid',
           label: 'Mid',
           icon: 'chevron-right',
-          children: [{ id: 'leaf', label: 'Leaf', icon: 'chevron-right', route: '/target' }],
+          children: [
+            { id: 'leaf', label: 'Leaf', icon: 'chevron-right', route: '/target', active: true },
+          ],
         },
       ],
     };
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', [DEEP_ITEM]);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = { url: '/target', events: { pipe: () => ({ subscribe: () => ({}) }) } };
-    expect(comp.isGroupActive(DEEP_ITEM)).toBe(true);
+    expect(f.componentInstance.isGroupActive(DEEP_ITEM)).toBe(true);
   });
 
   it('DOM mouseenter on nav group should trigger onGroupMouseEnter', async () => {
@@ -1256,40 +1315,39 @@ describe('NeuNavComponent', () => {
     vi.useRealTimers();
   });
 
-  it('_openActiveGroup direct call opens group for matching child route', () => {
-    // _openActiveGroup directo debe abrir el grupo cuando la ruta del hijo coincide
-    // _openActiveGroup direct call must open the group when child route matches
+  it('does not auto-open a group when its child becomes active', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.componentRef.setInput('items', [
+      {
+        ...GROUP_ITEMS[0],
+        children: GROUP_ITEMS[0].children?.map((child, i) => ({ ...child, active: i === 0 })),
+      },
+    ]);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    // Simulate router URL matching child route
-    comp['router'] = {
-      url: '/child1',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    // Call private method directly (covers line 587)
-    comp['_openActiveGroup']();
-    expect(comp.isGroupOpen('grp')).toBe(true);
+    expect(f.componentInstance.isGroupOpen('grp')).toBe(false);
   });
 
-  it('_openActiveGroup direct call opens parent group for matching grandchild route', () => {
-    // _openActiveGroup debe abrir el grupo padre cuando la ruta del nieto coincide
-    // _openActiveGroup must open the parent group when grandchild route matches
+  it('parent item replacement updates active presentation without route state', () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', NESTED_GROUP);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = {
-      url: '/grand1',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    comp['_openActiveGroup']();
-    expect(comp.isGroupOpen('parent')).toBe(true);
-    expect(comp.isGroupOpen('subgrp')).toBe(true);
+    expect(f.componentInstance.isGroupActive(NESTED_GROUP[0])).toBe(false);
+    const applied = [
+      {
+        ...NESTED_GROUP[0],
+        children: NESTED_GROUP[0].children?.map((child) => ({
+          ...child,
+          children: child.children?.map((grand, i) => ({ ...grand, active: i === 0 })),
+        })),
+      },
+    ];
+    f.componentRef.setInput('items', applied);
+    f.detectChanges();
+    expect(f.componentInstance.isGroupActive(applied[0])).toBe(true);
+    expect(f.componentInstance.isGroupOpen('parent')).toBe(false);
   });
 
-  it('isCurrentRoute should react to a real router navigation event', async () => {
+  it('router navigation alone does not set active state', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', SIMPLE_ITEMS);
     f.detectChanges();
@@ -1299,7 +1357,7 @@ describe('NeuNavComponent', () => {
     await router.navigateByUrl('/docs?tab=api');
     f.detectChanges();
 
-    expect(f.componentInstance.isCurrentRoute('/docs')).toBe(true);
+    expect(f.componentInstance.isCurrentRoute('/docs')).toBe(false);
   });
 
   it('DOM mouseleave handlers close collapsed flyouts through their template listeners', async () => {
@@ -1353,6 +1411,62 @@ describe('NeuNavComponent', () => {
 
     expect(f.componentInstance.flyoutState()).toBeNull();
     vi.useRealTimers();
+  });
+
+  it('controlled collapse emits a proposal without changing applied state', () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    const emitted: boolean[] = [];
+    f.componentInstance.collapsedChange.subscribe((value) => emitted.push(value));
+
+    f.componentInstance.toggleCollapse();
+    f.detectChanges();
+    expect(emitted).toEqual([true]);
+    expect(f.componentInstance.isCollapsed()).toBe(false);
+
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.isCollapsed()).toBe(true);
+    expect(emitted).toEqual([true]);
+  });
+
+  it('renders consumer-applied active state on an external link without Router state', () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      {
+        id: 'external',
+        label: 'External',
+        icon: 'chevron-right',
+        href: 'https://example.test',
+        active: true,
+      },
+    ]);
+    f.detectChanges();
+    const link = f.nativeElement.querySelector('a.neu-nav__item') as HTMLAnchorElement;
+    expect(link.classList).toContain('neu-nav__item--active');
+    expect(link.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('places a collapsed RTL flyout on the inline end and closes on Escape', () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.componentRef.setInput('collapsed', true);
+    f.nativeElement.setAttribute('dir', 'rtl');
+    f.detectChanges();
+    const group = f.nativeElement.querySelector('.neu-nav__group') as HTMLElement;
+    group.getBoundingClientRect = () => ({ top: 10, left: 50, right: 100 }) as DOMRect;
+    f.componentInstance.onGroupMouseEnter(GROUP_ITEMS[0], {
+      currentTarget: group,
+    } as unknown as MouseEvent);
+    expect(f.componentInstance.flyoutState()?.left).toBeNull();
+    expect(f.componentInstance.flyoutState()?.right).toBe(window.innerWidth - 50);
+    f.detectChanges();
+    const panel = f.nativeElement.querySelector('.neu-nav__flyout') as HTMLElement;
+    expect(panel.getAttribute('role')).toBe('navigation');
+    panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    f.detectChanges();
+    expect(f.componentInstance.flyoutState()).toBeNull();
   });
 
   it('isGroupActive returns false for leaf items and flyout enter clears pending timers', () => {

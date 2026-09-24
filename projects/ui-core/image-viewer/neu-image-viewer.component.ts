@@ -3,30 +3,38 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
-  HostListener,
   Injector,
   OnDestroy,
   ViewEncapsulation,
   computed,
+  effect,
   inject,
   input,
   output,
   signal,
+  untracked,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { InternalNeuMediaPreviewAdapter } from '@neural-ui/core/internal';
 import { NeuralIcon } from '@neural-icons/angular';
 import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
 import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
 import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
+import { iconRotateCw } from '@neural-icons/core/icons/rotate-cw';
+import { iconFlipHorizontal } from '@neural-icons/core/icons/flip-horizontal';
+import { iconFlipVertical } from '@neural-icons/core/icons/flip-vertical';
+import { iconDownload } from '@neural-icons/core/icons/download';
 import { iconX } from '@neural-icons/core/icons/x';
 import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
 import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
 
 export interface NeuImageViewerItem {
   src: string;
-  alt?: string;
+  /** Required; an empty string marks decorative media. */
+  alt: string;
   caption?: string;
 }
 
@@ -36,7 +44,7 @@ import { InjectionToken } from '@angular/core';
 export const NEU_IV_DATA = new InjectionToken<_NeuIvData>('NEU_IV_DATA');
 
 interface _NeuIvData {
-  items: NeuImageViewerItem[];
+  items: readonly NeuImageViewerItem[];
   initialIndex: number;
   ariaLabel: string;
   close: () => void;
@@ -48,7 +56,7 @@ interface _NeuIvData {
  */
 @Component({
   selector: 'neu-image-viewer-overlay',
-  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NeuralIcon],
+  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NgTemplateOutlet, NeuralIcon],
   hostDirectives: [NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -64,22 +72,87 @@ interface _NeuIvData {
     <div class="neu-iv__overlay" (click)="$event.stopPropagation()">
       <!-- Toolbar -->
       <div class="neu-iv__toolbar">
-        <span class="neu-iv__counter">{{ _index() + 1 }} / {{ _data.items.length }}</span>
-        <div class="neu-iv__toolbar-actions">
-          <button type="button" class="neu-iv__btn" aria-label="Zoom in" title="Zoom in" (click)="_zoom(0.25)">
+        <span class="neu-iv__counter">{{ _activeIndex() + 1 }} / {{ _items().length }}</span>
+        <div class="neu-iv__toolbar-actions" role="group" [attr.aria-label]="_label('toolbar')">
+          <button
+            type="button"
+            class="neu-iv__btn"
+            [attr.aria-label]="_label('zoomIn')"
+            [attr.title]="_label('zoomIn')"
+            (click)="_zoom(0.25)"
+          >
             <neural-icon [icon]="iconZoomIn" size="1.25rem" />
           </button>
-          <button type="button" class="neu-iv__btn" aria-label="Zoom out" title="Zoom out" (click)="_zoom(-0.25)">
+          <button
+            type="button"
+            class="neu-iv__btn"
+            [attr.aria-label]="_label('zoomOut')"
+            [attr.title]="_label('zoomOut')"
+            (click)="_zoom(-0.25)"
+          >
             <neural-icon [icon]="iconZoomOut" size="1.25rem" />
           </button>
-          <button type="button" class="neu-iv__btn" aria-label="Reset zoom" title="Reset zoom" (click)="_resetZoom()">
+          @if (_galleryHost) {
+            <button
+              type="button"
+              class="neu-iv__btn"
+              [attr.aria-label]="_label('rotateLeft')"
+              [attr.title]="_label('rotateLeft')"
+              (click)="_rotate(-90)"
+            >
+              <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
+            </button>
+            <button
+              type="button"
+              class="neu-iv__btn"
+              [attr.aria-label]="_label('rotateRight')"
+              [attr.title]="_label('rotateRight')"
+              (click)="_rotate(90)"
+            >
+              <neural-icon [icon]="iconRotateCw" size="1.25rem" />
+            </button>
+            <button
+              type="button"
+              class="neu-iv__btn"
+              [attr.aria-label]="_label('flipHorizontal')"
+              [attr.title]="_label('flipHorizontal')"
+              (click)="_flipAxis('x')"
+            >
+              <neural-icon [icon]="iconFlipHorizontal" size="1.25rem" />
+            </button>
+            <button
+              type="button"
+              class="neu-iv__btn"
+              [attr.aria-label]="_label('flipVertical')"
+              [attr.title]="_label('flipVertical')"
+              (click)="_flipAxis('y')"
+            >
+              <neural-icon [icon]="iconFlipVertical" size="1.25rem" />
+            </button>
+            <a
+              class="neu-iv__btn"
+              [href]="_current().src"
+              [attr.download]="_downloadName()"
+              [attr.aria-label]="_label('download')"
+              [attr.title]="_label('download')"
+            >
+              <neural-icon [icon]="iconDownload" size="1.25rem" />
+            </a>
+          }
+          <button
+            type="button"
+            class="neu-iv__btn"
+            [attr.aria-label]="_label('reset')"
+            [attr.title]="_label('reset')"
+            (click)="_resetTransform()"
+          >
             <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
           </button>
           <button
             type="button"
             class="neu-iv__btn neu-iv__btn--close"
-            aria-label="Close image viewer"
-            title="Close image viewer"
+            [attr.aria-label]="_label('close')"
+            [attr.title]="_label('close')"
             (click)="_data.close()"
           >
             <neural-icon [icon]="iconX" size="1.25rem" />
@@ -88,28 +161,43 @@ interface _NeuIvData {
       </div>
 
       <!-- Image -->
-      <div class="neu-iv__stage" (wheel)="_onWheel($event)" (mousedown)="_onMouseDown($event)">
+      <div
+        class="neu-iv__stage"
+        (wheel)="_onWheel($event)"
+        (pointerdown)="_onPointerDown($event)"
+        (pointermove)="_onPointerMove($event)"
+        (pointerup)="_onPointerUp($event)"
+        (pointercancel)="_onPointerCancel()"
+      >
         <img
           class="neu-iv__img"
           [src]="_current().src"
-          [alt]="_current().alt ?? ''"
+          [alt]="_current().alt"
           [style.transform]="_transform()"
           draggable="false"
+          (error)="_onImageError()"
         />
       </div>
 
       <!-- Caption -->
-      @if (_current().caption) {
+      @if (_galleryHost?.captionTemplate(); as template) {
+        <div class="neu-iv__caption">
+          <ng-container
+            [ngTemplateOutlet]="template"
+            [ngTemplateOutletContext]="{ $implicit: _current(), index: _activeIndex() }"
+          />
+        </div>
+      } @else if (_current().caption) {
         <div class="neu-iv__caption">{{ _current().caption }}</div>
       }
 
       <!-- Prev/Next arrows -->
-      @if (_data.items.length > 1) {
+      @if (_items().length > 1) {
         <button
           type="button"
           class="neu-iv__arrow neu-iv__arrow--prev"
-          aria-label="Previous image"
-          [disabled]="_index() === 0"
+          [attr.aria-label]="_label('previous')"
+          [disabled]="!_canNavigate(-1)"
           (click)="_navigate(-1)"
         >
           <neural-icon [icon]="iconChevronLeft" size="1.25rem" />
@@ -117,8 +205,8 @@ interface _NeuIvData {
         <button
           type="button"
           class="neu-iv__arrow neu-iv__arrow--next"
-          aria-label="Next image"
-          [disabled]="_index() === _data.items.length - 1"
+          [attr.aria-label]="_label('next')"
+          [disabled]="!_canNavigate(1)"
           (click)="_navigate(1)"
         >
           <neural-icon [icon]="iconChevronRight" size="1.25rem" />
@@ -131,22 +219,28 @@ interface _NeuIvData {
 export class NeuImageViewerOverlayComponent {
   protected readonly iconChevronLeft = iconChevronLeft;
   protected readonly iconChevronRight = iconChevronRight;
+  protected readonly iconDownload = iconDownload;
+  protected readonly iconFlipHorizontal = iconFlipHorizontal;
+  protected readonly iconFlipVertical = iconFlipVertical;
   protected readonly iconRotateCcw = iconRotateCcw;
+  protected readonly iconRotateCw = iconRotateCw;
   protected readonly iconX = iconX;
   protected readonly iconZoomIn = iconZoomIn;
   protected readonly iconZoomOut = iconZoomOut;
   readonly _data = inject(NEU_IV_DATA);
+  private readonly _adapter = inject(InternalNeuMediaPreviewAdapter, { optional: true });
+  readonly _galleryHost = this._adapter?.host ?? null;
   readonly _index = signal(this._data.initialIndex);
   readonly _scale = signal(1);
   readonly _panX = signal(0);
   readonly _panY = signal(0);
+  readonly _rotation = signal(0);
+  readonly _flips = signal({ x: 1, y: 1 });
 
-  private _dragging = false;
-  private _dragStart = { x: 0, y: 0, px: 0, py: 0 };
+  private _pointerStart: { id: number; x: number; y: number; panX: number; panY: number } | null =
+    null;
   private readonly destroyRef = inject(DestroyRef);
   private readonly modalFocus = inject(NeuModalFocusDirective, { self: true });
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private removeDragListeners: (() => void) | null = null;
 
   constructor() {
     const escapeSubscription = this.modalFocus.neuModalFocusEscape.subscribe(() =>
@@ -154,64 +248,112 @@ export class NeuImageViewerOverlayComponent {
     );
     this.destroyRef.onDestroy(() => {
       escapeSubscription.unsubscribe();
-      this.cleanupDragListeners();
+      this._pointerStart = null;
+    });
+    effect(() => {
+      this._current();
+      untracked(() => this._resetTransform());
     });
   }
 
-  readonly _current = computed(() => this._data.items[this._index()]);
+  readonly _items = computed(() => this._galleryHost?.items() ?? this._data.items);
+  readonly _activeIndex = computed(() => this._galleryHost?.index() ?? this._index());
+   readonly _current = computed(() => this._items()[this._activeIndex()] ?? { src: '', alt: '' });
 
   readonly _transform = computed(
-    () => `translate(${this._panX()}px, ${this._panY()}px) scale(${this._scale()})`,
+    () =>
+      `translate(${this._panX()}px, ${this._panY()}px) scale(${this._scale()}) rotate(${this._rotation()}deg) scale(${this._flips().x}, ${this._flips().y})`,
+  );
+  readonly _downloadName = computed(
+    () => this._current().src.split('/').pop()?.split('?')[0] || 'image',
   );
 
   _navigate(dir: -1 | 1): void {
-    this._index.update((i) => Math.max(0, Math.min(this._data.items.length - 1, i + dir)));
-    this._resetZoom();
+    if (!this._canNavigate(dir)) return;
+    if (this._galleryHost) this._galleryHost.navigate(dir);
+    else
+      this._index.update((index) => Math.max(0, Math.min(this._items().length - 1, index + dir)));
   }
 
   _zoom(delta: number): void {
-    this._scale.update((s) => Math.max(0.25, Math.min(5, s + delta)));
+    const previous = this._scale();
+    const maximum = Math.max(1, this._galleryHost?.maxZoom() ?? 5);
+    const next = Math.round(Math.max(0.25, Math.min(maximum, previous + delta)) * 100) / 100;
+    if (next === previous) return;
+    this._scale.set(next);
+    if (next <= 1) this._resetPan();
+    this._galleryHost?.onZoom(next);
   }
 
   _resetZoom(): void {
     this._scale.set(1);
+    this._resetPan();
+  }
+
+  _resetTransform(): void {
+    this._resetZoom();
+    this._rotation.set(0);
+    this._flips.set({ x: 1, y: 1 });
+    this._pointerStart = null;
+  }
+
+  _rotate(delta: number): void {
+    const next = (this._rotation() + delta + 360) % 360;
+    if (next === this._rotation()) return;
+    this._rotation.set(next);
+    this._galleryHost?.onRotation(next);
+  }
+
+  _flipAxis(axis: 'x' | 'y'): void {
+    const next = { ...this._flips(), [axis]: -this._flips()[axis] };
+    this._flips.set(next);
+    this._galleryHost?.onFlip(next);
+  }
+
+  private _resetPan(): void {
     this._panX.set(0);
     this._panY.set(0);
   }
 
   _onWheel(e: WheelEvent): void {
-    e.preventDefault();
+    if (!e.deltaY) return;
+    const before = this._scale();
     this._zoom(e.deltaY < 0 ? 0.1 : -0.1);
+    if (this._scale() !== before) e.preventDefault();
   }
 
-  _onMouseDown(e: MouseEvent): void {
-    if (e.button !== 0) return;
-    this._dragging = true;
-    this._dragStart = {
+  _onPointerDown(e: PointerEvent): void {
+    if (e.button !== 0 || this._pointerStart) return;
+    this._pointerStart = {
+      id: e.pointerId,
       x: e.clientX,
       y: e.clientY,
-      px: this._panX(),
-      py: this._panY(),
+      panX: this._panX(),
+      panY: this._panY(),
     };
-    const onMove = (ev: MouseEvent) => {
-      if (!this._dragging) return;
-      this._panX.set(this._dragStart.px + ev.clientX - this._dragStart.x);
-      this._panY.set(this._dragStart.py + ev.clientY - this._dragStart.y);
-    };
-    const view = (e.currentTarget instanceof HTMLElement ? e.currentTarget : this.host)
-      .ownerDocument.defaultView;
-    if (!view) return;
-    const onUp = () => {
-      this._dragging = false;
-      this.cleanupDragListeners();
-    };
-    view.addEventListener('mousemove', onMove);
-    view.addEventListener('mouseup', onUp);
-    this.removeDragListeners = () => {
-      view.removeEventListener('mousemove', onMove);
-      view.removeEventListener('mouseup', onUp);
-      this.removeDragListeners = null;
-    };
+    if (e.currentTarget instanceof HTMLElement && e.currentTarget.setPointerCapture) {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+  }
+
+  _onPointerMove(e: PointerEvent): void {
+    const start = this._pointerStart;
+    if (!start || start.id !== e.pointerId || this._scale() <= 1) return;
+    this._panX.set(start.panX + e.clientX - start.x);
+    this._panY.set(start.panY + e.clientY - start.y);
+  }
+
+  _onPointerUp(e: PointerEvent): void {
+    const start = this._pointerStart;
+    this._pointerStart = null;
+    if (!start || start.id !== e.pointerId) return;
+    if (this._scale() > 1 || !this._galleryHost) return;
+    const distance = e.clientX - start.x;
+    if (Math.abs(distance) > 36) this._navigate(distance > 0 ? -1 : 1);
+  }
+
+  _onPointerCancel(): void {
+    this._pointerStart = null;
   }
 
   _onBackdropClick(_e: MouseEvent): void {
@@ -221,26 +363,67 @@ export class NeuImageViewerOverlayComponent {
   _onKey(e: KeyboardEvent): void {
     switch (e.key) {
       case 'ArrowLeft':
+        e.preventDefault();
         this._navigate(-1);
         break;
       case 'ArrowRight':
+        e.preventDefault();
         this._navigate(1);
         break;
       case 'Escape':
         if (!e.defaultPrevented) this._data.close();
         break;
       case '+':
+        e.preventDefault();
         this._zoom(0.25);
         break;
       case '-':
+        e.preventDefault();
         this._zoom(-0.25);
         break;
     }
   }
 
-  private cleanupDragListeners(): void {
-    this.removeDragListeners?.();
-    this._dragging = false;
+  _canNavigate(direction: -1 | 1): boolean {
+    if (this._galleryHost) return this._galleryHost.canNavigate(direction);
+    const next = this._activeIndex() + direction;
+    return next >= 0 && next < this._items().length;
+  }
+
+  _onImageError(): void {
+    this._galleryHost?.onImageError(this._activeIndex());
+  }
+
+  _label(
+    name:
+      | 'toolbar'
+      | 'zoomIn'
+      | 'zoomOut'
+      | 'rotateLeft'
+      | 'rotateRight'
+      | 'flipHorizontal'
+      | 'flipVertical'
+      | 'reset'
+      | 'close'
+      | 'previous'
+      | 'next'
+      | 'download',
+  ): string {
+    const defaults = {
+      toolbar: 'Image controls',
+      zoomIn: 'Zoom in',
+      zoomOut: 'Zoom out',
+      rotateLeft: 'Rotate left',
+      rotateRight: 'Rotate right',
+      flipHorizontal: 'Flip horizontally',
+      flipVertical: 'Flip vertically',
+      reset: 'Reset zoom',
+      close: 'Close image viewer',
+      previous: 'Previous image',
+      next: 'Next image',
+      download: 'Download image',
+    };
+    return this._galleryHost?.labels()[name] ?? defaults[name];
   }
 }
 
@@ -263,6 +446,7 @@ export class NeuImageViewerOverlayComponent {
     style: 'cursor:pointer',
     role: 'button',
     tabindex: '0',
+    '[attr.aria-label]': '_triggerLabel()',
     '(click)': 'open()',
     '(keydown.enter)': 'openFromKeyboard($event)',
     '(keydown.space)': 'openFromKeyboard($event)',
@@ -270,12 +454,13 @@ export class NeuImageViewerOverlayComponent {
 })
 export class NeuImageViewerDirective implements OnDestroy {
   /** Puede ser una URL, NeuImageViewerItem o un array de items */
-  readonly neuImageViewer = input<string | NeuImageViewerItem | NeuImageViewerItem[]>('');
+  readonly neuImageViewer = input<string | NeuImageViewerItem | readonly NeuImageViewerItem[]>('');
   /** Índice inicial cuando se pasa un array */
   readonly neuIvIndex = input<number>(0);
 
   private readonly _overlay = inject(Overlay);
   private readonly _injector = inject(Injector);
+  private readonly _adapter = inject(InternalNeuMediaPreviewAdapter, { optional: true });
   private readonly _element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private _overlayRef: OverlayRef | null = null;
   private readonly eventDestroyRef = inject(DestroyRef);
@@ -309,8 +494,16 @@ export class NeuImageViewerDirective implements OnDestroy {
     });
 
     const portal = new ComponentPortal(NeuImageViewerOverlayComponent, null, injector);
-    overlayRef.attach(portal);
+    const componentRef = overlayRef.attach(portal);
     this._overlayRef = overlayRef;
+    this._adapter?.session.set({
+      scale: componentRef.instance._scale.asReadonly(),
+      transform: componentRef.instance._transform,
+      zoom: (delta) => componentRef.instance._zoom(delta),
+      rotate: (delta) => componentRef.instance._rotate(delta),
+      flip: (axis) => componentRef.instance._flipAxis(axis),
+      resetTransform: () => componentRef.instance._resetTransform(),
+    });
     this.opened.emit();
   }
 
@@ -323,6 +516,7 @@ export class NeuImageViewerDirective implements OnDestroy {
     const overlayRef = this._overlayRef;
     if (!overlayRef) return;
     this._overlayRef = null;
+    this._adapter?.session.set(null);
     overlayRef.detach();
     overlayRef.dispose();
     if (!this.destroying && !this.eventDestroyRef.destroyed) this.closed.emit();
@@ -333,12 +527,22 @@ export class NeuImageViewerDirective implements OnDestroy {
     this.close();
   }
 
+  protected _triggerLabel(): string {
+    return (
+      this._element.getAttribute('aria-label')?.trim() ||
+      this._element.getAttribute('alt')?.trim() ||
+      'Open image viewer'
+    );
+  }
+
   private _normalizeItems(): NeuImageViewerItem[] {
     const v = this.neuImageViewer();
-    const values = typeof v === 'string' ? [{ src: v }] : Array.isArray(v) ? v : [v];
-    return values.filter(
-      (item): item is NeuImageViewerItem =>
-        !!item && typeof item.src === 'string' && item.src.trim().length > 0,
-    );
+    const values = typeof v === 'string' ? [{ src: v, alt: '' }] : Array.isArray(v) ? v : [v];
+    return values
+      .filter(
+        (item): item is NeuImageViewerItem =>
+          !!item && typeof item.src === 'string' && item.src.trim().length > 0,
+      )
+      .map((item) => ({ ...item, alt: item.alt ?? '' }));
   }
 }

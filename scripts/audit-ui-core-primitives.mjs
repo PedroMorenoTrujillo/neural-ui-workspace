@@ -29,7 +29,6 @@ const allowedNativeControlDirs = new Set([
   'empty-state',
   'filter-bar',
   'gallery',
-  'image-gallery',
   'compare',
   'image-viewer',
   'input',

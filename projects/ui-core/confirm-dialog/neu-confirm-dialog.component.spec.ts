@@ -62,6 +62,17 @@ describe('NeuConfirmDialogComponent', () => {
     expect(closeFn).toHaveBeenCalledWith(false);
   });
 
+  it('settles a confirmation only once across repeated accept and reject gestures', () => {
+    const closeFn = mkDialogBed({ message: 'Test' });
+    const f = TestBed.createComponent(NeuConfirmDialogComponent);
+    f.detectChanges();
+    f.componentInstance.accept();
+    f.componentInstance.accept();
+    f.componentInstance.reject();
+    expect(closeFn).toHaveBeenCalledTimes(1);
+    expect(closeFn).toHaveBeenCalledWith(true);
+  });
+
   it('accept button should call accept()', async () => {
     const closeFn = mkDialogBed({ message: 'Test' });
     const f = TestBed.createComponent(NeuConfirmDialogComponent);

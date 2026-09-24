@@ -18,7 +18,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuralIcon } from '@neural-icons/angular';
@@ -120,7 +120,6 @@ export class NeuSpeedDialTriggerDirective {
   imports: [
     NgTemplateOutlet,
     RouterLink,
-    RouterLinkActive,
     NeuBadgeComponent,
     NeuralIcon,
     NeuTooltipDirective,
@@ -163,7 +162,6 @@ export class NeuSpeedDialTriggerDirective {
               <a
                 class="neu-speed-dial__action"
                 [attr.data-neu-speed-index]="index"
-                routerLinkActive="neu-speed-dial__action--router-active"
                 [routerLink]="action.routerLink ?? null"
                 role="menuitem"
                 [tabIndex]="isOpen() ? itemTabIndex(index) : -1"
@@ -291,6 +289,7 @@ export class NeuSpeedDialComponent {
   private readonly controller = new NeuRovingMenuController({ orientation: 'both' });
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-speed-dial-');
   private readonly _isOpen = signal(false);
+  private previousOwnedOpen: boolean | null = null;
   private pendingOwnedTransition:
     | {
         open: boolean;
@@ -323,7 +322,7 @@ export class NeuSpeedDialComponent {
   readonly opened = output<NeuSpeedDialVisibilityEvent>();
   readonly closed = output<NeuSpeedDialVisibilityEvent>();
 
-  readonly isOpen = this._isOpen.asReadonly();
+  readonly isOpen = computed(() => this.openState() ?? this._isOpen());
   readonly listId = computed(() => `${this.id() ?? this.generatedId}-list`);
   readonly focusedIndex = signal(-1);
   readonly resolvedItems = computed(() =>
@@ -347,8 +346,19 @@ export class NeuSpeedDialComponent {
     });
     effect(() => {
       const owned = this.openState();
-      if (owned === null) return;
-      untracked(() => this.reconcileOwnedState(owned));
+      if (owned === null) { this.previousOwnedOpen = null; this.pendingOwnedTransition = undefined; return; }
+      if (this.previousOwnedOpen === null) { this.previousOwnedOpen = owned; return; }
+      if (this.previousOwnedOpen === owned) return;
+      this.previousOwnedOpen = owned;
+      const pending = this.pendingOwnedTransition?.open === owned ? this.pendingOwnedTransition : null;
+      this.pendingOwnedTransition = undefined;
+      untracked(() => {
+        if (owned) this.opened.emit({ originalEvent: pending?.originalEvent ?? null, reason: pending?.reason ?? 'programmatic' });
+        else {
+          this.closed.emit({ originalEvent: pending?.originalEvent ?? null, reason: pending?.reason ?? 'programmatic' });
+          if (pending?.restoreFocus && isPlatformBrowser(this.platformId)) this.trigger().nativeElement.focus();
+        }
+      });
     });
     effect(() => {
       if (this.disabled() && this.isOpen()) {
@@ -540,20 +550,6 @@ export class NeuSpeedDialComponent {
     this.pendingOwnedTransition = { open, originalEvent, reason, restoreFocus };
     if (owner !== open) this.openChange.emit(open);
     return true;
-  }
-
-  private reconcileOwnedState(open: boolean): void {
-    const pending = this.pendingOwnedTransition?.open === open ? this.pendingOwnedTransition : null;
-    if (pending) this.pendingOwnedTransition = undefined;
-    if (open) {
-      this.commitOpen(pending?.originalEvent ?? null, pending?.reason ?? 'programmatic');
-    } else {
-      this.commitClose(
-        pending?.originalEvent ?? null,
-        pending?.reason ?? 'programmatic',
-        pending?.restoreFocus ?? false,
-      );
-    }
   }
 
   private commitOpen(

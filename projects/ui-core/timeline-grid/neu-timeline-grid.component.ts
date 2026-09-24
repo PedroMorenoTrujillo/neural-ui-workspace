@@ -1,10 +1,4 @@
-import {
-  Component,
-  computed,
-  input,
-  output,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, computed, input, output, ViewEncapsulation } from '@angular/core';
 import type { NeuDensity } from '@neural-ui/core';
 
 export type NeuTimelineGridItemTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
@@ -29,7 +23,7 @@ export interface NeuTimelineGridRow {
   id: string;
   label: string;
   description?: string;
-  items: NeuTimelineGridItem[];
+  items: readonly NeuTimelineGridItem[];
 }
 
 export interface NeuTimelineGridSlotSelection {
@@ -122,8 +116,8 @@ export interface NeuTimelineGridSlotSelection {
   styleUrl: './neu-timeline-grid.component.scss',
 })
 export class NeuTimelineGridComponent {
-  readonly columns = input<NeuTimelineGridColumn[]>([]);
-  readonly rows = input<NeuTimelineGridRow[]>([]);
+  readonly columns = input<readonly NeuTimelineGridColumn[]>([]);
+  readonly rows = input<readonly NeuTimelineGridRow[]>([]);
   readonly density = input<NeuDensity>('normal');
   readonly stickyLabels = input<boolean>(true);
   readonly minColumnWidth = input<string>('112px');
@@ -139,19 +133,34 @@ export class NeuTimelineGridComponent {
     return indexMap;
   });
 
+  private readonly _validItemsByRow = computed(() => {
+    const columns = this._columnIndexMap();
+    const projected = new Map<string, NeuTimelineGridItem[]>();
+    for (const row of this.rows()) {
+      projected.set(
+        row.id,
+        row.items.filter((item) => columns.has(item.start)),
+      );
+    }
+    return projected;
+  });
+
   readonly gridTemplateColumns = computed(
     () =>
       `repeat(${Math.max(this.columns().length, 1)}, minmax(var(--neu-timeline-grid-min-column-width), 1fr))`,
   );
 
   validItems(row: NeuTimelineGridRow): NeuTimelineGridItem[] {
-    const indexMap = this._columnIndexMap();
-    return row.items.filter((item) => indexMap.has(item.start));
+    return this._validItemsByRow().get(row.id) ?? [];
   }
 
   itemGridColumn(item: NeuTimelineGridItem): string {
     const start = this._columnIndexMap().get(item.start) ?? 1;
-    const span = Math.max(1, item.span ?? 1);
+    const requested = item.span ?? 1;
+    const span = Math.min(
+      Math.max(1, Number.isFinite(requested) ? Math.floor(requested) : 1),
+      Math.max(1, this.columns().length - start + 1),
+    );
     return `${start} / span ${span}`;
   }
 

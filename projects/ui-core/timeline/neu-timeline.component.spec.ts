@@ -19,7 +19,7 @@ const ITEMS: NeuTimelineItem[] = [
   template: `
     <neu-timeline [items]="items">
       <ng-template neuTimelineMarker let-item>
-            <span class="custom-marker">{{ item.tone }}</span>
+        <span class="custom-marker">{{ item.tone }}</span>
       </ng-template>
       <ng-template neuTimelineItem let-item let-index="index">
         <span class="custom-item">{{ index }}:{{ item.title }}</span>
@@ -113,7 +113,7 @@ describe('NeuTimelineComponent', () => {
         title: 'Evento con icono',
         description: 'desc',
         icon: 'M12 2 L2 22 L22 22 Z',
-      tone: 'success',
+        tone: 'success',
       },
     ]);
     fixture.detectChanges();
@@ -215,5 +215,41 @@ describe('NeuTimelineComponent', () => {
     expect(timeline.classList).toContain('neu-timeline--density-compact');
     expect(timeline.getAttribute('aria-label')).toBe('Order history');
     expect(timeline.querySelector('.neu-timeline__title')?.textContent).toContain('Evento C');
+  });
+
+  it('keeps distinct identity for duplicate titles and immutable reordered events', () => {
+    const fixture = TestBed.createComponent(NeuTimelineComponent);
+    const first = Object.freeze({ id: 'first', title: 'Same', description: 'One' });
+    const second = Object.freeze({ id: 'second', title: 'Same', description: 'Two' });
+    fixture.componentRef.setInput('items', Object.freeze([first, second]));
+    fixture.detectChanges();
+    const original = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-timeline__item'),
+    ) as HTMLElement[];
+
+    fixture.componentRef.setInput('items', Object.freeze([second, first]));
+    fixture.detectChanges();
+    const reordered = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-timeline__item'),
+    ) as HTMLElement[];
+    expect(reordered).toEqual([original[1], original[0]]);
+    expect(reordered[0].textContent).toContain('Two');
+    expect(reordered[1].textContent).toContain('One');
+  });
+
+  it('keeps 100 event nodes stable across a presentation-only density write', () => {
+    const fixture = TestBed.createComponent(NeuTimelineComponent);
+    const events = Object.freeze(
+      Array.from({ length: 100 }, (_, index) =>
+        Object.freeze({ id: index, title: `Event ${index}` }),
+      ),
+    );
+    fixture.componentRef.setInput('items', events);
+    fixture.detectChanges();
+    const first = fixture.nativeElement.querySelector('.neu-timeline__item');
+    expect(fixture.nativeElement.querySelectorAll('.neu-timeline__item')).toHaveLength(100);
+    fixture.componentRef.setInput('density', 'compact');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-timeline__item')).toBe(first);
   });
 });

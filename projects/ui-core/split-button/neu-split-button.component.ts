@@ -20,16 +20,19 @@ import {
   Overlay,
   OverlayModule,
 } from '@angular/cdk/overlay';
-import { NeuButtonSize, NeuButtonTone, NeuButtonVariant } from '@neural-ui/core/button';
-import { NeuRovingMenuController } from '@neural-ui/core/internal';
+import { NeuButtonComponent, NeuButtonSize, NeuButtonTone, NeuButtonVariant } from '@neural-ui/core/button';
+import { NeuIdGenerator, NeuRovingMenuController } from '@neural-ui/core/internal';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconName } from '@neural-icons/core';
+import { iconChevronDown } from '@neural-icons/core/icons/chevron-down';
 
 export interface NeuSplitButtonAction {
   /** Identificador único de la acción / Unique action identifier */
   id: string;
   /** Texto visible / Visible text */
   label: string;
-  /** Icono opcional (SVG string o nombre) / Optional icon (SVG string or name) */
-  icon?: string;
+  /** Canonical registered neural-icons name. */
+  icon?: NeuralIconName;
   /** Deshabilita esta acción individualmente / Disables this action individually */
   disabled?: boolean;
   /** Separador visual encima de este item / Visual separator above this item */
@@ -55,7 +58,7 @@ export class NeuSplitButtonItemDirective {
  */
 @Component({
   selector: 'neu-split-button',
-  imports: [OverlayModule, NgTemplateOutlet],
+  imports: [OverlayModule, NgTemplateOutlet, NeuButtonComponent, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-split-button-host',
@@ -66,30 +69,16 @@ export class NeuSplitButtonItemDirective {
     <div class="neu-split-button" [class.neu-split-button--disabled]="isDisabled()">
       <!-- Botón principal -->
       <button
+        neu-button
         class="neu-split-button__main"
-        [class]="mainClasses()"
         type="button"
-        [disabled]="isDisabled() || null"
-        [attr.aria-disabled]="isDisabled()"
-        [attr.aria-busy]="loading()"
-        (click)="onPrimaryClick($event)"
+        [tone]="tone()"
+        [variant]="variant()"
+        [size]="size()"
+        [disabled]="disabled()"
+        [loading]="loading()"
+        (neuClick)="onPrimaryClick($event)"
       >
-        @if (loading()) {
-          <span class="neu-button__spinner" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-dasharray="31.416"
-                stroke-dashoffset="10"
-              />
-            </svg>
-          </span>
-        }
         {{ label() }}
       </button>
 
@@ -98,30 +87,25 @@ export class NeuSplitButtonItemDirective {
 
       <!-- Chevron trigger -->
       <button
+        neu-button
         cdkOverlayOrigin
         #splitButtonOrigin="cdkOverlayOrigin"
         #menuTrigger
         class="neu-split-button__chevron"
-        [class]="chevronClasses()"
         type="button"
-        [disabled]="isDisabled() || null"
+        [tone]="tone()"
+        [variant]="variant()"
+        [size]="size()"
+        [disabled]="isDisabled()"
+        [iconOnly]="true"
+        [ariaLabel]="moreActionsAriaLabel()"
         [attr.aria-haspopup]="'menu'"
         [attr.aria-expanded]="isOpen()"
-        [attr.aria-label]="moreActionsAriaLabel()"
-        (click)="toggleDropdown($event)"
+        [attr.aria-controls]="panelId"
+        (neuClick)="toggleDropdown($event)"
         (keydown)="onTriggerKeydown($event)"
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+        <neural-icon [icon]="iconChevronDown" aria-hidden="true" />
       </button>
 
       <!-- Dropdown de acciones -->
@@ -141,6 +125,7 @@ export class NeuSplitButtonItemDirective {
         (overlayKeydown)="onOverlayKeydown($event)"
       >
         <div
+          [id]="panelId"
           class="neu-split-button__dropdown"
           role="menu"
           [attr.aria-label]="actionsAriaLabel()"
@@ -169,6 +154,9 @@ export class NeuSplitButtonItemDirective {
                   [ngTemplateOutletContext]="{ $implicit: action }"
                 />
               } @else {
+                @if (action.icon) {
+                  <neural-icon [icon]="action.icon" aria-hidden="true" />
+                }
                 {{ action.label }}
               }
             </button>
@@ -180,6 +168,8 @@ export class NeuSplitButtonItemDirective {
   styleUrl: './neu-split-button.component.scss',
 })
 export class NeuSplitButtonComponent {
+  protected readonly iconChevronDown = iconChevronDown;
+  protected readonly panelId = inject(NeuIdGenerator).getId('neu-split-menu-');
   /* v8 ignore start -- Angular signal-query factory; projected-item behavior is covered. */
   readonly itemTpl = contentChild(NeuSplitButtonItemDirective);
   /* v8 ignore stop */
@@ -274,16 +264,6 @@ export class NeuSplitButtonComponent {
   readonly isOpen = signal(false);
 
   readonly isDisabled = computed(() => this.disabled() || this.loading());
-
-  readonly mainClasses = computed(
-    () =>
-      `neu-button neu-button--${this.tone()} neu-button--${this.variant()} neu-button--${this.size()}${this.loading() ? ' neu-button--loading' : ''}`,
-  );
-
-  readonly chevronClasses = computed(
-    () =>
-      `neu-button neu-button--${this.tone()} neu-button--${this.variant()} neu-button--${this.size()}`,
-  );
 
   toggleDropdown(event: MouseEvent): void {
     event.stopPropagation();

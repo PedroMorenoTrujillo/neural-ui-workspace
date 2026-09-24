@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1481,
-    "bindingDelta": 314,
-    "mapped": 629,
+    "declarationBindings": 1475,
+    "bindingDelta": 308,
+    "mapped": 621,
     "aliasCorrections": 3,
-    "missingOldEntries": 532,
-    "newlyDiscovered": 846,
+    "missingOldEntries": 540,
+    "newlyDiscovered": 848,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 429,
+      "declaration-or-selector-was-not-recorded": 431,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 387
     }
@@ -953,38 +953,6 @@
     {
       "oldToken": "form-field/neu-form-field.component.ts#input:suffix",
       "newId": "./form-field#NeuFormFieldComponent.input:suffix"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:initialIndex",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:initialIndex"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:items",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:items"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:objectFit",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:objectFit"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:showCounter",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:showCounter"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:showThumbnails",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:showThumbnails"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:thumbnailPosition",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:thumbnailPosition"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#input:viewerEnabled",
-      "newId": "./image-gallery#NeuImageGalleryComponent.input:viewerEnabled"
-    },
-    {
-      "oldToken": "image-gallery/neu-image-gallery.component.ts#output:activeIndexChange",
-      "newId": "./image-gallery#NeuImageGalleryComponent.output:activeIndexChange"
     },
     {
       "oldToken": "image-viewer/neu-image-viewer.component.ts#input:neuImageViewer",
@@ -2595,6 +2563,14 @@
     "icon/neu-icon.component.ts#input:name",
     "icon/neu-icon.component.ts#input:size",
     "icon/neu-icon.component.ts#input:strokeWidth",
+    "image-gallery/neu-image-gallery.component.ts#input:initialIndex",
+    "image-gallery/neu-image-gallery.component.ts#input:items",
+    "image-gallery/neu-image-gallery.component.ts#input:objectFit",
+    "image-gallery/neu-image-gallery.component.ts#input:showCounter",
+    "image-gallery/neu-image-gallery.component.ts#input:showThumbnails",
+    "image-gallery/neu-image-gallery.component.ts#input:thumbnailPosition",
+    "image-gallery/neu-image-gallery.component.ts#input:viewerEnabled",
+    "image-gallery/neu-image-gallery.component.ts#output:activeIndexChange",
     "inline-editor/neu-inline-editor.component.ts#input:max",
     "inline-editor/neu-inline-editor.component.ts#input:min",
     "inline-editor/neu-inline-editor.component.ts#input:rows",
@@ -3891,6 +3867,10 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./gallery#NeuGalleryComponent.input:previewEnabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./gallery#NeuGalleryComponent.input:previewLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -3908,6 +3888,10 @@
     },
     {
       "id": "./gallery#NeuGalleryComponent.input:rotateRightLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:showCounter",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

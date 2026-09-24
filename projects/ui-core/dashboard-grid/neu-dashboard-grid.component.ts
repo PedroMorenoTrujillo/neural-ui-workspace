@@ -1,26 +1,23 @@
 import {
   Component,
+  DestroyRef,
   ElementRef,
-  Injector,
   PLATFORM_ID,
   ViewEncapsulation,
-  afterNextRender,
   effect,
   inject,
   input,
   output,
-  signal,
-  untracked,
   viewChildren,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {
   CdkDrag,
   CdkDragDrop,
+  CdkDragHandle,
   CdkDragPlaceholder,
   CdkDragPreview,
   CdkDropList,
-  moveItemInArray,
 } from '@angular/cdk/drag-drop';
 
 export interface NeuDashboardTileConfig {
@@ -46,7 +43,7 @@ export interface NeuDashboardTileConfig {
  */
 @Component({
   selector: 'neu-dashboard-grid',
-  imports: [CdkDrag, CdkDragPlaceholder, CdkDragPreview, CdkDropList],
+  imports: [CdkDrag, CdkDragHandle, CdkDragPlaceholder, CdkDragPreview, CdkDropList],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-dg',
@@ -63,12 +60,16 @@ export interface NeuDashboardTileConfig {
       cdkDropListOrientation="mixed"
       [cdkDropListData]="_orderedTiles()"
       (cdkDropListDropped)="_onDrop($event)"
+      role="list"
     >
       @for (tile of _orderedTiles(); track tile.id) {
         <div
           class="neu-dg__tile"
+          role="listitem"
           cdkDrag
           [cdkDragData]="tile"
+          (cdkDragStarted)="_onDragStarted()"
+          (cdkDragEnded)="_onDragEnded()"
           [style.--tile-cols]="tile.cols ?? 1"
           [style.--tile-rows]="tile.rows ?? 1"
         >
@@ -78,7 +79,7 @@ export interface NeuDashboardTileConfig {
             class="neu-dg__tile-handle"
             cdkDragHandle
             [attr.aria-label]="'Move ' + (tile.title || tile.id) + '; use arrow keys to reorder'"
-            (keydown)="_onHandleKey($event, $index)"
+            (keydown)="_onHandleKey($event, tile.id)"
           >
             @if (tile.title) {
               <span class="neu-dg__tile-title">{{ tile.title }}</span>
@@ -101,64 +102,112 @@ export interface NeuDashboardTileConfig {
 })
 export class NeuDashboardGridComponent {
   private readonly _host = inject(ElementRef) as ElementRef<HTMLElement>;
-  private readonly _injector = inject(Injector);
   private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _destroyRef = inject(DestroyRef);
+  private _dragActive = false;
+  private _dragCancelled = false;
+  private readonly _onDragKeydown = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    this._dragCancelled = true;
+  };
 
-  readonly tiles = input<NeuDashboardTileConfig[]>([]);
+  readonly tiles = input<readonly NeuDashboardTileConfig[]>([]);
   readonly columns = input<number>(3);
 
   /** Emits the proposed tile order after pointer or keyboard reordering. */
-  readonly orderChange = output<NeuDashboardTileConfig[]>();
+  readonly orderChange = output<readonly NeuDashboardTileConfig[]>();
 
-  protected readonly _orderedTiles = signal<NeuDashboardTileConfig[]>([]);
+  protected readonly _orderedTiles = this.tiles;
   /* v8 ignore start -- Angular signal-query factory; rendered tile-slot behavior is covered. */
   private readonly _tileSlots = viewChildren<ElementRef<HTMLElement>>('tileSlot');
   /* v8 ignore stop */
 
   constructor() {
-    effect(() => {
-      const t = this.tiles();
-      untracked(() => this._orderedTiles.set([...t]));
-    });
-
+    this._destroyRef.onDestroy(() => this._removeDragKeydown());
     effect(() => {
       this._orderedTiles();
       this._tileSlots();
       if (isPlatformBrowser(this._platformId)) {
-        queueMicrotask(() => this._attachProjectedTiles());
+        queueMicrotask(() => {
+          if (!this._destroyRef.destroyed) this._attachProjectedTiles();
+        });
       }
     });
   }
 
-  protected _onDrop(event: CdkDragDrop<NeuDashboardTileConfig[]>): void {
-    const tiles = [...this._orderedTiles()];
-    moveItemInArray(tiles, event.previousIndex, event.currentIndex);
-    this._orderedTiles.set(tiles);
-    this.orderChange.emit(tiles);
+  protected _onDragStarted(): void {
+    this._removeDragKeydown();
+    this._dragActive = true;
+    this._dragCancelled = false;
+    this._host.nativeElement.ownerDocument.addEventListener('keydown', this._onDragKeydown, true);
   }
 
-  protected _onHandleKey(event: KeyboardEvent, index: number): void {
+  protected _onDragEnded(): void {
+    this._dragActive = false;
+    this._removeDragKeydown();
+  }
+
+  protected _onDrop(event: CdkDragDrop<readonly NeuDashboardTileConfig[]>): void {
+    const cancelled = this._dragCancelled;
+    this._dragActive = false;
+    this._dragCancelled = false;
+    this._removeDragKeydown();
+    if (cancelled) return;
+    const tiles = this.tiles();
+    const draggedId = event.item?.data?.id;
+    const from =
+      draggedId === undefined
+        ? event.previousIndex
+        : tiles.findIndex((tile) => tile.id === draggedId);
+    this._proposeReorder(from, event.currentIndex);
+  }
+
+  protected _onHandleKey(event: KeyboardEvent, id: string): void {
+    if (event.key === 'Escape' && this._dragActive) {
+      event.preventDefault();
+      this._dragCancelled = true;
+      return;
+    }
+    const direction = this._host.nativeElement.ownerDocument.defaultView?.getComputedStyle(
+      this._host.nativeElement,
+    ).direction;
     const delta =
-      event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+      event.key === 'ArrowUp'
         ? -1
-        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+        : event.key === 'ArrowDown'
           ? 1
-          : 0;
+          : event.key === 'ArrowLeft'
+            ? direction === 'rtl'
+              ? 1
+              : -1
+            : event.key === 'ArrowRight'
+              ? direction === 'rtl'
+                ? -1
+                : 1
+              : 0;
     if (!delta) return;
     event.preventDefault();
-    const nextIndex = Math.max(0, Math.min(this._orderedTiles().length - 1, index + delta));
-    if (nextIndex === index) return;
-    const tiles = [...this._orderedTiles()];
-    moveItemInArray(tiles, index, nextIndex);
-    this._orderedTiles.set(tiles);
-    this.orderChange.emit(tiles);
-    afterNextRender(
-      () => {
-        const handles =
-          this._host.nativeElement.querySelectorAll<HTMLButtonElement>('.neu-dg__tile-handle');
-        handles[nextIndex]?.focus();
-      },
-      { injector: this._injector },
+    const index = this.tiles().findIndex((tile) => tile.id === id);
+    this._proposeReorder(index, index + delta);
+  }
+
+  private _proposeReorder(from: number, to: number): void {
+    const applied = this.tiles();
+    if (from < 0 || from >= applied.length || to < 0 || to >= applied.length || from === to) {
+      return;
+    }
+    const proposal = [...applied];
+    const [moved] = proposal.splice(from, 1);
+    proposal.splice(to, 0, moved);
+    this.orderChange.emit(proposal);
+  }
+
+  private _removeDragKeydown(): void {
+    this._host.nativeElement.ownerDocument.removeEventListener(
+      'keydown',
+      this._onDragKeydown,
+      true,
     );
   }
 

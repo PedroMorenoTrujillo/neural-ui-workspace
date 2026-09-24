@@ -39,7 +39,7 @@ export interface NeuStepperStep {
     <!-- Cabecera de pasos -->
     <div class="neu-stepper">
       <div class="neu-stepper__header">
-        @for (step of steps(); track step.label; let i = $index; let last = $last) {
+        @for (step of steps(); track $index; let i = $index; let last = $last) {
           <div
             class="neu-stepper__step"
             [class.neu-stepper__step--active]="i === activeStep()"
@@ -56,7 +56,11 @@ export interface NeuStepperStep {
               class="neu-stepper__step-btn"
               type="button"
               [disabled]="step.disabled"
-              [attr.aria-label]="stepAriaLabel(step)"
+              [attr.aria-current]="i === activeStep() ? 'step' : null"
+              [attr.aria-label]="
+                stepAriaLabel(step) + ', step ' + (i + 1) + ' of ' + steps().length +
+                (isCompleted(i) ? ', completed' : '')
+              "
               [neuTooltip]="stepTooltip(step)"
               [neuTooltipDisabled]="!isCompact()"
               neuTooltipPosition="bottom"
@@ -126,7 +130,7 @@ export class NeuStepperComponent {
 
   goTo(i: number): void {
     const step = this.steps()[i];
-    if (step?.disabled) return;
+    if (!step || step.disabled || i === this.activeStep()) return;
     if (this.linear() && i > this.activeStep() + 1 && !this.isCompleted(this.activeStep())) return;
     this.stepChange.emit(i);
   }
@@ -134,15 +138,11 @@ export class NeuStepperComponent {
   /** Marca el paso actual como completado y avanza al siguiente / Marks the current step as completed and advances to the next */
   next(): void {
     const current = this.activeStep();
-    if (current < this.steps().length - 1) {
-      this.stepChange.emit(current + 1);
-    }
+    this.goTo(current + 1);
   }
 
   prev(): void {
     const current = this.activeStep();
-    if (current > 0) {
-      this.stepChange.emit(current - 1);
-    }
+    this.goTo(current - 1);
   }
 }

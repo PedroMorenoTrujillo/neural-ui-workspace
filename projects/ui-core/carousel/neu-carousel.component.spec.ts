@@ -114,6 +114,58 @@ describe('NeuCarouselComponent', () => {
     await fixture.whenStable(); await new Promise<void>((resolve) => setTimeout(resolve, 8)); expect(fixture.componentInstance.effectiveVisible()).toBe(1); expect(fixture.componentInstance.page()).not.toBe(0); fixture.destroy();
   });
 
+  it('keeps the controlled page applied until the consumer accepts a proposal', () => {
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2, 3]);
+    fixture.componentRef.setInput('page', 0);
+    fixture.detectChanges();
+    const proposals: number[] = [];
+    fixture.componentInstance.pageChange.subscribe(event => proposals.push(event.page));
+    fixture.componentInstance.next();
+    expect(proposals).toEqual([1]);
+    expect(fixture.componentInstance.page()).toBe(0);
+    expect(fixture.componentInstance.visibleItems()).toEqual([1]);
+    fixture.componentRef.setInput('page', 1);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.page()).toBe(1);
+    expect(proposals).toEqual([1]);
+  });
+
+  it('reverses horizontal keyboard navigation in RTL without taking projected item keys', () => {
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.nativeElement.setAttribute('dir', 'rtl');
+    fixture.componentRef.setInput('items', [1, 2, 3]);
+    fixture.detectChanges();
+    const root = fixture.nativeElement.querySelector('.neu-carousel__root') as HTMLElement;
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(fixture.componentInstance.page()).toBe(1);
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(fixture.componentInstance.page()).toBe(0);
+    expect(root.querySelector('.neu-carousel__viewport')?.getAttribute('aria-live')).toBe('off');
+  });
+
+  it('does not start autoplay under reduced motion and cleans its media listener', async () => {
+    const original = Object.getOwnPropertyDescriptor(window, 'matchMedia');
+    const add = vi.fn();
+    const remove = vi.fn();
+    Object.defineProperty(window, 'matchMedia', { configurable: true, value: () => ({ matches: true, addEventListener: add, removeEventListener: remove }) });
+    try {
+      const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+      fixture.componentRef.setInput('items', [1, 2]);
+      fixture.componentRef.setInput('autoplayInterval', 1);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      await new Promise<void>(resolve => setTimeout(resolve, 10));
+      expect(fixture.componentInstance.page()).toBe(0);
+      fixture.destroy();
+      expect(add).toHaveBeenCalledTimes(1);
+      expect(remove).toHaveBeenCalledTimes(1);
+    } finally {
+      if (original) Object.defineProperty(window, 'matchMedia', original);
+      else Reflect.deleteProperty(window, 'matchMedia');
+    }
+  });
+
   it('falls back to the base layout during SSR and unregisters the browser listener on destroy', () => {
     TestBed.resetTestingModule(); TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection(), { provide: PLATFORM_ID, useValue: 'server' }] });
     const fixture = TestBed.createComponent(NeuCarouselComponent<number>); fixture.componentRef.setInput('items', [1, 2, 3]); fixture.componentRef.setInput('numVisible', 2); fixture.componentRef.setInput('responsiveOptions', [{ breakpoint: 2000, numVisible: 1 }]); fixture.detectChanges();

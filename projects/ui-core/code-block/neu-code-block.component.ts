@@ -7,7 +7,8 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
 import type { NeuDensity } from '@neural-ui/core';
 
 /**
@@ -74,6 +75,9 @@ import type { NeuDensity } from '@neural-ui/core';
             {{ resolvedCopyLabel() }}
           }
         </button>
+        <span class="neu-code-block__status" role="status" aria-live="polite">{{
+          copied() ? resolvedCopiedLabel() : ''
+        }}</span>
       </div>
 
       <!-- Bloque de código -->
@@ -89,6 +93,7 @@ import type { NeuDensity } from '@neural-ui/core';
 export class NeuCodeBlockComponent {
   private readonly doc = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /** Código fuente a mostrar / Source code to display */
   code = input<string>('');
@@ -176,7 +181,7 @@ export class NeuCodeBlockComponent {
 
     this.destroyRef.onDestroy(() => clearTimeout(this._copyTimer));
 
-    if (!root || !win?.MutationObserver) return;
+    if (!this.browser || !root || !win?.MutationObserver) return;
 
     const observer = new win.MutationObserver(() => {
       this.localeLabels.set(this._getLocaleLabels());
@@ -191,6 +196,7 @@ export class NeuCodeBlockComponent {
   }
 
   copy(): void {
+    if (!this.browser || this.destroyRef.destroyed) return;
     const text = this.code();
     const win = this.doc.defaultView;
 
@@ -205,6 +211,7 @@ export class NeuCodeBlockComponent {
   }
 
   private _copyWithTextarea(text: string): void {
+    if (this.destroyRef.destroyed) return;
     const previousFocus = this.doc.activeElement as HTMLElement | null;
     const ta = this.doc.createElement('textarea');
     ta.value = text;
@@ -223,9 +230,13 @@ export class NeuCodeBlockComponent {
   }
 
   private _markCopied(): void {
+    if (this.destroyRef.destroyed) return;
     this.copied.set(true);
     clearTimeout(this._copyTimer);
-    this._copyTimer = setTimeout(() => this.copied.set(false), 2000);
+    this._copyTimer = setTimeout(() => {
+      this._copyTimer = undefined;
+      if (!this.destroyRef.destroyed) this.copied.set(false);
+    }, 2000);
   }
 
   private _getLocaleLabels(): {

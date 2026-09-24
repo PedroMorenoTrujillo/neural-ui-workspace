@@ -1,9 +1,4 @@
-import {
-  Component,
-  Injectable,
-  ViewEncapsulation,
-  inject,
-} from '@angular/core';
+import { Component, Injectable, ViewEncapsulation, inject } from '@angular/core';
 import { Dialog, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
@@ -67,14 +62,19 @@ export interface NeuConfirmDialogData {
 export class NeuConfirmDialogComponent {
   readonly data: NeuConfirmDialogData = inject(DIALOG_DATA);
   private readonly _dialogRef = inject(DialogRef<boolean>);
+  private settled = false;
   protected readonly titleId = inject(NeuIdGenerator).getId('neu-confirm-title-');
   protected readonly messageId = inject(NeuIdGenerator).getId('neu-confirm-message-');
 
   accept(): void {
+    if (this.settled) return;
+    this.settled = true;
     this._dialogRef.close(true);
   }
 
   reject(): void {
+    if (this.settled) return;
+    this.settled = true;
     this._dialogRef.close(false);
   }
 }

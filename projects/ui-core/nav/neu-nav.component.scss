@@ -178,9 +178,7 @@ $item-radius: 8px;
 
     &:focus-visible {
       outline: none;
-      box-shadow:
-        var(--neu-focus-ring-strong),
-        var(--neu-nav-toggle-shadow);
+      box-shadow: var(--neu-focus-ring-strong), var(--neu-nav-toggle-shadow);
     }
   }
 
@@ -192,6 +190,10 @@ $item-radius: 8px;
     &:active {
       transform: translateX(1px) scale(0.96);
     }
+  }
+
+  &-wrapper:dir(rtl) &__toggle-tab neural-icon {
+    transform: scaleX(-1);
   }
 
   // ---- Lista de ítems / Items list ----
@@ -491,9 +493,14 @@ $item-radius: 8px;
       background var(--neu-transition),
       color var(--neu-transition);
 
-    &:hover {
+    &:hover:not(.neu-nav__flyout-item--disabled) {
       background: var(--neu-surface-2);
       color: var(--neu-text);
+    }
+
+    &--disabled {
+      color: var(--neu-text-disabled);
+      cursor: not-allowed;
     }
 
     &--active {

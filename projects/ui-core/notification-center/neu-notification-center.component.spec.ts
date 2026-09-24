@@ -1,5 +1,7 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconBell } from '@neural-icons/core/icons/bell';
 import {
   NeuNotificationCenterComponent,
   NeuNotificationService,
@@ -17,7 +19,11 @@ function setup() {
 
 beforeEach(() =>
   TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection(), NeuNotificationService],
+    providers: [
+      provideZonelessChangeDetection(),
+      NeuNotificationService,
+      provideNeuralIcons(iconBell),
+    ],
   }).compileComponents(),
 );
 
@@ -45,16 +51,16 @@ describe('NeuNotificationService', () => {
     expect(svc.notifications()[0].duration).toBe(5000);
   });
 
-  it('push with named type should set icon', () => {
+  it('push with named tone leaves the default icon to the renderer', () => {
     const svc = mkSvc();
     svc.push({ tone: 'success', message: 'OK' });
-    expect(svc.notifications()[0].icon).toBe('✅');
+    expect(svc.notifications()[0].icon).toBeUndefined();
   });
 
   it('push should preserve a custom icon', () => {
     const svc = mkSvc();
-    svc.push({ tone: 'info', message: 'Custom', icon: '⭐', duration: 0 });
-    expect(svc.notifications()[0].icon).toBe('⭐');
+    svc.push({ tone: 'info', message: 'Custom', icon: 'bell', duration: 0 });
+    expect(svc.notifications()[0].icon).toBe('bell');
   });
 
   it('push with positive duration should auto-dismiss after timeout', () => {
@@ -68,6 +74,16 @@ describe('NeuNotificationService', () => {
     expect(svc.notifications().length).toBe(0);
 
     vi.useRealTimers();
+  });
+
+  it('does not schedule auto-dismiss timers during server rendering', () => {
+    vi.useFakeTimers();
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: 'server' });
+    const svc = mkSvc();
+    const baselineTimers = vi.getTimerCount();
+    svc.push({ message: 'SSR', duration: 1000 });
+    expect(vi.getTimerCount()).toBe(baselineTimers);
+    expect(svc.notifications()).toHaveLength(1);
   });
 
   it('remove should delete the notification', () => {
@@ -395,7 +411,7 @@ describe('NeuNotificationCenterComponent', () => {
     f.detectChanges();
     await f.whenStable();
     const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
-    expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar notificación');
+    expect(closeBtn.getAttribute('aria-label')).toContain('Cerrar notificación:');
   });
 
   it('markAllRead button should appear and work when there are unread', async () => {

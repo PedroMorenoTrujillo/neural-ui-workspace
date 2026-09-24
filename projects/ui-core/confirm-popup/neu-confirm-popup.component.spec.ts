@@ -7,7 +7,9 @@ describe('NeuConfirmPopupComponent', () => {
   let service: NeuConfirmPopupService;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [NeuConfirmPopupComponent] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [NeuConfirmPopupComponent],
+    }).compileComponents();
     fixture = TestBed.createComponent(NeuConfirmPopupComponent);
     service = TestBed.inject(NeuConfirmPopupService);
   });
@@ -30,8 +32,12 @@ describe('NeuConfirmPopupComponent', () => {
     await fixture.whenStable();
     const panel = fixture.nativeElement.querySelector('.neu-confirm-popup') as HTMLElement;
     const bounds = vi.spyOn(panel, 'getBoundingClientRect');
-    bounds.mockReturnValue({ left: window.innerWidth - 50, right: window.innerWidth + 238,
-      top: window.innerHeight - 30, bottom: window.innerHeight + 170 } as DOMRect);
+    bounds.mockReturnValue({
+      left: window.innerWidth - 50,
+      right: window.innerWidth + 238,
+      top: window.innerHeight - 30,
+      bottom: window.innerHeight + 170,
+    } as DOMRect);
     window.dispatchEvent(new Event('resize'));
     expect(panel.style.transform).toBe('translate(-254px, -186px)');
     bounds.mockReturnValue({ left: 20, right: 308, top: 30, bottom: 230 } as DOMRect);
@@ -44,11 +50,18 @@ describe('NeuConfirmPopupComponent', () => {
 
   it('prefers service state and resolves accepted confirmations', async () => {
     const accepted = vi.spyOn(fixture.componentInstance.accepted, 'emit');
-    const promise = service.confirm({ title: 'Continue', message: 'Proceed?', acceptLabel: 'Yes', rejectLabel: 'No' });
+    const promise = service.confirm({
+      title: 'Continue',
+      message: 'Proceed?',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+    });
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Proceed?');
     expect(fixture.nativeElement.textContent).toContain('Yes');
-    (fixture.nativeElement.querySelector('.neu-confirm-popup__accept') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-confirm-popup__accept') as HTMLButtonElement
+    ).click();
     expect(accepted).toHaveBeenCalled();
     await expect(promise).resolves.toBe(true);
     expect(service.state()).toBeNull();
@@ -59,7 +72,9 @@ describe('NeuConfirmPopupComponent', () => {
     service.close(false);
     const promise = service.confirm({ message: 'Discard?' });
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('.neu-confirm-popup__reject') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector('.neu-confirm-popup__reject') as HTMLButtonElement
+    ).click();
     expect(rejected).toHaveBeenCalled();
     await expect(promise).resolves.toBe(false);
     service.close(true);
@@ -111,5 +126,63 @@ describe('NeuConfirmPopupComponent', () => {
 
     await expect(promise).resolves.toBe(false);
     expect(service.state()).toBeNull();
+  });
+
+  it('renders a service session on only one host and keeps it when another host is destroyed', async () => {
+    const other = TestBed.createComponent(NeuConfirmPopupComponent);
+    const promise = service.confirm({ message: 'One panel?' });
+    fixture.detectChanges();
+    other.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('[role="alertdialog"]')).toHaveLength(1);
+    expect(other.nativeElement.querySelectorAll('[role="alertdialog"]')).toHaveLength(0);
+
+    other.destroy();
+    expect(service.state()?.message).toBe('One panel?');
+    fixture.componentInstance.accept();
+    await expect(promise).resolves.toBe(true);
+  });
+
+  it('transfers a pending service session when its first host is destroyed', async () => {
+    const other = TestBed.createComponent(NeuConfirmPopupComponent);
+    const promise = service.confirm({ message: 'Continue?' });
+    fixture.detectChanges();
+    other.detectChanges();
+
+    fixture.destroy();
+    other.detectChanges();
+    expect(other.nativeElement.querySelectorAll('[role="alertdialog"]')).toHaveLength(1);
+    expect(other.nativeElement.textContent).toContain('Continue?');
+    other.componentInstance.reject();
+    await expect(promise).resolves.toBe(false);
+  });
+
+  it('rejects a service session exactly once on an outside pointer gesture', async () => {
+    const rejected = vi.spyOn(fixture.componentInstance.rejected, 'emit');
+    const promise = service.confirm({ message: 'Outside?' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    await expect(promise).resolves.toBe(false);
+    expect(rejected).toHaveBeenCalledTimes(1);
+    expect(service.state()).toBeNull();
+  });
+
+  it('leaves a rejected declarative close applied and does not trap outside focus', async () => {
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rejected = vi.spyOn(fixture.componentInstance.rejected, 'emit');
+
+    outside.focus();
+    expect(document.activeElement).toBe(outside);
+    outside.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rejected).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
+    outside.remove();
   });
 });

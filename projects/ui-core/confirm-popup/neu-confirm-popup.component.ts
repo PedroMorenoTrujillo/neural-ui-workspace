@@ -5,6 +5,7 @@ import {
   Injectable,
   ViewEncapsulation,
   afterRenderEffect,
+  computed,
   inject,
   input,
   output,
@@ -12,7 +13,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuConfirmPopupOptions {
@@ -49,19 +50,45 @@ export class NeuConfirmPopupService {
   }
 }
 
+/** Routes one service-owned confirmation to one mounted host per injector. */
+@Injectable({ providedIn: 'root' })
+class ConfirmPopupHostRegistry {
+  private nextId = 0;
+  private readonly hosts: number[] = [];
+  private readonly owner = signal<number | null>(null);
+  readonly active = this.owner.asReadonly();
+
+  register(): number {
+    const id = ++this.nextId;
+    this.hosts.push(id);
+    if (this.owner() === null) this.owner.set(id);
+    return id;
+  }
+
+  unregister(id: number): boolean {
+    const index = this.hosts.indexOf(id);
+    if (index !== -1) this.hosts.splice(index, 1);
+    if (this.owner() === id) this.owner.set(this.hosts[0] ?? null);
+    return this.hosts.length === 0;
+  }
+}
+
 @Component({
   selector: 'neu-confirm-popup',
-  imports: [NeuButtonComponent, NeuFocusTrapDirective, NeuModalFocusDirective],
+  imports: [NeuButtonComponent, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
-  host: { class: 'neu-confirm-popup-host', '(window:resize)': 'fitToViewport()' },
+  host: {
+    class: 'neu-confirm-popup-host',
+    '(window:resize)': 'fitToViewport()',
+    '(document:pointerdown)': 'onDocumentPointerDown($event)',
+  },
   template: `
-    @if (open() || service.state()) {
+    @if (open() || serviceSession()) {
       <div
         #panel
         class="neu-confirm-popup"
         role="alertdialog"
         aria-modal="false"
-        neuFocusTrap
         neuModalFocus
         [neuModalFocusInitial]="'.neu-confirm-popup__reject'"
         [attr.aria-labelledby]="currentTitle() ? titleId : null"
@@ -73,10 +100,26 @@ export class NeuConfirmPopupService {
         }
         <p [id]="messageId">{{ currentMessage() }}</p>
         <div class="neu-confirm-popup__actions">
-          <button neu-button type="button" class="neu-confirm-popup__reject" tone="neutral" variant="solid" size="sm" (click)="reject()">
+          <button
+            neu-button
+            type="button"
+            class="neu-confirm-popup__reject"
+            tone="neutral"
+            variant="solid"
+            size="sm"
+            (click)="reject()"
+          >
             {{ currentRejectLabel() }}
           </button>
-          <button neu-button type="button" class="neu-confirm-popup__accept" tone="brand" variant="solid" size="sm" (click)="accept()">
+          <button
+            neu-button
+            type="button"
+            class="neu-confirm-popup__accept"
+            tone="brand"
+            variant="solid"
+            size="sm"
+            (click)="accept()"
+          >
             {{ currentAcceptLabel() }}
           </button>
         </div>
@@ -87,6 +130,11 @@ export class NeuConfirmPopupService {
 })
 export class NeuConfirmPopupComponent {
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly registry = inject(ConfirmPopupHostRegistry);
+  private readonly hostId: number;
+  protected readonly serviceSession = computed(() =>
+    this.registry.active() === this.hostId ? this.service.state() : null,
+  );
   readonly open = input(false);
   readonly title = input('');
   readonly message = input('');
@@ -98,15 +146,16 @@ export class NeuConfirmPopupComponent {
   protected readonly messageId = inject(NeuIdGenerator).getId('neu-confirm-popup-message-');
 
   constructor(readonly service: NeuConfirmPopupService) {
+    this.hostId = this.registry.register();
     afterRenderEffect(() => {
       this.panel();
-      this.service.state();
+      this.serviceSession();
       this.title();
       this.message();
       this.fitToViewport();
     });
     inject(DestroyRef).onDestroy(() => {
-      if (this.service.state()) this.service.close(false);
+      if (this.registry.unregister(this.hostId) && this.service.state()) this.service.close(false);
     });
   }
 
@@ -122,29 +171,34 @@ export class NeuConfirmPopupComponent {
     panel.style.transform = `translate(${x}px, ${y}px)`;
   }
 
+  protected onDocumentPointerDown(event: PointerEvent): void {
+    const panel = this.panel()?.nativeElement;
+    if (panel && event.target && !panel.contains(event.target as Node)) this.reject();
+  }
+
   currentTitle(): string {
-    return this.service.state()?.title ?? this.title();
+    return this.serviceSession()?.title ?? this.title();
   }
 
   currentMessage(): string {
-    return this.service.state()?.message ?? this.message();
+    return this.serviceSession()?.message ?? this.message();
   }
 
   currentAcceptLabel(): string {
-    return this.service.state()?.acceptLabel ?? this.acceptLabel();
+    return this.serviceSession()?.acceptLabel ?? this.acceptLabel();
   }
 
   currentRejectLabel(): string {
-    return this.service.state()?.rejectLabel ?? this.rejectLabel();
+    return this.serviceSession()?.rejectLabel ?? this.rejectLabel();
   }
 
   accept(): void {
     this.accepted.emit();
-    this.service.close(true);
+    if (this.serviceSession()) this.service.close(true);
   }
 
   reject(): void {
     this.rejected.emit();
-    this.service.close(false);
+    if (this.serviceSession()) this.service.close(false);
   }
 }

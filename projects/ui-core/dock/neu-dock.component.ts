@@ -16,7 +16,7 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuralIcon } from '@neural-icons/angular';
 import {
@@ -54,7 +54,6 @@ export class NeuDockItemDirective {
   imports: [
     NgTemplateOutlet,
     RouterLink,
-    RouterLinkActive,
     NeuBadgeComponent,
     NeuralIcon,
     NeuTooltipDirective,
@@ -96,8 +95,6 @@ export class NeuDockItemDirective {
               <a
                 #dockAction
                 class="neu-dock__action"
-                routerLinkActive="neu-dock__action--router-active"
-                [routerLinkActiveOptions]="{ exact: false }"
                 [routerLink]="action.routerLink ?? null"
                 role="menuitem"
                 [class.neu-dock__action--active]="action.active"

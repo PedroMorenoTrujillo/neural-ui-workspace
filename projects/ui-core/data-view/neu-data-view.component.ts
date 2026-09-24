@@ -6,7 +6,6 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
-  effect,
   inject,
   input,
   output,
@@ -100,7 +99,8 @@ export class NeuDataViewFooterDirective {
                 neu-button
                 type="button"
                 class="neu-data-view__mode"
-                tone="neutral" variant="ghost"
+                tone="neutral"
+                variant="ghost"
                 size="sm"
                 [class.neu-data-view__mode--active]="mode() === item"
                 [attr.aria-pressed]="mode() === item"
@@ -119,9 +119,9 @@ export class NeuDataViewFooterDirective {
     } @else if (pagedItems().length === 0) {
       <div class="neu-data-view__empty" role="status">{{ emptyLabel() }}</div>
     } @else {
-      <div class="neu-data-view__items" [attr.role]="mode() === 'table' ? 'table' : 'list'">
+      <ul class="neu-data-view__items">
         @for (item of pagedItems(); track trackItem($index, item); let i = $index) {
-          <div class="neu-data-view__item" [attr.role]="mode() === 'table' ? 'row' : 'listitem'">
+          <li class="neu-data-view__item">
             @if (itemTpl()) {
               <ng-container
                 [ngTemplateOutlet]="itemTpl()!.templateRef"
@@ -130,9 +130,9 @@ export class NeuDataViewFooterDirective {
             } @else {
               {{ displayItem(item) }}
             }
-          </div>
+          </li>
         }
-      </div>
+      </ul>
     }
 
     @if (pagination() && pageCount() > 1) {
@@ -140,7 +140,8 @@ export class NeuDataViewFooterDirective {
         <button
           neu-button
           type="button"
-          tone="neutral" variant="solid"
+          tone="neutral"
+          variant="solid"
           size="sm"
           [disabled]="effectivePage() <= 1"
           (click)="previousPage()"
@@ -151,7 +152,8 @@ export class NeuDataViewFooterDirective {
         <button
           neu-button
           type="button"
-          tone="neutral" variant="solid"
+          tone="neutral"
+          variant="solid"
           size="sm"
           [disabled]="effectivePage() >= pageCount()"
           (click)="nextPage()"
@@ -170,17 +172,17 @@ export class NeuDataViewFooterDirective {
 export class NeuDataViewComponent {
   private readonly _destroyRef = inject(DestroyRef);
 
-  readonly items = input<unknown[]>([]);
+  readonly items = input<readonly unknown[]>([]);
   readonly mode = input<NeuDataViewMode>('list');
-  readonly modes = input<NeuDataViewMode[]>(['list', 'grid', 'table']);
+  readonly modes = input<readonly NeuDataViewMode[]>(['list', 'grid', 'table']);
   readonly modeLabels = input<Partial<Record<NeuDataViewMode, string>>>({});
   readonly viewSwitcher = input(true);
   readonly viewAriaLabel = input('View mode');
   readonly searchable = input(true);
-  readonly searchFields = input<string[]>([]);
+  readonly searchFields = input<readonly string[]>([]);
   readonly searchPlaceholder = input('Search...');
   readonly searchAriaLabel = input('Search items');
-  readonly sortOptions = input<NeuDataViewSortOption[]>([]);
+  readonly sortOptions = input<readonly NeuDataViewSortOption[]>([]);
   readonly sortAriaLabel = input('Sort items');
   readonly pagination = input(true);
   readonly pageSize = input(9);
@@ -223,10 +225,10 @@ export class NeuDataViewComponent {
 
   readonly filteredItems = computed(() => {
     if (this.total() !== undefined) {
-      return [...this.items()];
+      return this.items();
     }
     const q = this.query().trim().toLowerCase();
-    const rows = [...this.items()];
+    const rows = this.items();
     const sort = this.sortOptions().find((option) => option.value === this.sortKey());
 
     const filtered = q
@@ -253,19 +255,22 @@ export class NeuDataViewComponent {
     return Number.isFinite(page) ? Math.max(1, Math.trunc(page)) : 1;
   });
 
+  private readonly _pageSize = computed(() => {
+    const size = this.pageSize();
+    return Number.isFinite(size) ? Math.max(1, Math.trunc(size)) : 1;
+  });
+
   readonly pageCount = computed(() => {
     const rawCount = this.total() ?? this.filteredItems().length;
-    const rawSize = this.pageSize();
     const count = Number.isFinite(rawCount) ? Math.max(0, rawCount) : 0;
-    const size = Number.isFinite(rawSize) ? Math.max(1, rawSize) : 1;
-    return Math.max(1, Math.ceil(count / size));
+    return Math.max(1, Math.ceil(count / this._pageSize()));
   });
 
   readonly pagedItems = computed(() => {
     if (!this.pagination() || this.total() !== undefined) {
       return this.filteredItems();
     }
-    const size = Math.max(1, this.pageSize());
+    const size = this._pageSize();
     const start = (Math.min(this.effectivePage(), this.pageCount()) - 1) * size;
     return this.filteredItems().slice(start, start + size);
   });
@@ -278,40 +283,40 @@ export class NeuDataViewComponent {
     this._sortControl.valueChanges
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => this.setSort(value ?? ''));
-
-    effect(() => {
-      const query = this.query();
-      if (this._searchControl.value !== query) {
-        this._searchControl.setValue(query, { emitEvent: false });
-      }
-    });
-
-    effect(() => {
-      const sortKey = this.sortKey();
-      if (this._sortControl.value !== sortKey) {
-        this._sortControl.setValue(sortKey, { emitEvent: false });
-      }
-    });
   }
 
   setMode(mode: NeuDataViewMode): void {
+    if (this._destroyRef.destroyed) return;
+    if (mode === this.mode() || !this.modes().includes(mode)) return;
     this.modeChange.emit(mode);
   }
 
   modeLabel(mode: NeuDataViewMode): string {
     return (
       this.modeLabels()[mode] ??
-      ({ list: 'List', grid: 'Grid', table: 'Table' } satisfies Record<NeuDataViewMode, string>)[mode]
+      ({ list: 'List', grid: 'Grid', table: 'Table' } satisfies Record<NeuDataViewMode, string>)[
+        mode
+      ]
     );
   }
 
   setQuery(value: string): void {
+    if (this._destroyRef.destroyed) return;
+    if (this._searchControl.value !== value) {
+      this._searchControl.setValue(value, { emitEvent: false });
+    }
+    if (this.query() === value) return;
     this.query.set(value);
     if (this.currentPage() === undefined) this.page.set(1);
     this.searchChange.emit(value);
   }
 
   setSort(value: string): void {
+    if (this._destroyRef.destroyed) return;
+    if (this._sortControl.value !== value) {
+      this._sortControl.setValue(value, { emitEvent: false });
+    }
+    if (this.sortKey() === value) return;
     this.sortKey.set(value);
     this.sortChange.emit(value);
   }
@@ -339,15 +344,16 @@ export class NeuDataViewComponent {
   }
 
   private setPage(page: number): void {
+    if (this._destroyRef.destroyed) return;
     const clamped = Number.isFinite(page)
       ? Math.min(this.pageCount(), Math.max(1, Math.trunc(page)))
       : this.effectivePage();
     if (clamped === this.effectivePage()) return;
     if (this.currentPage() === undefined) this.page.set(clamped);
-    this.pageChange.emit({ page: clamped, pageSize: Math.max(1, this.pageSize()) });
+    this.pageChange.emit({ page: clamped, pageSize: this._pageSize() });
   }
 
-  private searchableText(item: unknown, fields: string[]): string {
+  private searchableText(item: unknown, fields: readonly string[]): string {
     if (!fields.length || typeof item !== 'object' || item === null) {
       return this.displayItem(item);
     }

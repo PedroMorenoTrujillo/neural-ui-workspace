@@ -466,14 +466,6 @@
       ]
     },
     {
-      "entrypoint": "./image-gallery",
-      "types": "./types/neural-ui-core-image-gallery.d.ts",
-      "exports": [
-        "./image-gallery#NeuImageGalleryComponent",
-        "./image-gallery#NeuImageViewerItem"
-      ]
-    },
-    {
       "entrypoint": "./image-viewer",
       "types": "./types/neural-ui-core-image-viewer.d.ts",
       "exports": [
@@ -558,6 +550,11 @@
         "./internal#InternalNeuConnectedOverlayCloseIntent",
         "./internal#InternalNeuConnectedOverlayCloseReason",
         "./internal#InternalNeuConnectedOverlaySession",
+        "./internal#InternalNeuMediaCaptionContext",
+        "./internal#InternalNeuMediaItem",
+        "./internal#InternalNeuMediaPreviewAdapter",
+        "./internal#InternalNeuMediaPreviewController",
+        "./internal#InternalNeuMediaPreviewHost",
         "./internal#InternalNeuOptionActiveRowController",
         "./internal#InternalNeuOptionActiveRowResult",
         "./internal#InternalNeuOptionLazyRequestSequencer",
@@ -4738,7 +4735,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: string;"
+          "signature": "icon?: NeuralIconName;"
         },
         {
           "id": "./breadcrumb#NeuBreadcrumbItem.property:label",
@@ -9373,7 +9370,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly tiles: _angular_core.InputSignal<NeuDashboardTileConfig[]>;"
+          "signature": "readonly tiles: _angular_core.InputSignal<readonly NeuDashboardTileConfig[]>;"
         },
         {
           "id": "./dashboard-grid#NeuDashboardGridComponent.output:orderChange",
@@ -9383,7 +9380,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly orderChange: _angular_core.OutputEmitterRef<NeuDashboardTileConfig[]>;"
+          "signature": "readonly orderChange: _angular_core.OutputEmitterRef<readonly NeuDashboardTileConfig[]>;"
         },
         {
           "id": "./dashboard-grid#NeuDashboardGridComponent.property:ɵcmp",
@@ -9482,7 +9479,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<unknown[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<readonly unknown[]>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.input:loading",
@@ -9532,7 +9529,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly modes: _angular_core.InputSignal<NeuDataViewMode[]>;"
+          "signature": "readonly modes: _angular_core.InputSignal<readonly NeuDataViewMode[]>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.input:nextLabel",
@@ -9612,7 +9609,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly searchFields: _angular_core.InputSignal<string[]>;"
+          "signature": "readonly searchFields: _angular_core.InputSignal<readonly string[]>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.input:searchPlaceholder",
@@ -9642,7 +9639,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly sortOptions: _angular_core.InputSignal<NeuDataViewSortOption[]>;"
+          "signature": "readonly sortOptions: _angular_core.InputSignal<readonly NeuDataViewSortOption[]>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.input:total",
@@ -9802,7 +9799,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly filteredItems: _angular_core.Signal<unknown[]>;"
+          "signature": "readonly filteredItems: _angular_core.Signal<readonly unknown[]>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.property:footerTpl",
@@ -9866,7 +9863,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly pagedItems: _angular_core.Signal<unknown[]>;"
+          "signature": "readonly pagedItems: _angular_core.Signal<readonly unknown[]>;"
         },
         {
           "id": "./data-view#NeuDataViewComponent.property:query",
@@ -13556,7 +13553,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<readonly NeuGalleryItem[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<readonly NeuImageViewerItem[]>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.input:maxZoom",
@@ -13587,6 +13584,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly objectFit: _angular_core.InputSignal<\"cover\" | \"contain\">;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:previewEnabled",
+          "name": "previewEnabled",
+          "kind": "input",
+          "publicName": "previewEnabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly previewEnabled: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.input:previewLabel",
@@ -13637,6 +13644,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly rotateRightLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.input:showCounter",
+          "name": "showCounter",
+          "kind": "input",
+          "publicName": "showCounter",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly showCounter: _angular_core.InputSignal<boolean>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.input:showItemNavigators",
@@ -13747,6 +13764,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "onKeydown(event: KeyboardEvent): void;"
+        },
+        {
+          "id": "./gallery#NeuGalleryComponent.method:onPointerCancel",
+          "name": "onPointerCancel",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onPointerCancel(): void;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.method:onPointerDown",
@@ -13894,7 +13919,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly activeItem: _angular_core.Signal<NeuGalleryItem>;"
+          "signature": "readonly activeItem: _angular_core.Signal<NeuImageViewerItem>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.property:canNext",
@@ -13966,7 +13991,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuGalleryComponent, \"neu-gallery\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"activeIndexInput\": {\n        \"alias\": \"activeIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialIndex\": {\n        \"alias\": \"initialIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"circular\": {\n        \"alias\": \"circular\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showThumbnails\": {\n        \"alias\": \"showThumbnails\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailPosition\": {\n        \"alias\": \"thumbnailPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showItemNavigators\": {\n        \"alias\": \"showItemNavigators\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"objectFit\": {\n        \"alias\": \"objectFit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"imageLoading\": {\n        \"alias\": \"imageLoading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxZoom\": {\n        \"alias\": \"maxZoom\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailLabel\": {\n        \"alias\": \"thumbnailLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewLabel\": {\n        \"alias\": \"previewLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"toolbarLabel\": {\n        \"alias\": \"toolbarLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"zoomOutLabel\": {\n        \"alias\": \"zoomOutLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"zoomInLabel\": {\n        \"alias\": \"zoomInLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateLeftLabel\": {\n        \"alias\": \"rotateLeftLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateRightLabel\": {\n        \"alias\": \"rotateRightLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"flipHorizontalLabel\": {\n        \"alias\": \"flipHorizontalLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"flipVerticalLabel\": {\n        \"alias\": \"flipVerticalLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resetLabel\": {\n        \"alias\": \"resetLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"downloadLabel\": {\n        \"alias\": \"downloadLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"activeIndexChange\": \"activeIndexChange\";\n    \"previewChange\": \"previewChange\";\n    \"zoomChange\": \"zoomChange\";\n    \"rotationChange\": \"rotationChange\";\n    \"flipChange\": \"flipChange\";\n    \"imageError\": \"imageError\";\n}, [\n    \"itemTemplate\",\n    \"captionTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuGalleryComponent, \"neu-gallery\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"activeIndexInput\": {\n        \"alias\": \"activeIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialIndex\": {\n        \"alias\": \"initialIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"circular\": {\n        \"alias\": \"circular\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showThumbnails\": {\n        \"alias\": \"showThumbnails\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailPosition\": {\n        \"alias\": \"thumbnailPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showItemNavigators\": {\n        \"alias\": \"showItemNavigators\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounter\": {\n        \"alias\": \"showCounter\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewEnabled\": {\n        \"alias\": \"previewEnabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"objectFit\": {\n        \"alias\": \"objectFit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"imageLoading\": {\n        \"alias\": \"imageLoading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxZoom\": {\n        \"alias\": \"maxZoom\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailLabel\": {\n        \"alias\": \"thumbnailLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previewLabel\": {\n        \"alias\": \"previewLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"toolbarLabel\": {\n        \"alias\": \"toolbarLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"zoomOutLabel\": {\n        \"alias\": \"zoomOutLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"zoomInLabel\": {\n        \"alias\": \"zoomInLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateLeftLabel\": {\n        \"alias\": \"rotateLeftLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rotateRightLabel\": {\n        \"alias\": \"rotateRightLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"flipHorizontalLabel\": {\n        \"alias\": \"flipHorizontalLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"flipVerticalLabel\": {\n        \"alias\": \"flipVerticalLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resetLabel\": {\n        \"alias\": \"resetLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"previousLabel\": {\n        \"alias\": \"previousLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"nextLabel\": {\n        \"alias\": \"nextLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"downloadLabel\": {\n        \"alias\": \"downloadLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"activeIndexChange\": \"activeIndexChange\";\n    \"previewChange\": \"previewChange\";\n    \"zoomChange\": \"zoomChange\";\n    \"rotationChange\": \"rotationChange\";\n    \"flipChange\": \"flipChange\";\n    \"imageError\": \"imageError\";\n}, [\n    \"itemTemplate\",\n    \"captionTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./gallery#NeuGalleryComponent.property:ɵfac",
@@ -13998,35 +14023,10 @@
       "id": "./gallery#NeuGalleryItem",
       "entrypoint": "./gallery",
       "name": "NeuGalleryItem",
-      "kind": "interface",
+      "kind": "type",
       "status": "SUPPORTED",
-      "signature": "interface NeuGalleryItem {\n}",
-      "members": [
-        {
-          "id": "./gallery#NeuGalleryItem.property:alt",
-          "name": "alt",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "alt: string;"
-        },
-        {
-          "id": "./gallery#NeuGalleryItem.property:caption",
-          "name": "caption",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "caption?: string;"
-        },
-        {
-          "id": "./gallery#NeuGalleryItem.property:src",
-          "name": "src",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "src: string;"
-        }
-      ]
+      "signature": "type NeuGalleryItem = NeuImageViewerItem;",
+      "members": []
     },
     {
       "id": "./gallery#NeuGalleryItemContext",
@@ -14098,163 +14098,6 @@
       ]
     },
     {
-      "id": "./image-gallery#NeuImageGalleryComponent",
-      "entrypoint": "./image-gallery",
-      "name": "NeuImageGalleryComponent",
-      "kind": "component",
-      "status": "SUPPORTED",
-      "selector": "neu-image-gallery",
-      "signature": "declare class NeuImageGalleryComponent {\n}",
-      "members": [
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:initialIndex",
-          "name": "initialIndex",
-          "kind": "input",
-          "publicName": "initialIndex",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly initialIndex: _angular_core.InputSignal<number>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:items",
-          "name": "items",
-          "kind": "input",
-          "publicName": "items",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<NeuImageViewerItem[]>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:objectFit",
-          "name": "objectFit",
-          "kind": "input",
-          "publicName": "objectFit",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly objectFit: _angular_core.InputSignal<\"cover\" | \"contain\">;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:showCounter",
-          "name": "showCounter",
-          "kind": "input",
-          "publicName": "showCounter",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly showCounter: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:showThumbnails",
-          "name": "showThumbnails",
-          "kind": "input",
-          "publicName": "showThumbnails",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly showThumbnails: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:thumbnailPosition",
-          "name": "thumbnailPosition",
-          "kind": "input",
-          "publicName": "thumbnailPosition",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly thumbnailPosition: _angular_core.InputSignal<\"bottom\" | \"left\">;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.input:viewerEnabled",
-          "name": "viewerEnabled",
-          "kind": "input",
-          "publicName": "viewerEnabled",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly viewerEnabled: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.method:goNext",
-          "name": "goNext",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "goNext(): void;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.method:goPrev",
-          "name": "goPrev",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "goPrev(): void;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.method:setActiveIndex",
-          "name": "setActiveIndex",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setActiveIndex(index: number): void;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.output:activeIndexChange",
-          "name": "activeIndexChange",
-          "kind": "output",
-          "publicName": "activeIndexChange",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly activeIndexChange: _angular_core.OutputEmitterRef<number>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.property:activeIndex",
-          "name": "activeIndex",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly activeIndex: _angular_core.Signal<number>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.property:currentItem",
-          "name": "currentItem",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly currentItem: _angular_core.Signal<NeuImageViewerItem>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.property:ɵcmp",
-          "name": "ɵcmp",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuImageGalleryComponent, \"neu-image-gallery\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"initialIndex\": {\n        \"alias\": \"initialIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showThumbnails\": {\n        \"alias\": \"showThumbnails\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"thumbnailPosition\": {\n        \"alias\": \"thumbnailPosition\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"objectFit\": {\n        \"alias\": \"objectFit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounter\": {\n        \"alias\": \"showCounter\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"viewerEnabled\": {\n        \"alias\": \"viewerEnabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"activeIndexChange\": \"activeIndexChange\";\n}, never, never, true, never>;"
-        },
-        {
-          "id": "./image-gallery#NeuImageGalleryComponent.property:ɵfac",
-          "name": "ɵfac",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuImageGalleryComponent, never>;"
-        }
-      ]
-    },
-    {
-      "id": "./image-gallery#NeuImageViewerItem",
-      "entrypoint": "./image-gallery",
-      "name": "NeuImageViewerItem",
-      "kind": "reexport",
-      "status": "SUPPORTED",
-      "target": "/image-viewer#NeuImageViewerItem",
-      "signature": "reexport @neural-ui/core/image-viewer#NeuImageViewerItem",
-      "members": []
-    },
-    {
       "id": "./image-viewer#NeuImageViewerDirective",
       "entrypoint": "./image-viewer",
       "name": "NeuImageViewerDirective",
@@ -14271,7 +14114,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly neuImageViewer: _angular_core.InputSignal<string | NeuImageViewerItem | NeuImageViewerItem[]>;"
+          "signature": "readonly neuImageViewer: _angular_core.InputSignal<string | NeuImageViewerItem | readonly NeuImageViewerItem[]>;"
         },
         {
           "id": "./image-viewer#NeuImageViewerDirective.input:neuIvIndex",
@@ -14367,7 +14210,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "alt?: string;"
+          "signature": "alt: string;"
         },
         {
           "id": "./image-viewer#NeuImageViewerItem.property:caption",
@@ -17729,6 +17572,256 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "requestRefresh(reason: InternalNeuConnectedOverlayRefreshReason): boolean;"
+        }
+      ]
+    },
+    {
+      "id": "./internal#InternalNeuMediaCaptionContext",
+      "entrypoint": "./internal",
+      "name": "InternalNeuMediaCaptionContext",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface InternalNeuMediaCaptionContext {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuMediaCaptionContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "$implicit: InternalNeuMediaItem;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaCaptionContext.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "index: number;"
+        }
+      ]
+    },
+    {
+      "id": "./internal#InternalNeuMediaItem",
+      "entrypoint": "./internal",
+      "name": "InternalNeuMediaItem",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface InternalNeuMediaItem {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuMediaItem.property:alt",
+          "name": "alt",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "alt: string;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaItem.property:caption",
+          "name": "caption",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "caption?: string;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaItem.property:src",
+          "name": "src",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "src: string;"
+        }
+      ]
+    },
+    {
+      "id": "./internal#InternalNeuMediaPreviewAdapter",
+      "entrypoint": "./internal",
+      "name": "InternalNeuMediaPreviewAdapter",
+      "kind": "class",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare class InternalNeuMediaPreviewAdapter {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuMediaPreviewAdapter.property:host",
+          "name": "host",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "host: InternalNeuMediaPreviewHost | null;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewAdapter.property:session",
+          "name": "session",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly session: i0.WritableSignal<InternalNeuMediaPreviewController | null>;"
+        }
+      ]
+    },
+    {
+      "id": "./internal#InternalNeuMediaPreviewController",
+      "entrypoint": "./internal",
+      "name": "InternalNeuMediaPreviewController",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface InternalNeuMediaPreviewController {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuMediaPreviewController.method:flip",
+          "name": "flip",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "flip(axis: 'x' | 'y'): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewController.method:resetTransform",
+          "name": "resetTransform",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "resetTransform(): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewController.method:rotate",
+          "name": "rotate",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "rotate(delta: number): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewController.method:zoom",
+          "name": "zoom",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "zoom(delta: number): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewController.property:scale",
+          "name": "scale",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly scale: Signal<number>;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewController.property:transform",
+          "name": "transform",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly transform: Signal<string>;"
+        }
+      ]
+    },
+    {
+      "id": "./internal#InternalNeuMediaPreviewHost",
+      "entrypoint": "./internal",
+      "name": "InternalNeuMediaPreviewHost",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface InternalNeuMediaPreviewHost {\n}",
+      "members": [
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:canNavigate",
+          "name": "canNavigate",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "canNavigate(direction: -1 | 1): boolean;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:captionTemplate",
+          "name": "captionTemplate",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "captionTemplate(): TemplateRef<InternalNeuMediaCaptionContext> | undefined;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:index",
+          "name": "index",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "index(): number;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:items",
+          "name": "items",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "items(): readonly InternalNeuMediaItem[];"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:labels",
+          "name": "labels",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "labels(): {\n    toolbar: string;\n    zoomIn: string;\n    zoomOut: string;\n    rotateLeft: string;\n    rotateRight: string;\n    flipHorizontal: string;\n    flipVertical: string;\n    reset: string;\n    close: string;\n    previous: string;\n    next: string;\n    download: string;\n};"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:maxZoom",
+          "name": "maxZoom",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "maxZoom(): number;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:navigate",
+          "name": "navigate",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "navigate(direction: -1 | 1): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:onFlip",
+          "name": "onFlip",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onFlip(value: {\n    x: number;\n    y: number;\n}): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:onImageError",
+          "name": "onImageError",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onImageError(index: number): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:onRotation",
+          "name": "onRotation",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onRotation(value: number): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.method:onZoom",
+          "name": "onZoom",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onZoom(value: number): void;"
+        },
+        {
+          "id": "./internal#InternalNeuMediaPreviewHost.property:gallery",
+          "name": "gallery",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly gallery: true;"
         }
       ]
     },
@@ -23705,7 +23798,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "collapsed: _angular_core.InputSignal<boolean>;"
+          "signature": "collapsed: _angular_core.InputSignal<boolean | undefined>;"
         },
         {
           "id": "./nav#NeuNavComponent.input:collapseLabel",
@@ -23835,7 +23928,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly flyoutState: _angular_core.WritableSignal<{\n    item: NeuNavItem;\n    top: number;\n    left: number;\n} | null>;"
+          "signature": "readonly flyoutState: _angular_core.WritableSignal<{\n    item: NeuNavItem;\n    top: number;\n    left: number | null;\n    right?: number | null;\n} | null>;"
         },
         {
           "id": "./nav#NeuNavComponent.property:isCollapsed",
@@ -23871,6 +23964,14 @@
       "status": "SUPPORTED",
       "signature": "interface NeuNavItem {\n}",
       "members": [
+        {
+          "id": "./nav#NeuNavItem.property:active",
+          "name": "active",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "active?: boolean;"
+        },
         {
           "id": "./nav#NeuNavItem.property:badge",
           "name": "badge",
@@ -23967,7 +24068,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: string;"
+          "signature": "icon?: NeuralIconName;"
         },
         {
           "id": "./notification-center#NeuNotification.property:id",
@@ -33686,7 +33787,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: string;"
+          "signature": "icon?: NeuralIconName;"
         },
         {
           "id": "./split-button#NeuSplitButtonAction.property:id",
@@ -33934,14 +34035,6 @@
           "signature": "primaryClick: _angular_core.OutputEmitterRef<MouseEvent>;"
         },
         {
-          "id": "./split-button#NeuSplitButtonComponent.property:chevronClasses",
-          "name": "chevronClasses",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly chevronClasses: _angular_core.Signal<string>;"
-        },
-        {
           "id": "./split-button#NeuSplitButtonComponent.property:isDisabled",
           "name": "isDisabled",
           "kind": "property",
@@ -33964,14 +34057,6 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly itemTpl: _angular_core.Signal<NeuSplitButtonItemDirective | undefined>;"
-        },
-        {
-          "id": "./split-button#NeuSplitButtonComponent.property:mainClasses",
-          "name": "mainClasses",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly mainClasses: _angular_core.Signal<string>;"
         },
         {
           "id": "./split-button#NeuSplitButtonComponent.property:overlayPositions",
@@ -38448,6 +38533,22 @@
           "signature": "ngOnChanges(changes: SimpleChanges): void;"
         },
         {
+          "id": "./terminal#NeuTerminalComponent.method:onCompositionEnd",
+          "name": "onCompositionEnd",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionEnd(): void;"
+        },
+        {
+          "id": "./terminal#NeuTerminalComponent.method:onCompositionStart",
+          "name": "onCompositionStart",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "onCompositionStart(): void;"
+        },
+        {
           "id": "./terminal#NeuTerminalComponent.method:onKeydown",
           "name": "onKeydown",
           "kind": "method",
@@ -38495,7 +38596,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly entries: _angular_core.WritableSignal<TerminalEntry[]>;"
+          "signature": "readonly entries: _angular_core.Signal<TerminalEntry[]>;"
         },
         {
           "id": "./terminal#NeuTerminalComponent.property:ɵcmp",
@@ -39593,7 +39694,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly columns: _angular_core.InputSignal<NeuTimelineGridColumn[]>;"
+          "signature": "readonly columns: _angular_core.InputSignal<readonly NeuTimelineGridColumn[]>;"
         },
         {
           "id": "./timeline-grid#NeuTimelineGridComponent.input:density",
@@ -39623,7 +39724,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly rows: _angular_core.InputSignal<NeuTimelineGridRow[]>;"
+          "signature": "readonly rows: _angular_core.InputSignal<readonly NeuTimelineGridRow[]>;"
         },
         {
           "id": "./timeline-grid#NeuTimelineGridComponent.input:selectedItemId",
@@ -39886,7 +39987,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "items: NeuTimelineGridItem[];"
+          "signature": "items: readonly NeuTimelineGridItem[];"
         },
         {
           "id": "./timeline-grid#NeuTimelineGridRow.property:label",
@@ -39980,7 +40081,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<NeuTimelineItem[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<readonly NeuTimelineItem[]>;"
         },
         {
           "id": "./timeline#NeuTimelineComponent.input:reverse",
@@ -40049,6 +40150,14 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "icon?: string;"
+        },
+        {
+          "id": "./timeline#NeuTimelineItem.property:id",
+          "name": "id",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "id?: string | number;"
         },
         {
           "id": "./timeline#NeuTimelineItem.property:time",
@@ -51212,7 +51321,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly tiles: _angular_core.InputSignal<NeuDashboardTileConfig[]>;"
+      "signature": "readonly tiles: _angular_core.InputSignal<readonly NeuDashboardTileConfig[]>;"
     },
     {
       "id": "./dashboard-grid#NeuDashboardGridComponent.output:orderChange",
@@ -51224,7 +51333,7 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly orderChange: _angular_core.OutputEmitterRef<NeuDashboardTileConfig[]>;"
+      "signature": "readonly orderChange: _angular_core.OutputEmitterRef<readonly NeuDashboardTileConfig[]>;"
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:currentPage",
@@ -51260,7 +51369,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<unknown[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<readonly unknown[]>;"
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:loading",
@@ -51320,7 +51429,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly modes: _angular_core.InputSignal<NeuDataViewMode[]>;"
+      "signature": "readonly modes: _angular_core.InputSignal<readonly NeuDataViewMode[]>;"
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:nextLabel",
@@ -51416,7 +51525,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly searchFields: _angular_core.InputSignal<string[]>;"
+      "signature": "readonly searchFields: _angular_core.InputSignal<readonly string[]>;"
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:searchPlaceholder",
@@ -51452,7 +51561,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly sortOptions: _angular_core.InputSignal<NeuDataViewSortOption[]>;"
+      "signature": "readonly sortOptions: _angular_core.InputSignal<readonly NeuDataViewSortOption[]>;"
     },
     {
       "id": "./data-view#NeuDataViewComponent.input:total",
@@ -52953,7 +53062,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<readonly NeuGalleryItem[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<readonly NeuImageViewerItem[]>;"
     },
     {
       "id": "./gallery#NeuGalleryComponent.input:maxZoom",
@@ -52990,6 +53099,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly objectFit: _angular_core.InputSignal<\"cover\" | \"contain\">;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:previewEnabled",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "previewEnabled",
+      "publicName": "previewEnabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly previewEnabled: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./gallery#NeuGalleryComponent.input:previewLabel",
@@ -53050,6 +53171,18 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly rotateRightLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./gallery#NeuGalleryComponent.input:showCounter",
+      "entrypoint": "./gallery",
+      "declaration": "NeuGalleryComponent",
+      "selector": "neu-gallery",
+      "propertyName": "showCounter",
+      "publicName": "showCounter",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly showCounter: _angular_core.InputSignal<boolean>;"
     },
     {
       "id": "./gallery#NeuGalleryComponent.input:showItemNavigators",
@@ -53208,102 +53341,6 @@
       "signature": "readonly zoomChange: _angular_core.OutputEmitterRef<number>;"
     },
     {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:initialIndex",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "initialIndex",
-      "publicName": "initialIndex",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly initialIndex: _angular_core.InputSignal<number>;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:items",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "items",
-      "publicName": "items",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<NeuImageViewerItem[]>;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:objectFit",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "objectFit",
-      "publicName": "objectFit",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly objectFit: _angular_core.InputSignal<\"cover\" | \"contain\">;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:showCounter",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "showCounter",
-      "publicName": "showCounter",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly showCounter: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:showThumbnails",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "showThumbnails",
-      "publicName": "showThumbnails",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly showThumbnails: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:thumbnailPosition",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "thumbnailPosition",
-      "publicName": "thumbnailPosition",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly thumbnailPosition: _angular_core.InputSignal<\"bottom\" | \"left\">;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.input:viewerEnabled",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "viewerEnabled",
-      "publicName": "viewerEnabled",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly viewerEnabled: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./image-gallery#NeuImageGalleryComponent.output:activeIndexChange",
-      "entrypoint": "./image-gallery",
-      "declaration": "NeuImageGalleryComponent",
-      "selector": "neu-image-gallery",
-      "propertyName": "activeIndexChange",
-      "publicName": "activeIndexChange",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly activeIndexChange: _angular_core.OutputEmitterRef<number>;"
-    },
-    {
       "id": "./image-viewer#NeuImageViewerDirective.input:neuImageViewer",
       "entrypoint": "./image-viewer",
       "declaration": "NeuImageViewerDirective",
@@ -53313,7 +53350,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly neuImageViewer: _angular_core.InputSignal<string | NeuImageViewerItem | NeuImageViewerItem[]>;"
+      "signature": "readonly neuImageViewer: _angular_core.InputSignal<string | NeuImageViewerItem | readonly NeuImageViewerItem[]>;"
     },
     {
       "id": "./image-viewer#NeuImageViewerDirective.input:neuIvIndex",
@@ -57136,7 +57173,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "collapsed: _angular_core.InputSignal<boolean>;"
+      "signature": "collapsed: _angular_core.InputSignal<boolean | undefined>;"
     },
     {
       "id": "./nav#NeuNavComponent.input:collapseLabel",
@@ -63061,7 +63098,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly columns: _angular_core.InputSignal<NeuTimelineGridColumn[]>;"
+      "signature": "readonly columns: _angular_core.InputSignal<readonly NeuTimelineGridColumn[]>;"
     },
     {
       "id": "./timeline-grid#NeuTimelineGridComponent.input:density",
@@ -63097,7 +63134,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly rows: _angular_core.InputSignal<NeuTimelineGridRow[]>;"
+      "signature": "readonly rows: _angular_core.InputSignal<readonly NeuTimelineGridRow[]>;"
     },
     {
       "id": "./timeline-grid#NeuTimelineGridComponent.input:selectedItemId",
@@ -63205,7 +63242,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<NeuTimelineItem[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<readonly NeuTimelineItem[]>;"
     },
     {
       "id": "./timeline#NeuTimelineComponent.input:reverse",
@@ -65721,33 +65758,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 98,
-    "exportedDeclarations": 792,
+    "entrypoints": 97,
+    "exportedDeclarations": 795,
     "declarationKinds": {
-      "class": 14,
-      "component": 95,
+      "class": 15,
+      "component": 94,
       "directive": 117,
       "function": 53,
-      "interface": 261,
-      "reexport": 49,
+      "interface": 264,
+      "reexport": 48,
       "service": 11,
       "token": 4,
-      "type": 187,
+      "type": 188,
       "variable": 1
     },
-    "publicSymbols": 5218,
+    "publicSymbols": 5233,
     "statuses": {
-      "SUPPORTED": 3295,
+      "SUPPORTED": 3286,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1923,
+      "INTERNAL/UNSUPPORTED": 1947,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1226,
-      "output": 231,
+      "input": 1221,
+      "output": 230,
       "model": 24,
-      "total": 1481
+      "total": 1475
     },
     "designTokens": 251
   }

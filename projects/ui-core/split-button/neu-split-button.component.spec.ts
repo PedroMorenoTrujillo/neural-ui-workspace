@@ -289,28 +289,43 @@ describe('NeuSplitButtonComponent', () => {
     expect(sep).toBeTruthy();
   });
 
-  it('chevronClasses should include the tone and variant CSS classes', () => {
+  it('A1 Button applies tone and variant classes to the menu trigger', () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
     fixture.componentRef.setInput('tone', 'neutral');
     fixture.componentRef.setInput('variant', 'solid');
     fixture.detectChanges();
-    const comp = fixture.componentInstance as any;
-    expect(comp.chevronClasses()).toContain('neu-button--neutral');
-    expect(comp.chevronClasses()).toContain('neu-button--solid');
+    const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
+    expect(trigger.classList).toContain('neu-button--neutral');
+    expect(trigger.classList).toContain('neu-button--solid');
   });
 
-  it('chevronClasses should include size modifier', () => {
-    // chevronClasses debe incluir el modificador de tamaño
-    // chevronClasses must include the size modifier
+  it('A1 Button applies the size modifier to the menu trigger', () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
     fixture.componentRef.setInput('size', 'sm');
     fixture.detectChanges();
-    const comp = fixture.componentInstance as any;
-    expect(comp.chevronClasses()).toContain('sm');
+    const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
+    expect(trigger.classList).toContain('neu-button--sm');
+  });
+
+  it('uses A1 Button semantics and links the menu trigger to its panel', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Save');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const primary = fixture.nativeElement.querySelector('.neu-split-button__main') as HTMLButtonElement;
+    const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
+    expect(primary.classList).toContain('neu-button');
+    expect(trigger.classList).toContain('neu-button--icon-only');
+    expect(trigger.querySelector('neural-icon')).toBeTruthy();
+    const targetId = trigger.getAttribute('aria-controls');
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.getElementById(targetId!)).toBeTruthy();
   });
 
   it('clicking a dropdown action button from the DOM should emit actionClick', async () => {

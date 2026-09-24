@@ -1,8 +1,10 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   Component,
   DestroyRef,
   ElementRef,
   Injectable,
+  PLATFORM_ID,
   ViewEncapsulation,
   computed,
   inject,
@@ -10,6 +12,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import { NeuralIcon } from '@neural-icons/angular';
+import type { NeuralIconDefinition, NeuralIconName } from '@neural-icons/core';
+import { iconBell } from '@neural-icons/core/icons/bell';
+import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
+import { iconCircleX } from '@neural-icons/core/icons/circle-x';
+import { iconInfo } from '@neural-icons/core/icons/info';
+import { iconWarning } from '@neural-icons/core/icons/warning';
+import { iconX } from '@neural-icons/core/icons/x';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 export type NeuNotificationTone = 'info' | 'success' | 'warning' | 'danger';
@@ -21,8 +31,8 @@ export interface NeuNotification {
   message: string;
   /** Auto-dismiss duration in ms (0 = persistent) */
   duration?: number;
-  /** Icon text / emoji */
-  icon?: string;
+  /** Optional consumer-registered neural icon name. */
+  icon?: NeuralIconName;
   timestamp: Date;
   read: boolean;
 }
@@ -32,11 +42,11 @@ export interface NeuNotificationOptions extends Omit<
   'id' | 'timestamp' | 'read'
 > {}
 
-const DEFAULT_ICONS: Record<NeuNotificationTone, string> = {
-  info: 'ℹ️',
-  success: '✅',
-  warning: '⚠️',
-  danger: '❌',
+const DEFAULT_ICONS: Record<NeuNotificationTone, NeuralIconDefinition> = {
+  info: iconInfo,
+  success: iconCircleCheck,
+  warning: iconWarning,
+  danger: iconCircleX,
 };
 
 /**
@@ -51,6 +61,7 @@ const DEFAULT_ICONS: Record<NeuNotificationTone, string> = {
 export class NeuNotificationService {
   private readonly ids = inject(NeuIdGenerator);
   private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /** Lista reactiva de notificaciones, con la más reciente primero / Reactive notification list, newest first */
   readonly notifications = signal<NeuNotification[]>([]);
@@ -72,14 +83,14 @@ export class NeuNotificationService {
       tone: opts.tone ?? 'info',
       title: opts.title,
       message: opts.message,
-      icon: opts.icon ?? DEFAULT_ICONS[opts.tone ?? 'info'],
+      icon: opts.icon,
       duration: opts.duration ?? 5000,
       timestamp: this.temporal.currentNow(),
       read: false,
     };
     this.notifications.update((list) => [n, ...list]);
 
-    if (n.duration && n.duration > 0) {
+    if (this.browser && n.duration && n.duration > 0) {
       const timer = setTimeout(() => this.remove(id), n.duration);
       this.timers.set(id, timer);
     }
@@ -125,7 +136,7 @@ export class NeuNotificationService {
  */
 @Component({
   selector: 'neu-notification-center',
-  imports: [OverlayModule],
+  imports: [OverlayModule, NeuralIcon],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-nc',
@@ -144,7 +155,7 @@ export class NeuNotificationService {
       [attr.aria-label]="'Notificaciones. ' + _svc.unreadCount() + ' sin leer'"
       (click)="_toggle()"
     >
-      <span class="neu-nc__bell-icon" aria-hidden="true">🔔</span>
+      <neural-icon class="neu-nc__bell-icon" [icon]="iconBell" size="1.2rem" aria-hidden="true" />
       @if (_svc.unreadCount() > 0) {
         <span class="neu-nc__badge" aria-hidden="true">{{
           _svc.unreadCount() > 99 ? '99+' : _svc.unreadCount()
@@ -202,9 +213,11 @@ export class NeuNotificationService {
               class="neu-nc__item"
               role="listitem"
               [class.neu-nc__item--unread]="!n.read"
-          [class]="'neu-nc__item--' + n.tone"
+              [class]="'neu-nc__item--' + n.tone"
             >
-              <span class="neu-nc__item-icon" aria-hidden="true">{{ n.icon }}</span>
+              <span class="neu-nc__item-icon" aria-hidden="true">
+                <neural-icon [icon]="n.icon ?? defaultIcon(n.tone)" size="1rem" />
+              </span>
               <div class="neu-nc__item-body">
                 @if (n.title) {
                   <p class="neu-nc__item-title">{{ n.title }}</p>
@@ -217,10 +230,10 @@ export class NeuNotificationService {
               <button
                 type="button"
                 class="neu-nc__item-close"
-                [attr.aria-label]="'Cerrar notificación'"
+                [attr.aria-label]="'Cerrar notificación: ' + (n.title ?? n.message)"
                 (click)="_svc.remove(n.id)"
               >
-                ×
+                <neural-icon [icon]="iconX" size="1rem" aria-hidden="true" />
               </button>
             </div>
           }
@@ -231,6 +244,8 @@ export class NeuNotificationService {
   styleUrl: './neu-notification-center.component.scss',
 })
 export class NeuNotificationCenterComponent {
+  protected readonly iconBell = iconBell;
+  protected readonly iconX = iconX;
   protected readonly _svc = inject(NeuNotificationService);
   private readonly overlay = inject(Overlay);
   private readonly temporal = inject(NeuInitialTemporalState);
@@ -338,5 +353,9 @@ export class NeuNotificationCenterComponent {
     const hours = Math.floor(mins / 60);
     if (hours < 24) return `Hace ${hours}h`;
     return `Hace ${Math.floor(hours / 24)}d`;
+  }
+
+  protected defaultIcon(tone: NeuNotificationTone): NeuralIconDefinition {
+    return DEFAULT_ICONS[tone];
   }
 }

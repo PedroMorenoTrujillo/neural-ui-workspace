@@ -21,13 +21,13 @@ const TILES: NeuDashboardTileConfig[] = [
   `,
 })
 class DashboardGridHostComponent {
-  readonly tiles: NeuDashboardTileConfig[] = [
+  tiles: NeuDashboardTileConfig[] = [
     { id: 'a', title: 'A' },
     { id: 'b', title: 'B' },
   ];
 }
 
-function setup(tiles = TILES) {
+function setup(tiles: readonly NeuDashboardTileConfig[] = TILES) {
   const f = TestBed.createComponent(NeuDashboardGridComponent);
   f.componentRef.setInput('tiles', tiles);
   f.detectChanges();
@@ -54,11 +54,12 @@ describe('NeuDashboardGridComponent', () => {
     expect(f.nativeElement.classList).toContain('neu-dg');
   });
 
-  it('should initialize _orderedTiles from tiles input', async () => {
+  it('renders the applied tile order without copying it into a writable owner', async () => {
     const f = setup();
     await f.whenStable();
     expect(f.componentInstance['_orderedTiles']().length).toBe(3);
     expect(f.componentInstance['_orderedTiles']()[0].id).toBe('a');
+    expect(f.componentInstance['_orderedTiles']()).toBe(TILES);
   });
 
   it('should expose tile slot view children once rendered', async () => {
@@ -90,11 +91,11 @@ describe('NeuDashboardGridComponent', () => {
     expect(dropList.orientation).toBe('mixed');
   });
 
-  it('_onDrop should reorder tiles and emit orderChange', async () => {
+  it('_onDrop proposes an immutable order and waits for the parent to apply it', async () => {
     const f = setup();
     await f.whenStable();
-    const changes: NeuDashboardTileConfig[][] = [];
-    f.componentInstance.orderChange.subscribe((v: NeuDashboardTileConfig[]) => changes.push(v));
+    const changes: (readonly NeuDashboardTileConfig[])[] = [];
+    f.componentInstance.orderChange.subscribe((v) => changes.push(v));
 
     // Simulate drop: move item at index 0 to index 2
     f.componentInstance['_onDrop']({
@@ -105,9 +106,10 @@ describe('NeuDashboardGridComponent', () => {
       previousContainer: { data: [...TILES] },
     } as any);
 
-    expect(f.componentInstance['_orderedTiles']()[2].id).toBe('a');
+    expect(f.componentInstance['_orderedTiles']().map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
     expect(changes.length).toBe(1);
     expect(changes[0]).not.toBe(TILES);
+    expect(changes[0].map((tile) => tile.id)).toEqual(['b', 'c', 'a']);
     expect(TILES.map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
 
     const replacement = [{ id: 'server', title: 'Server layout' }];
@@ -203,25 +205,22 @@ describe('NeuDashboardGridComponent', () => {
     }
   });
 
-  it('should clone the tiles input into the ordered signal', async () => {
+  it('uses the applied tiles directly without an input mirror', async () => {
     const f = setup();
     await f.whenStable();
-    expect(f.componentInstance['_orderedTiles']()).not.toBe(TILES);
+    expect(f.componentInstance['_orderedTiles']()).toBe(TILES);
     expect(f.componentInstance['_orderedTiles']()).toEqual(TILES);
   });
 
-  it('_onDrop reorders tiles and emits orderChange', () => {
+  it('_onDrop resolves the dragged semantic id and never changes applied tiles', () => {
     const f = setup();
-    const events: NeuDashboardTileConfig[][] = [];
-    f.componentInstance.orderChange.subscribe((tiles: NeuDashboardTileConfig[]) =>
-      events.push(tiles),
-    );
-    // Simulate a CdkDragDrop event from index 0 to index 2
-    const fakeDrop = { previousIndex: 0, currentIndex: 2 } as any;
+    const events: (readonly NeuDashboardTileConfig[])[] = [];
+    f.componentInstance.orderChange.subscribe((tiles) => events.push(tiles));
+    const fakeDrop = { previousIndex: 0, currentIndex: 2, item: { data: TILES[1] } } as any;
     f.componentInstance['_onDrop'](fakeDrop);
     expect(events.length).toBe(1);
-    expect(events[0][2].id).toBe('a');
-    expect(events[0][0].id).toBe('b');
+    expect(events[0].map((tile) => tile.id)).toEqual(['a', 'c', 'b']);
+    expect(f.componentInstance['_orderedTiles']()).toBe(TILES);
   });
 
   it('cdkDropListDropped output should invoke _onDrop through the template binding', async () => {
@@ -229,27 +228,38 @@ describe('NeuDashboardGridComponent', () => {
     await f.whenStable();
 
     const comp = f.componentInstance;
-    const changes: NeuDashboardTileConfig[][] = [];
-    comp.orderChange.subscribe((tiles: NeuDashboardTileConfig[]) => changes.push(tiles));
+    const changes: (readonly NeuDashboardTileConfig[])[] = [];
+    comp.orderChange.subscribe((tiles) => changes.push(tiles));
 
     const dropList = f.debugElement.query(By.directive(CdkDropList)).injector.get(CdkDropList);
     dropList.dropped.emit({ previousIndex: 0, currentIndex: 2 } as any);
     f.detectChanges();
 
     expect(changes).toHaveLength(1);
-    expect(comp['_orderedTiles']()[2].id).toBe('a');
+    expect(changes[0].map((tile) => tile.id)).toEqual(['b', 'c', 'a']);
+    expect(comp['_orderedTiles']()).toBe(TILES);
   });
 
-  it('orderChange emits the same tiles array when same index', () => {
+  it('does not emit a reorder for an unchanged index', () => {
     const f = setup();
-    const events: NeuDashboardTileConfig[][] = [];
-    f.componentInstance.orderChange.subscribe((tiles: NeuDashboardTileConfig[]) =>
-      events.push(tiles),
-    );
+    const events: (readonly NeuDashboardTileConfig[])[] = [];
+    f.componentInstance.orderChange.subscribe((tiles) => events.push(tiles));
     const fakeDrop = { previousIndex: 1, currentIndex: 1 } as any;
     f.componentInstance['_onDrop'](fakeDrop);
-    expect(events.length).toBe(1);
-    expect(events[0][1].id).toBe('b');
+    expect(events).toEqual([]);
+  });
+
+  it('does not propose a drop after Escape cancels an active drag', () => {
+    const f = setup();
+    const proposals: (readonly NeuDashboardTileConfig[])[] = [];
+    f.componentInstance.orderChange.subscribe((value) => proposals.push(value));
+    f.componentInstance['_onDragStarted']();
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    f.componentInstance['_onHandleKey'](escape, 'a');
+    f.componentInstance['_onDrop']({ previousIndex: 0, currentIndex: 2 } as any);
+    expect(escape.defaultPrevented).toBe(true);
+    expect(proposals).toEqual([]);
+    expect(f.componentInstance.tiles()).toBe(TILES);
   });
 
   it('should project each content block only into its matching tile', async () => {
@@ -313,7 +323,7 @@ describe('NeuDashboardGridComponent', () => {
     expect(f.nativeElement.querySelectorAll('.neu-dg__tile')).toHaveLength(1);
   });
 
-  it('reorders with arrow keys, emits the new order, and preserves handle focus', async () => {
+  it('proposes a keyboard reorder, preserves focus on rejection and follows parent acceptance', async () => {
     const f = setup();
     await f.whenStable();
     const changes: string[][] = [];
@@ -328,11 +338,15 @@ describe('NeuDashboardGridComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect(f.componentInstance['_orderedTiles']().map((tile) => tile.id)).toEqual(['b', 'a', 'c']);
+    expect(f.componentInstance['_orderedTiles']().map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
     expect(changes).toEqual([['b', 'a', 'c']]);
-    expect(document.activeElement).toBe(
-      f.nativeElement.querySelectorAll('.neu-dg__tile-handle')[1],
-    );
+    expect(document.activeElement).toBe(first);
+    f.componentRef.setInput('tiles', [TILES[1], TILES[0], TILES[2]]);
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.componentInstance['_orderedTiles']().map((tile) => tile.id)).toEqual(['b', 'a', 'c']);
+    expect(changes).toHaveLength(1);
+    expect(document.activeElement).toBe(first);
   });
 
   it('supports every arrow alias and ignores unrelated or boundary keys', async () => {
@@ -340,12 +354,93 @@ describe('NeuDashboardGridComponent', () => {
     await f.whenStable();
     const component = f.componentInstance;
     const ignored = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
-    component['_onHandleKey'](ignored, 0);
+    component['_onHandleKey'](ignored, 'a');
     expect(ignored.defaultPrevented).toBe(false);
-    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
+    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 'a');
     expect(component['_orderedTiles']().map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
-    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }), 0);
-    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowUp' }), 1);
+    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowDown' }), 'a');
+    component['_onHandleKey'](new KeyboardEvent('keydown', { key: 'ArrowUp' }), 'b');
     expect(component['_orderedTiles']().map((tile) => tile.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('accepts frozen tiles, keeps duplicate titles distinct, and emits no parent-write echo', async () => {
+    const tiles = Object.freeze([
+      Object.freeze({ id: 'first', title: 'Same' }),
+      Object.freeze({ id: 'second', title: 'Same' }),
+    ]);
+    const f = setup(tiles);
+    await f.whenStable();
+    const proposals: (readonly NeuDashboardTileConfig[])[] = [];
+    f.componentInstance.orderChange.subscribe((value) => proposals.push(value));
+    const second = f.nativeElement.querySelectorAll('.neu-dg__tile')[1];
+
+    f.componentInstance['_onDrop']({ previousIndex: 0, currentIndex: 1 } as any);
+    expect(proposals).toHaveLength(1);
+    expect(proposals[0].map((tile) => tile.id)).toEqual(['second', 'first']);
+    expect(f.nativeElement.querySelectorAll('.neu-dg__tile')[1]).toBe(second);
+    expect(tiles.map((tile) => tile.id)).toEqual(['first', 'second']);
+
+    f.componentRef.setInput('tiles', Object.freeze([tiles[1], tiles[0]]));
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelectorAll('.neu-dg__tile')[0]).toBe(second);
+    expect(proposals).toHaveLength(1);
+  });
+
+  it('uses visual horizontal arrow direction in RTL without changing domain order', async () => {
+    const f = setup();
+    f.nativeElement.setAttribute('dir', 'rtl');
+    await f.whenStable();
+    const proposals: string[][] = [];
+    f.componentInstance.orderChange.subscribe((value) =>
+      proposals.push(value.map((tile) => tile.id)),
+    );
+    const first = f.nativeElement.querySelector('.neu-dg__tile-handle') as HTMLButtonElement;
+    first.focus();
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+
+    expect(proposals).toEqual([['b', 'a', 'c']]);
+    expect(f.componentInstance.tiles()).toBe(TILES);
+    expect(document.activeElement).toBe(first);
+  });
+
+  it('treats column changes as presentation and leaves no proposal after destroy', async () => {
+    const f = setup();
+    const proposals: unknown[] = [];
+    f.componentInstance.orderChange.subscribe((value) => proposals.push(value));
+    f.componentRef.setInput('columns', 1);
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.style.getPropertyValue('--neu-dg-cols')).toBe('1');
+    expect(proposals).toEqual([]);
+    f.destroy();
+    await Promise.resolve();
+    expect(proposals).toEqual([]);
+  });
+
+  it('handles a representative 24-tile dashboard without per-tile state owners', () => {
+    const tiles = Object.freeze(
+      Array.from({ length: 24 }, (_, index) => Object.freeze({ id: `tile-${index}` })),
+    );
+    const f = setup(tiles);
+    const proposals: (readonly NeuDashboardTileConfig[])[] = [];
+    f.componentInstance.orderChange.subscribe((value) => proposals.push(value));
+    expect(f.nativeElement.querySelectorAll('.neu-dg__tile')).toHaveLength(24);
+
+    f.componentInstance['_onDrop']({ previousIndex: 0, currentIndex: 23 } as any);
+    expect(proposals).toHaveLength(1);
+    expect(proposals[0][23]).toBe(tiles[0]);
+    expect(f.componentInstance.tiles()).toBe(tiles);
+    expect(f.nativeElement.querySelectorAll('.neu-dg__tile')).toHaveLength(24);
+  });
+
+  it('releases CDK and projection lifecycle over 50 create/destroy cycles', async () => {
+    for (let index = 0; index < 50; index++) {
+      const f = setup([{ id: `cycle-${index}` }]);
+      f.destroy();
+    }
+    await Promise.resolve();
   });
 });

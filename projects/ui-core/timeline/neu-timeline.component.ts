@@ -26,6 +26,8 @@ export interface NeuTimelineMarkerContext {
 }
 
 export interface NeuTimelineItem {
+  /** Optional stable identity; visual index is the fallback when omitted. */
+  id?: string | number;
   /** Etiqueta de tiempo (ej. "Hace 2h", "12 Mar") / Time label (e.g. "2h ago", "Mar 12") */
   time?: string;
   /** Título del evento / Event title */
@@ -85,7 +87,7 @@ export class NeuTimelineMarkerDirective {
       [class.neu-timeline--density-relaxed]="density() === 'relaxed'"
       [attr.aria-label]="ariaLabel() || null"
     >
-      @for (item of renderedItems(); track item.title; let last = $last) {
+      @for (item of renderedItems(); track item.id ?? $index; let last = $last) {
         <li class="neu-timeline__item" [class.neu-timeline__item--last]="last">
           <!-- Eje izquierdo (punto + línea) -->
           <div class="neu-timeline__axis">
@@ -148,7 +150,7 @@ export class NeuTimelineComponent {
   readonly markerTpl = contentChild(NeuTimelineMarkerDirective);
   /* v8 ignore stop */
   /** Events rendered in chronological order. / Eventos renderizados en orden cronológico. */
-  readonly items = input<NeuTimelineItem[]>([]);
+  readonly items = input<readonly NeuTimelineItem[]>([]);
   /** Places the axis on the left, right or alternating sides. / Sitúa el eje a la izquierda, derecha o en lados alternos. */
   readonly align = input<NeuTimelineAlign>('left');
   /** Spatial compactness. / Compactación espacial. */

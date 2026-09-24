@@ -55,7 +55,7 @@ describe('NeuStepperComponent', () => {
     const steps: NeuStepperStep[] = [{ label: 'Paso 1', description: 'Rellena tus datos' }];
     const { f } = mk({ steps });
     const button: HTMLButtonElement = f.nativeElement.querySelector('.neu-stepper__step-btn');
-    expect(button.getAttribute('aria-label')).toBe('Paso 1 - Rellena tus datos');
+    expect(button.getAttribute('aria-label')).toBe('Paso 1 - Rellena tus datos, step 1 of 1');
   });
 
   it('should mark steps completed (i < activeStep)', () => {
@@ -303,5 +303,26 @@ describe('NeuStepperComponent', () => {
     comp.next();
     // stepChange not emitted when already on last step (index 2 = last of 3 steps)
     expect(emitted.length).toBe(0);
+  });
+
+  it('next and prev propose from applied state without writing it', () => {
+    const { comp } = mk({ activeStep: 1 });
+    const emitted: number[] = [];
+    comp.stepChange.subscribe((value: number) => emitted.push(value));
+    comp.next();
+    expect(emitted).toEqual([2]);
+    expect(comp.activeStep()).toBe(1);
+    comp.prev();
+    expect(emitted).toEqual([2, 0]);
+  });
+
+  it('imperative navigation rejects disabled and out-of-range targets', () => {
+    const { comp } = mk({ steps: [{ label: 'One' }, { label: 'Two', disabled: true }] });
+    const emitted: number[] = [];
+    comp.stepChange.subscribe((value: number) => emitted.push(value));
+    comp.next();
+    comp.goTo(-1);
+    comp.goTo(5);
+    expect(emitted).toEqual([]);
   });
 });

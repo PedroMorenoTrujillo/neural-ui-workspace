@@ -231,6 +231,29 @@ describe('NeuCodeBlockComponent', () => {
     f.detectChanges();
     const btn = f.nativeElement.querySelector('.neu-code-block__copy');
     expect(btn.textContent).toContain('Copied!');
+    expect(f.nativeElement.querySelector('[role="status"]').textContent).toContain('Copied!');
+    vi.useRealTimers();
+  });
+
+  it('ignores a late clipboard completion after destroy without scheduling feedback', async () => {
+    vi.useFakeTimers();
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    let finish!: () => void;
+    const writeText = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
+    const doc: Document = TestBed.inject(DOCUMENT);
+    const win = doc.defaultView as Window & typeof globalThis;
+    Object.defineProperty(win, 'navigator', {
+      value: { ...win.navigator, clipboard: { writeText } },
+      configurable: true,
+    });
+    f.componentInstance.copy();
+    const baselineTimers = vi.getTimerCount();
+    f.destroy();
+    finish();
+    await Promise.resolve();
+    expect(vi.getTimerCount()).toBe(baselineTimers);
+    expect(f.componentInstance['copied']()).toBe(false);
     vi.useRealTimers();
   });
 

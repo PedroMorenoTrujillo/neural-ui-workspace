@@ -19,12 +19,12 @@ const ROWS: NeuTimelineGridRow[] = [
   {
     id: 'design',
     label: 'Design',
-      items: [{ id: 'kickoff', title: 'Kickoff', start: 'mon', span: 2, tone: 'info' }],
+    items: [{ id: 'kickoff', title: 'Kickoff', start: 'mon', span: 2, tone: 'info' }],
   },
   {
     id: 'engineering',
     label: 'Engineering',
-      items: [{ id: 'build', title: 'Build', start: 'wed', tone: 'success' }],
+    items: [{ id: 'build', title: 'Build', start: 'wed', tone: 'success' }],
   },
 ];
 
@@ -160,5 +160,82 @@ describe('NeuTimelineGridComponent', () => {
     expect(component.itemAriaLabel(ROWS[0], ROWS[0].items[0])).toBe('Design: Kickoff');
     expect(component.slotAriaLabel(ROWS[0], COLUMNS[0])).toBe('Design: Mon');
     expect(component.slotKey('design', 'mon')).toBe('design:mon');
+  });
+
+  it('projects frozen rows once per applied input and drops removed time columns', () => {
+    const fixture = TestBed.createComponent(NeuTimelineGridComponent);
+    const rows = Object.freeze([
+      Object.freeze({
+        id: 'r',
+        label: 'Release',
+        items: Object.freeze([
+          { id: 'a', title: 'Start', start: 'a' },
+          { id: 'b', title: 'End', start: 'b' },
+        ]),
+      }),
+    ]);
+    fixture.componentRef.setInput(
+      'columns',
+      Object.freeze([
+        { id: 'a', label: 'A' },
+        { id: 'b', label: 'B' },
+      ]),
+    );
+    fixture.componentRef.setInput('rows', rows);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(component.validItems(rows[0])).toBe(component.validItems(rows[0]));
+    expect(component.validItems(rows[0])).toHaveLength(2);
+
+    fixture.componentRef.setInput('columns', Object.freeze([{ id: 'b', label: 'B' }]));
+    fixture.detectChanges();
+    expect(component.validItems(rows[0]).map((item) => item.id)).toEqual(['b']);
+    expect(fixture.nativeElement.querySelectorAll('.neu-timeline-grid__item')).toHaveLength(1);
+  });
+
+  it('keeps authored temporal order at inline-start in RTL and bounds event spans', () => {
+    const fixture = TestBed.createComponent(NeuTimelineGridComponent);
+    fixture.nativeElement.setAttribute('dir', 'rtl');
+    fixture.componentRef.setInput('columns', [
+      { id: 'early', label: 'Early' },
+      { id: 'late', label: 'Late' },
+    ]);
+    fixture.componentRef.setInput('rows', [
+      { id: 'r', label: 'Row', items: [{ id: 'wide', title: 'Wide', start: 'late', span: 99 }] },
+    ]);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    expect(getComputedStyle(fixture.nativeElement).direction).toBe('rtl');
+    expect(component.slotGridColumn('early')).toBe('1 / span 1');
+    expect(component.itemGridColumn({ id: 'wide', title: 'Wide', start: 'late', span: 99 })).toBe(
+      '2 / span 1',
+    );
+  });
+
+  it('renders a representative 100-row/500-event grid without rebuilding items on selection writes', () => {
+    const fixture = TestBed.createComponent(NeuTimelineGridComponent);
+    const columns = Array.from({ length: 12 }, (_, index) => ({
+      id: `c${index}`,
+      label: `Day ${index}`,
+    }));
+    const rows = Array.from({ length: 100 }, (_, row) => ({
+      id: `r${row}`,
+      label: `Row ${row}`,
+      items: Array.from({ length: 5 }, (_, item) => ({
+        id: `r${row}-i${item}`,
+        title: `Event ${item}`,
+        start: `c${item}`,
+      })),
+    }));
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('rows', rows);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.neu-timeline-grid__item')).toHaveLength(500);
+    const projected = fixture.componentInstance.validItems(rows[0]);
+    const first = fixture.nativeElement.querySelector('.neu-timeline-grid__item');
+    fixture.componentRef.setInput('selectedItemId', 'r0-i0');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.validItems(rows[0])).toBe(projected);
+    expect(fixture.nativeElement.querySelector('.neu-timeline-grid__item')).toBe(first);
   });
 });

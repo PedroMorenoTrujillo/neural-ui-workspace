@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   OnChanges,
@@ -35,12 +36,25 @@ export interface NeuTerminalCommand {
       @if (welcomeMessage()) {
         <p class="neu-terminal__welcome">{{ welcomeMessage() }}</p>
       }
-      <div class="neu-terminal__transcript" role="log" aria-live="polite" aria-relevant="additions text">
+      <div
+        class="neu-terminal__transcript"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+      >
         @for (entry of entries(); track entry.id) {
           @if (entry.type === 'command') {
-            <div class="neu-terminal__command"><span class="neu-terminal__prompt">{{ prompt() }}</span><span>{{ entry.text }}</span></div>
+            <div class="neu-terminal__command">
+              <span class="neu-terminal__prompt">{{ prompt() }}</span
+              ><span>{{ entry.text }}</span>
+            </div>
           } @else {
-            <div class="neu-terminal__output" [class]="'neu-terminal__output neu-terminal__output--' + entry.kind">{{ entry.text }}</div>
+            <div
+              class="neu-terminal__output"
+              [class]="'neu-terminal__output neu-terminal__output--' + entry.kind"
+            >
+              {{ entry.text }}
+            </div>
           }
         }
       </div>
@@ -58,6 +72,8 @@ export interface NeuTerminalCommand {
           [attr.aria-label]="inputAriaLabel()"
           [value]="draft()"
           (input)="draft.set($any($event.target).value)"
+          (compositionstart)="onCompositionStart()"
+          (compositionend)="onCompositionEnd()"
           (keydown)="onKeydown($event)"
         />
       </div>
@@ -80,45 +96,55 @@ export class NeuTerminalComponent implements OnChanges {
   /** Replaces the externally-controlled transcript without creating command events. */
   readonly output = input<readonly NeuTerminalLine[]>([]);
   readonly commandSubmit = output<NeuTerminalCommand>();
-  readonly entries = signal<TerminalEntry[]>([]);
+  private readonly localEntries = signal<LocalEntry[]>([]);
+  /** Applied output is projected, never copied into a second persistent transcript owner. */
+  readonly entries = computed<TerminalEntry[]>(() => {
+    const external = this.output();
+    const local = this.localEntries();
+    const projected: TerminalEntry[] = [];
+    let localIndex = 0;
+    for (let index = 0; index <= external.length; index++) {
+      while (localIndex < local.length && local[localIndex].afterOutput <= index) {
+        projected.push(local[localIndex++]);
+      }
+      if (index < external.length) {
+        const line = external[index];
+        projected.push({
+          id: -index - 1,
+          type: 'output',
+          text: line.text,
+          kind: line.kind ?? 'output',
+        });
+      }
+    }
+    while (localIndex < local.length) projected.push(local[localIndex++]);
+    return projected;
+  });
   readonly draft = signal('');
   private history: string[] = [];
   private historyIndex = -1;
-  private outputSnapshot: readonly NeuTerminalLine[] = [];
+  private previousOutputLength = 0;
+  private isComposing = false;
   private nextId = 0;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['output']) {
-      const external = this.output();
-      if (external !== this.outputSnapshot) {
-        const previous = this.outputSnapshot;
-        this.outputSnapshot = external;
-        const extendsPrevious =
-          external.length >= previous.length &&
-          previous.every(
-            (line, index) =>
-              line.text === external[index]?.text && line.kind === external[index]?.kind,
-          );
-        if (!external.length && previous.length) {
-          this.entries.set([]);
-        } else if (extendsPrevious) {
-          const additions = external.slice(previous.length).map((line) => this.outputEntry(line));
-          if (additions.length) this.entries.update((entries) => [...entries, ...additions]);
-        } else {
-          this.entries.update((entries) => [
-            ...entries.filter((entry) => entry.type === 'command'),
-            ...external.map((line) => this.outputEntry(line)),
-          ]);
-        }
-        this.scrollToEnd();
-      }
+      const length = this.output().length;
+      if (!length && this.previousOutputLength) this.localEntries.set([]);
+      this.previousOutputLength = length;
+      this.scrollToEnd();
     }
-    if (changes['response'] && this.response() && this.entries().some((entry) => entry.type === 'command')) {
+    if (
+      changes['response'] &&
+      this.response() &&
+      this.localEntries().some((entry) => entry.type === 'command')
+    ) {
       this.appendOutput(this.response()!);
     }
   }
 
   onKeydown(event: KeyboardEvent): void {
+    if (this.isComposing || event.isComposing || event.keyCode === 229) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       this.submit();
@@ -135,11 +161,22 @@ export class NeuTerminalComponent implements OnChanges {
     }
   }
 
+  onCompositionStart(): void {
+    this.isComposing = true;
+  }
+
+  onCompositionEnd(): void {
+    this.isComposing = false;
+  }
+
   submit(): void {
-    if (this.disabled() || this.readonly()) return;
+    if (this.disabled() || this.readonly() || this.isComposing) return;
     const command = this.draft().trim();
     if (!command) return;
-    this.entries.update((entries) => [...entries, { id: ++this.nextId, type: 'command', text: command }]);
+    this.localEntries.update((entries) => [
+      ...entries,
+      { id: ++this.nextId, type: 'command', text: command, afterOutput: this.output().length },
+    ]);
     this.history.push(command);
     this.historyIndex = this.history.length;
     this.draft.set('');
@@ -148,12 +185,15 @@ export class NeuTerminalComponent implements OnChanges {
   }
 
   appendOutput(text: string, kind: NeuTerminalLine['kind'] = 'output'): void {
-    this.entries.update((entries) => [...entries, this.outputEntry({ text, kind })]);
+    this.localEntries.update((entries) => [
+      ...entries,
+      { id: ++this.nextId, type: 'output', text, kind, afterOutput: this.output().length },
+    ]);
     this.scrollToEnd();
   }
 
   clear(): void {
-    this.entries.set([]);
+    this.localEntries.set([]);
   }
 
   focusInput(): void {
@@ -164,10 +204,6 @@ export class NeuTerminalComponent implements OnChanges {
     if (!this.history.length) return;
     this.historyIndex = Math.max(0, Math.min(this.history.length, this.historyIndex + direction));
     this.draft.set(this.history[this.historyIndex] ?? '');
-  }
-
-  private outputEntry(line: NeuTerminalLine): TerminalEntry {
-    return { id: ++this.nextId, type: 'output', text: line.text, kind: line.kind ?? 'output' };
   }
 
   private scrollToEnd(): void {
@@ -184,4 +220,8 @@ interface TerminalEntry {
   type: 'command' | 'output';
   text: string;
   kind?: NeuTerminalLine['kind'];
+}
+
+interface LocalEntry extends TerminalEntry {
+  afterOutput: number;
 }

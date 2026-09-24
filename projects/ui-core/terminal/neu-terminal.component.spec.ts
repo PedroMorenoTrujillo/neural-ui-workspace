@@ -12,10 +12,16 @@ describe('NeuTerminalComponent', () => {
 
   it('renders welcome and external output as plain text', () => {
     fixture.componentRef.setInput('welcomeMessage', 'Welcome');
-    fixture.componentRef.setInput('output', [{ text: '<img src=x onerror=alert(1)>', kind: 'error' }]);
+    fixture.componentRef.setInput('output', [
+      { text: '<img src=x onerror=alert(1)>', kind: 'error' },
+    ]);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.neu-terminal__welcome').textContent).toContain('Welcome');
-    expect(fixture.nativeElement.querySelector('.neu-terminal__output').textContent).toContain('<img src=x');
+    expect(fixture.nativeElement.querySelector('.neu-terminal__welcome').textContent).toContain(
+      'Welcome',
+    );
+    expect(fixture.nativeElement.querySelector('.neu-terminal__output').textContent).toContain(
+      '<img src=x',
+    );
     expect(fixture.nativeElement.querySelector('img')).toBeNull();
   });
 
@@ -30,10 +36,14 @@ describe('NeuTerminalComponent', () => {
     fixture.detectChanges();
     expect(emitted).toHaveBeenCalledTimes(1);
     expect(emitted).toHaveBeenCalledWith({ command: 'status' });
-    expect(fixture.nativeElement.querySelector('.neu-terminal__command').textContent).toContain('status');
+    expect(fixture.nativeElement.querySelector('.neu-terminal__command').textContent).toContain(
+      'status',
+    );
     fixture.componentRef.setInput('response', 'healthy');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('.neu-terminal__output').textContent).toContain('healthy');
+    expect(fixture.nativeElement.querySelector('.neu-terminal__output').textContent).toContain(
+      'healthy',
+    );
   });
 
   it('provides deterministic history and never emits commands for programmatic output', () => {
@@ -59,7 +69,7 @@ describe('NeuTerminalComponent', () => {
     component.appendOutput('ready');
     component.clear();
     expect(emitted).toHaveBeenCalledTimes(2);
-    expect(component.entries()).toEqual([]);
+    expect(component.entries().map((entry) => entry.text)).toEqual(['external']);
   });
 
   it('does not submit when disabled or readonly', () => {
@@ -142,5 +152,35 @@ describe('NeuTerminalComponent', () => {
     expect(component.entries().map((entry) => entry.text)).toEqual(['status', 'replacement']);
     fixture.destroy();
     await Promise.resolve();
+  });
+
+  it('projects reconstructed applied output without retaining the previous rows', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('output', [{ text: 'first' }]);
+    fixture.detectChanges();
+    const first = component.entries();
+    fixture.componentRef.setInput('output', [{ text: 'replacement' }]);
+    fixture.detectChanges();
+    expect(component.entries().map((entry) => entry.text)).toEqual(['replacement']);
+    expect(first.map((entry) => entry.text)).toEqual(['first']);
+  });
+
+  it('does not submit or navigate history while an IME composition is active', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const emitted = vi.spyOn(component.commandSubmit, 'emit');
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = '変換';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    component.submit();
+    expect(emitted).not.toHaveBeenCalled();
+    expect(component.draft()).toBe('変換');
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(emitted).toHaveBeenCalledOnce();
+    expect(emitted).toHaveBeenCalledWith({ command: '変換' });
   });
 });

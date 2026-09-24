@@ -34,6 +34,12 @@ const completed = new Map([
   ['B9', 'Splitter ScrollArea'],
   ['B5', 'Compare CompareHandle CompareIndicator CompareItem'],
   ['B2', 'Menu MenuButton Menubar TieredMenu'],
+  ['B1', 'Breadcrumb Dock Nav Stepper'],
+  ['B3', 'Carousel SplitButton SpeedDial'],
+  ['B4', 'BlockUI ConfirmDialog ConfirmPopup NotificationCenter'],
+  ['B10', 'CodeBlock Terminal Timeline TimelineGrid'],
+  ['B6', 'DashboardGrid DataView'],
+  ['C1', 'Gallery'],
   ['A1', 'Button ButtonGroup Tag Toolbar'],
   ['A2', 'Alert Badge Chip EmptyState ToastContainer'],
   ['A4', 'MeterGroup ProgressBar StatsCard FormField InputGroup'],
@@ -393,7 +399,9 @@ currentRoadmap = currentRoadmap
   .replace('A1 gives Icon/Button first; A2 can then safely audit consumers.', 'A0.2 externalized Icon; A1/A2/A4 certified the dependent action, feedback and metrics/form-shell surfaces.')
   .replace('planned removals', `current removals; ${summary.physicallyRemovedHistorical} products physically retired in D1`)
   .replace(`## WAVE D — removals (${summary.remove} actual components; 1 phase, execute before dependent B/C work)`, `## WAVE D — D1 completed (${summary.physicallyRemovedHistorical} historical products removed)`)
-  .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt');
+  .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt')
+  .replace('C1 must prove ImageGallery-only counter/viewer behavior before its merge; ImageViewer is a **directive**, not a 99th component.', 'C1 completed the ImageGallery merge into Gallery and physically removed its runtime/entrypoint; ImageViewer remains an independent directive using the one private preview engine.')
+  .replace('GPT-6 ASTRA only for high-impact design review before C1/C3/C4/C5/C6', 'GPT-6 ASTRA only for high-impact design review before C3/C4/C5/C6');
 const currentDependencySection = dependencySection
   .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch.')
   .replace('(65 → 22)', `(${summary.activePending + summary.remove} → ${summary.implementationBatches})`);

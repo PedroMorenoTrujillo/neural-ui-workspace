@@ -17,7 +17,7 @@ import {
 const ITEMS = [
   { src: 'img1.jpg', alt: 'Imagen 1', caption: 'Caption 1' },
   { src: 'img2.jpg', alt: 'Imagen 2' },
-  { src: 'img3.jpg' },
+  { src: 'img3.jpg', alt: '' },
 ];
 
 function mkData(partial: Partial<{ items: typeof ITEMS; initialIndex: number }> = {}) {
@@ -162,35 +162,35 @@ describe('NeuImageViewerOverlayComponent', () => {
     expect(f.componentInstance._scale()).toBeLessThan(1);
   });
 
-  it('_onMouseDown triggers pan on move', () => {
+  it('pans with captured Pointer Events only while zoomed above one', () => {
     const { f } = setupOverlay();
     const comp = f.componentInstance;
+    comp._zoom(0.25);
     const mockDown = {
       button: 0,
+      pointerId: 1,
       clientX: 100,
       clientY: 100,
-      preventDefault: vi.fn(),
-    } as unknown as MouseEvent;
-    comp._onMouseDown(mockDown);
-    const moveEvent = new MouseEvent('mousemove', { clientX: 120, clientY: 115 });
-    window.dispatchEvent(moveEvent);
+      currentTarget: f.nativeElement.querySelector('.neu-iv__stage'),
+    } as unknown as PointerEvent;
+    comp._onPointerDown(mockDown);
+    comp._onPointerMove({ pointerId: 1, clientX: 120, clientY: 115 } as PointerEvent);
     expect(comp._panX()).toBe(20);
     expect(comp._panY()).toBe(15);
-    const upEvent = new MouseEvent('mouseup');
-    window.dispatchEvent(upEvent);
+    comp._onPointerUp({ pointerId: 1, clientX: 120, clientY: 115 } as PointerEvent);
   });
 
-  it('_onMouseDown ignores non-left-button clicks', () => {
+  it('ignores non-primary pointer buttons', () => {
     const { f } = setupOverlay();
     const comp = f.componentInstance;
-    comp._onMouseDown({
+    comp._zoom(0.25);
+    comp._onPointerDown({
       button: 2,
+      pointerId: 1,
       clientX: 100,
       clientY: 100,
-      preventDefault: vi.fn(),
-    } as unknown as MouseEvent);
-    const moveEvent = new MouseEvent('mousemove', { clientX: 200, clientY: 200 });
-    window.dispatchEvent(moveEvent);
+    } as unknown as PointerEvent);
+    comp._onPointerMove({ pointerId: 1, clientX: 200, clientY: 200 } as PointerEvent);
     expect(comp._panX()).toBe(0);
   });
 
@@ -285,7 +285,7 @@ describe('NeuImageViewerDirective', () => {
     f.detectChanges();
     const dir = f.debugElement.children[0].injector.get(NeuImageViewerDirective);
     const items = (dir as any)._normalizeItems();
-    expect(items).toEqual([{ src: 'x.jpg' }]);
+    expect(items).toEqual([{ src: 'x.jpg', alt: '' }]);
   });
 
   it('_normalizeItems with object input should wrap in array', () => {
@@ -551,15 +551,12 @@ describe('NeuImageViewerDirective', () => {
     expect(f.componentInstance._scale()).toBeGreaterThan(1);
 
     stage.dispatchEvent(
-      new MouseEvent('mousedown', { button: 0, clientX: 10, clientY: 10, bubbles: true }),
+      new PointerEvent('pointerdown', { pointerId: 1, button: 0, clientX: 10, clientY: 10, bubbles: true }),
     );
-    (f.componentInstance as any)._dragging = false;
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 100 }));
-    expect(f.componentInstance._panX()).toBe(0);
-    expect(f.componentInstance._panY()).toBe(0);
-    (f.componentInstance as any)._dragging = true;
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 25, clientY: 30 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
+    stage.dispatchEvent(
+      new PointerEvent('pointermove', { pointerId: 1, clientX: 25, clientY: 30, bubbles: true }),
+    );
+    stage.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true }));
 
     expect(f.componentInstance._panX()).toBe(15);
     expect(f.componentInstance._panY()).toBe(20);

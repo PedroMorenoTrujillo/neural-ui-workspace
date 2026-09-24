@@ -34,10 +34,13 @@
 .neu-iv__toolbar-actions {
   display: flex;
   gap: 4px;
+  min-inline-size: 0;
+  overflow-x: auto;
 }
 
 .neu-iv__btn {
   all: unset;
+  flex: 0 0 44px;
   width: 44px;
   height: 44px;
   display: flex;

@@ -59,6 +59,9 @@ html[data-theme='dark'] {
 .neu-data-view__items {
   display: grid;
   gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .neu-data-view--grid .neu-data-view__items {

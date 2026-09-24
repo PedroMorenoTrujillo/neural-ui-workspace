@@ -5,6 +5,7 @@
 .neu-carousel__item { min-inline-size: 0; }
 .neu-carousel__nav { inline-size: 2.75rem; block-size: 2.75rem; border: 1px solid var(--neu-border); border-radius: 999px; background: var(--neu-surface); color: var(--neu-text); font-size: 1.5rem; cursor: pointer; }
 .neu-carousel__nav:disabled { opacity: .45; }
+.neu-carousel__root:dir(rtl) .neu-carousel__nav { transform: scaleX(-1); }
 .neu-carousel__controls { display: flex; justify-content: center; align-items: center; gap: var(--neu-space-2); min-block-size: 2.75rem; }
 .neu-carousel__indicators { display: flex; justify-content: center; gap: 0; }
 .neu-carousel__indicators button { inline-size: 2rem; block-size: 2.75rem; padding: 0; border: 0; border-radius: 999px; background: transparent; display: grid; place-items: center; cursor: pointer; }
