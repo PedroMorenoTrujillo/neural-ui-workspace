@@ -258,9 +258,13 @@
       "types": "./types/neural-ui-core-command-palette.d.ts",
       "exports": [
         "./command-palette#NeuCommand",
+        "./command-palette#NeuCommandAction",
+        "./command-palette#NeuCommandBase",
+        "./command-palette#NeuCommandLink",
         "./command-palette#NeuCommandPaletteComponent",
+        "./command-palette#NeuCommandPaletteItemContext",
         "./command-palette#NeuCommandPaletteItemDirective",
-        "./command-palette#NeuCommandPaletteService"
+        "./command-palette#NeuCommandRouterLink"
       ]
     },
     {
@@ -8076,65 +8080,182 @@
       "id": "./command-palette#NeuCommand",
       "entrypoint": "./command-palette",
       "name": "NeuCommand",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuCommand = NeuCommandAction | NeuCommandRouterLink | NeuCommandLink;",
+      "members": []
+    },
+    {
+      "id": "./command-palette#NeuCommandAction",
+      "entrypoint": "./command-palette",
+      "name": "NeuCommandAction",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuCommand {\n}",
+      "signature": "interface NeuCommandAction extends NeuCommandBase {\n}",
       "members": [
         {
-          "id": "./command-palette#NeuCommand.property:action",
+          "id": "./command-palette#NeuCommandAction.property:action",
           "name": "action",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "action: () => void;"
+          "signature": "readonly action?: never;"
         },
         {
-          "id": "./command-palette#NeuCommand.property:disabled",
+          "id": "./command-palette#NeuCommandAction.property:href",
+          "name": "href",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly href?: never;"
+        },
+        {
+          "id": "./command-palette#NeuCommandAction.property:kind",
+          "name": "kind",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly kind: 'action';"
+        },
+        {
+          "id": "./command-palette#NeuCommandAction.property:routerLink",
+          "name": "routerLink",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly routerLink?: never;"
+        },
+        {
+          "id": "./command-palette#NeuCommandAction.property:target",
+          "name": "target",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly target?: never;"
+        }
+      ]
+    },
+    {
+      "id": "./command-palette#NeuCommandBase",
+      "entrypoint": "./command-palette",
+      "name": "NeuCommandBase",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuCommandBase {\n}",
+      "members": [
+        {
+          "id": "./command-palette#NeuCommandBase.property:description",
+          "name": "description",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly description?: string;"
+        },
+        {
+          "id": "./command-palette#NeuCommandBase.property:disabled",
           "name": "disabled",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "disabled?: boolean;"
+          "signature": "readonly disabled?: boolean;"
         },
         {
-          "id": "./command-palette#NeuCommand.property:group",
+          "id": "./command-palette#NeuCommandBase.property:group",
           "name": "group",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "group?: string;"
+          "signature": "readonly group?: string;"
         },
         {
-          "id": "./command-palette#NeuCommand.property:icon",
+          "id": "./command-palette#NeuCommandBase.property:icon",
           "name": "icon",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: string;"
+          "signature": "readonly icon?: string;"
         },
         {
-          "id": "./command-palette#NeuCommand.property:id",
+          "id": "./command-palette#NeuCommandBase.property:id",
           "name": "id",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "id: string;"
+          "signature": "readonly id: string;"
         },
         {
-          "id": "./command-palette#NeuCommand.property:label",
+          "id": "./command-palette#NeuCommandBase.property:keywords",
+          "name": "keywords",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly keywords?: readonly string[];"
+        },
+        {
+          "id": "./command-palette#NeuCommandBase.property:label",
           "name": "label",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "label: string;"
+          "signature": "readonly label: string;"
         },
         {
-          "id": "./command-palette#NeuCommand.property:shortcut",
+          "id": "./command-palette#NeuCommandBase.property:shortcut",
           "name": "shortcut",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "shortcut?: string;"
+          "signature": "readonly shortcut?: string;"
+        }
+      ]
+    },
+    {
+      "id": "./command-palette#NeuCommandLink",
+      "entrypoint": "./command-palette",
+      "name": "NeuCommandLink",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuCommandLink extends NeuCommandBase {\n}",
+      "members": [
+        {
+          "id": "./command-palette#NeuCommandLink.property:action",
+          "name": "action",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly action?: never;"
+        },
+        {
+          "id": "./command-palette#NeuCommandLink.property:href",
+          "name": "href",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly href: string;"
+        },
+        {
+          "id": "./command-palette#NeuCommandLink.property:kind",
+          "name": "kind",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly kind: 'link';"
+        },
+        {
+          "id": "./command-palette#NeuCommandLink.property:routerLink",
+          "name": "routerLink",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly routerLink?: never;"
+        },
+        {
+          "id": "./command-palette#NeuCommandLink.property:target",
+          "name": "target",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly target?: string;"
         }
       ]
     },
@@ -8148,52 +8269,40 @@
       "signature": "declare class NeuCommandPaletteComponent {\n}",
       "members": [
         {
-          "id": "./command-palette#NeuCommandPaletteComponent.method:activeOptionId",
-          "name": "activeOptionId",
+          "id": "./command-palette#NeuCommandPaletteComponent.input:commands",
+          "name": "commands",
+          "kind": "input",
+          "publicName": "commands",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly commands: _angular_core.InputSignal<readonly NeuCommand[]>;"
+        },
+        {
+          "id": "./command-palette#NeuCommandPaletteComponent.method:close",
+          "name": "close",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "activeOptionId(): string | null;"
+          "signature": "close(): void;"
         },
         {
-          "id": "./command-palette#NeuCommandPaletteComponent.method:execute",
-          "name": "execute",
+          "id": "./command-palette#NeuCommandPaletteComponent.method:open",
+          "name": "open",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "execute(command: NeuCommand): void;"
+          "signature": "open(): void;"
         },
         {
-          "id": "./command-palette#NeuCommandPaletteComponent.method:optionId",
-          "name": "optionId",
-          "kind": "method",
+          "id": "./command-palette#NeuCommandPaletteComponent.output:commandAction",
+          "name": "commandAction",
+          "kind": "output",
+          "publicName": "commandAction",
+          "required": false,
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "optionId(index: number): string;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteComponent.method:setActive",
-          "name": "setActive",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setActive(index: number): void;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteComponent.property:itemTpl",
-          "name": "itemTpl",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly itemTpl: i0.Signal<NeuCommandPaletteItemDirective | undefined>;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteComponent.property:listId",
-          "name": "listId",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly listId: string;"
+          "status": "SUPPORTED",
+          "signature": "readonly commandAction: _angular_core.OutputEmitterRef<NeuCommandAction>;"
         },
         {
           "id": "./command-palette#NeuCommandPaletteComponent.property:ɵcmp",
@@ -8201,7 +8310,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuCommandPaletteComponent, \"neu-command-palette\", never, {}, {}, [\n    \"itemTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCommandPaletteComponent, \"neu-command-palette\", never, {\n    \"commands\": {\n        \"alias\": \"commands\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"commandAction\": \"commandAction\";\n}, [\n    \"itemTpl\"\n], never, true, never>;"
         },
         {
           "id": "./command-palette#NeuCommandPaletteComponent.property:ɵfac",
@@ -8209,7 +8318,33 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuCommandPaletteComponent, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuCommandPaletteComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteItemContext",
+      "entrypoint": "./command-palette",
+      "name": "NeuCommandPaletteItemContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuCommandPaletteItemContext {\n}",
+      "members": [
+        {
+          "id": "./command-palette#NeuCommandPaletteItemContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuCommand;"
+        },
+        {
+          "id": "./command-palette#NeuCommandPaletteItemContext.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
         }
       ]
     },
@@ -8228,7 +8363,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: i0.ɵɵDirectiveDeclaration<NeuCommandPaletteItemDirective, \"ng-template[neuCommandPaletteItem]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuCommandPaletteItemDirective, \"ng-template[neuCommandPaletteItem]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./command-palette#NeuCommandPaletteItemDirective.property:ɵfac",
@@ -8236,7 +8371,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuCommandPaletteItemDirective, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuCommandPaletteItemDirective, never>;"
         },
         {
           "id": "./command-palette#NeuCommandPaletteItemDirective.property:templateRef",
@@ -8244,97 +8379,57 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuCommand;\n    index: number;\n}>;"
+          "signature": "readonly templateRef: TemplateRef<NeuCommandPaletteItemContext>;"
         }
       ]
     },
     {
-      "id": "./command-palette#NeuCommandPaletteService",
+      "id": "./command-palette#NeuCommandRouterLink",
       "entrypoint": "./command-palette",
-      "name": "NeuCommandPaletteService",
-      "kind": "service",
+      "name": "NeuCommandRouterLink",
+      "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "declare class NeuCommandPaletteService {\n}",
+      "signature": "interface NeuCommandRouterLink extends NeuCommandBase {\n}",
       "members": [
         {
-          "id": "./command-palette#NeuCommandPaletteService.method:close",
-          "name": "close",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "close(): void;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.method:execute",
-          "name": "execute",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "execute(id: string): void;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.method:open",
-          "name": "open",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "open(): void;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.method:register",
-          "name": "register",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "register(...commands: NeuCommand[]): void;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.method:unregister",
-          "name": "unregister",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "unregister(...ids: string[]): void;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.property:filteredCommands",
-          "name": "filteredCommands",
+          "id": "./command-palette#NeuCommandRouterLink.property:action",
+          "name": "action",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly filteredCommands: i0.Signal<NeuCommand[]>;"
+          "signature": "readonly action?: never;"
         },
         {
-          "id": "./command-palette#NeuCommandPaletteService.property:isOpen",
-          "name": "isOpen",
+          "id": "./command-palette#NeuCommandRouterLink.property:href",
+          "name": "href",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly isOpen: i0.WritableSignal<boolean>;"
+          "signature": "readonly href?: never;"
         },
         {
-          "id": "./command-palette#NeuCommandPaletteService.property:ɵfac",
-          "name": "ɵfac",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuCommandPaletteService, never>;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.property:ɵprov",
-          "name": "ɵprov",
-          "kind": "property",
-          "static": true,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵprov: i0.ɵɵInjectableDeclaration<any>;"
-        },
-        {
-          "id": "./command-palette#NeuCommandPaletteService.property:query",
-          "name": "query",
+          "id": "./command-palette#NeuCommandRouterLink.property:kind",
+          "name": "kind",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly query: i0.WritableSignal<string>;"
+          "signature": "readonly kind: 'router';"
+        },
+        {
+          "id": "./command-palette#NeuCommandRouterLink.property:routerLink",
+          "name": "routerLink",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly routerLink: string | readonly unknown[];"
+        },
+        {
+          "id": "./command-palette#NeuCommandRouterLink.property:target",
+          "name": "target",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly target?: never;"
         }
       ]
     },
@@ -50934,6 +51029,30 @@
       "signature": "readonly valueCommitted: _angular_core.OutputEmitterRef<string>;"
     },
     {
+      "id": "./command-palette#NeuCommandPaletteComponent.input:commands",
+      "entrypoint": "./command-palette",
+      "declaration": "NeuCommandPaletteComponent",
+      "selector": "neu-command-palette",
+      "propertyName": "commands",
+      "publicName": "commands",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly commands: _angular_core.InputSignal<readonly NeuCommand[]>;"
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.output:commandAction",
+      "entrypoint": "./command-palette",
+      "declaration": "NeuCommandPaletteComponent",
+      "selector": "neu-command-palette",
+      "propertyName": "commandAction",
+      "publicName": "commandAction",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly commandAction: _angular_core.OutputEmitterRef<NeuCommandAction>;"
+    },
+    {
       "id": "./compare#NeuCompareComponent.input:defaultValue",
       "entrypoint": "./compare",
       "declaration": "NeuCompareComponent",
@@ -65669,32 +65788,32 @@
   ],
   "summary": {
     "entrypoints": 97,
-    "exportedDeclarations": 799,
+    "exportedDeclarations": 803,
     "declarationKinds": {
       "class": 15,
       "component": 94,
       "directive": 117,
       "function": 53,
-      "interface": 266,
+      "interface": 270,
       "reexport": 48,
-      "service": 11,
+      "service": 10,
       "token": 4,
-      "type": 190,
+      "type": 191,
       "variable": 1
     },
-    "publicSymbols": 5224,
+    "publicSymbols": 5234,
     "statuses": {
-      "SUPPORTED": 3290,
+      "SUPPORTED": 3306,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1934,
+      "INTERNAL/UNSUPPORTED": 1928,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1220,
-      "output": 229,
+      "input": 1221,
+      "output": 230,
       "model": 24,
-      "total": 1473
+      "total": 1475
     },
     "designTokens": 251
   }

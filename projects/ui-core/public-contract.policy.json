@@ -42,16 +42,6 @@
       "with"
     ],
     "NeuCheckboxHarness": ["getLabel", "hostSelector", "isChecked", "isDisabled", "toggle"],
-    "NeuCommandPaletteService": [
-      "close",
-      "execute",
-      "filteredCommands",
-      "isOpen",
-      "open",
-      "query",
-      "register",
-      "unregister"
-    ],
     "NeuConfirmDialogService": ["confirm"],
     "NeuConfirmPopupService": ["close", "confirm", "state"],
     "NeuDateInputHarness": [

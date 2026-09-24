@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 94 |
-| COMPLETED | 90 |
-| PENDING | 4 |
+| COMPLETED | 91 |
+| PENDING | 3 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
 | 🟢 LIGHT | 1 |
 | 🟡 MEDIUM | 0 |
-| 🟠 HEAVY | 2 |
+| 🟠 HEAVY | 1 |
 | 🔴 VERY HEAVY | 1 |
 | XS | 1 |
 | S | 0 |
 | M | 0 |
-| L | 2 |
+| L | 1 |
 | XL | 1 |
 
-The partition is **90 + 4 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 3 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **91 + 3 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 2 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
 
 ## Method and taxonomy
 
@@ -58,7 +58,7 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuChipComponent | @neural-ui/core/chip | COMPLETED | A2 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in A2; do not reopen for a transverse smoke test. |
 | NeuCodeBlockComponent | @neural-ui/core/code-block | COMPLETED | B10 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B10; do not reopen for a transverse smoke test. |
 | NeuColorPickerComponent | @neural-ui/core/color-picker | COMPLETED | N2-024 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-024; do not reopen for a transverse smoke test. |
-| NeuCommandPaletteComponent | @neural-ui/core/command-palette | PENDING | C4 | DEEP REFACTOR | • Audit command registry and Router coupling<br>• Design overlay search/focus/request lifecycle before refactor | HEAVY | L | HIGH | independent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | command overlay | 20 | command overlay; 298 source lines; overlay present. |
+| NeuCommandPaletteComponent | @neural-ui/core/command-palette | COMPLETED | C4 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C4; do not reopen for a transverse smoke test. |
 | NeuCompareComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |
 | NeuCompareHandleComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |
 | NeuCompareIndicatorComponent | @neural-ui/core/compare | COMPLETED | B5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B5; do not reopen for a transverse smoke test. |

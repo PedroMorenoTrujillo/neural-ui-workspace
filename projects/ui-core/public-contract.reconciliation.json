@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1473,
-    "bindingDelta": 306,
+    "declarationBindings": 1475,
+    "bindingDelta": 308,
     "mapped": 621,
     "aliasCorrections": 3,
     "missingOldEntries": 540,
-    "newlyDiscovered": 846,
+    "newlyDiscovered": 848,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 429,
+      "declaration-or-selector-was-not-recorded": 431,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 387
     }
@@ -3521,6 +3521,14 @@
     {
       "id": "./color-picker#NeuColorPickerComponent.output:valueCommitted",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.input:commands",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.output:commandAction",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./context-menu#NeuContextMenuDirective.input:neuContextMenu",

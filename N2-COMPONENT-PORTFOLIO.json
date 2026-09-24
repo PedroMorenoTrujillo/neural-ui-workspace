@@ -12,26 +12,26 @@
     "currentPublicComponents": 94,
     "componentEntrypoints": 82,
     "secondaryEntrypoints": 96,
-    "completed": 90,
-    "pending": 4,
+    "completed": 91,
+    "pending": 3,
     "remove": 0,
     "physicallyRemovedHistorical": 2,
     "mergedReplacedHistorical": 4,
     "pendingByDifficulty": {
       "LIGHT": 1,
       "MEDIUM": 0,
-      "HEAVY": 2,
+      "HEAVY": 1,
       "VERY HEAVY": 1
     },
     "pendingByEffort": {
       "XS": 1,
       "S": 0,
       "M": 0,
-      "L": 2,
+      "L": 1,
       "XL": 1
     },
-    "activePending": 3,
-    "implementationBatches": 3
+    "activePending": 2,
+    "implementationBatches": 2
   },
   "historicalIdentityDelta": {
     "from": "fbe9e5c^",
@@ -61,13 +61,6 @@
     ]
   },
   "batches": [
-    {
-      "id": "C4",
-      "wave": "C",
-      "family": "command overlay",
-      "components": 1,
-      "model": "GPT-6 SOL HIGH"
-    },
     {
       "id": "C5",
       "wave": "C",
@@ -592,30 +585,27 @@
     {
       "component": "NeuCommandPaletteComponent",
       "entrypoint": "@neural-ui/core/command-palette",
-      "status": "PENDING",
-      "evidenceStatus": "STILL PENDING",
-      "action": "DEEP REFACTOR",
-      "difficulty": "HEAVY",
-      "effort": "L",
-      "risk": "HIGH",
+      "status": "COMPLETED",
+      "evidenceStatus": "FULLY COMPLETED",
+      "action": "KEEP AS-IS",
+      "difficulty": "CLOSED",
+      "effort": "—",
+      "risk": "CLOSED",
       "dependencies": [],
       "roadmapPhase": "C4",
-      "recommendedModel": "GPT-6 SOL HIGH",
-      "batch": "C4",
-      "batchFamily": "command overlay",
-      "reason": "command overlay; 298 source lines; overlay present.",
-      "expectedChanges": [
-        "Audit command registry and Router coupling",
-        "Design overlay search/focus/request lifecycle before refactor"
-      ],
-      "apiImpact": "REVIEW",
-      "ssrHydrationWork": "real SSR + Chromium hydration",
-      "a11yKeyboardWork": "directed keyboard/focus + semantics",
-      "lifecycleComplexity": "HIGH",
-      "bundleRisk": "MEDIUM",
-      "rewriteProbability": "MEDIUM",
-      "designReviewProbability": "HIGH",
-      "priorityScore": 20,
+      "recommendedModel": "—",
+      "batch": "—",
+      "batchFamily": "—",
+      "reason": "Certified in C4; do not reopen for a transverse smoke test.",
+      "expectedChanges": [],
+      "apiImpact": "NONE",
+      "ssrHydrationWork": "certified",
+      "a11yKeyboardWork": "certified",
+      "lifecycleComplexity": "certified",
+      "bundleRisk": "certified",
+      "rewriteProbability": "N/A",
+      "designReviewProbability": "NONE",
+      "priorityScore": null,
       "sourceFile": "projects/ui-core/command-palette/neu-command-palette.component.ts"
     },
     {
