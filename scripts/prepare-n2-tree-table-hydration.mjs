@@ -1,5 +1,6 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -9,10 +10,22 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 }
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-tree-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+const trackedTreeTableFiles = new Set(
+  execFileSync('git', ['ls-files', '--', 'projects/ui-core/tree-table'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim().split('\n'),
+);
 cpSync(
   join(root, 'projects/ui-core/tree-table'),
   join(fixture, 'src/ui-core/tree-table'),
-  { recursive: true, dereference: true },
+  {
+    recursive: true,
+    dereference: true,
+    filter: (source) =>
+      statSync(source).isDirectory() ||
+      trackedTreeTableFiles.has(relative(root, source).replaceAll('\\', '/')),
+  },
 );
 for (const file of [
   'neu-tree-table.hierarchy.spec.ts',
