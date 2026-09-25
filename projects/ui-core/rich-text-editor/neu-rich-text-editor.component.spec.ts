@@ -2,6 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { NeuRichTextEditorComponent } from './neu-rich-text-editor.component';
+import { sanitizeRichTextHtml } from './neu-rich-text-editor.utils';
 
 async function setup(inputs: Record<string, unknown> = {}) {
   const fixture = TestBed.createComponent(NeuRichTextEditorComponent);
@@ -48,6 +49,63 @@ describe('NeuRichTextEditorComponent N2-009', () => {
     const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface');
     expect(editor.innerHTML).toBe('<p>Safe</p>');
     expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('preserves safe attribute semantics across sanitization', () => {
+    const input = '<a href="https://example.test/?a=1&amp;b=2"\n   title="A &amp; B">link</a>';
+    const once = sanitizeRichTextHtml(input);
+    const twice = sanitizeRichTextHtml(once);
+    const host = document.createElement('div');
+    host.innerHTML = once;
+    const anchor = host.querySelector('a')!;
+
+    expect(anchor.href).toBe('https://example.test/?a=1&b=2');
+    expect(new URL(anchor.href).searchParams.get('a')).toBe('1');
+    expect(new URL(anchor.href).searchParams.get('b')).toBe('2');
+    expect(anchor.title).toBe('A & B');
+    expect(twice).toBe(once);
+  });
+
+  it('renders an applied entity-bearing link without an initial value echo', async () => {
+    const fixture = await setup();
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    const applied = '<a href="https://example.test/?a=1&amp;b=2" title="A &amp; B">link</a>';
+
+    fixture.componentRef.setInput('value', applied);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    const anchor = editor.querySelector('a')!;
+    expect(anchor.href).toBe('https://example.test/?a=1&b=2');
+    expect(anchor.title).toBe('A & B');
+    expect(fixture.componentInstance.value()).toBe(applied);
+    expect(changes).not.toHaveBeenCalled();
+
+    editor.append(document.createTextNode('!'));
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(new URL(editor.querySelector('a')!.href).searchParams.get('b')).toBe('2');
+    expect(editor.querySelector('a')!.title).toBe('A & B');
+    expect(changes).toHaveBeenCalledTimes(1);
+    expect(sanitizeRichTextHtml(fixture.componentInstance.value())).toBe(fixture.componentInstance.value());
+  });
+
+  it('inserts a query-bearing link without escaping its URL twice', async () => {
+    const fixture = await setup();
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.test/?a=1&b=2')
+      .mockReturnValueOnce('A & B');
+
+    fixture.componentInstance.addLink();
+
+    const anchor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface a') as HTMLAnchorElement;
+    expect(anchor.href).toBe('https://example.test/?a=1&b=2');
+    expect(new URL(anchor.href).searchParams.get('b')).toBe('2');
+    expect(anchor.textContent).toBe('A & B');
+    expect(fixture.componentInstance.value()).not.toContain('&amp;amp;');
+    prompt.mockRestore();
   });
 
   it('publishes one sanitized value for one native input', async () => {
