@@ -60,6 +60,8 @@ import {NeuTreeComponent,type NeuTreeNode,type NeuTreeHierarchy,type NeuTreeSele
   <button id="c6-reconstruct" type="button" (click)="reconstruct()">Reconstruct</button>
   <button id="c6-loading" type="button" (click)="setLazyState('loading')">Loading</button>
   <button id="c6-error" type="button" (click)="setLazyState('error')">Error</button>
+  <button id="c6-typeahead" type="button" (click)="loadTypeahead()">Typeahead</button>
+  <button id="c6-expand-typeahead" type="button" (click)="expanded.set(['folder'])">Expand typeahead</button>
   <button id="c6-deep" type="button" (click)="loadDeep()">Deep</button>
   <div [attr.dir]="rtl()?'rtl':'ltr'">
   @if(show()){<neu-tree [nodes]="nodes()" [hierarchy]="hierarchy()" [expandedKeys]="expanded()"
@@ -109,6 +111,16 @@ export class C6Component {
   reconstruct(){this.nodes.update(nodes=>nodes.map(node=>({ ...node,data:{...node.data},label:node.key==='child'?'Child updated':node.label })));}
   setLazyState(state:'loading'|'error'){
     this.hierarchy.update(h=>({...h,children:h.children.map(r=>r.parentKey==='lazy'?{parentKey:'lazy',state,requestId:1}:r)}));
+  }
+  loadTypeahead(){
+    const labels=['Alpha','Beta','Berlin','Bravo','Folder','Hidden'];
+    const keys=['alpha','beta','berlin','bravo','folder','hidden'];
+    this.nodes.set(keys.map((key,index)=>({key,data:{name:labels[index]},label:labels[index]})));
+    this.hierarchy.set({revision:3,roots:keys.slice(0,5),children:[
+      {parentKey:'folder',state:'loaded',keys:['hidden']},
+    ]});
+    this.expanded.set([]);
+    this.selection.set({mode:'none'});
   }
   loadDeep(){
     const deep=Array.from({length:1001},(_,index)=>({key:String(index),data:{name:String(index)},label:'Depth '+index}));
@@ -181,6 +193,18 @@ export class C6Component {
       const requests = async () => JSON.parse(await page.locator('#c6-requests').textContent());
       assert.deepEqual(await events(), []);
       assert.deepEqual(await requests(), []);
+      await page.locator('[data-neu-tree-index="0"]').focus();
+      await page.evaluate(() => {
+        window.__c6TypeaheadFocus = 0;
+        document.querySelector('neu-tree')?.addEventListener('focusin', () => { window.__c6TypeaheadFocus += 1; });
+      });
+      await page.keyboard.press('c');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-neu-tree-index') === '1');
+      assert.equal(await page.evaluate(() => window.__c6TypeaheadFocus), 1, 'First hydrated character focused more than once');
+      assert.equal(await page.locator('[data-neu-tree-index="1"]').getAttribute('aria-level'), '2');
+      assert.equal(await page.locator('[data-neu-tree-index="1"]').getAttribute('aria-checked'), 'false');
+      assert.deepEqual(await events(), [], 'First hydrated character emitted expansion');
+      assert.deepEqual(await requests(), [], 'First hydrated character emitted a request');
       if (process.env.N2_C6_SCREENSHOT_DIR)
         await page.screenshot({ path: join(process.env.N2_C6_SCREENSHOT_DIR, 'tree-desktop.png'), fullPage: true });
       await page.locator('[data-neu-tree-index="2"]').focus();
@@ -208,6 +232,7 @@ export class C6Component {
       assert.equal(moves[0].position, 'after');
       const selections = async () => JSON.parse(await page.locator('#c6-selections').textContent());
       const actions = async () => JSON.parse(await page.locator('#c6-actions').textContent());
+      const moveEvents = async () => JSON.parse(await page.locator('#c6-moves').textContent());
       await page.locator('[data-neu-tree-index="1"] > .neu-tree__row .neu-tree__checkbox').click();
       await page.waitForFunction(() => document.querySelector('#c6-selections')?.textContent !== '[]');
       assert.equal((await selections()).length, 1);
@@ -256,6 +281,34 @@ export class C6Component {
         await page.locator('#c6-toggle').click();
         await page.locator('neu-tree').waitFor({ state: 'attached' });
       }
+      await page.locator('#c6-typeahead').click();
+      await page.waitForFunction(() => document.querySelectorAll('[role="treeitem"]').length === 5);
+      const outputCounts = [await events(), await requests(), await selections(), await actions(), await moveEvents()].map((value) => value.length);
+      await page.locator('[data-neu-tree-index="0"]').focus();
+      await page.keyboard.press('b');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-neu-tree-index') === '1');
+      await page.keyboard.press('e');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-neu-tree-index') === '2');
+      await page.keyboard.press('z');
+      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-neu-tree-index')), '2', 'No-match moved focus');
+      await page.waitForTimeout(550);
+      await page.locator('[data-neu-tree-index="0"]').focus();
+      await page.keyboard.press('h');
+      assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-neu-tree-index')), '0', 'Collapsed child was searched');
+      await page.waitForTimeout(550);
+      await page.locator('#c6-expand-typeahead').click();
+      await page.waitForFunction(() => document.querySelectorAll('[role="treeitem"]').length === 6);
+      await page.locator('[data-neu-tree-index="0"]').focus();
+      await page.keyboard.press('h');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-neu-tree-index') === '5');
+      assert.equal(await page.locator('[data-neu-tree-index="5"]').getAttribute('aria-level'), '2');
+      await page.locator('#c6-toggle').click();
+      await page.locator('neu-tree').waitFor({ state: 'detached' });
+      await page.waitForTimeout(550);
+      assert.deepEqual([await events(), await requests(), await selections(), await actions(), await moveEvents()].map((value) => value.length), outputCounts,
+        'Typeahead emitted a business output or late destroy side effect');
+      await page.locator('#c6-toggle').click();
+      await page.locator('neu-tree').waitFor({ state: 'attached' });
       await page.locator('#c6-deep').click();
       await page.waitForFunction(() => document.querySelectorAll('[role="treeitem"]').length === 1001,
         null, { timeout: 10000 });
@@ -263,7 +316,7 @@ export class C6Component {
       assert.ok(await page.locator('[role="group"]').count() <= 32, 'Deep DOM grouping is unbounded');
       assert.equal(errors.filter((error) => /NG050\d|NG0\d+|TypeError|ReferenceError/.test(error)).length,
         0, errors.join('\n'));
-      console.log('C6 SSR/hydration PASS: DOM reuse, 0 NG050x, zoneless, five semantic paths, pointer DnD, checkbox/disabled/RTL/reconstruct/mobile/deep 1001, 100 create/destroy.');
+      console.log('C6 SSR/hydration PASS: DOM reuse, 0 NG050x, zoneless, first-character and hierarchical typeahead, five semantic paths, pointer DnD, checkbox/disabled/RTL/reconstruct/mobile/deep 1001, 100 create/destroy.');
     } finally { release(); await browser.close(); }
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));

@@ -1,5 +1,7 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuTreeComponent } from './neu-tree.component';
+import { vi } from 'vitest';
+import { NeuTreeComponent, NeuTreeNodeDirective } from './neu-tree.component';
 import type { NeuTreeHierarchy, NeuTreeNode, NeuTreeSelection } from './neu-tree.types';
 
 interface Item { readonly id: string }
@@ -37,6 +39,32 @@ describe('NeuTreeComponent controlled C6', () => {
 
   function rows(fixture: ReturnType<typeof create>): HTMLElement[] {
     return [...fixture.nativeElement.querySelectorAll('[role="treeitem"]')] as HTMLElement[];
+  }
+
+  function flatTree(labels: readonly { key: string; label: string; disabled?: boolean }[]) {
+    return create({
+      nodes: labels.map(({ key, label, disabled }) => ({ key, label, disabled, data: { id: key } })),
+      hierarchy: { revision: 1, roots: labels.map(({ key }) => key), children: [] },
+      selection: { mode: 'single', key: null },
+    });
+  }
+
+  async function pressFocused(fixture: ReturnType<typeof create>, key: string, options: KeyboardEventInit = {}) {
+    const active = fixture.nativeElement.ownerDocument.activeElement as HTMLElement;
+    active.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, ...options }));
+    fixture.detectChanges();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    fixture.detectChanges();
+  }
+
+  function businessOutputs(fixture: ReturnType<typeof create>): unknown[] {
+    const emitted: unknown[] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.selectionChange.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.childrenRequest.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.nodeAction.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.nodeMove.subscribe((value) => emitted.push(value));
+    return emitted;
   }
 
   it('renders only applied roots with tree semantics and sibling metadata', () => {
@@ -170,6 +198,227 @@ describe('NeuTreeComponent controlled C6', () => {
     fixture.componentInstance.nodeAction.subscribe((value) => actions.push(value));
     rows(fixture)[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(actions).toEqual([{ key: 'child' }]);
+  });
+
+  it('typeahead moves real focus to the visible disabled label without changing applied state', async () => {
+    const fixture = flatTree([
+      { key: 'alpha', label: 'Alpha' },
+      { key: 'beta', label: 'Beta', disabled: true },
+      { key: 'charlie', label: 'Charlie' },
+    ]);
+    const emitted = businessOutputs(fixture);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'b');
+
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[1]);
+    expect(rows(fixture)[1]?.tabIndex).toBe(0);
+    expect(rows(fixture)[1]?.getAttribute('aria-disabled')).toBe('true');
+    expect(rows(fixture)[1]?.getAttribute('aria-selected')).toBe('false');
+    expect(fixture.componentInstance.selection()).toEqual({ mode: 'single', key: null });
+    expect(fixture.componentInstance.expandedKeys()).toEqual([]);
+    expect(emitted).toEqual([]);
+  });
+
+  it('accumulates a case/NFKC-normalized label prefix within the typeahead window', async () => {
+    const fixture = flatTree([
+      { key: 'alfa', label: 'Alfa' },
+      { key: 'beta', label: '  Beta   ' },
+      { key: 'berlin', label: 'Berlin' },
+      { key: 'bravo', label: 'Bravo' },
+    ]);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'Ｂ');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[1]);
+    await pressFocused(fixture, 'E');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[2]);
+    expect(rows(fixture)[2]?.getAttribute('aria-selected')).toBe('false');
+  });
+
+  it('resets the typeahead prefix after the existing 500 ms window', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const fixture = flatTree([
+        { key: 'alpha', label: 'Alpha' }, { key: 'beta', label: 'Beta' },
+        { key: 'berlin', label: 'Berlin' }, { key: 'echo', label: 'Echo' },
+      ]);
+      const internal = fixture.componentInstance as unknown as { activeKey(): string | null };
+      rows(fixture)[0]!.focus();
+      rows(fixture)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', bubbles: true }));
+      expect(internal.activeKey()).toBe('beta');
+      vi.advanceTimersByTime(501);
+      rows(fixture)[1]!.focus();
+      rows(fixture)[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'e', bubbles: true }));
+      expect(internal.activeKey()).toBe('echo');
+      fixture.destroy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('searches forward deterministically through duplicate prefixes and wraps to the start', async () => {
+    const labels = [
+      { key: 'apple', label: 'Apple' }, { key: 'apricot', label: 'Apricot' },
+      { key: 'avocado', label: 'Avocado' }, { key: 'beta', label: 'Beta' },
+    ];
+    const forward = flatTree(labels);
+    rows(forward)[0]!.focus();
+    await pressFocused(forward, 'a');
+    expect(forward.nativeElement.ownerDocument.activeElement).toBe(rows(forward)[1]);
+
+    const wrapped = flatTree(labels);
+    rows(wrapped)[2]!.focus();
+    await pressFocused(wrapped, 'a');
+    expect(wrapped.nativeElement.ownerDocument.activeElement).toBe(rows(wrapped)[0]);
+  });
+
+  it('ignores collapsed descendants until expansion is applied without proposing it', async () => {
+    const branchNodes: readonly NeuTreeNode<Item, string>[] = [
+      { key: 'alpha', data: { id: 'alpha' }, label: 'Alpha' },
+      { key: 'hidden', data: { id: 'hidden' }, label: 'Hidden' },
+      { key: 'bravo', data: { id: 'bravo' }, label: 'Bravo' },
+    ];
+    const fixture = create({
+      nodes: branchNodes,
+      hierarchy: { revision: 1, roots: ['alpha', 'bravo'], children: [
+        { parentKey: 'alpha', state: 'loaded', keys: ['hidden'] },
+      ] },
+      selection: { mode: 'single', key: null },
+    });
+    const emitted = businessOutputs(fixture);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'h');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[0]);
+    expect(rows(fixture)).toHaveLength(2);
+    expect(emitted).toEqual([]);
+
+    fixture.componentRef.setInput('expandedKeys', ['alpha']);
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve, 501));
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'h');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[1]);
+    expect(rows(fixture)[1]?.getAttribute('aria-level')).toBe('2');
+    expect(emitted).toEqual([]);
+  });
+
+  it('leaves focus stable on no match and does not let modified/navigation keys pollute the prefix', async () => {
+    const fixture = flatTree([
+      { key: 'alpha', label: 'Alpha' }, { key: 'beta', label: 'Beta' },
+    ]);
+    const emitted = businessOutputs(fixture);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'z');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[0]);
+    expect(emitted).toEqual([]);
+
+    const clean = flatTree([
+      { key: 'alpha', label: 'Alpha' }, { key: 'beta', label: 'Beta' },
+    ]);
+    rows(clean)[0]!.focus();
+    await pressFocused(clean, 'b', { ctrlKey: true });
+    await pressFocused(clean, 'b', { altKey: true });
+    await pressFocused(clean, 'b', { metaKey: true });
+    await pressFocused(clean, 'ArrowDown');
+    await pressFocused(clean, 'Home');
+    await pressFocused(clean, 'b');
+    expect(clean.nativeElement.ownerDocument.activeElement).toBe(rows(clean)[1]);
+  });
+
+  it('uses the replaced visible projection while a prefix is pending', async () => {
+    const fixture = flatTree([
+      { key: 'alpha', label: 'Alpha' }, { key: 'beta', label: 'Beta' },
+      { key: 'charlie', label: 'Charlie' },
+    ]);
+    const emitted = businessOutputs(fixture);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'b');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[1]);
+
+    fixture.componentRef.setInput('nodes', [
+      { key: 'alpha', label: 'Alpha', data: { id: 'alpha' } },
+      { key: 'beta', label: 'Bravo', data: { id: 'beta' } },
+      { key: 'berlin', label: 'Berlin', data: { id: 'berlin' } },
+    ]);
+    fixture.componentRef.setInput('hierarchy', {
+      revision: 2, roots: ['alpha', 'beta', 'berlin'], children: [],
+    });
+    fixture.detectChanges();
+    await pressFocused(fixture, 'e');
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(rows(fixture)[2]);
+    expect(rows(fixture)[2]?.textContent).toContain('Berlin');
+    expect(emitted).toEqual([]);
+  });
+
+  it('finds an offscreen loaded visible node in virtual mode and mounts its focus target', async () => {
+    const labels = Array.from({ length: 100 }, (_, index) => ({
+      key: String(index), label: index === 50 ? 'Beta' : `Item ${index}`,
+    }));
+    const fixture = flatTree(labels);
+    fixture.componentRef.setInput('virtualization', { itemSize: 40, viewportHeight: 200, buffer: 2 });
+    fixture.detectChanges();
+    const emitted = businessOutputs(fixture);
+    expect(rows(fixture).length).toBeLessThan(10);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'b');
+    const target = fixture.nativeElement.querySelector('[data-neu-tree-index="50"]') as HTMLElement;
+    expect(target).not.toBeNull();
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(target);
+    expect(rows(fixture).length).toBeLessThan(10);
+    expect(emitted).toEqual([]);
+  });
+
+  it('does not take character keys from an interactive node template', async () => {
+    @Component({
+      imports: [NeuTreeComponent, NeuTreeNodeDirective],
+      template: `<neu-tree [nodes]="nodes" [hierarchy]="hierarchy">
+        <ng-template neuTreeNode><input aria-label="Node editor" /></ng-template>
+      </neu-tree>`,
+    })
+    class TemplateHost {
+      readonly nodes = [
+        { key: 'alpha', label: 'Alpha', data: { id: 'alpha' } },
+        { key: 'beta', label: 'Beta', data: { id: 'beta' } },
+      ];
+      readonly hierarchy = { revision: 1, roots: ['alpha', 'beta'], children: [] };
+    }
+    const fixture = TestBed.createComponent(TemplateHost);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.focus();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', bubbles: true }));
+    fixture.detectChanges();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(input);
+  });
+
+  it('clears pending typeahead timers and focus frames through 100 destroy cycles', async () => {
+    try {
+      const schedule = vi.spyOn(globalThis, 'setTimeout');
+      const cancel = vi.spyOn(globalThis, 'clearTimeout');
+      const allEmitted: unknown[][] = [];
+      for (let index = 0; index < 100; index += 1) {
+        const fixture = flatTree([
+          { key: 'alpha', label: 'Alpha' }, { key: 'beta', label: 'Beta' },
+        ]);
+        const emitted = businessOutputs(fixture);
+        allEmitted.push(emitted);
+        rows(fixture)[0]!.focus();
+        rows(fixture)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', bubbles: true }));
+        let bufferTimer = -1;
+        for (let call = schedule.mock.calls.length - 1; call >= 0; call -= 1) {
+          if (schedule.mock.calls[call]?.[1] === 500) { bufferTimer = call; break; }
+        }
+        expect(bufferTimer).toBeGreaterThanOrEqual(0);
+        const handle = schedule.mock.results[bufferTimer]?.value;
+        fixture.destroy();
+        expect(cancel).toHaveBeenCalledWith(handle);
+        expect(emitted).toEqual([]);
+      }
+      await new Promise((resolve) => setTimeout(resolve, 501));
+      expect(allEmitted.every((events) => events.length === 0)).toBe(true);
+    } finally {
+      vi.restoreAllMocks();
+    }
   });
 
   it('renders checkbox mixed for a selected known node with unloaded descendants', () => {
