@@ -193,6 +193,9 @@ try {
         Object.fromEntries(Object.entries(consumers).map(([name, value]) => [name, value.size])),
       )}`,
     );
+    console.log(
+      `Calendar current vs HEAD: ${JSON.stringify({ before: legacyConsumers.calendar.size, after: consumers.calendar.size, delta: comparison.calendar })}`,
+    );
   }
 } finally {
   rmSync(candidate.workspace, { recursive: true, force: true });

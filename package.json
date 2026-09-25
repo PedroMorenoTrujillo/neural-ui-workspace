@@ -202,6 +202,7 @@
     "audit:n2-overlay-events-bundle": "node scripts/audit-n2-overlay-events-bundle.mjs",
     "audit:n2-overlay-events-bundle:update": "node scripts/audit-n2-overlay-events-bundle.mjs --update",
     "test:n2-overlay-events-hydration": "node scripts/test-n2-overlay-events-hydration.mjs",
+    "test:n2-final-rem-01-calendar-hydration": "node scripts/test-n2-final-rem-01-calendar-hydration.mjs",
     "test:n2-visual-types": "node scripts/test-n2-visual-types.mjs",
     "audit:n2-visual-nomenclature": "node scripts/audit-n2-visual-nomenclature.mjs",
     "test:n2-visual-hydration": "node scripts/test-n2-visual-hydration.mjs",

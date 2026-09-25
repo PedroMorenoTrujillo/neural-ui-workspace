@@ -23,6 +23,14 @@ function localDayKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function monthButton(root: HTMLElement, label: string): HTMLButtonElement {
+  const button = Array.from(
+    root.querySelectorAll<HTMLButtonElement>('.neu-calendar__month-grid .neu-calendar__day-select'),
+  ).find((candidate) => candidate.getAttribute('aria-label')?.includes(label));
+  if (!button) throw new Error(`Missing calendar day: ${label}`);
+  return button;
+}
+
 describe('NeuCalendarComponent', () => {
   it('projects the event template in the calendar views', async () => {
     @Component({
@@ -115,6 +123,14 @@ describe('NeuCalendarComponent', () => {
     fixture.detectChanges();
 
     expect(selectedChanges).toContain('2026-05-16');
+    expect(targetButton?.getAttribute('aria-pressed')).toBe('false');
+    fixture.componentRef.setInput('selectedDate', '2026-05-16');
+    fixture.detectChanges();
+    const acceptedButton = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-calendar__week-head') as NodeListOf<HTMLButtonElement>,
+    ).find((node) => node.getAttribute('aria-label')?.includes('May 16, 2026'));
+    expect(acceptedButton?.getAttribute('aria-pressed')).toBe('true');
+    expect(selectedChanges).toEqual(['2026-05-16']);
   });
 
   it('should avoid nested interactive day cells when events are clickable', async () => {
@@ -158,25 +174,49 @@ describe('NeuCalendarComponent', () => {
   it('prev and next should navigate according to the active view', async () => {
     const fixture = setup();
     await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
 
     fixture.componentInstance.prev();
+    expect(proposed).toEqual(['2026-04-14']);
+    expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('may');
+    fixture.componentRef.setInput('selectedDate', '2026-04-14');
+    fixture.detectChanges();
     expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('april');
     fixture.componentInstance.next();
+    expect(proposed).toEqual(['2026-04-14', '2026-05-14']);
+    fixture.componentRef.setInput('selectedDate', '2026-05-14');
+    fixture.detectChanges();
     expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('may');
+    expect(proposed).toHaveLength(2);
   });
 
   it('should navigate from the rendered header buttons', async () => {
     const fixture = setup();
     await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
 
     const navButtons = fixture.nativeElement.querySelectorAll('.neu-calendar__nav-btn');
     (navButtons[0] as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(proposed).toEqual(['2026-04-14']);
+    expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('may');
+    fixture.componentRef.setInput('selectedDate', '2026-04-14');
     fixture.detectChanges();
     expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('april');
 
     (navButtons[1] as HTMLButtonElement).click();
     fixture.detectChanges();
+    expect(proposed).toEqual(['2026-04-14', '2026-05-14']);
+    fixture.componentRef.setInput('selectedDate', '2026-05-14');
+    fixture.detectChanges();
     expect(fixture.componentInstance.currentLabel().toLowerCase()).toContain('may');
+    expect(proposed).toHaveLength(2);
   });
 
   it('selectDate should emit only the canonical selectedDateChange', async () => {
@@ -192,6 +232,136 @@ describe('NeuCalendarComponent', () => {
 
     expect(selectedChanges).toEqual(['2026-05-20']);
     expect('dateSelect' in fixture.componentInstance).toBe(false);
+  });
+
+  it('keeps the old DOM and accessible selection when a pointer proposal is rejected', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
+
+    monthButton(fixture.nativeElement, 'May 20, 2026').click();
+    fixture.detectChanges();
+
+    expect(proposed).toEqual(['2026-05-20']);
+    expect(monthButton(fixture.nativeElement, 'May 14, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(monthButton(fixture.nativeElement, 'May 20, 2026').getAttribute('aria-pressed')).toBe(
+      'false',
+    );
+    expect(
+      monthButton(fixture.nativeElement, 'May 14, 2026').closest('.neu-calendar__day')
+        ?.classList.contains('neu-calendar__day--selected'),
+    ).toBe(true);
+    expect(
+      monthButton(fixture.nativeElement, 'May 20, 2026').closest('.neu-calendar__day')
+        ?.classList.contains('neu-calendar__day--selected'),
+    ).toBe(false);
+    expect(fixture.nativeElement.querySelector('.neu-calendar__agenda-title').textContent).toContain(
+      'May 14',
+    );
+  });
+
+  it('applies an accepted pointer proposal once without an output echo', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const proposed: Date[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) => proposed.push(date));
+
+    monthButton(fixture.nativeElement, 'May 20, 2026').click();
+    fixture.detectChanges();
+    expect(proposed).toHaveLength(1);
+    expect(monthButton(fixture.nativeElement, 'May 14, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+
+    fixture.componentRef.setInput('selectedDate', proposed[0]);
+    fixture.detectChanges();
+    expect(monthButton(fixture.nativeElement, 'May 14, 2026').getAttribute('aria-pressed')).toBe(
+      'false',
+    );
+    expect(monthButton(fixture.nativeElement, 'May 20, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(proposed).toHaveLength(1);
+  });
+
+  it('uses a different parent-applied value rather than the proposed value', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
+
+    monthButton(fixture.nativeElement, 'May 20, 2026').click();
+    fixture.componentRef.setInput('selectedDate', '2026-05-21');
+    fixture.detectChanges();
+
+    expect(proposed).toEqual(['2026-05-20']);
+    expect(monthButton(fixture.nativeElement, 'May 20, 2026').getAttribute('aria-pressed')).toBe(
+      'false',
+    );
+    expect(monthButton(fixture.nativeElement, 'May 21, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+  });
+
+  it('emits one proposal per repeated gesture without accumulating optimistic state', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
+
+    monthButton(fixture.nativeElement, 'May 20, 2026').click();
+    monthButton(fixture.nativeElement, 'May 20, 2026').click();
+    fixture.detectChanges();
+
+    expect(proposed).toEqual(['2026-05-20', '2026-05-20']);
+    expect(monthButton(fixture.nativeElement, 'May 14, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(monthButton(fixture.nativeElement, 'May 20, 2026').getAttribute('aria-pressed')).toBe(
+      'false',
+    );
+  });
+
+  it('keeps keyboard proposals rejected until a parent write applies them', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
+
+    fixture.componentInstance.onDayKeydown(
+      new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }),
+      new Date('2026-05-20T12:00:00'),
+    );
+    fixture.detectChanges();
+    expect(proposed).toEqual(['2026-05-20']);
+    expect(monthButton(fixture.nativeElement, 'May 14, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(monthButton(fixture.nativeElement, 'May 20, 2026').getAttribute('aria-pressed')).toBe(
+      'false',
+    );
+
+    fixture.componentInstance.onDayKeydown(
+      new KeyboardEvent('keydown', { key: ' ', cancelable: true }),
+      new Date('2026-05-21T12:00:00'),
+    );
+    fixture.componentRef.setInput('selectedDate', '2026-05-21');
+    fixture.detectChanges();
+    expect(proposed).toEqual(['2026-05-20', '2026-05-21']);
+    expect(monthButton(fixture.nativeElement, 'May 21, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
   });
 
   it('should emit eventClick with normalized dates', async () => {
@@ -252,17 +422,26 @@ describe('NeuCalendarComponent', () => {
     expect(events).toEqual(['a']);
   });
 
-  it('should move the visible agenda to the date of the clicked event', async () => {
+  it('should move the visible agenda only after the parent accepts the clicked event date', async () => {
     const fixture = setup();
     await fixture.whenStable();
+    const proposed: string[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) =>
+      proposed.push(localDayKey(date)),
+    );
 
     const launchEvent = fixture.componentInstance
       .normalizedEvents()
       .find((event) => event.id === 'c');
     fixture.componentInstance.onEventClick(new MouseEvent('click'), launchEvent!);
 
+    expect(proposed).toEqual(['2026-05-16']);
+    expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-14');
+    fixture.componentRef.setInput('selectedDate', '2026-05-16');
+    fixture.detectChanges();
     expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-16');
     expect(fixture.componentInstance.selectedDayEvents().map((event) => event.id)).toEqual(['c']);
+    expect(proposed).toHaveLength(1);
   });
 
   it('formatEventMeta should prefer meta, then all-day, then time', async () => {
@@ -514,6 +693,9 @@ describe('NeuCalendarComponent', () => {
     moreButton.click();
     fixture.detectChanges();
 
+    expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-16');
+    fixture.componentRef.setInput('selectedDate', '2026-05-14');
+    fixture.detectChanges();
     expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-14');
     expect(fixture.componentInstance.selectedDayEvents()).toHaveLength(2);
   });
@@ -567,18 +749,48 @@ describe('NeuCalendarComponent', () => {
     ).toBe(true);
   });
 
-  it('today should move the selected date to the current day', async () => {
+  it('silently replaces the applied date without mutating the consumer Date', async () => {
     const fixture = setup();
     await fixture.whenStable();
+    const proposed: Date[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) => proposed.push(date));
+    const next = new Date('2026-05-21T18:30:00');
+    const originalTimestamp = next.getTime();
+
+    fixture.componentRef.setInput('selectedDate', next);
+    fixture.detectChanges();
+
+    expect(next.getTime()).toBe(originalTimestamp);
+    expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-21');
+    expect(monthButton(fixture.nativeElement, 'May 21, 2026').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(proposed).toEqual([]);
+  });
+
+  it('today should propose the current day without selecting it until accepted', async () => {
+    const fixture = setup();
+    await fixture.whenStable();
+    const proposed: Date[] = [];
+    fixture.componentInstance.selectedDateChange.subscribe((date) => proposed.push(date));
 
     fixture.componentInstance.today();
     const today = new Date();
-    expect(fixture.componentInstance.selectedDateChange).toBeTruthy();
+    expect(proposed).toHaveLength(1);
+    expect(localDayKey(proposed[0])).toBe(localDayKey(today));
+    expect(localDayKey(fixture.componentInstance.selectedDay().date)).toBe('2026-05-14');
+    fixture.componentRef.setInput('selectedDate', proposed[0]);
+    fixture.detectChanges();
     expect(
       fixture.componentInstance
         .monthDays()
-        .some((cell) => cell['isSelected'] && cell.date.getDate() === today.getDate()),
+        .some((cell) => cell['isSelected'] && localDayKey(cell.date) === localDayKey(today)),
     ).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector('.neu-calendar__day-select[aria-current="date"]')
+        ?.getAttribute('aria-pressed'),
+    ).toBe('true');
+    expect(proposed).toHaveLength(1);
   });
 
   it('selects a day with Enter and Space keyboard events', async () => {

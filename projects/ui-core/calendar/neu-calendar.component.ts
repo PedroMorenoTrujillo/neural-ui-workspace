@@ -6,11 +6,9 @@ import {
   ViewEncapsulation,
   computed,
   contentChild,
-  effect,
   inject,
   input,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -200,6 +198,8 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                     type="button"
                     class="neu-calendar__day-select"
                     [attr.aria-label]="formatDayAriaLabel(day)"
+                    [attr.aria-pressed]="day.isSelected"
+                    [attr.aria-current]="day.isToday ? 'date' : null"
                     (click)="openDay(day.date)"
                   >
                     <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
@@ -267,6 +267,8 @@ function defaultCalendarLabels(locale: string): NeuCalendarLabels {
                   type="button"
                   class="neu-calendar__week-head neu-calendar__day-select"
                   [attr.aria-label]="formatDayAriaLabel(day)"
+                  [attr.aria-pressed]="day.isSelected"
+                  [attr.aria-current]="day.isToday ? 'date' : null"
                   (click)="openDay(day.date)"
                 >
                   <span class="neu-calendar__day-number">{{ day.date.getDate() }}</span>
@@ -390,10 +392,10 @@ export class NeuCalendarComponent {
 
   /** Emits the active date after navigation or direct day selection. */
   readonly selectedDateChange = output<Date>();
-  /** Emits the opened event after synchronizing the built-in agenda with its start date. */
+  /** Emits the activated event; the agenda follows its date only if the consumer applies it. */
   readonly eventClick = output<NeuCalendarEvent>();
 
-  private readonly _selectedDate = signal(this.temporal.today());
+  private readonly appliedDate = computed(() => this.coerceDate(this.selectedDate()));
 
   readonly resolvedLabels = computed<NeuCalendarLabels>(() => ({
     ...defaultCalendarLabels(this.locale()),
@@ -463,7 +465,7 @@ export class NeuCalendarComponent {
   });
 
   readonly monthDays = computed<CalendarDayCell[]>(() => {
-    const selected = this._selectedDate();
+    const selected = this.appliedDate();
     const firstDayOfMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
     const gridStart = startOfWeek(firstDayOfMonth, this.firstDayOfWeek());
     return Array.from({ length: 42 }, (_, index) => {
@@ -473,22 +475,22 @@ export class NeuCalendarComponent {
   });
 
   readonly weekDays = computed<CalendarDayCell[]>(() => {
-    const start = startOfWeek(this._selectedDate(), this.firstDayOfWeek());
+    const start = startOfWeek(this.appliedDate(), this.firstDayOfWeek());
     return Array.from({ length: 7 }, (_, index) => this.buildDayCell(addDays(start, index), true));
   });
 
   readonly selectedDay = computed<CalendarDayCell>(() =>
-    this.buildDayCell(this._selectedDate(), true),
+    this.buildDayCell(this.appliedDate(), true),
   );
 
   readonly selectedDayEvents = computed<NormalizedCalendarEvent[]>(() => this.selectedDay().events);
 
   readonly selectedAgendaLabel = computed(() =>
-    this.agendaLabelFormatter().format(this._selectedDate()),
+    this.agendaLabelFormatter().format(this.appliedDate()),
   );
 
   readonly currentLabel = computed(() => {
-    const selected = this._selectedDate();
+    const selected = this.appliedDate();
     if (this.view() === 'month') {
       return this.monthLabelFormatter().format(selected);
     }
@@ -499,25 +501,19 @@ export class NeuCalendarComponent {
     return `${formatter.format(weekStart)} - ${formatter.format(weekEnd)}`;
   });
 
-  constructor() {
-    effect(() => {
-      this._selectedDate.set(this.coerceDate(this.selectedDate()));
-    });
-  }
-
   prev(): void {
     this.selectDate(
       this.view() === 'month'
-        ? addMonths(this._selectedDate(), -1)
-        : addDays(this._selectedDate(), -7),
+        ? addMonths(this.appliedDate(), -1)
+        : addDays(this.appliedDate(), -7),
     );
   }
 
   next(): void {
     this.selectDate(
       this.view() === 'month'
-        ? addMonths(this._selectedDate(), 1)
-        : addDays(this._selectedDate(), 7),
+        ? addMonths(this.appliedDate(), 1)
+        : addDays(this.appliedDate(), 7),
     );
   }
 
@@ -527,7 +523,6 @@ export class NeuCalendarComponent {
 
   selectDate(date: Date): void {
     const nextDate = startOfDay(date);
-    this._selectedDate.set(nextDate);
     this.selectedDateChange.emit(nextDate);
   }
 
@@ -584,9 +579,7 @@ export class NeuCalendarComponent {
 
   onEventClick(event: MouseEvent, calendarEvent: NormalizedCalendarEvent): void {
     event.stopPropagation();
-    // Keep the visible agenda in sync with the event that the user opened.
-    // Without this transition, clicking an event on another day left the
-    // detail surface showing the previously selected date.
+    // The consumer decides whether the event's date becomes the applied agenda date.
     this.selectDate(this.eventCalendarDate(calendarEvent.start));
     this.revealAgenda();
     this.eventClick.emit({
@@ -603,7 +596,7 @@ export class NeuCalendarComponent {
       date: normalizedDate,
       inCurrentMonth,
       isToday: sameDay(normalizedDate, today),
-      isSelected: sameDay(normalizedDate, this._selectedDate()),
+      isSelected: sameDay(normalizedDate, this.appliedDate()),
       events: this.eventsByDate().get(this.localDateKey(normalizedDate))?.slice() ?? [],
     };
   }
