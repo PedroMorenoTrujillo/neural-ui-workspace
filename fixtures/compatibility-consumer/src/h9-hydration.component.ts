@@ -10,7 +10,7 @@ import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuTextareaComponent } from '@neural-ui/core/textarea';
 import { NeuTreeComponent, type NeuTreeNode } from '@neural-ui/core/tree';
-import { NeuKanbanComponent, type NeuKanbanColumn } from '@neural-ui/core/kanban';
+import { NeuKanbanComponent, type NeuKanbanCardMove, type NeuKanbanColumn } from '@neural-ui/core/kanban';
 @Component({
   selector: 'app-root',
   imports: [
@@ -42,8 +42,7 @@ import { NeuKanbanComponent, type NeuKanbanColumn } from '@neural-ui/core/kanban
     <neu-kanban
       id="hydration-kanban"
       [columns]="kanbanColumns()"
-      stateMode="controlled"
-      (columnsChange)="acceptKanban($event)"
+      (cardMove)="acceptKanban($event)"
     />
     <neu-date-input
       locale="en"
@@ -91,7 +90,7 @@ export class H9HydrationComponent {
   readonly treeNodes: NeuTreeNode[] = [
     { id: 'root', label: 'Hydrated root', children: [{ id: 'leaf', label: 'Hydrated leaf' }] },
   ];
-  readonly kanbanColumns = signal<NeuKanbanColumn[]>([
+  readonly kanbanColumns = signal<readonly NeuKanbanColumn[]>([
     { id: 'one', title: 'One', cards: [{ id: 'hydrated-card', title: 'Hydrated card' }] },
     { id: 'two', title: 'Two', cards: [] },
   ]);
@@ -104,8 +103,19 @@ export class H9HydrationComponent {
   record(name: string): void {
     this.events.update((events) => [...events, name]);
   }
-  acceptKanban(columns: NeuKanbanColumn[]): void {
-    this.kanbanColumns.set(columns);
+  acceptKanban(move: NeuKanbanCardMove): void {
+    this.kanbanColumns.update((columns) => {
+      const sourceId = move.kind === 'reorder' ? move.columnId : move.fromColumnId;
+      const targetId = move.kind === 'reorder' ? move.columnId : move.toColumnId;
+      const next = columns.map((column) => ({ ...column, cards: [...column.cards] }));
+      const source = next.find((column) => column.id === sourceId);
+      const target = next.find((column) => column.id === targetId);
+      if (!source || !target) return columns;
+      const [card] = source.cards.splice(move.fromIndex, 1);
+      if (!card || card.id !== move.cardId) return columns;
+      target.cards.splice(move.toIndex, 0, card);
+      return next;
+    });
     this.record('kanbanMove');
   }
   acceptSheetClose(): void {

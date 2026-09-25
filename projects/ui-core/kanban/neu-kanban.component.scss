@@ -93,6 +93,13 @@
   color: var(--neu-text-muted);
 }
 
+.neu-kanban__diagnostic {
+  padding: var(--neu-space-4);
+  border: 1px solid var(--neu-error);
+  border-radius: var(--neu-radius);
+  color: var(--neu-error);
+}
+
 .neu-kanban__sr-only {
   position: absolute;
   width: 1px;
@@ -133,6 +140,11 @@
 
 .neu-kanban__card:active {
   cursor: grabbing;
+}
+
+.neu-kanban__card[aria-disabled='true'],
+.neu-kanban__card[aria-disabled='true']:active {
+  cursor: default;
 }
 
 .neu-kanban__card-header {
@@ -272,6 +284,11 @@
   color: var(--neu-primary);
   outline: 2px solid color-mix(in srgb, var(--neu-primary) 25%, transparent);
   outline-offset: 1px;
+}
+
+.neu-kanban__move-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .neu-kanban__move-actions {

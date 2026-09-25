@@ -43,6 +43,7 @@ const completed = new Map([
   ['C2', 'PickList OrderList'],
   ['C3', 'MegaMenu'],
   ['C4', 'CommandPalette'],
+  ['C5', 'Kanban'],
   ['A1', 'Button ButtonGroup Tag Toolbar'],
   ['A2', 'Alert Badge Chip EmptyState ToastContainer'],
   ['A4', 'MeterGroup ProgressBar StatsCard FormField InputGroup'],

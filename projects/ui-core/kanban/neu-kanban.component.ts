@@ -5,7 +5,6 @@ import {
   ViewEncapsulation,
   afterRenderEffect,
   computed,
-  effect,
   inject,
   input,
   output,
@@ -21,43 +20,19 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import {
+  diagnoseKanbanBoard,
+  findKanbanCard,
+  proposeKanbanCardMove,
+} from './neu-kanban.engine';
+import type {
+  NeuKanbanAssignee,
+  NeuKanbanCard,
+  NeuKanbanCardMove,
+  NeuKanbanColumn,
+} from './neu-kanban.types';
 
-export type NeuKanbanStateMode = 'optimistic' | 'controlled';
 type NeuKanbanMoveDirection = 'up' | 'down' | 'left' | 'right';
-
-export interface NeuKanbanAssignee {
-  name: string;
-  avatar?: string;
-  initials?: string;
-}
-
-export interface NeuKanbanCard {
-  id: string;
-  title: string;
-  description?: string;
-  tags?: string[];
-  assignee?: NeuKanbanAssignee;
-  dueDate?: string;
-  meta?: string;
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
-}
-
-export interface NeuKanbanColumn {
-  id: string;
-  title: string;
-  cards: NeuKanbanCard[];
-  color?: string;
-  wipLimit?: number;
-}
-
-export interface NeuKanbanCardDropEvent {
-  card: NeuKanbanCard;
-  fromColumnId: string;
-  toColumnId: string;
-  previousIndex: number;
-  currentIndex: number;
-  columns: NeuKanbanColumn[];
-}
 
 interface NeuKanbanKeyboardMove {
   readonly cardId: string;
@@ -77,6 +52,11 @@ interface NeuKanbanKeyboardMove {
     '(document:pointerdown)': 'onDocumentPointerDown($event)',
   },
   template: `
+    @if (boardDiagnostic(); as issue) {
+      <p class="neu-kanban__diagnostic" role="alert">
+        Invalid Kanban board: {{ issue.code }} ({{ issue.id }})
+      </p>
+    } @else {
     <div class="neu-kanban" cdkDropListGroup [attr.aria-describedby]="instructionsId">
       <p class="neu-kanban__sr-only" [id]="instructionsId">
         {{ labels().instructions }}
@@ -84,7 +64,7 @@ interface NeuKanbanKeyboardMove {
       <p class="neu-kanban__sr-only" aria-live="polite" aria-atomic="true">
         {{ liveMessage() }}
       </p>
-      @for (column of _columns(); track column.id) {
+      @for (column of columns(); track column.id) {
         <section class="neu-kanban__column" [attr.aria-label]="column.title">
           <header class="neu-kanban__column-header">
             <div class="neu-kanban__column-title">
@@ -124,13 +104,15 @@ interface NeuKanbanKeyboardMove {
             }
 
             @for (card of column.cards; track card.id; let cardIndex = $index) {
-              <div class="neu-kanban__card-shell" cdkDrag [cdkDragData]="card">
+              <div class="neu-kanban__card-shell" cdkDrag [cdkDragData]="card"
+                   [cdkDragDisabled]="card.disabled === true">
                 <article
                   class="neu-kanban__card"
                   cdkDragHandle
                   role="button"
                   tabindex="0"
-                  [attr.aria-label]="cardAriaLabel(card, column, cardIndex)"
+                   [attr.aria-label]="cardAriaLabel(card, column, cardIndex)"
+                   [attr.aria-disabled]="card.disabled ? 'true' : null"
                   [attr.aria-describedby]="instructionsId"
                   [attr.aria-pressed]="isKeyboardMoving(card.id) ? 'true' : 'false'"
                   [attr.aria-expanded]="isMoveMenuOpen(card.id)"
@@ -195,6 +177,7 @@ interface NeuKanbanKeyboardMove {
                   <button
                     type="button"
                     class="neu-kanban__move-trigger"
+                    [disabled]="card.disabled === true"
                     [attr.aria-expanded]="isMoveMenuOpen(card.id)"
                     [attr.aria-controls]="moveActionsId(card.id)"
                     [attr.aria-label]="resolvedMoveButtonLabel() + ': ' + card.title"
@@ -252,29 +235,26 @@ interface NeuKanbanKeyboardMove {
         </section>
       }
     </div>
+    }
   `,
   styleUrl: './neu-kanban.component.scss',
 })
 export class NeuKanbanComponent {
   private readonly doc = inject(DOCUMENT);
   private readonly defaultLocale = inject(NEURAL_LOCALE);
-  readonly columns = input<NeuKanbanColumn[]>([]);
+  readonly columns = input<readonly NeuKanbanColumn[]>([]);
   readonly columnWidth = input<string>('320px');
   readonly showCounts = input<boolean>(true);
   readonly showWipLimit = input<boolean>(true);
   /** Visible label for the per-card movement actions trigger. */
   readonly moveButtonLabel = input<string>('Move');
-  /** `controlled` emits immutable proposals without accepting them locally. */
-  readonly stateMode = input<NeuKanbanStateMode>('optimistic');
+  readonly cardMove = output<NeuKanbanCardMove>();
 
-  readonly columnsChange = output<NeuKanbanColumn[]>();
-  readonly cardDrop = output<NeuKanbanCardDropEvent>();
-
-  protected readonly _columns = signal<NeuKanbanColumn[]>([]);
+  protected readonly boardDiagnostic = computed(() => diagnoseKanbanBoard(this.columns()));
   protected readonly keyboardMove = signal<NeuKanbanKeyboardMove | null>(null);
   protected readonly activeMoveCardId = signal<string | null>(null);
   protected readonly liveMessage = signal('');
-  readonly connectedDropLists = computed(() => this._columns().map((column) => column.id));
+  protected readonly connectedDropLists = computed(() => this.columns().map((column) => column.id));
   private readonly activeLocale = signal(resolveDocumentLocale(this.doc, this.defaultLocale));
   protected readonly labels = computed(() => kanbanLabels(this.activeLocale()));
   protected readonly resolvedMoveButtonLabel = computed(() => {
@@ -290,9 +270,6 @@ export class NeuKanbanComponent {
   private destroyed = false;
 
   constructor() {
-    effect(() => {
-      this._columns.set(this._cloneColumns(this.columns()));
-    });
     afterRenderEffect(() => {
       const cardId = this.pendingFocusCardId();
       if (!cardId) return;
@@ -319,7 +296,7 @@ export class NeuKanbanComponent {
     }
   }
 
-  assigneeInitials(assignee: NeuKanbanAssignee): string {
+  protected assigneeInitials(assignee: NeuKanbanAssignee): string {
     if (assignee.initials) return assignee.initials;
     return assignee.name
       .split(' ')
@@ -329,16 +306,14 @@ export class NeuKanbanComponent {
       .join('');
   }
 
-  onCardDrop(event: CdkDragDrop<NeuKanbanCard[]>, targetColumnId: string): void {
-    this.proposeMove(
-      event.previousContainer.id,
-      targetColumnId,
-      event.previousIndex,
-      event.currentIndex,
-    );
+  protected onCardDrop(drop: unknown, targetColumnId: string): void {
+    const event = drop as CdkDragDrop<readonly NeuKanbanCard[]>;
+    const card = event.item.data as NeuKanbanCard | undefined;
+    if (!card) return;
+    this.proposeMove(card.id, event.previousContainer.id, targetColumnId, event.currentIndex);
   }
 
-  cardAriaLabel(card: NeuKanbanCard, column: NeuKanbanColumn, index: number): string {
+  protected cardAriaLabel(card: NeuKanbanCard, column: NeuKanbanColumn, index: number): string {
     return this.labels().cardPosition(card.title, column.title, index + 1, column.cards.length);
   }
 
@@ -350,30 +325,31 @@ export class NeuKanbanComponent {
     return this.labels().moveDirection(cardTitle, direction);
   }
 
-  isKeyboardMoving(cardId: string): boolean {
+  protected isKeyboardMoving(cardId: string): boolean {
     return this.keyboardMove()?.cardId === cardId;
   }
 
-  isMoveMenuOpen(cardId: string): boolean {
+  protected isMoveMenuOpen(cardId: string): boolean {
     return this.activeMoveCardId() === cardId;
   }
 
-  moveActionsId(cardId: string): string {
-    const safeCardId = cardId.replace(/[^a-zA-Z0-9_-]/g, '-');
-    return `${this.instructionsId}-actions-${safeCardId}`;
+  protected moveActionsId(cardId: string): string {
+    return `${this.instructionsId}-actions-${encodeURIComponent(cardId)}`;
   }
 
-  openMoveMenu(cardId: string): void {
+  protected openMoveMenu(cardId: string): void {
+    if (this.boardDiagnostic() || this.isCardDisabled(cardId)) return;
     this.activeMoveCardId.set(cardId);
   }
 
-  toggleMoveMenu(cardId: string, event: MouseEvent): void {
+  protected toggleMoveMenu(cardId: string, event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
+    if (this.boardDiagnostic() || this.isCardDisabled(cardId)) return;
     this.activeMoveCardId.update((activeCardId) => (activeCardId === cardId ? null : cardId));
   }
 
-  onMoveMenuKeydown(cardId: string, event: KeyboardEvent): void {
+  protected onMoveMenuKeydown(cardId: string, event: KeyboardEvent): void {
     if (event.key !== 'Escape' || !this.isMoveMenuOpen(cardId)) return;
     event.preventDefault();
     event.stopPropagation();
@@ -381,7 +357,7 @@ export class NeuKanbanComponent {
     queueMicrotask(() => this.focusMoveTrigger(cardId));
   }
 
-  onDocumentPointerDown(event: PointerEvent): void {
+  protected onDocumentPointerDown(event: PointerEvent): void {
     const activeCardId = this.activeMoveCardId();
     if (!activeCardId || !(event.target instanceof Element)) return;
     const controls = event.target.closest<HTMLElement>('.neu-kanban__move-controls');
@@ -389,28 +365,30 @@ export class NeuKanbanComponent {
     this.activeMoveCardId.set(null);
   }
 
-  canMove(cardId: string, direction: NeuKanbanMoveDirection): boolean {
-    const position = this.cardPosition(cardId);
-    if (!position) return false;
+  protected canMove(cardId: string, direction: NeuKanbanMoveDirection): boolean {
+    if (this.boardDiagnostic()) return false;
+    const position = findKanbanCard(this.columns(), cardId);
+    if (!position || position.column.cards[position.cardIndex].disabled) return false;
     if (direction === 'up') return position.cardIndex > 0;
     if (direction === 'down') return position.cardIndex < position.column.cards.length - 1;
-    if (direction === 'left') return position.columnIndex > 0;
-    return position.columnIndex < this._columns().length - 1;
+    const adjacent = position.columnIndex + this.visualColumnDelta(direction);
+    return adjacent >= 0 && adjacent < this.columns().length;
   }
 
-  moveByAction(cardId: string, direction: NeuKanbanMoveDirection): void {
+  protected moveByAction(cardId: string, direction: NeuKanbanMoveDirection): void {
     this.activeMoveCardId.set(null);
     const move = this.directionalMove(cardId, direction);
     if (!move) return;
-    this.proposeMove(move.fromColumnId, move.toColumnId, move.previousIndex, move.currentIndex);
+    this.proposeMove(cardId, move.fromColumnId, move.toColumnId, move.currentIndex);
   }
 
-  onCardKeydown(
+  protected onCardKeydown(
     card: NeuKanbanCard,
     columnId: string,
     cardIndex: number,
     event: KeyboardEvent,
   ): void {
+    if (this.boardDiagnostic() || card.disabled) return;
     const active = this.keyboardMove();
     if (!active) {
       if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -440,12 +418,7 @@ export class NeuKanbanComponent {
       event.preventDefault();
       event.stopPropagation();
       this.keyboardMove.set(null);
-      this.proposeMove(
-        active.fromColumnId,
-        active.toColumnId,
-        active.previousIndex,
-        active.currentIndex,
-      );
+      this.proposeMove(active.cardId, active.fromColumnId, active.toColumnId, active.currentIndex);
       return;
     }
 
@@ -461,12 +434,13 @@ export class NeuKanbanComponent {
     move: NeuKanbanKeyboardMove,
     key: string,
   ): NeuKanbanKeyboardMove | null {
-    const columns = this._columns();
+    const columns = this.columns();
     let columnIndex = columns.findIndex((column) => column.id === move.toColumnId);
     if (columnIndex < 0) return null;
     let currentIndex = move.currentIndex;
-    if (key === 'ArrowLeft') columnIndex = Math.max(0, columnIndex - 1);
-    else if (key === 'ArrowRight') columnIndex = Math.min(columns.length - 1, columnIndex + 1);
+    if (key === 'ArrowLeft' || key === 'ArrowRight')
+      columnIndex = Math.max(0, Math.min(columns.length - 1,
+        columnIndex + this.visualColumnDelta(key === 'ArrowLeft' ? 'left' : 'right')));
     else if (key === 'ArrowUp') currentIndex -= 1;
     else if (key === 'ArrowDown') currentIndex += 1;
     else if (key !== 'Home' && key !== 'End') return null;
@@ -484,7 +458,7 @@ export class NeuKanbanComponent {
     cardId: string,
     direction: NeuKanbanMoveDirection,
   ): Omit<NeuKanbanKeyboardMove, 'cardId' | 'cardTitle'> | null {
-    const position = this.cardPosition(cardId);
+    const position = findKanbanCard(this.columns(), cardId);
     if (!position || !this.canMove(cardId, direction)) return null;
     if (direction === 'up' || direction === 'down') {
       return {
@@ -494,7 +468,7 @@ export class NeuKanbanComponent {
         currentIndex: position.cardIndex + (direction === 'up' ? -1 : 1),
       };
     }
-    const targetColumn = this._columns()[position.columnIndex + (direction === 'left' ? -1 : 1)];
+    const targetColumn = this.columns()[position.columnIndex + this.visualColumnDelta(direction)];
     return {
       fromColumnId: position.column.id,
       previousIndex: position.cardIndex,
@@ -504,68 +478,31 @@ export class NeuKanbanComponent {
   }
 
   private proposeMove(
+    cardId: string,
     fromColumnId: string,
     toColumnId: string,
-    previousIndex: number,
-    currentIndex: number,
+    toIndex: number,
   ): void {
-    if (this.destroyed || this.emittingMove) return;
-    const nextColumns = this._cloneColumns(this._columns());
-    const sourceColumn = nextColumns.find((column) => column.id === fromColumnId);
-    const targetColumn = nextColumns.find((column) => column.id === toColumnId);
-    const sameColumn = fromColumnId === toColumnId;
-    if (
-      !sourceColumn ||
-      !targetColumn ||
-      previousIndex < 0 ||
-      previousIndex >= sourceColumn.cards.length ||
-      currentIndex < 0 ||
-      currentIndex > targetColumn.cards.length ||
-      (sameColumn && (currentIndex >= targetColumn.cards.length || previousIndex === currentIndex))
-    )
-      return;
-
-    const [movedCard] = sourceColumn.cards.splice(previousIndex, 1);
-    if (!movedCard) return;
-    targetColumn.cards.splice(currentIndex, 0, movedCard);
-    if (this.stateMode() === 'optimistic') this._columns.set(nextColumns);
-    this.pendingFocusCardId.set(movedCard.id);
-    this.liveMessage.set(
-      this.labels().moved(movedCard.title, targetColumn.title, currentIndex + 1),
-    );
+    if (this.destroyed || this.emittingMove || this.boardDiagnostic()) return;
+    const applied = this.columns();
+    const proposal = proposeKanbanCardMove(applied, cardId, fromColumnId, toColumnId, toIndex);
+    if (!proposal) return;
+    const movedCard = findKanbanCard(applied, cardId)?.column.cards[proposal.fromIndex];
+    const targetColumn = applied.find((column) => column.id === toColumnId);
+    if (!movedCard || !targetColumn) return;
+    this.pendingFocusCardId.set(cardId);
+    this.liveMessage.set(this.labels().moveRequested(movedCard.title, targetColumn.title, toIndex + 1));
 
     this.emittingMove = true;
     try {
-      this.columnsChange.emit(nextColumns);
-      if (this.destroyed) return;
-      this.cardDrop.emit({
-        card: movedCard,
-        fromColumnId,
-        toColumnId,
-        previousIndex,
-        currentIndex,
-        columns: nextColumns,
-      });
+      this.cardMove.emit(proposal);
     } finally {
       this.emittingMove = false;
     }
   }
 
-  private cardPosition(cardId: string): {
-    readonly column: NeuKanbanColumn;
-    readonly columnIndex: number;
-    readonly cardIndex: number;
-  } | null {
-    const columns = this._columns();
-    for (let columnIndex = 0; columnIndex < columns.length; columnIndex += 1) {
-      const cardIndex = columns[columnIndex].cards.findIndex((card) => card.id === cardId);
-      if (cardIndex >= 0) return { column: columns[columnIndex], columnIndex, cardIndex };
-    }
-    return null;
-  }
-
   private announceKeyboardTarget(move: NeuKanbanKeyboardMove): void {
-    const column = this._columns().find((candidate) => candidate.id === move.toColumnId);
+    const column = this.columns().find((candidate) => candidate.id === move.toColumnId);
     if (!column) return;
     this.liveMessage.set(
       this.labels().selected(move.cardTitle, column.title, move.currentIndex + 1),
@@ -587,13 +524,14 @@ export class NeuKanbanComponent {
     trigger?.focus({ preventScroll: true });
   }
 
-  private _cloneColumns(columns: NeuKanbanColumn[]): NeuKanbanColumn[] {
-    return columns.map((column) => ({
-      ...column,
-      // The component reorders only the card containers. Preserve each domain
-      // object exactly as supplied while keeping caller arrays immutable.
-      cards: [...column.cards],
-    }));
+  private isCardDisabled(cardId: string): boolean {
+    const position = findKanbanCard(this.columns(), cardId);
+    return !position || position.column.cards[position.cardIndex].disabled === true;
+  }
+
+  private visualColumnDelta(direction: 'left' | 'right'): number {
+    const rtl = this.doc.defaultView?.getComputedStyle(this.host).direction === 'rtl';
+    return direction === 'left' ? (rtl ? 1 : -1) : (rtl ? -1 : 1);
   }
 }
 
@@ -605,7 +543,7 @@ interface NeuKanbanLocaleLabels {
   readonly moveGroup: (card: string) => string;
   readonly moveDirection: (card: string, direction: NeuKanbanMoveDirection) => string;
   readonly moveCancelled: (card: string) => string;
-  readonly moved: (card: string, column: string, position: number) => string;
+  readonly moveRequested: (card: string, column: string, position: number) => string;
   readonly selected: (card: string, column: string, position: number) => string;
 }
 
@@ -624,13 +562,14 @@ function kanbanLabels(locale: string): NeuKanbanLocaleLabels {
         `${card}, ${column}, posición ${position} de ${total}`,
       moveGroup: (card) => `Mover ${card}`,
       moveDirection: (card, direction) => {
-        if (direction === 'left') return `Mover ${card} a la columna anterior`;
-        if (direction === 'right') return `Mover ${card} a la columna siguiente`;
+        if (direction === 'left') return `Mover ${card} a la columna visualmente izquierda`;
+        if (direction === 'right') return `Mover ${card} a la columna visualmente derecha`;
         if (direction === 'up') return `Mover ${card} hacia arriba`;
         return `Mover ${card} hacia abajo`;
       },
       moveCancelled: (card) => `Movimiento cancelado para ${card}.`,
-      moved: (card, column, position) => `${card} se movió a ${column}, posición ${position}.`,
+      moveRequested: (card, column, position) =>
+        `Movimiento solicitado para ${card} a ${column}, posición ${position}.`,
       selected: (card, column, position) =>
         `${card} seleccionada. Destino ${column}, posición ${position}.`,
     };
@@ -645,13 +584,14 @@ function kanbanLabels(locale: string): NeuKanbanLocaleLabels {
       `${card}, ${column}, position ${position} of ${total}`,
     moveGroup: (card) => `Move ${card}`,
     moveDirection: (card, direction) => {
-      if (direction === 'left') return `Move ${card} to the previous column`;
-      if (direction === 'right') return `Move ${card} to the next column`;
+      if (direction === 'left') return `Move ${card} to the visually left column`;
+      if (direction === 'right') return `Move ${card} to the visually right column`;
       if (direction === 'up') return `Move ${card} up`;
       return `Move ${card} down`;
     },
     moveCancelled: (card) => `Move cancelled for ${card}.`,
-    moved: (card, column, position) => `${card} moved to ${column}, position ${position}.`,
+    moveRequested: (card, column, position) =>
+      `Move requested for ${card} to ${column}, position ${position}.`,
     selected: (card, column, position) =>
       `${card} selected. Destination ${column}, position ${position}.`,
   };

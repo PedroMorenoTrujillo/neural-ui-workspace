@@ -2,7 +2,7 @@
 
 ## Decision and counts
 
-**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **94** = 91 completed + 3 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 1, MEDIUM 0, HEAVY 1, VERY HEAVY 1. Pending effort: XS 1, S 0, M 0, L 1, XL 1. One-by-one active work would require **2 component/removal tasks**; the proposal is **2 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
+**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **94** = 92 completed + 2 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 1, MEDIUM 0, HEAVY 0, VERY HEAVY 1. Pending effort: XS 1, S 0, M 0, L 0, XL 1. One-by-one active work would require **1 component/removal tasks**; the proposal is **1 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
 
 ## Top 10 next best targets
 
@@ -20,9 +20,8 @@ A3/A5/D1, B7/B8/B9/B5, A1, A2 and A4 are complete. A0.2 externalized Icon to neu
 ## WAVE B — medium (0 components; 10 batches)
 
 
-## WAVE C — heavy (2 components; 6 phases)
+## WAVE C — heavy (1 components; 6 phases)
 
-- **C5 — board DnD (1):** NeuKanbanComponent. GPT-6 SOL HIGH implementation; require pre-runtime design review where API/owner changes are material, using GPT-6 ASTRA for architecture only.
 - **C6 — hierarchical collection (1):** NeuTreeComponent. GPT-6 SOL HIGH implementation; require pre-runtime design review where API/owner changes are material, using GPT-6 ASTRA for architecture only.
 
 C1 completed the ImageGallery merge into Gallery and physically removed its runtime/entrypoint; ImageViewer remains an independent directive using the one private preview engine. C2 is a coordinated two-facade DnD family, not two duplicate engines. C3/C4 have Router/overlay/focus boundaries. C5 has cross-column DnD identity. C6 Tree has hierarchy + lazy + virtual + DnD and is the only VERY HEAVY component; evaluate a clean rewrite, not an automatic one. None should be moved ahead of independent quick wins merely for LOC.
@@ -76,4 +75,4 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 | InputMask (B8) | No other pending component | N2-003 Forms base already certified |
 | Splitter/ScrollArea (B9) | No other pending component | N2-001 controlled-state contract |
 
-A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch. The plan saves **0** active component/removal task slots versus one-by-one execution (2 → 2); this is a phase count, not a calendar or token-cost guarantee.
+A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch. The plan saves **0** active component/removal task slots versus one-by-one execution (1 → 1); this is a phase count, not a calendar or token-cost guarantee.

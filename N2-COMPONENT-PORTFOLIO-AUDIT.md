@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 94 |
-| COMPLETED | 91 |
-| PENDING | 3 |
+| COMPLETED | 92 |
+| PENDING | 2 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
 | 🟢 LIGHT | 1 |
 | 🟡 MEDIUM | 0 |
-| 🟠 HEAVY | 1 |
+| 🟠 HEAVY | 0 |
 | 🔴 VERY HEAVY | 1 |
 | XS | 1 |
 | S | 0 |
 | M | 0 |
-| L | 1 |
+| L | 0 |
 | XL | 1 |
 
-The partition is **91 + 3 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 2 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **92 + 2 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 1 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
 
 ## Method and taxonomy
 
@@ -80,7 +80,7 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuInputMaskComponent | @neural-ui/core/input-mask | COMPLETED | B8 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in B8; do not reopen for a transverse smoke test. |
 | NeuInputOTPComponent | @neural-ui/core/input-otp | COMPLETED | N2-003/004 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-003/004; do not reopen for a transverse smoke test. |
 | NeuInputTagsComponent | @neural-ui/core/input-tags | COMPLETED | N2-008 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-008; do not reopen for a transverse smoke test. |
-| NeuKanbanComponent | @neural-ui/core/kanban | PENDING | C5 | DEEP REFACTOR | • Audit board/column/card identity and controlled DnD<br>• Design cross-column move proposals and SSR/lifecycle gates | HEAVY | L | HIGH | independent | REVIEW | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | MEDIUM | HIGH | GPT-6 SOL HIGH | yes | board DnD | 20 | board DnD; 659 source lines; no overlay in component source. |
+| NeuKanbanComponent | @neural-ui/core/kanban | COMPLETED | C5 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C5; do not reopen for a transverse smoke test. |
 | NeuKnobComponent | @neural-ui/core/knob | COMPLETED | N2-005 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-005; do not reopen for a transverse smoke test. |
 | NeuListboxComponent | @neural-ui/core/listbox | COMPLETED | N2-007 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-007; do not reopen for a transverse smoke test. |
 | NeuMegaMenuComponent | @neural-ui/core/mega-menu | COMPLETED | C3 | KEEP AS-IS |  | CLOSED | — | CLOSED | NeuBadgeComponent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C3; do not reopen for a transverse smoke test. |

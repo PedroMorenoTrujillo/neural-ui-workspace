@@ -4,11 +4,11 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1475,
-    "bindingDelta": 308,
-    "mapped": 621,
+    "declarationBindings": 1473,
+    "bindingDelta": 306,
+    "mapped": 619,
     "aliasCorrections": 3,
-    "missingOldEntries": 540,
+    "missingOldEntries": 542,
     "newlyDiscovered": 848,
     "ambiguities": 6,
     "discoveryReasons": {
@@ -1145,14 +1145,6 @@
     {
       "oldToken": "kanban/neu-kanban.component.ts#input:showWipLimit",
       "newId": "./kanban#NeuKanbanComponent.input:showWipLimit"
-    },
-    {
-      "oldToken": "kanban/neu-kanban.component.ts#output:cardDrop",
-      "newId": "./kanban#NeuKanbanComponent.output:cardDrop"
-    },
-    {
-      "oldToken": "kanban/neu-kanban.component.ts#output:columnsChange",
-      "newId": "./kanban#NeuKanbanComponent.output:columnsChange"
     },
     {
       "oldToken": "key-filter/neu-key-filter.directive.ts#input:neuKeyFilter",
@@ -2582,6 +2574,8 @@
     "input-otp/neu-input-otp.component.ts#output:valueChange",
     "input/neu-input.component.ts#input:maxlength",
     "input/neu-input.component.ts#input:minlength",
+    "kanban/neu-kanban.component.ts#output:cardDrop",
+    "kanban/neu-kanban.component.ts#output:columnsChange",
     "knob/neu-knob.component.ts#output:valueChange",
     "listbox/neu-listbox.component.ts#input:emptyFilterMessage",
     "listbox/neu-listbox.component.ts#input:emptyMessage",
@@ -4423,7 +4417,7 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./kanban#NeuKanbanComponent.input:stateMode",
+      "id": "./kanban#NeuKanbanComponent.output:cardMove",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {

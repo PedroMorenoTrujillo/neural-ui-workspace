@@ -602,10 +602,11 @@
       "exports": [
         "./kanban#NeuKanbanAssignee",
         "./kanban#NeuKanbanCard",
-        "./kanban#NeuKanbanCardDropEvent",
+        "./kanban#NeuKanbanCardMove",
+        "./kanban#NeuKanbanCardReorder",
+        "./kanban#NeuKanbanCardTransfer",
         "./kanban#NeuKanbanColumn",
-        "./kanban#NeuKanbanComponent",
-        "./kanban#NeuKanbanStateMode"
+        "./kanban#NeuKanbanComponent"
       ]
     },
     {
@@ -19403,7 +19404,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "avatar?: string;"
+          "signature": "readonly avatar?: string;"
         },
         {
           "id": "./kanban#NeuKanbanAssignee.property:initials",
@@ -19411,7 +19412,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "initials?: string;"
+          "signature": "readonly initials?: string;"
         },
         {
           "id": "./kanban#NeuKanbanAssignee.property:name",
@@ -19419,7 +19420,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "name: string;"
+          "signature": "readonly name: string;"
         }
       ]
     },
@@ -19437,7 +19438,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "assignee?: NeuKanbanAssignee;"
+          "signature": "readonly assignee?: NeuKanbanAssignee;"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:description",
@@ -19445,7 +19446,15 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "description?: string;"
+          "signature": "readonly description?: string;"
+        },
+        {
+          "id": "./kanban#NeuKanbanCard.property:disabled",
+          "name": "disabled",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled?: boolean;"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:dueDate",
@@ -19453,7 +19462,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "dueDate?: string;"
+          "signature": "readonly dueDate?: string;"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:id",
@@ -19461,7 +19470,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "id: string;"
+          "signature": "readonly id: string;"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:meta",
@@ -19469,7 +19478,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "meta?: string;"
+          "signature": "readonly meta?: string;"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:priority",
@@ -19477,7 +19486,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "priority?: 'low' | 'medium' | 'high' | 'urgent';"
+          "signature": "readonly priority?: 'low' | 'medium' | 'high' | 'urgent';"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:tags",
@@ -19485,7 +19494,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "tags?: string[];"
+          "signature": "readonly tags?: readonly string[];"
         },
         {
           "id": "./kanban#NeuKanbanCard.property:title",
@@ -19493,65 +19502,124 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "title: string;"
+          "signature": "readonly title: string;"
         }
       ]
     },
     {
-      "id": "./kanban#NeuKanbanCardDropEvent",
+      "id": "./kanban#NeuKanbanCardMove",
       "entrypoint": "./kanban",
-      "name": "NeuKanbanCardDropEvent",
+      "name": "NeuKanbanCardMove",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuKanbanCardMove = NeuKanbanCardReorder | NeuKanbanCardTransfer;",
+      "members": []
+    },
+    {
+      "id": "./kanban#NeuKanbanCardReorder",
+      "entrypoint": "./kanban",
+      "name": "NeuKanbanCardReorder",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuKanbanCardDropEvent {\n}",
+      "signature": "interface NeuKanbanCardReorder {\n}",
       "members": [
         {
-          "id": "./kanban#NeuKanbanCardDropEvent.property:card",
-          "name": "card",
+          "id": "./kanban#NeuKanbanCardReorder.property:cardId",
+          "name": "cardId",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "card: NeuKanbanCard;"
+          "signature": "readonly cardId: string;"
         },
         {
-          "id": "./kanban#NeuKanbanCardDropEvent.property:columns",
-          "name": "columns",
+          "id": "./kanban#NeuKanbanCardReorder.property:columnId",
+          "name": "columnId",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "columns: NeuKanbanColumn[];"
+          "signature": "readonly columnId: string;"
         },
         {
-          "id": "./kanban#NeuKanbanCardDropEvent.property:currentIndex",
-          "name": "currentIndex",
+          "id": "./kanban#NeuKanbanCardReorder.property:fromIndex",
+          "name": "fromIndex",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "currentIndex: number;"
+          "signature": "readonly fromIndex: number;"
         },
         {
-          "id": "./kanban#NeuKanbanCardDropEvent.property:fromColumnId",
+          "id": "./kanban#NeuKanbanCardReorder.property:kind",
+          "name": "kind",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly kind: 'reorder';"
+        },
+        {
+          "id": "./kanban#NeuKanbanCardReorder.property:toIndex",
+          "name": "toIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly toIndex: number;"
+        }
+      ]
+    },
+    {
+      "id": "./kanban#NeuKanbanCardTransfer",
+      "entrypoint": "./kanban",
+      "name": "NeuKanbanCardTransfer",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuKanbanCardTransfer {\n}",
+      "members": [
+        {
+          "id": "./kanban#NeuKanbanCardTransfer.property:cardId",
+          "name": "cardId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly cardId: string;"
+        },
+        {
+          "id": "./kanban#NeuKanbanCardTransfer.property:fromColumnId",
           "name": "fromColumnId",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "fromColumnId: string;"
+          "signature": "readonly fromColumnId: string;"
         },
         {
-          "id": "./kanban#NeuKanbanCardDropEvent.property:previousIndex",
-          "name": "previousIndex",
+          "id": "./kanban#NeuKanbanCardTransfer.property:fromIndex",
+          "name": "fromIndex",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "previousIndex: number;"
+          "signature": "readonly fromIndex: number;"
         },
         {
-          "id": "./kanban#NeuKanbanCardDropEvent.property:toColumnId",
+          "id": "./kanban#NeuKanbanCardTransfer.property:kind",
+          "name": "kind",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly kind: 'transfer';"
+        },
+        {
+          "id": "./kanban#NeuKanbanCardTransfer.property:toColumnId",
           "name": "toColumnId",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "toColumnId: string;"
+          "signature": "readonly toColumnId: string;"
+        },
+        {
+          "id": "./kanban#NeuKanbanCardTransfer.property:toIndex",
+          "name": "toIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly toIndex: number;"
         }
       ]
     },
@@ -19569,7 +19637,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "cards: NeuKanbanCard[];"
+          "signature": "readonly cards: readonly NeuKanbanCard[];"
         },
         {
           "id": "./kanban#NeuKanbanColumn.property:color",
@@ -19577,7 +19645,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "color?: string;"
+          "signature": "readonly color?: string;"
         },
         {
           "id": "./kanban#NeuKanbanColumn.property:id",
@@ -19585,7 +19653,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "id: string;"
+          "signature": "readonly id: string;"
         },
         {
           "id": "./kanban#NeuKanbanColumn.property:title",
@@ -19593,7 +19661,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "title: string;"
+          "signature": "readonly title: string;"
         },
         {
           "id": "./kanban#NeuKanbanColumn.property:wipLimit",
@@ -19601,7 +19669,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "wipLimit?: number;"
+          "signature": "readonly wipLimit?: number;"
         }
       ]
     },
@@ -19622,7 +19690,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly columns: _angular_core.InputSignal<NeuKanbanColumn[]>;"
+          "signature": "readonly columns: _angular_core.InputSignal<readonly NeuKanbanColumn[]>;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.input:columnWidth",
@@ -19665,146 +19733,14 @@
           "signature": "readonly showWipLimit: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./kanban#NeuKanbanComponent.input:stateMode",
-          "name": "stateMode",
-          "kind": "input",
-          "publicName": "stateMode",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly stateMode: _angular_core.InputSignal<NeuKanbanStateMode>;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:assigneeInitials",
-          "name": "assigneeInitials",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "assigneeInitials(assignee: NeuKanbanAssignee): string;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:canMove",
-          "name": "canMove",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "canMove(cardId: string, direction: NeuKanbanMoveDirection): boolean;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:cardAriaLabel",
-          "name": "cardAriaLabel",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "cardAriaLabel(card: NeuKanbanCard, column: NeuKanbanColumn, index: number): string;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:isKeyboardMoving",
-          "name": "isKeyboardMoving",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isKeyboardMoving(cardId: string): boolean;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:isMoveMenuOpen",
-          "name": "isMoveMenuOpen",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isMoveMenuOpen(cardId: string): boolean;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:moveActionsId",
-          "name": "moveActionsId",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "moveActionsId(cardId: string): string;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:moveByAction",
-          "name": "moveByAction",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "moveByAction(cardId: string, direction: NeuKanbanMoveDirection): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:onCardDrop",
-          "name": "onCardDrop",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onCardDrop(event: CdkDragDrop<NeuKanbanCard[]>, targetColumnId: string): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:onCardKeydown",
-          "name": "onCardKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onCardKeydown(card: NeuKanbanCard, columnId: string, cardIndex: number, event: KeyboardEvent): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:onDocumentPointerDown",
-          "name": "onDocumentPointerDown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onDocumentPointerDown(event: PointerEvent): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:onMoveMenuKeydown",
-          "name": "onMoveMenuKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onMoveMenuKeydown(cardId: string, event: KeyboardEvent): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:openMoveMenu",
-          "name": "openMoveMenu",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "openMoveMenu(cardId: string): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.method:toggleMoveMenu",
-          "name": "toggleMoveMenu",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "toggleMoveMenu(cardId: string, event: MouseEvent): void;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.output:cardDrop",
-          "name": "cardDrop",
+          "id": "./kanban#NeuKanbanComponent.output:cardMove",
+          "name": "cardMove",
           "kind": "output",
-          "publicName": "cardDrop",
+          "publicName": "cardMove",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly cardDrop: _angular_core.OutputEmitterRef<NeuKanbanCardDropEvent>;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.output:columnsChange",
-          "name": "columnsChange",
-          "kind": "output",
-          "publicName": "columnsChange",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly columnsChange: _angular_core.OutputEmitterRef<NeuKanbanColumn[]>;"
-        },
-        {
-          "id": "./kanban#NeuKanbanComponent.property:connectedDropLists",
-          "name": "connectedDropLists",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly connectedDropLists: _angular_core.Signal<string[]>;"
+          "signature": "readonly cardMove: _angular_core.OutputEmitterRef<NeuKanbanCardMove>;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.property:ɵcmp",
@@ -19812,7 +19748,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuKanbanComponent, \"neu-kanban\", never, {\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnWidth\": {\n        \"alias\": \"columnWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounts\": {\n        \"alias\": \"showCounts\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showWipLimit\": {\n        \"alias\": \"showWipLimit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"moveButtonLabel\": {\n        \"alias\": \"moveButtonLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"stateMode\": {\n        \"alias\": \"stateMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"columnsChange\": \"columnsChange\";\n    \"cardDrop\": \"cardDrop\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuKanbanComponent, \"neu-kanban\", never, {\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnWidth\": {\n        \"alias\": \"columnWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showCounts\": {\n        \"alias\": \"showCounts\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showWipLimit\": {\n        \"alias\": \"showWipLimit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"moveButtonLabel\": {\n        \"alias\": \"moveButtonLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"cardMove\": \"cardMove\";\n}, never, never, true, never>;"
         },
         {
           "id": "./kanban#NeuKanbanComponent.property:ɵfac",
@@ -19823,15 +19759,6 @@
           "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuKanbanComponent, never>;"
         }
       ]
-    },
-    {
-      "id": "./kanban#NeuKanbanStateMode",
-      "entrypoint": "./kanban",
-      "name": "NeuKanbanStateMode",
-      "kind": "type",
-      "status": "SUPPORTED",
-      "signature": "type NeuKanbanStateMode = 'optimistic' | 'controlled';",
-      "members": []
     },
     {
       "id": "./key-filter#NeuKeyFilterDirective",
@@ -55328,7 +55255,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly columns: _angular_core.InputSignal<NeuKanbanColumn[]>;"
+      "signature": "readonly columns: _angular_core.InputSignal<readonly NeuKanbanColumn[]>;"
     },
     {
       "id": "./kanban#NeuKanbanComponent.input:columnWidth",
@@ -55379,40 +55306,16 @@
       "signature": "readonly showWipLimit: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./kanban#NeuKanbanComponent.input:stateMode",
+      "id": "./kanban#NeuKanbanComponent.output:cardMove",
       "entrypoint": "./kanban",
       "declaration": "NeuKanbanComponent",
       "selector": "neu-kanban",
-      "propertyName": "stateMode",
-      "publicName": "stateMode",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly stateMode: _angular_core.InputSignal<NeuKanbanStateMode>;"
-    },
-    {
-      "id": "./kanban#NeuKanbanComponent.output:cardDrop",
-      "entrypoint": "./kanban",
-      "declaration": "NeuKanbanComponent",
-      "selector": "neu-kanban",
-      "propertyName": "cardDrop",
-      "publicName": "cardDrop",
+      "propertyName": "cardMove",
+      "publicName": "cardMove",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly cardDrop: _angular_core.OutputEmitterRef<NeuKanbanCardDropEvent>;"
-    },
-    {
-      "id": "./kanban#NeuKanbanComponent.output:columnsChange",
-      "entrypoint": "./kanban",
-      "declaration": "NeuKanbanComponent",
-      "selector": "neu-kanban",
-      "propertyName": "columnsChange",
-      "publicName": "columnsChange",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly columnsChange: _angular_core.OutputEmitterRef<NeuKanbanColumn[]>;"
+      "signature": "readonly cardMove: _angular_core.OutputEmitterRef<NeuKanbanCardMove>;"
     },
     {
       "id": "./key-filter#NeuKeyFilterDirective.input:neuKeyFilter",
@@ -65788,32 +65691,32 @@
   ],
   "summary": {
     "entrypoints": 97,
-    "exportedDeclarations": 803,
+    "exportedDeclarations": 804,
     "declarationKinds": {
       "class": 15,
       "component": 94,
       "directive": 117,
       "function": 53,
-      "interface": 270,
+      "interface": 271,
       "reexport": 48,
       "service": 10,
       "token": 4,
       "type": 191,
       "variable": 1
     },
-    "publicSymbols": 5234,
+    "publicSymbols": 5225,
     "statuses": {
-      "SUPPORTED": 3306,
+      "SUPPORTED": 3311,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1928,
+      "INTERNAL/UNSUPPORTED": 1914,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1221,
-      "output": 230,
+      "input": 1220,
+      "output": 229,
       "model": 24,
-      "total": 1475
+      "total": 1473
     },
     "designTokens": 251
   }
