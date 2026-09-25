@@ -1,164 +1,198 @@
-import {
-  AfterViewInit,
-  Component,
-  DestroyRef,
-  inject,
-  ContentChild,
-  TemplateRef,
-  ViewChild,
-  ViewEncapsulation,
-  afterNextRender,
-  afterRenderEffect,
-  computed,
-  input,
-  output,
-} from '@angular/core';
-import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { NgTemplateOutlet } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged } from 'rxjs';
+import {
+  afterNextRender, afterRenderEffect, Component, computed, contentChild, DestroyRef,
+  Directive, ElementRef, inject, input, isDevMode, output, signal, TemplateRef,
+  viewChild, ViewEncapsulation,
+} from '@angular/core';
+import { duplicateVirtualListKeys, keyToken, projectVirtualWindow } from './neu-virtual-list.engine';
+import type {
+  NeuVirtualItemContext, NeuVirtualListKey, NeuVirtualListRange, NeuVirtualListScrollTarget,
+} from './neu-virtual-list.types';
 
-@Component({
-  selector: 'neu-virtual-list-row',
-  standalone: true,
-  imports: [NgTemplateOutlet],
-  template: `
-    @if (template(); as projectedTemplate) {
-      <ng-container [ngTemplateOutlet]="projectedTemplate" [ngTemplateOutletContext]="context()" />
-    } @else {
-      <div class="neu-virtual-list__item-default" [style.height.px]="itemSize()">
-        {{ label() }}
-      </div>
-    }
-  `,
-})
-export class NeuVirtualListRowComponent {
-  readonly item = input.required<unknown>();
-  readonly index = input.required<number>();
-  readonly itemSize = input.required<number>();
-  readonly label = input.required<string>();
-  readonly template = input<TemplateRef<{ $implicit: unknown; index: number }> | null>(null);
+@Directive({ selector: 'ng-template[neuVirtualItem]', standalone: true })
+export class NeuVirtualItemDirective<T, K extends NeuVirtualListKey = NeuVirtualListKey> {
+  /** [neuVirtualItem]="items" acts as a typing witness for consumer templates. */
+  readonly neuVirtualItem = input<readonly T[] | undefined>();
+  /** Optional key witness preserves the exact K type in the template context. */
+  readonly neuVirtualItemKey = input<((item: T) => K) | undefined>();
+  readonly templateRef = inject<TemplateRef<NeuVirtualItemContext<T, K>>>(TemplateRef);
 
-  readonly context = computed(() => ({ $implicit: this.item(), index: this.index() }));
+  static ngTemplateContextGuard<T, K extends NeuVirtualListKey>(
+    _directive: NeuVirtualItemDirective<T, K>, context: unknown,
+  ): context is NeuVirtualItemContext<T, K> {
+    return true;
+  }
 }
 
-/**
- * NeuralUI VirtualList
- *
- * Wrapper sobre CDK VirtualScrollViewport para listas de miles de ítems.
- * Proyecta contenido mediante `ng-template` con let-item.
- *
- * Uso:
- *   <neu-virtual-list [items]="bigArray" [itemSize]="40">
- *     <ng-template neuVirtualItem let-item>
- *       <div class="my-row">{{ item.name }}</div>
- *     </ng-template>
- *   </neu-virtual-list>
- */
+interface RenderedItem<T, K extends NeuVirtualListKey> {
+  readonly item: T;
+  readonly index: number;
+  readonly track: string;
+  readonly context: NeuVirtualItemContext<T, K>;
+}
+
 @Component({
   selector: 'neu-virtual-list',
-  imports: [ScrollingModule, NeuVirtualListRowComponent],
+  imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  host: {
-    class: 'neu-virtual-list',
-    '[style.height]': '_containerHeight()',
-  },
-  /* v8 ignore start -- CDK/Angular template factory; simulated viewport rows are covered. */
+  host: { class: 'neu-virtual-list' },
   template: `
-    <cdk-virtual-scroll-viewport
-      class="neu-virtual-list__viewport"
-      [itemSize]="itemSize()"
-      [style.height]="_containerHeight()"
-      tabindex="0"
-    >
-      <ng-container *cdkVirtualFor="let item of items(); let index = index; trackBy: _trackBy">
-        <neu-virtual-list-row
-          [item]="item"
-          [index]="index"
-          [itemSize]="itemSize()"
-          [label]="_defaultItemLabel(item)"
-          [template]="itemTemplate"
-          (click)="itemClick.emit({ item, index })"
-        />
-      </ng-container>
-    </cdk-virtual-scroll-viewport>
-    @if (_isEmpty()) {
+    <div #viewport class="neu-virtual-list__viewport" role="list"
+      [style.block-size.px]="viewportBlockSize()">
+      <div class="neu-virtual-list__spacer" aria-hidden="true"
+        [style.block-size.px]="window().topSpacer"></div>
+      @for (row of renderedItems(); track row.track) {
+        <div class="neu-virtual-list__item" role="listitem"
+          [attr.aria-posinset]="row.index + 1"
+          [attr.aria-setsize]="items().length"
+          [style.block-size.px]="window().itemSize">
+          @if (itemTemplate(); as projected) {
+            <ng-container [ngTemplateOutlet]="projected.templateRef"
+              [ngTemplateOutletContext]="row.context" />
+          } @else {
+            {{ row.item }}
+          }
+        </div>
+      }
+      <div class="neu-virtual-list__spacer" aria-hidden="true"
+        [style.block-size.px]="window().bottomSpacer"></div>
+    </div>
+    @if (items().length === 0) {
       <div class="neu-virtual-list__empty" role="status">{{ emptyLabel() }}</div>
     }
   `,
-  /* v8 ignore stop */
   styleUrl: './neu-virtual-list.component.scss',
 })
-export class NeuVirtualListComponent<T = unknown> implements AfterViewInit {
-  /** Referencia al viewport CDK — para forzar remeasure tras render / CDK viewport ref — to force remeasure after render */
-  @ViewChild(CdkVirtualScrollViewport) private readonly _viewport?: CdkVirtualScrollViewport;
+export class NeuVirtualListComponent<T, K extends NeuVirtualListKey = string> {
+  readonly items = input<readonly T[]>([]);
+  readonly itemSize = input(48);
+  readonly visibleRows = input(10);
+  readonly itemKey = input.required<(item: T) => K>();
+  readonly emptyLabel = input('No results');
+  /** Intersecting viewport range; [start, end), excluding overscan. */
+  readonly rangeChange = output<NeuVirtualListRange>();
+
+  private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
+  protected readonly itemTemplate = contentChild(NeuVirtualItemDirective<T, K>);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly scrollTop = signal(0);
+  private readonly measuredHeight = signal<number | null>(null);
+  private readonly browserActive = signal(false);
+  private pendingFrame: number | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private removeScrollListener: (() => void) | null = null;
+  private lastEmittedRange: NeuVirtualListRange | null = null;
+  private lastDuplicateSignature = '';
+
+  private readonly normalizedItemSize = computed(() =>
+    Number.isFinite(this.itemSize()) && this.itemSize() > 0 ? this.itemSize() : 1,
+  );
+  protected readonly viewportBlockSize = computed(() => {
+    const rows = this.visibleRows();
+    return (Number.isFinite(rows) ? Math.max(1, Math.floor(rows)) : 1) * this.normalizedItemSize();
+  });
+  protected readonly window = computed(() => projectVirtualWindow({
+    scrollTop: this.scrollTop(),
+    viewportHeight: this.measuredHeight() ?? this.viewportBlockSize(),
+    itemSize: this.itemSize(),
+    itemCount: this.items().length,
+    overscan: 2,
+  }));
+  private readonly duplicateKeys = computed(() =>
+    duplicateVirtualListKeys(this.items(), this.itemKey()),
+  );
+  protected readonly renderedItems = computed(() => {
+    const rows: RenderedItem<T, K>[] = [];
+    const items = this.items();
+    const getKey = this.itemKey();
+    const duplicates = this.duplicateKeys();
+    const { render } = this.window();
+    for (let index = render.start; index < render.end; index++) {
+      const item = items[index];
+      const key = getKey(item);
+      const token = keyToken(key);
+      rows.push({
+        item, index,
+        track: duplicates.has(token) ? `${token}@${index}` : token,
+        context: { $implicit: item, item, index, key },
+      });
+    }
+    return rows;
+  });
 
   constructor() {
-    // Fuerza checkViewportSize() tras el primer paint completo (necesario en modo zoneless)
-    // Forces checkViewportSize() after the first full paint (needed in zoneless mode)
-    afterNextRender(() => this._viewport?.checkViewportSize());
-    // Inputs can change while the viewport is already scrolled. CDK otherwise
-    // keeps its previous measurement and may leave a blank area at the end.
+    afterNextRender(() => {
+      if (this.destroyRef.destroyed) return;
+      const viewport = this.viewport().nativeElement;
+      const update = () => {
+        if (this.destroyRef.destroyed) return;
+        this.scrollTop.set(viewport.scrollTop);
+        this.measuredHeight.set(viewport.clientHeight || this.viewportBlockSize());
+      };
+      const schedule = () => {
+        if (this.pendingFrame !== null || this.destroyRef.destroyed) return;
+        this.pendingFrame = requestAnimationFrame(() => {
+          this.pendingFrame = null;
+          update();
+        });
+      };
+      viewport.addEventListener('scroll', schedule, { passive: true });
+      this.removeScrollListener = () => viewport.removeEventListener('scroll', schedule);
+      if (typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(schedule);
+        this.resizeObserver.observe(viewport);
+      }
+      update();
+      this.browserActive.set(true);
+    });
     afterRenderEffect(() => {
-      this.items();
-      this.itemSize();
-      this.visibleRows();
-      this._viewport?.checkViewportSize();
+      const range = this.window().visible;
+      const duplicateKeys = this.duplicateKeys();
+      if (!this.browserActive()) return;
+      if (isDevMode()) {
+        const signature = duplicateKeys.size ? JSON.stringify([...duplicateKeys]) : '';
+        if (signature && signature !== this.lastDuplicateSignature)
+          console.warn(`NeuVirtualList duplicate itemKey: ${signature}`);
+        this.lastDuplicateSignature = signature;
+      }
+      if (this.lastEmittedRange?.start === range.start && this.lastEmittedRange.end === range.end)
+        return;
+      this.lastEmittedRange = range;
+      this.rangeChange.emit(range);
+    });
+    this.destroyRef.onDestroy(() => {
+      this.removeScrollListener?.();
+      this.resizeObserver?.disconnect();
+      if (this.pendingFrame !== null) cancelAnimationFrame(this.pendingFrame);
+      this.pendingFrame = null;
     });
   }
 
-  /** Rendered range including buffer: start inclusive, end exclusive. */
-  readonly rangeChange = output<{ start: number; end: number }>();
-  private readonly eventDestroyRef = inject(DestroyRef);
-
-  ngAfterViewInit(): void {
-    this._viewport?.renderedRangeStream
-      .pipe(
-        distinctUntilChanged((a, b) => a.start === b.start && a.end === b.end),
-        takeUntilDestroyed(this.eventDestroyRef),
-      )
-      .subscribe(({ start, end }) => this.rangeChange.emit({ start, end }));
-    // Segundo intento de medición sincrona por si afterNextRender no cubre todos los casos
-    // Second synchronous measurement pass as a fallback
-    this._viewport?.checkViewportSize();
-  }
-  /** Array de ítems / Item array */
-  readonly items = input<T[]>([]);
-
-  /** Altura de cada fila en px / Row height in px */
-  readonly itemSize = input<number>(48);
-
-  /** Número de filas visibles / Visible row count (sets container height) */
-  readonly visibleRows = input<number>(10);
-
-  /** Texto cuando la lista está vacía / Empty state text */
-  readonly emptyLabel = input<string>('No results');
-
-  /** Función de tracking / Tracking function */
-  readonly trackBy = input<(index: number, item: T) => unknown>((i) => i);
-
-  /** Emitido al hacer click en un ítem / Emitted on item click */
-  readonly itemClick = output<{ item: T; index: number }>();
-
-  @ContentChild(TemplateRef) itemTemplate: TemplateRef<{ $implicit: T; index: number }> | null =
-    null;
-
-  protected readonly _containerHeight = computed(() => `${this.itemSize() * this.visibleRows()}px`);
-  protected readonly _isEmpty = computed(() => this.items().length === 0);
-
-  protected _trackBy = (index: number, item: T) => this.trackBy()(index, item);
-
-  protected _itemTemplateOrDefault(
-    fallback: TemplateRef<{ $implicit: T; index: number }>,
-  ): TemplateRef<{ $implicit: T; index: number }> {
-    return this.itemTemplate ?? fallback;
-  }
-
-  protected _itemContext(item: T, index: number): { $implicit: T; index: number } {
-    return { $implicit: item, index };
-  }
-
-  protected _defaultItemLabel(item: T): string {
-    return String(item);
+  /** Scrolls the applied client list; key lookup is an on-demand linear scan. */
+  scrollTo(target: NeuVirtualListScrollTarget<K>): boolean {
+    if (!this.browserActive() || this.destroyRef.destroyed) return false;
+    const items = this.items();
+    let index: number;
+    if ('index' in target) index = target.index;
+    else {
+      const requested = keyToken(target.key);
+      const getKey = this.itemKey();
+      index = items.findIndex((item) => keyToken(getKey(item)) === requested);
+    }
+    if (!Number.isInteger(index) || index < 0 || index >= items.length) return false;
+    const viewport = this.viewport().nativeElement;
+    const size = this.normalizedItemSize();
+    const height = viewport.clientHeight || this.viewportBlockSize();
+    const top = index * size;
+    const align = target.align ?? 'nearest';
+    let next = viewport.scrollTop;
+    if (align === 'start') next = top;
+    else if (align === 'center') next = top - (height - size) / 2;
+    else if (align === 'end') next = top + size - height;
+    else if (top < next) next = top;
+    else if (top + size > next + height) next = top + size - height;
+    viewport.scrollTop = Math.max(0, Math.min(next, Math.max(0, items.length * size - height)));
+    this.scrollTop.set(viewport.scrollTop);
+    return true;
   }
 }

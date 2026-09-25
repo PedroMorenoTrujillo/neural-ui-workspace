@@ -12,26 +12,26 @@
     "currentPublicComponents": 94,
     "componentEntrypoints": 82,
     "secondaryEntrypoints": 96,
-    "completed": 92,
-    "pending": 2,
+    "completed": 94,
+    "pending": 0,
     "remove": 0,
     "physicallyRemovedHistorical": 2,
     "mergedReplacedHistorical": 4,
     "pendingByDifficulty": {
-      "LIGHT": 1,
+      "LIGHT": 0,
       "MEDIUM": 0,
       "HEAVY": 0,
-      "VERY HEAVY": 1
+      "VERY HEAVY": 0
     },
     "pendingByEffort": {
-      "XS": 1,
+      "XS": 0,
       "S": 0,
       "M": 0,
       "L": 0,
-      "XL": 1
+      "XL": 0
     },
-    "activePending": 1,
-    "implementationBatches": 1
+    "activePending": 0,
+    "implementationBatches": 0
   },
   "historicalIdentityDelta": {
     "from": "fbe9e5c^",
@@ -60,22 +60,7 @@
       }
     ]
   },
-  "batches": [
-    {
-      "id": "C6",
-      "wave": "C",
-      "family": "hierarchical collection",
-      "components": 1,
-      "model": "GPT-6 SOL HIGH"
-    },
-    {
-      "id": "P3",
-      "wave": "FUTURE",
-      "family": "deferred virtual extension",
-      "components": 1,
-      "model": "GPT-6 LUNA"
-    }
-  ],
+  "batches": [],
   "components": [
     {
       "component": "NeuAccordionComponent",
@@ -2418,30 +2403,27 @@
     {
       "component": "NeuTreeComponent",
       "entrypoint": "@neural-ui/core/tree",
-      "status": "PENDING",
-      "evidenceStatus": "STILL PENDING",
-      "action": "REWRITE",
-      "difficulty": "VERY HEAVY",
-      "effort": "XL",
-      "risk": "HIGH",
+      "status": "COMPLETED",
+      "evidenceStatus": "FULLY COMPLETED",
+      "action": "KEEP AS-IS",
+      "difficulty": "CLOSED",
+      "effort": "—",
+      "risk": "CLOSED",
       "dependencies": [],
       "roadmapPhase": "C6",
-      "recommendedModel": "GPT-6 SOL HIGH",
-      "batch": "C6",
-      "batchFamily": "hierarchical collection",
-      "reason": "hierarchical collection; 920 source lines; no overlay in component source.",
-      "expectedChanges": [
-        "Design clean hierarchical state and lazy/virtual interaction",
-        "Replace legacy mirrors/engines only after API review"
-      ],
-      "apiImpact": "PUBLIC",
-      "ssrHydrationWork": "real SSR + Chromium hydration",
-      "a11yKeyboardWork": "directed keyboard/focus + semantics",
-      "lifecycleComplexity": "HIGH",
-      "bundleRisk": "MEDIUM",
-      "rewriteProbability": "HIGH",
-      "designReviewProbability": "HIGH",
-      "priorityScore": 0,
+      "recommendedModel": "—",
+      "batch": "—",
+      "batchFamily": "—",
+      "reason": "Certified in C6; do not reopen for a transverse smoke test.",
+      "expectedChanges": [],
+      "apiImpact": "NONE",
+      "ssrHydrationWork": "certified",
+      "a11yKeyboardWork": "certified",
+      "lifecycleComplexity": "certified",
+      "bundleRisk": "certified",
+      "rewriteProbability": "N/A",
+      "designReviewProbability": "NONE",
+      "priorityScore": null,
       "sourceFile": "projects/ui-core/tree/neu-tree.component.ts"
     },
     {
@@ -2525,30 +2507,27 @@
     {
       "component": "NeuVirtualListComponent",
       "entrypoint": "@neural-ui/core/virtual-list",
-      "status": "PENDING",
-      "evidenceStatus": "STILL PENDING",
-      "action": "AUDIT ONLY",
-      "difficulty": "LIGHT",
-      "effort": "XS",
-      "risk": "LOW",
+      "status": "COMPLETED",
+      "evidenceStatus": "FULLY COMPLETED",
+      "action": "KEEP AS-IS",
+      "difficulty": "CLOSED",
+      "effort": "—",
+      "risk": "CLOSED",
       "dependencies": [],
-      "roadmapPhase": "N2-036 (P3 deferred)",
-      "recommendedModel": "GPT-6 LUNA",
-      "batch": "P3",
-      "batchFamily": "deferred virtual extension",
-      "reason": "deferred virtual extension; 165 source lines; no overlay in component source.",
-      "expectedChanges": [
-        "Audit current fixed-height contract and bundle only",
-        "Defer 2D/variable-height until measured use case"
-      ],
+      "roadmapPhase": "C7",
+      "recommendedModel": "—",
+      "batch": "—",
+      "batchFamily": "—",
+      "reason": "Certified in C7; do not reopen for a transverse smoke test.",
+      "expectedChanges": [],
       "apiImpact": "NONE",
-      "ssrHydrationWork": "SSR import/render smoke; hydration if changed DOM",
-      "a11yKeyboardWork": "semantic/keyboard smoke",
-      "lifecycleComplexity": "LOW",
-      "bundleRisk": "LOW",
-      "rewriteProbability": "LOW",
-      "designReviewProbability": "LOW",
-      "priorityScore": 0,
+      "ssrHydrationWork": "certified",
+      "a11yKeyboardWork": "certified",
+      "lifecycleComplexity": "certified",
+      "bundleRisk": "certified",
+      "rewriteProbability": "N/A",
+      "designReviewProbability": "NONE",
+      "priorityScore": null,
       "sourceFile": "projects/ui-core/virtual-list/neu-virtual-list.component.ts"
     }
   ]

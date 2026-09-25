@@ -2,7 +2,7 @@
 
 ## Decision and counts
 
-**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **94** = 92 completed + 2 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 1, MEDIUM 0, HEAVY 0, VERY HEAVY 1. Pending effort: XS 1, S 0, M 0, L 0, XL 1. One-by-one active work would require **1 component/removal tasks**; the proposal is **1 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
+**Reorder the original roadmap.** Preserve historical IDs N2-001…025 and keep N2-026…037 as references; do not renumber history. Current public components: **94** = 94 completed + 0 pending + 0 current removals; 2 products physically retired in D1. Pending difficulty: LIGHT 0, MEDIUM 0, HEAVY 0, VERY HEAVY 0. Pending effort: XS 0, S 0, M 0, L 0, XL 0. One-by-one active work would require **0 component/removal tasks**; the proposal is **0 implementation batches/phases** (remaining active groups; A3 already closed). This excludes one P3-deferred audit, final technical certification, Showcase and RC.
 
 ## Top 10 next best targets
 
@@ -20,9 +20,8 @@ A3/A5/D1, B7/B8/B9/B5, A1, A2 and A4 are complete. A0.2 externalized Icon to neu
 ## WAVE B — medium (0 components; 10 batches)
 
 
-## WAVE C — heavy (1 components; 6 phases)
+## WAVE C — heavy (0 components; 6 phases)
 
-- **C6 — hierarchical collection (1):** NeuTreeComponent. GPT-6 SOL HIGH implementation; require pre-runtime design review where API/owner changes are material, using GPT-6 ASTRA for architecture only.
 
 C1 completed the ImageGallery merge into Gallery and physically removed its runtime/entrypoint; ImageViewer remains an independent directive using the one private preview engine. C2 is a coordinated two-facade DnD family, not two duplicate engines. C3/C4 have Router/overlay/focus boundaries. C5 has cross-column DnD identity. C6 Tree has hierarchy + lazy + virtual + DnD and is the only VERY HEAVY component; evaluate a clean rewrite, not an automatic one. None should be moved ahead of independent quick wins merely for LOC.
 
@@ -40,7 +39,7 @@ One cross-cutting checkpoint after all active runtime batches: full suite, globa
 
 ## Explicit P3 deferral
 
-VirtualList remains a real public component, but N2-036 2D/variable-height is **AUDIT ONLY / XS** now, not an active implementation batch. N2-037 StyleClass/AutoFocus is a directive/utility question, not a missing public component. Activate P3 only with a measured use case and new approval.
+C7 certifies the public VirtualList fixed-height primitive; N2-036 2D/variable-height remains P3-deferred without an active implementation batch. N2-037 StyleClass/AutoFocus is a directive/utility question, not a missing public component. Activate P3 only with a measured use case and new approval.
 
 ## Original roadmap disposition
 
@@ -56,7 +55,7 @@ VirtualList remains a real public component, but N2-036 2D/variable-height is **
 | N2-033 final certification | KEEP AFTER RUNTIME → E | Full technical gate |
 | N2-034 Showcase | KEEP LAST → F | 17 demos are deferred |
 | N2-035 RC | KEEP AFTER F | Release gate, not automatic release |
-| N2-036 2D virtualization | DEFER P3 | No measured need, VirtualList audit only |
+| N2-036 2D virtualization | DEFER P3 | Fixed-height completed in C7; no measured 2D/variable-height need |
 | N2-037 StyleClass/AutoFocus | DEFER P3 | Utility/directive, not component backlog |
 
 ## Gate and model policy
@@ -75,4 +74,4 @@ LIGHT audit-only: GPT-6 LUNA; bounded implementation: GPT-6 SOL MEDIUM. MEDIUM a
 | InputMask (B8) | No other pending component | N2-003 Forms base already certified |
 | Splitter/ScrollArea (B9) | No other pending component | N2-001 controlled-state contract |
 
-A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch. The plan saves **0** active component/removal task slots versus one-by-one execution (1 → 1); this is a phase count, not a calendar or token-cost guarantee.
+A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch. The plan saves **0** active component/removal task slots versus one-by-one execution (0 → 0); this is a phase count, not a calendar or token-cost guarantee.

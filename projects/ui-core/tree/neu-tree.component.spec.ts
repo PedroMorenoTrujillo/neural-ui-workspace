@@ -1,901 +1,290 @@
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { NeuTreeComponent, NeuTreeNode } from './neu-tree.component';
+import { NeuTreeComponent } from './neu-tree.component';
+import type { NeuTreeHierarchy, NeuTreeNode, NeuTreeSelection } from './neu-tree.types';
 
-const NODES: NeuTreeNode[] = [
-  {
-    id: 'workspace',
-    label: 'Workspace',
-    expanded: true,
-    children: [
-      {
-        id: 'apps',
-        label: 'Apps',
-        children: [{ id: 'admin', label: 'Admin portal' }],
-      },
-      { id: 'design', label: 'Design system', description: 'Shared tokens' },
-    ],
-  },
-  { id: 'archive', label: 'Archive', disabled: true },
+interface Item { readonly id: string }
+const nodes: readonly NeuTreeNode<Item, string>[] = [
+  { key: 'root', data: { id: 'root' }, label: 'Workspace' },
+  { key: 'child', data: { id: 'child' }, label: 'Design', description: 'Shared tokens' },
+  { key: 'grandchild', data: { id: 'grandchild' }, label: 'Admin portal' },
+  { key: 'disabled', data: { id: 'disabled' }, label: 'Archive', disabled: true },
 ];
+const hierarchy: NeuTreeHierarchy<string> = {
+  revision: 1, roots: ['root', 'disabled'], children: [
+    { parentKey: 'root', state: 'loaded', keys: ['child'] },
+    { parentKey: 'child', state: 'loaded', keys: ['grandchild'] },
+    { parentKey: 'disabled', state: 'unloaded' },
+  ],
+};
 
-describe('NeuTreeComponent', () => {
+describe('NeuTreeComponent controlled C6', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [NeuTreeComponent],
-    }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [NeuTreeComponent] }).compileComponents();
   });
 
-  it('renders root and visible child nodes', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
+  function create(
+    state: { nodes?: readonly NeuTreeNode<Item, string>[]; hierarchy?: NeuTreeHierarchy<string>;
+      expandedKeys?: readonly string[]; selection?: NeuTreeSelection<string> } = {},
+  ) {
+    const fixture = TestBed.createComponent(NeuTreeComponent<Item, string>);
+    fixture.componentRef.setInput('nodes', state.nodes ?? nodes);
+    fixture.componentRef.setInput('hierarchy', state.hierarchy ?? hierarchy);
+    fixture.componentRef.setInput('expandedKeys', state.expandedKeys ?? []);
+    fixture.componentRef.setInput('selection', state.selection ?? { mode: 'none' });
     fixture.detectChanges();
+    return fixture;
+  }
 
-    const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Workspace');
-    expect(text).toContain('Apps');
-    expect(text).toContain('Design system');
+  function rows(fixture: ReturnType<typeof create>): HTMLElement[] {
+    return [...fixture.nativeElement.querySelectorAll('[role="treeitem"]')] as HTMLElement[];
+  }
+
+  it('renders only applied roots with tree semantics and sibling metadata', () => {
+    const fixture = create();
+    expect(fixture.nativeElement.querySelector('[role="tree"]')).not.toBeNull();
+    expect(rows(fixture).map((row) => row.querySelector('.neu-tree__row')?.textContent?.trim())).toEqual(['Workspace', 'Archive']);
+    expect(rows(fixture)[0]?.getAttribute('aria-level')).toBe('1');
+    expect(rows(fixture)[0]?.getAttribute('aria-posinset')).toBe('1');
+    expect(rows(fixture)[1]?.getAttribute('aria-setsize')).toBe('2');
+    expect(rows(fixture).filter((row) => row.tabIndex === 0)).toHaveLength(1);
+    const internal = fixture.componentInstance as unknown as { model(): unknown; visibleNodes(): unknown };
+    const modelBeforeFocus = internal.model();
+    const visibleBeforeFocus = internal.visibleNodes();
+    rows(fixture)[1]!.focus();
+    fixture.detectChanges();
+    expect(internal.model()).toBe(modelBeforeFocus);
+    expect(internal.visibleNodes()).toBe(visibleBeforeFocus);
   });
 
-  it('toggles collapsed branches', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).not.toContain('Admin portal');
-
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-tree__toggle');
-    buttons[1].click();
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Admin portal');
-  });
-
-  it('filters nodes and preserves matching ancestry', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('searchable', true);
-    fixture.detectChanges();
-
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input input');
-    input.value = 'admin';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Workspace');
-    expect(text).toContain('Apps');
-    expect(text).toContain('Admin portal');
-    expect(text).not.toContain('Design system');
-  });
-
-  it('emits single selection when a node is activated', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    const emitted: string[][] = [];
-
-    fixture.componentInstance.selectionChange.subscribe((nodes) => {
-      emitted.push(nodes.map((node) => node.id));
-    });
-
-    fixture.detectChanges();
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-tree__content');
-    buttons[1].click();
-    fixture.detectChanges();
-
-    expect(emitted.at(-1)).toEqual(['apps']);
-  });
-
-  it('supports multiple selection with checkboxes', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    const emitted: string[][] = [];
-
-    fixture.componentInstance.selectionChange.subscribe((nodes) => {
-      emitted.push(nodes.map((node) => node.id));
-    });
-
-    fixture.detectChanges();
-    const checkboxes = fixture.nativeElement.querySelectorAll(
-      '.neu-tree__checkbox input[type="checkbox"]',
-    );
-    checkboxes[0].checked = true;
-    checkboxes[0].dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-
-    checkboxes[1].checked = true;
-    checkboxes[1].dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-
-    expect(emitted.at(-1)).toEqual(['workspace', 'apps']);
-  });
-
-  it('removes a selected node when its checkbox is unchecked in multiple mode', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    const emitted: string[][] = [];
-
-    fixture.componentInstance.selectionChange.subscribe((nodes) => {
-      emitted.push(nodes.map((node) => node.id));
-    });
-
-    fixture.detectChanges();
-    const checkboxes = fixture.nativeElement.querySelectorAll(
-      '.neu-tree__checkbox input[type="checkbox"]',
-    );
-    checkboxes[0].checked = true;
-    checkboxes[0].dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-
-    checkboxes[0].checked = false;
-    checkboxes[0].dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-
-    expect(emitted.at(-1)).toEqual([]);
-  });
-
-  it('keeps checkbox clicks scoped to the checkbox primitive', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    const clicks: string[] = [];
-    fixture.componentInstance.nodeClick.subscribe((node) => clicks.push(node.id));
-    fixture.detectChanges();
-
-    (fixture.nativeElement.querySelector('.neu-tree__checkbox') as HTMLElement).click();
-    expect(clicks).toEqual([]);
-  });
-
-  it('shows the empty label when filtering returns no matches', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('searchable', true);
-    fixture.componentRef.setInput('emptyLabel', 'Nothing found');
-    fixture.detectChanges();
-
-    const input = fixture.nativeElement.querySelector('.neu-tree__search-input input');
-    input.value = 'zzz';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Nothing found');
-  });
-
-  it('does not emit selection or nodeClick for disabled nodes', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    let selectionCount = 0;
-    let clickCount = 0;
-    fixture.componentInstance.selectionChange.subscribe(() => selectionCount++);
-    fixture.componentInstance.nodeClick.subscribe(() => clickCount++);
-    fixture.detectChanges();
-
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-tree__content');
-    buttons[3].click();
-    fixture.detectChanges();
-
-    expect(selectionCount).toBe(0);
-    expect(clickCount).toBe(0);
-  });
-
-  it('preserves nested expanded descendants from the input model', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [
-      {
-        id: 'workspace',
-        label: 'Workspace',
-        expanded: true,
-        children: [
-          {
-            id: 'apps',
-            label: 'Apps',
-            expanded: true,
-            children: [{ id: 'admin', label: 'Admin portal' }],
-          },
-        ],
-      },
-    ]);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Admin portal');
-  });
-
-  it('ignores checkbox changes for disabled nodes', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    let selectionCount = 0;
-    fixture.componentInstance.selectionChange.subscribe(() => selectionCount++);
-    fixture.detectChanges();
-
-    fixture.componentInstance.onCheckboxChange(NODES[1], {
-      target: { checked: true },
-    } as unknown as Event);
-    fixture.detectChanges();
-
-    expect(selectionCount).toBe(0);
-  });
-
-  it('emits nodeClick but not selection when selectable is false', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', false);
-    let selectionCount = 0;
-    let clickCount = 0;
-    fixture.componentInstance.selectionChange.subscribe(() => selectionCount++);
-    fixture.componentInstance.nodeClick.subscribe(() => clickCount++);
-    fixture.detectChanges();
-
-    const buttons = fixture.nativeElement.querySelectorAll('.neu-tree__content');
-    buttons[1].click();
-    fixture.detectChanges();
-
-    expect(clickCount).toBe(1);
-    expect(selectionCount).toBe(0);
-  });
-
-  it('renders badges and keeps search-expanded descendants visible', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [
-      {
-        id: 'root',
-        label: 'Root',
-        badge: 'NEW',
-        expanded: false,
-        children: [{ id: 'leaf', label: 'Leaf result', description: 'Nested match' }],
-      },
-    ]);
-    fixture.componentRef.setInput('searchable', true);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('NEW');
-    const input = fixture.nativeElement.querySelector(
-      '.neu-tree__search-input input',
-    ) as HTMLInputElement;
-    input.value = 'leaf';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent).toContain('Leaf result');
-    expect(fixture.nativeElement.textContent).toContain('Nested match');
-  });
-
-  it('uses expanded state as fallback while search is active', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    const node: NeuTreeNode = {
-      id: 'root',
-      label: 'Root',
-      children: [{ id: 'leaf', label: 'Leaf' }],
-    };
-    fixture.componentRef.setInput('nodes', [node]);
-    fixture.componentRef.setInput('searchable', true);
-    fixture.detectChanges();
-
-    const input = fixture.nativeElement.querySelector(
-      '.neu-tree__search-input input',
-    ) as HTMLInputElement;
-    input.value = 'root';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(fixture.componentInstance.isRenderedExpanded(node)).toBe(false);
-    fixture.componentInstance.toggleNode(node);
-    expect(fixture.componentInstance.isRenderedExpanded(node)).toBe(true);
-  });
-
-  it('toggleNode ignores leaf and disabled nodes and can collapse open parents', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    const emitted: string[][] = [];
-    fixture.componentInstance.expansionChange.subscribe((keys) => emitted.push(keys));
-    fixture.detectChanges();
-
-    fixture.componentInstance.toggleNode(NODES[0].children![1]);
-    fixture.componentInstance.toggleNode(NODES[1]);
-    expect(emitted).toEqual([]);
-
-    fixture.componentInstance.toggleNode(NODES[0]);
-    fixture.detectChanges();
-    expect(emitted.at(-1)).not.toContain('workspace');
-  });
-
-  it('multiple activation toggles selected nodes off again', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    const emitted: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) =>
-      emitted.push(nodes.map((node) => node.id)),
-    );
-    fixture.detectChanges();
-
-    fixture.componentInstance.activateNode(NODES[0]);
-    fixture.componentInstance.activateNode(NODES[0]);
-    fixture.detectChanges();
-
-    expect(emitted.at(-1)).toEqual([]);
-  });
-
-  it('single checkbox changes can clear a selected node', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'single');
-    const emitted: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) =>
-      emitted.push(nodes.map((node) => node.id)),
-    );
-    fixture.detectChanges();
-
-    fixture.componentInstance.onCheckboxChange(NODES[0], {
-      target: { checked: true },
-    } as unknown as Event);
-    fixture.componentInstance.onCheckboxChange(NODES[0], {
-      target: { checked: false },
-    } as unknown as Event);
-
-    expect(emitted.at(-1)).toEqual([]);
-  });
-
-  it('activateNode returns early for disabled nodes when called directly', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    let clicks = 0;
-    fixture.componentInstance.nodeClick.subscribe(() => clicks++);
-    fixture.detectChanges();
-
-    fixture.componentInstance.activateNode(NODES[1]);
-
-    expect(clicks).toBe(0);
-  });
-
-  it('owns one tree tab stop and preserves focus across hierarchy navigation', async () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.detectChanges();
-    const items = () =>
-      Array.from(fixture.nativeElement.querySelectorAll('[role="treeitem"]')) as HTMLElement[];
-    expect(items().filter((item) => item.tabIndex === 0)).toHaveLength(1);
-    expect(items().at(-1)?.getAttribute('aria-disabled')).toBe('true');
-
-    items()[0].focus();
-    items()[0].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(items()[1]);
-    items()[1].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(items().some((item) => item.textContent?.includes('Admin portal'))).toBe(true);
-    expect(document.activeElement).toBe(items()[1]);
-    items()[1].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement?.textContent).toContain('Admin portal');
-    (document.activeElement as HTMLElement).dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement).toBe(items()[0]);
-    items()[0].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
-    );
-    expect(document.activeElement?.textContent).toContain('Design system');
-  });
-
-  it('supports RTL collapse, activation and unhandled-key navigation paths', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.detectChanges();
-    fixture.nativeElement.style.direction = 'rtl';
-    const component = fixture.componentInstance;
-    const selected: string[][] = [];
-    component.selectionChange.subscribe((nodes) => selected.push(nodes.map((node) => node.id)));
-
-    component.onNodeKeydown(NODES[0], new KeyboardEvent('keydown', { key: 'Unidentified' }));
-    expect(component.isRenderedExpanded(NODES[0])).toBe(true);
-    component.onNodeKeydown(
-      NODES[0],
-      new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }),
-    );
-    expect(component.isRenderedExpanded(NODES[0])).toBe(false);
-    component.onNodeKeydown(NODES[0], new KeyboardEvent('keydown', { key: 'Enter' }));
-    expect(selected.at(-1)).toEqual(['workspace']);
-  });
-
-  it('removes nested selection controls from sequential Tab order', async () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'multiple');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    const nested = Array.from(
-      fixture.nativeElement.querySelectorAll(
-        '.neu-tree__toggle, .neu-tree__content, .neu-tree__checkbox input',
-      ),
-    ) as HTMLElement[];
-    expect(nested.every((element) => element.tabIndex === -1)).toBe(true);
-  });
-
-  it('terminates self/ancestor cycles, preserves shared branches, and walks depth 5,000', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    const self: NeuTreeNode = { id: 'self', label: 'Self', expanded: true, children: [] };
-    const parent: NeuTreeNode = { id: 'parent', label: 'Parent', expanded: true, children: [] };
-    const child: NeuTreeNode = { id: 'child', label: 'Child', expanded: true, children: [] };
-    const grandchild: NeuTreeNode = {
-      id: 'grandchild',
-      label: 'Grandchild',
-      expanded: true,
-      children: [],
-    };
-    const shared: NeuTreeNode = { id: 'shared', label: 'Shared' };
-    self.children = [self, { id: 'safe', label: 'Safe sibling' }];
-    parent.children = [child, shared];
-    child.children = [grandchild];
-    grandchild.children = [parent];
-    fixture.componentRef.setInput('nodes', [
-      self,
-      parent,
-      { id: 'right', label: 'Right', expanded: true, children: [shared] },
-    ]);
-    expect(() => fixture.detectChanges()).not.toThrow();
-    expect(fixture.nativeElement.textContent).toContain('Safe sibling');
-    expect(fixture.nativeElement.textContent.match(/Shared/g)).toHaveLength(2);
-
-    let deep: NeuTreeNode = { id: 'deep-5000', label: 'Deep', expanded: true };
-    for (let level = 4999; level >= 0; level -= 1) {
-      deep = { id: `deep-${level}`, label: `Deep ${level}`, expanded: true, children: [deep] };
-    }
-    expect((fixture.componentInstance as any).collectExpandedKeys([deep]).size).toBe(5001);
-  });
-
-  it('renders shared identities under each parent but expands their descendants canonically once', () => {
-    const leaf: NeuTreeNode = { id: 'leaf', label: 'Leaf' };
-    const shared: NeuTreeNode = {
-      id: 'shared',
-      label: 'Shared',
-      expanded: true,
-      children: [leaf],
-    };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [
-      { id: 'left', label: 'Left', expanded: true, children: [shared] },
-      { id: 'right', label: 'Right', expanded: true, children: [shared] },
-    ]);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.textContent.match(/Shared/g)).toHaveLength(2);
-    expect(fixture.nativeElement.textContent.match(/Leaf/g)).toHaveLength(1);
-    expect(fixture.componentInstance.allEntries()).toHaveLength(5);
-  });
-
-  it('bounds Astra compact DAG input without changing true-tree identity or order', () => {
-    const dag = Array.from({ length: 15 }, (_, index) => ({
-      id: `dag-${index}`,
-      label: `DAG ${index}`,
-      expanded: true,
-      children: [] as NeuTreeNode[],
-    }));
-    for (let index = 0; index < dag.length - 1; index += 1) {
-      dag[index].children = [dag[index + 1], dag[index + 1]];
-    }
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [dag[0]]);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.allEntries()).toHaveLength(29);
-
-    const trueTree: NeuTreeNode[] = [
-      { id: 'a', label: 'A', expanded: true, children: [{ id: 'b', label: 'B' }] },
-      { id: 'c', label: 'C' },
-    ];
-    fixture.componentRef.setInput('nodes', trueTree);
-    fixture.detectChanges();
-    const entries = fixture.componentInstance.allEntries();
-    expect(entries.map(({ node }) => node.id)).toEqual(['a', 'b', 'c']);
-    expect(entries.map(({ node }) => node)).toEqual([
-      trueTree[0],
-      trueTree[0].children![0],
-      trueTree[1],
-    ]);
-  });
-
-  it('keeps controlled selection and expansion authoritative while emitting proposals', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selection', [NODES[0].children![0]]);
+  it('renders nested applied expansion and parent collapse without output echo', () => {
+    const fixture = create({ expandedKeys: ['root', 'child'] });
+    const proposals: unknown[] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((value) => proposals.push(value));
+    expect(rows(fixture).map((row) => row.getAttribute('aria-level'))).toEqual(['1', '2', '3', '1']);
+    expect(fixture.nativeElement.querySelectorAll('[role="group"]')).toHaveLength(2);
     fixture.componentRef.setInput('expandedKeys', []);
-    const selections: string[][] = [];
-    const expansions: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) =>
-      selections.push(nodes.map((node) => node.id)),
-    );
-    fixture.componentInstance.expansionChange.subscribe((keys) => expansions.push(keys));
     fixture.detectChanges();
-
-    fixture.componentInstance.activateNode(NODES[0].children![1]);
-    fixture.componentInstance.toggleNode(NODES[0]);
-
-    expect(selections.at(-1)).toEqual(['design']);
-    expect(fixture.componentInstance.isSelected('apps')).toBe(true);
-    expect(fixture.componentInstance.isSelected('design')).toBe(false);
-    expect(expansions.at(-1)).toEqual(['workspace']);
-    expect(fixture.componentInstance.isExpanded('workspace')).toBe(false);
+    expect(rows(fixture)).toHaveLength(2);
+    expect(proposals).toEqual([]);
   });
 
-  it('propagates checkbox state iteratively and stops at disabled boundaries', () => {
-    const hidden: NeuTreeNode = { id: 'hidden', label: 'Hidden' };
-    const root: NeuTreeNode = {
-      id: 'root',
-      label: 'Root',
-      expanded: true,
-      children: [
-        { id: 'first', label: 'First' },
-        { id: 'second', label: 'Second' },
-        { id: 'locked', label: 'Locked', disabled: true, children: [hidden] },
+  it('emits one expansion proposal; rejection leaves DOM applied', () => {
+    const fixture = create();
+    const proposals: unknown[] = [];
+    const requests: unknown[] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((value) => proposals.push(value));
+    fixture.componentInstance.childrenRequest.subscribe((value) => requests.push(value));
+    rows(fixture)[0]!.querySelector<HTMLButtonElement>('.neu-tree__toggle')!.click();
+    fixture.detectChanges();
+    expect(proposals).toEqual([{ keys: ['root'], key: 'root', expanded: true, source: 'pointer' }]);
+    expect(rows(fixture)).toHaveLength(2);
+    expect(requests).toEqual([]);
+  });
+
+  it('requests unloaded children only after accepted expansion, once per revision', () => {
+    const fixture = create();
+    const requests: unknown[] = [];
+    fixture.componentInstance.childrenRequest.subscribe((value) => requests.push(value));
+    fixture.componentRef.setInput('expandedKeys', ['disabled']);
+    fixture.detectChanges();
+    expect(requests).toEqual([{ requestId: 1, hierarchyRevision: 1, parentKey: 'disabled', reason: 'expand' }]);
+    fixture.detectChanges();
+    expect(requests).toHaveLength(1);
+  });
+
+  it('does not request an expanded unloaded descendant hidden by a collapsed ancestor', () => {
+    const nested: NeuTreeHierarchy<string> = {
+      revision: 2, roots: ['root'], children: [
+        { parentKey: 'root', state: 'loaded', keys: ['child'] },
+        { parentKey: 'child', state: 'unloaded' },
       ],
     };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [root]);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'checkbox');
-    fixture.componentRef.setInput('showSelectAll', true);
-    const proposals: string[][] = [];
-    fixture.componentInstance.selectionChange.subscribe((nodes) =>
-      proposals.push(nodes.map((node) => node.id)),
-    );
+    const fixture = create({ nodes: nodes.slice(0, 2), hierarchy: nested, expandedKeys: ['child'] });
+    const requests: unknown[] = [];
+    fixture.componentInstance.childrenRequest.subscribe((value) => requests.push(value));
     fixture.detectChanges();
-
-    fixture.componentInstance.onCheckboxChange(root, true);
-    expect(proposals.at(-1)).toEqual(['root', 'first', 'second']);
-    expect(fixture.componentInstance.checkboxState('root')).toBe('checked');
-    expect(fixture.componentInstance.checkboxState('hidden')).toBe('unchecked');
-
-    fixture.componentInstance.onCheckboxChange(root.children![0], false);
-    expect(fixture.componentInstance.checkboxState('root')).toBe('mixed');
+    expect(requests).toEqual([]);
+    fixture.componentRef.setInput('expandedKeys', ['root', 'child']);
     fixture.detectChanges();
-    expect(
-      fixture.nativeElement
-        .querySelector('[data-neu-tree-node-id="root"]')
-        ?.getAttribute('aria-checked'),
-    ).toBe('mixed');
-    fixture.componentInstance.toggleSelectAll(false);
-    expect(proposals.at(-1)).toEqual([]);
+    expect(requests).toEqual([{ requestId: 1, hierarchyRevision: 2, parentKey: 'child', reason: 'expand' }]);
   });
 
-  it('deduplicates lazy requests and exposes an explicit retry', () => {
-    const lazy: NeuTreeNode = { id: 'lazy', label: 'Lazy', leaf: false };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [lazy]);
-    fixture.componentRef.setInput('lazy', true);
-    const requests: string[] = [];
-    fixture.componentInstance.lazyRequest.subscribe((event) =>
-      requests.push(`${event.reason}:${event.requestId}`),
-    );
+  it('does not duplicate a loading request and retries error on explicit gesture', () => {
+    const loading = { ...hierarchy, children: [...hierarchy.children.slice(0, 2), { parentKey: 'disabled', state: 'loading' as const, requestId: 9 }] };
+    const fixture = create({ hierarchy: loading, expandedKeys: ['disabled'] });
+    const requests: unknown[] = [];
+    fixture.componentInstance.childrenRequest.subscribe((value) => requests.push(value));
     fixture.detectChanges();
-
-    fixture.componentInstance.toggleNode(lazy);
-    fixture.componentInstance.toggleNode(lazy);
-    fixture.componentInstance.toggleNode(lazy);
-    fixture.componentInstance.retryLazy(lazy);
-
-    expect(requests).toEqual(['expand:1', 'retry:2']);
-    expect(fixture.componentInstance.isExpandable(lazy)).toBe(true);
+    expect(requests).toEqual([]);
+    fixture.componentRef.setInput('hierarchy', { ...loading, children: [...loading.children.slice(0, 2), { parentKey: 'disabled', state: 'error' }] });
+    fixture.detectChanges();
+    rows(fixture)[1]!.querySelector<HTMLButtonElement>('.neu-tree__retry')!.click();
+    expect(requests).toEqual([{ requestId: 1, hierarchyRevision: 1, parentKey: 'disabled', reason: 'retry' }]);
   });
 
-  it('windows a flattened 10k-capable projection without flattening on scroll', () => {
-    const children = Array.from({ length: 10_000 }, (_, index) => ({
-      id: `node-${index}`,
-      label: `Node ${index}`,
-    }));
-    const root: NeuTreeNode = { id: 'root', label: 'Root', expanded: true, children };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [root]);
-    fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('visibleRows', 5);
-    fixture.componentRef.setInput('virtualOverscan', 1);
+  it('keeps disabled nodes focusable and structurally expandable but blocks action/selection', () => {
+    const fixture = create({ selection: { mode: 'single', key: null } });
+    const actions: unknown[] = [];
+    const selections: unknown[] = [];
+    fixture.componentInstance.nodeAction.subscribe((value) => actions.push(value));
+    fixture.componentInstance.selectionChange.subscribe((value) => selections.push(value));
+    rows(fixture)[1]!.focus();
     fixture.detectChanges();
+    expect(rows(fixture)[1]?.tabIndex).toBe(0);
+    rows(fixture)[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    rows(fixture)[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    expect(actions).toEqual([]);
+    expect(selections).toEqual([]);
+    expect(rows(fixture)[1]?.getAttribute('aria-disabled')).toBe('true');
+    expect(rows(fixture)[1]?.querySelector('.neu-tree__toggle')).not.toBeNull();
+  });
 
-    const projection = fixture.componentInstance.flatVisibleNodes();
-    expect(projection).toHaveLength(10_001);
-    expect(fixture.componentInstance.virtualEntries()).toHaveLength(6);
-    const viewport = fixture.nativeElement.querySelector('.neu-tree__virtual') as HTMLElement;
-    viewport.scrollTop = 440;
+  it('separates focus from applied selection and emits one keyboard selection proposal', () => {
+    const fixture = create({ selection: { mode: 'single', key: null } });
+    const proposals: unknown[] = [];
+    fixture.componentInstance.selectionChange.subscribe((value) => proposals.push(value));
+    rows(fixture)[0]!.focus();
+    fixture.detectChanges();
+    expect(rows(fixture)[0]?.getAttribute('aria-selected')).toBe('false');
+    rows(fixture)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    fixture.detectChanges();
+    expect(proposals).toEqual([{ selection: { mode: 'single', key: 'root' }, key: 'root', source: 'keyboard' }]);
+    expect(rows(fixture)[0]?.getAttribute('aria-selected')).toBe('false');
+    fixture.componentRef.setInput('selection', { mode: 'single', key: 'root' });
+    fixture.detectChanges();
+    expect(rows(fixture)[0]?.getAttribute('aria-selected')).toBe('true');
+    expect(proposals).toHaveLength(1);
+  });
+
+  it('emits semantic action, not DOM event, on Enter', () => {
+    const fixture = create();
+    const actions: unknown[] = [];
+    fixture.componentInstance.nodeAction.subscribe((value) => actions.push(value));
+    rows(fixture)[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(actions).toEqual([{ key: 'root' }]);
+  });
+
+  it('handles a nested child keyboard action once despite bubbling through ancestor groups', () => {
+    const fixture = create({ expandedKeys: ['root'] });
+    const actions: unknown[] = [];
+    fixture.componentInstance.nodeAction.subscribe((value) => actions.push(value));
+    rows(fixture)[1]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(actions).toEqual([{ key: 'child' }]);
+  });
+
+  it('renders checkbox mixed for a selected known node with unloaded descendants', () => {
+    const fixture = create({ selection: { mode: 'checkbox', keys: ['disabled'] } });
+    expect(rows(fixture)[1]?.getAttribute('aria-checked')).toBe('mixed');
+    expect(rows(fixture)[1]?.querySelector('input[type="checkbox"]')).not.toBeNull();
+  });
+
+  it('searches loaded descendants and transiently reveals ancestor paths', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('searchable', true);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.value = '  ADMIN   PORTAL ';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows(fixture).map((row) => row.querySelector('.neu-tree__row')?.textContent?.trim())).toEqual(['Workspace', 'DesignShared tokens', 'Admin portal']);
+    expect(rows(fixture)[0]?.getAttribute('aria-expanded')).toBe('true');
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(rows(fixture)).toHaveLength(2);
+  });
+
+  it('fails closed with a deterministic error state for malformed hierarchy', () => {
+    const fixture = create({ hierarchy: { ...hierarchy, roots: ['root', 'root'] } });
+    expect(rows(fixture)).toHaveLength(0);
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.getAttribute('data-neu-tree-error')).toBe('duplicate-root');
+  });
+
+  it('does not mutate frozen applied nodes, relations, expansion or selection', () => {
+    const frozenNodes = Object.freeze(nodes.map((node) => Object.freeze({ ...node, data: Object.freeze({ ...node.data }) })));
+    const frozenHierarchy = Object.freeze({ ...hierarchy, roots: Object.freeze([...hierarchy.roots]), children: Object.freeze([...hierarchy.children]) });
+    const fixture = create({ nodes: frozenNodes, hierarchy: frozenHierarchy, expandedKeys: Object.freeze([]), selection: Object.freeze({ mode: 'single', key: null }) });
+    rows(fixture)[0]!.querySelector<HTMLButtonElement>('.neu-tree__toggle')!.click();
+    expect(frozenNodes[0]!.label).toBe('Workspace');
+    expect(frozenHierarchy.roots).toEqual(['root', 'disabled']);
+  });
+
+  it('virtualizes the visible loaded sequence without changing the logical count', () => {
+    const many = Array.from({ length: 1000 }, (_, index) => ({ key: `${index}`, data: { id: `${index}` }, label: `Item ${index}` }));
+    const fixture = create({ nodes: many, hierarchy: { revision: 1, roots: many.map((node) => node.key), children: [] } });
+    fixture.componentRef.setInput('virtualization', { itemSize: 40, viewportHeight: 200, buffer: 2 });
+    fixture.detectChanges();
+    const internal = fixture.componentInstance as unknown as { model(): unknown; visibleNodes(): unknown };
+    const modelBeforeScroll = internal.model();
+    const visibleBeforeScroll = internal.visibleNodes();
+    expect(rows(fixture).length).toBeLessThan(10);
+    const viewport = fixture.nativeElement.querySelector('[role="tree"]') as HTMLElement;
+    viewport.scrollTop = 20000;
     viewport.dispatchEvent(new Event('scroll'));
     fixture.detectChanges();
-    expect(fixture.componentInstance.flatVisibleNodes()).toBe(projection);
-    expect(fixture.componentInstance.virtualRange().start).toBe(9);
+    expect(rows(fixture).length).toBeLessThan(10);
+    expect(rows(fixture)[0]?.textContent).toContain('Item 498');
+    expect(internal.model()).toBe(modelBeforeScroll);
+    expect(internal.visibleNodes()).toBe(visibleBeforeScroll);
   });
 
-  it('emits typed pointer/keyboard context and rejects DnD cycles', () => {
-    const root = NODES[0];
-    const child = root.children![0];
-    const sibling = root.children![1];
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('dragDrop', true);
+  it('updates reconstructed T with stable K without stale object identity', () => {
+    const fixture = create({ expandedKeys: ['root'] });
+    fixture.componentRef.setInput('nodes', nodes.map((node) => node.key === 'child' ? { ...node, label: 'Renamed' } : { ...node }));
     fixture.detectChanges();
-    const contexts: string[] = [];
-    fixture.componentInstance.contextRequest.subscribe((event) => contexts.push(event.node.id));
-    fixture.componentInstance.onNodeContext(
-      child,
-      new MouseEvent('contextmenu', { cancelable: true }),
-    );
-    fixture.componentInstance.onNodeKeydown(
-      child,
-      new KeyboardEvent('keydown', { key: 'F10', shiftKey: true, cancelable: true }),
-    );
-    expect(contexts).toEqual(['apps', 'apps']);
-
-    const rootDrag = fixture.componentInstance.dragData(root);
-    const childTarget = fixture.componentInstance.dropTarget(child, 'inside');
-    expect(fixture.componentInstance.acceptDrop(rootDrag, childTarget)).toBe(false);
-    const childDrag = fixture.componentInstance.dragData(child);
-    const siblingTarget = fixture.componentInstance.dropTarget(sibling, 'before');
-    expect(fixture.componentInstance.acceptDrop(childDrag, siblingTarget)).toBe(true);
-    const drops: string[] = [];
-    fixture.componentInstance.nodeDrop.subscribe((event) =>
-      drops.push(`${event.dragNode.id}:${event.position}:${event.targetNode.id}`),
-    );
-    fixture.componentInstance.onTreeDrop({
-      data: childDrag,
-      targetData: siblingTarget,
-      interaction: 'keyboard',
-      originalEvent: null,
-      scope: ['neu-tree'],
-      effect: 'move',
-    });
-    expect(drops).toEqual(['apps:before:design']);
+    expect(rows(fixture)[1]?.textContent).toContain('Renamed');
   });
 
-  it('routes recursive and virtual template interactions through the public intents', () => {
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', NODES);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'checkbox');
-    fixture.componentRef.setInput('showSelectAll', true);
-    fixture.componentRef.setInput('dragDrop', true);
-    fixture.detectChanges();
-
-    const selectAll = fixture.nativeElement.querySelector(
-      '.neu-tree__select-all input',
-    ) as HTMLInputElement;
-    selectAll.click();
-    fixture.detectChanges();
-    const firstTreeItem = fixture.nativeElement.querySelector('[role="treeitem"]') as HTMLElement;
-    firstTreeItem.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
-
-    const drag = fixture.componentInstance.dragData(NODES[0].children![0]);
-    const dropEvent = {
-      data: drag,
-      targetData: fixture.componentInstance.dropTarget(NODES[0].children![1], 'before'),
-      scope: ['neu-tree'],
-      effect: 'move' as const,
-      interaction: 'keyboard' as const,
-      originalEvent: null,
-    };
-    for (const dropZone of fixture.debugElement.queryAll(By.css('.neu-tree__drop')))
-      dropZone.triggerEventHandler('drop', dropEvent);
-
-    fixture.componentRef.setInput('virtualScroll', true);
-    fixture.detectChanges();
-    const flatItem = fixture.debugElement.query(By.css('.neu-tree__node--flat'));
-    flatItem.triggerEventHandler('focus', new FocusEvent('focus'));
-    flatItem.triggerEventHandler('keydown', new KeyboardEvent('keydown', { key: 'Home' }));
-    flatItem.triggerEventHandler(
-      'contextmenu',
-      new MouseEvent('contextmenu', { cancelable: true }),
-    );
-    for (const dropZone of fixture.debugElement.queryAll(By.css('.neu-tree__drop')))
-      dropZone.triggerEventHandler('drop', dropEvent);
-
-    expect(fixture.componentInstance.selectAllState()).toBe('checked');
-  });
-
-  it('fails closed across disabled, duplicate, lazy and cross-tree edge policies', () => {
-    const locked: NeuTreeNode = { id: 'locked', label: 'Locked', disabled: true };
-    const fixed: NeuTreeNode = { id: 'fixed', label: 'Fixed', draggable: false };
-    const leaf: NeuTreeNode = { id: 'leaf', label: 'Leaf', leaf: true };
-    const blocked: NeuTreeNode = { id: 'blocked', label: 'Blocked', droppable: false };
-    const loading: NeuTreeNode = { id: 'loading', label: 'Loading', leaf: false, loading: true };
-    const noSelect: NeuTreeNode = { id: 'no-select', label: 'No select', selectable: false };
-    const root: NeuTreeNode = {
-      id: 'root',
-      label: 'Root',
-      children: [locked, fixed, leaf, blocked, loading, noSelect],
-    };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [root]);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'checkbox');
-    fixture.componentRef.setInput('lazy', true);
-    fixture.componentRef.setInput('loadingKeys', ['leaf']);
-    fixture.detectChanges();
-    const component = fixture.componentInstance;
-    const rootData = component.dragData(root);
-
-    expect(component.isMultiMode()).toBe(true);
-    expect(component.isCheckboxMode()).toBe(true);
-    expect(component.isLoading(loading)).toBe(true);
-    expect(component.isLoading(leaf)).toBe(true);
-    expect(component.navigationIndex('missing')).toBe(-1);
-    expect(component.dragData({ id: 'missing', label: 'Missing' }).index).toBe(-1);
-    expect(component.acceptDrop(null as never, component.dropTarget(leaf, 'before'))).toBe(false);
-    expect(component.acceptDrop(rootData, null as never)).toBe(false);
-    expect(component.acceptDrop(rootData, component.dropTarget(locked, 'before'))).toBe(false);
-    expect(component.acceptDrop(rootData, component.dropTarget(blocked, 'before'))).toBe(false);
-    expect(
-      component.acceptDrop(component.dragData(locked), component.dropTarget(leaf, 'before')),
-    ).toBe(false);
-    expect(
-      component.acceptDrop(component.dragData(fixed), component.dropTarget(leaf, 'before')),
-    ).toBe(false);
-    expect(component.acceptDrop(rootData, component.dropTarget(leaf, 'inside'))).toBe(false);
-    expect(
-      component.acceptDrop(
-        { treeId: 'external', node: root, parent: null, index: 0 },
-        component.dropTarget(leaf, 'before'),
-      ),
-    ).toBe(false);
-    expect(
-      component.acceptDrop(
-        {
-          treeId: 'external',
-          node: { id: 'external', label: 'External' },
-          parent: null,
-          index: 0,
-        },
-        component.dropTarget(leaf, 'before'),
-      ),
-    ).toBe(true);
-
-    component.activateNode(locked);
-    component.activateNode(noSelect);
-    component.toggleNode(locked);
-    component.toggleNode(leaf);
-    component.toggleNode(loading);
-    component.onNodeContext(locked, new MouseEvent('contextmenu'));
-    const checkboxEvent = new Event('change');
-    Object.defineProperty(checkboxEvent, 'target', { value: { checked: true } });
-    component.onCheckboxChange(leaf, checkboxEvent);
-    component.onCheckboxChange(leaf, false);
-    component.toggleSelectAll(true);
-    component.toggleSelectAll(false);
-    component.retryLazy(loading);
-    component.retryLazy(leaf);
-
-    fixture.componentRef.setInput('nodes', [
-      { id: 'duplicate', label: 'First' },
-      { id: 'duplicate', label: 'Second' },
-      { id: 'other', label: 'Other' },
-    ]);
-    fixture.detectChanges();
-    const duplicates = component.nodes();
-    expect(
-      component.acceptDrop(
-        component.dragData(duplicates[0]),
-        component.dropTarget(duplicates[2], 'before'),
-      ),
-    ).toBe(false);
-  });
-
-  it('reconciles replaced state and exercises template callbacks and indexed fallbacks', () => {
-    const lazy: NeuTreeNode = { id: 'lazy', label: 'Lazy', leaf: false };
-    const child: NeuTreeNode = { id: 'child', label: 'Child' };
-    const root: NeuTreeNode = {
-      id: 'root',
-      label: 'Root',
-      expanded: true,
-      children: [lazy, child],
-    };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [root]);
-    fixture.componentRef.setInput('selectable', true);
-    fixture.componentRef.setInput('selectionMode', 'checkbox');
-    fixture.componentRef.setInput('lazy', true);
-    fixture.detectChanges();
-    const component = fixture.componentInstance;
-    component.activateNode(child);
-    component.toggleNode(lazy);
-
-    const context = component.templateContext(child, 2);
-    context.toggleSelection();
-    context.toggle();
-    expect(component.hasChildren(root)).toBe(true);
-    expect(component.hasChildren(child)).toBe(false);
-
-    expect(
-      component.acceptDrop(
-        { treeId: 'tree', node: { ...child }, parent: root, index: 1 },
-        component.dropTarget({ ...lazy }, 'before'),
-      ),
-    ).toBe(true);
-    component.onTreeDrop({
-      data: { treeId: 'tree', node: root, parent: null, index: 0 },
-      targetData: component.dropTarget(child, 'inside'),
-      scope: ['neu-tree'],
-      effect: 'move',
-      interaction: 'keyboard',
-      originalEvent: null,
-    });
-    component.onTreeDrop({
-      data: {
-        treeId: 'external',
-        node: { id: 'external-source', label: 'External source' },
-        parent: null,
-        index: 0,
-      },
-      targetData: component.dropTarget(
-        { id: 'external-target', label: 'External target' },
-        'after',
-      ),
-      scope: ['neu-tree'],
-      effect: 'move',
-      interaction: 'keyboard',
-      originalEvent: null,
-    });
-
-    fixture.componentRef.setInput('nodes', [
-      {
-        ...root,
-        children: [{ ...lazy, children: [{ id: 'loaded', label: 'Loaded' }] }],
-      },
-    ]);
-    fixture.detectChanges();
-    expect(component.isSelected('child')).toBe(false);
-  });
-
-  it('emits every drop position and materializes virtual keyboard focus', async () => {
-    const root: NeuTreeNode = {
-      id: 'root',
-      label: 'Root',
-      expanded: true,
-      children: Array.from({ length: 30 }, (_, index) => ({
-        id: `child-${index}`,
-        label: `Child ${index}`,
+  it('renders a 1,001-deep applied branch without a stack overflow', () => {
+    const deepNodes = Array.from({ length: 1001 }, (_, index) => ({
+      key: `${index}`, data: { id: `${index}` }, label: `Node ${index}`,
+    }));
+    const deepHierarchy: NeuTreeHierarchy<string> = {
+      revision: 1, roots: ['0'], children: deepNodes.slice(0, -1).map((node, index) => ({
+        parentKey: node.key, state: 'loaded', keys: [`${index + 1}`],
       })),
     };
-    const fixture = TestBed.createComponent(NeuTreeComponent);
-    fixture.componentRef.setInput('nodes', [root]);
-    fixture.componentRef.setInput('virtualScroll', true);
-    fixture.componentRef.setInput('visibleRows', 3);
-    fixture.componentRef.setInput('dragDrop', true);
-    fixture.detectChanges();
-    const component = fixture.componentInstance;
-    const drag = component.dragData(root.children![0]);
-    const positions: string[] = [];
-    component.nodeDrop.subscribe((event) => positions.push(event.position));
-    for (const position of ['before', 'inside', 'after'] as const)
-      component.onTreeDrop({
-        data: drag,
-        targetData: component.dropTarget(root.children![1], position),
-        scope: ['neu-tree'],
-        effect: 'move',
-        interaction: 'pointer',
-        originalEvent: null,
-      });
-    component.setActiveNode('child-20');
-    component.onNodeKeydown(
-      root.children![20],
-      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
-    );
-    fixture.detectChanges();
-    await fixture.whenStable();
+    const fixture = create({ nodes: deepNodes, hierarchy: deepHierarchy,
+      expandedKeys: deepNodes.map((node) => node.key) });
+    expect(rows(fixture)).toHaveLength(1001);
+    expect(rows(fixture)[1000]?.getAttribute('aria-level')).toBe('1001');
+  });
 
-    expect(positions).toEqual(['before', 'inside', 'after']);
-    expect(component.virtualRange().start).toBeGreaterThan(0);
+  it('survives 100 controlled expansion, selection, keyboard and lazy open/cancel cycles', () => {
+    const fixture = create({ selection: { mode: 'single', key: null } });
+    const expansion: unknown[] = [];
+    const selection: unknown[] = [];
+    const requests: unknown[] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((value) => expansion.push(value));
+    fixture.componentInstance.selectionChange.subscribe((value) => selection.push(value));
+    fixture.componentInstance.childrenRequest.subscribe((value) => requests.push(value));
+    const keyboardMs: number[] = [];
+    const lazyMs: number[] = [];
+    for (let index = 0; index < 100; index += 1) {
+      const root = rows(fixture)[0]!;
+      root.focus();
+      const keyboardStart = performance.now();
+      root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+      keyboardMs.push(performance.now() - keyboardStart);
+      root.querySelector<HTMLButtonElement>('.neu-tree__toggle')!.click();
+      root.querySelector<HTMLElement>('.neu-tree__content')!.click();
+      fixture.componentRef.setInput('hierarchy', { ...hierarchy, revision: index + 2 });
+      fixture.componentRef.setInput('expandedKeys', ['disabled']);
+      const lazyStart = performance.now();
+      fixture.detectChanges();
+      lazyMs.push(performance.now() - lazyStart);
+      fixture.componentRef.setInput('expandedKeys', []);
+      fixture.detectChanges();
+    }
+    expect(expansion).toHaveLength(100);
+    expect(selection).toHaveLength(100);
+    expect(requests).toHaveLength(100);
+    const quantiles = (values: number[]) => {
+      const sorted = [...values].sort((a, b) => a - b);
+      return { p50Ms: +sorted[50]!.toFixed(3), p95Ms: +sorted[95]!.toFixed(3) };
+    };
+    console.log(`N2_C6_INTERACTION_PERFORMANCE:${JSON.stringify({ keyboard100: quantiles(keyboardMs), lazy100: quantiles(lazyMs) })}`);
+    fixture.destroy();
   });
 });

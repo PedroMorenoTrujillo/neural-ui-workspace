@@ -6,8 +6,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { By } from '@angular/platform-browser';
 import { NeuAutocompleteComponent } from './autocomplete/neu-autocomplete.component';
 import { NeuInputTagsComponent } from './input-tags/neu-input-tags.component';
 import { NeuTreeSelectComponent } from './tree-select/neu-tree-select.component';
@@ -491,27 +489,29 @@ describe('H9-A2 zoneless runtime event contracts', () => {
     expect(details).toHaveLength(4);
   });
 
-  it('VirtualList emits distinct rendered ranges for programmatic range updates and unsubscribes at destruction', async () => {
+  it('VirtualList emits distinct visible ranges for programmatic scroll and stops after destruction', async () => {
     const f = TestBed.createComponent(NeuVirtualListComponent);
     const c = f.componentInstance;
     const ranges = capture(c.rangeChange);
+    f.componentRef.setInput('itemKey', (item: number) => item);
     f.componentRef.setInput(
       'items',
       Array.from({ length: 100 }, (_, i) => i),
     );
     f.detectChanges();
     await f.whenStable();
-    const viewport = f.debugElement.query(By.directive(CdkVirtualScrollViewport))
-      .componentInstance as CdkVirtualScrollViewport;
+    const viewport = f.nativeElement.querySelector('.neu-virtual-list__viewport') as HTMLElement;
     ranges.length = 0;
-    viewport.setRenderedRange({ start: 20, end: 30 });
-    viewport.setRenderedRange({ start: 20, end: 30 });
-    expect(ranges).toEqual([{ start: 20, end: 30 }]);
-    viewport.setRenderedRange({ start: 21, end: 31 });
-    expect(ranges).toHaveLength(2);
+    expect(c.scrollTo({ index: 20, align: 'start' })).toBe(true);
+    f.detectChanges();
+    expect(ranges.at(-1)).toEqual({ start: 20, end: 30 });
+    expect(c.scrollTo({ index: 20, align: 'start' })).toBe(true);
+    f.detectChanges();
+    expect(ranges.filter((range) => range.start === 20)).toHaveLength(1);
+    const count = ranges.length;
     f.destroy();
-    viewport.setRenderedRange({ start: 30, end: 40 });
-    expect(ranges).toHaveLength(2);
+    viewport.dispatchEvent(new Event('scroll'));
+    expect(ranges).toHaveLength(count);
   });
 });
 

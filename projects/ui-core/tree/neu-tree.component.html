@@ -1,0 +1,156 @@
+<div class="neu-tree" [class.neu-tree--dragging]="dragging()" neuDragDropGroup [neuDragDropGroupDisabled]="!reorderable()" (focusout)="onFocusOut($event)">
+  @if (searchable()) {
+    <label class="neu-tree__search-input">
+      <span class="neu-tree__sr-only">{{ searchLabel() }}</span>
+      <input type="search" [placeholder]="searchLabel()" [value]="searchQuery()" (input)="onSearchInput($event)" />
+    </label>
+  }
+
+  @if (model().issue; as issue) {
+    <div class="neu-tree__empty" role="alert" [attr.data-neu-tree-error]="issue.code">
+      {{ invalidTreeLabel() }}
+    </div>
+  } @else if (visibleNodes().length === 0) {
+    <div class="neu-tree__empty" role="status">{{ emptyLabel() }}</div>
+  } @else {
+    <div
+      class="neu-tree__list neu-tree__list--root"
+      [class.neu-tree__virtual]="virtualization() !== null"
+      role="tree"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-multiselectable]="selection().mode === 'multiple' || selection().mode === 'checkbox' ? 'true' : null"
+      [style.height.px]="virtualization()?.viewportHeight ?? null"
+      (scroll)="onScroll($event)"
+    >
+      @if (virtualization()) {
+        <div aria-hidden="true" [style.height.px]="virtualRange().start * virtualItemSize()"></div>
+        @for (entry of renderedNodes(); track entry.trackToken) {
+          <ng-container [ngTemplateOutlet]="treeNode" [ngTemplateOutletContext]="{ $implicit: entry, nested: false }" />
+        }
+        <div aria-hidden="true" [style.height.px]="(virtualRange().total - virtualRange().end) * virtualItemSize()"></div>
+      } @else {
+        @for (entry of rootNodes(); track entry.trackToken) {
+          <ng-container [ngTemplateOutlet]="treeNode" [ngTemplateOutletContext]="{ $implicit: entry, nested: true }" />
+        }
+      }
+      <ng-template #treeNode let-entry let-nested="nested">
+        <div
+          class="neu-tree__node"
+          [class.neu-tree__node--flat]="!nested"
+          role="treeitem"
+          [style.height.px]="virtualization() ? virtualItemSize() : null"
+          [attr.aria-level]="entry.level"
+          [attr.aria-posinset]="entry.index + 1"
+          [attr.aria-setsize]="entry.setSize"
+          [attr.aria-expanded]="entry.hasChildren ? entry.expanded : null"
+          [attr.aria-selected]="selection().mode === 'single' || selection().mode === 'multiple' ? isSelected(entry.key) : null"
+          [attr.aria-checked]="selection().mode === 'checkbox' ? checkboxAria(entry.key) : null"
+          [attr.aria-disabled]="entry.node.disabled ? 'true' : null"
+          [attr.aria-busy]="entry.loading ? 'true' : null"
+          [attr.data-neu-tree-index]="entry.visibleIndex"
+          [tabIndex]="isTabbable(entry.key) ? 0 : -1"
+          (focus)="onNodeFocus(entry.key)"
+          (keydown)="onNodeKeydown(entry, $event)"
+        >
+          @if (reorderable()) {
+            @for (position of dropPositions; track position) {
+              <span
+                [class]="'neu-tree__drop neu-tree__drop--' + position"
+                [neuDropZone]="dropTarget(entry.key, position)"
+                [neuDropScope]="dragScope"
+                [neuDropAccept]="acceptDrop"
+                [neuDropAriaLabel]="'Place ' + position + ' ' + entry.node.label"
+                (drop)="onDrop($event)"
+              ></span>
+            }
+          }
+          <div
+            class="neu-tree__row"
+            [class.neu-tree__row--selected]="isSelected(entry.key)"
+            [class.neu-tree__row--disabled]="entry.node.disabled"
+            [style.padding-inline-start.px]="(entry.level - 1) * indentSize() + 6"
+            [neuDropZone]="null"
+            [neuDropScope]="dragScope"
+            [neuDropAccept]="rejectDrop"
+            [neuDropRole]="null"
+            [neuDropTabIndex]="-1"
+            [neuDropZoneDisabled]="!reorderable()"
+          >
+            @if (entry.hasChildren) {
+              <button
+                class="neu-tree__toggle"
+                [class.neu-tree__toggle--open]="entry.expanded"
+                type="button"
+                tabindex="-1"
+                [attr.aria-label]="entry.expanded ? collapseLabel() : expandLabel()"
+                (click)="onToggleClick(entry, $event)"
+              >
+                @if (entry.loading) {
+                  <span class="neu-tree__spinner" aria-hidden="true"></span>
+                } @else {
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 5 6 5-6 5" /></svg>
+                }
+              </button>
+            } @else {
+              <span class="neu-tree__toggle neu-tree__toggle--placeholder" aria-hidden="true"></span>
+            }
+            @if (selection().mode === 'checkbox') {
+              <input
+                class="neu-tree__checkbox"
+                type="checkbox"
+                tabindex="-1"
+                [checked]="checkboxState(entry.key) === 'checked'"
+                [indeterminate]="checkboxState(entry.key) === 'mixed'"
+                [disabled]="entry.node.disabled"
+                [attr.aria-label]="'Select ' + entry.node.label"
+                (click)="onCheckboxClick(entry.key, $event)"
+              />
+            }
+            <span class="neu-tree__content" (click)="onContentClick(entry, $event)">
+              @if (nodeTpl()) {
+                <ng-container [ngTemplateOutlet]="nodeTpl()!.templateRef" [ngTemplateOutletContext]="templateContext(entry)" />
+              } @else {
+                <span class="neu-tree__main">
+                  <span class="neu-tree__label">{{ entry.node.label }}</span>
+                  @if (entry.node.badge) { <span class="neu-tree__badge">{{ entry.node.badge }}</span> }
+                </span>
+                @if (entry.node.description) { <span class="neu-tree__description">{{ entry.node.description }}</span> }
+              }
+            </span>
+            @if (entry.relation?.state === 'error') {
+              <button type="button" class="neu-tree__retry" [attr.aria-label]="retryLabel() + ' ' + entry.node.label" (click)="onRetryClick(entry.key, $event)">{{ retryLabel() }}</button>
+            }
+            @if (reorderable()) {
+              <button
+                type="button"
+                class="neu-tree__drag-handle"
+                [neuDraggable]="dragData(entry.key)"
+                [neuDragScope]="dragScope"
+                [neuDraggableDisabled]="entry.node.disabled"
+                [neuDragPointer]="true"
+                [neuDragKeyboard]="true"
+                [neuDragAriaLabel]="'Move ' + entry.node.label"
+                [attr.aria-label]="'Move ' + entry.node.label"
+                (dragStart)="dragging.set(true)"
+                (dragEnd)="dragging.set(false)"
+              >⋮⋮</button>
+            }
+          </div>
+          @if (nested && entry.expanded && entry.loadedChildren.length) {
+            <div class="neu-tree__group" role="group">
+              @if (entry.level < maxGroupDepth) {
+                @for (child of visibleChildren(entry); track child.trackToken) {
+                  <ng-container [ngTemplateOutlet]="treeNode" [ngTemplateOutletContext]="{ $implicit: child, nested: true }" />
+                }
+              } @else {
+                @for (child of visibleDescendants(entry); track child.trackToken) {
+                  <ng-container [ngTemplateOutlet]="treeNode" [ngTemplateOutletContext]="{ $implicit: child, nested: false }" />
+                }
+              }
+            </div>
+          }
+        </div>
+      </ng-template>
+    </div>
+  }
+</div>

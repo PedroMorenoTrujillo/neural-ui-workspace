@@ -106,6 +106,7 @@ interface Option {
       <section id="h9-virtual">
         <neu-virtual-list
           [items]="items"
+          [itemKey]="virtualItemKey"
           [itemSize]="32"
           [visibleRows]="4"
           (rangeChange)="onRange($event)"
@@ -211,6 +212,7 @@ export class H9EventContractComponent {
   readonly tree: Option[] = [{ value: 'root', label: 'Root', children: this.options }];
   readonly optionValue = (option: Option) => option.value;
   readonly items = Array.from({ length: 300 }, (_, i) => `Row ${i}`);
+  readonly virtualItemKey = (item: string): string => item;
   readonly image =
     'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="blue"/%3E%3C/svg%3E';
   readonly autocomplete = viewChild(NeuAutocompleteComponent);

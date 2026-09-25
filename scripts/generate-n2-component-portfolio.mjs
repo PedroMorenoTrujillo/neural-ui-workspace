@@ -44,6 +44,8 @@ const completed = new Map([
   ['C3', 'MegaMenu'],
   ['C4', 'CommandPalette'],
   ['C5', 'Kanban'],
+  ['C6', 'Tree'],
+  ['C7', 'VirtualList'],
   ['A1', 'Button ButtonGroup Tag Toolbar'],
   ['A2', 'Alert Badge Chip EmptyState ToastContainer'],
   ['A4', 'MeterGroup ProgressBar StatsCard FormField InputGroup'],
@@ -71,7 +73,7 @@ const groups = [
   ['C4', 'C', 'command overlay', 'CommandPalette', 'HEAVY', 'HIGH', 'GPT-6 SOL HIGH'],
   ['C5', 'C', 'board DnD', 'Kanban', 'HEAVY', 'HIGH', 'GPT-6 SOL HIGH'],
   ['C6', 'C', 'hierarchical collection', 'Tree', 'VERY HEAVY', 'HIGH', 'GPT-6 SOL HIGH'],
-  ['P3', 'FUTURE', 'deferred virtual extension', 'VirtualList', 'LIGHT', 'LOW', 'GPT-6 LUNA'],
+  ['C7', 'C', 'fixed-height linear virtualization', 'VirtualList', 'MEDIUM', 'LOW', 'GPT-6 SOL HIGH'],
   ['D1', 'D', 'physical removals', 'OrganizationChart SchedulerGantt', 'LIGHT', 'MEDIUM', 'GPT-6 SOL MEDIUM'],
 ].map(([id, wave, family, names, difficulty, risk, model]) => ({ id, wave, family, names: names.split(' '), difficulty, risk, model }));
 
@@ -139,7 +141,7 @@ const changes = {
   CommandPalette: ['Audit command registry and Router coupling', 'Design overlay search/focus/request lifecycle before refactor'],
   Kanban: ['Audit board/column/card identity and controlled DnD', 'Design cross-column move proposals and SSR/lifecycle gates'],
   Tree: ['Design clean hierarchical state and lazy/virtual interaction', 'Replace legacy mirrors/engines only after API review'],
-  VirtualList: ['Audit current fixed-height contract and bundle only', 'Defer 2D/variable-height until measured use case'],
+  VirtualList: ['Certify signal-first fixed-height window and exact-K identity', 'Defer 2D/variable-height until measured use case'],
   OrganizationChart: ['Remove product entrypoint/runtime/tests and active docs', 'Verify no remaining Tree consumer or token export'],
   SchedulerGantt: ['Remove shared Scheduler/Gantt runtime and entrypoint once', 'Verify TimelineGrid remains an independent public component'],
 };
@@ -151,7 +153,7 @@ const special = {
   InlineEditor: 'N2-009',
   Slider: 'N2-026', Rating: 'N2-026', InputMask: 'N2-027', Splitter: 'N2-028',
   Gallery: 'N2-029', ImageGallery: 'N2-029', StatsCard: 'N2-030',
-  VirtualList: 'N2-036 (P3 deferred)',
+  VirtualList: 'N2-C7 (fixed height); N2-036 2D P3 deferred',
 };
 const deps = {
   Button: [], Alert: ['NeuButtonComponent'],
@@ -171,10 +173,10 @@ const action = {
   Menu: 'DEEP REFACTOR', Menubar: 'DEEP REFACTOR', TieredMenu: 'DEEP REFACTOR',
   Gallery: 'REFACTOR', ImageGallery: 'MERGE', PickList: 'DEEP REFACTOR',
   OrderList: 'DEEP REFACTOR', MegaMenu: 'DEEP REFACTOR', CommandPalette: 'DEEP REFACTOR',
-  Kanban: 'DEEP REFACTOR', Tree: 'REWRITE', VirtualList: 'AUDIT ONLY',
+  Kanban: 'DEEP REFACTOR', Tree: 'REWRITE', VirtualList: 'REWRITE',
   OrganizationChart: 'REMOVE', SchedulerGantt: 'REMOVE',
 };
-const audits = new Set('ButtonGroup Tag Toolbar Badge Chip ToastContainer Avatar AvatarGroup Card Divider Skeleton Spinner FormField InputGroup Fieldset ScrollTop CompareHandle CompareIndicator CompareItem VirtualList'.split(' '));
+const audits = new Set('ButtonGroup Tag Toolbar Badge Chip ToastContainer Avatar AvatarGroup Card Divider Skeleton Spinner FormField InputGroup Fieldset ScrollTop CompareHandle CompareIndicator CompareItem'.split(' '));
 const transverse = new Set('Alert Avatar Badge BlockUI Button Chip CodeBlock EmptyState NotificationCenter Nav ProgressBar SchedulerGantt Skeleton Spinner SplitButton Tag Timeline TimelineGrid ToastContainer Toolbar ScrollArea'.split(' '));
 
 function declarationInventory() {
@@ -341,7 +343,8 @@ const currentAudit = audit
   .replace('SchedulerGantt→TimelineGrid, OrganizationChart→Tree.', 'the retired SchedulerGantt→TimelineGrid and OrganizationChart→Tree dependencies no longer exist in active runtime.')
   .replace('Button→Icon, Alert/EmptyState→Button+Icon, DataView→Button/Input/Select, Dock/MegaMenu/SpeedDial→Badge/Icon, Gallery→Icon', 'Button/Alert/EmptyState/Dock/MegaMenu/SpeedDial/Gallery→published neural-icons, DataView→Button/Input/Select')
   .replace('physical removals precede TimelineGrid and Tree changes.', 'D1 physical removals are complete before TimelineGrid and Tree changes.')
-  .replace('No runtime, SCSS, token or product contract was changed by this audit.', 'Runtime, token, contract and package changes belong to the separate D1 execution report.');
+  .replace('No runtime, SCSS, token or product contract was changed by this audit.', 'Runtime, token, contract and package changes belong to their separately approved execution reports.')
+  .replace('VirtualList\'s 2D/variable-height extension is P3-deferred.', 'C7 certifies VirtualList fixed-height; its 2D/variable-height extension remains P3-deferred.');
 
 const whyNow = {
   A1: 'Button, ButtonGroup, Tag and Toolbar certified after the neural-icons integration',
@@ -405,6 +408,8 @@ currentRoadmap = currentRoadmap
   .replace(`## WAVE D — removals (${summary.remove} actual components; 1 phase, execute before dependent B/C work)`, `## WAVE D — D1 completed (${summary.physicallyRemovedHistorical} historical products removed)`)
   .replace('D1 physically removes OrganizationChart and SchedulerGantt', 'D1 physically removed OrganizationChart and SchedulerGantt')
   .replace('C1 must prove ImageGallery-only counter/viewer behavior before its merge; ImageViewer is a **directive**, not a 99th component.', 'C1 completed the ImageGallery merge into Gallery and physically removed its runtime/entrypoint; ImageViewer remains an independent directive using the one private preview engine.')
+  .replace('VirtualList remains a real public component, but N2-036 2D/variable-height is **AUDIT ONLY / XS** now, not an active implementation batch.', 'C7 certifies the public VirtualList fixed-height primitive; N2-036 2D/variable-height remains P3-deferred without an active implementation batch.')
+  .replace('No measured need, VirtualList audit only', 'Fixed-height completed in C7; no measured 2D/variable-height need')
   .replace('GPT-6 ASTRA only for high-impact design review before C1/C3/C4/C5/C6', 'GPT-6 ASTRA only for high-impact design review before C3/C4/C5/C6');
 const currentDependencySection = dependencySection
   .replace('Independent quick wins A3/A4/A5 may run after A1 without waiting for the heavy lane.', 'A3, A5, D1, A1, A2 and A4 are complete; remaining work is gated by its own batch.')

@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1473,
-    "bindingDelta": 306,
-    "mapped": 619,
+    "declarationBindings": 1462,
+    "bindingDelta": 295,
+    "mapped": 618,
     "aliasCorrections": 3,
-    "missingOldEntries": 542,
-    "newlyDiscovered": 848,
+    "missingOldEntries": 543,
+    "newlyDiscovered": 838,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 431,
+      "declaration-or-selector-was-not-recorded": 421,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 387
     }
@@ -2491,10 +2491,6 @@
       "newId": "./virtual-list#NeuVirtualListComponent.input:itemSize"
     },
     {
-      "oldToken": "virtual-list/neu-virtual-list.component.ts#input:trackBy",
-      "newId": "./virtual-list#NeuVirtualListComponent.input:trackBy"
-    },
-    {
       "oldToken": "virtual-list/neu-virtual-list.component.ts#input:visibleRows",
       "newId": "./virtual-list#NeuVirtualListComponent.input:visibleRows"
     }
@@ -3041,7 +3037,8 @@
     "tree-table/neu-tree-table.component.ts#output:serverStateChange",
     "virtual-list/neu-virtual-list.component.ts#input:index",
     "virtual-list/neu-virtual-list.component.ts#input:item",
-    "virtual-list/neu-virtual-list.component.ts#input:label"
+    "virtual-list/neu-virtual-list.component.ts#input:label",
+    "virtual-list/neu-virtual-list.component.ts#input:trackBy"
   ],
   "newlyDiscovered": [
     {
@@ -6261,14 +6258,6 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:dragDrop",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:dragScope",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
       "id": "./tree#NeuTreeComponent.input:emptyLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -6281,27 +6270,15 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree#NeuTreeComponent.input:hierarchy",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree#NeuTreeComponent.input:indentSize",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:itemSize",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:lazy",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:loading",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:loadingKeys",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:loadingLabel",
+      "id": "./tree#NeuTreeComponent.input:invalidTreeLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6309,19 +6286,19 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./tree#NeuTreeComponent.input:reorderable",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:retryLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./tree#NeuTreeComponent.input:searchable",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:searchPlaceholder",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:selectable",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:selectAllLabel",
+      "id": "./tree#NeuTreeComponent.input:searchLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6329,55 +6306,27 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:selectionMode",
+      "id": "./tree#NeuTreeComponent.input:virtualization",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:showSelectAll",
+      "id": "./tree#NeuTreeComponent.output:childrenRequest",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:treeId",
+      "id": "./tree#NeuTreeComponent.output:expandedKeysChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:virtualOverscan",
+      "id": "./tree#NeuTreeComponent.output:nodeAction",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:virtualScroll",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:visibleRows",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:contextRequest",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:expansionChange",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:lazyRequest",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:nodeClick",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:nodeDrop",
+      "id": "./tree#NeuTreeComponent.output:nodeMove",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./tree#NeuTreeComponent.output:selectionChange",
-      "reason": "declaration-or-selector-was-not-recorded"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:virtualRangeChange",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
@@ -6429,7 +6378,15 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
-      "id": "./virtual-list#NeuVirtualListComponent.output:itemClick",
+      "id": "./virtual-list#NeuVirtualItemDirective.input:neuVirtualItem",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./virtual-list#NeuVirtualItemDirective.input:neuVirtualItemKey",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListComponent.input:itemKey",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

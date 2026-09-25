@@ -1,8 +1,10 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet, isPlatformBrowser } from '@angular/common';
 import {
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
+  PLATFORM_ID,
   TemplateRef,
   ViewEncapsulation,
   afterRenderEffect,
@@ -11,909 +13,415 @@ import {
   effect,
   inject,
   input,
+  isDevMode,
   output,
   signal,
 } from '@angular/core';
-import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import {
   NeuDragDropGroupDirective,
   NeuDraggableDirective,
   NeuDropZoneDirective,
-  type NeuDropAccept,
-  type NeuDropEvent,
 } from '@neural-ui/core/drag-drop';
 import {
-  NeuTreeNavigationController,
-  type NeuTreeNavigationItem,
-  walkNeuTreeDepthFirst,
-} from '@neural-ui/core/internal';
-import { NeuInputComponent } from '@neural-ui/core/input';
+  buildTreeModel,
+  deriveTreeCheckboxStates,
+  normalizeTreeSearch,
+  projectVisibleTree,
+  proposeTreeExpansion,
+  proposeTreeMove,
+  proposeTreeSelection,
+  treeSelectedTokens,
+  treeToken,
+  type TreeCheckboxState,
+  type VisibleTreeEntry,
+} from './neu-tree.engine';
+import type {
+  NeuTreeChildrenRequest,
+  NeuTreeExpandedKeysChange,
+  NeuTreeHierarchy,
+  NeuTreeKey,
+  NeuTreeMovePosition,
+  NeuTreeNode,
+  NeuTreeNodeAction,
+  NeuTreeNodeMove,
+  NeuTreeNodeTemplateContext,
+  NeuTreeSelection,
+  NeuTreeSelectionChange,
+  NeuTreeVirtualization,
+} from './neu-tree.types';
 
-export interface NeuTreeNode<T = unknown> {
-  id: string;
-  label: string;
-  description?: string;
-  badge?: string;
-  children?: NeuTreeNode<T>[];
-  disabled?: boolean;
-  expanded?: boolean;
-  selectable?: boolean;
-  /** `false` keeps a node expandable before lazy children have been supplied. */
-  leaf?: boolean;
-  /** Consumer-owned loading state for this node. */
-  loading?: boolean;
-  draggable?: boolean;
-  droppable?: boolean;
-  data?: T;
+@Directive({ selector: 'ng-template[neuTreeNode]', standalone: true })
+export class NeuTreeNodeDirective<T, K extends NeuTreeKey = string> {
+  constructor(readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext<T, K>>) {}
 }
 
-export type NeuTreeSelectionMode = 'single' | 'multiple' | 'checkbox';
-
-export interface NeuTreeNodeTemplateContext<T = unknown> {
-  $implicit: NeuTreeNode<T>;
-  node: NeuTreeNode<T>;
-  level: number;
-  selected: boolean;
-  partial: boolean;
-  expanded: boolean;
-  loading: boolean;
-  toggle: () => void;
-  toggleSelection: () => void;
+interface TreeDragData<K extends NeuTreeKey> {
+  readonly owner: object;
+  readonly key: K;
 }
 
-export interface NeuTreeLazyRequest<T = unknown> {
-  readonly node: NeuTreeNode<T>;
-  readonly reason: 'expand' | 'retry';
-  readonly requestId: number;
-}
-
-export interface NeuTreeContextRequest<T = unknown> {
-  readonly node: NeuTreeNode<T>;
-  readonly selection: readonly NeuTreeNode<T>[];
-  readonly originalEvent: MouseEvent | KeyboardEvent;
-}
-
-export interface NeuTreeVirtualRange {
-  readonly start: number;
-  readonly end: number;
-  readonly total: number;
-}
-
-export type NeuTreeDropPosition = 'before' | 'inside' | 'after';
-const NEU_TREE_DROP_POSITIONS: readonly NeuTreeDropPosition[] = ['before', 'inside', 'after'];
-
-export interface NeuTreeDragData<T = unknown> {
-  readonly treeId: string;
-  readonly node: NeuTreeNode<T>;
-  readonly parent: NeuTreeNode<T> | null;
-  readonly index: number;
-}
-
-export interface NeuTreeDropTarget<T = unknown> {
-  readonly node: NeuTreeNode<T>;
-  readonly position: NeuTreeDropPosition;
-}
-
-export interface NeuTreeDropEvent<T = unknown> {
-  readonly dragNode: NeuTreeNode<T>;
-  readonly targetNode: NeuTreeNode<T>;
-  readonly position: NeuTreeDropPosition;
-  readonly sourceTreeId: string;
-  readonly targetTreeId: string;
-  readonly sourceParent: NeuTreeNode<T> | null;
-  readonly targetParent: NeuTreeNode<T> | null;
-  readonly sourceIndex: number;
-  readonly targetIndex: number;
-  readonly interaction: 'pointer' | 'keyboard';
-  readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;
-}
-
-interface NeuTreeFlatEntry<T = unknown> {
-  readonly node: NeuTreeNode<T>;
-  readonly level: number;
-  readonly parentId?: string;
-  readonly posInSet: number;
-  readonly setSize: number;
-}
-
-type CheckboxVisualState = 'checked' | 'mixed' | 'unchecked';
-
-@Directive({ selector: 'ng-template[neuTreeNode]' })
-export class NeuTreeNodeDirective<T = unknown> {
-  constructor(readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext<T>>) {}
+interface TreeDropTarget<K extends NeuTreeKey> {
+  readonly key: K;
+  readonly position: NeuTreeMovePosition;
 }
 
 @Component({
   selector: 'neu-tree',
   standalone: true,
-  imports: [
-    NgTemplateOutlet,
-    NeuCheckboxComponent,
-    NeuInputComponent,
-    NeuDragDropGroupDirective,
-    NeuDraggableDirective,
-    NeuDropZoneDirective,
-  ],
+  imports: [NgTemplateOutlet, NeuDragDropGroupDirective, NeuDraggableDirective, NeuDropZoneDirective],
   encapsulation: ViewEncapsulation.None,
-  template: `
-    <div
-      class="neu-tree"
-      [attr.aria-busy]="loading() ? 'true' : null"
-      neuDragDropGroup
-      [neuDragDropGroupDisabled]="!dragDrop()"
-    >
-      @if (searchable()) {
-        <neu-input
-          class="neu-tree__search-input"
-          type="search"
-          size="sm"
-          [floatingLabel]="false"
-          [placeholder]="searchPlaceholder()"
-          (valueChange)="onSearchValue($event)"
-        />
-      }
-
-      @if (showSelectAll() && isCheckboxMode()) {
-        <div class="neu-tree__select-all">
-          <neu-checkbox
-            [checked]="selectAllState() === 'checked'"
-            [indeterminate]="selectAllState() === 'mixed'"
-            [disabled]="eligibleNodeCount() === 0"
-            [label]="selectAllLabel()"
-            [ariaLabel]="selectAllLabel()"
-            (checkedChange)="toggleSelectAll($event)"
-          />
-        </div>
-      }
-
-      @if (loading() && !renderNodes().length) {
-        <div class="neu-tree__empty" role="status">{{ loadingLabel() }}</div>
-      } @else if (flatVisibleNodes().length) {
-        @if (virtualScroll()) {
-          <div
-            class="neu-tree__virtual"
-            role="tree"
-            [attr.aria-label]="ariaLabel()"
-            [attr.aria-multiselectable]="isMultiMode() ? 'true' : null"
-            [style.height.px]="itemSize() * visibleRows()"
-            (scroll)="onVirtualScroll($event)"
-          >
-            <div aria-hidden="true" [style.height.px]="virtualRange().start * itemSize()"></div>
-            @for (entry of virtualEntries(); track entry.node.id) {
-              <ng-container
-                [ngTemplateOutlet]="treeItem"
-                [ngTemplateOutletContext]="{ $implicit: entry, flat: true }"
-              />
-            }
-            <div
-              aria-hidden="true"
-              [style.height.px]="(virtualRange().total - virtualRange().end) * itemSize()"
-            ></div>
-          </div>
-        } @else {
-          <ul
-            class="neu-tree__list neu-tree__list--root"
-            role="tree"
-            [attr.aria-label]="ariaLabel()"
-            [attr.aria-multiselectable]="isMultiMode() ? 'true' : null"
-          >
-            <ng-container
-              [ngTemplateOutlet]="treeNodes"
-              [ngTemplateOutletContext]="{ $implicit: visibleNodes(), level: 1 }"
-            />
-          </ul>
-        }
-      } @else {
-        <div class="neu-tree__empty">{{ emptyLabel() }}</div>
-      }
-    </div>
-
-    <ng-template #treeNodes let-nodes let-level="level">
-      @for (node of nodes; track node.id; let position = $index; let count = $count) {
-        <li class="neu-tree__branch" role="none">
-          <ng-container
-            [ngTemplateOutlet]="treeItem"
-            [ngTemplateOutletContext]="{
-              $implicit: { node, level, posInSet: position + 1, setSize: count },
-              flat: false,
-            }"
-          />
-          @if (node.children?.length && isRenderedExpanded(node)) {
-            <ul class="neu-tree__list" role="group">
-              <ng-container
-                [ngTemplateOutlet]="treeNodes"
-                [ngTemplateOutletContext]="{ $implicit: node.children ?? [], level: level + 1 }"
-              />
-            </ul>
-          }
-        </li>
-      }
-    </ng-template>
-
-    <ng-template #treeItem let-entry let-flat="flat">
-      <div
-        class="neu-tree__node"
-        [class.neu-tree__node--flat]="flat"
-        role="treeitem"
-        [style.height.px]="flat ? itemSize() : null"
-        [attr.aria-level]="entry.level"
-        [attr.aria-posinset]="entry.posInSet"
-        [attr.aria-setsize]="entry.setSize"
-        [attr.aria-expanded]="isExpandable(entry.node) ? isRenderedExpanded(entry.node) : null"
-        [attr.aria-selected]="
-          canSelect(entry.node) && !isCheckboxMode() ? isSelected(entry.node.id) : null
-        "
-        [attr.aria-checked]="
-          canSelect(entry.node) && isCheckboxMode() ? ariaChecked(entry.node.id) : null
-        "
-        [attr.aria-disabled]="entry.node.disabled ? 'true' : null"
-        [attr.aria-busy]="isLoading(entry.node) ? 'true' : null"
-        [tabIndex]="tabIndexForNode(entry.node)"
-        [neuDraggable]="dragData(entry.node)"
-        [neuDragScope]="dragScope()"
-        [neuDraggableDisabled]="entry.node.disabled || entry.node.draggable === false"
-        [neuDragPointer]="dragDrop()"
-        [neuDragKeyboard]="dragDrop()"
-        [neuDragTabIndex]="tabIndexForNode(entry.node)"
-        neuDragRole="treeitem"
-        [neuDragAriaLabel]="dragDrop() ? 'Move ' + entry.node.label : null"
-        [attr.data-neu-tree-index]="navigationIndex(entry.node.id)"
-        [attr.data-neu-tree-node-id]="entry.node.id"
-        (focus)="setActiveNode(entry.node.id)"
-        (keydown)="onNodeKeydown(entry.node, $event)"
-        (contextmenu)="onNodeContext(entry.node, $event)"
-      >
-        @if (dragDrop()) {
-          @for (position of dropPositions; track position) {
-            <span
-              [class]="'neu-tree__drop neu-tree__drop--' + position"
-              [neuDropZone]="dropTarget(entry.node, position)"
-              [neuDropScope]="dragScope()"
-              [neuDropAccept]="acceptDrop"
-              [neuDropAriaLabel]="'Place ' + position + ' ' + entry.node.label"
-              (drop)="onTreeDrop($event)"
-            ></span>
-          }
-        }
-        <ng-container
-          [ngTemplateOutlet]="nodeRow"
-          [ngTemplateOutletContext]="{ $implicit: entry.node, level: entry.level }"
-        />
-      </div>
-    </ng-template>
-
-    <ng-template #nodeRow let-node let-level="level">
-      <div
-        class="neu-tree__row"
-        [class.neu-tree__row--selected]="isSelected(node.id)"
-        [class.neu-tree__row--disabled]="node.disabled"
-        [style.padding-inline-start.px]="(level - 1) * indentSize() + 6"
-      >
-        @if (isExpandable(node)) {
-          <button
-            class="neu-tree__toggle"
-            type="button"
-            tabindex="-1"
-            [disabled]="node.disabled || isLoading(node)"
-            [class.neu-tree__toggle--open]="isRenderedExpanded(node)"
-            [attr.aria-label]="isRenderedExpanded(node) ? collapseLabel() : expandLabel()"
-            (click)="toggleNode(node, $event)"
-          >
-            @if (isLoading(node)) {
-              <span class="neu-tree__spinner" aria-hidden="true"></span>
-            } @else {
-              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="m7 5 6 5-6 5" />
-              </svg>
-            }
-          </button>
-        } @else {
-          <span class="neu-tree__toggle neu-tree__toggle--placeholder" aria-hidden="true"></span>
-        }
-        @if (canSelect(node) && isCheckboxMode()) {
-          <neu-checkbox
-            class="neu-tree__checkbox"
-            [checked]="checkboxState(node.id) === 'checked'"
-            [indeterminate]="checkboxState(node.id) === 'mixed'"
-            [disabled]="node.disabled"
-            [ariaLabel]="'Select ' + node.label"
-            (click)="$event.stopPropagation()"
-            (checkedChange)="onCheckboxChange(node, $event)"
-          />
-        }
-        <button
-          class="neu-tree__content"
-          type="button"
-          tabindex="-1"
-          [disabled]="node.disabled"
-          (click)="activateNode(node)"
-        >
-          @if (nodeTpl()) {
-            <ng-container
-              [ngTemplateOutlet]="nodeTpl()!.templateRef"
-              [ngTemplateOutletContext]="templateContext(node, level)"
-            />
-          } @else {
-            <span class="neu-tree__main"
-              ><span class="neu-tree__label">{{ node.label }}</span>
-              @if (node.badge) {
-                <span class="neu-tree__badge">{{ node.badge }}</span>
-              }
-            </span>
-            @if (node.description) {
-              <span class="neu-tree__description">{{ node.description }}</span>
-            }
-          }
-        </button>
-      </div>
-    </ng-template>
-  `,
+  templateUrl: './neu-tree.component.html',
   styleUrl: './neu-tree.component.scss',
 })
-export class NeuTreeComponent<T = unknown> {
-  protected readonly dropPositions = NEU_TREE_DROP_POSITIONS;
-  readonly nodeTpl = contentChild(NeuTreeNodeDirective<T>);
-  readonly nodes = input<NeuTreeNode<T>[]>([]);
-  readonly selectable = input(false);
+export class NeuTreeComponent<T, K extends NeuTreeKey = string> {
+  readonly nodes = input.required<readonly NeuTreeNode<T, K>[]>();
+  readonly hierarchy = input.required<NeuTreeHierarchy<K>>();
+  readonly expandedKeys = input<readonly K[]>([]);
+  readonly selection = input<NeuTreeSelection<K>>({ mode: 'none' });
   readonly searchable = input(false);
-  readonly selectionMode = input<NeuTreeSelectionMode>('single');
-  /** Presence makes selection consumer-authoritative. */
-  readonly selection = input<readonly NeuTreeNode<T>[] | undefined>(undefined);
-  /** Presence makes expansion consumer-authoritative. */
-  readonly expandedKeys = input<readonly string[] | undefined>(undefined);
-  readonly showSelectAll = input(false);
-  readonly lazy = input(false);
-  readonly loading = input(false);
-  readonly loadingKeys = input<readonly string[]>([]);
-  readonly virtualScroll = input(false);
-  readonly itemSize = input(44);
-  readonly visibleRows = input(10);
-  readonly virtualOverscan = input(3);
-  readonly dragDrop = input(false);
-  readonly treeId = input('tree');
-  readonly dragScope = input<string | readonly string[]>('neu-tree');
+  readonly virtualization = input<NeuTreeVirtualization | null>(null);
+  readonly reorderable = input(false);
   readonly indentSize = input(18);
   readonly ariaLabel = input('Tree');
-  readonly searchPlaceholder = input('Search nodes');
+  readonly searchLabel = input('Search nodes');
   readonly emptyLabel = input('No nodes available');
-  readonly loadingLabel = input('Loading nodes');
-  readonly selectAllLabel = input('Select all nodes');
+  readonly invalidTreeLabel = input('Tree data is invalid');
   readonly expandLabel = input('Expand node');
   readonly collapseLabel = input('Collapse node');
+  readonly retryLabel = input('Retry loading');
 
-  readonly selectionChange = output<NeuTreeNode<T>[]>();
-  readonly expansionChange = output<string[]>();
-  readonly nodeClick = output<NeuTreeNode<T>>();
-  readonly lazyRequest = output<NeuTreeLazyRequest<T>>();
-  readonly contextRequest = output<NeuTreeContextRequest<T>>();
-  readonly virtualRangeChange = output<NeuTreeVirtualRange>();
-  readonly nodeDrop = output<NeuTreeDropEvent<T>>();
+  readonly expandedKeysChange = output<NeuTreeExpandedKeysChange<K>>();
+  readonly selectionChange = output<NeuTreeSelectionChange<K>>();
+  readonly childrenRequest = output<NeuTreeChildrenRequest<K>>();
+  readonly nodeAction = output<NeuTreeNodeAction<K>>();
+  readonly nodeMove = output<NeuTreeNodeMove<K>>();
 
-  readonly searchQuery = signal('');
-  private readonly internalExpandedKeys = signal<Set<string>>(new Set());
-  private readonly internalSelectedKeys = signal<Set<string>>(new Set());
-  private readonly virtualScrollTop = signal(0);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly navigation = new NeuTreeNavigationController();
-  private readonly pendingLazy = new Map<string, NeuTreeNode<T>>();
-  private requestId = 0;
-  private previousNodes: readonly NeuTreeNode<T>[] | null = null;
-  private focusAfterRender = false;
-  private navigationSnapshot: readonly NeuTreeNavigationItem[] | null = null;
-
-  readonly renderNodes = computed(() => this.cycleSafeProjection(this.nodes()));
-  readonly effectiveExpandedKeys = computed(
-    () => new Set(this.expandedKeys() ?? this.internalExpandedKeys()),
-  );
-  readonly effectiveSelectedKeys = computed(() =>
-    this.selection() === undefined
-      ? this.internalSelectedKeys()
-      : new Set(this.selection()!.map((node) => node.id)),
-  );
-  readonly visibleNodes = computed(() => {
-    const query = this.searchQuery().trim().toLocaleLowerCase();
-    return query ? this.filterNodes(this.renderNodes(), query) : this.renderNodes();
+  protected readonly nodeTpl = contentChild(NeuTreeNodeDirective<T, K>);
+  protected readonly dropPositions: readonly NeuTreeMovePosition[] = ['before', 'inside', 'after'];
+  protected readonly maxGroupDepth = 32;
+  protected readonly dragScope = 'neu-tree';
+  protected readonly rejectDrop = (): boolean => false;
+  protected readonly searchQuery = signal('');
+  protected readonly activeKey = signal<K | null>(null);
+  protected readonly scrollTop = signal(0);
+  protected readonly dragging = signal(false);
+  protected readonly model = computed(() => buildTreeModel(this.nodes(), this.hierarchy()));
+  protected readonly visibleNodes = computed(() => projectVisibleTree(this.model(), this.expandedKeys(), this.searchQuery()));
+  protected readonly visibleByToken = computed(() => new Map(this.visibleNodes().map((entry) => [treeToken(entry.key), entry])));
+  protected readonly rootNodes = computed(() => this.visibleNodes().filter((entry) => entry.parentKey === null));
+  protected readonly selectedTokens = computed(() => treeSelectedTokens(this.selection()));
+  protected readonly checkboxStates = computed(() => deriveTreeCheckboxStates(this.model(), this.selection()));
+  protected readonly virtualItemSize = computed(() => Math.max(1, this.virtualization()?.itemSize ?? 1));
+  protected readonly virtualRange = computed(() => {
+    const total = this.visibleNodes().length;
+    const options = this.virtualization();
+    if (!options) return { start: 0, end: total, total };
+    const itemSize = Math.max(1, options.itemSize);
+    const buffer = Math.max(0, Math.floor(options.buffer ?? 3));
+    const viewport = Math.max(1, options.viewportHeight);
+    const first = Math.floor(this.scrollTop() / itemSize);
+    return { start: Math.max(0, first - buffer), end: Math.min(total, first + Math.ceil(viewport / itemSize) + buffer), total };
   });
-  readonly allEntries = computed(() =>
-    walkNeuTreeDepthFirst(this.renderNodes(), (node) => node.children ?? []),
-  );
-  readonly traversalIndex = computed(() => {
-    const entries = this.allEntries();
-    const entryIndexById = new Map<string, number>();
-    const entryIndexByNode = new Map<NeuTreeNode<T>, number>();
-    const duplicateIds = new Set<string>();
-    for (let index = 0; index < entries.length; index++) {
-      const entry = entries[index];
-      if (entryIndexById.has(entry.node.id)) duplicateIds.add(entry.node.id);
-      else entryIndexById.set(entry.node.id, index);
-      entryIndexByNode.set(entry.node, index);
-    }
-    return { entries, entryIndexById, entryIndexByNode, duplicateIds };
-  });
-  readonly loadingKeySet = computed(() => new Set(this.loadingKeys()));
-  readonly checkboxStates = computed(() => this.deriveCheckboxStates(this.effectiveSelectedKeys()));
-  readonly flatVisibleNodes = computed<NeuTreeFlatEntry<T>[]>(() =>
-    walkNeuTreeDepthFirst(this.visibleNodes(), (node) => node.children ?? [], {
-      shouldDescend: (entry) =>
-        !!entry.node.children?.length && this.isRenderedExpanded(entry.node),
-    }).map((entry) => ({
-      node: entry.node,
-      level: entry.level + 1,
-      ...(entry.parent ? { parentId: entry.parent.id } : {}),
-      posInSet: entry.index + 1,
-      setSize: entry.setSize,
-    })),
-  );
-  readonly navigationIndexById = computed(
-    () => new Map(this.flatVisibleNodes().map((entry, index) => [entry.node.id, index])),
-  );
-  readonly navigationItems = computed<readonly NeuTreeNavigationItem[]>(() =>
-    this.flatVisibleNodes().map((entry) => ({
-      key: entry.node.id,
-      label: entry.node.label,
-      level: entry.level,
-      parentKey: entry.parentId,
-      disabled: entry.node.disabled,
-      hasChildren: this.isExpandable(entry.node),
-      expanded: this.isRenderedExpanded(entry.node),
-    })),
-  );
-  readonly virtualRange = computed<NeuTreeVirtualRange>(() => {
-    const total = this.flatVisibleNodes().length;
-    const overscan = Math.max(0, this.virtualOverscan());
-    const viewportRows = Math.max(1, this.visibleRows());
-    const rawStart = Math.floor(this.virtualScrollTop() / Math.max(1, this.itemSize()));
-    const start = Math.max(0, Math.min(rawStart - overscan, total));
-    return { start, end: Math.min(total, rawStart + viewportRows + overscan), total };
-  });
-  readonly virtualEntries = computed(() => {
+  protected readonly renderedNodes = computed(() => {
     const range = this.virtualRange();
-    return this.flatVisibleNodes().slice(range.start, range.end);
+    return this.visibleNodes().slice(range.start, range.end);
   });
-  readonly eligibleNodeCount = computed(
-    () => this.allEntries().filter(({ node }) => this.canSelect(node) && !node.disabled).length,
-  );
-  readonly selectAllState = computed<CheckboxVisualState>(() => {
-    const eligible = this.allEntries().filter(({ node }) => this.canSelect(node) && !node.disabled);
-    if (!eligible.length) return 'unchecked';
-    const checked = eligible.filter(({ node }) => this.checkboxState(node.id) === 'checked').length;
-    return checked === eligible.length ? 'checked' : checked === 0 ? 'unchecked' : 'mixed';
+  protected readonly tabbableKey = computed(() => {
+    const visible = this.visibleNodes();
+    const active = this.activeKey();
+    if (active !== null && visible.some((entry) => treeToken(entry.key) === treeToken(active))) return active;
+    return visible[0]?.key ?? null;
   });
+
+  private readonly host: HTMLElement = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly requestSeen = new Map<unknown, number>();
+  private readonly dragOwner = {};
+  private nextRequestId = 0;
+  private lastDiagnostic = '';
+  private focusPath: K[] = [];
+  private hadTreeFocus = false;
+  private typeahead = '';
+  private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
+  private focusFrame: number | null = null;
 
   constructor() {
     effect(() => {
-      const nodes = this.nodes();
-      if (nodes === this.previousNodes) return;
-      this.previousNodes = nodes;
-      const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
-        sharedReferences: 'shallow',
-      });
-      const valid = new Set(entries.map(({ node }) => node.id));
-      if (this.expandedKeys() === undefined) {
-        const next = new Set([...this.internalExpandedKeys()].filter((key) => valid.has(key)));
-        for (const { node } of entries) if (node.expanded) next.add(node.id);
-        this.internalExpandedKeys.set(next);
-      }
-      if (this.selection() === undefined)
-        this.internalSelectedKeys.set(
-          new Set([...this.internalSelectedKeys()].filter((key) => valid.has(key))),
-        );
-      for (const [key, pendingNode] of this.pendingLazy) {
-        const current = entries.find(({ node }) => node.id === key)?.node;
-        if (
-          !current ||
-          current !== pendingNode ||
-          current.children?.length ||
-          current.leaf === true
-        )
-          this.pendingLazy.delete(key);
+      const issue = this.model().issue;
+      const fingerprint = issue ? `${issue.code}:${String(issue.key)}` : '';
+      if (fingerprint === this.lastDiagnostic) return;
+      this.lastDiagnostic = fingerprint;
+      if (issue && isDevMode()) console.error(`[NeuTree] ${issue.code}: ${String(issue.key)}`);
+    });
+    effect(() => {
+      if (!this.browser) return;
+      const model = this.model();
+      const expanded = new Set(this.expandedKeys().map(treeToken));
+      if (model.issue) return;
+      // Only an applied, visibly expanded branch can demand children. An
+      // expanded descendant behind a collapsed ancestor stays dormant.
+      for (const entry of projectVisibleTree(model, this.expandedKeys(), '')) {
+        const token = treeToken(entry.key);
+        if (!expanded.has(token) || entry.relation?.state !== 'unloaded') {
+          if (entry.relation?.state === 'loaded' || entry.relation?.state === 'error') this.requestSeen.delete(token);
+          continue;
+        }
+        if (this.requestSeen.get(token) === model.revision) continue;
+        this.requestSeen.set(token, model.revision);
+        this.emitChildrenRequest(entry.key, 'expand', model.revision);
       }
     });
     afterRenderEffect(() => {
-      this.flatVisibleNodes();
-      this.reconcileNavigation();
-      for (const checkbox of this.host.querySelectorAll<HTMLInputElement>(
-        '.neu-tree__checkbox input',
-      ))
-        checkbox.tabIndex = -1;
-      if (this.focusAfterRender) {
-        this.focusAfterRender = false;
-        this.focusActiveNode();
-      }
+      if (!this.browser || !this.hadTreeFocus) return;
+      const active = this.activeKey();
+      const visible = this.visibleNodes();
+      if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;
+      const fallback = this.focusPath.find((key) => visible.some((entry) => treeToken(entry.key) === treeToken(key))) ?? visible[0]?.key;
+      if (fallback === undefined) return;
+      this.activeKey.set(fallback);
+      this.scheduleFocus(fallback);
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.typeaheadTimer !== null) clearTimeout(this.typeaheadTimer);
+      if (this.focusFrame !== null && this.browser) cancelAnimationFrame(this.focusFrame);
+      this.requestSeen.clear();
     });
   }
 
-  isMultiMode(): boolean {
-    return this.selectable() && this.selectionMode() !== 'single';
+  protected isSelected(key: K): boolean {
+    return this.selectedTokens().has(treeToken(key));
   }
-  isCheckboxMode(): boolean {
-    return this.selectionMode() === 'checkbox' || this.selectionMode() === 'multiple';
+
+  protected checkboxState(key: K): TreeCheckboxState {
+    return this.checkboxStates().get(treeToken(key)) ?? 'unchecked';
   }
-  isExpandable(node: NeuTreeNode<T>): boolean {
-    return !!node.children?.length || (this.lazy() && node.leaf === false);
-  }
-  hasChildren(node: NeuTreeNode<T>): boolean {
-    return this.isExpandable(node);
-  }
-  canSelect(node: NeuTreeNode<T>): boolean {
-    return this.selectable() && node.selectable !== false;
-  }
-  isExpanded(nodeId: string): boolean {
-    return this.effectiveExpandedKeys().has(nodeId);
-  }
-  isRenderedExpanded(node: NeuTreeNode<T>): boolean {
-    return this.searchQuery().trim()
-      ? (node.expanded ?? this.isExpanded(node.id))
-      : this.isExpanded(node.id);
-  }
-  isSelected(nodeId: string): boolean {
-    return this.effectiveSelectedKeys().has(nodeId);
-  }
-  isLoading(node: NeuTreeNode<T>): boolean {
-    return node.loading === true || this.loadingKeySet().has(node.id);
-  }
-  checkboxState(nodeId: string): CheckboxVisualState {
-    if (this.selectionMode() === 'multiple')
-      return this.isSelected(nodeId) ? 'checked' : 'unchecked';
-    return this.checkboxStates().get(nodeId) ?? 'unchecked';
-  }
-  ariaChecked(nodeId: string): 'true' | 'false' | 'mixed' {
-    const state = this.checkboxState(nodeId);
+
+  protected checkboxAria(key: K): 'true' | 'false' | 'mixed' {
+    const state = this.checkboxState(key);
     return state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false';
   }
-  onSearch(event: Event): void {
-    this.searchQuery.set((event.target as HTMLInputElement).value);
+
+  protected isTabbable(key: K): boolean {
+    const active = this.tabbableKey();
+    return active !== null && treeToken(active) === treeToken(key);
   }
 
-  protected onSearchValue(value: string): void {
-    this.searchQuery.set(value);
+  protected templateContext(entry: VisibleTreeEntry<T, K>): NeuTreeNodeTemplateContext<T, K> {
+    return { $implicit: entry.node.data, key: entry.key, level: entry.level,
+      expanded: entry.expanded, selected: this.isSelected(entry.key),
+      partial: this.checkboxState(entry.key) === 'mixed', disabled: !!entry.node.disabled,
+      loading: entry.loading, hasChildren: entry.hasChildren };
   }
 
-  toggleNode(node: NeuTreeNode<T>, event?: Event): void {
-    event?.stopPropagation();
-    if (node.disabled || !this.isExpandable(node) || this.isLoading(node)) return;
-    const next = new Set(this.effectiveExpandedKeys());
-    if (next.has(node.id)) next.delete(node.id);
-    else next.add(node.id);
-    if (this.expandedKeys() === undefined) this.internalExpandedKeys.set(next);
-    this.expansionChange.emit([...next]);
-    if (next.has(node.id)) this.emitLazyRequest(node, 'expand');
-  }
-
-  retryLazy(node: NeuTreeNode<T>): void {
-    this.pendingLazy.delete(node.id);
-    this.emitLazyRequest(node, 'retry');
-  }
-  activateNode(node: NeuTreeNode<T>): void {
-    if (node.disabled) return;
-    this.nodeClick.emit(node);
-    if (this.canSelect(node)) this.updateSelection(node, !this.isSelected(node.id));
-  }
-  onCheckboxChange(node: NeuTreeNode<T>, value: boolean | Event): void {
-    this.updateSelection(
-      node,
-      typeof value === 'boolean' ? value : (value.target as HTMLInputElement).checked,
-    );
-  }
-
-  toggleSelectAll(checked: boolean): void {
-    const next = new Set(this.effectiveSelectedKeys());
-    for (const { node } of this.allEntries())
-      if (this.canSelect(node) && !node.disabled)
-        checked ? next.add(node.id) : next.delete(node.id);
-    this.commitSelection(next);
-  }
-
-  onNodeContext(node: NeuTreeNode<T>, event: MouseEvent): void {
-    if (node.disabled) return;
-    event.preventDefault();
-    this.contextRequest.emit({
-      node,
-      selection: this.collectSelectedNodes(this.nodes(), this.effectiveSelectedKeys()),
-      originalEvent: event,
+  protected visibleChildren(entry: VisibleTreeEntry<T, K>): readonly VisibleTreeEntry<T, K>[] {
+    const visible = this.visibleByToken();
+    return entry.loadedChildren.flatMap((key) => {
+      const child = visible.get(treeToken(key));
+      return child ? [child] : [];
     });
   }
 
-  onVirtualScroll(event: Event): void {
-    this.virtualScrollTop.set((event.currentTarget as HTMLElement).scrollTop);
-    this.virtualRangeChange.emit(this.virtualRange());
+  protected visibleDescendants(entry: VisibleTreeEntry<T, K>): readonly VisibleTreeEntry<T, K>[] {
+    const visible = this.visibleNodes();
+    let end = entry.visibleIndex + 1;
+    while (end < visible.length && visible[end]!.level > entry.level) end += 1;
+    return visible.slice(entry.visibleIndex + 1, end);
   }
-  dragData(node: NeuTreeNode<T>): NeuTreeDragData<T> {
-    const index =
-      this.traversalIndex().entryIndexByNode.get(node) ??
-      this.traversalIndex().entryIndexById.get(node.id);
-    const entry = index == null ? undefined : this.allEntries()[index];
-    return {
-      treeId: this.treeId(),
-      node,
-      parent: entry?.parent ?? null,
-      index: entry?.index ?? -1,
-    };
+
+  protected onSearchInput(event: Event): void {
+    this.searchQuery.set((event.target as HTMLInputElement).value);
+    this.scrollTop.set(0);
   }
-  dropTarget(node: NeuTreeNode<T>, position: NeuTreeDropPosition): NeuTreeDropTarget<T> {
-    return { node, position };
+
+  protected onScroll(event: Event): void {
+    if (!this.virtualization()) return;
+    this.scrollTop.set((event.target as HTMLElement).scrollTop);
   }
-  readonly acceptDrop: NeuDropAccept<NeuTreeDragData<T>, NeuTreeDropTarget<T>> = (data, target) => {
-    if (
-      !data ||
-      !target ||
-      target.node.disabled ||
-      target.node.droppable === false ||
-      data.node.disabled ||
-      data.node.draggable === false
-    )
-      return false;
-    if (data.node.id === target.node.id) return false;
-    const index = this.traversalIndex();
-    if (index.duplicateIds.has(data.node.id) || index.duplicateIds.has(target.node.id))
-      return false;
-    if (data.treeId === this.treeId()) {
-      const sourceIndex =
-        index.entryIndexByNode.get(data.node) ?? index.entryIndexById.get(data.node.id);
-      let targetIndex =
-        index.entryIndexByNode.get(target.node) ?? index.entryIndexById.get(target.node.id);
-      while (sourceIndex != null && targetIndex != null) {
-        if (sourceIndex === targetIndex) return false;
-        targetIndex = index.entries[targetIndex].parentEntryIndex ?? undefined;
-      }
-    } else if (index.entryIndexById.has(data.node.id)) return false;
-    return target.position !== 'inside' || target.node.leaf !== true;
+
+  protected onToggleClick(entry: VisibleTreeEntry<T, K>, event: MouseEvent): void {
+    event.stopPropagation();
+    this.proposeExpansion(entry.key, 'pointer');
+  }
+
+  protected onRetryClick(key: K, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.model().byKey.get(treeToken(key))?.relation?.state !== 'error') return;
+    this.emitChildrenRequest(key, 'retry', this.model().revision);
+  }
+
+  protected onCheckboxClick(key: K, event: MouseEvent): void {
+    event.stopPropagation();
+    const target = event.target as HTMLInputElement;
+    const state = this.checkboxState(key);
+    target.checked = state === 'checked';
+    target.indeterminate = state === 'mixed';
+    this.proposeSelection(key, 'pointer');
+  }
+
+  protected onContentClick(entry: VisibleTreeEntry<T, K>, event: MouseEvent): void {
+    if (this.isInteractiveDescendant(event.target, event.currentTarget)) return;
+    this.activeKey.set(entry.key);
+    this.proposeSelection(entry.key, 'pointer');
+    this.activate(entry.key);
+  }
+
+  protected onNodeFocus(key: K): void {
+    this.hadTreeFocus = true;
+    this.activeKey.set(key);
+    const path: K[] = [];
+    let parent = this.model().byKey.get(treeToken(key))?.parentKey ?? null;
+    while (parent !== null) {
+      path.push(parent);
+      parent = this.model().byKey.get(treeToken(parent))?.parentKey ?? null;
+    }
+    this.focusPath = path;
+  }
+
+  protected onFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget;
+    if (next instanceof Node && !this.host.contains(next)) this.hadTreeFocus = false;
+  }
+
+  protected onNodeKeydown(entry: VisibleTreeEntry<T, K>, event: KeyboardEvent): void {
+    // Nested role=group branches bubble through ancestor treeitems. Only the
+    // focused item owns its key gesture; controls inside it retain native keys.
+    if (event.target !== event.currentTarget) return;
+    const visible = this.visibleNodes();
+    const index = entry.visibleIndex;
+    const rtl = this.browser && getComputedStyle(this.host).direction === 'rtl';
+    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
+    const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+    let nextIndex: number | null = null;
+    if (event.key === 'ArrowDown') nextIndex = Math.min(visible.length - 1, index + 1);
+    else if (event.key === 'ArrowUp') nextIndex = Math.max(0, index - 1);
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = visible.length - 1;
+    else if (event.key === forward) {
+      event.preventDefault();
+      if (entry.hasChildren && !entry.expanded) this.proposeExpansion(entry.key, 'keyboard');
+      else if (entry.expanded && visible[index + 1]?.parentKey !== null &&
+        visible[index + 1] && treeToken(visible[index + 1]!.parentKey!) === treeToken(entry.key)) nextIndex = index + 1;
+    } else if (event.key === back) {
+      event.preventDefault();
+      if (entry.hasChildren && entry.expanded && this.expandedKeys().some((key) => treeToken(key) === treeToken(entry.key))) {
+        this.proposeExpansion(entry.key, 'keyboard');
+      } else if (entry.parentKey !== null) nextIndex = visible.findIndex((item) => treeToken(item.key) === treeToken(entry.parentKey!));
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      this.activate(entry.key);
+    } else if (event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      this.proposeSelection(entry.key, 'keyboard');
+    } else if (event.key.length === 1 && !event.altKey && !event.ctrlKey && !event.metaKey) {
+      this.handleTypeahead(event.key, index);
+      return;
+    } else return;
+    if (nextIndex !== null && nextIndex >= 0) {
+      event.preventDefault();
+      this.focusIndex(nextIndex);
+    }
+  }
+
+  protected dragData(key: K): TreeDragData<K> {
+    return { owner: this.dragOwner, key };
+  }
+
+  protected dropTarget(key: K, position: NeuTreeMovePosition): TreeDropTarget<K> {
+    return { key, position };
+  }
+
+  protected readonly acceptDrop = (data: unknown, target: unknown): boolean => {
+    if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;
+    if (data.owner !== this.dragOwner) return false;
+    return proposeTreeMove(this.model(), data.key, target.key, target.position) !== null;
   };
 
-  onTreeDrop(event: NeuDropEvent<unknown, NeuTreeDropTarget<T>>): void {
-    const data = event.data as NeuTreeDragData<T>;
-    const target = event.targetData;
-    if (!this.acceptDrop(data, target)) return;
-    const targetEntryIndex =
-      this.traversalIndex().entryIndexByNode.get(target.node) ??
-      this.traversalIndex().entryIndexById.get(target.node.id);
-    const targetEntry = targetEntryIndex == null ? undefined : this.allEntries()[targetEntryIndex];
-    const targetParent = target.position === 'inside' ? target.node : (targetEntry?.parent ?? null);
-    const targetIndex =
-      target.position === 'inside'
-        ? (target.node.children?.length ?? 0)
-        : (targetEntry?.index ?? 0) + (target.position === 'after' ? 1 : 0);
-    this.nodeDrop.emit({
-      dragNode: data.node,
-      targetNode: target.node,
-      position: target.position,
-      sourceTreeId: data.treeId,
-      targetTreeId: this.treeId(),
-      sourceParent: data.parent,
-      targetParent,
-      sourceIndex: data.index,
-      targetIndex,
-      interaction: event.interaction,
-      originalEvent: event.originalEvent,
-    });
-  }
-  templateContext(node: NeuTreeNode<T>, level: number): NeuTreeNodeTemplateContext<T> {
-    return {
-      $implicit: node,
-      node,
-      level,
-      selected: this.isSelected(node.id),
-      partial: this.checkboxState(node.id) === 'mixed',
-      expanded: this.isRenderedExpanded(node),
-      loading: this.isLoading(node),
-      toggle: () => this.toggleNode(node),
-      toggleSelection: () => this.updateSelection(node, !this.isSelected(node.id)),
-    };
-  }
-  navigationIndex(nodeId: string): number {
-    return this.navigationIndexById().get(nodeId) ?? -1;
-  }
-  tabIndexForNode(node: NeuTreeNode<T>): 0 | -1 {
-    this.reconcileNavigation();
-    return this.navigation.tabIndexFor(this.navigationIndex(node.id));
-  }
-  setActiveNode(nodeId: string): void {
-    this.reconcileNavigation();
-    this.navigation.setActiveKey(nodeId);
+  protected onDrop(event: unknown): void {
+    if (!event || typeof event !== 'object') return;
+    const candidate = event as { data?: unknown; targetData?: unknown };
+    if (!this.acceptDrop(candidate.data, candidate.targetData)) return;
+    const data = candidate.data as TreeDragData<K>;
+    const target = candidate.targetData as TreeDropTarget<K>;
+    const move = proposeTreeMove(this.model(), data.key, target.key, target.position);
+    if (move) this.nodeMove.emit(move);
   }
 
-  onNodeKeydown(node: NeuTreeNode<T>, event: KeyboardEvent): void {
-    if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey)) {
-      event.preventDefault();
-      this.contextRequest.emit({
-        node,
-        selection: this.collectSelectedNodes(this.nodes(), this.effectiveSelectedKeys()),
-        originalEvent: event,
-      });
-      return;
-    }
-    this.reconcileNavigation();
-    this.navigation.setActiveKey(node.id);
-    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
-    this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });
-    const result = this.navigation.handleKey(event);
-    if (!result.handled) return;
-    if (result.action === 'expand' && !this.isRenderedExpanded(node)) {
-      this.focusAfterRender = true;
-      this.toggleNode(node, event);
-    } else if (result.action === 'collapse' && this.isRenderedExpanded(node)) {
-      this.focusAfterRender = true;
-      this.toggleNode(node, event);
-    } else if (result.action === 'activate') this.activateNode(node);
-    else this.materializeAndFocus(result.activeIndex);
+  private proposeExpansion(key: K, source: 'pointer' | 'keyboard'): void {
+    const entry = this.model().byKey.get(treeToken(key));
+    if (!entry || !entry.relation || entry.relation.state === 'loaded' && entry.relation.keys.length === 0) return;
+    this.expandedKeysChange.emit(proposeTreeExpansion(this.expandedKeys(), key, source));
   }
 
-  private updateSelection(node: NeuTreeNode<T>, checked: boolean): void {
-    if (node.disabled || !this.canSelect(node)) return;
-    const next = new Set(this.effectiveSelectedKeys());
-    if (this.selectionMode() === 'single') {
-      next.clear();
-      if (checked) next.add(node.id);
-    } else if (this.selectionMode() === 'checkbox') {
-      const entries = walkNeuTreeDepthFirst([node], (candidate) => candidate.children ?? [], {
-        sharedReferences: 'shallow',
-        shouldDescend: (entry) =>
-          entry.node === node || (!entry.node.disabled && this.canSelect(entry.node)),
-      });
-      for (const entry of entries)
-        if (!entry.node.disabled && this.canSelect(entry.node))
-          checked ? next.add(entry.node.id) : next.delete(entry.node.id);
-      this.reconcileAncestorSelection(next);
-    } else {
-      checked ? next.add(node.id) : next.delete(node.id);
-    }
-    this.commitSelection(next);
+  private proposeSelection(key: K, source: 'pointer' | 'keyboard'): void {
+    const change = proposeTreeSelection(this.model(), this.selection(), key, source);
+    if (change) this.selectionChange.emit(change);
   }
 
-  private reconcileAncestorSelection(next: Set<string>): void {
-    const entries = this.allEntries();
-    const states = this.deriveCheckboxStates(next);
-    for (let index = entries.length - 1; index >= 0; index -= 1) {
-      const entry = entries[index];
-      if (entry.node.disabled || !this.canSelect(entry.node)) continue;
-      const children = entry.childEntryIndices
-        .map((child) => entries[child].node)
-        .filter((child) => !child.disabled && this.canSelect(child));
-      if (!children.length) continue;
-      if (children.every((child) => states.get(child.id) === 'checked')) next.add(entry.node.id);
-      else next.delete(entry.node.id);
-    }
+  private activate(key: K): void {
+    const entry = this.model().byKey.get(treeToken(key));
+    if (entry && !entry.node.disabled) this.nodeAction.emit({ key });
   }
 
-  private deriveCheckboxStates(selected: Set<string>): Map<string, CheckboxVisualState> {
-    const entries = this.allEntries();
-    const states = new Map<string, CheckboxVisualState>();
-    for (let index = entries.length - 1; index >= 0; index -= 1) {
-      const entry = entries[index];
-      const node = entry.node;
-      if (node.disabled || !this.canSelect(node)) {
-        states.set(node.id, 'unchecked');
-        continue;
-      }
-      const children = entry.childEntryIndices
-        .map((child) => entries[child].node)
-        .filter((child) => !child.disabled && this.canSelect(child));
-      if (!children.length) {
-        states.set(node.id, selected.has(node.id) ? 'checked' : 'unchecked');
-        continue;
-      }
-      const childStates = children.map((child) => states.get(child.id) ?? 'unchecked');
-      states.set(
-        node.id,
-        childStates.every((state) => state === 'checked')
-          ? 'checked'
-          : childStates.every((state) => state === 'unchecked') && !selected.has(node.id)
-            ? 'unchecked'
-            : 'mixed',
-      );
-    }
-    return states;
+  private emitChildrenRequest(key: K, reason: 'expand' | 'retry', hierarchyRevision: number): void {
+    if (!this.browser || this.destroyRef.destroyed) return;
+    this.childrenRequest.emit({ requestId: ++this.nextRequestId, hierarchyRevision, parentKey: key, reason });
   }
 
-  private commitSelection(next: Set<string>): void {
-    if (this.selection() === undefined) this.internalSelectedKeys.set(next);
-    this.selectionChange.emit(this.collectSelectedNodes(this.nodes(), next));
-  }
-  private collectExpandedKeys(nodes: readonly NeuTreeNode<T>[]): Set<string> {
-    return new Set(
-      walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
-        sharedReferences: 'shallow',
-      })
-        .filter(({ node }) => node.expanded)
-        .map(({ node }) => node.id),
-    );
-  }
-  private emitLazyRequest(node: NeuTreeNode<T>, reason: 'expand' | 'retry'): void {
-    if (
-      !this.lazy() ||
-      node.leaf !== false ||
-      node.children?.length ||
-      node.loading ||
-      this.loadingKeySet().has(node.id) ||
-      this.pendingLazy.get(node.id) === node
-    )
-      return;
-    this.pendingLazy.set(node.id, node);
-    this.lazyRequest.emit({ node, reason, requestId: ++this.requestId });
-  }
-  private collectSelectedNodes(
-    nodes: readonly NeuTreeNode<T>[],
-    selected: Set<string>,
-  ): NeuTreeNode<T>[] {
-    return walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
-      sharedReferences: 'shallow',
-    })
-      .filter(({ node }) => selected.has(node.id))
-      .map(({ node }) => node);
-  }
-
-  private filterNodes(nodes: NeuTreeNode<T>[], query: string): NeuTreeNode<T>[] {
-    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
-      sharedReferences: 'shallow',
-    });
-    const projected = new Map<number, NeuTreeNode<T>>();
-    for (let index = entries.length - 1; index >= 0; index -= 1) {
-      const entry = entries[index];
-      const children = entry.childEntryIndices.flatMap((child) =>
-        projected.has(child) ? [projected.get(child)!] : [],
-      );
-      const node = entry.node;
-      const matches =
-        node.label.toLocaleLowerCase().includes(query) ||
-        node.description?.toLocaleLowerCase().includes(query) ||
-        node.badge?.toLocaleLowerCase().includes(query);
-      if (matches || children.length)
-        projected.set(index, {
-          ...node,
-          children,
-          expanded: children.length ? true : node.expanded,
-        });
-    }
-    return entries.flatMap((entry, index) =>
-      entry.parentEntryIndex == null && projected.has(index) ? [projected.get(index)!] : [],
-    );
-  }
-
-  private cycleSafeProjection(nodes: readonly NeuTreeNode<T>[]): NeuTreeNode<T>[] {
-    const entries = walkNeuTreeDepthFirst(nodes, (node) => node.children ?? [], {
-      sharedReferences: 'shallow',
-    });
-    const projected = new Map<number, NeuTreeNode<T>>();
-    for (let index = entries.length - 1; index >= 0; index -= 1) {
-      const entry = entries[index];
-      const children = entry.childEntryIndices.map((child) => projected.get(child)!);
-      const original = entry.node.children;
-      const unchanged =
-        original == null ||
-        (original.length === children.length &&
-          original.every((child, childIndex) => child === children[childIndex]));
-      projected.set(index, unchanged ? entry.node : { ...entry.node, children });
-    }
-    return entries.flatMap((entry, index) =>
-      entry.parentEntryIndex == null ? [projected.get(index)!] : [],
-    );
-  }
-
-  private reconcileNavigation(): void {
-    const items = this.navigationItems();
-    if (items === this.navigationSnapshot) return;
-    this.navigationSnapshot = items;
-    this.navigation.setItems(items);
-  }
-
-  private materializeAndFocus(index: number): void {
-    if (this.virtualScroll() && index >= 0) {
+  private focusIndex(index: number): void {
+    const key = this.visibleNodes()[index]?.key;
+    if (key === undefined) return;
+    this.activeKey.set(key);
+    const options = this.virtualization();
+    if (options) {
       const range = this.virtualRange();
       if (index < range.start || index >= range.end) {
-        const viewport = this.host.querySelector<HTMLElement>('.neu-tree__virtual');
-        const scrollTop = Math.max(0, index * this.itemSize());
-        if (viewport) viewport.scrollTop = scrollTop;
-        this.virtualScrollTop.set(scrollTop);
-        this.focusAfterRender = true;
+        const top = index * this.virtualItemSize();
+        const viewport = this.host.querySelector<HTMLElement>('[role="tree"]');
+        if (viewport) viewport.scrollTop = top;
+        this.scrollTop.set(top);
+      }
+    }
+    this.scheduleFocus(key);
+  }
+
+  private scheduleFocus(key: K): void {
+    if (!this.browser) return;
+    if (this.focusFrame !== null) cancelAnimationFrame(this.focusFrame);
+    this.focusFrame = requestAnimationFrame(() => {
+      this.focusFrame = null;
+      const index = this.visibleNodes().findIndex((entry) => treeToken(entry.key) === treeToken(key));
+      if (index < 0) return;
+      this.host.querySelector<HTMLElement>(`[data-neu-tree-index="${index}"]`)?.focus({ preventScroll: true });
+    });
+  }
+
+  private handleTypeahead(character: string, index: number): void {
+    this.typeahead += normalizeTreeSearch(character);
+    if (this.typeaheadTimer !== null) clearTimeout(this.typeaheadTimer);
+    this.typeaheadTimer = setTimeout(() => { this.typeahead = ''; this.typeaheadTimer = null; }, 500);
+    const visible = this.visibleNodes();
+    for (let offset = 1; offset <= visible.length; offset += 1) {
+      const candidateIndex = (index + offset) % visible.length;
+      if (normalizeTreeSearch(visible[candidateIndex]!.node.label).startsWith(this.typeahead)) {
+        this.focusIndex(candidateIndex);
         return;
       }
     }
-    this.focusActiveNode();
   }
 
-  private focusActiveNode(): void {
-    this.host
-      .querySelector<HTMLElement>(`[data-neu-tree-index="${this.navigation.index}"]`)
-      ?.focus({ preventScroll: true });
+  private isInteractiveDescendant(target: EventTarget | null, current: EventTarget | null): boolean {
+    if (!(target instanceof Element) || !(current instanceof Element) || target === current) return false;
+    const interactive = target.closest('input, textarea, select, button, a, [contenteditable], [role="button"], [role="link"]');
+    return interactive !== null && current.contains(interactive);
+  }
+
+  private isTreeDragData(value: unknown): value is TreeDragData<K> {
+    return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;
+  }
+
+  private isTreeDropTarget(value: unknown): value is TreeDropTarget<K> {
+    return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&
+      (value.position === 'before' || value.position === 'inside' || value.position === 'after');
   }
 }

@@ -122,7 +122,6 @@
     "NeuStepperComponent": ["goTo", "next", "prev"],
     "NeuTableComponent": ["export", "focusCell", "retryData", "scrollTo"],
     "NeuTooltipDirective": ["hide", "show"],
-    "NeuTreeComponent": ["activateNode", "toggleNode"],
     "NeuTreeTableComponent": ["export", "focus", "retryData", "scrollTo"]
   }
 }

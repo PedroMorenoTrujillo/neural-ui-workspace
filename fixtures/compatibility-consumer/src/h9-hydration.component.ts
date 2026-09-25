@@ -9,7 +9,7 @@ import { NeuBottomSheetComponent } from '@neural-ui/core/bottom-sheet';
 import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuTextareaComponent } from '@neural-ui/core/textarea';
-import { NeuTreeComponent, type NeuTreeNode } from '@neural-ui/core/tree';
+import { NeuTreeComponent, type NeuTreeHierarchy, type NeuTreeNode } from '@neural-ui/core/tree';
 import { NeuKanbanComponent, type NeuKanbanCardMove, type NeuKanbanColumn } from '@neural-ui/core/kanban';
 @Component({
   selector: 'app-root',
@@ -38,7 +38,7 @@ import { NeuKanbanComponent, type NeuKanbanCardMove, type NeuKanbanColumn } from
     />
     <neu-input id="hydration-input" label="Hydrated input" [formControl]="inputControl" />
     <neu-textarea id="hydration-textarea" label="Hydrated textarea" />
-    <neu-tree id="hydration-tree" [nodes]="treeNodes" [expandedKeys]="['root']" />
+    <neu-tree id="hydration-tree" [nodes]="treeNodes" [hierarchy]="treeHierarchy" [expandedKeys]="treeExpandedKeys" />
     <neu-kanban
       id="hydration-kanban"
       [columns]="kanbanColumns()"
@@ -87,9 +87,16 @@ export class H9HydrationComponent {
   readonly sheetOpen = signal(false);
   readonly inputControl = new FormControl('', { nonNullable: true });
   readonly inputValues = signal<string[]>([]);
-  readonly treeNodes: NeuTreeNode[] = [
-    { id: 'root', label: 'Hydrated root', children: [{ id: 'leaf', label: 'Hydrated leaf' }] },
+  readonly treeNodes: readonly NeuTreeNode<{ readonly id: string }>[] = [
+    { key: 'root', data: { id: 'root' }, label: 'Hydrated root' },
+    { key: 'leaf', data: { id: 'leaf' }, label: 'Hydrated leaf' },
   ];
+  readonly treeHierarchy: NeuTreeHierarchy<string> = {
+    revision: 1,
+    roots: ['root'],
+    children: [{ parentKey: 'root', state: 'loaded', keys: ['leaf'] }],
+  };
+  readonly treeExpandedKeys: readonly string[] = ['root'];
   readonly kanbanColumns = signal<readonly NeuKanbanColumn[]>([
     { id: 'one', title: 'One', cards: [{ id: 'hydrated-card', title: 'Hydrated card' }] },
     { id: 'two', title: 'Two', cards: [] },

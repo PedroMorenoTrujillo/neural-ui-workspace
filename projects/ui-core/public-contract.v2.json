@@ -1248,18 +1248,22 @@
       "entrypoint": "./tree",
       "types": "./types/neural-ui-core-tree.d.ts",
       "exports": [
+        "./tree#NeuTreeChildrenRelation",
+        "./tree#NeuTreeChildrenRequest",
         "./tree#NeuTreeComponent",
-        "./tree#NeuTreeContextRequest",
-        "./tree#NeuTreeDragData",
-        "./tree#NeuTreeDropEvent",
-        "./tree#NeuTreeDropPosition",
-        "./tree#NeuTreeDropTarget",
-        "./tree#NeuTreeLazyRequest",
+        "./tree#NeuTreeExpandedKeysChange",
+        "./tree#NeuTreeHierarchy",
+        "./tree#NeuTreeInteractionSource",
+        "./tree#NeuTreeKey",
+        "./tree#NeuTreeMovePosition",
         "./tree#NeuTreeNode",
+        "./tree#NeuTreeNodeAction",
         "./tree#NeuTreeNodeDirective",
+        "./tree#NeuTreeNodeMove",
         "./tree#NeuTreeNodeTemplateContext",
-        "./tree#NeuTreeSelectionMode",
-        "./tree#NeuTreeVirtualRange"
+        "./tree#NeuTreeSelection",
+        "./tree#NeuTreeSelectionChange",
+        "./tree#NeuTreeVirtualization"
       ]
     },
     {
@@ -1391,7 +1395,12 @@
       "entrypoint": "./virtual-list",
       "types": "./types/neural-ui-core-virtual-list.d.ts",
       "exports": [
-        "./virtual-list#NeuVirtualListComponent"
+        "./virtual-list#NeuVirtualItemContext",
+        "./virtual-list#NeuVirtualItemDirective",
+        "./virtual-list#NeuVirtualListComponent",
+        "./virtual-list#NeuVirtualListKey",
+        "./virtual-list#NeuVirtualListRange",
+        "./virtual-list#NeuVirtualListScrollTarget"
       ]
     }
   ],
@@ -45320,13 +45329,64 @@
       "members": []
     },
     {
+      "id": "./tree#NeuTreeChildrenRelation",
+      "entrypoint": "./tree",
+      "name": "NeuTreeChildrenRelation",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTreeChildrenRelation<K extends NeuTreeKey> = {\n    readonly parentKey: K;\n    readonly state: 'unloaded';\n} | {\n    readonly parentKey: K;\n    readonly state: 'loading';\n    readonly requestId: number;\n} | {\n    readonly parentKey: K;\n    readonly state: 'loaded';\n    readonly keys: readonly K[];\n} | {\n    readonly parentKey: K;\n    readonly state: 'error';\n    readonly requestId?: number;\n};",
+      "members": []
+    },
+    {
+      "id": "./tree#NeuTreeChildrenRequest",
+      "entrypoint": "./tree",
+      "name": "NeuTreeChildrenRequest",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeChildrenRequest<K extends NeuTreeKey> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeChildrenRequest.property:hierarchyRevision",
+          "name": "hierarchyRevision",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hierarchyRevision: number;"
+        },
+        {
+          "id": "./tree#NeuTreeChildrenRequest.property:parentKey",
+          "name": "parentKey",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly parentKey: K;"
+        },
+        {
+          "id": "./tree#NeuTreeChildrenRequest.property:reason",
+          "name": "reason",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reason: 'expand' | 'retry';"
+        },
+        {
+          "id": "./tree#NeuTreeChildrenRequest.property:requestId",
+          "name": "requestId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly requestId: number;"
+        }
+      ]
+    },
+    {
       "id": "./tree#NeuTreeComponent",
       "entrypoint": "./tree",
       "name": "NeuTreeComponent",
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-tree",
-      "signature": "declare class NeuTreeComponent<T = unknown> {\n}",
+      "signature": "declare class NeuTreeComponent<T, K extends NeuTreeKey = string> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeComponent.input:ariaLabel",
@@ -45349,26 +45409,6 @@
           "signature": "readonly collapseLabel: _angular_core.InputSignal<string>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.input:dragDrop",
-          "name": "dragDrop",
-          "kind": "input",
-          "publicName": "dragDrop",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:dragScope",
-          "name": "dragScope",
-          "kind": "input",
-          "publicName": "dragScope",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly dragScope: _angular_core.InputSignal<string | readonly string[]>;"
-        },
-        {
           "id": "./tree#NeuTreeComponent.input:emptyLabel",
           "name": "emptyLabel",
           "kind": "input",
@@ -45386,7 +45426,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly K[]>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:expandLabel",
@@ -45399,6 +45439,16 @@
           "signature": "readonly expandLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./tree#NeuTreeComponent.input:hierarchy",
+          "name": "hierarchy",
+          "kind": "input",
+          "publicName": "hierarchy",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hierarchy: _angular_core.InputSignal<NeuTreeHierarchy<K>>;"
+        },
+        {
           "id": "./tree#NeuTreeComponent.input:indentSize",
           "name": "indentSize",
           "kind": "input",
@@ -45409,64 +45459,44 @@
           "signature": "readonly indentSize: _angular_core.InputSignal<number>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.input:itemSize",
-          "name": "itemSize",
+          "id": "./tree#NeuTreeComponent.input:invalidTreeLabel",
+          "name": "invalidTreeLabel",
           "kind": "input",
-          "publicName": "itemSize",
+          "publicName": "invalidTreeLabel",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly itemSize: _angular_core.InputSignal<number>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:lazy",
-          "name": "lazy",
-          "kind": "input",
-          "publicName": "lazy",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly lazy: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:loading",
-          "name": "loading",
-          "kind": "input",
-          "publicName": "loading",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:loadingKeys",
-          "name": "loadingKeys",
-          "kind": "input",
-          "publicName": "loadingKeys",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly loadingKeys: _angular_core.InputSignal<readonly string[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:loadingLabel",
-          "name": "loadingLabel",
-          "kind": "input",
-          "publicName": "loadingLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly loadingLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly invalidTreeLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:nodes",
           "name": "nodes",
           "kind": "input",
           "publicName": "nodes",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly nodes: _angular_core.InputSignal<readonly NeuTreeNode<T, K>[]>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:reorderable",
+          "name": "reorderable",
+          "kind": "input",
+          "publicName": "reorderable",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly nodes: _angular_core.InputSignal<NeuTreeNode<T>[]>;"
+          "signature": "readonly reorderable: _angular_core.InputSignal<boolean>;"
+        },
+        {
+          "id": "./tree#NeuTreeComponent.input:retryLabel",
+          "name": "retryLabel",
+          "kind": "input",
+          "publicName": "retryLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly retryLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:searchable",
@@ -45479,34 +45509,14 @@
           "signature": "readonly searchable: _angular_core.InputSignal<boolean>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.input:searchPlaceholder",
-          "name": "searchPlaceholder",
+          "id": "./tree#NeuTreeComponent.input:searchLabel",
+          "name": "searchLabel",
           "kind": "input",
-          "publicName": "searchPlaceholder",
+          "publicName": "searchLabel",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:selectable",
-          "name": "selectable",
-          "kind": "input",
-          "publicName": "selectable",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly selectable: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:selectAllLabel",
-          "name": "selectAllLabel",
-          "kind": "input",
-          "publicName": "selectAllLabel",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly selectAllLabel: _angular_core.InputSignal<string>;"
+          "signature": "readonly searchLabel: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./tree#NeuTreeComponent.input:selection",
@@ -45516,333 +45526,57 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly selection: _angular_core.InputSignal<readonly NeuTreeNode<T>[] | undefined>;"
+          "signature": "readonly selection: _angular_core.InputSignal<NeuTreeSelection<K>>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.input:selectionMode",
-          "name": "selectionMode",
+          "id": "./tree#NeuTreeComponent.input:virtualization",
+          "name": "virtualization",
           "kind": "input",
-          "publicName": "selectionMode",
+          "publicName": "virtualization",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly selectionMode: _angular_core.InputSignal<NeuTreeSelectionMode>;"
+          "signature": "readonly virtualization: _angular_core.InputSignal<NeuTreeVirtualization | null>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.input:showSelectAll",
-          "name": "showSelectAll",
-          "kind": "input",
-          "publicName": "showSelectAll",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly showSelectAll: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:treeId",
-          "name": "treeId",
-          "kind": "input",
-          "publicName": "treeId",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly treeId: _angular_core.InputSignal<string>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:virtualOverscan",
-          "name": "virtualOverscan",
-          "kind": "input",
-          "publicName": "virtualOverscan",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly virtualOverscan: _angular_core.InputSignal<number>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:virtualScroll",
-          "name": "virtualScroll",
-          "kind": "input",
-          "publicName": "virtualScroll",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly virtualScroll: _angular_core.InputSignal<boolean>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.input:visibleRows",
-          "name": "visibleRows",
-          "kind": "input",
-          "publicName": "visibleRows",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly visibleRows: _angular_core.InputSignal<number>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:activateNode",
-          "name": "activateNode",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "activateNode(node: NeuTreeNode<T>): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:ariaChecked",
-          "name": "ariaChecked",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "ariaChecked(nodeId: string): 'true' | 'false' | 'mixed';"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:canSelect",
-          "name": "canSelect",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "canSelect(node: NeuTreeNode<T>): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:checkboxState",
-          "name": "checkboxState",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "checkboxState(nodeId: string): CheckboxVisualState;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:dragData",
-          "name": "dragData",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "dragData(node: NeuTreeNode<T>): NeuTreeDragData<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:dropTarget",
-          "name": "dropTarget",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "dropTarget(node: NeuTreeNode<T>, position: NeuTreeDropPosition): NeuTreeDropTarget<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:hasChildren",
-          "name": "hasChildren",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "hasChildren(node: NeuTreeNode<T>): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isCheckboxMode",
-          "name": "isCheckboxMode",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isCheckboxMode(): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isExpandable",
-          "name": "isExpandable",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isExpandable(node: NeuTreeNode<T>): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isExpanded",
-          "name": "isExpanded",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isExpanded(nodeId: string): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isLoading",
-          "name": "isLoading",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isLoading(node: NeuTreeNode<T>): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isMultiMode",
-          "name": "isMultiMode",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isMultiMode(): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isRenderedExpanded",
-          "name": "isRenderedExpanded",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isRenderedExpanded(node: NeuTreeNode<T>): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:isSelected",
-          "name": "isSelected",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "isSelected(nodeId: string): boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:navigationIndex",
-          "name": "navigationIndex",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "navigationIndex(nodeId: string): number;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:onCheckboxChange",
-          "name": "onCheckboxChange",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onCheckboxChange(node: NeuTreeNode<T>, value: boolean | Event): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:onNodeContext",
-          "name": "onNodeContext",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onNodeContext(node: NeuTreeNode<T>, event: MouseEvent): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:onNodeKeydown",
-          "name": "onNodeKeydown",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onNodeKeydown(node: NeuTreeNode<T>, event: KeyboardEvent): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:onSearch",
-          "name": "onSearch",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onSearch(event: Event): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:onTreeDrop",
-          "name": "onTreeDrop",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onTreeDrop(event: NeuDropEvent<unknown, NeuTreeDropTarget<T>>): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:onVirtualScroll",
-          "name": "onVirtualScroll",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "onVirtualScroll(event: Event): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:retryLazy",
-          "name": "retryLazy",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "retryLazy(node: NeuTreeNode<T>): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:setActiveNode",
-          "name": "setActiveNode",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "setActiveNode(nodeId: string): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:tabIndexForNode",
-          "name": "tabIndexForNode",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "tabIndexForNode(node: NeuTreeNode<T>): 0 | -1;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:templateContext",
-          "name": "templateContext",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "templateContext(node: NeuTreeNode<T>, level: number): NeuTreeNodeTemplateContext<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:toggleNode",
-          "name": "toggleNode",
-          "kind": "method",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "toggleNode(node: NeuTreeNode<T>, event?: Event): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.method:toggleSelectAll",
-          "name": "toggleSelectAll",
-          "kind": "method",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "toggleSelectAll(checked: boolean): void;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.output:contextRequest",
-          "name": "contextRequest",
+          "id": "./tree#NeuTreeComponent.output:childrenRequest",
+          "name": "childrenRequest",
           "kind": "output",
-          "publicName": "contextRequest",
+          "publicName": "childrenRequest",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly contextRequest: _angular_core.OutputEmitterRef<NeuTreeContextRequest<T>>;"
+          "signature": "readonly childrenRequest: _angular_core.OutputEmitterRef<NeuTreeChildrenRequest<K>>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.output:expansionChange",
-          "name": "expansionChange",
+          "id": "./tree#NeuTreeComponent.output:expandedKeysChange",
+          "name": "expandedKeysChange",
           "kind": "output",
-          "publicName": "expansionChange",
+          "publicName": "expandedKeysChange",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+          "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<NeuTreeExpandedKeysChange<K>>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.output:lazyRequest",
-          "name": "lazyRequest",
+          "id": "./tree#NeuTreeComponent.output:nodeAction",
+          "name": "nodeAction",
           "kind": "output",
-          "publicName": "lazyRequest",
+          "publicName": "nodeAction",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly lazyRequest: _angular_core.OutputEmitterRef<NeuTreeLazyRequest<T>>;"
+          "signature": "readonly nodeAction: _angular_core.OutputEmitterRef<NeuTreeNodeAction<K>>;"
         },
         {
-          "id": "./tree#NeuTreeComponent.output:nodeClick",
-          "name": "nodeClick",
+          "id": "./tree#NeuTreeComponent.output:nodeMove",
+          "name": "nodeMove",
           "kind": "output",
-          "publicName": "nodeClick",
+          "publicName": "nodeMove",
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly nodeClick: _angular_core.OutputEmitterRef<NeuTreeNode<T>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.output:nodeDrop",
-          "name": "nodeDrop",
-          "kind": "output",
-          "publicName": "nodeDrop",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly nodeDrop: _angular_core.OutputEmitterRef<NeuTreeDropEvent<T>>;"
+          "signature": "readonly nodeMove: _angular_core.OutputEmitterRef<NeuTreeNodeMove<K>>;"
         },
         {
           "id": "./tree#NeuTreeComponent.output:selectionChange",
@@ -45852,105 +45586,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeNode<T>[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.output:virtualRangeChange",
-          "name": "virtualRangeChange",
-          "kind": "output",
-          "publicName": "virtualRangeChange",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly virtualRangeChange: _angular_core.OutputEmitterRef<NeuTreeVirtualRange>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:acceptDrop",
-          "name": "acceptDrop",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly acceptDrop: NeuDropAccept<NeuTreeDragData<T>, NeuTreeDropTarget<T>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:allEntries",
-          "name": "allEntries",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly allEntries: _angular_core.Signal<_neural_ui_core_internal.InternalNeuTreeTraversalEntry<NeuTreeNode<T>>[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:checkboxStates",
-          "name": "checkboxStates",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly checkboxStates: _angular_core.Signal<Map<string, CheckboxVisualState>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:effectiveExpandedKeys",
-          "name": "effectiveExpandedKeys",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly effectiveExpandedKeys: _angular_core.Signal<Set<string>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:effectiveSelectedKeys",
-          "name": "effectiveSelectedKeys",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly effectiveSelectedKeys: _angular_core.Signal<Set<string>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:eligibleNodeCount",
-          "name": "eligibleNodeCount",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly eligibleNodeCount: _angular_core.Signal<number>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:flatVisibleNodes",
-          "name": "flatVisibleNodes",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly flatVisibleNodes: _angular_core.Signal<NeuTreeFlatEntry<T>[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:loadingKeySet",
-          "name": "loadingKeySet",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly loadingKeySet: _angular_core.Signal<Set<string>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:navigationIndexById",
-          "name": "navigationIndexById",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly navigationIndexById: _angular_core.Signal<Map<string, number>>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:navigationItems",
-          "name": "navigationItems",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly navigationItems: _angular_core.Signal<readonly NeuTreeNavigationItem[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:nodeTpl",
-          "name": "nodeTpl",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly nodeTpl: _angular_core.Signal<NeuTreeNodeDirective<any> | undefined>;"
+          "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeSelectionChange<K>>;"
         },
         {
           "id": "./tree#NeuTreeComponent.property:ɵcmp",
@@ -45958,7 +45594,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeComponent<any>, \"neu-tree\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectable\": {\n        \"alias\": \"selectable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionMode\": {\n        \"alias\": \"selectionMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"showSelectAll\": {\n        \"alias\": \"showSelectAll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"lazy\": {\n        \"alias\": \"lazy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loading\": {\n        \"alias\": \"loading\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingKeys\": {\n        \"alias\": \"loadingKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualScroll\": {\n        \"alias\": \"virtualScroll\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemSize\": {\n        \"alias\": \"itemSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visibleRows\": {\n        \"alias\": \"visibleRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualOverscan\": {\n        \"alias\": \"virtualOverscan\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dragDrop\": {\n        \"alias\": \"dragDrop\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"treeId\": {\n        \"alias\": \"treeId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dragScope\": {\n        \"alias\": \"dragScope\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchPlaceholder\": {\n        \"alias\": \"searchPlaceholder\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"loadingLabel\": {\n        \"alias\": \"loadingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectAllLabel\": {\n        \"alias\": \"selectAllLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"selectionChange\": \"selectionChange\";\n    \"expansionChange\": \"expansionChange\";\n    \"nodeClick\": \"nodeClick\";\n    \"lazyRequest\": \"lazyRequest\";\n    \"contextRequest\": \"contextRequest\";\n    \"virtualRangeChange\": \"virtualRangeChange\";\n    \"nodeDrop\": \"nodeDrop\";\n}, [\n    \"nodeTpl\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTreeComponent<any, any>, \"neu-tree\", never, {\n    \"nodes\": {\n        \"alias\": \"nodes\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"hierarchy\": {\n        \"alias\": \"hierarchy\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchable\": {\n        \"alias\": \"searchable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualization\": {\n        \"alias\": \"virtualization\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"reorderable\": {\n        \"alias\": \"reorderable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indentSize\": {\n        \"alias\": \"indentSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"searchLabel\": {\n        \"alias\": \"searchLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalidTreeLabel\": {\n        \"alias\": \"invalidTreeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandLabel\": {\n        \"alias\": \"expandLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"collapseLabel\": {\n        \"alias\": \"collapseLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"retryLabel\": {\n        \"alias\": \"retryLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"selectionChange\": \"selectionChange\";\n    \"childrenRequest\": \"childrenRequest\";\n    \"nodeAction\": \"nodeAction\";\n    \"nodeMove\": \"nodeMove\";\n}, [\n    \"nodeTpl\"\n], never, true, never>;"
         },
         {
           "id": "./tree#NeuTreeComponent.property:ɵfac",
@@ -45966,308 +45602,112 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeComponent<any>, never>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:renderNodes",
-          "name": "renderNodes",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly renderNodes: _angular_core.Signal<NeuTreeNode<T>[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:searchQuery",
-          "name": "searchQuery",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly searchQuery: _angular_core.WritableSignal<string>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:selectAllState",
-          "name": "selectAllState",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly selectAllState: _angular_core.Signal<CheckboxVisualState>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:traversalIndex",
-          "name": "traversalIndex",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly traversalIndex: _angular_core.Signal<{\n    entries: _neural_ui_core_internal.InternalNeuTreeTraversalEntry<NeuTreeNode<T>>[];\n    entryIndexById: Map<string, number>;\n    entryIndexByNode: Map<NeuTreeNode<T>, number>;\n    duplicateIds: Set<string>;\n}>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:virtualEntries",
-          "name": "virtualEntries",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly virtualEntries: _angular_core.Signal<NeuTreeFlatEntry<T>[]>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:virtualRange",
-          "name": "virtualRange",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly virtualRange: _angular_core.Signal<NeuTreeVirtualRange>;"
-        },
-        {
-          "id": "./tree#NeuTreeComponent.property:visibleNodes",
-          "name": "visibleNodes",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly visibleNodes: _angular_core.Signal<NeuTreeNode<T>[]>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeComponent<any, any>, never>;"
         }
       ]
     },
     {
-      "id": "./tree#NeuTreeContextRequest",
+      "id": "./tree#NeuTreeExpandedKeysChange",
       "entrypoint": "./tree",
-      "name": "NeuTreeContextRequest",
+      "name": "NeuTreeExpandedKeysChange",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeContextRequest<T = unknown> {\n}",
+      "signature": "interface NeuTreeExpandedKeysChange<K extends NeuTreeKey> {\n}",
       "members": [
         {
-          "id": "./tree#NeuTreeContextRequest.property:node",
-          "name": "node",
+          "id": "./tree#NeuTreeExpandedKeysChange.property:expanded",
+          "name": "expanded",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly node: NeuTreeNode<T>;"
+          "signature": "readonly expanded: boolean;"
         },
         {
-          "id": "./tree#NeuTreeContextRequest.property:originalEvent",
-          "name": "originalEvent",
+          "id": "./tree#NeuTreeExpandedKeysChange.property:key",
+          "name": "key",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly originalEvent: MouseEvent | KeyboardEvent;"
+          "signature": "readonly key: K;"
         },
         {
-          "id": "./tree#NeuTreeContextRequest.property:selection",
-          "name": "selection",
+          "id": "./tree#NeuTreeExpandedKeysChange.property:keys",
+          "name": "keys",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly selection: readonly NeuTreeNode<T>[];"
+          "signature": "readonly keys: readonly K[];"
+        },
+        {
+          "id": "./tree#NeuTreeExpandedKeysChange.property:source",
+          "name": "source",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly source: NeuTreeInteractionSource;"
         }
       ]
     },
     {
-      "id": "./tree#NeuTreeDragData",
+      "id": "./tree#NeuTreeHierarchy",
       "entrypoint": "./tree",
-      "name": "NeuTreeDragData",
+      "name": "NeuTreeHierarchy",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeDragData<T = unknown> {\n}",
+      "signature": "interface NeuTreeHierarchy<K extends NeuTreeKey> {\n}",
       "members": [
         {
-          "id": "./tree#NeuTreeDragData.property:index",
-          "name": "index",
+          "id": "./tree#NeuTreeHierarchy.property:children",
+          "name": "children",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly index: number;"
+          "signature": "readonly children: readonly NeuTreeChildrenRelation<K>[];"
         },
         {
-          "id": "./tree#NeuTreeDragData.property:node",
-          "name": "node",
+          "id": "./tree#NeuTreeHierarchy.property:revision",
+          "name": "revision",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly node: NeuTreeNode<T>;"
+          "signature": "readonly revision: number;"
         },
         {
-          "id": "./tree#NeuTreeDragData.property:parent",
-          "name": "parent",
+          "id": "./tree#NeuTreeHierarchy.property:roots",
+          "name": "roots",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly parent: NeuTreeNode<T> | null;"
-        },
-        {
-          "id": "./tree#NeuTreeDragData.property:treeId",
-          "name": "treeId",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly treeId: string;"
+          "signature": "readonly roots: readonly K[];"
         }
       ]
     },
     {
-      "id": "./tree#NeuTreeDropEvent",
+      "id": "./tree#NeuTreeInteractionSource",
       "entrypoint": "./tree",
-      "name": "NeuTreeDropEvent",
-      "kind": "interface",
-      "status": "SUPPORTED",
-      "signature": "interface NeuTreeDropEvent<T = unknown> {\n}",
-      "members": [
-        {
-          "id": "./tree#NeuTreeDropEvent.property:dragNode",
-          "name": "dragNode",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly dragNode: NeuTreeNode<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:interaction",
-          "name": "interaction",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly interaction: 'pointer' | 'keyboard';"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:originalEvent",
-          "name": "originalEvent",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly originalEvent: MouseEvent | TouchEvent | KeyboardEvent | null;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:position",
-          "name": "position",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly position: NeuTreeDropPosition;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:sourceIndex",
-          "name": "sourceIndex",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly sourceIndex: number;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:sourceParent",
-          "name": "sourceParent",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly sourceParent: NeuTreeNode<T> | null;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:sourceTreeId",
-          "name": "sourceTreeId",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly sourceTreeId: string;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:targetIndex",
-          "name": "targetIndex",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly targetIndex: number;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:targetNode",
-          "name": "targetNode",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly targetNode: NeuTreeNode<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:targetParent",
-          "name": "targetParent",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly targetParent: NeuTreeNode<T> | null;"
-        },
-        {
-          "id": "./tree#NeuTreeDropEvent.property:targetTreeId",
-          "name": "targetTreeId",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly targetTreeId: string;"
-        }
-      ]
-    },
-    {
-      "id": "./tree#NeuTreeDropPosition",
-      "entrypoint": "./tree",
-      "name": "NeuTreeDropPosition",
+      "name": "NeuTreeInteractionSource",
       "kind": "type",
       "status": "SUPPORTED",
-      "signature": "type NeuTreeDropPosition = 'before' | 'inside' | 'after';",
+      "signature": "type NeuTreeInteractionSource = 'pointer' | 'keyboard';",
       "members": []
     },
     {
-      "id": "./tree#NeuTreeDropTarget",
+      "id": "./tree#NeuTreeKey",
       "entrypoint": "./tree",
-      "name": "NeuTreeDropTarget",
-      "kind": "interface",
+      "name": "NeuTreeKey",
+      "kind": "type",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeDropTarget<T = unknown> {\n}",
-      "members": [
-        {
-          "id": "./tree#NeuTreeDropTarget.property:node",
-          "name": "node",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly node: NeuTreeNode<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeDropTarget.property:position",
-          "name": "position",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly position: NeuTreeDropPosition;"
-        }
-      ]
+      "signature": "type NeuTreeKey = string | number;",
+      "members": []
     },
     {
-      "id": "./tree#NeuTreeLazyRequest",
+      "id": "./tree#NeuTreeMovePosition",
       "entrypoint": "./tree",
-      "name": "NeuTreeLazyRequest",
-      "kind": "interface",
+      "name": "NeuTreeMovePosition",
+      "kind": "type",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeLazyRequest<T = unknown> {\n}",
-      "members": [
-        {
-          "id": "./tree#NeuTreeLazyRequest.property:node",
-          "name": "node",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly node: NeuTreeNode<T>;"
-        },
-        {
-          "id": "./tree#NeuTreeLazyRequest.property:reason",
-          "name": "reason",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly reason: 'expand' | 'retry';"
-        },
-        {
-          "id": "./tree#NeuTreeLazyRequest.property:requestId",
-          "name": "requestId",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly requestId: number;"
-        }
-      ]
+      "signature": "type NeuTreeMovePosition = 'before' | 'inside' | 'after';",
+      "members": []
     },
     {
       "id": "./tree#NeuTreeNode",
@@ -46275,7 +45715,7 @@
       "name": "NeuTreeNode",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeNode<T = unknown> {\n}",
+      "signature": "interface NeuTreeNode<T, K extends NeuTreeKey = string> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeNode.property:badge",
@@ -46283,15 +45723,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "badge?: string;"
-        },
-        {
-          "id": "./tree#NeuTreeNode.property:children",
-          "name": "children",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "children?: NeuTreeNode<T>[];"
+          "signature": "readonly badge?: string;"
         },
         {
           "id": "./tree#NeuTreeNode.property:data",
@@ -46299,7 +45731,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "data?: T;"
+          "signature": "readonly data: T;"
         },
         {
           "id": "./tree#NeuTreeNode.property:description",
@@ -46307,7 +45739,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "description?: string;"
+          "signature": "readonly description?: string;"
         },
         {
           "id": "./tree#NeuTreeNode.property:disabled",
@@ -46315,39 +45747,15 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "disabled?: boolean;"
+          "signature": "readonly disabled?: boolean;"
         },
         {
-          "id": "./tree#NeuTreeNode.property:draggable",
-          "name": "draggable",
+          "id": "./tree#NeuTreeNode.property:key",
+          "name": "key",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "draggable?: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNode.property:droppable",
-          "name": "droppable",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "droppable?: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNode.property:expanded",
-          "name": "expanded",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "expanded?: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNode.property:id",
-          "name": "id",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "id: string;"
+          "signature": "readonly key: K;"
         },
         {
           "id": "./tree#NeuTreeNode.property:label",
@@ -46355,31 +45763,25 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "label: string;"
-        },
+          "signature": "readonly label: string;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeNodeAction",
+      "entrypoint": "./tree",
+      "name": "NeuTreeNodeAction",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeNodeAction<K extends NeuTreeKey> {\n}",
+      "members": [
         {
-          "id": "./tree#NeuTreeNode.property:leaf",
-          "name": "leaf",
+          "id": "./tree#NeuTreeNodeAction.property:key",
+          "name": "key",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "leaf?: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNode.property:loading",
-          "name": "loading",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "loading?: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNode.property:selectable",
-          "name": "selectable",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "selectable?: boolean;"
+          "signature": "readonly key: K;"
         }
       ]
     },
@@ -46390,7 +45792,7 @@
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuTreeNode]",
-      "signature": "declare class NeuTreeNodeDirective<T = unknown> {\n}",
+      "signature": "declare class NeuTreeNodeDirective<T, K extends NeuTreeKey = string> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeNodeDirective.property:ɵdir",
@@ -46398,7 +45800,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeNodeDirective<any>, \"ng-template[neuTreeNode]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTreeNodeDirective<any, any>, \"ng-template[neuTreeNode]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./tree#NeuTreeNodeDirective.property:ɵfac",
@@ -46406,7 +45808,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeNodeDirective<any>, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTreeNodeDirective<any, any>, never>;"
         },
         {
           "id": "./tree#NeuTreeNodeDirective.property:templateRef",
@@ -46414,7 +45816,73 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext<T>>;"
+          "signature": "readonly templateRef: TemplateRef<NeuTreeNodeTemplateContext<T, K>>;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeNodeMove",
+      "entrypoint": "./tree",
+      "name": "NeuTreeNodeMove",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeNodeMove<K extends NeuTreeKey> {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeNodeMove.property:position",
+          "name": "position",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly position: NeuTreeMovePosition;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeMove.property:sourceIndex",
+          "name": "sourceIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceIndex: number;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeMove.property:sourceKey",
+          "name": "sourceKey",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceKey: K;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeMove.property:sourceParentKey",
+          "name": "sourceParentKey",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly sourceParentKey: K | null;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeMove.property:targetIndex",
+          "name": "targetIndex",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetIndex: number;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeMove.property:targetKey",
+          "name": "targetKey",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetKey: K;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeMove.property:targetParentKey",
+          "name": "targetParentKey",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetParentKey: K | null;"
         }
       ]
     },
@@ -46424,7 +45892,7 @@
       "name": "NeuTreeNodeTemplateContext",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeNodeTemplateContext<T = unknown> {\n}",
+      "signature": "interface NeuTreeNodeTemplateContext<T, K extends NeuTreeKey = string> {\n}",
       "members": [
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:$implicit",
@@ -46432,7 +45900,15 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "$implicit: NeuTreeNode<T>;"
+          "signature": "readonly $implicit: T;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:disabled",
+          "name": "disabled",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled: boolean;"
         },
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:expanded",
@@ -46440,7 +45916,23 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "expanded: boolean;"
+          "signature": "readonly expanded: boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:hasChildren",
+          "name": "hasChildren",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hasChildren: boolean;"
+        },
+        {
+          "id": "./tree#NeuTreeNodeTemplateContext.property:key",
+          "name": "key",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly key: K;"
         },
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:level",
@@ -46448,7 +45940,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "level: number;"
+          "signature": "readonly level: number;"
         },
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:loading",
@@ -46456,15 +45948,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "loading: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNodeTemplateContext.property:node",
-          "name": "node",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "node: NeuTreeNode<T>;"
+          "signature": "readonly loading: boolean;"
         },
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:partial",
@@ -46472,7 +45956,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "partial: boolean;"
+          "signature": "readonly partial: boolean;"
         },
         {
           "id": "./tree#NeuTreeNodeTemplateContext.property:selected",
@@ -46480,66 +45964,84 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "selected: boolean;"
-        },
-        {
-          "id": "./tree#NeuTreeNodeTemplateContext.property:toggle",
-          "name": "toggle",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "toggle: () => void;"
-        },
-        {
-          "id": "./tree#NeuTreeNodeTemplateContext.property:toggleSelection",
-          "name": "toggleSelection",
-          "kind": "property",
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "toggleSelection: () => void;"
+          "signature": "readonly selected: boolean;"
         }
       ]
     },
     {
-      "id": "./tree#NeuTreeSelectionMode",
+      "id": "./tree#NeuTreeSelection",
       "entrypoint": "./tree",
-      "name": "NeuTreeSelectionMode",
+      "name": "NeuTreeSelection",
       "kind": "type",
       "status": "SUPPORTED",
-      "signature": "type NeuTreeSelectionMode = 'single' | 'multiple' | 'checkbox';",
+      "signature": "type NeuTreeSelection<K extends NeuTreeKey> = {\n    readonly mode: 'none';\n} | {\n    readonly mode: 'single';\n    readonly key: K | null;\n} | {\n    readonly mode: 'multiple';\n    readonly keys: readonly K[];\n} | {\n    readonly mode: 'checkbox';\n    readonly keys: readonly K[];\n};",
       "members": []
     },
     {
-      "id": "./tree#NeuTreeVirtualRange",
+      "id": "./tree#NeuTreeSelectionChange",
       "entrypoint": "./tree",
-      "name": "NeuTreeVirtualRange",
+      "name": "NeuTreeSelectionChange",
       "kind": "interface",
       "status": "SUPPORTED",
-      "signature": "interface NeuTreeVirtualRange {\n}",
+      "signature": "interface NeuTreeSelectionChange<K extends NeuTreeKey> {\n}",
       "members": [
         {
-          "id": "./tree#NeuTreeVirtualRange.property:end",
-          "name": "end",
+          "id": "./tree#NeuTreeSelectionChange.property:key",
+          "name": "key",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly end: number;"
+          "signature": "readonly key: K;"
         },
         {
-          "id": "./tree#NeuTreeVirtualRange.property:start",
-          "name": "start",
+          "id": "./tree#NeuTreeSelectionChange.property:selection",
+          "name": "selection",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly start: number;"
+          "signature": "readonly selection: NeuTreeSelection<K>;"
         },
         {
-          "id": "./tree#NeuTreeVirtualRange.property:total",
-          "name": "total",
+          "id": "./tree#NeuTreeSelectionChange.property:source",
+          "name": "source",
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly total: number;"
+          "signature": "readonly source: NeuTreeInteractionSource;"
+        }
+      ]
+    },
+    {
+      "id": "./tree#NeuTreeVirtualization",
+      "entrypoint": "./tree",
+      "name": "NeuTreeVirtualization",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTreeVirtualization {\n}",
+      "members": [
+        {
+          "id": "./tree#NeuTreeVirtualization.property:buffer",
+          "name": "buffer",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly buffer?: number;"
+        },
+        {
+          "id": "./tree#NeuTreeVirtualization.property:itemSize",
+          "name": "itemSize",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly itemSize: number;"
+        },
+        {
+          "id": "./tree#NeuTreeVirtualization.property:viewportHeight",
+          "name": "viewportHeight",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly viewportHeight: number;"
         }
       ]
     },
@@ -47481,13 +46983,118 @@
       ]
     },
     {
+      "id": "./virtual-list#NeuVirtualItemContext",
+      "entrypoint": "./virtual-list",
+      "name": "NeuVirtualItemContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuVirtualItemContext<T, K extends NeuVirtualListKey> {\n}",
+      "members": [
+        {
+          "id": "./virtual-list#NeuVirtualItemContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: T;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemContext.property:index",
+          "name": "index",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: number;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemContext.property:item",
+          "name": "item",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly item: T;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemContext.property:key",
+          "name": "key",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly key: K;"
+        }
+      ]
+    },
+    {
+      "id": "./virtual-list#NeuVirtualItemDirective",
+      "entrypoint": "./virtual-list",
+      "name": "NeuVirtualItemDirective",
+      "kind": "directive",
+      "status": "SUPPORTED",
+      "selector": "ng-template[neuVirtualItem]",
+      "signature": "declare class NeuVirtualItemDirective<T, K extends NeuVirtualListKey = NeuVirtualListKey> {\n}",
+      "members": [
+        {
+          "id": "./virtual-list#NeuVirtualItemDirective.input:neuVirtualItem",
+          "name": "neuVirtualItem",
+          "kind": "input",
+          "publicName": "neuVirtualItem",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuVirtualItem: _angular_core.InputSignal<readonly T[] | undefined>;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemDirective.input:neuVirtualItemKey",
+          "name": "neuVirtualItemKey",
+          "kind": "input",
+          "publicName": "neuVirtualItemKey",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly neuVirtualItemKey: _angular_core.InputSignal<((item: T) => K) | undefined>;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard<T, K extends NeuVirtualListKey>(_directive: NeuVirtualItemDirective<T, K>, context: unknown): context is NeuVirtualItemContext<T, K>;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuVirtualItemDirective<any, any>, \"ng-template[neuVirtualItem]\", never, {\n    \"neuVirtualItem\": {\n        \"alias\": \"neuVirtualItem\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"neuVirtualItemKey\": {\n        \"alias\": \"neuVirtualItemKey\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuVirtualItemDirective<any, any>, never>;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualItemDirective.property:templateRef",
+          "name": "templateRef",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly templateRef: TemplateRef<NeuVirtualItemContext<T, K>>;"
+        }
+      ]
+    },
+    {
       "id": "./virtual-list#NeuVirtualListComponent",
       "entrypoint": "./virtual-list",
       "name": "NeuVirtualListComponent",
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-virtual-list",
-      "signature": "declare class NeuVirtualListComponent<T = unknown> implements AfterViewInit {\n}",
+      "signature": "declare class NeuVirtualListComponent<T, K extends NeuVirtualListKey = string> {\n}",
       "members": [
         {
           "id": "./virtual-list#NeuVirtualListComponent.input:emptyLabel",
@@ -47500,6 +47107,16 @@
           "signature": "readonly emptyLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./virtual-list#NeuVirtualListComponent.input:itemKey",
+          "name": "itemKey",
+          "kind": "input",
+          "publicName": "itemKey",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly itemKey: _angular_core.InputSignal<(item: T) => K>;"
+        },
+        {
           "id": "./virtual-list#NeuVirtualListComponent.input:items",
           "name": "items",
           "kind": "input",
@@ -47507,7 +47124,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly items: _angular_core.InputSignal<T[]>;"
+          "signature": "readonly items: _angular_core.InputSignal<readonly T[]>;"
         },
         {
           "id": "./virtual-list#NeuVirtualListComponent.input:itemSize",
@@ -47520,16 +47137,6 @@
           "signature": "readonly itemSize: _angular_core.InputSignal<number>;"
         },
         {
-          "id": "./virtual-list#NeuVirtualListComponent.input:trackBy",
-          "name": "trackBy",
-          "kind": "input",
-          "publicName": "trackBy",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly trackBy: _angular_core.InputSignal<(index: number, item: T) => unknown>;"
-        },
-        {
           "id": "./virtual-list#NeuVirtualListComponent.input:visibleRows",
           "name": "visibleRows",
           "kind": "input",
@@ -47540,22 +47147,12 @@
           "signature": "readonly visibleRows: _angular_core.InputSignal<number>;"
         },
         {
-          "id": "./virtual-list#NeuVirtualListComponent.method:ngAfterViewInit",
-          "name": "ngAfterViewInit",
+          "id": "./virtual-list#NeuVirtualListComponent.method:scrollTo",
+          "name": "scrollTo",
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "ngAfterViewInit(): void;"
-        },
-        {
-          "id": "./virtual-list#NeuVirtualListComponent.output:itemClick",
-          "name": "itemClick",
-          "kind": "output",
-          "publicName": "itemClick",
-          "required": false,
-          "static": false,
-          "status": "SUPPORTED",
-          "signature": "readonly itemClick: _angular_core.OutputEmitterRef<{\n    item: T;\n    index: number;\n}>;"
+          "signature": "scrollTo(target: NeuVirtualListScrollTarget<K>): boolean;"
         },
         {
           "id": "./virtual-list#NeuVirtualListComponent.output:rangeChange",
@@ -47565,15 +47162,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<{\n    start: number;\n    end: number;\n}>;"
-        },
-        {
-          "id": "./virtual-list#NeuVirtualListComponent.property:itemTemplate",
-          "name": "itemTemplate",
-          "kind": "property",
-          "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
-          "signature": "itemTemplate: TemplateRef<{\n    $implicit: T;\n    index: number;\n}> | null;"
+          "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<NeuVirtualListRange>;"
         },
         {
           "id": "./virtual-list#NeuVirtualListComponent.property:ɵcmp",
@@ -47581,7 +47170,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuVirtualListComponent<any>, \"neu-virtual-list\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemSize\": {\n        \"alias\": \"itemSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visibleRows\": {\n        \"alias\": \"visibleRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"trackBy\": {\n        \"alias\": \"trackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"rangeChange\": \"rangeChange\";\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTemplate\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuVirtualListComponent<any, any>, \"neu-virtual-list\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemSize\": {\n        \"alias\": \"itemSize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"visibleRows\": {\n        \"alias\": \"visibleRows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"itemKey\": {\n        \"alias\": \"itemKey\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"emptyLabel\": {\n        \"alias\": \"emptyLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"rangeChange\": \"rangeChange\";\n}, [\n    \"itemTemplate\"\n], never, true, never>;"
         },
         {
           "id": "./virtual-list#NeuVirtualListComponent.property:ɵfac",
@@ -47589,9 +47178,53 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuVirtualListComponent<any>, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuVirtualListComponent<any, any>, never>;"
         }
       ]
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListKey",
+      "entrypoint": "./virtual-list",
+      "name": "NeuVirtualListKey",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuVirtualListKey = string | number;",
+      "members": []
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListRange",
+      "entrypoint": "./virtual-list",
+      "name": "NeuVirtualListRange",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuVirtualListRange {\n}",
+      "members": [
+        {
+          "id": "./virtual-list#NeuVirtualListRange.property:end",
+          "name": "end",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly end: number;"
+        },
+        {
+          "id": "./virtual-list#NeuVirtualListRange.property:start",
+          "name": "start",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly start: number;"
+        }
+      ]
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListScrollTarget",
+      "entrypoint": "./virtual-list",
+      "name": "NeuVirtualListScrollTarget",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuVirtualListScrollTarget<K extends NeuVirtualListKey> = {\n    readonly index: number;\n    readonly align?: 'nearest' | 'start' | 'center' | 'end';\n} | {\n    readonly key: K;\n    readonly align?: 'nearest' | 'start' | 'center' | 'end';\n};",
+      "members": []
     },
     {
       "id": ".#defineNeuPreset",
@@ -64391,30 +64024,6 @@
       "signature": "readonly collapseLabel: _angular_core.InputSignal<string>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:dragDrop",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "dragDrop",
-      "publicName": "dragDrop",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly dragDrop: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:dragScope",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "dragScope",
-      "publicName": "dragScope",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly dragScope: _angular_core.InputSignal<string | readonly string[]>;"
-    },
-    {
       "id": "./tree#NeuTreeComponent.input:emptyLabel",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
@@ -64436,7 +64045,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly K[]>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:expandLabel",
@@ -64451,6 +64060,18 @@
       "signature": "readonly expandLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./tree#NeuTreeComponent.input:hierarchy",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "hierarchy",
+      "publicName": "hierarchy",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly hierarchy: _angular_core.InputSignal<NeuTreeHierarchy<K>>;"
+    },
+    {
       "id": "./tree#NeuTreeComponent.input:indentSize",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
@@ -64463,64 +64084,16 @@
       "signature": "readonly indentSize: _angular_core.InputSignal<number>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:itemSize",
+      "id": "./tree#NeuTreeComponent.input:invalidTreeLabel",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "itemSize",
-      "publicName": "itemSize",
+      "propertyName": "invalidTreeLabel",
+      "publicName": "invalidTreeLabel",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly itemSize: _angular_core.InputSignal<number>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:lazy",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "lazy",
-      "publicName": "lazy",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly lazy: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:loading",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "loading",
-      "publicName": "loading",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly loading: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:loadingKeys",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "loadingKeys",
-      "publicName": "loadingKeys",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly loadingKeys: _angular_core.InputSignal<readonly string[]>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:loadingLabel",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "loadingLabel",
-      "publicName": "loadingLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly loadingLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly invalidTreeLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:nodes",
@@ -64530,9 +64103,33 @@
       "propertyName": "nodes",
       "publicName": "nodes",
       "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly nodes: _angular_core.InputSignal<readonly NeuTreeNode<T, K>[]>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:reorderable",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "reorderable",
+      "publicName": "reorderable",
+      "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly nodes: _angular_core.InputSignal<NeuTreeNode<T>[]>;"
+      "signature": "readonly reorderable: _angular_core.InputSignal<boolean>;"
+    },
+    {
+      "id": "./tree#NeuTreeComponent.input:retryLabel",
+      "entrypoint": "./tree",
+      "declaration": "NeuTreeComponent",
+      "selector": "neu-tree",
+      "propertyName": "retryLabel",
+      "publicName": "retryLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly retryLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:searchable",
@@ -64547,40 +64144,16 @@
       "signature": "readonly searchable: _angular_core.InputSignal<boolean>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:searchPlaceholder",
+      "id": "./tree#NeuTreeComponent.input:searchLabel",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "searchPlaceholder",
-      "publicName": "searchPlaceholder",
+      "propertyName": "searchLabel",
+      "publicName": "searchLabel",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly searchPlaceholder: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:selectable",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "selectable",
-      "publicName": "selectable",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly selectable: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:selectAllLabel",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "selectAllLabel",
-      "publicName": "selectAllLabel",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly selectAllLabel: _angular_core.InputSignal<string>;"
+      "signature": "readonly searchLabel: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./tree#NeuTreeComponent.input:selection",
@@ -64592,139 +64165,67 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly selection: _angular_core.InputSignal<readonly NeuTreeNode<T>[] | undefined>;"
+      "signature": "readonly selection: _angular_core.InputSignal<NeuTreeSelection<K>>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:selectionMode",
+      "id": "./tree#NeuTreeComponent.input:virtualization",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "selectionMode",
-      "publicName": "selectionMode",
+      "propertyName": "virtualization",
+      "publicName": "virtualization",
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly selectionMode: _angular_core.InputSignal<NeuTreeSelectionMode>;"
+      "signature": "readonly virtualization: _angular_core.InputSignal<NeuTreeVirtualization | null>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.input:showSelectAll",
+      "id": "./tree#NeuTreeComponent.output:childrenRequest",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "showSelectAll",
-      "publicName": "showSelectAll",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly showSelectAll: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:treeId",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "treeId",
-      "publicName": "treeId",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly treeId: _angular_core.InputSignal<string>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:virtualOverscan",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "virtualOverscan",
-      "publicName": "virtualOverscan",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly virtualOverscan: _angular_core.InputSignal<number>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:virtualScroll",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "virtualScroll",
-      "publicName": "virtualScroll",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly virtualScroll: _angular_core.InputSignal<boolean>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.input:visibleRows",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "visibleRows",
-      "publicName": "visibleRows",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly visibleRows: _angular_core.InputSignal<number>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:contextRequest",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "contextRequest",
-      "publicName": "contextRequest",
+      "propertyName": "childrenRequest",
+      "publicName": "childrenRequest",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly contextRequest: _angular_core.OutputEmitterRef<NeuTreeContextRequest<T>>;"
+      "signature": "readonly childrenRequest: _angular_core.OutputEmitterRef<NeuTreeChildrenRequest<K>>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.output:expansionChange",
+      "id": "./tree#NeuTreeComponent.output:expandedKeysChange",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "expansionChange",
-      "publicName": "expansionChange",
+      "propertyName": "expandedKeysChange",
+      "publicName": "expandedKeysChange",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly expansionChange: _angular_core.OutputEmitterRef<string[]>;"
+      "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<NeuTreeExpandedKeysChange<K>>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.output:lazyRequest",
+      "id": "./tree#NeuTreeComponent.output:nodeAction",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "lazyRequest",
-      "publicName": "lazyRequest",
+      "propertyName": "nodeAction",
+      "publicName": "nodeAction",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly lazyRequest: _angular_core.OutputEmitterRef<NeuTreeLazyRequest<T>>;"
+      "signature": "readonly nodeAction: _angular_core.OutputEmitterRef<NeuTreeNodeAction<K>>;"
     },
     {
-      "id": "./tree#NeuTreeComponent.output:nodeClick",
+      "id": "./tree#NeuTreeComponent.output:nodeMove",
       "entrypoint": "./tree",
       "declaration": "NeuTreeComponent",
       "selector": "neu-tree",
-      "propertyName": "nodeClick",
-      "publicName": "nodeClick",
+      "propertyName": "nodeMove",
+      "publicName": "nodeMove",
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly nodeClick: _angular_core.OutputEmitterRef<NeuTreeNode<T>>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:nodeDrop",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "nodeDrop",
-      "publicName": "nodeDrop",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly nodeDrop: _angular_core.OutputEmitterRef<NeuTreeDropEvent<T>>;"
+      "signature": "readonly nodeMove: _angular_core.OutputEmitterRef<NeuTreeNodeMove<K>>;"
     },
     {
       "id": "./tree#NeuTreeComponent.output:selectionChange",
@@ -64736,19 +64237,7 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeNode<T>[]>;"
-    },
-    {
-      "id": "./tree#NeuTreeComponent.output:virtualRangeChange",
-      "entrypoint": "./tree",
-      "declaration": "NeuTreeComponent",
-      "selector": "neu-tree",
-      "propertyName": "virtualRangeChange",
-      "publicName": "virtualRangeChange",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly virtualRangeChange: _angular_core.OutputEmitterRef<NeuTreeVirtualRange>;"
+      "signature": "readonly selectionChange: _angular_core.OutputEmitterRef<NeuTreeSelectionChange<K>>;"
     },
     {
       "id": "./uploader#NeuUploaderComponent.input:accept",
@@ -65352,6 +64841,30 @@
       "signature": "readonly touch: _angular_core.OutputEmitterRef<void>;"
     },
     {
+      "id": "./virtual-list#NeuVirtualItemDirective.input:neuVirtualItem",
+      "entrypoint": "./virtual-list",
+      "declaration": "NeuVirtualItemDirective",
+      "selector": "ng-template[neuVirtualItem]",
+      "propertyName": "neuVirtualItem",
+      "publicName": "neuVirtualItem",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuVirtualItem: _angular_core.InputSignal<readonly T[] | undefined>;"
+    },
+    {
+      "id": "./virtual-list#NeuVirtualItemDirective.input:neuVirtualItemKey",
+      "entrypoint": "./virtual-list",
+      "declaration": "NeuVirtualItemDirective",
+      "selector": "ng-template[neuVirtualItem]",
+      "propertyName": "neuVirtualItemKey",
+      "publicName": "neuVirtualItemKey",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly neuVirtualItemKey: _angular_core.InputSignal<((item: T) => K) | undefined>;"
+    },
+    {
       "id": "./virtual-list#NeuVirtualListComponent.input:emptyLabel",
       "entrypoint": "./virtual-list",
       "declaration": "NeuVirtualListComponent",
@@ -65364,6 +64877,18 @@
       "signature": "readonly emptyLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./virtual-list#NeuVirtualListComponent.input:itemKey",
+      "entrypoint": "./virtual-list",
+      "declaration": "NeuVirtualListComponent",
+      "selector": "neu-virtual-list",
+      "propertyName": "itemKey",
+      "publicName": "itemKey",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly itemKey: _angular_core.InputSignal<(item: T) => K>;"
+    },
+    {
       "id": "./virtual-list#NeuVirtualListComponent.input:items",
       "entrypoint": "./virtual-list",
       "declaration": "NeuVirtualListComponent",
@@ -65373,7 +64898,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly items: _angular_core.InputSignal<T[]>;"
+      "signature": "readonly items: _angular_core.InputSignal<readonly T[]>;"
     },
     {
       "id": "./virtual-list#NeuVirtualListComponent.input:itemSize",
@@ -65388,18 +64913,6 @@
       "signature": "readonly itemSize: _angular_core.InputSignal<number>;"
     },
     {
-      "id": "./virtual-list#NeuVirtualListComponent.input:trackBy",
-      "entrypoint": "./virtual-list",
-      "declaration": "NeuVirtualListComponent",
-      "selector": "neu-virtual-list",
-      "propertyName": "trackBy",
-      "publicName": "trackBy",
-      "kind": "input",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly trackBy: _angular_core.InputSignal<(index: number, item: T) => unknown>;"
-    },
-    {
       "id": "./virtual-list#NeuVirtualListComponent.input:visibleRows",
       "entrypoint": "./virtual-list",
       "declaration": "NeuVirtualListComponent",
@@ -65412,18 +64925,6 @@
       "signature": "readonly visibleRows: _angular_core.InputSignal<number>;"
     },
     {
-      "id": "./virtual-list#NeuVirtualListComponent.output:itemClick",
-      "entrypoint": "./virtual-list",
-      "declaration": "NeuVirtualListComponent",
-      "selector": "neu-virtual-list",
-      "propertyName": "itemClick",
-      "publicName": "itemClick",
-      "kind": "output",
-      "required": false,
-      "status": "SUPPORTED",
-      "signature": "readonly itemClick: _angular_core.OutputEmitterRef<{\n    item: T;\n    index: number;\n}>;"
-    },
-    {
       "id": "./virtual-list#NeuVirtualListComponent.output:rangeChange",
       "entrypoint": "./virtual-list",
       "declaration": "NeuVirtualListComponent",
@@ -65433,7 +64934,7 @@
       "kind": "output",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<{\n    start: number;\n    end: number;\n}>;"
+      "signature": "readonly rangeChange: _angular_core.OutputEmitterRef<NeuVirtualListRange>;"
     }
   ],
   "designTokens": [
@@ -65691,32 +65192,32 @@
   ],
   "summary": {
     "entrypoints": 97,
-    "exportedDeclarations": 804,
+    "exportedDeclarations": 813,
     "declarationKinds": {
       "class": 15,
       "component": 94,
-      "directive": 117,
+      "directive": 118,
       "function": 53,
-      "interface": 271,
+      "interface": 274,
       "reexport": 48,
       "service": 10,
       "token": 4,
-      "type": 191,
+      "type": 196,
       "variable": 1
     },
-    "publicSymbols": 5225,
+    "publicSymbols": 5179,
     "statuses": {
-      "SUPPORTED": 3311,
+      "SUPPORTED": 3305,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1914,
+      "INTERNAL/UNSUPPORTED": 1874,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1220,
-      "output": 229,
+      "input": 1212,
+      "output": 226,
       "model": 24,
-      "total": 1473
+      "total": 1462
     },
     "designTokens": 251
   }

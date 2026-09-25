@@ -1,32 +1,5 @@
-.neu-virtual-list {
-  display: block;
-  overflow: hidden;
-}
-
-.neu-virtual-list__viewport {
-  width: 100%;
-  overflow-y: auto;
-
-  &:focus-visible {
-    outline: 2px solid var(--neu-primary);
-    outline-offset: -2px;
-  }
-}
-
-.neu-virtual-list__item-default {
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  border-bottom: 1px solid var(--neu-border);
-  font-size: 0.875rem;
-  color: var(--neu-text);
-}
-
-.neu-virtual-list__empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  color: var(--neu-text-muted);
-  font-size: 0.875rem;
-}
+.neu-virtual-list { display: block; min-inline-size: 0; }
+.neu-virtual-list__viewport { overflow: auto; inline-size: 100%; }
+.neu-virtual-list__spacer { pointer-events: none; }
+.neu-virtual-list__item { box-sizing: border-box; inline-size: 100%; overflow: hidden; }
+.neu-virtual-list__empty { color: var(--neu-text-muted); }

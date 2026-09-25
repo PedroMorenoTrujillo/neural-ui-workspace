@@ -6,22 +6,22 @@
 | --- | --- |
 | HISTORICAL CATALOG | 98 component source files; 102 public component declarations at Phase-1 checkpoint |
 | CURRENT PUBLIC COMPONENTS | 94 |
-| COMPLETED | 92 |
-| PENDING | 2 |
+| COMPLETED | 94 |
+| PENDING | 0 |
 | REMOVE | 0 |
 | PHYSICALLY REMOVED IN D1 (historical) | 2 |
 | MERGED/REPLACED (historical identities) | 4 |
-| 🟢 LIGHT | 1 |
+| 🟢 LIGHT | 0 |
 | 🟡 MEDIUM | 0 |
 | 🟠 HEAVY | 0 |
-| 🔴 VERY HEAVY | 1 |
-| XS | 1 |
+| 🔴 VERY HEAVY | 0 |
+| XS | 0 |
 | S | 0 |
 | M | 0 |
 | L | 0 |
-| XL | 1 |
+| XL | 0 |
 
-The partition is **92 + 2 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 1 pending components are on the active implementation track; VirtualList's 2D/variable-height extension is P3-deferred.
+The partition is **94 + 0 + 0 = 94**. The merged/replaced number describes retired historical identities, not another current-status bucket. 0 pending components are on the active implementation track; C7 certifies VirtualList fixed-height; its 2D/variable-height extension remains P3-deferred.
 
 ## Method and taxonomy
 
@@ -128,14 +128,14 @@ Calendar and Timeline are KEEP; Calendar's N2-022 event contract is completed, T
 | NeuToastContainerComponent | @neural-ui/core/toast | COMPLETED | A2 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in A2; do not reopen for a transverse smoke test. |
 | NeuToggleButtonGroupComponent | @neural-ui/core/toggle-button-group | COMPLETED | N2-007 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-007; do not reopen for a transverse smoke test. |
 | NeuToolbarComponent | @neural-ui/core/toolbar | COMPLETED | A1 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in A1; do not reopen for a transverse smoke test. |
-| NeuTreeComponent | @neural-ui/core/tree | PENDING | C6 | REWRITE | • Design clean hierarchical state and lazy/virtual interaction<br>• Replace legacy mirrors/engines only after API review | VERY HEAVY | XL | HIGH | independent | PUBLIC | real SSR + Chromium hydration | directed keyboard/focus + semantics | HIGH | MEDIUM | HIGH | HIGH | GPT-6 SOL HIGH | yes | hierarchical collection | 0 | hierarchical collection; 920 source lines; no overlay in component source. |
+| NeuTreeComponent | @neural-ui/core/tree | COMPLETED | C6 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C6; do not reopen for a transverse smoke test. |
 | NeuTreeSelectComponent | @neural-ui/core/tree-select | COMPLETED | N2-019 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-019; do not reopen for a transverse smoke test. |
 | NeuTreeTableComponent | @neural-ui/core/tree-table | COMPLETED | N2-015I/K | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-015I/K; do not reopen for a transverse smoke test. |
 | NeuUploaderComponent | @neural-ui/core/uploader | COMPLETED | N2-009 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in N2-009; do not reopen for a transverse smoke test. |
-| NeuVirtualListComponent | @neural-ui/core/virtual-list | PENDING | N2-036 (P3 deferred) | AUDIT ONLY | • Audit current fixed-height contract and bundle only<br>• Defer 2D/variable-height until measured use case | LIGHT | XS | LOW | independent | NONE | SSR import/render smoke; hydration if changed DOM | semantic/keyboard smoke | LOW | LOW | LOW | LOW | GPT-6 LUNA | no | deferred virtual extension | 0 | deferred virtual extension; 165 source lines; no overlay in component source. |
+| NeuVirtualListComponent | @neural-ui/core/virtual-list | COMPLETED | C7 | KEEP AS-IS |  | CLOSED | — | CLOSED | independent | NONE | certified | certified | certified | certified | N/A | NONE | — | no | — | — | Certified in C7; do not reopen for a transverse smoke test. |
 
 ## Dependencies, uncertainty and validation
 
 The dependencies column lists pending public components only; certified controls and private directives are omitted. Source imports additionally show Button/Alert/EmptyState/Dock/MegaMenu/SpeedDial/Gallery→published neural-icons, DataView→Button/Input/Select, the retired SchedulerGantt→TimelineGrid and OrganizationChart→Tree dependencies no longer exist in active runtime. Accordingly foundation/actions precedes feedback; D1 physical removals are complete before TimelineGrid and Tree changes. ImageGallery→Gallery is a proposed **migration dependency**, not a current import. Difficulty/effort/risk are planning estimates inferred from source contracts, interaction surface and roadmap—not certification or hours. Heavy design reviews must freeze the API before runtime work.
 
-The source/package/contract count gate is node scripts/generate-n2-component-portfolio.mjs; it rejects missing/duplicated exports and count drift. Runtime, token, contract and package changes belong to the separate D1 execution report.
+The source/package/contract count gate is node scripts/generate-n2-component-portfolio.mjs; it rejects missing/duplicated exports and count drift. Runtime, token, contract and package changes belong to their separately approved execution reports.

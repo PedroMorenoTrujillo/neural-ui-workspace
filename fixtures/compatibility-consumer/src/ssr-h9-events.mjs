@@ -19,6 +19,7 @@ for (const [entry, name] of [
 }
 const events = [];
 class H9SSR {
+  itemKey = (item) => item;
   record(name) {
     events.push(name);
   }
@@ -32,7 +33,7 @@ core.Component({
  <neu-bottom-sheet [open]="true" title="SSR event sheet" (opened)="record('sheetOpened')" (closed)="record('sheetClosed')" />
  <neu-date-input (viewChange)="record('view')" (opened)="record('dateOpened')" />
  <neu-tree-select (filter)="record('filter')" (opened)="record('treeOpened')" />
- <neu-virtual-list [items]="['SSR row']" (rangeChange)="record('range')" />
+  <neu-virtual-list [items]="['SSR row']" [itemKey]="itemKey" (rangeChange)="record('range')" />
  <neu-autocomplete (select)="record('select')" /><neu-input-tags (optionActivated)="record('tagSelect')" />
  <neu-color-picker mode="oklch" [showAlpha]="true" [showChannels]="true"
    (opened)="record('colorOpened')" (closed)="record('colorClosed')"
