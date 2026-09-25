@@ -3,22 +3,62 @@ import { spawnSync } from 'node:child_process';
 import { createReadStream, cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const fixture = mkdtempSync(join(root, '.n2-c6-hydration-'));
+const packaged = process.env.N2_C6_PACKAGED_HYDRATION === '1';
+const fixture = mkdtempSync(join(packaged ? tmpdir() : root, '.n2-c6-hydration-'));
+const npmCache = packaged ? mkdtempSync(join(tmpdir(), '.n2-c6-npm-cache-')) : null;
 function run(command, args, cwd = root) {
   const result = spawnSync(command, args, {
     cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, timeout: 180000,
-    env: { ...process.env, PATH: `/opt/homebrew/bin:/usr/bin:/bin:${process.env.PATH}` },
+    env: { ...process.env, ...(npmCache ? { npm_config_cache: npmCache } : {}),
+      PATH: `/opt/homebrew/bin:/usr/bin:/bin:${process.env.PATH}` },
   });
   if (result.status !== 0)
     throw new Error(`${command} failed:\n${result.stdout?.slice(-5000)}\n${result.stderr?.slice(-5000)}`);
+  return result.stdout;
 }
 
 try {
   cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+  if (packaged) {
+    const workspacePackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    const packageTarball = run('npm', ['pack', join(root, 'dist/neural-ui/core'),
+      '--pack-destination', fixture]).trim().split('\n').at(-1);
+    assert.ok(packageTarball?.endsWith('.tgz'), 'npm pack did not return a tarball');
+    const packagePath = join(fixture, 'package.json');
+    const consumerPackage = JSON.parse(readFileSync(packagePath, 'utf8'));
+    const angularVersion = workspacePackage.dependencies['@angular/core'];
+    const buildVersion = workspacePackage.devDependencies['@angular/build'];
+    consumerPackage.dependencies = {
+      '@angular/cdk': workspacePackage.dependencies['@angular/cdk'],
+      '@angular/common': angularVersion,
+      '@angular/compiler': angularVersion,
+      '@angular/core': angularVersion,
+      '@angular/forms': angularVersion,
+      '@angular/platform-browser': angularVersion,
+      '@angular/platform-server': angularVersion,
+      '@angular/router': angularVersion,
+      '@angular/ssr': buildVersion,
+      '@neural-ui/core': `file:${join(fixture, packageTarball)}`,
+      '@neural-icons/core': workspacePackage.dependencies['@neural-icons/core'],
+      '@neural-icons/angular': workspacePackage.dependencies['@neural-icons/angular'],
+      rxjs: workspacePackage.dependencies.rxjs,
+      tslib: workspacePackage.dependencies.tslib,
+    };
+    consumerPackage.devDependencies = {
+      '@types/node': '^22.0.0',
+      '@angular/build': buildVersion,
+      '@angular/cli': workspacePackage.devDependencies['@angular/cli'],
+      '@angular/compiler-cli': workspacePackage.devDependencies['@angular/compiler-cli'],
+      typescript: workspacePackage.devDependencies.typescript,
+    };
+    writeFileSync(packagePath, `${JSON.stringify(consumerPackage, null, 2)}\n`);
+    run('npm', ['install', '--no-audit', '--no-fund'], fixture);
+  }
   writeFileSync(join(fixture, 'src/styles.css'), `
 :root { color-scheme: light; --neu-primary: #2563eb; --neu-primary-dark: #1d4ed8;
   --neu-surface: #ffffff; --neu-surface-2: #f8fafc; --neu-border: #cbd5e1;
@@ -145,12 +185,13 @@ export class C6Component {
   writeFileSync(appTsPath, `${JSON.stringify(appTs, null, 2)}\n`);
   const tsPath = join(fixture, 'tsconfig.json');
   const ts = JSON.parse(readFileSync(tsPath, 'utf8'));
-  ts.compilerOptions.paths = {
+  if (packaged) delete ts.compilerOptions.paths;
+  else ts.compilerOptions.paths = {
     '@neural-ui/core': [join(root, 'dist/neural-ui/core')],
     '@neural-ui/core/*': [join(root, 'dist/neural-ui/core/*')],
   };
   writeFileSync(tsPath, `${JSON.stringify(ts, null, 2)}\n`);
-  run(join(root, 'node_modules/.bin/ng'), ['build'], fixture);
+  run(join(packaged ? fixture : root, 'node_modules/.bin/ng'), ['build'], fixture);
   run(process.execPath, [join(fixture, 'dist/server/server.mjs')], fixture);
   const browserRoot = join(fixture, 'dist/browser');
   const html = readFileSync(join(browserRoot, 'index.html'), 'utf8');
@@ -316,9 +357,12 @@ export class C6Component {
       assert.ok(await page.locator('[role="group"]').count() <= 32, 'Deep DOM grouping is unbounded');
       assert.equal(errors.filter((error) => /NG050\d|NG0\d+|TypeError|ReferenceError/.test(error)).length,
         0, errors.join('\n'));
-      console.log('C6 SSR/hydration PASS: DOM reuse, 0 NG050x, zoneless, first-character and hierarchical typeahead, five semantic paths, pointer DnD, checkbox/disabled/RTL/reconstruct/mobile/deep 1001, 100 create/destroy.');
+      console.log(`C6 ${packaged ? 'packed consumer ' : ''}SSR/hydration PASS: DOM reuse, 0 NG050x, zoneless, first-character and hierarchical typeahead, five semantic paths, pointer DnD, checkbox/disabled/RTL/reconstruct/mobile/deep 1001, 100 create/destroy.`);
     } finally { release(); await browser.close(); }
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
-} finally { rmSync(fixture, { recursive: true, force: true }); }
+} finally {
+  rmSync(fixture, { recursive: true, force: true });
+  if (npmCache) rmSync(npmCache, { recursive: true, force: true });
+}
