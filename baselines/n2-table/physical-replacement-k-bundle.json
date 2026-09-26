@@ -3,33 +3,33 @@
   "method": "Angular-compiled minified split ESM; initial static closure; per-format lazy closure; Angular dependencies external; gzip 9; Brotli 11",
   "consumers": {
     "basic": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
     "csvInitial": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
     "jsonInitial": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
     "xlsxInitial": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
     "combinedInitial": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
     "csvLazy": {
       "raw": 584,
-      "gzip": 383,
+      "gzip": 382,
       "brotli": 338
     },
     "jsonLazy": {
@@ -39,7 +39,7 @@
     },
     "xlsxLazy": {
       "raw": 3964,
-      "gzip": 1422,
+      "gzip": 1430,
       "brotli": 1278
     },
     "rootUnused": {
@@ -55,13 +55,13 @@
       "brotli": 25552
     },
     "physicalReplacementBasic": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
-    "rawDeltaPercent": 0,
-    "gzipDeltaPercent": 0,
-    "brotliDeltaPercent": 0
+    "rawDeltaPercent": -0.05505786811346509,
+    "gzipDeltaPercent": 0.3013095376057481,
+    "brotliDeltaPercent": -0.023481527864746398
   },
   "formatFiles": {
     "csv": [

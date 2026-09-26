@@ -3,7 +3,10 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertDirectFesmInputs, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const fesm = join(root, 'dist/neural-ui/core/fesm2022');
 const menu = join(fesm, 'neural-ui-core-menu.mjs');
 const internal = join(fesm, 'neural-ui-core-internal.mjs');
@@ -11,18 +14,21 @@ const packageRoot = join(fesm, 'neural-ui-core.mjs');
 const names = ['NeuMenuComponent', 'NeuMenuButtonComponent', 'NeuMenubarComponent', 'NeuTieredMenuComponent'];
 const cases = Object.fromEntries(names.map(name => [name, `import {${name}} from '${menu}'; export const component=${name};`]));
 cases.combined = `import {${names.join(',')}} from '${menu}'; export const components=[${names.join(',')}];`;
-cases.rootUnused = `import {${names.join(',')}} from '${packageRoot}';`;
+cases.rootUnused = `import {provideNeuralUI} from '${packageRoot}';`;
 
 const results = {};
 for (const [name, contents] of Object.entries(cases)) {
   const bundle = await build({
-    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'ts' },
+    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'js' },
+    tsconfigRaw: { compilerOptions: {} },
+    metafile: true,
     bundle: true, format: 'esm', platform: 'browser', minify: true, write: false,
     external: ['@angular/*', '@angular/cdk/*', 'rxjs'],
     plugins: [{ name: 'n2-b2-private-internal', setup(plugin) {
       plugin.onResolve({ filter: /^@neural-ui\/core\/internal$/ }, () => ({ path: internal }));
     } }],
   });
+  assertDirectFesmInputs(bundle.metafile, join(root, 'dist/neural-ui/core'), contents);
   const bytes = Buffer.concat(bundle.outputFiles.map(file => Buffer.from(file.contents)));
   results[name] = {
     raw: bytes.length,

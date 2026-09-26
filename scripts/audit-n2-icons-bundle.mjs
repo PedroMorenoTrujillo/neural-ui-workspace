@@ -3,7 +3,10 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertDirectFesmInputs, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const fesm = join(root, 'dist/neural-ui/core/fesm2022');
 const icon = (name) => `@neural-icons/core/icons/${name}`;
 const cases = {
@@ -23,13 +26,15 @@ const cases = {
     import {NeuButtonComponent} from '${join(fesm, 'neural-ui-core-button.mjs')}';
     import {NeuDialogComponent} from '${join(fesm, 'neural-ui-core-modal.mjs')}';
     export const components=[NeuAlertComponent,NeuButtonComponent,NeuDialogComponent];`,
-  rootUnused: `import {NeuButtonComponent} from '${join(fesm, 'neural-ui-core.mjs')}';`,
+  rootUnused: `import {provideNeuralUI} from '${join(fesm, 'neural-ui-core.mjs')}';`,
 };
 
 const results = {};
 for (const [name, contents] of Object.entries(cases)) {
   const bundle = await build({
-    stdin: { contents, sourcefile: 'n2-icon-consumer.ts', resolveDir: root, loader: 'ts' },
+    stdin: { contents, sourcefile: 'n2-icon-consumer.ts', resolveDir: root, loader: 'js' },
+    tsconfigRaw: { compilerOptions: {} },
+    metafile: true,
     bundle: true, format: 'esm', platform: 'browser', minify: true, write: false,
     external: ['@angular/*', 'rxjs'],
     plugins: [{ name: 'neural-package-entrypoints', setup(plugin) {
@@ -39,6 +44,7 @@ for (const [name, contents] of Object.entries(cases)) {
       });
     } }],
   });
+  assertDirectFesmInputs(bundle.metafile, join(root, 'dist/neural-ui/core'), contents);
   const bytes = Buffer.concat(bundle.outputFiles.map((file) => Buffer.from(file.contents)));
   const code = bytes.toString('utf8');
   results[name] = {

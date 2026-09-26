@@ -17,6 +17,8 @@
     "audit:bundle:main": "node scripts/audit-h9-b4-bundle-policy.mjs --profile=main",
     "audit:bundle:pr": "node scripts/audit-h9-b4-bundle-policy.mjs --profile=pr",
     "audit:bundle:release": "node scripts/audit-h9-b4-bundle-policy.mjs --profile=release",
+    "audit:rel-01-package-bundle": "node scripts/audit-n2-rel-01-package-bundle.mjs",
+    "test:rel-01-package-bundle": "node --test scripts/rel-01-package-bundle-evidence.spec.mjs",
     "audit:n2-forms-bundle": "node scripts/audit-n2-forms-bundle.mjs",
     "audit:table-architecture": "node scripts/audit-table-architecture.mjs",
     "audit:h5c2-boundaries": "node scripts/audit-h5c2-package-private-boundaries.mjs && node scripts/generate-h5c2-package-private-dependency-graph.mjs",

@@ -5,7 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 
+import { assertPackageOnlyBundle, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const update = process.argv.includes('--update');
 const artifactPath = join(root, 'baselines/n2-table/interactions-h-bundle.json');
 const graphPath = join(root, 'baselines/n2-table/interactions-h-dependency-graph.json');
@@ -74,11 +77,13 @@ async function bundle({ packageRoot, source, sourceMode = false, includeKinds = 
     outdir: 'out',
     platform: 'browser',
     plugins: packageRoot ? [packagePlugin(packageRoot)] : [],
-    stdin: { contents: source, loader: 'ts', resolveDir: root },
+    stdin: { contents: source, loader: packageRoot ? 'js' : 'ts', resolveDir: root },
+    tsconfigRaw: packageRoot ? { compilerOptions: {} } : undefined,
     splitting: true,
     treeShaking: true,
     write: false,
   });
+  if (packageRoot) assertPackageOnlyBundle(result.metafile, packageRoot, source);
   const [entryPath, entryOutput] =
     Object.entries(result.metafile.outputs).find(([, output]) => output.entryPoint !== undefined) ?? [];
   if (entryPath === undefined || entryOutput === undefined) throw new Error('Missing entry output.');

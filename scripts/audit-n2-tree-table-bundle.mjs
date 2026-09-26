@@ -13,7 +13,10 @@ import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 
+import { assertPackageOnlyBundle, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const update = process.argv.includes('--update');
 const checkpoint = process.argv.includes('--checkpoint=N2-011K')
   ? 'N2-011K'
@@ -105,10 +108,12 @@ async function packageConsumer(packageRoot, source) {
     splitting: true,
     outdir: 'out',
     plugins: [packagePlugin(packageRoot)],
-    stdin: { contents: source, loader: 'ts', resolveDir: root },
+    stdin: { contents: source, loader: 'js', resolveDir: root },
+    tsconfigRaw: { compilerOptions: {} },
     treeShaking: true,
     write: false,
   });
+  assertPackageOnlyBundle(result.metafile, packageRoot, source);
   const entryOutput = Object.entries(result.metafile.outputs).find(
     ([, output]) => output.entryPoint !== undefined,
   )?.[0];

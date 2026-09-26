@@ -13,7 +13,10 @@ import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 
+import { assertPackageOnlyBundle, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const update = process.argv.includes('--update');
 const artifactPath = join(root, 'baselines/n2-table/remote-f-bundle.json');
 const graphPath = join(root, 'baselines/n2-table/remote-f-dependency-graph.json');
@@ -76,11 +79,13 @@ async function bundle(options) {
     outdir: 'out',
     platform: 'browser',
     plugins: options.packageRoot ? [packagePlugin(options.packageRoot)] : [],
-    stdin: { contents: options.source, loader: 'ts', resolveDir: root },
+    stdin: { contents: options.source, loader: options.packageRoot ? 'js' : 'ts', resolveDir: root },
+    tsconfigRaw: options.packageRoot ? { compilerOptions: {} } : undefined,
     splitting: true,
     treeShaking: true,
     write: false,
   });
+  if (options.packageRoot) assertPackageOnlyBundle(result.metafile, options.packageRoot, options.source);
   const [entryPath, entryOutput] =
     Object.entries(result.metafile.outputs).find(([, output]) => output.entryPoint !== undefined) ??
     [];

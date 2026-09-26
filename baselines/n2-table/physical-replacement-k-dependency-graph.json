@@ -2,9 +2,9 @@
   "checkpoint": "N2-011K",
   "measured": {
     "initial": {
-      "raw": 174362,
-      "gzip": 34516,
-      "brotli": 25552
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
     },
     "initialFiles": [
       "out/chunk-shared.js",
@@ -14,7 +14,7 @@
       "csv": {
         "size": {
           "raw": 584,
-          "gzip": 383,
+          "gzip": 382,
           "brotli": 338
         },
         "files": [
@@ -46,7 +46,7 @@
       "xlsx": {
         "size": {
           "raw": 3964,
-          "gzip": 1422,
+          "gzip": 1430,
           "brotli": 1278
         },
         "files": [
@@ -64,9 +64,9 @@
   },
   "sourceComponent": {
     "initial": {
-      "raw": 73918,
-      "gzip": 20823,
-      "brotli": 18590
+      "raw": 73914,
+      "gzip": 20831,
+      "brotli": 18593
     },
     "initialFiles": [
       "out/chunk-shared.js",
@@ -92,7 +92,7 @@
       "json": {
         "size": {
           "raw": 916,
-          "gzip": 488,
+          "gzip": 487,
           "brotli": 424
         },
         "files": [
@@ -108,7 +108,7 @@
       "xlsx": {
         "size": {
           "raw": 3993,
-          "gzip": 1443,
+          "gzip": 1455,
           "brotli": 1294
         },
         "files": [
@@ -141,7 +141,7 @@
       },
       {
         "path": "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
-        "bytesInOutput": 3932
+        "bytesInOutput": 3928
       },
       {
         "path": "projects/ui-core/table/internal/query-ui/neu-table-query-transitions.ts",

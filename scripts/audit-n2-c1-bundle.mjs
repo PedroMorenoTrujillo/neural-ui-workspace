@@ -3,7 +3,10 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertDirectFesmInputs, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const fesm = join(root, 'dist/neural-ui/core/fesm2022');
 const gallery = join(fesm, 'neural-ui-core-gallery.mjs');
 const viewer = join(fesm, 'neural-ui-core-image-viewer.mjs');
@@ -14,13 +17,14 @@ const cases = {
   galleryAdvanced: `import {NeuGalleryComponent} from '${gallery}'; export const component=NeuGalleryComponent;`,
   imageViewerStandalone: `import {NeuImageViewerDirective} from '${viewer}'; export const directive=NeuImageViewerDirective;`,
   combined: `import {NeuGalleryComponent} from '${gallery}'; import {NeuImageViewerDirective} from '${viewer}'; export const surfaces=[NeuGalleryComponent,NeuImageViewerDirective];`,
-  rootUnused: `import {NeuGalleryComponent,NeuImageViewerDirective} from '${join(fesm, 'neural-ui-core.mjs')}';`,
+  rootUnused: `import {provideNeuralUI} from '${join(fesm, 'neural-ui-core.mjs')}';`,
 };
 
 const results = {};
 for (const [name, contents] of Object.entries(cases)) {
   const result = await build({
-    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'ts' },
+    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'js' },
+    tsconfigRaw: { compilerOptions: {} },
     bundle: true,
     format: 'esm',
     platform: 'browser',
@@ -37,6 +41,7 @@ for (const [name, contents] of Object.entries(cases)) {
       },
     }],
   });
+  assertDirectFesmInputs(result.metafile, join(root, 'dist/neural-ui/core'), contents);
   const bytes = Buffer.concat(result.outputFiles.map((file) => Buffer.from(file.contents)));
   results[name] = {
     raw: bytes.length,

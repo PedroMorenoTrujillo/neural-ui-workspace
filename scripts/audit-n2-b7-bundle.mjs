@@ -3,7 +3,10 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertDirectFesmInputs, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const fesm = join(root, 'dist/neural-ui/core/fesm2022');
 const slider = join(fesm, 'neural-ui-core-slider.mjs');
 const rating = join(fesm, 'neural-ui-core-rating.mjs');
@@ -15,13 +18,15 @@ const cases = {
   integer: `import {NeuRatingComponent} from "${rating}"; export const control=NeuRatingComponent; export const data=3;`,
   half: `import {NeuRatingComponent} from "${rating}"; export const control=NeuRatingComponent; export const data=2.5;`,
   combined: `import {NeuSliderComponent} from "${slider}"; import {NeuRatingComponent} from "${rating}"; export const controls=[NeuSliderComponent,NeuRatingComponent];`,
-  rootUnused: `import {NeuSliderComponent} from "${packageRoot}"; import {NeuRatingComponent} from "${packageRoot}";`,
+  rootUnused: `import {provideNeuralUI} from "${packageRoot}";`,
 };
 
 const results = {};
 for (const [name, contents] of Object.entries(cases)) {
   const bundle = await build({
-    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'ts' },
+    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'js' },
+    tsconfigRaw: { compilerOptions: {} },
+    metafile: true,
     bundle: true,
     format: 'esm',
     platform: 'browser',
@@ -35,6 +40,7 @@ for (const [name, contents] of Object.entries(cases)) {
       },
     }],
   });
+  assertDirectFesmInputs(bundle.metafile, join(root, 'dist/neural-ui/core'), contents);
   const bytes = Buffer.concat(bundle.outputFiles.map((file) => Buffer.from(file.contents)));
   results[name] = {
     raw: bytes.length,

@@ -1,0 +1,85 @@
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const packageRoot = join(root, 'dist/neural-ui/core');
+const baselinePath = join(root, 'baselines/n2-release/rel-01-package-bundle.json');
+const update = process.argv.includes('--update');
+
+const cases = [
+  ['root', '@neural-ui/core', 'provideNeuralUI'],
+  ['small-primitive', '@neural-ui/core/tag', 'NeuTagComponent'],
+  ['table', '@neural-ui/core/table', 'NeuTableComponent'],
+  ['tree-table', '@neural-ui/core/tree-table', 'NeuTreeTableComponent'],
+  ['tree', '@neural-ui/core/tree', 'NeuTreeComponent'],
+  ['virtual-list', '@neural-ui/core/virtual-list', 'NeuVirtualListComponent'],
+];
+
+const forbiddenByCase = {
+  'small-primitive': ['table', 'tree', 'tree-table'],
+  table: ['tree', 'tree-table'],
+  tree: ['table', 'tree-table'],
+  'virtual-list': ['table', 'tree', 'tree-table'],
+};
+
+function packageFesms(inputs) {
+  return inputs.filter((input) => input.startsWith('fesm2022/'));
+}
+
+function assertIsolation(name, inputs) {
+  const files = packageFesms(inputs);
+  for (const forbidden of forbiddenByCase[name] ?? []) {
+    if (files.some((file) => file === `fesm2022/neural-ui-core-${forbidden}.mjs`)) {
+      throw new Error(`${name} retained ${forbidden}`);
+    }
+  }
+}
+
+if (!existsSync(join(packageRoot, 'package.json'))) throw new Error('Built package missing. Run npm run build.');
+
+const measurements = {};
+for (const [name, specifier, symbol] of cases) {
+  const result = await verifyUnusedPackageExport(packageRoot, specifier, symbol);
+  assertIsolation(name, result.used.packageInputs);
+  measurements[name] = {
+    specifier,
+    symbol,
+    unused: result.unused.size,
+    used: result.used.size,
+    unusedPackageInputs: packageFesms(result.unused.packageInputs),
+    usedPackageInputs: packageFesms(result.used.packageInputs),
+    invalidExportRejected: result.invalidExportRejected,
+  };
+}
+
+const harnesses = readdirSync(join(root, 'scripts'))
+  .filter((name) => /^audit-.*bundle.*\.mjs$/.test(name))
+  .filter((name) => /root.?unused/i.test(readFileSync(join(root, 'scripts', name), 'utf8')))
+  .sort();
+
+for (const name of harnesses) {
+  const source = readFileSync(join(root, 'scripts', name), 'utf8');
+  if (!source.includes('verifyUnusedPackageExport')) {
+    throw new Error(`Root-unused harness lacks a validated package control: ${name}`);
+  }
+}
+
+const evidence = {
+  method: 'built-package export map; JavaScript loader; empty tsconfig aliases; metafile inputs before tree-shaking; invalid and used controls',
+  measurements,
+  auditedRootUnusedHarnesses: harnesses,
+};
+
+if (update) {
+  writeFileSync(baselinePath, `${JSON.stringify(evidence, null, 2)}\n`);
+} else {
+  if (!existsSync(baselinePath)) throw new Error('REL-01 baseline missing. Use --update once after review.');
+  const expected = JSON.parse(readFileSync(baselinePath, 'utf8'));
+  if (JSON.stringify(evidence) !== JSON.stringify(expected)) {
+    throw new Error('Built package or harness inventory differs from REL-01 evidence baseline.');
+  }
+}
+
+console.log(`REL-01 package bundle evidence PASS: ${cases.length} consumers, ${harnesses.length} root-unused harnesses, Tree ${measurements.tree.used.raw} B raw / ${measurements.tree.used.gzip} B gzip.`);

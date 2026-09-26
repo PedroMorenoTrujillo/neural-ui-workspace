@@ -9,7 +9,7 @@
     "basic": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -17,7 +17,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -25,7 +25,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -33,7 +33,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -41,7 +41,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -49,7 +49,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -64,7 +64,7 @@
     "typical": {
       "size": {
         "raw": 113211,
-        "gzip": 22763,
+        "gzip": 22767,
         "brotli": 19278
       },
       "chunks": [
@@ -72,7 +72,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4400,
-            "gzip": 1200,
+            "gzip": 1199,
             "brotli": 1017
           }
         },
@@ -80,7 +80,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 616,
-            "gzip": 406,
+            "gzip": 405,
             "brotli": 359
           }
         },
@@ -88,7 +88,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2589,
-            "gzip": 1104,
+            "gzip": 1103,
             "brotli": 967
           }
         },
@@ -96,7 +96,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 919,
-            "gzip": 490,
+            "gzip": 491,
             "brotli": 431
           }
         },
@@ -104,7 +104,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 4000,
-            "gzip": 1444,
+            "gzip": 1455,
             "brotli": 1300
           }
         }
@@ -123,7 +123,7 @@
     "remote": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -131,7 +131,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -139,7 +139,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -147,7 +147,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -155,7 +155,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -163,7 +163,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -178,7 +178,7 @@
     "virtual": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -186,7 +186,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -194,7 +194,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -202,7 +202,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -210,7 +210,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -218,7 +218,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -233,7 +233,7 @@
     "editing": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -241,7 +241,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -249,7 +249,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -257,7 +257,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -265,7 +265,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -273,7 +273,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -288,7 +288,7 @@
     "row-actions": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -296,7 +296,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -304,7 +304,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -312,7 +312,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -320,7 +320,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -328,7 +328,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -343,7 +343,7 @@
     "export-csv": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -351,7 +351,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -359,7 +359,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -367,7 +367,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -375,7 +375,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -383,7 +383,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -398,7 +398,7 @@
     "export-json": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -406,7 +406,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -414,7 +414,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -422,7 +422,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -430,7 +430,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -438,7 +438,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -453,7 +453,7 @@
     "export-xlsx": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -461,7 +461,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -469,7 +469,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -477,7 +477,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -485,7 +485,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -493,7 +493,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -508,7 +508,7 @@
     "combined": {
       "size": {
         "raw": 113211,
-        "gzip": 22763,
+        "gzip": 22767,
         "brotli": 19278
       },
       "chunks": [
@@ -516,7 +516,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4400,
-            "gzip": 1200,
+            "gzip": 1199,
             "brotli": 1017
           }
         },
@@ -524,7 +524,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 616,
-            "gzip": 406,
+            "gzip": 405,
             "brotli": 359
           }
         },
@@ -532,7 +532,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2589,
-            "gzip": 1104,
+            "gzip": 1103,
             "brotli": 967
           }
         },
@@ -540,7 +540,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 919,
-            "gzip": 490,
+            "gzip": 491,
             "brotli": 431
           }
         },
@@ -548,7 +548,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 4000,
-            "gzip": 1444,
+            "gzip": 1455,
             "brotli": 1300
           }
         }
@@ -567,7 +567,7 @@
     "templates": {
       "size": {
         "raw": 113211,
-        "gzip": 22763,
+        "gzip": 22767,
         "brotli": 19278
       },
       "chunks": [
@@ -575,7 +575,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4400,
-            "gzip": 1200,
+            "gzip": 1199,
             "brotli": 1017
           }
         },
@@ -583,7 +583,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 616,
-            "gzip": 406,
+            "gzip": 405,
             "brotli": 359
           }
         },
@@ -591,7 +591,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2589,
-            "gzip": 1104,
+            "gzip": 1103,
             "brotli": 967
           }
         },
@@ -599,7 +599,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 919,
-            "gzip": 490,
+            "gzip": 491,
             "brotli": 431
           }
         },
@@ -607,7 +607,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 4000,
-            "gzip": 1444,
+            "gzip": 1455,
             "brotli": 1300
           }
         }
@@ -626,7 +626,7 @@
     "nested": {
       "size": {
         "raw": 112510,
-        "gzip": 22483,
+        "gzip": 22494,
         "brotli": 19039
       },
       "chunks": [
@@ -634,7 +634,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
           "size": {
             "raw": 4372,
-            "gzip": 1185,
+            "gzip": 1183,
             "brotli": 1003
           }
         },
@@ -642,7 +642,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
           "size": {
             "raw": 588,
-            "gzip": 386,
+            "gzip": 385,
             "brotli": 341
           }
         },
@@ -650,7 +650,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
           "size": {
             "raw": 2561,
-            "gzip": 1097,
+            "gzip": 1096,
             "brotli": 959
           }
         },
@@ -658,7 +658,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
           "size": {
             "raw": 891,
-            "gzip": 471,
+            "gzip": 472,
             "brotli": 413
           }
         },
@@ -666,7 +666,7 @@
           "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
           "size": {
             "raw": 3972,
-            "gzip": 1425,
+            "gzip": 1433,
             "brotli": 1280
           }
         }
@@ -696,7 +696,7 @@
       "name": "out/neural-ui-core-tree-table-neu-tree-table-active-editor.component.js",
       "size": {
         "raw": 4372,
-        "gzip": 1185,
+        "gzip": 1183,
         "brotli": 1003
       }
     },
@@ -704,7 +704,7 @@
       "name": "out/neural-ui-core-tree-table-neu-tree-table-csv-export.js",
       "size": {
         "raw": 588,
-        "gzip": 386,
+        "gzip": 385,
         "brotli": 341
       }
     },
@@ -712,7 +712,7 @@
       "name": "out/neural-ui-core-tree-table-neu-tree-table-export.js",
       "size": {
         "raw": 2561,
-        "gzip": 1097,
+        "gzip": 1096,
         "brotli": 959
       }
     },
@@ -720,7 +720,7 @@
       "name": "out/neural-ui-core-tree-table-neu-tree-table-json-export.js",
       "size": {
         "raw": 891,
-        "gzip": 471,
+        "gzip": 472,
         "brotli": 413
       }
     },
@@ -728,7 +728,7 @@
       "name": "out/neural-ui-core-tree-table-neu-tree-table-xlsx-export.js",
       "size": {
         "raw": 3972,
-        "gzip": 1425,
+        "gzip": 1433,
         "brotli": 1280
       }
     }
@@ -742,11 +742,11 @@
     },
     "physicalReplacementBasic": {
       "raw": 112510,
-      "gzip": 22483,
+      "gzip": 22494,
       "brotli": 19039
     },
     "rawDeltaPercent": -0.013330371028660299,
-    "gzipDeltaPercent": -0.0088948187680676,
+    "gzipDeltaPercent": 0.0400266844563042,
     "brotliDeltaPercent": -0.05249619402593312
   }
 }

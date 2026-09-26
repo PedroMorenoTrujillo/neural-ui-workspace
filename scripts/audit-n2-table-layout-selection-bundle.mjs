@@ -13,7 +13,10 @@ import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 
+import { assertPackageOnlyBundle, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const update = process.argv.includes('--update');
 const artifactPath = join(root, 'baselines/n2-table/layout-selection-d-bundle.json');
 const graphPath = join(root, 'baselines/n2-table/layout-selection-d-dependency-graph.json');
@@ -64,10 +67,12 @@ async function packageConsumer(packageRoot, source) {
     minify: true,
     platform: 'browser',
     plugins: [packagePlugin(packageRoot)],
-    stdin: { contents: source, loader: 'ts', resolveDir: root },
+    stdin: { contents: source, loader: 'js', resolveDir: root },
+    tsconfigRaw: { compilerOptions: {} },
     treeShaking: true,
     write: false,
   });
+  assertPackageOnlyBundle(result.metafile, packageRoot, source);
   const bytes = Buffer.concat(result.outputFiles.map((file) => file.contents));
   return {
     size: compressed(bytes),

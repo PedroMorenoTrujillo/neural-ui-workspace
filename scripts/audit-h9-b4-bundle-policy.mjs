@@ -19,7 +19,23 @@ import {
   walkFiles,
 } from './lib/release-artifacts.mjs';
 
+import {
+  assertPackageOnlyBundle,
+  verifyUnusedPackageExport,
+} from './lib/rel-01-package-bundle-evidence.mjs';
+import {
+  assertButtonIconBoundary,
+  assertTableInitialBoundary,
+  bytesForOutputs,
+  outputClosure,
+} from './lib/h9-static-closure.mjs';
+
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(
+  resolve(workspaceRoot, 'dist/neural-ui/core'),
+  '@neural-ui/core',
+  'provideNeuralUI',
+);
 const packageRoot = resolve(workspaceRoot, 'dist/neural-ui/core');
 const policyPath = resolve(workspaceRoot, 'scripts/h9-b4-bundle-policy.json');
 const profileArgument = process.argv.find((value) => value.startsWith('--profile='));
@@ -35,10 +51,14 @@ const external = ['@angular/*', '@angular/cdk/*', 'rxjs', 'rxjs/*'];
 const scenarios = {
   'root-unused': { source: "import { provideNeuralUI } from '@neural-ui/core';" },
   provider: { imports: [['provideNeuralUI', '']] },
-  button: { imports: [['NeuButtonComponent', 'button']] },
+  button: {
+    imports: [['NeuButtonComponent', 'button']],
+    extraExternal: ['@neural-icons/*'],
+    iconBoundary: true,
+  },
   select: { imports: [['NeuSelectComponent', 'select']] },
-  'table-basic': { imports: [['NeuTableComponent', 'table']] },
-  'table-advanced-lazy': { imports: [['NeuTableComponent', 'table']] },
+  'table-basic': { imports: [['NeuTableComponent', 'table']], split: 'initial' },
+  'table-advanced-lazy': { imports: [['NeuTableComponent', 'table']], split: 'all' },
   'tree-basic': { imports: [['NeuTreeComponent', 'tree']] },
   'tree-checkbox': { imports: [['NeuTreeComponent', 'tree']] },
   'tree-lazy': { imports: [['NeuTreeComponent', 'tree']] },
@@ -113,22 +133,66 @@ function compress(bytes) {
   };
 }
 
+function compressOutputs(result, keys) {
+  return keys.reduce(
+    (total, key) => {
+      const size = compress(bytesForOutputs(result, [key], workspaceRoot));
+      return {
+        raw: total.raw + size.raw,
+        gzip: total.gzip + size.gzip,
+        brotli: total.brotli + size.brotli,
+      };
+    },
+    { raw: 0, gzip: 0, brotli: 0 },
+  );
+}
+
 async function measureScenario(root, definition) {
+  const source = scenarioSource(definition);
   const result = await build({
+    absWorkingDir: workspaceRoot,
     bundle: true,
-    external,
+    external: [...external, ...(definition.extraExternal ?? [])],
     format: 'esm',
+    metafile: true,
     minify: true,
+    ...(definition.split ? { outdir: 'h9-consumer-output', splitting: true } : {}),
     platform: 'browser',
     plugins: [packagePlugin(root)],
     stdin: {
-      contents: scenarioSource(definition),
+      contents: source,
       loader: 'js',
       resolveDir: workspaceRoot,
     },
     treeShaking: true,
+    tsconfigRaw: { compilerOptions: {} },
     write: false,
   });
+  assertPackageOnlyBundle(result.metafile, root, source, workspaceRoot);
+  if (definition.iconBoundary) assertButtonIconBoundary(result.metafile);
+  if (definition.split) {
+    const initial = outputClosure(result.metafile);
+    const boundary = assertTableInitialBoundary(result.metafile, initial);
+    const selected =
+      definition.split === 'initial'
+        ? initial
+        : outputClosure(result.metafile, { includeDynamic: true });
+    return {
+      ...compressOutputs(result, selected),
+      ...(definition.split === 'initial'
+        ? {
+            closure: {
+              initialOutputs: boundary.initialOutputs,
+              lazyOutputs: boundary.lazyOutputs,
+              lazyChunks: boundary.lazyKeys.map((key) => ({
+                input: result.metafile.outputs[key].entryPoint,
+                size: compressOutputs(result, [key]),
+              })),
+            },
+          }
+        : {}),
+    };
+  }
   return compress(Buffer.concat(result.outputFiles.map(({ contents }) => contents)));
 }
 
@@ -298,6 +362,9 @@ if (!existsSync(resolve(packageRoot, 'package.json')))
 
 const selectedNames = profile === 'pr' ? [...prScenarios] : Object.keys(scenarios);
 const current = await measureScenarios(packageRoot, selectedNames);
+const buttonEndUserClosure = selectedNames.includes('button')
+  ? await measureScenario(packageRoot, { imports: [['NeuButtonComponent', 'button']] })
+  : undefined;
 const aggregate = measureAggregate(packageRoot);
 const packageMetrics = measurePackage(packageRoot);
 const architecture = architecturalChecks(packageRoot, current, packageMetrics);
@@ -313,7 +380,8 @@ if (calibrating) {
     JSON.stringify(
       {
         methodology: {
-          consumer: 'minified ESM; Angular, CDK, ng-icons and RxJS external; esbuild tree shaking',
+          consumer:
+            'minified ESM; Angular, CDK and RxJS external; Button additionally externalizes neural-icons; split Table measures static initial closure per output',
           raw: 'canonical strict bytes',
           gzip: compression.gzip,
           brotli: compression.brotli,
@@ -321,7 +389,7 @@ if (calibrating) {
             'Angular standalone component templates retain one component implementation; input bindings do not create separate basic/advanced closures.',
         },
         baseline: { scenarios: baseline, aggregate: baselineAggregate, package: baselinePackage },
-        candidate: { scenarios: current, aggregate, package: packageMetrics },
+        candidate: { scenarios: current, buttonEndUserClosure, aggregate, package: packageMetrics },
       },
       null,
       2,
@@ -377,6 +445,10 @@ console.log(
     {
       profile,
       toolchain: policy.toolchain,
+      diagnostics: {
+        buttonEndUserClosure,
+        tableInitialClosure: current['table-basic']?.closure,
+      },
       aggregate: {
         ...aggregate,
         baseline: policy.aggregate.baseline,

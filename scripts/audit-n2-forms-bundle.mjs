@@ -5,7 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 
+import { assertPackageOnlyBundle, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const candidate = join(root, 'dist/neural-ui/core');
 const temporary = mkdtempSync(join(root, '.n2-forms-baseline-'));
 const baseline = join(temporary, 'dist/neural-ui/core');
@@ -40,13 +43,16 @@ async function consumer(packageRoot, source) {
     bundle: true,
     external,
     format: 'esm',
+    metafile: true,
     minify: true,
     platform: 'browser',
     plugins: [packagePlugin(packageRoot)],
-    stdin: { contents: source, loader: 'ts', resolveDir: root },
+    stdin: { contents: source, loader: 'js', resolveDir: root },
+    tsconfigRaw: { compilerOptions: {} },
     treeShaking: true,
     write: false,
   });
+  assertPackageOnlyBundle(result.metafile, packageRoot, source);
   return compressed(Buffer.concat(result.outputFiles.map((file) => file.contents)));
 }
 

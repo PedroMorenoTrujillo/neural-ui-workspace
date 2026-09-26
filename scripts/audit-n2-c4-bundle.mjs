@@ -3,7 +3,10 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertDirectFesmInputs, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const fesm = join(root, 'dist/neural-ui/core/fesm2022');
 const palette = join(fesm, 'neural-ui-core-command-palette.mjs');
 const cases = {
@@ -11,13 +14,14 @@ const cases = {
   opened: `import {NeuCommandPaletteComponent} from '${palette}'; export const component=NeuCommandPaletteComponent; export const commands=[{id:'a',kind:'action',label:'Action'}];`,
   grouped: `import {NeuCommandPaletteComponent,NeuCommandPaletteItemDirective} from '${palette}'; export const components=[NeuCommandPaletteComponent,NeuCommandPaletteItemDirective]; export const commands=[{id:'a',kind:'action',label:'Action',group:'Group'}];`,
   router: `import {NeuCommandPaletteComponent} from '${palette}'; export const component=NeuCommandPaletteComponent; export const commands=[{id:'r',kind:'router',label:'Route',routerLink:'/route'}];`,
-  rootUnused: `import {NeuCommandPaletteComponent} from '${join(fesm, 'neural-ui-core.mjs')}';`,
+  rootUnused: `import {provideNeuralUI} from '${join(fesm, 'neural-ui-core.mjs')}';`,
 };
 
 const results = {};
 for (const [name, contents] of Object.entries(cases)) {
   const result = await build({
-    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'ts' },
+    stdin: { contents, sourcefile: 'consumer.ts', resolveDir: root, loader: 'js' },
+    tsconfigRaw: { compilerOptions: {} },
     bundle: true,
     format: 'esm',
     platform: 'browser',
@@ -34,6 +38,7 @@ for (const [name, contents] of Object.entries(cases)) {
       },
     }],
   });
+  assertDirectFesmInputs(result.metafile, join(root, 'dist/neural-ui/core'), contents);
   const bytes = Buffer.concat(result.outputFiles.map((file) => Buffer.from(file.contents)));
   const inputs = Object.keys(result.metafile.inputs);
   const menuFacades = inputs.filter((file) => /neural-ui-core-(menu|mega-menu)\.mjs$/.test(file));
