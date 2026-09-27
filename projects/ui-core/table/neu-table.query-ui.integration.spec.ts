@@ -178,6 +178,57 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(host.requestEvents).toBe(0);
   });
 
+  it('cycles accepted sort directions and removes a sorted field on the third activation', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    host.accept = true;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const sort = native.querySelector<HTMLButtonElement>('th[data-column-id="name"] button')!;
+
+    sort.click();
+    await fixture.whenStable();
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'asc' }]);
+    expect(sort.closest('th')?.getAttribute('aria-sort')).toBe('ascending');
+
+    sort.click();
+    await fixture.whenStable();
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'desc' }]);
+    expect(sort.closest('th')?.getAttribute('aria-sort')).toBe('descending');
+
+    sort.click();
+    await fixture.whenStable();
+    expect(host.query().sort).toEqual([]);
+    expect(sort.closest('th')?.getAttribute('aria-sort')).toBeNull();
+    expect(host.queryEvents).toHaveLength(3);
+  });
+
+  it('cancels an uncommitted search and clears an applied search through the toolbar', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    host.query.set({ ...host.query(), search: 'Ada' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const search = native.querySelector<HTMLInputElement>('input[aria-label="Search table"]')!;
+
+    search.focus();
+    search.value = 'Grace';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(search.value).toBe('Ada');
+    expect(host.queryEvents).toHaveLength(0);
+
+    host.accept = true;
+    native.querySelector<HTMLButtonElement>('button[aria-label="Clear table search"]')!.click();
+    await fixture.whenStable();
+    expect(host.query().search).toBe('');
+    expect(host.queryEvents).toHaveLength(1);
+    expect(search.value).toBe('');
+  });
+
   it('keeps search/menu drafts ephemeral and preserves nested filter branches', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
@@ -256,6 +307,28 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(host.selectionEvents).toBe(0);
     expect(host.layoutEvents).toBe(0);
     expect(host.requestEvents).toBe(0);
+  });
+
+  it('accepts a page jump while preserving selection and pinned layout', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    host.accept = true;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const jump = [...native.querySelectorAll<HTMLInputElement>('input[type="number"]')].find((input) =>
+      input.closest('label')?.textContent?.includes('Go to page'),
+    )!;
+
+    jump.value = '3';
+    jump.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.query()).toMatchObject({ page: 2, pageSize: 2 });
+    expect(jump.value).toBe('3');
+    expect(host.selection()).toEqual({ kind: 'keys', keys: [2, 500] });
+    expect(host.layout().pinnedStart).toEqual(['name']);
+    expect(host.selectionEvents).toBe(0);
+    expect(host.layoutEvents).toBe(0);
   });
 
   it('loads the private advanced builder only on demand and proposes one AST snapshot', async () => {

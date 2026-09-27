@@ -237,6 +237,41 @@ describe('NeuDateInput N2-025 periods and presentation', () => {
     expect(yearFixture.componentInstance.value()).toEqual({ year: 2026 });
   });
 
+  it('pages month and year focus without committing a period value', async () => {
+    const monthFixture = create('month');
+    monthFixture.componentRef.setInput('presentation', 'inline');
+    monthFixture.componentRef.setInput('value', { year: 2026, month: 9 } satisfies CivilMonth);
+    monthFixture.detectChanges();
+    const september = monthFixture.nativeElement.querySelector('[data-civil-month="9"]') as HTMLButtonElement;
+    const forwardMonth = new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true });
+    september.dispatchEvent(forwardMonth);
+    monthFixture.detectChanges();
+    await Promise.resolve();
+    expect(forwardMonth.defaultPrevented).toBe(true);
+    expect(monthFixture.componentInstance.viewYear()).toBe(2027);
+    expect(monthFixture.componentInstance.focusedMonth()).toBe(9);
+    expect(monthFixture.componentInstance.value()).toEqual({ year: 2026, month: 9 });
+    const futureSeptember = monthFixture.nativeElement.querySelector('[data-civil-month="9"]') as HTMLButtonElement;
+    futureSeptember.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageUp', bubbles: true, cancelable: true }));
+    monthFixture.detectChanges();
+    expect(monthFixture.componentInstance.viewYear()).toBe(2026);
+
+    const yearFixture = create('year');
+    yearFixture.componentRef.setInput('presentation', 'inline');
+    yearFixture.componentRef.setInput('value', { year: 2026 } satisfies CivilYear);
+    yearFixture.detectChanges();
+    const year = yearFixture.nativeElement.querySelector('[data-civil-year="2026"]') as HTMLButtonElement;
+    year.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true }));
+    yearFixture.detectChanges();
+    expect(yearFixture.componentInstance.focusedYear()).toBe(2038);
+    expect(yearFixture.componentInstance.value()).toEqual({ year: 2026 });
+    const futureYear = yearFixture.nativeElement.querySelector('[data-civil-year="2038"]') as HTMLButtonElement;
+    futureYear.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageUp', bubbles: true, cancelable: true }));
+    yearFixture.detectChanges();
+    expect(yearFixture.componentInstance.focusedYear()).toBe(2026);
+    expect(yearFixture.componentInstance.value()).toEqual({ year: 2026 });
+  });
+
   it('keeps readonly periods focusable but rejects selection and marks inline touch only on focus exit', async () => {
     const fixture = create('month');
     const touches = vi.fn();
@@ -636,6 +671,49 @@ describe('NeuDateInputComponent', () => {
     await datetimeFixture.whenStable();
     expect(document.querySelector('.neu-date-input__calendar')).toBeTruthy();
     expect(document.querySelector('.neu-date-input__time')).toBeTruthy();
+  });
+
+  it('navigates the rendered calendar and selects a day through its grid', async () => {
+    const fixture = create();
+    fixture.componentRef.setInput('showMonthYearPicker', true);
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+    const arrows = panel.querySelectorAll<HTMLButtonElement>('.neu-date-input__cal-arrow');
+    const initialMonth = fixture.componentInstance.viewMonth();
+    arrows[1].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.viewMonth()).not.toBe(initialMonth);
+    const monthPicker = panel.querySelector<HTMLSelectElement>('.neu-date-input__picker')!;
+    monthPicker.value = '2';
+    monthPicker.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.viewMonth()).toBe(2);
+    const day = Array.from(panel.querySelectorAll<HTMLButtonElement>('.neu-date-input__cal-day'))
+      .find((button) => button.dataset['civilDate']?.startsWith(`${fixture.componentInstance.viewYear()}-03-`) && !button.disabled)!;
+    const selected = day.dataset['civilDate']!;
+    day.click();
+    expect(fixture.componentInstance.value()).toBe(selected);
+    expect(changes).toHaveBeenCalledExactlyOnceWith(selected);
+    fixture.destroy();
+  });
+
+  it('uses rendered time drum arrows and keeps the untouched time part', async () => {
+    const fixture = create('time');
+    fixture.componentInstance.value.set(localTime('12:30') as never);
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+    const drums = panel.querySelectorAll<HTMLElement>('.neu-date-input__drum');
+    (drums[0].querySelectorAll('.neu-date-input__drum-arrow')[1] as HTMLButtonElement).click();
+    expect(fixture.componentInstance.value()).toBe('13:30');
+    (drums[1].querySelectorAll('.neu-date-input__drum-arrow')[0] as HTMLButtonElement).click();
+    expect(fixture.componentInstance.value()).toBe('13:29');
+    fixture.destroy();
   });
 
   it('month and year navigation emits only while open and only on a changed interval', () => {

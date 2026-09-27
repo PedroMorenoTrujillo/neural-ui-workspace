@@ -170,6 +170,54 @@ describe('NeuColorPickerComponent N2-009', () => {
     expect(committed).toHaveBeenCalledTimes(1);
   });
 
+  it('exposes all color-area keyboard moves through accessible values', async () => {
+    const fixture = setup({ value: '#336699' });
+    const committed = vi.fn();
+    fixture.componentInstance.valueCommitted.subscribe(committed);
+    (fixture.nativeElement.querySelector('.neu-cp__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const area = document.querySelector('.neu-cp__canvas-wrap') as HTMLElement;
+    expect(area).not.toBeNull();
+    const values = () => {
+      const text = area.getAttribute('aria-valuetext') ?? '';
+      const match = text.match(/(\d+) percent saturation, (\d+) percent brightness/);
+      expect(match).not.toBeNull();
+      return { saturation: Number(match![1]), brightness: Number(match![2]) };
+    };
+    const press = (key: string, shiftKey = false) => {
+      const event = new KeyboardEvent('keydown', { key, shiftKey, bubbles: true, cancelable: true });
+      area.dispatchEvent(event);
+      fixture.detectChanges();
+      return event;
+    };
+
+    const initial = values();
+    expect(press('Home').defaultPrevented).toBe(true);
+    expect(values().saturation).toBe(0);
+    expect(press('End').defaultPrevented).toBe(true);
+    expect(values().saturation).toBe(100);
+    press('ArrowLeft');
+    expect(values().saturation).toBe(99);
+    press('ArrowRight');
+    expect(values().saturation).toBe(100);
+    press('ArrowLeft', true);
+    expect(values().saturation).toBe(90);
+    press('ArrowDown');
+    expect(values().brightness).toBe(initial.brightness - 1);
+    press('ArrowUp');
+    expect(values().brightness).toBe(initial.brightness);
+    press('PageDown');
+    expect(values().brightness).toBe(initial.brightness - 10);
+    press('PageUp');
+    expect(values().brightness).toBe(initial.brightness);
+    const beforeUnknownKey = values();
+    expect(press('x').defaultPrevented).toBe(false);
+    expect(values()).toEqual(beforeUnknownKey);
+    expect(committed).toHaveBeenCalledTimes(9);
+    fixture.destroy();
+  });
+
   it('supports text, channels, alpha and OKLCH without a parallel value event', () => {
     const fixture = setup({ value: '#336699', showAlpha: true, showChannels: true });
     const component = fixture.componentInstance;
@@ -189,6 +237,41 @@ describe('NeuColorPickerComponent N2-009', () => {
     component['_onAlphaChange'](0.25);
     component['finishColorChange']();
     expect(changes.mock.calls.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('edits color through the rendered format, channel, slider and swatch controls', async () => {
+    const fixture = await openPanel(setup({ value: '#336699', showAlpha: true, showChannels: true }));
+    const component = fixture.componentInstance;
+    const committed = vi.fn();
+    component.valueCommitted.subscribe(committed);
+    const panel = document.querySelector('.neu-cp__panel') as HTMLElement;
+    const hsl = Array.from(panel.querySelectorAll<HTMLButtonElement>('.neu-cp__mode-btn'))
+      .find((button) => button.textContent?.trim() === 'HSL')!;
+    hsl.click();
+    fixture.detectChanges();
+    expect(hsl.getAttribute('aria-pressed')).toBe('true');
+    const hueChannel = panel.querySelector<HTMLInputElement>('.neu-cp__channels input[aria-label="Hue"]')!;
+    hueChannel.value = '120';
+    hueChannel.dispatchEvent(new Event('focus'));
+    hueChannel.dispatchEvent(new Event('input', { bubbles: true }));
+    hueChannel.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(component.value()).not.toBe('#336699');
+    expect(committed).toHaveBeenCalledTimes(1);
+    const alpha = panel.querySelector<HTMLInputElement>('.neu-cp__alpha-slider')!;
+    alpha.value = '0.5';
+    alpha.dispatchEvent(new Event('input', { bubbles: true }));
+    alpha.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(component.value()).toMatch(/(?:80|0\.5)/);
+    expect(committed).toHaveBeenCalledTimes(2);
+    const swatch = panel.querySelector<HTMLButtonElement>('.neu-cp__sw')!;
+    swatch.click();
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('.neu-cp__hex-label') as HTMLElement).textContent?.trim())
+      .toBe(`${swatch.getAttribute('aria-label')!.replace('Color ', '')}ff`);
+    expect(committed).toHaveBeenCalledTimes(3);
+    fixture.destroy();
   });
 
   it('retains an applied alpha channel when alpha editing is hidden', () => {

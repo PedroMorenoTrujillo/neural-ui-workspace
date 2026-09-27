@@ -108,6 +108,27 @@ describe('NeuRichTextEditorComponent N2-009', () => {
     prompt.mockRestore();
   });
 
+  it('leaves content unchanged when a link prompt is cancelled and uses safe image alt fallback', async () => {
+    const fixture = await setup({ value: '<p>Initial</p>' });
+    const component = fixture.componentInstance;
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce('https://example.test/image.png')
+      .mockReturnValueOnce(null);
+
+    component.addLink();
+    expect(component.value()).toBe('<p>Initial</p>');
+    expect(changes).not.toHaveBeenCalled();
+    component.addImageUrl();
+    const image = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface img') as HTMLImageElement;
+    expect(image.src).toBe('https://example.test/image.png');
+    expect(image.alt.length).toBeGreaterThan(0);
+    expect(component.value()).not.toContain('javascript:');
+    prompt.mockRestore();
+  });
+
   it('publishes one sanitized value for one native input', async () => {
     const fixture = await setup({ value: '<p>Initial</p>' });
     const component = fixture.componentInstance;
@@ -175,6 +196,21 @@ describe('NeuRichTextEditorComponent N2-009', () => {
       maxBytes: 1,
       reason: 'size',
     });
+  });
+
+  it('inserts an allowed pasted image only after its file data resolves', async () => {
+    const fixture = await setup();
+    const component = fixture.componentInstance;
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    const image = new File(['image'], 'small.png', { type: 'image/png' });
+    const event = clipboard({}, [image]);
+
+    component.handlePaste(event);
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+    await vi.waitFor(() => expect(component.value()).toContain('<img'));
+    expect(component.value()).toContain('data:image/png;base64,');
+    expect(changes).toHaveBeenCalledTimes(1);
   });
 
   it('treats toolbar and editor as one touch and commit boundary', async () => {

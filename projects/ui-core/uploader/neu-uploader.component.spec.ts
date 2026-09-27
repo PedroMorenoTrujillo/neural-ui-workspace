@@ -187,6 +187,55 @@ describe('NeuUploaderComponent N2-009', () => {
     expect(dropzone.getAttribute('tabindex')).toBe('0');
   });
 
+  it('shows drag feedback and accepts a dropped file through the rendered dropzone', async () => {
+    const fixture = await setup({ label: 'Evidence' });
+    const component = fixture.componentInstance;
+    const dropzone = fixture.nativeElement.querySelector('.neu-uploader__dropzone') as HTMLElement;
+    const first = file('evidence.txt');
+    const selected = vi.fn();
+    component.filesSelected.subscribe(selected);
+
+    const over = new Event('dragover', { bubbles: true, cancelable: true });
+    dropzone.dispatchEvent(over);
+    fixture.detectChanges();
+    expect(over.defaultPrevented).toBe(true);
+    expect(fixture.nativeElement.querySelector('.neu-uploader--drag-over')).not.toBeNull();
+
+    dropzone.dispatchEvent(new Event('dragleave', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-uploader--drag-over')).toBeNull();
+
+    const drop = new Event('drop', { bubbles: true, cancelable: true });
+    Object.defineProperty(drop, 'dataTransfer', { value: { files: [first] } });
+    dropzone.dispatchEvent(drop);
+    fixture.detectChanges();
+    expect(drop.defaultPrevented).toBe(true);
+    expect(component.value()).toEqual([first]);
+    expect(selected).toHaveBeenCalledExactlyOnceWith([first]);
+    expect(fixture.nativeElement.querySelector('.neu-uploader__item-name')?.textContent).toContain('evidence.txt');
+  });
+
+  it('uses the picker-only trigger and blocks file gestures when disabled', async () => {
+    const fixture = await setup({ dropzone: false, showPickerText: false });
+    const component = fixture.componentInstance;
+    const host = fixture.nativeElement as HTMLElement;
+    const trigger = host.querySelector('.neu-uploader__picker-trigger') as HTMLButtonElement;
+    const input = host.querySelector('input[type="file"]') as HTMLInputElement;
+    const picker = vi.spyOn(input, 'click');
+
+    expect(host.querySelector('.neu-uploader__dropzone')).toBeNull();
+    trigger.click();
+    expect(picker).toHaveBeenCalledOnce();
+
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    expect(trigger.disabled).toBe(true);
+    const before = picker.mock.calls.length;
+    trigger.click();
+    expect(picker).toHaveBeenCalledTimes(before);
+    expect(component.value()).toEqual([]);
+  });
+
   it('reports an empty selection and formats byte values', async () => {
     const fixture = await setup();
     const rejected = vi.fn();

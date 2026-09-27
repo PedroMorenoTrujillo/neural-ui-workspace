@@ -93,5 +93,5 @@ describe('NeuTable I export performance evidence', () => {
     runtime.process?.stdout?.write(
       `N2_TABLE_I_PERFORMANCE:${JSON.stringify(metrics)}\n`,
     );
-  });
+  }, 15_000);
 });

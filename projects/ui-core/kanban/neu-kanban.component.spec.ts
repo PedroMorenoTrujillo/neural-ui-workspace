@@ -95,6 +95,24 @@ describe('NeuKanbanComponent controlled board', () => {
     expect(host.textContent).toContain('urgent');
   });
 
+  it('renders rich card metadata and an accessible assignee avatar without proposing a move', () => {
+    const { fixture, proposals } = setup([{ id: 'todo', title: 'To do', cards: [
+      {
+        id: 'rich', title: 'Release review', priority: 'high', description: 'Check package',
+        assignee: { name: 'Ada Lovelace', avatar: '/ada.png' }, dueDate: 'Tomorrow',
+      },
+      { id: 'meta', title: 'Follow up', meta: 'Blocked' },
+    ] }]);
+    const host = fixture.nativeElement as HTMLElement;
+    const rich = card(host, 'rich');
+    expect(rich.querySelector('.neu-kanban__priority')?.textContent).toContain('high');
+    expect(rich.querySelector('.neu-kanban__description')?.textContent).toContain('Check package');
+    expect(rich.querySelector<HTMLImageElement>('.neu-kanban__avatar img')?.alt).toBe('Ada Lovelace');
+    expect(rich.querySelector('.neu-kanban__meta-value')?.textContent).toContain('Tomorrow');
+    expect(card(host, 'meta').querySelector('.neu-kanban__meta-value')?.textContent).toContain('Blocked');
+    expect(proposals).toEqual([]);
+  });
+
   it('keeps WIP informational and honors presentation inputs', () => {
     const { fixture } = setup();
     const host = fixture.nativeElement as HTMLElement;

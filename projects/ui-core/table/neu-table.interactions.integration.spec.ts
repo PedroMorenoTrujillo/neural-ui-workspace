@@ -191,6 +191,36 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     expect(native.querySelector('.neu-table2__editor')).toBeNull();
   });
 
+  it('activates editable cells only through the configured double-click or keyboard gesture', async () => {
+    const fixture = TestBed.createComponent(InteractionHostComponent);
+    const host = fixture.componentInstance;
+    const native = fixture.nativeElement as HTMLElement;
+    host.editingOptions.set({ mode: 'cell', activation: 'double-click', commitOnBlur: false });
+    await render(fixture);
+    const name = native.querySelector<HTMLElement>('tr[data-row-key="1"] td[data-column-id="name"]')!;
+    const id = native.querySelector<HTMLElement>('tr[data-row-key="1"] td[data-column-id="id"]')!;
+
+    click(name);
+    expect(host.editChanges).toHaveLength(0);
+    id.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    expect(host.editChanges).toHaveLength(0);
+    name.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    expect(host.editChanges.at(-1)?.next).toEqual({ kind: 'cell', key: 1, columnId: 'name' });
+
+    host.editingOptions.set({ mode: 'cell', activation: 'enter', commitOnBlur: false });
+    await render(fixture);
+    const beforeEnter = host.editChanges.length;
+    name.dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true }));
+    expect(host.editChanges).toHaveLength(beforeEnter);
+    name.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(host.editChanges).toHaveLength(beforeEnter + 1);
+
+    host.editingOptions.set({ mode: 'cell', activation: 'f2', commitOnBlur: false });
+    await render(fixture);
+    name.dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true }));
+    expect(host.editChanges).toHaveLength(beforeEnter + 2);
+  });
+
   it('invalidates late async validation and cancels only accepted semantic query', async () => {
     const fixture = TestBed.createComponent(InteractionHostComponent);
     const host = fixture.componentInstance;

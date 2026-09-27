@@ -6,6 +6,7 @@ import {
   TemplateRef,
   ViewContainerRef,
   provideZonelessChangeDetection,
+  signal,
 } from '@angular/core';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -63,6 +64,41 @@ class RawCountrySelectHostComponent {
   countries = COUNTRY_MODELS;
   readonly valueOf = (country: CountryModel) => country.id;
   ctrl = new FormControl<number | null>(null);
+}
+
+@Component({
+  template: `
+    <neu-select
+      [options]="options()"
+      [groups]="groups()"
+      [groupConfig]="{ labelAccessor: 'title', childrenAccessor: 'children' }"
+      [lazy]="lazy()"
+      [loading]="loading()"
+      [searchable]="true"
+    >
+      <ng-template neuSelectHeader>Country header</ng-template>
+      <ng-template neuSelectFooter>Country footer</ng-template>
+      <ng-template neuSelectGroup let-group><span class="projected-group">{{ $any(group).title }}</span></ng-template>
+      <ng-template neuSelectLoader let-first="first"><span class="projected-loader">Loading from {{ first }}</span></ng-template>
+      <ng-template neuSelectEmpty><span class="projected-empty">No countries</span></ng-template>
+      <ng-template neuSelectEmptyFilter><span class="projected-empty-filter">No match</span></ng-template>
+    </neu-select>
+  `,
+  imports: [
+    NeuSelectComponent,
+    NeuSelectHeaderDirective,
+    NeuSelectFooterDirective,
+    NeuSelectGroupDirective,
+    NeuSelectLoaderDirective,
+    NeuSelectEmptyDirective,
+    NeuSelectEmptyFilterDirective,
+  ],
+})
+class ProjectedSelectHostComponent {
+  readonly options = signal<readonly NeuSelectOption[]>([]);
+  readonly groups = signal<readonly { title: string; children: readonly NeuSelectOption[] }[]>([]);
+  readonly lazy = signal(false);
+  readonly loading = signal(false);
 }
 
 @Component({
@@ -1380,6 +1416,42 @@ describe('NeuSelectComponent', () => {
     expect(document.querySelector('.neu-select__empty')?.textContent).toContain(
       'Loading countries',
     );
+  });
+
+  it('renders projected empty, filtered, grouped and lazy-loading states in the open panel', async () => {
+    await TestBed.configureTestingModule({
+      imports: [ProjectedSelectHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ProjectedSelectHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.neu-select__trigger')!.click();
+    await fixture.whenStable();
+
+    expect(document.querySelector('.neu-select__header')?.textContent).toContain('Country header');
+    expect(document.querySelector('.neu-select__footer')?.textContent).toContain('Country footer');
+    expect(document.querySelector('.projected-empty')?.textContent).toContain('No countries');
+
+    const search = document.querySelector<HTMLInputElement>('.neu-select__search-input')!;
+    search.value = 'missing';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+    expect(document.querySelector('.projected-empty-filter')?.textContent).toContain('No match');
+
+    search.value = '';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.componentInstance.groups.set([{ title: 'Europe', children: [OPTIONS[0]] }]);
+    await fixture.whenStable();
+    expect(document.querySelector('.projected-group')?.textContent).toContain('Europe');
+    expect(document.querySelector('.neu-select__option')?.textContent).toContain('España');
+
+    fixture.componentInstance.groups.set([]);
+    fixture.componentInstance.lazy.set(true);
+    fixture.componentInstance.loading.set(true);
+    await fixture.whenStable();
+    expect(document.querySelector('.projected-loader')?.textContent).toContain('Loading from');
+    expect(document.querySelector('.neu-select__list')?.getAttribute('aria-busy')).toBe('true');
   });
 
   it('hides the clear action while loading so trigger actions cannot overlap', async () => {

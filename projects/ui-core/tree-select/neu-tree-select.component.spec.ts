@@ -236,6 +236,44 @@ describe('NeuTreeSelectComponent N2-019', () => {
     expect(closed).toHaveBeenCalledTimes(1);
   });
 
+  it('opens at the last eligible node with ArrowUp and selects it with Enter', async () => {
+    const { fixture, component } = createTreeSelect({ searchable: false });
+    const trigger = fixture.nativeElement.querySelector('.neu-tree-select__trigger') as HTMLButtonElement;
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const active = document.activeElement as HTMLElement;
+    expect(active.getAttribute('data-neu-tree-select-index')).toBe('1');
+    expect(active.textContent).toContain('Lazy');
+    active.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.value()).toBe('lazy');
+  });
+
+  it('proposes keyboard expansion and collapse without mutating controlled expanded keys', async () => {
+    const { fixture, component } = createTreeSelect({ searchable: false });
+    const proposals = vi.fn();
+    component.expandedKeysChange.subscribe(proposals);
+    component.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = document.querySelector<HTMLElement>('[data-neu-tree-select-index="0"]')!;
+
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    expect(proposals).toHaveBeenLastCalledWith(['engineering']);
+    expect(component.isExpanded('engineering')).toBe(false);
+
+    fixture.componentRef.setInput('expandedKeys', ['engineering']);
+    fixture.detectChanges();
+    root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect(proposals).toHaveBeenLastCalledWith([]);
+    expect(component.isExpanded('engineering')).toBe(true);
+  });
+
   it('emits touch only after focus leaves the composite control', () => {
     const { fixture, component } = createTreeSelect();
     const touched = vi.fn();

@@ -179,6 +179,47 @@ describe('NeuTreeTable 2 final P1 features', () => {
     expect(xlsx).not.toContain('<f>');
   });
 
+  it('normalizes unusual JSON values and rejects circular export data', () => {
+    const repeated = { z: 1, a: undefined };
+    const matrix = {
+      columns: [
+        { key: 'numbers', header: 'Numbers' },
+        { key: 'nested', header: 'Nested' },
+        { key: 'other', header: 'Other' },
+      ],
+      rows: [[
+        [Number.NaN, Number.POSITIVE_INFINITY, 3n, undefined],
+        { z: repeated, a: repeated, when: new Date('2024-01-02T03:04:05.000Z') },
+        [new Set([1]), Symbol('label'), () => 'callable'],
+      ]],
+    } as const;
+
+    const serialized = new TextDecoder().decode(serializeNeuTreeTableJson(matrix).bytes);
+    expect(JSON.parse(serialized)).toEqual([{
+      numbers: [null, null, '3', null],
+      nested: {
+        a: { a: null, z: 1 },
+        when: '2024-01-02T03:04:05.000Z',
+        z: { a: null, z: 1 },
+      },
+      other: ['[object Set]', 'Symbol(label)', expect.stringContaining('callable')],
+    }]);
+
+    const circular: Record<string, unknown> = {};
+    circular['self'] = circular;
+    expect(() => serializeNeuTreeTableJson({
+      columns: [{ key: 'value', header: 'Value' }],
+      rows: [[circular]],
+    })).toThrowError('Circular export value');
+
+    const circularArray: unknown[] = [];
+    circularArray.push(circularArray);
+    expect(() => serializeNeuTreeTableJson({
+      columns: [{ key: 'value', header: 'Value' }],
+      rows: [[circularArray]],
+    })).toThrowError('Circular export value');
+  });
+
   it('returns bounded outcomes for disabled, SSR and destroyed export paths', async () => {
     const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy);
     const projection = projectNormalizedNeuTreeTableHierarchy(normalized, [1, 2]);

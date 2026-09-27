@@ -9,6 +9,7 @@ import {
   proposeNeuTableVisibility,
 } from './internal/layout/neu-table-layout';
 import {
+  areNeuTableSelectionScopesEqual,
   areNeuTableSelectionsEqual,
   createNeuTableSelectionScope,
   projectNeuTableSelection,
@@ -24,6 +25,7 @@ import type {
   NeuTableRowOptions,
   NeuTableSelection,
   NeuTableSelectionOptions,
+  NeuTableSelectionScope,
 } from './public/neu-table.types';
 
 interface Row {
@@ -141,6 +143,34 @@ describe('NeuTable 2 pure controlled layout', () => {
 });
 
 describe('NeuTable 2 pure controlled selection', () => {
+  it('invalidates an all-matching scope when its nested filter semantics change', () => {
+    const condition = { kind: 'condition' as const, field: 'score' as const, rule: 'greaterThan' as const, value: 20 };
+    const base: NeuTableSelectionScope<Field> = {
+      search: '  GRACE  ',
+      globalFields: ['name', 'score'],
+      filters: { kind: 'group', operator: 'and', children: [condition] },
+    };
+    const equivalent: NeuTableSelectionScope<Field> = {
+      search: 'grace',
+      globalFields: ['name', 'score'],
+      filters: { kind: 'group', operator: 'and', children: [{ ...condition }] },
+    };
+    expect(areNeuTableSelectionScopesEqual(base, equivalent)).toBe(true);
+    expect(areNeuTableSelectionScopesEqual(base, {
+      ...equivalent,
+      filters: { kind: 'group', operator: 'and', children: [{ ...condition, value: 21 }] },
+    })).toBe(false);
+    expect(areNeuTableSelectionScopesEqual(base, {
+      ...equivalent,
+      filters: { kind: 'group', operator: 'or', children: [condition] },
+    })).toBe(false);
+    expect(areNeuTableSelectionScopesEqual(base, {
+      ...equivalent,
+      globalFields: ['score', 'name'],
+    })).toBe(false);
+    expect(areNeuTableSelectionScopesEqual(base, { ...equivalent, filters: null })).toBe(false);
+  });
+
   it('projects key membership by exact K and uses only the first key in single mode', () => {
     const single: NeuTableSelectionOptions<Row> = {
       mode: 'single',

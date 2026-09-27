@@ -269,6 +269,54 @@ describe('NeuTreeTable 2 pure hierarchical query engine', () => {
     expect(test('isNotEmpty', null, [0])).toBe(true);
   });
 
+  it('keeps numeric, bigint, string and null filter boundaries type safe', () => {
+    const row: Row = { id: 'typed', name: 'Typed', rank: 0, group: 'x' };
+    const evaluate = (
+      rule: NeuTreeFilterConstraint<Field>['rule'],
+      candidate: unknown,
+      value: unknown,
+    ) => evaluateNeuTreeFilter(
+      { kind: 'condition', field: 'rank', rule, value },
+      candidate,
+      row,
+      filterOptions,
+    );
+
+    // Heterogeneous remote values must never be coerced into an ordered match.
+    expect(evaluate('lessThan', 2, '3')).toBe(false);
+    expect(evaluate('greaterThan', Number.NaN, 2)).toBe(false);
+    expect(evaluate('between', 2, [1, Number.NaN])).toBe(false);
+    expect(evaluate('between', 2, [1])).toBe(false);
+    expect(evaluate('equals', -0, 0)).toBe(false);
+    expect(evaluate('equals', true, true)).toBe(true);
+    expect(evaluate('notEquals', 2n, 3n)).toBe(true);
+
+    // Ordered bigint and string ranges preserve their native ordering.
+    expect(evaluate('between', 3n, [1n, 5n])).toBe(true);
+    expect(evaluate('between', 0n, [1n, 5n])).toBe(false);
+    expect(evaluate('greaterThan', 9n, 3n)).toBe(true);
+    expect(evaluate('lessThanOrEqual', 3n, 3n)).toBe(true);
+    expect(evaluate('between', 'beta', ['alpha', 'gamma'])).toBe(true);
+    expect(evaluate('between', 'omega', ['alpha', 'gamma'])).toBe(false);
+    expect(evaluate('greaterThanOrEqual', 'alpha', 'alpha')).toBe(true);
+
+    expect(evaluate('isNull', 0, null)).toBe(false);
+    expect(evaluate('isNotNull', undefined, null)).toBe(false);
+    expect(evaluate('isEmpty', null, null)).toBe(false);
+    expect(evaluate('isEmpty', ['item'], null)).toBe(false);
+    expect(evaluate('isNotEmpty', ' ', null)).toBe(false);
+    expect(evaluate('notIn', 2, [2, 3])).toBe(false);
+
+    const custom = evaluateNeuTreeFilter(
+      { kind: 'condition', field: 'name', rule: 'equals', value: 'typed' },
+      'TYPED',
+      row,
+      { ...filterOptions, predicates: { equals: ({ candidate, filterValue }) =>
+        String(candidate).toLowerCase() === filterValue } },
+    );
+    expect(custom).toBe(true);
+  });
+
   it('combines global search AND a nested filter AST while retaining deep paths', () => {
     const rows: readonly Row[] = [
       { id: 'a', name: 'root', rank: 0, group: 'x' },

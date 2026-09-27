@@ -825,6 +825,45 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(host.expansionChanges()).toEqual([]);
   });
 
+  it('keeps an explicit row filter private until change and clears it through a controlled proposal', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.filterOptions.set({
+      surfaces: ['row'],
+      globalFields: ['name'],
+      predicates: {},
+      debounceMs: 0,
+      commit: 'explicit',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const filter = native.querySelector<HTMLInputElement>('input[aria-label="Filter Name"]')!;
+
+    filter.value = 'Beta';
+    filter.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(0);
+    expect(host.query().filters).toBeNull();
+    expect(filter.value).toBe('Beta');
+
+    host.acceptQuery.set(true);
+    filter.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(1);
+    expect(host.query().filters).toEqual({
+      kind: 'condition', field: 'name', rule: 'contains', value: 'Beta',
+    });
+
+    filter.value = '';
+    filter.dispatchEvent(new Event('input', { bubbles: true }));
+    filter.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(2);
+    expect(host.query().filters).toBeNull();
+    expect(filter.value).toBe('');
+  });
+
   it('reconciles focus through filtered visibility without mutating exact-K selection', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     const host = fixture.componentInstance;

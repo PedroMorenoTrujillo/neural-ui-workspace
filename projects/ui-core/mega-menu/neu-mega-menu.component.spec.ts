@@ -143,6 +143,25 @@ describe('NeuMegaMenuComponent — C3 navigation-first contract', () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  it('keeps a panel open for internal pointer actions and dismisses it outside', async () => {
+    const fixture = create();
+    const trigger = rootButtons(fixture)[0];
+    const panel = await open(fixture);
+
+    panel.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    trigger.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.querySelector('.cdk-overlay-container .neu-mega-menu__panel')).toBeNull();
+  });
+
   it('hover cannot open a closed panel, but switches an open panel without focus theft', async () => {
     const second: NeuMegaMenuItem = {
       key: 'company', label: 'Company', kind: 'panel',
