@@ -554,8 +554,9 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
         : [];
       let declarationSource = parsed.sourceFile;
       const targetEntrypoint = resolveEntrypoint(exportedSymbol.moduleName, packageName);
-      if (!declarations.length && entrypoint === './internal'
-        && targetEntrypoint === '/internal-state') {
+      const declarationBoundary = (entrypoint === './internal' && targetEntrypoint === '/internal-state')
+        || (entrypoint === './menu' && ['/menu-shared', '/menu-tiered'].includes(targetEntrypoint));
+      if (!declarations.length && declarationBoundary) {
         const target = parsedByEntrypoint.get(
           targetEntrypoint.startsWith('/') ? `.${targetEntrypoint}` : targetEntrypoint,
         );

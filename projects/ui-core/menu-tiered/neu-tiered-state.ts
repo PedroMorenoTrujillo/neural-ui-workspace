@@ -1,4 +1,4 @@
-import type { NeuMenuItem } from './neu-menu.component';
+import type { NeuMenuItem } from '@neural-ui/core/menu-shared';
 
 /** A gesture opens one ancestor chain, without rewriting a wider applied input on read. */
 export function openTieredPath(ancestors: readonly string[], key: string): string[] {

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NeuTieredMenuComponent, type NeuMenuItem } from './neu-menu.component';
-import { closeTieredBranch, deepestTieredBranch, openTieredPath } from './neu-tiered-state';
+import { NeuTieredMenuComponent, type NeuMenuItem } from '@neural-ui/core/menu';
+import { closeTieredBranch, deepestTieredBranch, openTieredPath } from '../menu-tiered/neu-tiered-state';
 
 const items: NeuMenuItem[] = [
   {

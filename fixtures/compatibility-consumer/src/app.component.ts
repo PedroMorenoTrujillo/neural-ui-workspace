@@ -23,6 +23,8 @@ import { NeuNotificationCenterComponent } from '@neural-ui/core/notification-cen
 import { NeuMegaMenuComponent } from '@neural-ui/core/mega-menu';
 import { NeuKanbanComponent } from '@neural-ui/core/kanban';
 import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
+import { NeuMenuButtonComponent, NeuMenuComponent, NeuMenubarComponent, NeuTieredMenuComponent } from '@neural-ui/core/menu';
+import { NeuPickListComponent, NeuOrderListComponent } from '@neural-ui/core/pick-list';
 
 @Component({
   selector: 'app-root',
@@ -43,6 +45,12 @@ import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
     NeuMegaMenuComponent,
     NeuKanbanComponent,
     NeuColorPickerComponent,
+    NeuMenuComponent,
+    NeuMenuButtonComponent,
+    NeuMenubarComponent,
+    NeuTieredMenuComponent,
+    NeuPickListComponent,
+    NeuOrderListComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -76,6 +84,12 @@ import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
     <neu-mega-menu id="rel01e-mega" [items]="[]" />
     <neu-kanban id="rel01e-kanban" [columns]="[]" />
     <neu-color-picker id="rel01e-color" />
+    <neu-menu id="rel01g-menu" [items]="[]" />
+    <neu-menu-button id="rel01g-button" [items]="[]" label="Actions" />
+    <neu-menubar id="rel01g-menubar" [items]="[]" />
+    <neu-tiered-menu id="rel01g-tiered" [items]="[]" />
+    <neu-pick-list id="rel01g-pick" [source]="[]" [target]="[]" />
+    <neu-order-list id="rel01g-order" [items]="[]" />
   `,
 })
 export class AppComponent {

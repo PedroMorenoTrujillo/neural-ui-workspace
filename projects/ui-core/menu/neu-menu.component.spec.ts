@@ -8,7 +8,16 @@ import {
   NeuMenuItemDirective,
   NeuMenubarComponent,
   NeuTieredMenuComponent,
-} from './neu-menu.component';
+} from '@neural-ui/core/menu';
+import { NeuMenuItemDirective as SharedMenuItemDirective } from '@neural-ui/core/menu-shared';
+import { NeuTieredMenuComponent as TieredEntrypointComponent } from '@neural-ui/core/menu-tiered';
+
+describe('Menu package aliases', () => {
+  it('keeps the supported Menu aliases identical to their implementation entrypoints', () => {
+    expect(NeuMenuItemDirective).toBe(SharedMenuItemDirective);
+    expect(NeuTieredMenuComponent).toBe(TieredEntrypointComponent);
+  });
+});
 
 @Component({
   imports: [NeuMenuComponent, NeuMenuButtonComponent, NeuMenuItemDirective],

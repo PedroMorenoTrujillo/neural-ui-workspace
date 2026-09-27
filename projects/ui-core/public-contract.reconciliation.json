@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1462,
-    "bindingDelta": 295,
+    "declarationBindings": 1467,
+    "bindingDelta": 300,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 838,
+    "newlyDiscovered": 843,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 421,
+      "declaration-or-selector-was-not-recorded": 426,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 387
     }
@@ -4611,6 +4611,26 @@
     },
     {
       "id": "./mega-menu#NeuMegaMenuComponent.output:mobileActiveChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.input:ariaLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.input:expandedKeys",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.input:items",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.output:expandedKeysChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.output:itemClick",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

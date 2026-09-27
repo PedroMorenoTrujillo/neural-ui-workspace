@@ -701,6 +701,21 @@
       ]
     },
     {
+      "entrypoint": "./menu-shared",
+      "types": "./types/neural-ui-core-menu-shared.d.ts",
+      "exports": [
+        "./menu-shared#NeuMenuItem",
+        "./menu-shared#NeuMenuItemDirective"
+      ]
+    },
+    {
+      "entrypoint": "./menu-tiered",
+      "types": "./types/neural-ui-core-menu-tiered.d.ts",
+      "exports": [
+        "./menu-tiered#NeuTieredMenuComponent"
+      ]
+    },
+    {
       "entrypoint": "./meter-group",
       "types": "./types/neural-ui-core-meter-group.d.ts",
       "exports": [
@@ -22682,6 +22697,264 @@
       ]
     },
     {
+      "id": "./menu-shared#NeuMenuItem",
+      "entrypoint": "./menu-shared",
+      "name": "NeuMenuItem",
+      "kind": "interface",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "interface NeuMenuItem {\n}",
+      "members": [
+        {
+          "id": "./menu-shared#NeuMenuItem.property:active",
+          "name": "active",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "active?: boolean;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:badge",
+          "name": "badge",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "badge?: string | number;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:children",
+          "name": "children",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "children?: NeuMenuItem[];"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:command",
+          "name": "command",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "command?: (event: {\n    originalEvent: Event;\n    item: NeuMenuItem;\n}) => void;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:data",
+          "name": "data",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "data?: unknown;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:disabled",
+          "name": "disabled",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "disabled?: boolean;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:icon",
+          "name": "icon",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "icon?: NeuralIconName;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:key",
+          "name": "key",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "key: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "label: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:rel",
+          "name": "rel",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "rel?: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:routerLink",
+          "name": "routerLink",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "routerLink?: string | unknown[];"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:separator",
+          "name": "separator",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "separator?: boolean;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:shortcut",
+          "name": "shortcut",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "shortcut?: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:target",
+          "name": "target",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "target?: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:tooltip",
+          "name": "tooltip",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "tooltip?: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:url",
+          "name": "url",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "url?: string;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItem.property:visible",
+          "name": "visible",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "visible?: boolean;"
+        }
+      ]
+    },
+    {
+      "id": "./menu-shared#NeuMenuItemDirective",
+      "entrypoint": "./menu-shared",
+      "name": "NeuMenuItemDirective",
+      "kind": "directive",
+      "status": "INTERNAL/UNSUPPORTED",
+      "selector": "ng-template[neuMenuItem]",
+      "signature": "declare class NeuMenuItemDirective {\n}",
+      "members": [
+        {
+          "id": "./menu-shared#NeuMenuItemDirective.property:ɵdir",
+          "name": "ɵdir",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵdir: i0.ɵɵDirectiveDeclaration<NeuMenuItemDirective, \"ng-template[neuMenuItem]\", never, {}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItemDirective.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuMenuItemDirective, never>;"
+        },
+        {
+          "id": "./menu-shared#NeuMenuItemDirective.property:templateRef",
+          "name": "templateRef",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly templateRef: TemplateRef<{\n    $implicit: NeuMenuItem;\n}>;"
+        }
+      ]
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent",
+      "entrypoint": "./menu-tiered",
+      "name": "NeuTieredMenuComponent",
+      "kind": "component",
+      "status": "INTERNAL/UNSUPPORTED",
+      "selector": "neu-tiered-menu",
+      "signature": "declare class NeuTieredMenuComponent {\n}",
+      "members": [
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.input:expandedKeys",
+          "name": "expandedKeys",
+          "kind": "input",
+          "publicName": "expandedKeys",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+        },
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.input:items",
+          "name": "items",
+          "kind": "input",
+          "publicName": "items",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly items: _angular_core.InputSignal<NeuMenuItem[]>;"
+        },
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.output:expandedKeysChange",
+          "name": "expandedKeysChange",
+          "kind": "output",
+          "publicName": "expandedKeysChange",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<string[]>;"
+        },
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.output:itemClick",
+          "name": "itemClick",
+          "kind": "output",
+          "publicName": "itemClick",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMenuItem>;"
+        },
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTieredMenuComponent, \"neu-tiered-menu\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"itemClick\": \"itemClick\";\n}, [\n    \"itemTpl\"\n], [\n    \"ng-template[neuMenuItem]\"\n], true, never>;"
+        },
+        {
+          "id": "./menu-tiered#NeuTieredMenuComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTieredMenuComponent, never>;"
+        }
+      ]
+    },
+    {
       "id": "./menu#NeuMenubarComponent",
       "entrypoint": "./menu",
       "name": "NeuMenubarComponent",
@@ -23092,6 +23365,7 @@
       "name": "NeuMenuItem",
       "kind": "interface",
       "status": "SUPPORTED",
+      "target": "/menu-shared#NeuMenuItem",
       "signature": "interface NeuMenuItem {\n}",
       "members": [
         {
@@ -23239,6 +23513,7 @@
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuMenuItem]",
+      "target": "/menu-shared#NeuMenuItemDirective",
       "signature": "declare class NeuMenuItemDirective {\n}",
       "members": [
         {
@@ -23247,7 +23522,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuMenuItemDirective, \"ng-template[neuMenuItem]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: i0.ɵɵDirectiveDeclaration<NeuMenuItemDirective, \"ng-template[neuMenuItem]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./menu#NeuMenuItemDirective.property:ɵfac",
@@ -23255,7 +23530,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuMenuItemDirective, never>;"
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuMenuItemDirective, never>;"
         },
         {
           "id": "./menu#NeuMenuItemDirective.property:templateRef",
@@ -23274,6 +23549,7 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-tiered-menu",
+      "target": "/menu-tiered#NeuTieredMenuComponent",
       "signature": "declare class NeuTieredMenuComponent {\n}",
       "members": [
         {
@@ -56303,6 +56579,66 @@
       "signature": "readonly mobileActiveChange: _angular_core.OutputEmitterRef<boolean>;"
     },
     {
+      "id": "./menu-tiered#NeuTieredMenuComponent.input:ariaLabel",
+      "entrypoint": "./menu-tiered",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "ariaLabel",
+      "publicName": "ariaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.input:expandedKeys",
+      "entrypoint": "./menu-tiered",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "expandedKeys",
+      "publicName": "expandedKeys",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly expandedKeys: _angular_core.InputSignal<readonly string[] | undefined>;"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.input:items",
+      "entrypoint": "./menu-tiered",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "items",
+      "publicName": "items",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly items: _angular_core.InputSignal<NeuMenuItem[]>;"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.output:expandedKeysChange",
+      "entrypoint": "./menu-tiered",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "expandedKeysChange",
+      "publicName": "expandedKeysChange",
+      "kind": "output",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly expandedKeysChange: _angular_core.OutputEmitterRef<string[]>;"
+    },
+    {
+      "id": "./menu-tiered#NeuTieredMenuComponent.output:itemClick",
+      "entrypoint": "./menu-tiered",
+      "declaration": "NeuTieredMenuComponent",
+      "selector": "neu-tiered-menu",
+      "propertyName": "itemClick",
+      "publicName": "itemClick",
+      "kind": "output",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly itemClick: _angular_core.OutputEmitterRef<NeuMenuItem>;"
+    },
+    {
       "id": "./menu#NeuMenubarComponent.input:ariaLabel",
       "entrypoint": "./menu",
       "declaration": "NeuMenubarComponent",
@@ -65293,33 +65629,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 98,
-    "exportedDeclarations": 815,
+    "entrypoints": 100,
+    "exportedDeclarations": 818,
     "declarationKinds": {
       "class": 15,
-      "component": 94,
-      "directive": 118,
+      "component": 95,
+      "directive": 119,
       "function": 53,
-      "interface": 274,
+      "interface": 275,
       "reexport": 48,
       "service": 12,
       "token": 4,
       "type": 196,
       "variable": 1
     },
-    "publicSymbols": 5190,
+    "publicSymbols": 5220,
     "statuses": {
       "SUPPORTED": 3305,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1885,
+      "INTERNAL/UNSUPPORTED": 1915,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1212,
-      "output": 226,
+      "input": 1215,
+      "output": 228,
       "model": 24,
-      "total": 1462
+      "total": 1467
     },
     "designTokens": 251
   }

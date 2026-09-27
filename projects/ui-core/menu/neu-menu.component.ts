@@ -1,11 +1,9 @@
 import {
   Component,
   DestroyRef,
-  Directive,
   ElementRef,
   TemplateRef,
   ViewEncapsulation,
-  afterNextRender,
   afterRenderEffect,
   computed,
   contentChild,
@@ -20,41 +18,13 @@ import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
 import { NeuIdGenerator, NeuRovingMenuController } from '@neural-ui/core/internal';
-import { NeuTieredLevelComponent, type NeuTieredOwner } from './neu-tiered-level.component';
-import { closeTieredBranch, deepestTieredBranch, openTieredPath } from './neu-tiered-state';
+import { NeuMenuItemDirective, type NeuMenuItem } from '@neural-ui/core/menu-shared';
 import {
   NEU_OVERLAY_DISMISS_GUARD,
   allowsNeuOverlayDismissal,
   type NeuOverlayDismissReason,
 } from '@neural-ui/core/foundation';
-
-export interface NeuMenuItem {
-  key: string;
-  label: string;
-  icon?: NeuralIconName;
-  badge?: string | number;
-  active?: boolean;
-  command?: (event: { originalEvent: Event; item: NeuMenuItem }) => void;
-  routerLink?: string | unknown[];
-  url?: string;
-  target?: string;
-  rel?: string;
-  tooltip?: string;
-  visible?: boolean;
-  shortcut?: string;
-  disabled?: boolean;
-  separator?: boolean;
-  children?: NeuMenuItem[];
-  data?: unknown;
-}
-
-/** Custom visual content for each menu item; menu semantics remain owned by the component. */
-@Directive({ selector: 'ng-template[neuMenuItem]' })
-export class NeuMenuItemDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuMenuItem }>) {}
-}
 
 @Component({
   selector: 'neu-menu',
@@ -575,87 +545,6 @@ export class NeuMenubarComponent {
       element.setAttribute('role', 'menuitem');
     }
   }
-}
-
-@Component({
-  selector: 'neu-tiered-menu',
-  imports: [NeuTieredLevelComponent],
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    class: 'neu-tiered-menu',
-    '(document:pointerdown)': 'onDocumentPointerDown($event)',
-  },
-  template: `<neu-tiered-level
-    [owner]="rendererOwner"
-    [items]="items()"
-    [label]="ariaLabel()"
-    [levelId]="rendererOwner.id"
-    [itemTemplate]="itemTpl()?.templateRef ?? null"
-  /><ng-content select="ng-template[neuMenuItem]" />`,
-  styleUrl: './neu-menu.component.scss',
-})
-export class NeuTieredMenuComponent {
-  readonly items = input<NeuMenuItem[]>([]);
-  readonly ariaLabel = input('Tiered menu');
-  readonly expandedKeys = input<readonly string[] | undefined>(undefined);
-  readonly expandedKeysChange = output<string[]>();
-  readonly itemClick = output<NeuMenuItem>();
-  protected readonly itemTpl = contentChild(NeuMenuItemDirective);
-
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private readonly localExpandedKeys = signal<readonly string[]>([]);
-  private readonly overlayReady = signal(false);
-  private readonly appliedKeys = computed(() => this.expandedKeys() ?? this.localExpandedKeys());
-  private readonly appliedSet = computed(() => new Set(this.appliedKeys()));
-  private readonly id = inject(NeuIdGenerator).getId('neu-tiered-menu-');
-
-  protected readonly rendererOwner: NeuTieredOwner = {
-    id: this.id,
-    overlayReady: () => this.overlayReady(),
-    isExpanded: (key) => this.appliedSet().has(key),
-    openBranch: (ancestors, key) => this.propose(openTieredPath(ancestors, key)),
-    closeBranch: (key) => this.propose(closeTieredBranch(this.appliedKeys(), this.items(), key)),
-    closeDeepest: () => {
-      const key = deepestTieredBranch(this.items(), this.appliedSet());
-      if (key) this.propose(closeTieredBranch(this.appliedKeys(), this.items(), key));
-    },
-    activateLeaf: (item, event) => {
-      if (item.disabled) return;
-      item.command?.({ originalEvent: event, item });
-      this.itemClick.emit(item);
-      if (this.appliedKeys().length) this.propose([]);
-    },
-    direction: () => this.direction(),
-  };
-
-  constructor() {
-    afterNextRender(() => this.overlayReady.set(true));
-  }
-
-  protected onDocumentPointerDown(event: PointerEvent): void {
-    if (!this.appliedKeys().length) return;
-    const withinOwner = event.composedPath().some((node) =>
-      node instanceof Element &&
-      (this.host.contains(node) || node.getAttribute('data-neu-tiered-owner') === this.id),
-    );
-    if (!withinOwner) this.propose([]);
-  }
-
-  private propose(keys: string[]): void {
-    if (sameMenuKeys(this.appliedKeys(), keys)) return;
-    if (this.expandedKeys() === undefined) this.localExpandedKeys.set(keys);
-    this.expandedKeysChange.emit(keys);
-  }
-
-  private direction(): 'ltr' | 'rtl' {
-    return this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction === 'rtl'
-      ? 'rtl'
-      : 'ltr';
-  }
-}
-
-function sameMenuKeys(current: readonly string[], next: readonly string[]): boolean {
-  return current.length === next.length && current.every((key, index) => key === next[index]);
 }
 
 function collectMenuBranchKeys(items: readonly NeuMenuItem[]): string[] {

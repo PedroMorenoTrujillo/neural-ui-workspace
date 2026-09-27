@@ -13,7 +13,7 @@ import {
 import { NeuralIcon } from '@neural-icons/angular';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
-import type { NeuMenuItem } from './neu-menu.component';
+import type { NeuMenuItem } from '@neural-ui/core/menu-shared';
 
 export interface NeuTieredOwner {
   readonly id: string;
@@ -107,7 +107,7 @@ export interface NeuTieredOwner {
       }
     </div>
   `,
-  styleUrl: './neu-menu.component.scss',
+  styleUrl: '../menu/neu-menu.component.scss',
 })
 export class NeuTieredLevelComponent {
   readonly owner = input.required<NeuTieredOwner>();

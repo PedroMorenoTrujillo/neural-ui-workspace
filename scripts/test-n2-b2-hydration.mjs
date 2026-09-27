@@ -3,11 +3,14 @@ import { spawnSync } from 'node:child_process';
 import { createReadStream, cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const fixture = mkdtempSync(join(root, '.n2-b2-hydration-'));
+const tarballMode = process.argv.includes('--tarball');
+const fixture = mkdtempSync(join(tarballMode ? tmpdir() : root, '.n2-b2-hydration-'));
+const npmCache = tarballMode ? mkdtempSync(join(tmpdir(), '.n2-b2-npm-cache-')) : null;
 function run(command, args, cwd = root) {
   const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
   if (result.status !== 0) throw new Error(`${command} failed:\n${result.stdout.slice(-4000)}\n${result.stderr.slice(-4000)}`);
@@ -15,6 +18,48 @@ function run(command, args, cwd = root) {
 
 try {
   cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+  if (tarballMode) {
+    const workspacePackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    const packed = spawnSync('npm', ['pack', join(root, 'dist/neural-ui/core'), '--pack-destination', fixture], {
+      cwd: fixture, encoding: 'utf8', env: { ...process.env, npm_config_cache: npmCache },
+    });
+    if (packed.status !== 0 || packed.error) throw new Error(`Tarball pack failed: ${packed.stderr || packed.error?.message}`);
+    const tarball = packed.stdout.trim().split('\n').at(-1);
+    if (!tarball?.endsWith('.tgz')) throw new Error('Tarball pack did not return an archive');
+    const fixturePackagePath = join(fixture, 'package.json');
+    const fixturePackage = JSON.parse(readFileSync(fixturePackagePath, 'utf8'));
+    const framework = workspacePackage.dependencies['@angular/core'];
+    const tooling = workspacePackage.devDependencies['@angular/build'];
+    fixturePackage.dependencies = {
+      '@angular/cdk': workspacePackage.dependencies['@angular/cdk'],
+      '@angular/common': framework,
+      '@angular/compiler': framework,
+      '@angular/core': framework,
+      '@angular/forms': framework,
+      '@angular/platform-browser': framework,
+      '@angular/platform-server': framework,
+      '@angular/router': framework,
+      '@angular/ssr': tooling,
+      '@neural-ui/core': `file:${join(fixture, tarball)}`,
+      '@neural-icons/core': workspacePackage.dependencies['@neural-icons/core'],
+      '@neural-icons/angular': workspacePackage.dependencies['@neural-icons/angular'],
+      rxjs: workspacePackage.dependencies.rxjs,
+      tslib: workspacePackage.dependencies.tslib,
+    };
+    fixturePackage.devDependencies = {
+      '@angular/build': tooling,
+      '@angular/cli': workspacePackage.devDependencies['@angular/cli'],
+      '@angular/compiler-cli': workspacePackage.devDependencies['@angular/compiler-cli'],
+      '@types/node': '^22.0.0',
+      typescript: workspacePackage.devDependencies.typescript,
+    };
+    writeFileSync(fixturePackagePath, `${JSON.stringify(fixturePackage, null, 2)}\n`);
+    const installed = spawnSync('npm', ['install', '--no-audit', '--no-fund'], {
+      cwd: fixture, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024,
+      env: { ...process.env, npm_config_cache: npmCache },
+    });
+    if (installed.status !== 0 || installed.error) throw new Error(`Tarball install failed: ${installed.stderr || installed.error?.message}`);
+  }
   const providers = 'provideZonelessChangeDetection(),provideClientHydration(),provideNeuralIcons(iconEdit)';
   writeFileSync(join(fixture, 'src/main.ts'), `
 import {provideZonelessChangeDetection} from '@angular/core';
@@ -75,9 +120,10 @@ export class B2Component {
   writeFileSync(appTsPath, `${JSON.stringify(appTs, null, 2)}\n`);
   const tsPath = join(fixture, 'tsconfig.json');
   const ts = JSON.parse(readFileSync(tsPath, 'utf8'));
-  ts.compilerOptions.paths = { '@neural-ui/core': [join(root, 'dist/neural-ui/core')], '@neural-ui/core/*': [join(root, 'dist/neural-ui/core/*')] };
+  if (tarballMode) delete ts.compilerOptions.paths;
+  else ts.compilerOptions.paths = { '@neural-ui/core': [join(root, 'dist/neural-ui/core')], '@neural-ui/core/*': [join(root, 'dist/neural-ui/core/*')] };
   writeFileSync(tsPath, `${JSON.stringify(ts, null, 2)}\n`);
-  run(join(root, 'node_modules/.bin/ng'), ['build'], fixture);
+  run(join(tarballMode ? fixture : root, 'node_modules/.bin/ng'), ['build'], fixture);
   run(process.execPath, [join(fixture, 'dist/server/server.mjs')], fixture);
   const browserRoot = join(fixture, 'dist/browser');
   const html = readFileSync(join(browserRoot, 'index.html'), 'utf8');
@@ -158,7 +204,10 @@ export class B2Component {
       assert.ok(rtlPanelBox.x + rtlPanelBox.width <= rtlTriggerBox.x + 2, 'RTL submenu opens toward physical left');
       assert.deepEqual(errors.filter(message => /NG050|error/i.test(message)), []);
       assert.ok((await events()).includes('tier-keys:file'));
-      console.log('B2 Chromium SSR/hydration PASS: DOM reuse, 0 NG050x, inline/floating menus, first hover/keyboard, controlled rejection, RTL');
+      console.log(`B2 ${tarballMode ? 'tarball ' : ''}Chromium SSR/hydration PASS: DOM reuse, 0 NG050x, inline/floating menus, first hover/keyboard, controlled rejection, RTL`);
     } finally { release(); await browser.close(); }
   } finally { await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())); }
-} finally { rmSync(fixture, { recursive: true, force: true }); }
+} finally {
+  rmSync(fixture, { recursive: true, force: true });
+  if (npmCache) rmSync(npmCache, { recursive: true, force: true });
+}

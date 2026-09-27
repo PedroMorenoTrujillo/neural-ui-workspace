@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 2,
+  "activeBaseline": "N2 canonical REL-01 package bundle evidence",
+  "historicalProvenance": {
+    "path": "baselines/n2-release/rel-01-package-bundle.json",
+    "sha256": "c2d296a2d72c42dd2162917a627305bdd3629072c73d837f292bc4f56bc42c23",
+    "disposition": "immutable REL-01 historical artifact"
+  },
+  "method": "built-package export map; JavaScript loader; empty tsconfig aliases; metafile inputs before tree-shaking; invalid and used controls",
+  "compressionEnvironment": {
+    "node": "22.22.3",
+    "zlib": "1.2.12",
+    "brotli": "1.2.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "gzipLevel": 9,
+    "brotliQuality": 11
+  },
+  "measurements": {
+    "root": {
+      "specifier": "@neural-ui/core",
+      "symbol": "provideNeuralUI",
+      "unused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "used": {
+        "raw": 793,
+        "gzip": 452,
+        "brotli": 377
+      },
+      "unusedPackageInputs": [
+        "fesm2022/neural-ui-core-foundation.mjs",
+        "fesm2022/neural-ui-core.mjs"
+      ],
+      "usedPackageInputs": [
+        "fesm2022/neural-ui-core-foundation.mjs",
+        "fesm2022/neural-ui-core.mjs"
+      ],
+      "invalidExportRejected": true
+    },
+    "small-primitive": {
+      "specifier": "@neural-ui/core/tag",
+      "symbol": "NeuTagComponent",
+      "unused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "used": {
+        "raw": 12812,
+        "gzip": 2828,
+        "brotli": 2448
+      },
+      "unusedPackageInputs": [
+        "fesm2022/neural-ui-core-tag.mjs"
+      ],
+      "usedPackageInputs": [
+        "fesm2022/neural-ui-core-tag.mjs"
+      ],
+      "invalidExportRejected": true
+    },
+    "table": {
+      "specifier": "@neural-ui/core/table",
+      "symbol": "NeuTableComponent",
+      "unused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "used": {
+        "raw": 192870,
+        "gzip": 38901,
+        "brotli": 28785
+      },
+      "unusedPackageInputs": [
+        "fesm2022/neural-ui-core-table-neu-table-active-editor.component-D9pu2loG.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-advanced-filter-builder.component-CSodi-av.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-csv-export-CuNooDyP.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-json-export-DxhLBe72.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-xlsx-export-B4bugFc_.mjs",
+        "fesm2022/neural-ui-core-table-neural-ui-core-table-B695N9tg.mjs",
+        "fesm2022/neural-ui-core-table.mjs"
+      ],
+      "usedPackageInputs": [
+        "fesm2022/neural-ui-core-table-neu-table-active-editor.component-D9pu2loG.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-advanced-filter-builder.component-CSodi-av.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-csv-export-CuNooDyP.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-json-export-DxhLBe72.mjs",
+        "fesm2022/neural-ui-core-table-neu-table-xlsx-export-B4bugFc_.mjs",
+        "fesm2022/neural-ui-core-table-neural-ui-core-table-B695N9tg.mjs",
+        "fesm2022/neural-ui-core-table.mjs"
+      ],
+      "invalidExportRejected": true
+    },
+    "tree-table": {
+      "specifier": "@neural-ui/core/tree-table",
+      "symbol": "NeuTreeTableComponent",
+      "unused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "used": {
+        "raw": 124813,
+        "gzip": 25747,
+        "brotli": 21846
+      },
+      "unusedPackageInputs": [
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-active-editor.component-CpGWcKm1.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-csv-export-yCRJhREb.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-export-D5ctQaAq.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-json-export-CUV0Jbtb.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-xlsx-export-Cjpk_h5y.mjs",
+        "fesm2022/neural-ui-core-tree-table-neural-ui-core-tree-table-CJAKD9tN.mjs",
+        "fesm2022/neural-ui-core-tree-table.mjs"
+      ],
+      "usedPackageInputs": [
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-active-editor.component-CpGWcKm1.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-csv-export-yCRJhREb.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-export-D5ctQaAq.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-json-export-CUV0Jbtb.mjs",
+        "fesm2022/neural-ui-core-tree-table-neu-tree-table-xlsx-export-Cjpk_h5y.mjs",
+        "fesm2022/neural-ui-core-tree-table-neural-ui-core-tree-table-CJAKD9tN.mjs",
+        "fesm2022/neural-ui-core-tree-table.mjs"
+      ],
+      "invalidExportRejected": true
+    },
+    "tree": {
+      "specifier": "@neural-ui/core/tree",
+      "symbol": "NeuTreeComponent",
+      "unused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "used": {
+        "raw": 62514,
+        "gzip": 12166,
+        "brotli": 10726
+      },
+      "unusedPackageInputs": [
+        "fesm2022/neural-ui-core-drag-drop.mjs",
+        "fesm2022/neural-ui-core-tree.mjs"
+      ],
+      "usedPackageInputs": [
+        "fesm2022/neural-ui-core-drag-drop.mjs",
+        "fesm2022/neural-ui-core-tree.mjs"
+      ],
+      "invalidExportRejected": true
+    },
+    "virtual-list": {
+      "specifier": "@neural-ui/core/virtual-list",
+      "symbol": "NeuVirtualListComponent",
+      "unused": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "used": {
+        "raw": 10658,
+        "gzip": 3023,
+        "brotli": 2689
+      },
+      "unusedPackageInputs": [
+        "fesm2022/neural-ui-core-virtual-list.mjs"
+      ],
+      "usedPackageInputs": [
+        "fesm2022/neural-ui-core-virtual-list.mjs"
+      ],
+      "invalidExportRejected": true
+    }
+  },
+  "auditedRootUnusedHarnesses": [
+    "audit-h9-b4-bundle-policy.mjs",
+    "audit-n2-a1-bundle.mjs",
+    "audit-n2-a2-bundle.mjs",
+    "audit-n2-a4-bundle.mjs",
+    "audit-n2-accordion-bundle.mjs",
+    "audit-n2-b1-bundle.mjs",
+    "audit-n2-b10-bundle.mjs",
+    "audit-n2-b2-bundle.mjs",
+    "audit-n2-b3-bundle.mjs",
+    "audit-n2-b4-bundle.mjs",
+    "audit-n2-b5-bundle.mjs",
+    "audit-n2-b6-bundle.mjs",
+    "audit-n2-b7-bundle.mjs",
+    "audit-n2-b8-bundle.mjs",
+    "audit-n2-b9-bundle.mjs",
+    "audit-n2-c1-bundle.mjs",
+    "audit-n2-c2-bundle.mjs",
+    "audit-n2-c3-bundle.mjs",
+    "audit-n2-c4-bundle.mjs",
+    "audit-n2-c5-bundle.mjs",
+    "audit-n2-c6-bundle.mjs",
+    "audit-n2-c7-bundle.mjs",
+    "audit-n2-forms-bundle.mjs",
+    "audit-n2-icons-bundle.mjs",
+    "audit-n2-navigation-bundle.mjs",
+    "audit-n2-overlay-events-bundle.mjs",
+    "audit-n2-rel-01-package-bundle.mjs",
+    "audit-n2-table-client-bundle.mjs",
+    "audit-n2-table-export-bundle.mjs",
+    "audit-n2-table-interactions-bundle.mjs",
+    "audit-n2-table-layout-selection-bundle.mjs",
+    "audit-n2-table-query-ui-bundle.mjs",
+    "audit-n2-table-remote-bundle.mjs",
+    "audit-n2-table-virtualization-bundle.mjs",
+    "audit-n2-tree-select-bundle.mjs",
+    "audit-n2-tree-table-bundle.mjs",
+    "audit-n2-visual-bundle.mjs"
+  ]
+}

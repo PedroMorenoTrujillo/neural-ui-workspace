@@ -44,7 +44,7 @@
     "dialog-all-advanced": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
     "color-picker-basic": { "baseline": { "raw": 59866, "gzip": 11735, "brotli": 10288 } },
     "color-picker-advanced": { "baseline": { "raw": 59866, "gzip": 11735, "brotli": 10288 } },
-    "pick-list-order-list": { "baseline": { "raw": 76025, "gzip": 11936, "brotli": 10202 } },
+    "pick-list-order-list": { "baseline": { "raw": 106805, "gzip": 16529, "brotli": 13916 } },
     "menu": { "baseline": { "raw": 70946, "gzip": 10266, "brotli": 8913 } },
     "pagination": { "baseline": { "raw": 140883, "gzip": 24933, "brotli": 21379 } }
   },

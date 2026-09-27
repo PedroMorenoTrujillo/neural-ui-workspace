@@ -123,12 +123,13 @@ try {
     ['node', ['src/ssr-h9-events.mjs']],
     ['node', ['src/ssr-n2-forms.mjs']],
     ['node', ['src/ssr-rel-01e.mjs']],
+    ['node', ['src/ssr-rel-01g.mjs']],
     [
       'node',
       [
         '--input-type=module',
         '--eval',
-        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/color-picker'); console.log('SSR entrypoint imports passed')",
+        "await import('@angular/compiler'); await import('@neural-ui/core/input'); await import('@neural-ui/core/modal'); await import('@neural-ui/core/table'); await import('@neural-ui/core/tree-table'); await import('@neural-ui/core/nav'); await import('@neural-ui/core/color-picker'); await import('@neural-ui/core/menu'); await import('@neural-ui/core/menu-shared'); await import('@neural-ui/core/menu-tiered'); await import('@neural-ui/core/pick-list'); await import('@neural-ui/core/kanban'); await import('@neural-ui/core/internal-state'); console.log('SSR entrypoint imports passed')",
       ],
     ],
   ];
