@@ -1018,4 +1018,45 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(host.queryChanges()).toEqual([]);
     expect(host.query().search).toBe('Gamma');
   });
+
+  it('rejects stale rendered filter drafts and then commits an immediate replacement once', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.filterOptions.set({
+      surfaces: ['row'],
+      globalFields: ['name'],
+      predicates: {},
+      debounceMs: 0,
+      commit: 'explicit',
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const filter = native.querySelector<HTMLInputElement>('input[aria-label="Filter Name"]')!;
+    filter.value = 'Beta';
+    filter.dispatchEvent(new Event('input', { bubbles: true }));
+    host.query.set({
+      ...host.query(),
+      filters: { kind: 'condition', field: 'name', rule: 'contains', value: 'Gamma' },
+    });
+    fixture.detectChanges();
+    filter.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.queryChanges()).toEqual([]);
+    expect(filter.value).toBe('Gamma');
+
+    host.filterOptions.set({ ...host.filterOptions(), commit: 'immediate' });
+    host.acceptQuery.set(true);
+    fixture.detectChanges();
+    filter.value = 'Alpha';
+    filter.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(1);
+    expect(host.query().filters).toEqual({
+      kind: 'condition', field: 'name', rule: 'contains', value: 'Alpha',
+    });
+    filter.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.queryChanges()).toHaveLength(1);
+  });
 });

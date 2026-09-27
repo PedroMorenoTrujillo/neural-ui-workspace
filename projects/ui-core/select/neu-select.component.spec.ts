@@ -102,6 +102,29 @@ class ProjectedSelectHostComponent {
 }
 
 @Component({
+  template: `
+    <neu-select [options]="options" [value]="value()" [searchable]="true" [clearable]="true">
+      <ng-template neuSelectClearIcon><span class="exact-clear-icon">Remove country</span></ng-template>
+      <ng-template neuSelectFilterIcon><span class="exact-filter-icon">Find country</span></ng-template>
+      @if (customFilter()) {
+        <ng-template neuSelectFilter><span class="exact-filter">Custom country filter</span></ng-template>
+      }
+    </neu-select>
+  `,
+  imports: [
+    NeuSelectComponent,
+    NeuSelectClearIconDirective,
+    NeuSelectFilterIconDirective,
+    NeuSelectFilterDirective,
+  ],
+})
+class ExactTargetSelectHostComponent {
+  readonly options = OPTIONS;
+  readonly value = signal<string | null>('es');
+  readonly customFilter = signal(false);
+}
+
+@Component({
   selector: 'cdk-virtual-scroll-viewport',
   template: '<ng-content />',
   standalone: true,
@@ -1452,6 +1475,29 @@ describe('NeuSelectComponent', () => {
     await fixture.whenStable();
     expect(document.querySelector('.projected-loader')?.textContent).toContain('Loading from');
     expect(document.querySelector('.neu-select__list')?.getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('renders projected clear and filter controls as their content state changes', async () => {
+    await TestBed.configureTestingModule({
+      imports: [ExactTargetSelectHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(ExactTargetSelectHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    expect(native.querySelector('.exact-clear-icon')?.textContent).toContain('Remove country');
+    native.querySelector<HTMLElement>('.neu-select__trigger')!.click();
+    await fixture.whenStable();
+    expect(document.querySelector('.exact-filter-icon')?.textContent).toContain('Find country');
+
+    fixture.componentInstance.customFilter.set(true);
+    await fixture.whenStable();
+    expect(document.querySelector('.exact-filter')?.textContent).toContain('Custom country filter');
+    expect(document.querySelector('.neu-select__search-input')).toBeNull();
+    native.querySelector<HTMLButtonElement>('.neu-select__clear')!.click();
+    await fixture.whenStable();
+    expect(native.querySelector('.neu-select__clear')).toBeNull();
   });
 
   it('toggles all eligible options and removes a chip through the rendered multiple controls', async () => {

@@ -5,27 +5,27 @@
   "total": {
     "lines": {
       "total": 19060,
-      "covered": 18269,
+      "covered": 18283,
       "skipped": 0,
-      "pct": 95.84
+      "pct": 95.92
     },
     "statements": {
       "total": 24564,
-      "covered": 22979,
+      "covered": 23002,
       "skipped": 0,
-      "pct": 93.54
+      "pct": 93.64
     },
     "functions": {
       "total": 4695,
-      "covered": 4365,
+      "covered": 4368,
       "skipped": 0,
-      "pct": 92.97
+      "pct": 93.03
     },
     "branches": {
       "total": 14708,
-      "covered": 13060,
+      "covered": 13086,
       "skipped": 0,
-      "pct": 88.79
+      "pct": 88.97
     },
     "branchesTrue": {
       "total": 0,
@@ -43,17 +43,17 @@
       "metrics": {
         "statements": {
           "total": 619,
-          "covered": 527,
+          "covered": 528,
           "skipped": 0,
-          "pct": 85.13,
-          "uncovered": 92
+          "pct": 85.29,
+          "uncovered": 91
         },
         "branches": {
           "total": 330,
-          "covered": 225,
+          "covered": 231,
           "skipped": 0,
-          "pct": 68.18,
-          "uncovered": 105
+          "pct": 70,
+          "uncovered": 99
         },
         "functions": {
           "total": 156,
@@ -64,10 +64,10 @@
         },
         "lines": {
           "total": 540,
-          "covered": 480,
+          "covered": 481,
           "skipped": 0,
-          "pct": 88.88,
-          "uncovered": 60
+          "pct": 89.07,
+          "uncovered": 59
         }
       },
       "uncoveredLineRanges": [
@@ -122,10 +122,6 @@
         [
           684,
           688
-        ],
-        [
-          765,
-          765
         ],
         [
           824,
@@ -206,24 +202,6 @@
           "block": 33,
           "branch": 0,
           "source": "if (column.sort === undefined) return '';"
-        },
-        {
-          "line": 461,
-          "block": 34,
-          "branch": 1,
-          "source": "const defaultState = this.sortOptions().defaultDirection === 'asc' ? 'ascending' : 'descending';"
-        },
-        {
-          "line": 462,
-          "block": 35,
-          "branch": 1,
-          "source": "const oppositeState = defaultState === 'ascending' ? 'descending' : 'ascending';"
-        },
-        {
-          "line": 468,
-          "block": 38,
-          "branch": 1,
-          "source": ": this.sortOptions().removable"
         },
         {
           "line": 474,
@@ -520,28 +498,10 @@
           "source": "if (Number.isFinite(page)) this.changePage(page);"
         },
         {
-          "line": 764,
-          "block": 83,
-          "branch": 0,
-          "source": "if (this.paginationOptions().report === 'summary') {"
-        },
-        {
           "line": 765,
           "block": 84,
           "branch": 0,
           "source": "return state.total === null"
-        },
-        {
-          "line": 765,
-          "block": 84,
-          "branch": 1,
-          "source": "return state.total === null"
-        },
-        {
-          "line": 767,
-          "block": 85,
-          "branch": 0,
-          "source": ": `Page ${state.humanPage} of ${Math.max(1, state.pageCount ?? 1)}`;"
         },
         {
           "line": 767,
@@ -888,24 +848,24 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 275
+      "absoluteGap": 267
     },
     {
       "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
       "metrics": {
         "statements": {
           "total": 649,
-          "covered": 560,
+          "covered": 562,
           "skipped": 0,
-          "pct": 86.28,
-          "uncovered": 89
+          "pct": 86.59,
+          "uncovered": 87
         },
         "branches": {
           "total": 451,
-          "covered": 326,
+          "covered": 328,
           "skipped": 0,
-          "pct": 72.28,
-          "uncovered": 125
+          "pct": 72.72,
+          "uncovered": 123
         },
         "functions": {
           "total": 114,
@@ -1088,12 +1048,6 @@
           "source": "if (!field) return;"
         },
         {
-          "line": 410,
-          "block": 34,
-          "branch": 0,
-          "source": "if (this.filterOptions().commit !== 'explicit' || !column.filter) return;"
-        },
-        {
           "line": 421,
           "block": 37,
           "branch": 0,
@@ -1158,12 +1112,6 @@
           "block": 47,
           "branch": 1,
           "source": "typeof current === 'string' || typeof current === 'number' ? String(current) : '';"
-        },
-        {
-          "line": 488,
-          "block": 49,
-          "branch": 0,
-          "source": "if (current === nextValue) return;"
         },
         {
           "line": 590,
@@ -1829,17 +1777,17 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 269
+      "absoluteGap": 265
     },
     {
       "file": "projects/ui-core/select/neu-select.component.ts",
       "metrics": {
         "statements": {
           "total": 954,
-          "covered": 878,
+          "covered": 882,
           "skipped": 0,
-          "pct": 92.03,
-          "uncovered": 76
+          "pct": 92.45,
+          "uncovered": 72
         },
         "branches": {
           "total": 655,
@@ -1857,17 +1805,13 @@
         },
         "lines": {
           "total": 781,
-          "covered": 730,
+          "covered": 735,
           "skipped": 0,
-          "pct": 93.46,
-          "uncovered": 51
+          "pct": 94.11,
+          "uncovered": 46
         }
       },
       "uncoveredLineRanges": [
-        [
-          211,
-          212
-        ],
         [
           233,
           233
@@ -1875,14 +1819,6 @@
         [
           235,
           236
-        ],
-        [
-          288,
-          289
-        ],
-        [
-          294,
-          294
         ],
         [
           333,
@@ -2010,24 +1946,6 @@
         ]
       ],
       "uncoveredBranchLocations": [
-        {
-          "line": 210,
-          "block": 2,
-          "branch": 0,
-          "source": "@if (clearIconTpl()) {"
-        },
-        {
-          "line": 293,
-          "block": 3,
-          "branch": 0,
-          "source": "@if (filterIconTpl()) {"
-        },
-        {
-          "line": 287,
-          "block": 4,
-          "branch": 0,
-          "source": "@if (filterTpl()) {"
-        },
         {
           "line": 350,
           "block": 7,
@@ -2213,6 +2131,12 @@
           "block": 87,
           "branch": 1,
           "source": "if (view) {"
+        },
+        {
+          "line": 947,
+          "block": 88,
+          "branch": 0,
+          "source": "if (!this.isOpen() || this._scrollDismissGeneration !== generation) return;"
         },
         {
           "line": 950,
@@ -2491,6 +2415,18 @@
           "source": "if (!isPlatformBrowser(this._platformId)) return;"
         },
         {
+          "line": 1689,
+          "block": 266,
+          "branch": 1,
+          "source": "const element = row?.kind === 'option' ? this._document.getElementById(this.rowId(row)) : null;"
+        },
+        {
+          "line": 1691,
+          "block": 267,
+          "branch": 0,
+          "source": "if (!element || !list) return;"
+        },
+        {
           "line": 1695,
           "block": 269,
           "branch": 0,
@@ -2687,615 +2623,7 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 242
-    },
-    {
-      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
-      "metrics": {
-        "statements": {
-          "total": 917,
-          "covered": 842,
-          "skipped": 0,
-          "pct": 91.82,
-          "uncovered": 75
-        },
-        "branches": {
-          "total": 620,
-          "covered": 552,
-          "skipped": 0,
-          "pct": 89.03,
-          "uncovered": 68
-        },
-        "functions": {
-          "total": 152,
-          "covered": 136,
-          "skipped": 0,
-          "pct": 89.47,
-          "uncovered": 16
-        },
-        "lines": {
-          "total": 678,
-          "covered": 641,
-          "skipped": 0,
-          "pct": 94.54,
-          "uncovered": 37
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          188,
-          188
-        ],
-        [
-          192,
-          194
-        ],
-        [
-          197,
-          198
-        ],
-        [
-          200,
-          201
-        ],
-        [
-          203,
-          203
-        ],
-        [
-          213,
-          213
-        ],
-        [
-          237,
-          237
-        ],
-        [
-          323,
-          323
-        ],
-        [
-          645,
-          645
-        ],
-        [
-          672,
-          672
-        ],
-        [
-          726,
-          728
-        ],
-        [
-          765,
-          770
-        ],
-        [
-          897,
-          899
-        ],
-        [
-          951,
-          951
-        ],
-        [
-          969,
-          969
-        ],
-        [
-          979,
-          982
-        ],
-        [
-          986,
-          986
-        ],
-        [
-          1013,
-          1013
-        ],
-        [
-          1206,
-          1207
-        ],
-        [
-          1253,
-          1253
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 323,
-          "block": 3,
-          "branch": 0,
-          "source": "(mouseenter)=\"hoverDate.set(cell.disabled ? null : cell.civil)\""
-        },
-        {
-          "line": 213,
-          "block": 8,
-          "branch": 0,
-          "source": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\""
-        },
-        {
-          "line": 213,
-          "block": 8,
-          "branch": 1,
-          "source": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\""
-        },
-        {
-          "line": 213,
-          "block": 9,
-          "branch": 0,
-          "source": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\""
-        },
-        {
-          "line": 213,
-          "block": 9,
-          "branch": 1,
-          "source": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\""
-        },
-        {
-          "line": 252,
-          "block": 10,
-          "branch": 0,
-          "source": "(click)=\"navigateMonth(mode() === 'year' ? 12 : mode() === 'month' ? 12 : 1)\""
-        },
-        {
-          "line": 252,
-          "block": 11,
-          "branch": 0,
-          "source": "(click)=\"navigateMonth(mode() === 'year' ? 12 : mode() === 'month' ? 12 : 1)\""
-        },
-        {
-          "line": 349,
-          "block": 16,
-          "branch": 0,
-          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeHour(slot.offset)\">{{ slot.label }}</button>"
-        },
-        {
-          "line": 349,
-          "block": 16,
-          "branch": 1,
-          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeHour(slot.offset)\">{{ slot.label }}</button>"
-        },
-        {
-          "line": 359,
-          "block": 17,
-          "branch": 0,
-          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeMinute(slot.offset)\">{{ slot.label }}</button>"
-        },
-        {
-          "line": 359,
-          "block": 17,
-          "branch": 1,
-          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeMinute(slot.offset)\">{{ slot.label }}</button>"
-        },
-        {
-          "line": 473,
-          "block": 24,
-          "branch": 2,
-          "source": "readonly resolvedLocale = computed(() => this.locale()?.trim() || this.defaultLocale || 'en-US');"
-        },
-        {
-          "line": 622,
-          "block": 44,
-          "branch": 0,
-          "source": "const end = range.end ? `${this.texts().rangeEnd}: ${this.formatCivil(range.end)}` : '';"
-        },
-        {
-          "line": 671,
-          "block": 57,
-          "branch": 0,
-          "source": "} else if (event.key === 'Enter') {"
-        },
-        {
-          "line": 673,
-          "block": 58,
-          "branch": 1,
-          "source": "} else if (event.key === 'Escape') {"
-        },
-        {
-          "line": 705,
-          "block": 72,
-          "branch": 0,
-          "source": "(target?.isConnected ? target : this.textInput().nativeElement).focus();"
-        },
-        {
-          "line": 726,
-          "block": 78,
-          "branch": 0,
-          "source": "if (this.presentation() === 'overlay') {"
-        },
-        {
-          "line": 726,
-          "block": 78,
-          "branch": 1,
-          "source": "if (this.presentation() === 'overlay') {"
-        },
-        {
-          "line": 733,
-          "block": 79,
-          "branch": 1,
-          "source": "if (!this.disabled() && !this.destroyed) this.focusVisitActive = true;"
-        },
-        {
-          "line": 753,
-          "block": 90,
-          "branch": 1,
-          "source": "if (this.presentation() === 'overlay') this.close(true);"
-        },
-        {
-          "line": 764,
-          "block": 93,
-          "branch": 0,
-          "source": "if (this.mode() === 'month') {"
-        },
-        {
-          "line": 766,
-          "block": 94,
-          "branch": 0,
-          "source": "if (!next) return;"
-        },
-        {
-          "line": 766,
-          "block": 94,
-          "branch": 1,
-          "source": "if (!next) return;"
-        },
-        {
-          "line": 774,
-          "block": 96,
-          "branch": 0,
-          "source": "if (!validCivilYear(next)) return;"
-        },
-        {
-          "line": 787,
-          "block": 97,
-          "branch": 0,
-          "source": "if (this.disabled() || this.mode() === 'time') return;"
-        },
-        {
-          "line": 796,
-          "block": 101,
-          "branch": 0,
-          "source": "if (this.disabled() || this.mode() === 'time') return;"
-        },
-        {
-          "line": 805,
-          "block": 105,
-          "branch": 0,
-          "source": "if (this.mode() === 'month' || this.mode() === 'year') return;"
-        },
-        {
-          "line": 834,
-          "block": 118,
-          "branch": 0,
-          "source": "if (!isCivilMonth(candidate)) return true;"
-        },
-        {
-          "line": 843,
-          "block": 120,
-          "branch": 0,
-          "source": "if (!isCivilYear(candidate)) return true;"
-        },
-        {
-          "line": 864,
-          "block": 126,
-          "branch": 0,
-          "source": "if (this.presentation() === 'overlay') this.close(true);"
-        },
-        {
-          "line": 871,
-          "block": 129,
-          "branch": 0,
-          "source": "if (this.presentation() === 'overlay') this.close(true);"
-        },
-        {
-          "line": 883,
-          "block": 133,
-          "branch": 0,
-          "source": "else if (event.key === 'Home') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 1 };"
-        },
-        {
-          "line": 884,
-          "block": 134,
-          "branch": 0,
-          "source": "else if (event.key === 'End') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 4 };"
-        },
-        {
-          "line": 885,
-          "block": 135,
-          "branch": 1,
-          "source": "else if (event.key === 'PageUp' || event.key === 'PageDown')"
-        },
-        {
-          "line": 887,
-          "block": 138,
-          "branch": 0,
-          "source": "if (!target) return;"
-        },
-        {
-          "line": 896,
-          "block": 139,
-          "branch": 0,
-          "source": "if (event.key === 'Enter' || event.key === ' ') {"
-        },
-        {
-          "line": 904,
-          "block": 142,
-          "branch": 0,
-          "source": "else if (event.key === 'Home') target = page[0];"
-        },
-        {
-          "line": 905,
-          "block": 143,
-          "branch": 0,
-          "source": "else if (event.key === 'End') target = page.at(-1)!;"
-        },
-        {
-          "line": 906,
-          "block": 144,
-          "branch": 1,
-          "source": "else if (event.key === 'PageUp' || event.key === 'PageDown') target = year + (event.key === 'PageUp' ? -12 : 12);"
-        },
-        {
-          "line": 907,
-          "block": 147,
-          "branch": 0,
-          "source": "if (target === null || !validCivilYear(target)) return;"
-        },
-        {
-          "line": 935,
-          "block": 154,
-          "branch": 0,
-          "source": "if (this.disabled()) return;"
-        },
-        {
-          "line": 947,
-          "block": 163,
-          "branch": 1,
-          "source": "else if (event.key === 'Enter' || event.key === ' ') {"
-        },
-        {
-          "line": 947,
-          "block": 164,
-          "branch": 1,
-          "source": "else if (event.key === 'Enter' || event.key === ' ') {"
-        },
-        {
-          "line": 968,
-          "block": 170,
-          "branch": 1,
-          "source": "else if (this.mode() === 'datetime') this.commit(localDateTime(raw));"
-        },
-        {
-          "line": 977,
-          "block": 172,
-          "branch": 1,
-          "source": "if (this.mode() === 'date')"
-        },
-        {
-          "line": 979,
-          "block": 174,
-          "branch": 0,
-          "source": "if (this.mode() === 'time')"
-        },
-        {
-          "line": 979,
-          "block": 174,
-          "branch": 1,
-          "source": "if (this.mode() === 'time')"
-        },
-        {
-          "line": 980,
-          "block": 175,
-          "branch": 0,
-          "source": "return raw.length < 5 && /^\\d{0,2}(?::\\d{0,2}(?::\\d{0,2})?)?$/.test(raw);"
-        },
-        {
-          "line": 980,
-          "block": 175,
-          "branch": 1,
-          "source": "return raw.length < 5 && /^\\d{0,2}(?::\\d{0,2}(?::\\d{0,2})?)?$/.test(raw);"
-        },
-        {
-          "line": 981,
-          "block": 176,
-          "branch": 0,
-          "source": "if (this.mode() === 'datetime')"
-        },
-        {
-          "line": 981,
-          "block": 176,
-          "branch": 1,
-          "source": "if (this.mode() === 'datetime')"
-        },
-        {
-          "line": 983,
-          "block": 177,
-          "branch": 0,
-          "source": "raw.length < 16 &&"
-        },
-        {
-          "line": 983,
-          "block": 177,
-          "branch": 1,
-          "source": "raw.length < 16 &&"
-        },
-        {
-          "line": 997,
-          "block": 178,
-          "branch": 0,
-          "source": "if (this.sameValue(this.value(), next)) return false;"
-        },
-        {
-          "line": 1075,
-          "block": 213,
-          "branch": 1,
-          "source": "return label ? `${label} ${value.year}` : '';"
-        },
-        {
-          "line": 1090,
-          "block": 225,
-          "branch": 0,
-          "source": "if (!range.start) return this.formatCivil(range.end!);"
-        },
-        {
-          "line": 1122,
-          "block": 230,
-          "branch": 1,
-          "source": "range.start && previewEnd ? (range.start < previewEnd ? range.start : previewEnd) : null;"
-        },
-        {
-          "line": 1124,
-          "block": 233,
-          "branch": 1,
-          "source": "range.start && previewEnd ? (range.start < previewEnd ? previewEnd : range.start) : null;"
-        },
-        {
-          "line": 1182,
-          "block": 243,
-          "branch": 1,
-          "source": "if (next.start !== previous.start || next.end !== previous.end) this.viewChange.emit(next);"
-        },
-        {
-          "line": 1182,
-          "block": 244,
-          "branch": 1,
-          "source": "if (next.start !== previous.start || next.end !== previous.end) this.viewChange.emit(next);"
-        },
-        {
-          "line": 1205,
-          "block": 250,
-          "branch": 0,
-          "source": "if (this.mode() === 'year') {"
-        },
-        {
-          "line": 1217,
-          "block": 251,
-          "branch": 0,
-          "source": "if (this.destroyed) return;"
-        },
-        {
-          "line": 1230,
-          "block": 254,
-          "branch": 0,
-          "source": "const bounded = isCivilMonth(min) && compareCivilMonth(chosen, min) < 0 ? min :"
-        },
-        {
-          "line": 1230,
-          "block": 256,
-          "branch": 0,
-          "source": "const bounded = isCivilMonth(min) && compareCivilMonth(chosen, min) < 0 ? min :"
-        },
-        {
-          "line": 1238,
-          "block": 260,
-          "branch": 0,
-          "source": "const bounded = isCivilYear(min) && compareCivilYear(chosen, min) < 0 ? min :"
-        },
-        {
-          "line": 1238,
-          "block": 262,
-          "branch": 0,
-          "source": "const bounded = isCivilYear(min) && compareCivilYear(chosen, min) < 0 ? min :"
-        },
-        {
-          "line": 1248,
-          "block": 265,
-          "branch": 0,
-          "source": "if ("
-        },
-        {
-          "line": 1332,
-          "block": 276,
-          "branch": 1,
-          "source": "return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;"
-        }
-      ],
-      "uncoveredFunctions": [
-        {
-          "name": "NeuDateInputControl_ng_template_13_Template_div_keydown_escape_0_listener",
-          "line": 188,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_1_For_2_Template_button_click_0_listener",
-          "line": 198,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_2_listener",
-          "line": 213,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_5_Template_select_change_4_listener",
-          "line": 237,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_11_For_6_For_3_Template_button_keydown_0_listener",
-          "line": 323,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_13_listener",
-          "line": 332,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_15_Template_button_click_0_listener",
-          "line": 335,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_2_listener",
-          "line": 346,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_3_For_6_Template_button_click_0_listener",
-          "line": 349,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_3_For_16_Template_button_click_0_listener",
-          "line": 359,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_17_listener",
-          "line": 362,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_Template_ng_template_backdropClick_16_listener",
-          "line": 381,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_151)",
-          "line": 441,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_65)",
-          "line": 644,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_75)",
-          "line": 725,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_107)",
-          "line": 1013,
-          "hits": 0
-        }
-      ],
-      "absoluteGap": 196
+      "absoluteGap": 233
     },
     {
       "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
@@ -3752,6 +3080,529 @@
       "absoluteGap": 164
     },
     {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "metrics": {
+        "statements": {
+          "total": 917,
+          "covered": 855,
+          "skipped": 0,
+          "pct": 93.23,
+          "uncovered": 62
+        },
+        "branches": {
+          "total": 620,
+          "covered": 564,
+          "skipped": 0,
+          "pct": 90.96,
+          "uncovered": 56
+        },
+        "functions": {
+          "total": 152,
+          "covered": 137,
+          "skipped": 0,
+          "pct": 90.13,
+          "uncovered": 15
+        },
+        "lines": {
+          "total": 678,
+          "covered": 648,
+          "skipped": 0,
+          "pct": 95.57,
+          "uncovered": 30
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          188,
+          188
+        ],
+        [
+          192,
+          194
+        ],
+        [
+          197,
+          198
+        ],
+        [
+          200,
+          201
+        ],
+        [
+          203,
+          203
+        ],
+        [
+          237,
+          237
+        ],
+        [
+          323,
+          323
+        ],
+        [
+          645,
+          645
+        ],
+        [
+          672,
+          672
+        ],
+        [
+          726,
+          728
+        ],
+        [
+          897,
+          899
+        ],
+        [
+          951,
+          951
+        ],
+        [
+          969,
+          969
+        ],
+        [
+          979,
+          982
+        ],
+        [
+          986,
+          986
+        ],
+        [
+          1013,
+          1013
+        ],
+        [
+          1206,
+          1207
+        ],
+        [
+          1253,
+          1253
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 323,
+          "block": 3,
+          "branch": 0,
+          "source": "(mouseenter)=\"hoverDate.set(cell.disabled ? null : cell.civil)\""
+        },
+        {
+          "line": 213,
+          "block": 9,
+          "branch": 1,
+          "source": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\""
+        },
+        {
+          "line": 349,
+          "block": 16,
+          "branch": 0,
+          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeHour(slot.offset)\">{{ slot.label }}</button>"
+        },
+        {
+          "line": 349,
+          "block": 16,
+          "branch": 1,
+          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeHour(slot.offset)\">{{ slot.label }}</button>"
+        },
+        {
+          "line": 359,
+          "block": 17,
+          "branch": 0,
+          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeMinute(slot.offset)\">{{ slot.label }}</button>"
+        },
+        {
+          "line": 359,
+          "block": 17,
+          "branch": 1,
+          "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeMinute(slot.offset)\">{{ slot.label }}</button>"
+        },
+        {
+          "line": 473,
+          "block": 24,
+          "branch": 2,
+          "source": "readonly resolvedLocale = computed(() => this.locale()?.trim() || this.defaultLocale || 'en-US');"
+        },
+        {
+          "line": 622,
+          "block": 44,
+          "branch": 0,
+          "source": "const end = range.end ? `${this.texts().rangeEnd}: ${this.formatCivil(range.end)}` : '';"
+        },
+        {
+          "line": 671,
+          "block": 57,
+          "branch": 0,
+          "source": "} else if (event.key === 'Enter') {"
+        },
+        {
+          "line": 673,
+          "block": 58,
+          "branch": 1,
+          "source": "} else if (event.key === 'Escape') {"
+        },
+        {
+          "line": 705,
+          "block": 72,
+          "branch": 0,
+          "source": "(target?.isConnected ? target : this.textInput().nativeElement).focus();"
+        },
+        {
+          "line": 726,
+          "block": 78,
+          "branch": 0,
+          "source": "if (this.presentation() === 'overlay') {"
+        },
+        {
+          "line": 726,
+          "block": 78,
+          "branch": 1,
+          "source": "if (this.presentation() === 'overlay') {"
+        },
+        {
+          "line": 733,
+          "block": 79,
+          "branch": 1,
+          "source": "if (!this.disabled() && !this.destroyed) this.focusVisitActive = true;"
+        },
+        {
+          "line": 753,
+          "block": 90,
+          "branch": 1,
+          "source": "if (this.presentation() === 'overlay') this.close(true);"
+        },
+        {
+          "line": 766,
+          "block": 94,
+          "branch": 0,
+          "source": "if (!next) return;"
+        },
+        {
+          "line": 774,
+          "block": 96,
+          "branch": 0,
+          "source": "if (!validCivilYear(next)) return;"
+        },
+        {
+          "line": 787,
+          "block": 97,
+          "branch": 0,
+          "source": "if (this.disabled() || this.mode() === 'time') return;"
+        },
+        {
+          "line": 796,
+          "block": 101,
+          "branch": 0,
+          "source": "if (this.disabled() || this.mode() === 'time') return;"
+        },
+        {
+          "line": 805,
+          "block": 105,
+          "branch": 0,
+          "source": "if (this.mode() === 'month' || this.mode() === 'year') return;"
+        },
+        {
+          "line": 834,
+          "block": 118,
+          "branch": 0,
+          "source": "if (!isCivilMonth(candidate)) return true;"
+        },
+        {
+          "line": 843,
+          "block": 120,
+          "branch": 0,
+          "source": "if (!isCivilYear(candidate)) return true;"
+        },
+        {
+          "line": 864,
+          "block": 126,
+          "branch": 0,
+          "source": "if (this.presentation() === 'overlay') this.close(true);"
+        },
+        {
+          "line": 871,
+          "block": 129,
+          "branch": 0,
+          "source": "if (this.presentation() === 'overlay') this.close(true);"
+        },
+        {
+          "line": 885,
+          "block": 135,
+          "branch": 1,
+          "source": "else if (event.key === 'PageUp' || event.key === 'PageDown')"
+        },
+        {
+          "line": 887,
+          "block": 138,
+          "branch": 0,
+          "source": "if (!target) return;"
+        },
+        {
+          "line": 896,
+          "block": 139,
+          "branch": 0,
+          "source": "if (event.key === 'Enter' || event.key === ' ') {"
+        },
+        {
+          "line": 906,
+          "block": 144,
+          "branch": 1,
+          "source": "else if (event.key === 'PageUp' || event.key === 'PageDown') target = year + (event.key === 'PageUp' ? -12 : 12);"
+        },
+        {
+          "line": 907,
+          "block": 147,
+          "branch": 0,
+          "source": "if (target === null || !validCivilYear(target)) return;"
+        },
+        {
+          "line": 935,
+          "block": 154,
+          "branch": 0,
+          "source": "if (this.disabled()) return;"
+        },
+        {
+          "line": 947,
+          "block": 163,
+          "branch": 1,
+          "source": "else if (event.key === 'Enter' || event.key === ' ') {"
+        },
+        {
+          "line": 947,
+          "block": 164,
+          "branch": 1,
+          "source": "else if (event.key === 'Enter' || event.key === ' ') {"
+        },
+        {
+          "line": 968,
+          "block": 170,
+          "branch": 1,
+          "source": "else if (this.mode() === 'datetime') this.commit(localDateTime(raw));"
+        },
+        {
+          "line": 977,
+          "block": 172,
+          "branch": 1,
+          "source": "if (this.mode() === 'date')"
+        },
+        {
+          "line": 979,
+          "block": 174,
+          "branch": 0,
+          "source": "if (this.mode() === 'time')"
+        },
+        {
+          "line": 979,
+          "block": 174,
+          "branch": 1,
+          "source": "if (this.mode() === 'time')"
+        },
+        {
+          "line": 980,
+          "block": 175,
+          "branch": 0,
+          "source": "return raw.length < 5 && /^\\d{0,2}(?::\\d{0,2}(?::\\d{0,2})?)?$/.test(raw);"
+        },
+        {
+          "line": 980,
+          "block": 175,
+          "branch": 1,
+          "source": "return raw.length < 5 && /^\\d{0,2}(?::\\d{0,2}(?::\\d{0,2})?)?$/.test(raw);"
+        },
+        {
+          "line": 981,
+          "block": 176,
+          "branch": 0,
+          "source": "if (this.mode() === 'datetime')"
+        },
+        {
+          "line": 981,
+          "block": 176,
+          "branch": 1,
+          "source": "if (this.mode() === 'datetime')"
+        },
+        {
+          "line": 983,
+          "block": 177,
+          "branch": 0,
+          "source": "raw.length < 16 &&"
+        },
+        {
+          "line": 983,
+          "block": 177,
+          "branch": 1,
+          "source": "raw.length < 16 &&"
+        },
+        {
+          "line": 1075,
+          "block": 213,
+          "branch": 1,
+          "source": "return label ? `${label} ${value.year}` : '';"
+        },
+        {
+          "line": 1090,
+          "block": 225,
+          "branch": 0,
+          "source": "if (!range.start) return this.formatCivil(range.end!);"
+        },
+        {
+          "line": 1122,
+          "block": 230,
+          "branch": 1,
+          "source": "range.start && previewEnd ? (range.start < previewEnd ? range.start : previewEnd) : null;"
+        },
+        {
+          "line": 1124,
+          "block": 233,
+          "branch": 1,
+          "source": "range.start && previewEnd ? (range.start < previewEnd ? previewEnd : range.start) : null;"
+        },
+        {
+          "line": 1182,
+          "block": 243,
+          "branch": 1,
+          "source": "if (next.start !== previous.start || next.end !== previous.end) this.viewChange.emit(next);"
+        },
+        {
+          "line": 1182,
+          "block": 244,
+          "branch": 1,
+          "source": "if (next.start !== previous.start || next.end !== previous.end) this.viewChange.emit(next);"
+        },
+        {
+          "line": 1205,
+          "block": 250,
+          "branch": 0,
+          "source": "if (this.mode() === 'year') {"
+        },
+        {
+          "line": 1217,
+          "block": 251,
+          "branch": 0,
+          "source": "if (this.destroyed) return;"
+        },
+        {
+          "line": 1230,
+          "block": 254,
+          "branch": 0,
+          "source": "const bounded = isCivilMonth(min) && compareCivilMonth(chosen, min) < 0 ? min :"
+        },
+        {
+          "line": 1230,
+          "block": 256,
+          "branch": 0,
+          "source": "const bounded = isCivilMonth(min) && compareCivilMonth(chosen, min) < 0 ? min :"
+        },
+        {
+          "line": 1238,
+          "block": 260,
+          "branch": 0,
+          "source": "const bounded = isCivilYear(min) && compareCivilYear(chosen, min) < 0 ? min :"
+        },
+        {
+          "line": 1238,
+          "block": 262,
+          "branch": 0,
+          "source": "const bounded = isCivilYear(min) && compareCivilYear(chosen, min) < 0 ? min :"
+        },
+        {
+          "line": 1248,
+          "block": 265,
+          "branch": 0,
+          "source": "if ("
+        },
+        {
+          "line": 1332,
+          "block": 276,
+          "branch": 1,
+          "source": "return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;"
+        }
+      ],
+      "uncoveredFunctions": [
+        {
+          "name": "NeuDateInputControl_ng_template_13_Template_div_keydown_escape_0_listener",
+          "line": 188,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_1_For_2_Template_button_click_0_listener",
+          "line": 198,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_5_Template_select_change_4_listener",
+          "line": 237,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_11_For_6_For_3_Template_button_keydown_0_listener",
+          "line": 323,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_13_listener",
+          "line": 332,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_15_Template_button_click_0_listener",
+          "line": 335,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_2_listener",
+          "line": 346,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_3_For_6_Template_button_click_0_listener",
+          "line": 349,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_3_For_16_Template_button_click_0_listener",
+          "line": 359,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_17_listener",
+          "line": 362,
+          "hits": 0
+        },
+        {
+          "name": "NeuDateInputControl_Template_ng_template_backdropClick_16_listener",
+          "line": 381,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_151)",
+          "line": 441,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_65)",
+          "line": 644,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_75)",
+          "line": 725,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_107)",
+          "line": 1013,
+          "hits": 0
+        }
+      ],
+      "absoluteGap": 163
+    },
+    {
       "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
       "metrics": {
         "statements": {
@@ -4206,10 +4057,10 @@
         },
         "branches": {
           "total": 215,
-          "covered": 155,
+          "covered": 156,
           "skipped": 0,
-          "pct": 72.09,
-          "uncovered": 60
+          "pct": 72.55,
+          "uncovered": 59
         },
         "functions": {
           "total": 61,
@@ -4368,12 +4219,6 @@
           "block": 28,
           "branch": 1,
           "source": "return this.checkboxStates().get(treeToken(key)) ?? 'unchecked';"
-        },
-        {
-          "line": 202,
-          "block": 29,
-          "branch": 0,
-          "source": "return state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false';"
         },
         {
           "line": 221,
@@ -4696,7 +4541,7 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 156
+      "absoluteGap": 155
     },
     {
       "file": "projects/ui-core/kanban/neu-kanban.component.ts",
@@ -10812,10 +10657,10 @@
         },
         "branches": {
           "total": 115,
-          "covered": 96,
+          "covered": 97,
           "skipped": 0,
-          "pct": 83.47,
-          "uncovered": 19
+          "pct": 84.34,
+          "uncovered": 18
         },
         "functions": {
           "total": 28,
@@ -10904,12 +10749,6 @@
           "source": "left.children.every((child, index) => sameFilter(child, right.children[index] ?? null, equals))"
         },
         {
-          "line": 126,
-          "block": 18,
-          "branch": 1,
-          "source": ": options.sortOptions.removable"
-        },
-        {
           "line": 141,
           "block": 22,
           "branch": 1,
@@ -10982,7 +10821,7 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 37
+      "absoluteGap": 36
     },
     {
       "file": "projects/ui-core/cascade-select/neu-cascade-select.component.ts",
@@ -11277,146 +11116,6 @@
         {
           "name": "(anonymous_32)",
           "line": 393,
-          "hits": 0
-        }
-      ],
-      "absoluteGap": 32
-    },
-    {
-      "file": "projects/ui-core/select/neu-select.directives.ts",
-      "metrics": {
-        "statements": {
-          "total": 61,
-          "covered": 49,
-          "skipped": 0,
-          "pct": 80.32,
-          "uncovered": 12
-        },
-        "branches": {
-          "total": 65,
-          "covered": 57,
-          "skipped": 0,
-          "pct": 87.69,
-          "uncovered": 8
-        },
-        "functions": {
-          "total": 18,
-          "covered": 14,
-          "skipped": 0,
-          "pct": 77.77,
-          "uncovered": 4
-        },
-        "lines": {
-          "total": 35,
-          "covered": 27,
-          "skipped": 0,
-          "pct": 77.14,
-          "uncovered": 8
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          21,
-          21
-        ],
-        [
-          33,
-          33
-        ],
-        [
-          45,
-          45
-        ],
-        [
-          68,
-          68
-        ],
-        [
-          94,
-          94
-        ],
-        [
-          99,
-          99
-        ],
-        [
-          104,
-          104
-        ],
-        [
-          109,
-          109
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 93,
-          "block": 18,
-          "branch": 0,
-          "source": "export class NeuSelectDropdownIconDirective {"
-        },
-        {
-          "line": 93,
-          "block": 18,
-          "branch": 1,
-          "source": "export class NeuSelectDropdownIconDirective {"
-        },
-        {
-          "line": 98,
-          "block": 20,
-          "branch": 0,
-          "source": "export class NeuSelectLoadingIconDirective {"
-        },
-        {
-          "line": 98,
-          "block": 20,
-          "branch": 1,
-          "source": "export class NeuSelectLoadingIconDirective {"
-        },
-        {
-          "line": 103,
-          "block": 22,
-          "branch": 0,
-          "source": "export class NeuSelectClearIconDirective {"
-        },
-        {
-          "line": 103,
-          "block": 22,
-          "branch": 1,
-          "source": "export class NeuSelectClearIconDirective {"
-        },
-        {
-          "line": 108,
-          "block": 24,
-          "branch": 0,
-          "source": "export class NeuSelectFilterIconDirective {"
-        },
-        {
-          "line": 108,
-          "block": 24,
-          "branch": 1,
-          "source": "export class NeuSelectFilterIconDirective {"
-        }
-      ],
-      "uncoveredFunctions": [
-        {
-          "name": "(anonymous_14)",
-          "line": 94,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_15)",
-          "line": 99,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_16)",
-          "line": 104,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_17)",
-          "line": 109,
           "hits": 0
         }
       ],
@@ -13086,6 +12785,108 @@
         {
           "name": "(anonymous_15)",
           "line": 130,
+          "hits": 0
+        }
+      ],
+      "absoluteGap": 22
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.directives.ts",
+      "metrics": {
+        "statements": {
+          "total": 61,
+          "covered": 52,
+          "skipped": 0,
+          "pct": 85.24,
+          "uncovered": 9
+        },
+        "branches": {
+          "total": 65,
+          "covered": 61,
+          "skipped": 0,
+          "pct": 93.84,
+          "uncovered": 4
+        },
+        "functions": {
+          "total": 18,
+          "covered": 16,
+          "skipped": 0,
+          "pct": 88.88,
+          "uncovered": 2
+        },
+        "lines": {
+          "total": 35,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 80,
+          "uncovered": 7
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          21,
+          21
+        ],
+        [
+          33,
+          33
+        ],
+        [
+          45,
+          45
+        ],
+        [
+          57,
+          57
+        ],
+        [
+          68,
+          68
+        ],
+        [
+          94,
+          94
+        ],
+        [
+          99,
+          99
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 93,
+          "block": 18,
+          "branch": 0,
+          "source": "export class NeuSelectDropdownIconDirective {"
+        },
+        {
+          "line": 93,
+          "block": 18,
+          "branch": 1,
+          "source": "export class NeuSelectDropdownIconDirective {"
+        },
+        {
+          "line": 98,
+          "block": 20,
+          "branch": 0,
+          "source": "export class NeuSelectLoadingIconDirective {"
+        },
+        {
+          "line": 98,
+          "block": 20,
+          "branch": 1,
+          "source": "export class NeuSelectLoadingIconDirective {"
+        }
+      ],
+      "uncoveredFunctions": [
+        {
+          "name": "(anonymous_14)",
+          "line": 94,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_15)",
+          "line": 99,
           "hits": 0
         }
       ],

@@ -204,6 +204,31 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(host.queryEvents).toHaveLength(3);
   });
 
+  it('uses the rendered descending default and keeps a required sort while reporting page summary', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    host.accept = true;
+    Object.assign(host.sortOptions, { defaultDirection: 'desc', removable: false });
+    Object.assign(host.paginationOptions, { report: 'summary' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const sort = native.querySelector<HTMLButtonElement>('th[data-column-id="name"] button')!;
+
+    sort.click();
+    await fixture.whenStable();
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'desc' }]);
+    expect(sort.closest('th')?.getAttribute('aria-sort')).toBe('descending');
+    sort.click();
+    await fixture.whenStable();
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'asc' }]);
+    sort.click();
+    await fixture.whenStable();
+    expect(host.query().sort).toEqual([{ field: 'name', direction: 'desc' }]);
+    expect(host.queryEvents).toHaveLength(3);
+    expect(native.textContent).toContain('Page 1 of');
+  });
+
   it('cancels an uncommitted search and clears an applied search through the toolbar', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     const host = fixture.componentInstance;

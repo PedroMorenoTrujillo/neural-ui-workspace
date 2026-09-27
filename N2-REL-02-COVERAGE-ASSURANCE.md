@@ -373,3 +373,122 @@ Branch `v2` remains at checkpoint commit `b78cfa67232e0b0d8ad6c35db8865dda586cda
 ### C26. Recommendation
 
 **REL-02 REMEDIATION REQUIRED.** The final clean canonical report remains below 95.01% in statements, branches and functions. The A/B source-origin attribution and narrow C/D/F evidence do not prove that compiler, browser/SSR or contract-impossible units dominate the 915-branch gate shortfall; a policy review would be premature. Continue only with branch-identity-specific behavioral work that shows materially better yield, or gather a reproducible counter/source-map proof before proposing any policy change.
+
+## REL-02D — coverage gate provenance and branch forensics
+
+### D1. Scope
+
+This audit examines the existing 95.01% global gate, 245 exact missing branch slots, 123 uncovered function records, and a predeclared 50-slot experiment. It changes tests and evidence only. Production source, public API, Angular test builder, V8 provider, coverage thresholds, exclusions, and runtime behavior are unchanged. REL-02D is left unstaged and uncommitted.
+
+### D2. Starting checkpoint
+
+The REL-02C tests, fixture-only corrections, inventories, and report were committed once as `09e181859076dca0e379378814d0074dfa7f38c4` (`test(coverage): add branch-targeted Neural UI 2 scenarios`), parent `b78cfa67232e0b0d8ad6c35db8865dda586cda3b`. Before this checkpoint, the full no-coverage suite passed 188/188 files and 2,562/2,562 tests and `ng build ui-core` passed. The foreign untracked `projects/ui-core/tree-table/public_api 2.ts` was excluded from the commit.
+
+### D3. 95.01 threshold origin
+
+`git log -S 95.01 -- angular.json` identifies `470eaac03144d1c2d2dac3cd887d7cbbde91b79a` (2026-09-01, `test(ui-core): make coverage gate deterministic`) as the introduction. Its parent used 95 for statements, branches, functions, and lines. The commit changed all four to 95.01, retained `perFile: false`, and added `runnerConfig: vitest.coverage.config.mts`, which serializes test files in one worker. The commit message and diff contain no numeric rationale for the extra 0.01 point; none is inferred.
+
+### D4. Threshold git history and configuration
+
+At the threshold commit, the test builder was `@angular/build:unit-test`, coverage was enabled, the only explicit test exclusion was `**/*.stress.spec.ts`, and reporters were text, HTML, LCOV, and JSON summary. The same test block, including global rather than per-file enforcement, is present at H7 and HEAD. The runner still has `fileParallelism: false` and `maxWorkers: 1`. The project does not configure a separate browser or SSR source population for the canonical gate. `@vitest/coverage-v8` remains `^4.1.3` and Vitest `^4.0.8`; Angular changed from core/build 21.2.19 at H7 to core 22.1.6/build 22.1.8 now. GitHub CI history inspected for the threshold/H7 SHAs yielded no corresponding all-four-metric run; the local historical reproduction below is the positive evidence.
+
+### D5. Historical four-metric PASS evidence
+
+An isolated worktree at `bd1b168a6d2b185e20370225329a2546440a5ab4` (`test(ui-core): complete H7 coverage hardening`, 2026-09-01) was installed from its lockfile and ran its own `npm run test:coverage` to completion with exit 0: 148/148 files and 3,157/3,157 tests. The emitted summary was statements 23,255/23,672 (98.23%), branches 15,529/16,072 (96.62%), functions 4,905/4,970 (98.69%), and lines 18,197/18,404 (98.87%). This proves at least one historical green run under the 95.01 gate. It does not prove that this was the last green revision or that present counters are interchangeable.
+
+### D6. Historical instrumentation and population
+
+The H7 and present test blocks have the same builder, runner configuration, test exclusion, V8 package range, reporters, and global threshold. H7's summary contains 161 source records, all TypeScript; the present summary has 180 records, including 175 TypeScript and 5 authored HTML template records. Current tests number 188 files/2,568 tests. Angular major version, compiled output, source set, template mapping, and tests changed. These population differences are material even though the gate settings did not change.
+
+### D7. Comparability verdict
+
+**PARTIALLY COMPARABLE.** The historical PASS establishes that the gate was achievable for the H7 source and instrumented population. It cannot certify a like-for-like present percentage. In particular, H7 had **1,364 more** branch denominator slots (16,072 versus 14,708), despite having fewer source records. A simple claim that the Angular 22 upgrade inflated the current branch denominator is contradicted by the measured totals. Identifying the exact per-counter causes would require a two-revision source-map/counter diff, which this audit has not produced.
+
+### D8. Denominator timeline
+
+| Checkpoint | S covered/total | B covered/total | F covered/total | L covered/total |
+| --- | ---: | ---: | ---: | ---: |
+| H7 reproduced | 23,255/23,672 | 15,529/16,072 | 4,905/4,970 | 18,197/18,404 |
+| REL-02C checkpoint | 22,979/24,564 | 13,060/14,708 | 4,365/4,695 | 18,269/19,060 |
+| REL-02D final | 23,002/24,564 | 13,086/14,708 | 4,368/4,695 | 18,283/19,060 |
+
+The REL-02 initial, REL-02B, REL-02C, and REL-02D current-source runs kept the same four denominators. Thus REL-02D's delta is interpretable at slot level; H7's percentage is historical provenance, not a current baseline.
+
+### D9. Branch forensic sample method
+
+[`audit-n2-rel-02d-forensics.mjs`](scripts/audit-n2-rel-02d-forensics.mjs) records a deterministic 245-slot sample from the REL-02C inventory's high-gap clusters in [`N2-REL-02D-FORENSIC-SAMPLE.json`](N2-REL-02D-FORENSIC-SAMPLE.json). Every row retains file, line, LCOV block and branch, original source line, syntax, one category, and reason. This is a purposive top-residual sample, not a statistically random estimate of all 1,648 baseline missing branches. A/B classifications are source-based candidates for reachable behavior; only the experiment proves hits.
+
+### D10. Branch category counts
+
+| Category | Meaning | Sample slots |
+| --- | --- | ---: |
+| A | Distinct user behavior candidate | 127 |
+| B | Reachable defensive/error behavior candidate | 28 |
+| C | Repeated counters for one behavior | 12 |
+| D | Proven Angular structural counter | 0 |
+| E | Proven browser-only branch | 0 |
+| F | Proven SSR-only branch | 0 |
+| G | Contract-impossible branch with source proof | 3 |
+| H | Unknown or unproven environment/counter mapping | 75 |
+
+The syntax distribution is 80 if/else, 41 short-circuit, 39 ternary, 32 optional/nullish, 17 template, 13 error guard, 12 browser guard, 1 switch, and 10 other. The 12 browser guards remain H because seeing a platform check does not establish which environment can execute its missing side. The 17 template slots remain subject to their individual A/B/H classification; template syntax alone is not proof of a compiler-only counter.
+
+### D11. Counter multiplication evidence
+
+The 12 C slots occur at `mega-menu/neu-mega-menu.component.ts:345-346`: repeated `rtl ? ... : ...` ternaries set overlay origin, alignment, and offset from the **same** local `rtl` boolean. A single direction state selects those coordinates together while LCOV assigns separate block/branch identities. This proves local counter multiplication for that source expression, not that all 12 slots are irrelevant or that the global 95.01 branch floor is unsound. Twelve is under 1% of the baseline 1,648-branch gap.
+
+### D12. Template and compiler evidence
+
+The sample contains 17 template syntax slots but no D assignment: no generated JavaScript/source-map pair was shown to establish a purely structural Angular branch. The source population now includes five HTML records absent at H7, which is a provenance difference rather than proof that their counters are artificial. Generated template listeners correspond to rendered interactions until demonstrated otherwise. No threshold or exclusion change is justified by these observations.
+
+### D13. Browser and SSR candidate count
+
+Twelve sampled slots have browser/platform guard syntax, but **zero** are proven browser-only E or SSR-only F. For example, Table renderer `341:13:0` checks `viewport.ownerDocument.defaultView === null` and has zero hits, while `341:13:1` has 111 canonical hits; TreeTable renderer `264:7:0` has zero and its sibling has 104. Neither fact proves the null side runs in the existing SSR fixture: the viewport effect may never execute there. The current candidate count is therefore 12 to investigate and zero verified environment-exclusive slots.
+
+### D14. Contract-impossible count
+
+Select source lines 1044 and 1062 use literal `false && ...`; the right operand cannot run without a source change. Tree source line 118 is the no-options arm of `virtualRange()`, but the template reads this computed value only inside the `virtualization()` arm and `focusIndex` calls it only after the options guard. Those are the three G assignments. The proof is limited to the current call graph and public contract; the audit does not generalize G to other nullish or error checks.
+
+### D15. Function forensic sample
+
+The same artifact classifies 123 of the baseline 330 uncovered function records: 50 meaningful event callbacks, 30 meaningful application functions, 2 browser callbacks, and 41 unknown. Proven compiler wrapper, SSR-only, defensive-only, and contract-impossible counts are zero. Across the full baseline, 107 uncovered function names have `_listener` form, 218 are `(anonymous_n)`, 2 are `HostBindingHandler`, and 3 have other names. Names are not causal proof: a `_listener` points to an interaction; an anonymous source-map position may identify a method declaration or signal initialization. The 41 unknown sample records require generated-code/source-map inspection before policy use.
+
+### D16. Exact-target branch experiment
+
+Before test edits, [`audit-n2-rel-02d-targets.mjs`](scripts/audit-n2-rel-02d-targets.mjs) froze 50 missing identities in [`N2-REL-02D-EXACT-TARGETS.json`](N2-REL-02D-EXACT-TARGETS.json): DateInput 17, Select 12, Table renderer 11, TreeTable renderer 6, Tree 4. Each row specifies file/line/block/branch, source condition, covered sibling sides, missing side, intended user state, and a visible assertion. An isolated rerun of checkpoint `09e1818` reproduced 188/188 files and 2,562/2,562 tests and supplied the 92 sibling counters retained in [`N2-REL-02D-BASELINE-SIBLINGS.json`](N2-REL-02D-BASELINE-SIBLINGS.json). It differed from the committed checkpoint summary by two branch hits and one statement hit, with the same denominators and target identities. Eight targets lacked any covered sibling in their block. Six tests were then added: DateInput month and year navigation (2), Select projected controls (1), Table required descending sort and page summary (1), TreeTable stale draft/immediate replacement (1), and Tree checked/mixed ARIA with zero-buffer window (1). No production file was edited. Directed runs passed DateInput 55/55, Select 102/102, Table 13/13, and combined Tree/TreeTable 57/57 tests. The two-file directed coverage command exited 1 solely because a subset cannot meet the global coverage thresholds.
+
+### D17. Target-hit accuracy
+
+[`audit-n2-rel-02d-results.mjs`](scripts/audit-n2-rel-02d-results.mjs) joins the frozen identities to the final LCOV file; [`N2-REL-02D-TARGET-RESULT.json`](N2-REL-02D-TARGET-RESULT.json) contains all 50 outcomes and 31 misses. **19/50 (38%)** targets received at least one hit, 31 remained zero, and none disappeared from instrumentation. Hits by file: DateInput 9/17, Select 3/12, Table 5/11, TreeTable 1/6, Tree 1/4. For example, rendered month/year navigation hit DateInput `213:8:0`, `213:8:1`, `213:9:0`, `252:10:0`, and `252:11:0`; Select template projection hit `210:2:0`, `293:3:0`, and `287:4:0`. This is direct slot evidence, while the 31 misses show that a plausible state/assumption did not necessarily trigger its exact branch.
+
+### D18. Coverage delta from exact targeting
+
+The final global run covered 29 baseline-missing branches: 19 declared targets and 10 incidental slots. Three Select slots that were covered in the checkpoint became uncovered (`947:88:0`, `1689:266:1`, `1691:267:0`), leaving a net **+26 branches**. Statements gained 23, functions 3, and lines 14; denominators stayed fixed. The six scenarios therefore produced 26/6 = 4.33 net branch slots per scenario, a useful local result but far short of the remaining gate. The Select file had three target hits yet no net branch gain, which illustrates why raw target-hit and global delta are both reported. The exact three newly uncovered identities are retained in the result artifact rather than silently credited to the new tests.
+
+### D19. Browser merge proof
+
+**BROWSER COVERAGE MERGE = NOT VALIDATED.** Existing Chromium hydration fixtures assert DOM behavior but call neither CDP precise coverage nor Playwright JavaScript coverage, and their application build has no demonstrated mapping from bundle V8 ranges to the canonical LCOV `SF`/`BRDA` identities. The source example at Table `341:13:0` is an unhit browser-null guard, but its sibling is already hit in the canonical DOM test; it is not a known missing browser-only branch definitely executed by hydration. There is therefore no defensible one-branch fixture to merge yet. Same original source, compatible block/branch identity, a single denominator, and repeatable combined hit count remain unproven. Browser assertions remain separate assurance.
+
+### D20. SSR merge proof
+
+**SSR COVERAGE MERGE = NOT VALIDATED.** The fixture runner builds an Angular server bundle and invokes `server/server.mjs` without Node V8 coverage collection or source-map remapping. The package SSR smoke imports built entry points without canonical counters. The `defaultView === null` examples are candidate server sides, but the existing SSR render has not shown that their viewport effects run. No SSR-only source branch with a mapped canonical `BRDA` hit, unchanged denominator, and deterministic merge was obtained. SSR behavior checks remain separate assurance.
+
+### D21. Current coverage and gates
+
+After deleting stale `coverage/ui-core`, the canonical `ng test ui-core --watch=false --coverage` run passed **188/188 test files and 2,568/2,568 tests**, then exited 1 on the unchanged global gate. Statements are 23,002/24,564 = 93.64% (337 more hits needed); branches 13,086/14,708 = 88.97% (889 needed); functions 4,368/4,695 = 93.03% (93 needed); lines 18,283/19,060 = 95.92% (pass). Needed-hit counts use `ceil(0.9501 × denominator) − covered`; they assume the denominator stays fixed.
+
+### D22. Policy provenance conclusion
+
+The gate has a concrete historical all-four PASS under the same global settings, but not a fully comparable instrumented population. The sample identifies 155 A/B candidates versus 12 C and 3 G with proof, 75 H requiring investigation, and no proven D/E/F. The exact experiment produces real branch gains with stable identities and denominator. These facts support continued focused remediation now; they do not show that compiler counters, environment partitioning, or impossible paths materially account for the 889-branch deficit.
+
+### D23. Remediation feasibility
+
+Next bounded tranche: predeclare approximately 100 LCOV identities across the same five high-gap components, then implement **at most 20** rendered-behavior scenarios with explicit events and assertions. Prioritize DateInput's remaining keyboard/commit branches, Table's filter commit and page state, Select's lazy/autofocus and keyboard paths, TreeTable's immediate versus explicit filter branches, and Tree's virtual scroll guards; skip G identities and resolve H before counting them as behavior. After each five-scenario batch, run directed coverage and compare exact hit IDs. Stop the tranche for redesign if fewer than half the declared identities are hit or net gain falls below four branches per scenario. Twenty scenarios at the observed 4.33 net yield suggest about 87 further branch hits, not a guarantee; this tranche alone cannot close an 889-slot gap. Reassess source maps, counter stability, and remaining meaningful behavior after the tranche before estimating further test count.
+
+### D24. Policy-review eligibility
+
+Policy review is not currently supported by the required counter evidence. The historical pass is only partially comparable; 12 proven multiplied and 3 impossible sample slots cannot explain hundreds of missing branches; and browser/SSR merges are unvalidated. A policy proposal would first need reproducible generated-code mappings for C/D/H, a quantified whole-population split, and a one-branch browser or SSR merge with unchanged denominator. Keep all four 95.01 thresholds, provider, include/exclude rules, and per-file setting intact while gathering that evidence.
+
+### D25. Recommended next action and repository state
+
+**REL-02 REMEDIATION REQUIRED.** The checkpoint commit is complete; REL-02D's six tests, three audit scripts, four JSON evidence files, updated inventories, and this report remain unstaged and uncommitted. The full no-coverage run exited 0 (188/188 files, 2,568/2,568 tests), `ng build ui-core` exited 0, and the fresh coverage run's only failure was the three unchanged thresholds in D21. `git diff --check` passes, staging is empty, no production source or symlink/temporary artifact changed, and the foreign untracked `projects/ui-core/tree-table/public_api 2.ts` still has SHA-256 `c125dde6541cf65f1936dcc6d0468c84da4391234e2a162ba10f889d1936b644`. Continue with the bounded exact-identity tranche in D23. The synchronized [machine inventory](N2-REL-02-COVERAGE-INVENTORY.json) and [human inventory](N2-REL-02-COVERAGE-INVENTORY.md) reflect the fresh REL-02D run. No push, tag, release, publication, Showcase2 work, production change, or gate change is part of this audit.

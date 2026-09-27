@@ -1,0 +1,3473 @@
+{
+  "source": "REL-02C canonical LCOV-derived inventory at checkpoint 09e181859076dca0e379378814d0074dfa7f38c4",
+  "populationUncoveredBranches": 1648,
+  "method": "Purposive top-residual sample, including required syntax and platform/error guards; conservative source-level primary classification. Counts are sample counts, not population estimates. H is used when counter semantics are unproven.",
+  "sampleSize": 245,
+  "counts": {
+    "A": 127,
+    "B": 28,
+    "C": 12,
+    "D": 0,
+    "E": 0,
+    "F": 0,
+    "G": 3,
+    "H": 75
+  },
+  "syntaxCounts": {
+    "browser-guard": 12,
+    "error-guard": 13,
+    "if-else": 80,
+    "optional-nullish": 32,
+    "other": 10,
+    "short-circuit": 41,
+    "switch": 1,
+    "template": 17,
+    "ternary": 39
+  },
+  "rows": [
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 264,
+      "block": 7,
+      "branch": 0,
+      "source": "if (browser === null) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 1101,
+      "block": 192,
+      "branch": 0,
+      "source": "if (!this.browser) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 697,
+      "block": 87,
+      "branch": 0,
+      "source": "this.proposeSelection(node, indicator.type === 'radio' ? 'radio' : 'checkbox', event);",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 410,
+      "block": 34,
+      "branch": 0,
+      "source": "if (this.filterOptions().commit !== 'explicit' || !column.filter) return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 236,
+      "block": 3,
+      "branch": 1,
+      "source": "return this.rows()[0]?.token ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 234,
+      "block": 2,
+      "branch": 1,
+      "source": "if (this.rows().some((node) => node.token === token)) return token;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 783,
+      "block": 124,
+      "branch": 1,
+      "source": "target.kind === 'index'",
+      "syntax": "other",
+      "category": "H",
+      "reason": "Source snippet alone does not establish a distinct outcome or a counter-only classification."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 826,
+      "block": 134,
+      "branch": 1,
+      "source": "} else if ('key' in target) {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 825,
+      "block": 133,
+      "branch": 1,
+      "source": "node = projection.visible[projection.visible.length - 1] ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 827,
+      "block": 135,
+      "branch": 1,
+      "source": "node = projection.nodesByToken.get(neuExactKeyToken(target.key)) ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 825,
+      "block": 133,
+      "branch": 0,
+      "source": "node = projection.visible[projection.visible.length - 1] ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 829,
+      "block": 136,
+      "branch": 1,
+      "source": "if (node) this.focusNode(node);",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 824,
+      "block": 132,
+      "branch": 0,
+      "source": "else if (target.kind === 'last') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 830,
+      "block": 137,
+      "branch": 0,
+      "source": "else if (projection.visible.length === 0) this.scheduleFocus({ kind: 'container' });",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 823,
+      "block": 131,
+      "branch": 1,
+      "source": "if (target.kind === 'first') node = projection.visible[0] ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 830,
+      "block": 137,
+      "branch": 1,
+      "source": "else if (projection.visible.length === 0) this.scheduleFocus({ kind: 'container' });",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 823,
+      "block": 131,
+      "branch": 0,
+      "source": "if (target.kind === 'first') node = projection.visible[0] ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 837,
+      "block": 138,
+      "branch": 0,
+      "source": "if (!node.expandable) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 823,
+      "block": 130,
+      "branch": 0,
+      "source": "if (target.kind === 'first') node = projection.visible[0] ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 854,
+      "block": 139,
+      "branch": 1,
+      "source": "shiftKey: event?.shiftKey ?? false,",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 805,
+      "block": 129,
+      "branch": 0,
+      "source": "if (target.behavior === 'smooth') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 855,
+      "block": 140,
+      "branch": 1,
+      "source": "platformModifier: (event?.ctrlKey ?? false) || (event?.metaKey ?? false),",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 797,
+      "block": 128,
+      "branch": 0,
+      "source": "if (offset === null) return;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 855,
+      "block": 140,
+      "branch": 3,
+      "source": "platformModifier: (event?.ctrlKey ?? false) || (event?.metaKey ?? false),",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 787,
+      "block": 126,
+      "branch": 0,
+      "source": "if (",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 857,
+      "block": 141,
+      "branch": 1,
+      "source": "if (!(event?.shiftKey ?? false)) this.selectionAnchor.set(node.key);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 785,
+      "block": 125,
+      "branch": 1,
+      "source": ": (projection.nodesByToken.get(neuExactKeyToken(target.key))?.logicalVisibleIndex ??",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 857,
+      "block": 142,
+      "branch": 1,
+      "source": "if (!(event?.shiftKey ?? false)) this.selectionAnchor.set(node.key);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 785,
+      "block": 125,
+      "branch": 0,
+      "source": ": (projection.nodesByToken.get(neuExactKeyToken(target.key))?.logicalVisibleIndex ??",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 867,
+      "block": 144,
+      "branch": 1,
+      "source": "if (options.mode === 'cell') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 780,
+      "block": 123,
+      "branch": 1,
+      "source": "offset = Number.isFinite(target.offset) ? Math.max(0, target.offset) : null;",
+      "syntax": "ternary",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 875,
+      "block": 146,
+      "branch": 0,
+      "source": "if (!this.columns().some((candidate) => candidate.edit !== undefined)) return false;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 780,
+      "block": 123,
+      "branch": 0,
+      "source": "offset = Number.isFinite(target.offset) ? Math.max(0, target.offset) : null;",
+      "syntax": "ternary",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 875,
+      "block": 146,
+      "branch": 1,
+      "source": "if (!this.columns().some((candidate) => candidate.edit !== undefined)) return false;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 779,
+      "block": 122,
+      "branch": 0,
+      "source": "if (target.kind === 'offset') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.html",
+      "line": 203,
+      "block": 7,
+      "branch": 0,
+      "source": "@if (editorTemplate(column.id); as template) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.html",
+      "line": 315,
+      "block": 17,
+      "branch": 1,
+      "source": "@if (summaryTemplate(); as template) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.html",
+      "line": 301,
+      "block": 16,
+      "branch": 1,
+      "source": "@if (footerTemplates().size > 0) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 341,
+      "block": 13,
+      "branch": 0,
+      "source": "if (browser === null) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 827,
+      "block": 92,
+      "branch": 0,
+      "source": "aggregate.error === null",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 827,
+      "block": 92,
+      "branch": 1,
+      "source": "aggregate.error === null",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 461,
+      "block": 34,
+      "branch": 1,
+      "source": "const defaultState = this.sortOptions().defaultDirection === 'asc' ? 'ascending' : 'descending';",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 394,
+      "block": 19,
+      "branch": 0,
+      "source": "if (viewport === undefined || offset === null) return Promise.resolve();",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 246,
+      "block": 2,
+      "branch": 1,
+      "source": "(this.grouping()?.by.length ?? 0) > 0,",
+      "syntax": "optional-nullish",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 454,
+      "block": 31,
+      "branch": 0,
+      "source": "if (column.sort === undefined) return null;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 468,
+      "block": 38,
+      "branch": 1,
+      "source": ": this.sortOptions().removable",
+      "syntax": "other",
+      "category": "H",
+      "reason": "Source snippet alone does not establish a distinct outcome or a counter-only classification."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 687,
+      "block": 78,
+      "branch": 2,
+      "source": "if (column !== null && isNeuTableFilterRule(rule) && this.filterRules(column).includes(rule)) {",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 696,
+      "block": 79,
+      "branch": 0,
+      "source": "if (column?.filter === undefined) return;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 687,
+      "block": 78,
+      "branch": 1,
+      "source": "if (column !== null && isNeuTableFilterRule(rule) && this.filterRules(column).includes(rule)) {",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 698,
+      "block": 80,
+      "branch": 0,
+      "source": "if (!this.filterRules(column).includes(rule)) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 687,
+      "block": 78,
+      "branch": 0,
+      "source": "if (column !== null && isNeuTableFilterRule(rule) && this.filterRules(column).includes(rule)) {",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 716,
+      "block": 81,
+      "branch": 0,
+      "source": "if (this.openFilterColumnId() === null) return;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 687,
+      "block": 77,
+      "branch": 1,
+      "source": "if (column !== null && isNeuTableFilterRule(rule) && this.filterRules(column).includes(rule)) {",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 760,
+      "block": 82,
+      "branch": 1,
+      "source": "if (Number.isFinite(page)) this.changePage(page);",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 687,
+      "block": 77,
+      "branch": 0,
+      "source": "if (column !== null && isNeuTableFilterRule(rule) && this.filterRules(column).includes(rule)) {",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 764,
+      "block": 83,
+      "branch": 0,
+      "source": "if (this.paginationOptions().report === 'summary') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 683,
+      "block": 76,
+      "branch": 1,
+      "source": "this.allColumns().find((column) => column.id === this.openFilterColumnId()) ?? null;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 765,
+      "block": 84,
+      "branch": 0,
+      "source": "return state.total === null",
+      "syntax": "other",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 675,
+      "block": 75,
+      "branch": 1,
+      "source": "...(scope?.querySelectorAll<HTMLElement>('[data-filter-editor]') ?? []),",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 765,
+      "block": 84,
+      "branch": 1,
+      "source": "return state.total === null",
+      "syntax": "other",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 666,
+      "block": 74,
+      "branch": 0,
+      "source": "if (column.filter === undefined) return;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 767,
+      "block": 85,
+      "branch": 0,
+      "source": ": `Page ${state.humanPage} of ${Math.max(1, state.pageCount ?? 1)}`;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 648,
+      "block": 73,
+      "branch": 0,
+      "source": "if (timer !== undefined) clearTimeout(timer);",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 767,
+      "block": 85,
+      "branch": 1,
+      "source": ": `Page ${state.humanPage} of ${Math.max(1, state.pageCount ?? 1)}`;",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 646,
+      "block": 72,
+      "branch": 0,
+      "source": "if (column.filter === undefined) return;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 814,
+      "block": 90,
+      "branch": 0,
+      "source": "if (!this.rowExpandable(renderRow)) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 635,
+      "block": 71,
+      "branch": 1,
+      "source": "if (control instanceof HTMLInputElement) control.value = this.filterValue(column);",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 823,
+      "block": 91,
+      "branch": 0,
+      "source": "`Group ${context.value == null ? '' : String(context.value)}`.trim();",
+      "syntax": "ternary",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 635,
+      "block": 71,
+      "branch": 0,
+      "source": "if (control instanceof HTMLInputElement) control.value = this.filterValue(column);",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 828,
+      "block": 93,
+      "branch": 0,
+      "source": "? `${aggregate.field}: ${aggregate.value == null ? '' : String(aggregate.value)}`",
+      "syntax": "ternary",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 634,
+      "block": 70,
+      "branch": 1,
+      "source": "if (control instanceof HTMLSelectElement) control.value = this.filterRule(column);",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 828,
+      "block": 93,
+      "branch": 1,
+      "source": "? `${aggregate.field}: ${aggregate.value == null ? '' : String(aggregate.value)}`",
+      "syntax": "ternary",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 634,
+      "block": 70,
+      "branch": 0,
+      "source": "if (control instanceof HTMLSelectElement) control.value = this.filterRule(column);",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 56,
+      "block": 1,
+      "branch": 0,
+      "source": "@if (!appliedPageSizeConfigured()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 80,
+      "block": 7,
+      "branch": 0,
+      "source": "[value]=\"searchEditing() ? searchDraft() : query().search\"",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 192,
+      "block": 20,
+      "branch": 0,
+      "source": "\"",
+      "syntax": "other",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 482,
+      "block": 33,
+      "branch": 0,
+      "source": "@if (editorTemplate(column.id); as template) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 493,
+      "block": 32,
+      "branch": 1,
+      "source": "[errors]=\"context.errors()\"",
+      "syntax": "other",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 480,
+      "block": 34,
+      "branch": 1,
+      "source": "@if (editorContext(renderRow, column); as context) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 426,
+      "block": 31,
+      "branch": 1,
+      "source": "@if (rowExpandable(renderRow)) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 469,
+      "block": 36,
+      "branch": 0,
+      "source": "\"",
+      "syntax": "other",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 345,
+      "block": 29,
+      "branch": 0,
+      "source": "@if (hasSelectionColumn()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 455,
+      "block": 38,
+      "branch": 1,
+      "source": "@if (groupingCellVisible(presentationNode, column)) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 342,
+      "block": 28,
+      "branch": 0,
+      "source": "@if (expansionActive()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "line": 420,
+      "block": 40,
+      "branch": 0,
+      "source": "(dragover)=\"rowOptions().reorderable && $event.preventDefault()\"",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1044,
+      "block": 111,
+      "branch": 0,
+      "source": "if (false && event.target instanceof HTMLInputElement) return;",
+      "syntax": "short-circuit",
+      "category": "G",
+      "reason": "Literal false short-circuits the right operand; this branch cannot be entered as written."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1062,
+      "block": 114,
+      "branch": 0,
+      "source": "if (false && event.key === ' ' && event.target instanceof HTMLInputElement)",
+      "syntax": "short-circuit",
+      "category": "G",
+      "reason": "Literal false short-circuits the right operand; this branch cannot be entered as written."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1436,
+      "block": 203,
+      "branch": 0,
+      "source": "if (!isPlatformBrowser(this._platformId)) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1687,
+      "block": 265,
+      "branch": 0,
+      "source": "if (!isPlatformBrowser(this._platformId)) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1764,
+      "block": 283,
+      "branch": 0,
+      "source": "if (!isPlatformBrowser(this._platformId)) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1807,
+      "block": 290,
+      "branch": 1,
+      "source": "if (!origin || !isPlatformBrowser(this._platformId)) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1807,
+      "block": 291,
+      "branch": 1,
+      "source": "if (!origin || !isPlatformBrowser(this._platformId)) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 210,
+      "block": 2,
+      "branch": 0,
+      "source": "@if (clearIconTpl()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 420,
+      "block": 12,
+      "branch": 1,
+      "source": "{{ currentFilter() ? noResultsMessage() : emptyMessage() }}",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 795,
+      "block": 55,
+      "branch": 0,
+      "source": "if (max != null && labels.length > max) return `${this.currentValues().length} selected`;",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 663,
+      "block": 27,
+      "branch": 1,
+      "source": "request: (callback) => this._document.defaultView?.requestAnimationFrame(callback) ?? -1,",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1032,
+      "block": 109,
+      "branch": 0,
+      "source": "switch (event.key) {",
+      "syntax": "switch",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 700,
+      "block": 29,
+      "branch": 0,
+      "source": "if (this.ariaDescribedBy()) return this.ariaDescribedBy();",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 770,
+      "block": 48,
+      "branch": 0,
+      "source": "this.lazy()",
+      "syntax": "other",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1105,
+      "block": 121,
+      "branch": 0,
+      "source": "if (this.isOpen()) this.proposeOpen(false);",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1134,
+      "block": 130,
+      "branch": 1,
+      "source": "if (row?.kind === 'option' && !row.disabled) this.selectRow(null, row, rowIndex, false);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1097,
+      "block": 120,
+      "branch": 1,
+      "source": "if (!this.isDisabledFinal()) this.focusTrigger();",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1149,
+      "block": 138,
+      "branch": 1,
+      "source": "if (closePanel && !this.multiple()) this.requestClose(originalEvent ?? undefined);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1097,
+      "block": 120,
+      "branch": 0,
+      "source": "if (!this.isDisabledFinal()) this.focusTrigger();",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1174,
+      "block": 146,
+      "branch": 1,
+      "source": "if (this.filterValue() === null) this.searchQuery.set(value);",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1085,
+      "block": 119,
+      "branch": 0,
+      "source": "if (result.rowIndex !== -1) {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1180,
+      "block": 149,
+      "branch": 1,
+      "source": "if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1077,
+      "block": 117,
+      "branch": 1,
+      "source": "if (",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1228,
+      "block": 158,
+      "branch": 1,
+      "source": "return (",
+      "syntax": "other",
+      "category": "H",
+      "reason": "Source snippet alone does not establish a distinct outcome or a counter-only classification."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1067,
+      "block": 116,
+      "branch": 1,
+      "source": "if (row?.kind === 'option') this.selectRow(event, row, next);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 733,
+      "block": 79,
+      "branch": 1,
+      "source": "if (!this.disabled() && !this.destroyed) this.focusVisitActive = true;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 1217,
+      "block": 251,
+      "branch": 0,
+      "source": "if (this.destroyed) return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 323,
+      "block": 3,
+      "branch": 0,
+      "source": "(mouseenter)=\"hoverDate.set(cell.disabled ? null : cell.civil)\"",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 622,
+      "block": 44,
+      "branch": 0,
+      "source": "const end = range.end ? `${this.texts().rangeEnd}: ${this.formatCivil(range.end)}` : '';",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 787,
+      "block": 97,
+      "branch": 0,
+      "source": "if (this.disabled() || this.mode() === 'time') return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 473,
+      "block": 24,
+      "branch": 2,
+      "source": "readonly resolvedLocale = computed(() => this.locale()?.trim() || this.defaultLocale || 'en-US');",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 671,
+      "block": 57,
+      "branch": 0,
+      "source": "} else if (event.key === 'Enter') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 904,
+      "block": 142,
+      "branch": 0,
+      "source": "else if (event.key === 'Home') target = page[0];",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 905,
+      "block": 143,
+      "branch": 0,
+      "source": "else if (event.key === 'End') target = page.at(-1)!;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 896,
+      "block": 139,
+      "branch": 0,
+      "source": "if (event.key === 'Enter' || event.key === ' ') {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 906,
+      "block": 144,
+      "branch": 1,
+      "source": "else if (event.key === 'PageUp' || event.key === 'PageDown') target = year + (event.key === 'PageUp' ? -12 : 12);",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 887,
+      "block": 138,
+      "branch": 0,
+      "source": "if (!target) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 907,
+      "block": 147,
+      "branch": 0,
+      "source": "if (target === null || !validCivilYear(target)) return;",
+      "syntax": "short-circuit",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 885,
+      "block": 135,
+      "branch": 1,
+      "source": "else if (event.key === 'PageUp' || event.key === 'PageDown')",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 935,
+      "block": 154,
+      "branch": 0,
+      "source": "if (this.disabled()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 884,
+      "block": 134,
+      "branch": 0,
+      "source": "else if (event.key === 'End') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 4 };",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 947,
+      "block": 163,
+      "branch": 1,
+      "source": "else if (event.key === 'Enter' || event.key === ' ') {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 883,
+      "block": 133,
+      "branch": 0,
+      "source": "else if (event.key === 'Home') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 1 };",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 947,
+      "block": 164,
+      "branch": 1,
+      "source": "else if (event.key === 'Enter' || event.key === ' ') {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 871,
+      "block": 129,
+      "branch": 0,
+      "source": "if (this.presentation() === 'overlay') this.close(true);",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 968,
+      "block": 170,
+      "branch": 1,
+      "source": "else if (this.mode() === 'datetime') this.commit(localDateTime(raw));",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 864,
+      "block": 126,
+      "branch": 0,
+      "source": "if (this.presentation() === 'overlay') this.close(true);",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 977,
+      "block": 172,
+      "branch": 1,
+      "source": "if (this.mode() === 'date')",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 843,
+      "block": 120,
+      "branch": 0,
+      "source": "if (!isCivilYear(candidate)) return true;",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 979,
+      "block": 174,
+      "branch": 0,
+      "source": "if (this.mode() === 'time')",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 155,
+      "block": 10,
+      "branch": 1,
+      "source": "if (issue && isDevMode()) console.error(`[NeuTree] ${issue.code}: ${String(issue.key)}`);",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 158,
+      "block": 12,
+      "branch": 0,
+      "source": "if (!this.browser) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 176,
+      "block": 19,
+      "branch": 1,
+      "source": "if (!this.browser || !this.hadTreeFocus) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 249,
+      "block": 35,
+      "branch": 0,
+      "source": "if (this.model().byKey.get(treeToken(key))?.relation?.state !== 'error') return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 367,
+      "block": 77,
+      "branch": 0,
+      "source": "if (!this.browser || this.destroyRef.destroyed) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 389,
+      "block": 84,
+      "branch": 0,
+      "source": "if (!this.browser) return;",
+      "syntax": "browser-guard",
+      "category": "H",
+      "reason": "Platform guard is visible, but the uncovered branch side and source-counter identity need a browser/SSR run."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 202,
+      "block": 29,
+      "branch": 0,
+      "source": "return state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false';",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 179,
+      "block": 21,
+      "branch": 0,
+      "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 114,
+      "block": 2,
+      "branch": 1,
+      "source": "protected readonly virtualItemSize = computed(() => Math.max(1, this.virtualization()?.itemSize ?? 1));",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 118,
+      "block": 3,
+      "branch": 0,
+      "source": "if (!options) return { start: 0, end: total, total };",
+      "syntax": "if-else",
+      "category": "G",
+      "reason": "virtualRange is consumed only inside the template virtualization() arm or the focusIndex options guard; its no-options arm has no valid caller."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 341,
+      "block": 69,
+      "branch": 0,
+      "source": "if (!event || typeof event !== 'object') return;",
+      "syntax": "short-circuit",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 341,
+      "block": 68,
+      "branch": 1,
+      "source": "if (!event || typeof event !== 'object') return;",
+      "syntax": "short-circuit",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 341,
+      "block": 69,
+      "branch": 1,
+      "source": "if (!event || typeof event !== 'object') return;",
+      "syntax": "short-circuit",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 341,
+      "block": 68,
+      "branch": 0,
+      "source": "if (!event || typeof event !== 'object') return;",
+      "syntax": "short-circuit",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 343,
+      "block": 70,
+      "branch": 0,
+      "source": "if (!this.acceptDrop(candidate.data, candidate.targetData)) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 336,
+      "block": 67,
+      "branch": 1,
+      "source": "if (data.owner !== this.dragOwner) return false;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 343,
+      "block": 70,
+      "branch": 1,
+      "source": "if (!this.acceptDrop(candidate.data, candidate.targetData)) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 336,
+      "block": 67,
+      "branch": 0,
+      "source": "if (data.owner !== this.dragOwner) return false;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 347,
+      "block": 71,
+      "branch": 0,
+      "source": "if (move) this.nodeMove.emit(move);",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 335,
+      "block": 66,
+      "branch": 2,
+      "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 821,
+      "block": 79,
+      "branch": 0,
+      "source": "if (this.eventDestroyRef.destroyed) return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 866,
+      "block": 86,
+      "branch": 0,
+      "source": "if (!this.eventDestroyRef.destroyed && !this._isDisabled()) this.focus();",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 866,
+      "block": 87,
+      "branch": 1,
+      "source": "if (!this.eventDestroyRef.destroyed && !this._isDisabled()) this.focus();",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 290,
+      "block": 8,
+      "branch": 0,
+      "source": "@if (_sampleError()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 527,
+      "block": 22,
+      "branch": 1,
+      "source": "return this.showAlpha() ? [...channels, alpha] : channels;",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 653,
+      "block": 39,
+      "branch": 0,
+      "source": "if (!this._dragging || event.pointerId !== this.activePointerId || !this.canMutate()) return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 355,
+      "block": 11,
+      "branch": 1,
+      "source": "() => parseColor((this.value() ?? '').trim())?.color ?? DEFAULT_COLOR,",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 465,
+      "block": 21,
+      "branch": 0,
+      "source": "} else if (this._activeMode() === 'oklch') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 786,
+      "block": 68,
+      "branch": 0,
+      "source": "if (!this.gestureStillOwned()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 785,
+      "block": 66,
+      "branch": 0,
+      "source": "if (!this.canMutate() || !text.trim()) return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 788,
+      "block": 69,
+      "branch": 0,
+      "source": "if (!Number.isFinite(value)) return;",
+      "syntax": "if-else",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 771,
+      "block": 65,
+      "branch": 1,
+      "source": "if (event.key === 'Enter' && !this._textInvalid()) {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 790,
+      "block": 70,
+      "branch": 0,
+      "source": "if (channel === 'alpha') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 771,
+      "block": 65,
+      "branch": 0,
+      "source": "if (event.key === 'Enter' && !this._textInvalid()) {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 796,
+      "block": 72,
+      "branch": 1,
+      "source": "const hue = channel === 'hue' ? wrapHue(value) : hsl.hue;",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 771,
+      "block": 64,
+      "branch": 1,
+      "source": "if (event.key === 'Enter' && !this._textInvalid()) {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 797,
+      "block": 73,
+      "branch": 0,
+      "source": "const saturation = channel === 'saturation' ? clamp(value, 0, 100) : hsl.saturation;",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 771,
+      "block": 64,
+      "branch": 0,
+      "source": "if (event.key === 'Enter' && !this._textInvalid()) {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 798,
+      "block": 74,
+      "branch": 0,
+      "source": "const lightness = channel === 'lightness' ? clamp(value, 0, 100) : hsl.lightness;",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "line": 764,
+      "block": 63,
+      "branch": 1,
+      "source": "if (event.key === 'Escape') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 345,
+      "block": 30,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'start' : 'end', originY: 'top', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetX: rtl ? -8 : 8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 345,
+      "block": 30,
+      "branch": 1,
+      "source": "{ originX: rtl ? 'start' : 'end', originY: 'top', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetX: rtl ? -8 : 8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 345,
+      "block": 31,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'start' : 'end', originY: 'top', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetX: rtl ? -8 : 8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 345,
+      "block": 31,
+      "branch": 1,
+      "source": "{ originX: rtl ? 'start' : 'end', originY: 'top', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetX: rtl ? -8 : 8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 345,
+      "block": 32,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'start' : 'end', originY: 'top', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetX: rtl ? -8 : 8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 345,
+      "block": 32,
+      "branch": 1,
+      "source": "{ originX: rtl ? 'start' : 'end', originY: 'top', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetX: rtl ? -8 : 8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 346,
+      "block": 33,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'top', overlayX: rtl ? 'start' : 'end', overlayY: 'top', offsetX: rtl ? 8 : -8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 346,
+      "block": 33,
+      "branch": 1,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'top', overlayX: rtl ? 'start' : 'end', overlayY: 'top', offsetX: rtl ? 8 : -8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 346,
+      "block": 34,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'top', overlayX: rtl ? 'start' : 'end', overlayY: 'top', offsetX: rtl ? 8 : -8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 346,
+      "block": 34,
+      "branch": 1,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'top', overlayX: rtl ? 'start' : 'end', overlayY: 'top', offsetX: rtl ? 8 : -8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 346,
+      "block": 35,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'top', overlayX: rtl ? 'start' : 'end', overlayY: 'top', offsetX: rtl ? 8 : -8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 346,
+      "block": 35,
+      "branch": 1,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'top', overlayX: rtl ? 'start' : 'end', overlayY: 'top', offsetX: rtl ? 8 : -8 },",
+      "syntax": "ternary",
+      "category": "C",
+      "reason": "The same rtl boolean is repeated in coordinate ternaries on this line; one direction state selects all coordinates together."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 391,
+      "block": 43,
+      "branch": 0,
+      "source": "if (root.kind !== 'panel' || this.disabled() || root.disabled || this.invalid('root/' + root.key)) return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 162,
+      "block": 3,
+      "branch": 1,
+      "source": "@if (root.routerLink != null) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 350,
+      "block": 36,
+      "branch": 0,
+      "source": "{ originX: rtl ? 'end' : 'start', originY: 'bottom', overlayX: rtl ? 'end' : 'start', overlayY: 'top', offsetY: 8 },",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 403,
+      "block": 48,
+      "branch": 0,
+      "source": "if (event.key === 'Escape' && this.openRoot()) {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 392,
+      "block": 45,
+      "branch": 0,
+      "source": "this.openKey.set(this.openRoot()?.key === root.key ? null : root.key);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 343,
+      "block": 29,
+      "branch": 0,
+      "source": "if (this.orientation() === 'vertical') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 444,
+      "block": 60,
+      "branch": 1,
+      "source": "if (!this.mobileOpen()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "line": 453,
+      "block": 61,
+      "branch": 0,
+      "source": "if (this.disabled()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 486,
+      "block": 64,
+      "branch": 0,
+      "source": "if (this.destroyed || this.emittingMove || this.boardDiagnostic()) return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 520,
+      "block": 70,
+      "branch": 0,
+      "source": "if (this.destroyed) return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 349,
+      "block": 25,
+      "branch": 0,
+      "source": "this.activeMoveCardId.update((activeCardId) => (activeCardId === cardId ? null : cardId));",
+      "syntax": "ternary",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 262,
+      "block": 14,
+      "branch": 0,
+      "source": "return configured && configured !== 'Move' ? configured : this.labels().move;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 287,
+      "block": 17,
+      "branch": 1,
+      "source": "if (win?.MutationObserver) {",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 300,
+      "block": 18,
+      "branch": 0,
+      "source": "if (assignee.initials) return assignee.initials;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 443,
+      "block": 51,
+      "branch": 0,
+      "source": "columnIndex + this.visualColumnDelta(key === 'ArrowLeft' ? 'left' : 'right')));",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 444,
+      "block": 52,
+      "branch": 0,
+      "source": "else if (key === 'ArrowUp') currentIndex -= 1;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 439,
+      "block": 48,
+      "branch": 0,
+      "source": "if (columnIndex < 0) return null;",
+      "syntax": "if-else",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 445,
+      "block": 53,
+      "branch": 0,
+      "source": "else if (key === 'ArrowDown') currentIndex += 1;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 426,
+      "block": 47,
+      "branch": 0,
+      "source": "if (!next) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 446,
+      "block": 54,
+      "branch": 0,
+      "source": "else if (key !== 'Home' && key !== 'End') return null;",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 408,
+      "block": 43,
+      "branch": 0,
+      "source": "if (active.cardId !== card.id) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 462,
+      "block": 59,
+      "branch": 0,
+      "source": "if (!position || !this.canMove(cardId, direction)) return null;",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 394,
+      "block": 41,
+      "branch": 0,
+      "source": "if (event.key !== 'Enter' && event.key !== ' ') return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 463,
+      "block": 61,
+      "branch": 0,
+      "source": "if (direction === 'up' || direction === 'down') {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 381,
+      "block": 37,
+      "branch": 0,
+      "source": "if (!move) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 468,
+      "block": 63,
+      "branch": 0,
+      "source": "currentIndex: position.cardIndex + (direction === 'up' ? -1 : 1),",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 371,
+      "block": 32,
+      "branch": 0,
+      "source": "if (!position || position.column.cards[position.cardIndex].disabled) return false;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "line": 468,
+      "block": 63,
+      "branch": 1,
+      "source": "currentIndex: position.cardIndex + (direction === 'up' ? -1 : 1),",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 848,
+      "block": 121,
+      "branch": 0,
+      "source": "if (this.eventDestroyRef.destroyed || this.isDisabled() || this.open()) return;",
+      "syntax": "error-guard",
+      "category": "B",
+      "reason": "The source handles a lifecycle, error, or invalid-state boundary; individual reachability remains a follow-up test question."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 282,
+      "block": 7,
+      "branch": 0,
+      "source": "@if (emptyTpl()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 489,
+      "block": 59,
+      "branch": 0,
+      "source": "this.open() ? this.close() : this.openPanel(false);",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 61,
+      "block": 13,
+      "branch": 0,
+      "source": "return typeof value === 'number' && Object.is(value, -0) ? NEGATIVE_ZERO_TOKEN : value;",
+      "syntax": "short-circuit",
+      "category": "B",
+      "reason": "The source checks a runtime type or validity boundary; malformed or boundary input selects its other path."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 433,
+      "block": 40,
+      "branch": 1,
+      "source": "readonly selectedNode = computed(() => this.selectedNodes()[0] ?? null);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 475,
+      "block": 57,
+      "branch": 0,
+      "source": "if (!this.effectiveVirtualization().enabled) return this.visibleNodes();",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 704,
+      "block": 102,
+      "branch": 1,
+      "source": ": this.isRecord(node)",
+      "syntax": "other",
+      "category": "H",
+      "reason": "Source snippet alone does not establish a distinct outcome or a counter-only classification."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 674,
+      "block": 96,
+      "branch": 0,
+      "source": "this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 676,
+      "block": 97,
+      "branch": 0,
+      "source": "if (!result.handled) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 655,
+      "block": 95,
+      "branch": 1,
+      "source": "if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 681,
+      "block": 100,
+      "branch": 1,
+      "source": "if (result.action === 'activate') {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 655,
+      "block": 95,
+      "branch": 0,
+      "source": "if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 712,
+      "block": 104,
+      "branch": 1,
+      "source": "return this.isRecord(node) ? Boolean((node as UnknownRecord)['lazy']) : false;",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 652,
+      "block": 94,
+      "branch": 1,
+      "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "line": 725,
+      "block": 107,
+      "branch": 0,
+      "source": "if (!root) return [...this.currentValues()];",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 176,
+      "block": 3,
+      "branch": 0,
+      "source": "@if (previewTemplate()) {",
+      "syntax": "template",
+      "category": "A",
+      "reason": "A valid rendered mode, keyboard action, or visible template state selects a distinct user-observable outcome."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 339,
+      "block": 17,
+      "branch": 0,
+      "source": "return this.hint() ? `${this.inputId()}-hint` : null;",
+      "syntax": "ternary",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 333,
+      "block": 14,
+      "branch": 0,
+      "source": "this.showPickerText() && this.chooseLabel() ? null : this.chooseLabel(),",
+      "syntax": "short-circuit",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 157,
+      "block": 2,
+      "branch": 0,
+      "source": "[value]=\"progress() ?? 0\"",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 360,
+      "block": 25,
+      "branch": 0,
+      "source": "if (this.errorMessage()) {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 414,
+      "block": 34,
+      "branch": 0,
+      "source": "if (!this.dropzone() || this.isInteractionBlocked()) {",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 392,
+      "block": 33,
+      "branch": 1,
+      "source": "const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 422,
+      "block": 36,
+      "branch": 0,
+      "source": "if (!this.dropzone()) {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 392,
+      "block": 33,
+      "branch": 0,
+      "source": "const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';",
+      "syntax": "ternary",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 435,
+      "block": 39,
+      "branch": 1,
+      "source": "this.consumeFiles(event.dataTransfer?.files ?? null);",
+      "syntax": "optional-nullish",
+      "category": "H",
+      "reason": "Optional-state source needs a public-state and counter-side proof before it can be called reachable or redundant."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 391,
+      "block": 32,
+      "branch": 1,
+      "source": "if (this.disabled()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 443,
+      "block": 41,
+      "branch": 0,
+      "source": "if (!match) {",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 391,
+      "block": 32,
+      "branch": 0,
+      "source": "if (this.disabled()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 457,
+      "block": 42,
+      "branch": 0,
+      "source": "if (this.isInteractionBlocked()) return;",
+      "syntax": "if-else",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "line": 386,
+      "block": 31,
+      "branch": 1,
+      "source": "if (next && (event.currentTarget as HTMLElement).contains(next)) return;",
+      "syntax": "short-circuit",
+      "category": "A",
+      "reason": "The source chooses between application states or actions; the exact opposite outcome remains a test target."
+    }
+  ],
+  "functionPopulationUncovered": 330,
+  "functionSampleSize": 123,
+  "functionCounts": {
+    "browser callback": 2,
+    "meaningful application function": 30,
+    "meaningful event callback": 50,
+    "unknown": 41
+  },
+  "functionRows": [
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "name": "NeuSelectComponent_ng_template_13_Template_div_scroll_5_listener",
+      "line": 333,
+      "source": "(scroll)=\"onPanelScroll($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "name": "NeuDateInputControl_ng_template_13_Conditional_1_For_2_Template_button_click_0_listener",
+      "line": 198,
+      "source": "(click)=\"applyPreset(preset)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_5_Template_select_change_4_listener",
+      "line": 237,
+      "source": "(change)=\"onYearSelect($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "name": "NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_13_listener",
+      "line": 332,
+      "source": "<button type=\"button\" class=\"neu-date-input__cal-footer-btn\" [disabled]=\"readonly()\" (click)=\"clear()\">{{ texts().clear }}</button>",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "name": "NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_2_listener",
+      "line": 346,
+      "source": "<button type=\"button\" class=\"neu-date-input__drum-arrow\" [disabled]=\"readonly()\" [attr.aria-label]=\"texts().prevHour\" (click)=\"changeHour(-1)\">▲</button>",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "name": "NeuDateInputControl_ng_template_13_Conditional_3_For_16_Template_button_click_0_listener",
+      "line": 359,
+      "source": "<button type=\"button\" class=\"neu-date-input__drum-item\" [class.neu-date-input__drum-item--selected]=\"slot.offset === 0\" [disabled]=\"readonly()\" (click)=\"slot.offset && changeMinute(slot.offset)\">{{ slot.label }}</button>",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "NeuColorPickerComponent_Template_button_focus_0_listener",
+      "line": 102,
+      "source": "(focus)=\"onBoundaryFocusIn()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "NeuColorPickerComponent_ng_template_5_Template_input_pointercancel_6_listener",
+      "line": 171,
+      "source": "(change)=\"finishColorChange()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "NeuColorPickerComponent_ng_template_5_Conditional_9_Template_input_pointercancel_4_listener",
+      "line": 193,
+      "source": "(change)=\"finishColorChange()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "NeuColorPickerComponent_ng_template_5_Conditional_16_For_2_Template_input_blur_3_listener",
+      "line": 253,
+      "source": "(change)=\"finishColorChange()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "NeuColorPickerComponent_ng_template_5_Template_input_input_18_listener",
+      "line": 272,
+      "source": "(focus)=\"beginColorChange()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "NeuColorPickerComponent_ng_template_5_Conditional_20_Template_button_click_0_listener",
+      "line": 285,
+      "source": "(click)=\"_sampleScreenColor()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "name": "NeuMegaMenuComponent_For_5_Conditional_2_Conditional_0_Template_a_click_0_listener",
+      "line": 166,
+      "source": "(click)=\"activate(root, $event)\">",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "name": "NeuMegaMenuComponent_Conditional_7_Conditional_0_Template_ng_template_detach_0_listener",
+      "line": 209,
+      "source": "(attach)=\"onOverlayAttach()\" (detach)=\"onOverlayDetach()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "name": "NeuMegaMenuComponent_ng_template_8_For_3_For_2_For_4_Conditional_0_Conditional_1_Conditional_1_Template_a_click_0_listener",
+      "line": 249,
+      "source": "(click)=\"activate(leaf, $event)\">",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "name": "NeuKanbanComponent_Conditional_1_For_6_For_12_Conditional_16_Template_button_click_1_listener",
+      "line": 201,
+      "source": "(click)=\"moveByAction(card.id, 'left')\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "name": "NeuKanbanComponent_Conditional_1_For_6_For_12_Conditional_16_Template_button_click_5_listener",
+      "line": 217,
+      "source": "(click)=\"moveByAction(card.id, 'down')\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "name": "NeuTableBasicRendererComponent_For_14_Template_th_dragend_0_listener",
+      "line": 202,
+      "source": "(drop)=\"onColumnDrop(column.id, $event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "name": "NeuTableBasicRendererComponent_For_14_Template_button_keydown_arrowleft_14_listener",
+      "line": 299,
+      "source": "(pointercancel)=\"cancelResize()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "name": "NeuTableBasicRendererComponent_For_14_Conditional_15_Template_form_keydown_escape_0_listener",
+      "line": 311,
+      "source": "(submit)=\"applyFilterMenu($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Template_select_change_4_listener",
+      "line": 357,
+      "source": "(change)=\"setRowFilterRule(column, $event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_7_Template_input_keydown_enter_3_listener",
+      "line": 372,
+      "source": "(input)=\"setRowFilterValue(column, $event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_9_Template_button_click_0_listener",
+      "line": 384,
+      "source": "(click)=\"clearFilter(column)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "name": "NeuTreeSelectComponent_Template_ng_template_backdropClick_12_listener",
+      "line": 174,
+      "source": "(backdropClick)=\"requestClose('outside-pointer', $event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
+      "name": "NeuRichTextEditorComponent_Template_button_click_5_listener",
+      "line": 139,
+      "source": "(click)=\"format('bold')\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
+      "name": "NeuRichTextEditorComponent_Template_button_click_9_listener",
+      "line": 161,
+      "source": "(click)=\"format('underline')\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
+      "name": "NeuRichTextEditorComponent_Template_button_click_14_listener",
+      "line": 190,
+      "source": "(click)=\"format('insertOrderedList')\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
+      "name": "NeuRichTextEditorComponent_Template_button_click_19_listener",
+      "line": 219,
+      "source": "(click)=\"addImageUrl()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
+      "name": "NeuRichTextEditorComponent_Template_div_blur_25_listener",
+      "line": 275,
+      "source": "(focus)=\"onFocus()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "name": "NeuUploaderComponent_Conditional_4_Template_div_keydown_enter_0_listener",
+      "line": 83,
+      "source": "(click)=\"openFilePicker()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "name": "NeuListboxComponent_Template_div_cdkDropListDropped_4_listener",
+      "line": 151,
+      "source": "(scroll)=\"onScroll($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/slider/neu-slider.component.ts",
+      "name": "NeuSliderComponent_Template_div_lostpointercapture_3_listener",
+      "line": 62,
+      "source": "(pointercancel)=\"onRangePointerEnd($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "name": "NeuCommandPaletteComponent_Conditional_0_Conditional_12_For_1_For_4_Template_li_mouseenter_1_listener",
+      "line": 97,
+      "source": "<li class=\"neu-cmd__item\" (mouseenter)=\"highlight(command.id)\">",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "name": "NeuCommandPaletteComponent_Conditional_0_Conditional_12_For_1_For_4_Conditional_4_Template_a_click_0_listener",
+      "line": 116,
+      "source": "(focus)=\"highlight(command.id)\" (click)=\"onLinkClick($event, command)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/inline-editor/neu-inline-editor.component.ts",
+      "name": "NeuInlineEditorControl_Conditional_0_Template_button_click_6_listener",
+      "line": 85,
+      "source": "(click)=\"cancel()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/inline-editor/neu-inline-editor.component.ts",
+      "name": "NeuInlineEditorControl_focusout_HostBindingHandler",
+      "line": 112,
+      "source": "export class NeuInlineEditorControl<V = string | number | null> implements FormValueControl<V> {",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.html",
+      "name": "NeuTreeComponent_Conditional_4_ng_template_3_Conditional_5_Template_input_click_0_listener",
+      "line": 106,
+      "source": "(click)=\"onCheckboxClick(entry.key, $event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.html",
+      "name": "NeuTreeComponent_Conditional_4_ng_template_3_Conditional_10_Template_button_dragEnd_0_listener",
+      "line": 134,
+      "source": "(dragStart)=\"dragging.set(true)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/gallery/neu-gallery.component.ts",
+      "name": "NeuGalleryComponent_Conditional_0_Template_div_pointercancel_1_listener",
+      "line": 62,
+      "source": "(pointerup)=\"onPointerUp($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/image-viewer/neu-image-viewer.component.ts",
+      "name": "NeuImageViewerOverlayComponent_Template_img_error_15_listener",
+      "line": 178,
+      "source": "(error)=\"_onImageError()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts",
+      "name": "NeuDashboardGridComponent_For_4_Template_div_cdkDragStarted_0_listener",
+      "line": 71,
+      "source": "(cdkDragStarted)=\"_onDragStarted()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/nav/neu-nav.component.ts",
+      "name": "NeuNavComponent_For_9_Conditional_0_Template_div_focusout_0_listener",
+      "line": 82,
+      "source": "(focusin)=\"onGroupFocusIn(item, $event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/nav/neu-nav.component.ts",
+      "name": "NeuNavComponent_Conditional_12_Template_div_focusout_0_listener",
+      "line": 369,
+      "source": "(focusin)=\"onFlyoutMouseEnter()\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/features/editing/neu-table-active-editor.component.ts",
+      "name": "NeuTableActiveEditorComponent_Template_button_click_6_listener",
+      "line": 24,
+      "source": "<button type=\"button\" (click)=\"cancel()('consumer')\">Cancel</button>",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/rating/neu-rating.component.ts",
+      "name": "NeuRatingComponent_For_2_Template_button_mouseleave_0_listener",
+      "line": 52,
+      "source": "(mouseenter)=\"onHover(i)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+      "name": "NeuTableAdvancedFilterBuilderComponent_Template_select_change_8_listener",
+      "line": 44,
+      "source": "<select [value]=\"activeRule()\" (change)=\"setRule($event)\">",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+      "name": "NeuTableAdvancedFilterBuilderComponent_Template_button_click_22_listener",
+      "line": 65,
+      "source": "<button type=\"button\" (click)=\"cancel()\">Cancel advanced filter</button>",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/carousel/neu-carousel.component.ts",
+      "name": "NeuCarouselComponent_Conditional_2_Conditional_9_Template_button_click_0_listener",
+      "line": 34,
+      "source": "@if (autoplayInterval() > 0 && pageCount() > 1) { <button type=\"button\" class=\"neu-carousel__autoplay\" [attr.aria-label]=\"(paused() ? 'Resume ' : 'Pause ') + ariaLabel()\" [attr.aria-pressed]=\"paused()\" (click)=\"paused.update(value => !value)\">{{ paused() ? '▶' : 'Ⅱ' }}</button> }",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/features/editing/neu-tree-table-active-editor.component.ts",
+      "name": "NeuTreeTableActiveEditorComponent_Template_input_keydown_enter_2_listener",
+      "line": 16,
+      "source": "(input)=\"update($event)\"",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/features/editing/neu-tree-table-active-editor.component.ts",
+      "name": "NeuTreeTableActiveEditorComponent_Template_button_click_6_listener",
+      "line": 22,
+      "source": "<button type=\"button\" (click)=\"cancel()()\">Cancel</button>",
+      "category": "meaningful event callback",
+      "reason": "Angular generated a listener for a declared template or host event; the event has a user-visible interaction path."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "name": "(anonymous_155)",
+      "line": 128,
+      "source": "private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "name": "(anonymous_65)",
+      "line": 575,
+      "source": "protected readonly setRowFilterRule = (column: NeuTableColumn<T, F>, event: Event) => {",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "name": "(anonymous_68)",
+      "line": 600,
+      "source": "private scheduleRowFilter(column: NeuTableColumn<T, F>): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "name": "(anonymous_77)",
+      "line": 684,
+      "source": "protected readonly setMenuRule = (event: Event) => {",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "name": "(anonymous_109)",
+      "line": 879,
+      "source": "cancel: () => this.cancelEdit()('consumer'),",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "name": "(anonymous_134)",
+      "line": 1044,
+      "source": "protected readonly cancelRowDrag = () => this.draggedRow.set(null);",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "name": "(anonymous_113)",
+      "line": 128,
+      "source": "private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "name": "(anonymous_44)",
+      "line": 427,
+      "source": "this.searchTimer = setTimeout(() => {",
+      "category": "browser callback",
+      "reason": "The mapped arrow is scheduled by a browser event/timing API."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "name": "(anonymous_58)",
+      "line": 554,
+      "source": "toggleSelection: () => this.proposeSelection(node, 'checkbox'),",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "name": "(anonymous_102)",
+      "line": 1114,
+      "source": "(candidate) => candidate.dataset['columnId'] === target.columnId,",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "name": "(anonymous_48)",
+      "line": 785,
+      "source": "previousGroup(option: T): string | undefined {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "name": "(anonymous_79)",
+      "line": 997,
+      "source": "onCompositeFocusOut(event: FocusEvent): void { this.onInputBlur(event); }",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "name": "(anonymous_108)",
+      "line": 1294,
+      "source": "reset: () => this.resetFilter(),",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "name": "(anonymous_152)",
+      "line": 1583,
+      "source": "leftValues.every((value, index) => this.valuesEqual(value, rightValues[index] as V))",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "name": "(anonymous_177)",
+      "line": 1811,
+      "source": "const frameId = view.requestAnimationFrame(() => {",
+      "category": "browser callback",
+      "reason": "The mapped arrow is scheduled by a browser event/timing API."
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "name": "(anonymous_75)",
+      "line": 725,
+      "source": "onPickerEscape(event: Event): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "name": "(anonymous_76)",
+      "line": 829,
+      "source": "focus(options?: FocusOptions): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "name": "(anonymous_59)",
+      "line": 302,
+      "source": "private readonly defaultTemplate = viewChild.required<TemplateRef<NeuMegaMenuItemTemplateContext>>('defaultItem');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
+      "name": "(anonymous_47)",
+      "line": 452,
+      "source": "protected toggleMobile(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "name": "(anonymous_19)",
+      "line": 179,
+      "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "name": "(anonymous_35)",
+      "line": 253,
+      "source": "protected onCheckboxClick(key: K, event: MouseEvent): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "name": "(anonymous_44)",
+      "line": 334,
+      "source": "protected readonly acceptDrop = (data: unknown, target: unknown): boolean => {",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "name": "(anonymous_58)",
+      "line": 423,
+      "source": "private isTreeDropTarget(value: unknown): value is TreeDropTarget<K> {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "name": "(anonymous_54)",
+      "line": 561,
+      "source": "cardPosition: (card, column, position, total) =>",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "name": "(anonymous_57)",
+      "line": 570,
+      "source": "moveCancelled: (card) => `Movimiento cancelado para ${card}.`,",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "name": "(anonymous_41)",
+      "line": 493,
+      "source": "focus(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "name": "(anonymous_63)",
+      "line": 651,
+      "source": "onSearchKeydown(event: KeyboardEvent): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
+      "name": "(anonymous_46)",
+      "line": 338,
+      "source": "private readonly editorRef = viewChild<ElementRef<HTMLDivElement>>('editorRef');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/internal/selection/neu-table-selection.ts",
+      "name": "(anonymous_19)",
+      "line": 248,
+      "source": "[...leftExcluded].every((token) => rightExcluded.has(token))",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/table/internal/selection/neu-table-selection.ts",
+      "name": "(anonymous_38)",
+      "line": 383,
+      "source": "...rangeKeys.filter((key) => !tokens.has(neuTableIdentityToken(key))),",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/table/internal/selection/neu-table-selection.ts",
+      "name": "(anonymous_43)",
+      "line": 459,
+      "source": "selection.excludedKeys.find((key) => neuTableIdentityToken(key) === token),",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/table/internal/selection/neu-table-selection.ts",
+      "name": "(anonymous_48)",
+      "line": 475,
+      "source": "(key) =>",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "name": "(anonymous_32)",
+      "line": 390,
+      "source": "focus(options?: FocusOptions): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/public/neu-table.component-contract.ts",
+      "name": "(anonymous_89)",
+      "line": 295,
+      "source": "});",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/public/neu-table.component-contract.ts",
+      "name": "(anonymous_92)",
+      "line": 305,
+      "source": "{ descendants: true },",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/public/neu-table.component-contract.ts",
+      "name": "(anonymous_96)",
+      "line": 319,
+      "source": "});",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/public/neu-table.component-contract.ts",
+      "name": "(anonymous_99)",
+      "line": 329,
+      "source": "{ descendants: true },",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/public/neu-table.component-contract.ts",
+      "name": "(anonymous_45)",
+      "line": 636,
+      "source": "const expanded = this.expandedKeys().some((key) => neuTableIdentityToken(key) === token);",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "name": "(anonymous_90)",
+      "line": 870,
+      "source": "protected indicatorTemplateContext(row: InternalNeuOptionRow<T>) {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "name": "(anonymous_106)",
+      "line": 982,
+      "source": "return this.allOptions().filter((option) => this.isOptionSelected(option));",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "name": "(anonymous_121)",
+      "line": 1092,
+      "source": "reset(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/public/neu-tree-table.component-contract.ts",
+      "name": "(anonymous_49)",
+      "line": 263,
+      "source": "});",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/public/neu-tree-table.component-contract.ts",
+      "name": "(anonymous_52)",
+      "line": 273,
+      "source": "{ descendants: true },",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/public/neu-tree-table.component-contract.ts",
+      "name": "(anonymous_55)",
+      "line": 285,
+      "source": "});",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/public/neu-tree-table.component-contract.ts",
+      "name": "(anonymous_44)",
+      "line": 480,
+      "source": "async export(request: NeuTreeTableExportRequest<F>): Promise<NeuTreeTableExportOutcome> {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/menu-tiered/neu-tiered-level.component.ts",
+      "name": "(anonymous_23)",
+      "line": 32,
+      "source": "imports: [OverlayModule, NeuButtonComponent, NeuralIcon, NgTemplateOutlet, forwardRef(() => NeuTieredLevelComponent)],",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "name": "(anonymous_42)",
+      "line": 167,
+      "source": "protected readonly itemTpl = contentChild(NeuCommandPaletteItemDirective);",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/hierarchy/neu-tree-table-hierarchy.ts",
+      "name": "(anonymous_11)",
+      "line": 241,
+      "source": ".filter((key): key is K => key !== undefined);",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/inline-editor/neu-inline-editor.component.ts",
+      "name": "(anonymous_19)",
+      "line": 243,
+      "source": "reset(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/virtual-list/neu-virtual-list.component.ts",
+      "name": "(anonymous_9)",
+      "line": 132,
+      "source": "const schedule = () => {",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/pick-list/neu-pick-list.component.ts",
+      "name": "(anonymous_80)",
+      "line": 668,
+      "source": "const index = visible.findIndex((item) =>",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tabs/neu-tabs.component.ts",
+      "name": "(anonymous_39)",
+      "line": 124,
+      "source": "readonly labelTpl = contentChild(NeuTabLabelDirective<T>, { descendants: false });",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/gallery/neu-gallery.component.ts",
+      "name": "(anonymous_47)",
+      "line": 356,
+      "source": "onPointerCancel(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/cascade-select/neu-cascade-select.component.ts",
+      "name": "(anonymous_36)",
+      "line": 547,
+      "source": "reset(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.directives.ts",
+      "name": "(anonymous_14)",
+      "line": 94,
+      "source": "constructor(readonly templateRef: TemplateRef<NeuSelectIconContext>) {}",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.directives.ts",
+      "name": "(anonymous_17)",
+      "line": 109,
+      "source": "constructor(readonly templateRef: TemplateRef<void>) {}",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/speed-dial/neu-speed-dial.component.ts",
+      "name": "(anonymous_62)",
+      "line": 287,
+      "source": "protected readonly itemTemplate = contentChild(NeuSpeedDialItemDirective);",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/internal/features/export/neu-table-json-export.ts",
+      "name": "(anonymous_1)",
+      "line": 17,
+      "source": "return value.map((entry) => jsonValue(entry, next));",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/input-tags/neu-input-tags.component.ts",
+      "name": "(anonymous_73)",
+      "line": 758,
+      "source": "if (this.allOptions().every((option) => typeof option === 'string'))",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/calendar/neu-calendar.component.ts",
+      "name": "(anonymous_71)",
+      "line": 374,
+      "source": "readonly eventTpl = contentChild(NeuCalendarEventDirective);",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/rating/neu-rating.component.ts",
+      "name": "(anonymous_15)",
+      "line": 130,
+      "source": "onLeave(): void {",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/internal/layout/neu-table-layout.ts",
+      "name": "(anonymous_26)",
+      "line": 138,
+      "source": "const hidden = projection.hiddenColumns.map((column) => column.id);",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/menu-tiered/neu-tiered-menu.component.ts",
+      "name": "(anonymous_17)",
+      "line": 41,
+      "source": "protected readonly itemTpl = contentChild(NeuMenuItemDirective);",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/panel/neu-panel.component.ts",
+      "name": "(anonymous_39)",
+      "line": 231,
+      "source": "readonly viewport = viewChild.required<ElementRef<HTMLDivElement>>('viewport');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/table/internal/export/neu-table-export-projection.ts",
+      "name": "(anonymous_8)",
+      "line": 102,
+      "source": "selected.keys.some((key) => !loadedTokens.has(neuTableIdentityToken(key)));",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/input-mask/neu-input-mask.component.ts",
+      "name": "(anonymous_25)",
+      "line": 94,
+      "source": "private readonly nativeInput = viewChild.required<ElementRef<HTMLInputElement>>('nativeInput');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/context-menu/neu-context-menu.component.ts",
+      "name": "(anonymous_35)",
+      "line": 214,
+      "source": "readonly itemTpl = contentChild(NeuContextMenuItemDirective);",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/popover/neu-popover.component.ts",
+      "name": "(anonymous_9)",
+      "line": 183,
+      "source": "this._overlayRef!.keydownEvents().subscribe((event) => this.onEscape(event));",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/knob/neu-knob.component.ts",
+      "name": "(anonymous_41)",
+      "line": 123,
+      "source": "private readonly dial = viewChild.required<ElementRef<HTMLElement>>('dial');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/confirm-popup/neu-confirm-popup.component.ts",
+      "name": "(anonymous_23)",
+      "line": 132,
+      "source": "private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');",
+      "category": "unknown",
+      "reason": "The mapped source line does not establish the callback role."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/editing/neu-tree-table-editing.ts",
+      "name": "reconcileNeuTreeTableEditSession",
+      "line": 80,
+      "source": "export function reconcileNeuTreeTableEditSession<",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/export/neu-tree-table-export.ts",
+      "name": "download",
+      "line": 110,
+      "source": "function download(",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    },
+    {
+      "file": "projects/ui-core/panel/scroll-left.ts",
+      "name": "detectRtlScrollMode",
+      "line": 25,
+      "source": "export function detectRtlScrollMode(document: Document): RtlScrollMode {",
+      "category": "meaningful application function",
+      "reason": "The mapped arrow or named function computes or applies application state."
+    }
+  ]
+}

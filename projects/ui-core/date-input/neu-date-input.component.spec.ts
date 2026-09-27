@@ -893,4 +893,62 @@ describe('NeuDateInputComponent', () => {
     fixture.detectChanges();
     expect(field.dirty()).toBe(false);
   });
+
+  it('navigates the rendered month grid by arrows and row keys before committing a period', async () => {
+    const fixture = create('month');
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', { year: 2026, month: 6 } satisfies CivilMonth);
+    fixture.detectChanges();
+    const native = fixture.nativeElement as HTMLElement;
+    const arrows = native.querySelectorAll<HTMLButtonElement>('.neu-date-input__cal-arrow');
+    arrows[0]!.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewYear()).toBe(2025);
+    arrows[1]!.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewYear()).toBe(2026);
+
+    const june = native.querySelector<HTMLButtonElement>('[data-civil-month="6"]')!;
+    for (const [key, focused] of [['Home', 5], ['End', 8]] as const) {
+      june.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+      await fixture.whenStable();
+      expect(fixture.componentInstance.focusedMonth()).toBe(focused);
+    }
+    june.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageUp', bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewYear()).toBe(2025);
+    june.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewYear()).toBe(2026);
+    june.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.value()).toEqual({ year: 2026, month: 6 });
+  });
+
+  it('navigates the rendered year grid and commits the focused year', async () => {
+    const fixture = create('year');
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', { year: 2026 } satisfies CivilYear);
+    fixture.detectChanges();
+    const native = fixture.nativeElement as HTMLElement;
+    const arrows = native.querySelectorAll<HTMLButtonElement>('.neu-date-input__cal-arrow');
+    const initial = fixture.componentInstance.viewYear();
+    arrows[0]!.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewYear()).toBe(initial - 12);
+    arrows[1]!.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.viewYear()).toBe(initial);
+
+    const year = native.querySelector<HTMLButtonElement>('[data-civil-year="2026"]')!;
+    year.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.focusedYear()).toBe(fixture.componentInstance.yearPage()[0]);
+    year.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.focusedYear()).toBe(fixture.componentInstance.yearPage().at(-1));
+    year.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.value()).toEqual({ year: 2026 });
+  });
 });

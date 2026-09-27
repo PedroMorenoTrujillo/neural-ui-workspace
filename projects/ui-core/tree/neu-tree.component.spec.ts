@@ -535,6 +535,27 @@ describe('NeuTreeComponent controlled C6', () => {
     expect(internal.visibleNodes()).toBe(visibleBeforeScroll);
   });
 
+  it('keeps checked and mixed ARIA states while applying a zero-buffer virtual window', () => {
+    const fixture = create({
+      expandedKeys: ['root', 'child'],
+      selection: { mode: 'checkbox', keys: ['grandchild'] },
+    });
+    const rowFor = (label: string) => rows(fixture).find((row) => row.querySelector('.neu-tree__row')?.textContent?.includes(label));
+    expect(rowFor('Admin portal')?.getAttribute('aria-checked')).toBe('true');
+    expect(rowFor('Design')?.getAttribute('aria-checked')).toBe('mixed');
+    expect(rowFor('Workspace')?.getAttribute('aria-checked')).toBe('mixed');
+
+    const viewport = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[role="tree"]')!;
+    fixture.componentRef.setInput('virtualization', { itemSize: 20, viewportHeight: 20, buffer: 0 });
+    fixture.detectChanges();
+    viewport.scrollTop = 40;
+    viewport.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    expect(rows(fixture).length).toBeLessThanOrEqual(2);
+    expect(rows(fixture)[0]?.textContent).toContain('Admin portal');
+    expect(rows(fixture)[0]?.getAttribute('aria-checked')).toBe('true');
+  });
+
   it('updates reconstructed T with stable K without stale object identity', () => {
     const fixture = create({ expandedKeys: ['root'] });
     fixture.componentRef.setInput('nodes', nodes.map((node) => node.key === 'child' ? { ...node, label: 'Renamed' } : { ...node }));

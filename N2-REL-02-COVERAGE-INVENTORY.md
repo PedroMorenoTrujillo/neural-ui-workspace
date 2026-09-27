@@ -6,13 +6,13 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 
 | Rank | Production file | S% (miss) | B% (miss) | F% (miss) | L% (miss) | Absolute gap |
 |---:|---|---:|---:|---:|---:|---:|
-| 1 | `projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts` | 85.13 (92) | 68.18 (105) | 88.46 (18) | 88.88 (60) | 275 |
-| 2 | `projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts` | 86.28 (89) | 72.28 (125) | 90.35 (11) | 91.98 (44) | 269 |
-| 3 | `projects/ui-core/select/neu-select.component.ts` | 92.03 (76) | 84.88 (99) | 91.62 (16) | 93.46 (51) | 242 |
-| 4 | `projects/ui-core/date-input/neu-date-input.component.ts` | 91.82 (75) | 89.03 (68) | 89.47 (16) | 94.54 (37) | 196 |
-| 5 | `projects/ui-core/color-picker/neu-color-picker.component.ts` | 87.31 (69) | 81.6 (46) | 85.56 (14) | 91.84 (35) | 164 |
+| 1 | `projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts` | 85.29 (91) | 70 (99) | 88.46 (18) | 89.07 (59) | 267 |
+| 2 | `projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts` | 86.59 (87) | 72.72 (123) | 90.35 (11) | 91.98 (44) | 265 |
+| 3 | `projects/ui-core/select/neu-select.component.ts` | 92.45 (72) | 84.88 (99) | 91.62 (16) | 94.11 (46) | 233 |
+| 4 | `projects/ui-core/color-picker/neu-color-picker.component.ts` | 87.31 (69) | 81.6 (46) | 85.56 (14) | 91.84 (35) | 164 |
+| 5 | `projects/ui-core/date-input/neu-date-input.component.ts` | 93.23 (62) | 90.96 (56) | 90.13 (15) | 95.57 (30) | 163 |
 | 6 | `projects/ui-core/mega-menu/neu-mega-menu.component.ts` | 81.76 (64) | 77.5 (45) | 79.03 (13) | 86.12 (34) | 156 |
-| 7 | `projects/ui-core/tree/neu-tree.component.ts` | 82.11 (54) | 72.09 (60) | 80.32 (12) | 87.12 (30) | 156 |
+| 7 | `projects/ui-core/tree/neu-tree.component.ts` | 82.11 (54) | 72.55 (59) | 80.32 (12) | 87.12 (30) | 155 |
 | 8 | `projects/ui-core/kanban/neu-kanban.component.ts` | 87.05 (47) | 77.22 (41) | 81.81 (12) | 93.81 (17) | 117 |
 | 9 | `projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html` | 90.45 (50) | 81.63 (27) | 74.13 (15) | 93.57 (23) | 115 |
 | 10 | `projects/ui-core/tree-select/neu-tree-select.component.ts` | 91.94 (41) | 86.98 (38) | 91.66 (9) | 95.28 (19) | 107 |
@@ -38,24 +38,24 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 | 30 | `projects/ui-core/tabs/neu-tabs.component.ts` | 93.54 (14) | 85.8 (22) | 95.45 (2) | 98.13 (3) | 41 |
 | 31 | `projects/ui-core/gallery/neu-gallery.component.ts` | 94.09 (14) | 86.91 (14) | 90.56 (5) | 96.08 (7) | 40 |
 | 32 | `projects/ui-core/tree-table/internal/remote/neu-tree-table-remote.ts` | 89.31 (14) | 83.83 (16) | 100 (0) | 92.03 (9) | 39 |
-| 33 | `projects/ui-core/table/internal/query-ui/neu-table-query-transitions.ts` | 90 (10) | 83.47 (19) | 92.85 (2) | 92.85 (6) | 37 |
+| 33 | `projects/ui-core/table/internal/query-ui/neu-table-query-transitions.ts` | 90 (10) | 84.34 (18) | 92.85 (2) | 92.85 (6) | 36 |
 | 34 | `projects/ui-core/cascade-select/neu-cascade-select.component.ts` | 96.57 (13) | 93.33 (12) | 96.72 (2) | 97.68 (7) | 34 |
 | 35 | `projects/ui-core/image-viewer/neu-image-viewer.component.ts` | 96.61 (10) | 88.03 (14) | 93.54 (4) | 98.22 (4) | 32 |
-| 36 | `projects/ui-core/select/neu-select.directives.ts` | 80.32 (12) | 87.69 (8) | 77.77 (4) | 77.14 (8) | 32 |
-| 37 | `projects/ui-core/speed-dial/neu-speed-dial.component.ts` | 96.35 (11) | 91.06 (16) | 95.23 (3) | 99.09 (2) | 32 |
-| 38 | `projects/ui-core/table/internal/grouping/neu-table-grouping.ts` | 89.01 (10) | 68.88 (14) | 85.71 (2) | 92.4 (6) | 32 |
-| 39 | `projects/ui-core/panel/scroll-left.ts` | 38.09 (13) | 75 (5) | 75 (1) | 33.33 (12) | 31 |
-| 40 | `projects/ui-core/rich-text-editor/neu-rich-text-editor.utils.ts` | 92.1 (6) | 80.51 (15) | 100 (0) | 91.54 (6) | 27 |
-| 41 | `projects/ui-core/tree-table/internal/selection/neu-tree-table-selection.ts` | 94.11 (11) | 91.15 (13) | 100 (0) | 98.07 (3) | 27 |
-| 42 | `projects/ui-core/table/internal/features/export/neu-table-json-export.ts` | 63.33 (11) | 60 (10) | 83.33 (1) | 80.95 (4) | 26 |
-| 43 | `projects/ui-core/accordion/neu-accordion.component.ts` | 92.48 (10) | 88.6 (9) | 96.15 (1) | 94.84 (5) | 25 |
-| 44 | `projects/ui-core/compare/neu-compare.component.ts` | 93.97 (10) | 89.34 (13) | 100 (0) | 97.67 (2) | 25 |
-| 45 | `projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts` | 89.47 (12) | 94.91 (3) | 80 (4) | 93.1 (6) | 25 |
-| 46 | `projects/ui-core/input-tags/neu-input-tags.component.ts` | 98.29 (9) | 96 (13) | 99.03 (1) | 99.52 (2) | 25 |
-| 47 | `projects/ui-core/nav/neu-nav.component.ts` | 97.5 (8) | 93.38 (9) | 92.1 (3) | 98.31 (4) | 24 |
-| 48 | `projects/ui-core/table/internal/features/editing/neu-table-active-editor.component.ts` | 86.36 (9) | 80 (4) | 71.42 (4) | 85.36 (6) | 23 |
-| 49 | `projects/ui-core/calendar/neu-calendar.component.ts` | 97.12 (9) | 93.81 (6) | 97.22 (2) | 97.94 (5) | 22 |
-| 50 | `projects/ui-core/rating/neu-rating.component.ts` | 93.43 (9) | 92.78 (7) | 87.09 (4) | 98.05 (2) | 22 |
+| 36 | `projects/ui-core/speed-dial/neu-speed-dial.component.ts` | 96.35 (11) | 91.06 (16) | 95.23 (3) | 99.09 (2) | 32 |
+| 37 | `projects/ui-core/table/internal/grouping/neu-table-grouping.ts` | 89.01 (10) | 68.88 (14) | 85.71 (2) | 92.4 (6) | 32 |
+| 38 | `projects/ui-core/panel/scroll-left.ts` | 38.09 (13) | 75 (5) | 75 (1) | 33.33 (12) | 31 |
+| 39 | `projects/ui-core/rich-text-editor/neu-rich-text-editor.utils.ts` | 92.1 (6) | 80.51 (15) | 100 (0) | 91.54 (6) | 27 |
+| 40 | `projects/ui-core/tree-table/internal/selection/neu-tree-table-selection.ts` | 94.11 (11) | 91.15 (13) | 100 (0) | 98.07 (3) | 27 |
+| 41 | `projects/ui-core/table/internal/features/export/neu-table-json-export.ts` | 63.33 (11) | 60 (10) | 83.33 (1) | 80.95 (4) | 26 |
+| 42 | `projects/ui-core/accordion/neu-accordion.component.ts` | 92.48 (10) | 88.6 (9) | 96.15 (1) | 94.84 (5) | 25 |
+| 43 | `projects/ui-core/compare/neu-compare.component.ts` | 93.97 (10) | 89.34 (13) | 100 (0) | 97.67 (2) | 25 |
+| 44 | `projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts` | 89.47 (12) | 94.91 (3) | 80 (4) | 93.1 (6) | 25 |
+| 45 | `projects/ui-core/input-tags/neu-input-tags.component.ts` | 98.29 (9) | 96 (13) | 99.03 (1) | 99.52 (2) | 25 |
+| 46 | `projects/ui-core/nav/neu-nav.component.ts` | 97.5 (8) | 93.38 (9) | 92.1 (3) | 98.31 (4) | 24 |
+| 47 | `projects/ui-core/table/internal/features/editing/neu-table-active-editor.component.ts` | 86.36 (9) | 80 (4) | 71.42 (4) | 85.36 (6) | 23 |
+| 48 | `projects/ui-core/calendar/neu-calendar.component.ts` | 97.12 (9) | 93.81 (6) | 97.22 (2) | 97.94 (5) | 22 |
+| 49 | `projects/ui-core/rating/neu-rating.component.ts` | 93.43 (9) | 92.78 (7) | 87.09 (4) | 98.05 (2) | 22 |
+| 50 | `projects/ui-core/select/neu-select.directives.ts` | 85.24 (9) | 93.84 (4) | 88.88 (2) | 80 (7) | 22 |
 | 51 | `projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts` | 94.06 (7) | 74.35 (10) | 78.26 (5) | 100 (0) | 22 |
 | 52 | `projects/ui-core/table/internal/layout/neu-table-layout.ts` | 91.34 (9) | 83.92 (9) | 90.62 (3) | 100 (0) | 21 |
 | 53 | `projects/ui-core/splitter/neu-splitter.component.ts` | 94.03 (9) | 92.52 (8) | 93.33 (2) | 99.08 (1) | 20 |
@@ -141,33 +141,33 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 
 ### projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts
 
-- Uncovered line ranges: 365, 543, 547, 550, 575-580, 582-583, 588-589, 596-598, 601-604, 608-609, 615-623, 629-636, 684-688, 765, 824-825, 827, 879, 965-966, 1007, 1044, 1063-1066, 1103, 1131
-- Uncovered branch locations (line:block.branch): 246:2.1, 341:13.0, 394:19.0, 424:23.0, 427:25.0, 454:31.0, 459:33.0, 461:34.1, 462:35.1, 468:38.1, 474:40.0, 496:42.1, 509:44.1, 519:45.1, 533:47.1, 534:48.0, 537:49.0, 542:51.0, 545:53.0, 545:54.0, 545:54.1, 546:55.0, 550:56.0, 550:56.1, 550:56.2, 550:56.3, 562:57.0, 562:58.1, 566:61.1, 577:64.0, 577:64.1, 577:65.0, 577:65.1, 602:66.0, 602:66.1, 603:67.0, 603:67.1, 618:68.0, 618:68.1, 620:69.0, 620:69.1, 634:70.0, 634:70.1, 635:71.0, 635:71.1, 646:72.0, 648:73.0, 666:74.0, 675:75.1, 683:76.1, 687:77.0, 687:77.1, 687:78.0, 687:78.1, 687:78.2, 696:79.0, 698:80.0, 716:81.0, 760:82.1, 764:83.0, 765:84.0, 765:84.1, 767:85.0, 767:85.1, 814:90.0, 823:91.0, 827:92.0, 827:92.1, 828:93.0, 828:93.1, 836:94.2, 836:94.3, 836:94.4, 868:101.0, 889:103.0, 902:106.1, 931:109.1, 940:111.0, 954:114.0, 963:116.1, 966:117.0, 966:117.1, 966:117.2, 967:118.1, 975:119.0, 1002:122.0, 1003:123.2, 1030:129.1, 1036:130.0, 1056:132.0, 1080:133.1, 1082:134.1, 1082:135.0, 1082:135.1, 1089:136.1, 1089:137.0, 1089:137.1, 1097:138.1, 1107:139.0, 1113:141.0, 1118:142.0, 1121:143.1, 1130:144.0, 1130:145.1, 1148:146.0
+- Uncovered line ranges: 365, 543, 547, 550, 575-580, 582-583, 588-589, 596-598, 601-604, 608-609, 615-623, 629-636, 684-688, 824-825, 827, 879, 965-966, 1007, 1044, 1063-1066, 1103, 1131
+- Uncovered branch locations (line:block.branch): 246:2.1, 341:13.0, 394:19.0, 424:23.0, 427:25.0, 454:31.0, 459:33.0, 474:40.0, 496:42.1, 509:44.1, 519:45.1, 533:47.1, 534:48.0, 537:49.0, 542:51.0, 545:53.0, 545:54.0, 545:54.1, 546:55.0, 550:56.0, 550:56.1, 550:56.2, 550:56.3, 562:57.0, 562:58.1, 566:61.1, 577:64.0, 577:64.1, 577:65.0, 577:65.1, 602:66.0, 602:66.1, 603:67.0, 603:67.1, 618:68.0, 618:68.1, 620:69.0, 620:69.1, 634:70.0, 634:70.1, 635:71.0, 635:71.1, 646:72.0, 648:73.0, 666:74.0, 675:75.1, 683:76.1, 687:77.0, 687:77.1, 687:78.0, 687:78.1, 687:78.2, 696:79.0, 698:80.0, 716:81.0, 760:82.1, 765:84.0, 767:85.1, 814:90.0, 823:91.0, 827:92.0, 827:92.1, 828:93.0, 828:93.1, 836:94.2, 836:94.3, 836:94.4, 868:101.0, 889:103.0, 902:106.1, 931:109.1, 940:111.0, 954:114.0, 963:116.1, 966:117.0, 966:117.1, 966:117.2, 967:118.1, 975:119.0, 1002:122.0, 1003:123.2, 1030:129.1, 1036:130.0, 1056:132.0, 1080:133.1, 1082:134.1, 1082:135.0, 1082:135.1, 1089:136.1, 1089:137.0, 1089:137.1, 1097:138.1, 1107:139.0, 1113:141.0, 1118:142.0, 1121:143.1, 1130:144.0, 1130:145.1, 1148:146.0
 - Uncovered functions (name@line): (anonymous_155)@128, (anonymous_32)@365, (anonymous_61)@549, (anonymous_65)@575, (anonymous_66)@582, (anonymous_67)@591, (anonymous_68)@600, (anonymous_69)@607, (anonymous_70)@615, (anonymous_77)@684, (anonymous_98)@824, (anonymous_99)@826, (anonymous_109)@879, (anonymous_122)@965, (anonymous_123)@966, (anonymous_134)@1044, (anonymous_138)@1063, (anonymous_147)@1103
 
 ### projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts
 
 - Uncovered line ranges: 288, 313, 428-429, 448, 451-452, 483, 485, 553-554, 594, 626-629, 636-637, 717-718, 780, 793, 806-807, 825, 830, 875-877, 910-912, 1011, 1086-1089, 1110-1114, 1116, 1170
-- Uncovered branch locations (line:block.branch): 234:2.1, 236:3.1, 264:7.0, 280:8.1, 338:17.0, 343:18.0, 363:26.0, 369:28.0, 384:30.0, 389:31.1, 395:32.0, 410:34.0, 421:37.0, 440:39.0, 442:40.0, 444:41.1, 463:43.0, 475:44.0, 482:45.0, 484:46.0, 484:46.1, 484:47.0, 484:47.1, 488:49.0, 590:62.1, 612:64.1, 617:65.0, 620:66.0, 627:67.0, 627:67.1, 634:68.0, 635:70.1, 636:72.0, 636:72.1, 636:73.0, 636:73.1, 649:76.1, 669:80.1, 679:82.1, 690:84.0, 697:87.0, 715:91.0, 716:93.0, 725:94.0, 728:95.0, 739:101.1, 742:103.1, 762:116.0, 762:117.1, 776:121.0, 779:122.0, 780:123.0, 780:123.1, 783:124.1, 785:125.0, 785:125.1, 787:126.0, 797:128.0, 805:129.0, 823:130.0, 823:131.0, 823:131.1, 824:132.0, 825:133.0, 825:133.1, 826:134.1, 827:135.1, 829:136.1, 830:137.0, 830:137.1, 837:138.0, 854:139.1, 855:140.1, 855:140.3, 857:141.1, 857:142.1, 867:144.1, 875:146.0, 875:146.1, 881:147.0, 896:150.0, 901:152.1, 902:153.1, 909:154.0, 911:155.0, 911:155.1, 916:156.1, 917:157.1, 918:158.1, 926:159.0, 946:161.0, 952:162.0, 969:164.0, 971:166.1, 972:167.2, 985:168.1, 998:169.0, 1005:171.0, 1006:172.3, 1024:176.0, 1027:177.1, 1034:178.0, 1068:186.1, 1082:188.1, 1085:189.0, 1088:190.0, 1088:190.1, 1092:191.1, 1101:192.0, 1106:194.1, 1108:195.1, 1111:196.0, 1111:196.1, 1112:197.0, 1112:197.1, 1135:199.1, 1150:201.1, 1151:202.0, 1153:204.0, 1154:206.1, 1155:207.1, 1162:211.1, 1169:213.1, 1170:214.0, 1170:214.1
+- Uncovered branch locations (line:block.branch): 234:2.1, 236:3.1, 264:7.0, 280:8.1, 338:17.0, 343:18.0, 363:26.0, 369:28.0, 384:30.0, 389:31.1, 395:32.0, 421:37.0, 440:39.0, 442:40.0, 444:41.1, 463:43.0, 475:44.0, 482:45.0, 484:46.0, 484:46.1, 484:47.0, 484:47.1, 590:62.1, 612:64.1, 617:65.0, 620:66.0, 627:67.0, 627:67.1, 634:68.0, 635:70.1, 636:72.0, 636:72.1, 636:73.0, 636:73.1, 649:76.1, 669:80.1, 679:82.1, 690:84.0, 697:87.0, 715:91.0, 716:93.0, 725:94.0, 728:95.0, 739:101.1, 742:103.1, 762:116.0, 762:117.1, 776:121.0, 779:122.0, 780:123.0, 780:123.1, 783:124.1, 785:125.0, 785:125.1, 787:126.0, 797:128.0, 805:129.0, 823:130.0, 823:131.0, 823:131.1, 824:132.0, 825:133.0, 825:133.1, 826:134.1, 827:135.1, 829:136.1, 830:137.0, 830:137.1, 837:138.0, 854:139.1, 855:140.1, 855:140.3, 857:141.1, 857:142.1, 867:144.1, 875:146.0, 875:146.1, 881:147.0, 896:150.0, 901:152.1, 902:153.1, 909:154.0, 911:155.0, 911:155.1, 916:156.1, 917:157.1, 918:158.1, 926:159.0, 946:161.0, 952:162.0, 969:164.0, 971:166.1, 972:167.2, 985:168.1, 998:169.0, 1005:171.0, 1006:172.3, 1024:176.0, 1027:177.1, 1034:178.0, 1068:186.1, 1082:188.1, 1085:189.0, 1088:190.0, 1088:190.1, 1092:191.1, 1101:192.0, 1106:194.1, 1108:195.1, 1111:196.0, 1111:196.1, 1112:197.0, 1112:197.1, 1135:199.1, 1150:201.1, 1151:202.0, 1153:204.0, 1154:206.1, 1155:207.1, 1162:211.1, 1169:213.1, 1170:214.0, 1170:214.1
 - Uncovered functions (name@line): (anonymous_113)@128, (anonymous_20)@288, (anonymous_28)@313, (anonymous_44)@427, (anonymous_46)@450, (anonymous_57)@553, (anonymous_58)@554, (anonymous_64)@594, (anonymous_70)@625, (anonymous_88)@875, (anonymous_102)@1114
 
 ### projects/ui-core/select/neu-select.component.ts
 
-- Uncovered line ranges: 211-212, 233, 235-236, 288-289, 294, 333, 336, 339, 356, 367, 487, 489, 743, 786-788, 817, 824-825, 905, 924, 997, 1063, 1086, 1097, 1293-1294, 1319, 1379, 1424, 1478, 1583, 1636, 1696, 1744-1745, 1750, 1775-1776, 1808-1814, 1816, 1821
-- Uncovered branch locations (line:block.branch): 210:2.0, 293:3.0, 287:4.0, 350:7.1, 361:8.1, 420:12.1, 335:20.0, 663:27.1, 700:29.0, 742:44.0, 770:48.0, 771:49.0, 771:49.1, 787:52.0, 787:52.1, 788:53.0, 788:53.1, 795:55.0, 795:56.1, 796:58.0, 812:61.1, 814:62.1, 825:65.0, 825:65.1, 847:69.0, 847:70.1, 892:76.0, 898:79.0, 912:82.0, 915:83.1, 921:84.0, 923:85.0, 923:86.1, 929:87.1, 950:90.1, 966:95.1, 980:97.0, 982:98.1, 1019:104.0, 1020:105.0, 1023:107.1, 1026:108.0, 1032:109.0, 1037:110.0, 1044:111.0, 1062:114.0, 1067:116.1, 1077:117.1, 1085:119.0, 1097:120.0, 1097:120.1, 1105:121.0, 1134:130.1, 1149:138.1, 1174:146.1, 1180:149.1, 1228:158.1, 1230:159.0, 1238:161.1, 1239:162.0, 1246:165.0, 1248:166.1, 1269:167.1, 1318:175.0, 1419:197.0, 1436:203.0, 1438:204.0, 1474:212.1, 1561:226.0, 1571:231.1, 1580:234.1, 1603:238.1, 1635:248.0, 1651:251.1, 1658:254.1, 1673:258.1, 1681:261.1, 1682:262.1, 1683:263.0, 1687:265.0, 1695:269.0, 1712:272.0, 1737:276.1, 1737:277.1, 1743:278.1, 1744:279.0, 1744:279.1, 1764:283.0, 1774:285.0, 1801:289.1, 1807:290.1, 1807:291.1, 1809:292.0, 1809:292.1, 1814:293.0, 1814:293.1, 1816:294.0, 1816:294.1, 1820:295.1
+- Uncovered line ranges: 233, 235-236, 333, 336, 339, 356, 367, 487, 489, 743, 786-788, 817, 824-825, 905, 924, 997, 1063, 1086, 1097, 1293-1294, 1319, 1379, 1424, 1478, 1583, 1636, 1696, 1744-1745, 1750, 1775-1776, 1808-1814, 1816, 1821
+- Uncovered branch locations (line:block.branch): 350:7.1, 361:8.1, 420:12.1, 335:20.0, 663:27.1, 700:29.0, 742:44.0, 770:48.0, 771:49.0, 771:49.1, 787:52.0, 787:52.1, 788:53.0, 788:53.1, 795:55.0, 795:56.1, 796:58.0, 812:61.1, 814:62.1, 825:65.0, 825:65.1, 847:69.0, 847:70.1, 892:76.0, 898:79.0, 912:82.0, 915:83.1, 921:84.0, 923:85.0, 923:86.1, 929:87.1, 947:88.0, 950:90.1, 966:95.1, 980:97.0, 982:98.1, 1019:104.0, 1020:105.0, 1023:107.1, 1026:108.0, 1032:109.0, 1037:110.0, 1044:111.0, 1062:114.0, 1067:116.1, 1077:117.1, 1085:119.0, 1097:120.0, 1097:120.1, 1105:121.0, 1134:130.1, 1149:138.1, 1174:146.1, 1180:149.1, 1228:158.1, 1230:159.0, 1238:161.1, 1239:162.0, 1246:165.0, 1248:166.1, 1269:167.1, 1318:175.0, 1419:197.0, 1436:203.0, 1438:204.0, 1474:212.1, 1561:226.0, 1571:231.1, 1580:234.1, 1603:238.1, 1635:248.0, 1651:251.1, 1658:254.1, 1673:258.1, 1681:261.1, 1682:262.1, 1683:263.0, 1687:265.0, 1689:266.1, 1691:267.0, 1695:269.0, 1712:272.0, 1737:276.1, 1737:277.1, 1743:278.1, 1744:279.0, 1744:279.1, 1764:283.0, 1774:285.0, 1801:289.1, 1807:290.1, 1807:291.1, 1809:292.0, 1809:292.1, 1814:293.0, 1814:293.1, 1816:294.0, 1816:294.1, 1820:295.1
 - Uncovered functions (name@line): NeuSelectComponent_ng_template_13_Template_div_scroll_5_listener@333, (anonymous_13)@487, (anonymous_14)@488, (anonymous_48)@785, (anonymous_58)@817, (anonymous_61)@823, (anonymous_79)@997, (anonymous_84)@1096, (anonymous_107)@1293, (anonymous_108)@1294, (anonymous_111)@1318, (anonymous_124)@1378, (anonymous_152)@1583, (anonymous_159)@1636, (anonymous_168)@1750, (anonymous_177)@1811
-
-### projects/ui-core/date-input/neu-date-input.component.ts
-
-- Uncovered line ranges: 188, 192-194, 197-198, 200-201, 203, 213, 237, 323, 645, 672, 726-728, 765-770, 897-899, 951, 969, 979-982, 986, 1013, 1206-1207, 1253
-- Uncovered branch locations (line:block.branch): 323:3.0, 213:8.0, 213:8.1, 213:9.0, 213:9.1, 252:10.0, 252:11.0, 349:16.0, 349:16.1, 359:17.0, 359:17.1, 473:24.2, 622:44.0, 671:57.0, 673:58.1, 705:72.0, 726:78.0, 726:78.1, 733:79.1, 753:90.1, 764:93.0, 766:94.0, 766:94.1, 774:96.0, 787:97.0, 796:101.0, 805:105.0, 834:118.0, 843:120.0, 864:126.0, 871:129.0, 883:133.0, 884:134.0, 885:135.1, 887:138.0, 896:139.0, 904:142.0, 905:143.0, 906:144.1, 907:147.0, 935:154.0, 947:163.1, 947:164.1, 968:170.1, 977:172.1, 979:174.0, 979:174.1, 980:175.0, 980:175.1, 981:176.0, 981:176.1, 983:177.0, 983:177.1, 997:178.0, 1075:213.1, 1090:225.0, 1122:230.1, 1124:233.1, 1182:243.1, 1182:244.1, 1205:250.0, 1217:251.0, 1230:254.0, 1230:256.0, 1238:260.0, 1238:262.0, 1248:265.0, 1332:276.1
-- Uncovered functions (name@line): NeuDateInputControl_ng_template_13_Template_div_keydown_escape_0_listener@188, NeuDateInputControl_ng_template_13_Conditional_1_For_2_Template_button_click_0_listener@198, NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_2_listener@213, NeuDateInputControl_ng_template_13_Conditional_2_Conditional_5_Template_select_change_4_listener@237, NeuDateInputControl_ng_template_13_Conditional_2_Conditional_11_For_6_For_3_Template_button_keydown_0_listener@323, NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_13_listener@332, NeuDateInputControl_ng_template_13_Conditional_2_Conditional_15_Template_button_click_0_listener@335, NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_2_listener@346, NeuDateInputControl_ng_template_13_Conditional_3_For_6_Template_button_click_0_listener@349, NeuDateInputControl_ng_template_13_Conditional_3_For_16_Template_button_click_0_listener@359, NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_17_listener@362, NeuDateInputControl_Template_ng_template_backdropClick_16_listener@381, (anonymous_151)@441, (anonymous_65)@644, (anonymous_75)@725, (anonymous_107)@1013
 
 ### projects/ui-core/color-picker/neu-color-picker.component.ts
 
 - Uncovered line ranges: 171-172, 193-194, 253, 273, 285, 291-293, 296-298, 466-467, 577, 593, 771-774, 791-792, 810-811, 830, 832, 839-844, 946-947
 - Uncovered branch locations (line:block.branch): 290:8.0, 295:9.0, 355:11.1, 355:12.1, 465:21.0, 527:22.1, 586:31.0, 653:39.0, 666:44.0, 674:46.0, 709:49.0, 732:54.0, 739:55.0, 741:57.0, 746:58.0, 749:59.1, 756:60.0, 757:61.0, 764:63.1, 771:64.0, 771:64.1, 771:65.0, 771:65.1, 785:66.0, 786:68.0, 788:69.0, 790:70.0, 796:72.1, 797:73.0, 798:74.0, 802:75.1, 804:76.0, 805:77.1, 806:78.0, 821:79.0, 824:80.0, 830:82.0, 830:82.1, 848:83.0, 864:85.1, 866:86.0, 866:87.1, 878:89.0, 925:98.0, 928:100.0, 945:103.0
 - Uncovered functions (name@line): NeuColorPickerComponent_Template_button_focus_0_listener@102, NeuColorPickerComponent_Template_ng_template_backdropClick_5_listener@120, NeuColorPickerComponent_ng_template_5_Template_input_pointercancel_6_listener@171, NeuColorPickerComponent_ng_template_5_Template_input_lostpointercapture_6_listener@172, NeuColorPickerComponent_ng_template_5_Conditional_9_Template_input_pointercancel_4_listener@193, NeuColorPickerComponent_ng_template_5_Conditional_9_Template_input_lostpointercapture_4_listener@194, NeuColorPickerComponent_ng_template_5_Conditional_16_For_2_Template_input_blur_3_listener@253, NeuColorPickerComponent_ng_template_5_Template_input_focus_18_listener@272, NeuColorPickerComponent_ng_template_5_Template_input_input_18_listener@272, NeuColorPickerComponent_ng_template_5_Template_input_keydown_18_listener@273, NeuColorPickerComponent_ng_template_5_Conditional_20_Template_button_click_0_listener@285, (anonymous_53)@576, (anonymous_76)@829, (anonymous_77)@838
+
+### projects/ui-core/date-input/neu-date-input.component.ts
+
+- Uncovered line ranges: 188, 192-194, 197-198, 200-201, 203, 237, 323, 645, 672, 726-728, 897-899, 951, 969, 979-982, 986, 1013, 1206-1207, 1253
+- Uncovered branch locations (line:block.branch): 323:3.0, 213:9.1, 349:16.0, 349:16.1, 359:17.0, 359:17.1, 473:24.2, 622:44.0, 671:57.0, 673:58.1, 705:72.0, 726:78.0, 726:78.1, 733:79.1, 753:90.1, 766:94.0, 774:96.0, 787:97.0, 796:101.0, 805:105.0, 834:118.0, 843:120.0, 864:126.0, 871:129.0, 885:135.1, 887:138.0, 896:139.0, 906:144.1, 907:147.0, 935:154.0, 947:163.1, 947:164.1, 968:170.1, 977:172.1, 979:174.0, 979:174.1, 980:175.0, 980:175.1, 981:176.0, 981:176.1, 983:177.0, 983:177.1, 1075:213.1, 1090:225.0, 1122:230.1, 1124:233.1, 1182:243.1, 1182:244.1, 1205:250.0, 1217:251.0, 1230:254.0, 1230:256.0, 1238:260.0, 1238:262.0, 1248:265.0, 1332:276.1
+- Uncovered functions (name@line): NeuDateInputControl_ng_template_13_Template_div_keydown_escape_0_listener@188, NeuDateInputControl_ng_template_13_Conditional_1_For_2_Template_button_click_0_listener@198, NeuDateInputControl_ng_template_13_Conditional_2_Conditional_5_Template_select_change_4_listener@237, NeuDateInputControl_ng_template_13_Conditional_2_Conditional_11_For_6_For_3_Template_button_keydown_0_listener@323, NeuDateInputControl_ng_template_13_Conditional_2_Template_button_click_13_listener@332, NeuDateInputControl_ng_template_13_Conditional_2_Conditional_15_Template_button_click_0_listener@335, NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_2_listener@346, NeuDateInputControl_ng_template_13_Conditional_3_For_6_Template_button_click_0_listener@349, NeuDateInputControl_ng_template_13_Conditional_3_For_16_Template_button_click_0_listener@359, NeuDateInputControl_ng_template_13_Conditional_3_Template_button_click_17_listener@362, NeuDateInputControl_Template_ng_template_backdropClick_16_listener@381, (anonymous_151)@441, (anonymous_65)@644, (anonymous_75)@725, (anonymous_107)@1013
 
 ### projects/ui-core/mega-menu/neu-mega-menu.component.ts
 
@@ -178,7 +178,7 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 ### projects/ui-core/tree/neu-tree.component.ts
 
 - Uncovered line ranges: 103, 177-180, 182-183, 254-259, 327, 331, 334-337, 341-347, 415-416, 420, 424
-- Uncovered branch locations (line:block.branch): 114:2.1, 118:3.0, 120:4.1, 133:7.1, 155:10.1, 158:12.0, 170:18.0, 176:19.1, 179:21.0, 179:21.1, 179:22.0, 179:22.1, 180:23.0, 180:23.1, 181:24.0, 197:28.1, 202:29.0, 221:32.1, 238:34.0, 249:35.0, 263:36.0, 283:39.0, 303:52.1, 309:57.1, 335:65.0, 335:65.1, 335:66.0, 335:66.1, 335:66.2, 336:67.0, 336:67.1, 341:68.0, 341:68.1, 341:69.0, 341:69.1, 343:70.0, 343:70.1, 347:71.0, 347:71.1, 352:72.0, 367:77.0, 373:79.0, 378:81.1, 381:83.1, 389:84.0, 394:86.0, 414:89.1, 416:91.0, 416:91.1, 420:92.0, 420:92.1, 420:92.2, 420:92.3, 424:93.0, 424:93.1, 424:93.2, 424:93.3, 424:93.4, 424:93.5, 424:93.6
+- Uncovered branch locations (line:block.branch): 114:2.1, 118:3.0, 120:4.1, 133:7.1, 155:10.1, 158:12.0, 170:18.0, 176:19.1, 179:21.0, 179:21.1, 179:22.0, 179:22.1, 180:23.0, 180:23.1, 181:24.0, 197:28.1, 221:32.1, 238:34.0, 249:35.0, 263:36.0, 283:39.0, 303:52.1, 309:57.1, 335:65.0, 335:65.1, 335:66.0, 335:66.1, 335:66.2, 336:67.0, 336:67.1, 341:68.0, 341:68.1, 341:69.0, 341:69.1, 343:70.0, 343:70.1, 347:71.0, 347:71.1, 352:72.0, 367:77.0, 373:79.0, 378:81.1, 381:83.1, 389:84.0, 394:86.0, 414:89.1, 416:91.0, 416:91.1, 420:92.0, 420:92.1, 420:92.2, 420:92.3, 424:93.0, 424:93.1, 424:93.2, 424:93.3, 424:93.4, 424:93.5, 424:93.6
 - Uncovered functions (name@line): (anonymous_60)@99, (anonymous_1)@103, (anonymous_19)@179, (anonymous_20)@180, (anonymous_21)@180, (anonymous_35)@253, (anonymous_42)@326, (anonymous_43)@330, (anonymous_44)@334, (anonymous_45)@340, (anonymous_57)@419, (anonymous_58)@423
 
 ### projects/ui-core/kanban/neu-kanban.component.ts
@@ -334,7 +334,7 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 ### projects/ui-core/table/internal/query-ui/neu-table-query-transitions.ts
 
 - Uncovered line ranges: 65, 168, 170-171, 216, 226
-- Uncovered branch locations (line:block.branch): 50:0.1, 64:5.0, 64:6.1, 66:7.0, 66:7.1, 66:7.2, 69:8.0, 73:11.1, 126:18.1, 141:22.1, 155:23.1, 166:24.0, 167:25.0, 210:33.0, 213:35.1, 225:37.0, 239:41.0, 248:43.0, 259:44.1
+- Uncovered branch locations (line:block.branch): 50:0.1, 64:5.0, 64:6.1, 66:7.0, 66:7.1, 66:7.2, 69:8.0, 73:11.1, 141:22.1, 155:23.1, 166:24.0, 167:25.0, 210:33.0, 213:35.1, 225:37.0, 239:41.0, 248:43.0, 259:44.1
 - Uncovered functions (name@line): (anonymous_13)@170, (anonymous_14)@171
 
 ### projects/ui-core/cascade-select/neu-cascade-select.component.ts
@@ -348,12 +348,6 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 - Uncovered line ranges: 169, 335, 356, 394
 - Uncovered branch locations (line:block.branch): 261:3.1, 268:4.1, 282:8.0, 302:10.0, 319:11.0, 322:13.1, 334:16.0, 349:20.0, 352:24.1, 352:25.0, 374:27.1, 487:41.1, 487:41.2, 546:49.1
 - Uncovered functions (name@line): NeuImageViewerOverlayComponent_Template_div_pointercancel_14_listener@169, NeuImageViewerOverlayComponent_Template_img_error_15_listener@178, (anonymous_28)@355, (anonymous_32)@393
-
-### projects/ui-core/select/neu-select.directives.ts
-
-- Uncovered line ranges: 21, 33, 45, 68, 94, 99, 104, 109
-- Uncovered branch locations (line:block.branch): 93:18.0, 93:18.1, 98:20.0, 98:20.1, 103:22.0, 103:22.1, 108:24.0, 108:24.1
-- Uncovered functions (name@line): (anonymous_14)@94, (anonymous_15)@99, (anonymous_16)@104, (anonymous_17)@109
 
 ### projects/ui-core/speed-dial/neu-speed-dial.component.ts
 
@@ -438,6 +432,12 @@ Sorted by absolute uncovered counts across the four metrics. Counts overlap and 
 - Uncovered line ranges: 111, 131
 - Uncovered branch locations (line:block.branch): 102:3.1, 127:9.0, 160:23.1, 164:26.0, 171:31.0, 188:38.0, 189:39.1
 - Uncovered functions (name@line): NeuRatingComponent_For_2_Template_button_mouseleave_0_listener@52, (anonymous_8)@110, (anonymous_9)@111, (anonymous_15)@130
+
+### projects/ui-core/select/neu-select.directives.ts
+
+- Uncovered line ranges: 21, 33, 45, 57, 68, 94, 99
+- Uncovered branch locations (line:block.branch): 93:18.0, 93:18.1, 98:20.0, 98:20.1
+- Uncovered functions (name@line): (anonymous_14)@94, (anonymous_15)@99
 
 ### projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts
 
