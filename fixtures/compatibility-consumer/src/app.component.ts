@@ -18,6 +18,11 @@ import {
   NeuTreeTableHierarchy,
 } from '@neural-ui/core/tree-table';
 import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
+import { NeuDateInputComponent } from '@neural-ui/core/date-input';
+import { NeuNotificationCenterComponent } from '@neural-ui/core/notification-center';
+import { NeuMegaMenuComponent } from '@neural-ui/core/mega-menu';
+import { NeuKanbanComponent } from '@neural-ui/core/kanban';
+import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +38,11 @@ import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
     NeuNavComponent,
     NeuButtonComponent,
     NeuAlertComponent,
+    NeuDateInputComponent,
+    NeuNotificationCenterComponent,
+    NeuMegaMenuComponent,
+    NeuKanbanComponent,
+    NeuColorPickerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -61,6 +71,11 @@ import { NeuNavComponent, NeuNavItem } from '@neural-ui/core/nav';
       [rowKey]="rowKey"
       [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 18 }"
     ></neu-tree-table>
+    <neu-date-input id="rel01e-date" />
+    <neu-notification-center id="rel01e-notification" />
+    <neu-mega-menu id="rel01e-mega" [items]="[]" />
+    <neu-kanban id="rel01e-kanban" [columns]="[]" />
+    <neu-color-picker id="rel01e-color" />
   `,
 })
 export class AppComponent {

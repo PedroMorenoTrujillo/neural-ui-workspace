@@ -597,6 +597,14 @@
       ]
     },
     {
+      "entrypoint": "./internal-state",
+      "types": "./types/neural-ui-core-internal-state.d.ts",
+      "exports": [
+        "./internal-state#NeuInitialTemporalState",
+        "./internal-state#NeuResponsiveState"
+      ]
+    },
+    {
       "entrypoint": "./kanban",
       "types": "./types/neural-ui-core-kanban.d.ts",
       "exports": [
@@ -17394,6 +17402,98 @@
       "members": []
     },
     {
+      "id": "./internal-state#NeuInitialTemporalState",
+      "entrypoint": "./internal-state",
+      "name": "NeuInitialTemporalState",
+      "kind": "service",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare class NeuInitialTemporalState {\n}",
+      "members": [
+        {
+          "id": "./internal-state#NeuInitialTemporalState.method:currentNow",
+          "name": "currentNow",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "currentNow(): Date;"
+        },
+        {
+          "id": "./internal-state#NeuInitialTemporalState.method:now",
+          "name": "now",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "now(): Date;"
+        },
+        {
+          "id": "./internal-state#NeuInitialTemporalState.method:timeZone",
+          "name": "timeZone",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "timeZone(): string | undefined;"
+        },
+        {
+          "id": "./internal-state#NeuInitialTemporalState.method:today",
+          "name": "today",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "today(): Date;"
+        },
+        {
+          "id": "./internal-state#NeuInitialTemporalState.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuInitialTemporalState, never>;"
+        },
+        {
+          "id": "./internal-state#NeuInitialTemporalState.property:ɵprov",
+          "name": "ɵprov",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵprov: i0.ɵɵInjectableDeclaration<any>;"
+        }
+      ]
+    },
+    {
+      "id": "./internal-state#NeuResponsiveState",
+      "entrypoint": "./internal-state",
+      "name": "NeuResponsiveState",
+      "kind": "service",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare class NeuResponsiveState {\n}",
+      "members": [
+        {
+          "id": "./internal-state#NeuResponsiveState.method:observe",
+          "name": "observe",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "observe(query: string | Signal<string>, destroyRef?: DestroyRef): WritableSignal<boolean>;"
+        },
+        {
+          "id": "./internal-state#NeuResponsiveState.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuResponsiveState, never>;"
+        },
+        {
+          "id": "./internal-state#NeuResponsiveState.property:ɵprov",
+          "name": "ɵprov",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵprov: i0.ɵɵInjectableDeclaration<any>;"
+        }
+      ]
+    },
+    {
       "id": "./internal#activateNeuMenuAction",
       "entrypoint": "./internal",
       "name": "activateNeuMenuAction",
@@ -18463,6 +18563,7 @@
       "name": "NeuInitialTemporalState",
       "kind": "service",
       "status": "INTERNAL/UNSUPPORTED",
+      "target": "/internal-state#NeuInitialTemporalState",
       "signature": "declare class NeuInitialTemporalState {\n}",
       "members": [
         {
@@ -18833,6 +18934,7 @@
       "name": "NeuResponsiveState",
       "kind": "service",
       "status": "INTERNAL/UNSUPPORTED",
+      "target": "/internal-state#NeuResponsiveState",
       "signature": "declare class NeuResponsiveState {\n}",
       "members": [
         {
@@ -65191,8 +65293,8 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 97,
-    "exportedDeclarations": 813,
+    "entrypoints": 98,
+    "exportedDeclarations": 815,
     "declarationKinds": {
       "class": 15,
       "component": 94,
@@ -65200,17 +65302,17 @@
       "function": 53,
       "interface": 274,
       "reexport": 48,
-      "service": 10,
+      "service": 12,
       "token": 4,
       "type": 196,
       "variable": 1
     },
-    "publicSymbols": 5179,
+    "publicSymbols": 5190,
     "statuses": {
       "SUPPORTED": 3305,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1874,
+      "INTERNAL/UNSUPPORTED": 1885,
       "REVIEW": 0
     },
     "bindings": {

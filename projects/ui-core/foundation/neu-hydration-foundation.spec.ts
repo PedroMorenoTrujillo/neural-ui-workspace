@@ -22,6 +22,10 @@ import {
   NeuInitialTemporalState,
   NeuResponsiveState,
 } from '@neural-ui/core/internal';
+import {
+  NeuInitialTemporalState as CanonicalTemporalState,
+  NeuResponsiveState as CanonicalResponsiveState,
+} from '@neural-ui/core/internal-state';
 
 @Component({ template: '' })
 class ResponsiveHost {
@@ -30,6 +34,25 @@ class ResponsiveHost {
 }
 
 describe('Neural hydration foundation', () => {
+  it('preserves one injectable class identity through the internal re-export', () => {
+    expect(NeuInitialTemporalState).toBe(CanonicalTemporalState);
+    expect(NeuResponsiveState).toBe(CanonicalResponsiveState);
+    const rootTemporal = TestBed.inject(NeuInitialTemporalState);
+    const rootResponsive = TestBed.inject(NeuResponsiveState);
+    expect(TestBed.inject(CanonicalTemporalState)).toBe(rootTemporal);
+    expect(TestBed.inject(CanonicalResponsiveState)).toBe(rootResponsive);
+
+    const parent = TestBed.inject(EnvironmentInjector);
+    const first = createEnvironmentInjector([NeuInitialTemporalState, NeuResponsiveState], parent);
+    const second = createEnvironmentInjector([NeuInitialTemporalState, NeuResponsiveState], parent);
+    expect(first.get(CanonicalTemporalState)).toBe(first.get(NeuInitialTemporalState));
+    expect(first.get(CanonicalResponsiveState)).toBe(first.get(NeuResponsiveState));
+    expect(first.get(CanonicalTemporalState)).not.toBe(second.get(CanonicalTemporalState));
+    expect(first.get(CanonicalResponsiveState)).not.toBe(second.get(CanonicalResponsiveState));
+    first.destroy();
+    second.destroy();
+  });
+
   it('allocates unique IDs within an application and restarts for a new application injector', () => {
     const parent = TestBed.inject(EnvironmentInjector);
     const first = createEnvironmentInjector([NeuIdGenerator], parent);

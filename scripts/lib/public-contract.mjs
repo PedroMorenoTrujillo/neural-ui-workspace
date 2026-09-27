@@ -549,14 +549,27 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
       if (seenExports.has(exportedSymbol.exportedName)) continue;
       seenExports.add(exportedSymbol.exportedName);
       const id = `${entrypoint}#${exportedSymbol.exportedName}`;
-      const declarations = exportedSymbol.localName
+      let declarations = exportedSymbol.localName
         ? (parsed.locals.get(exportedSymbol.localName) ?? [])
         : [];
-      const node = declarations[0];
+      let declarationSource = parsed.sourceFile;
       const targetEntrypoint = resolveEntrypoint(exportedSymbol.moduleName, packageName);
+      if (!declarations.length && entrypoint === './internal'
+        && targetEntrypoint === '/internal-state') {
+        const target = parsedByEntrypoint.get(
+          targetEntrypoint.startsWith('/') ? `.${targetEntrypoint}` : targetEntrypoint,
+        );
+        const targetName = exportedSymbol.importedName ?? exportedSymbol.exportedName;
+        const targetExport = target?.exports.find((item) => item.exportedName === targetName);
+        if (targetExport?.localName) {
+          declarations = target.locals.get(targetExport.localName) ?? [];
+          if (declarations.length) declarationSource = target.sourceFile;
+        }
+      }
+      const node = declarations[0];
       let kind = node ? declarationKind(node) : 'reexport';
       const angular =
-        node && ts.isClassDeclaration(node) ? angularMetadata(node, parsed.sourceFile) : undefined;
+        node && ts.isClassDeclaration(node) ? angularMetadata(node, declarationSource) : undefined;
       if (angular) kind = angular.angularKind;
       else if (
         node &&
@@ -583,7 +596,7 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
             exportedName: exportedSymbol.exportedName,
             declarationKind: kind,
             node,
-            sourceFile: parsed.sourceFile,
+            sourceFile: declarationSource,
             angular,
             policy,
           })
@@ -609,7 +622,7 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
               }
             : {}),
         signature: node
-          ? aggregateDeclarations(declarations, parsed.sourceFile)
+          ? aggregateDeclarations(declarations, declarationSource)
           : `reexport ${exportedSymbol.moduleName}#${exportedSymbol.importedName ?? exportedSymbol.exportedName}`,
         members,
       });

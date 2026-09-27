@@ -122,6 +122,7 @@ try {
     ['node', ['src/ssr-icons.mjs']],
     ['node', ['src/ssr-h9-events.mjs']],
     ['node', ['src/ssr-n2-forms.mjs']],
+    ['node', ['src/ssr-rel-01e.mjs']],
     [
       'node',
       [

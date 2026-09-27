@@ -11,7 +11,7 @@
     "ngTemplateContextGuard"
   ],
   "closedMemberKinds": ["component", "directive", "service"],
-  "internalEntrypoints": ["./internal"],
+  "internalEntrypoints": ["./internal", "./internal-state"],
   "internalDeclarations": [
     "./focus-trap#NeuModalFocusDirective",
     "./focus-trap#NeuModalInitialFocus"
