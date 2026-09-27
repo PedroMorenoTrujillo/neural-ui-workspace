@@ -130,6 +130,43 @@ describe('NeuTreeComponent controlled C6', () => {
     expect(rows(fixture)).toHaveLength(3);
   });
 
+  it('maps RTL horizontal keys to expansion, child focus and parent return', async () => {
+    const fixture = create();
+    (fixture.nativeElement as HTMLElement).style.direction = 'rtl';
+    const proposals: unknown[] = [];
+    fixture.componentInstance.expandedKeysChange.subscribe((value) => proposals.push(value));
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'ArrowLeft');
+    expect(proposals).toEqual([{ keys: ['root'], key: 'root', expanded: true, source: 'keyboard' }]);
+    expect(rows(fixture)).toHaveLength(2);
+    fixture.componentRef.setInput('expandedKeys', ['root']);
+    fixture.detectChanges();
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'ArrowLeft');
+    expect(document.activeElement).toBe(rows(fixture)[1]);
+    await pressFocused(fixture, 'ArrowRight');
+    expect(document.activeElement).toBe(rows(fixture)[0]);
+  });
+
+  it('keeps first and last focus boundaries stable through Home, End and arrows', async () => {
+    const fixture = flatTree([
+      { key: 'a', label: 'Alpha' },
+      { key: 'b', label: 'Beta' },
+      { key: 'c', label: 'Gamma' },
+    ]);
+    const output = businessOutputs(fixture);
+    rows(fixture)[0]!.focus();
+    await pressFocused(fixture, 'End');
+    expect(document.activeElement).toBe(rows(fixture)[2]);
+    await pressFocused(fixture, 'ArrowDown');
+    expect(document.activeElement).toBe(rows(fixture)[2]);
+    await pressFocused(fixture, 'Home');
+    expect(document.activeElement).toBe(rows(fixture)[0]);
+    await pressFocused(fixture, 'ArrowUp');
+    expect(document.activeElement).toBe(rows(fixture)[0]);
+    expect(output).toEqual([]);
+  });
+
   it('requests unloaded children only after accepted expansion, once per revision', () => {
     const fixture = create();
     const requests: unknown[] = [];

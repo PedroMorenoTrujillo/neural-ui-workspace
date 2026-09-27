@@ -5,27 +5,27 @@
   "total": {
     "lines": {
       "total": 19060,
-      "covered": 18218,
+      "covered": 18269,
       "skipped": 0,
-      "pct": 95.58
+      "pct": 95.84
     },
     "statements": {
       "total": 24564,
-      "covered": 22889,
+      "covered": 22979,
       "skipped": 0,
-      "pct": 93.18
+      "pct": 93.54
     },
     "functions": {
       "total": 4695,
-      "covered": 4340,
+      "covered": 4365,
       "skipped": 0,
-      "pct": 92.43
+      "pct": 92.97
     },
     "branches": {
       "total": 14708,
-      "covered": 13024,
+      "covered": 13060,
       "skipped": 0,
-      "pct": 88.55
+      "pct": 88.79
     },
     "branchesTrue": {
       "total": 0,
@@ -38,957 +38,6 @@
   "filesWithGaps": 130,
   "ordering": "absoluteGap = uncovered statements + branches + functions + lines; an ordering proxy, not additive executable code",
   "files": [
-    {
-      "file": "projects/ui-core/select/neu-select.component.ts",
-      "metrics": {
-        "statements": {
-          "total": 954,
-          "covered": 864,
-          "skipped": 0,
-          "pct": 90.56,
-          "uncovered": 90
-        },
-        "branches": {
-          "total": 655,
-          "covered": 548,
-          "skipped": 0,
-          "pct": 83.66,
-          "uncovered": 107
-        },
-        "functions": {
-          "total": 191,
-          "covered": 170,
-          "skipped": 0,
-          "pct": 89,
-          "uncovered": 21
-        },
-        "lines": {
-          "total": 781,
-          "covered": 724,
-          "skipped": 0,
-          "pct": 92.7,
-          "uncovered": 57
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          160,
-          160
-        ],
-        [
-          182,
-          182
-        ],
-        [
-          211,
-          212
-        ],
-        [
-          233,
-          233
-        ],
-        [
-          235,
-          236
-        ],
-        [
-          288,
-          289
-        ],
-        [
-          294,
-          294
-        ],
-        [
-          311,
-          311
-        ],
-        [
-          314,
-          314
-        ],
-        [
-          316,
-          317
-        ],
-        [
-          333,
-          333
-        ],
-        [
-          336,
-          336
-        ],
-        [
-          339,
-          339
-        ],
-        [
-          356,
-          356
-        ],
-        [
-          367,
-          367
-        ],
-        [
-          487,
-          487
-        ],
-        [
-          489,
-          489
-        ],
-        [
-          743,
-          743
-        ],
-        [
-          786,
-          788
-        ],
-        [
-          817,
-          817
-        ],
-        [
-          824,
-          825
-        ],
-        [
-          905,
-          905
-        ],
-        [
-          924,
-          924
-        ],
-        [
-          997,
-          997
-        ],
-        [
-          1063,
-          1063
-        ],
-        [
-          1086,
-          1086
-        ],
-        [
-          1097,
-          1097
-        ],
-        [
-          1293,
-          1294
-        ],
-        [
-          1319,
-          1319
-        ],
-        [
-          1379,
-          1379
-        ],
-        [
-          1424,
-          1424
-        ],
-        [
-          1478,
-          1478
-        ],
-        [
-          1583,
-          1583
-        ],
-        [
-          1636,
-          1636
-        ],
-        [
-          1696,
-          1696
-        ],
-        [
-          1744,
-          1745
-        ],
-        [
-          1750,
-          1750
-        ],
-        [
-          1775,
-          1776
-        ],
-        [
-          1808,
-          1814
-        ],
-        [
-          1816,
-          1816
-        ],
-        [
-          1821,
-          1821
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 210,
-          "block": 2,
-          "branch": 0,
-          "source": "@if (clearIconTpl()) {"
-        },
-        {
-          "line": 293,
-          "block": 3,
-          "branch": 0,
-          "source": "@if (filterIconTpl()) {"
-        },
-        {
-          "line": 287,
-          "block": 4,
-          "branch": 0,
-          "source": "@if (filterTpl()) {"
-        },
-        {
-          "line": 314,
-          "block": 5,
-          "branch": 0,
-          "source": "[disabled]=\"isDisabledFinal() || readonly()\""
-        },
-        {
-          "line": 314,
-          "block": 5,
-          "branch": 1,
-          "source": "[disabled]=\"isDisabledFinal() || readonly()\""
-        },
-        {
-          "line": 317,
-          "block": 6,
-          "branch": 0,
-          "source": ">{{ allScopedSelected() ? 'Clear all' : 'Select all' }}</button>"
-        },
-        {
-          "line": 317,
-          "block": 6,
-          "branch": 1,
-          "source": ">{{ allScopedSelected() ? 'Clear all' : 'Select all' }}</button>"
-        },
-        {
-          "line": 350,
-          "block": 7,
-          "branch": 1,
-          "source": "@if (groupTpl()) {"
-        },
-        {
-          "line": 361,
-          "block": 8,
-          "branch": 1,
-          "source": "@if (loaderTpl()) {"
-        },
-        {
-          "line": 420,
-          "block": 12,
-          "branch": 1,
-          "source": "{{ currentFilter() ? noResultsMessage() : emptyMessage() }}"
-        },
-        {
-          "line": 335,
-          "block": 20,
-          "branch": 0,
-          "source": "@if (virtualTopHeight() > 0) {"
-        },
-        {
-          "line": 663,
-          "block": 27,
-          "branch": 1,
-          "source": "request: (callback) => this._document.defaultView?.requestAnimationFrame(callback) ?? -1,"
-        },
-        {
-          "line": 700,
-          "block": 29,
-          "branch": 0,
-          "source": "if (this.ariaDescribedBy()) return this.ariaDescribedBy();"
-        },
-        {
-          "line": 742,
-          "block": 44,
-          "branch": 0,
-          "source": "if (this.options().some((option) => resolveNeuOptionGroup(option) !== undefined))"
-        },
-        {
-          "line": 770,
-          "block": 48,
-          "branch": 0,
-          "source": "this.lazy()"
-        },
-        {
-          "line": 771,
-          "block": 49,
-          "branch": 0,
-          "source": "? (this.totalItems() ?? this.filteredOptions().length)"
-        },
-        {
-          "line": 771,
-          "block": 49,
-          "branch": 1,
-          "source": "? (this.totalItems() ?? this.filteredOptions().length)"
-        },
-        {
-          "line": 787,
-          "block": 52,
-          "branch": 0,
-          "source": "const previous = index > 0 ? this.filteredOptions()[index - 1] : undefined;"
-        },
-        {
-          "line": 787,
-          "block": 52,
-          "branch": 1,
-          "source": "const previous = index > 0 ? this.filteredOptions()[index - 1] : undefined;"
-        },
-        {
-          "line": 788,
-          "block": 53,
-          "branch": 0,
-          "source": "return previous === undefined ? undefined : this.optionGroup(previous);"
-        },
-        {
-          "line": 788,
-          "block": 53,
-          "branch": 1,
-          "source": "return previous === undefined ? undefined : this.optionGroup(previous);"
-        },
-        {
-          "line": 795,
-          "block": 55,
-          "branch": 0,
-          "source": "if (max != null && labels.length > max) return `${this.currentValues().length} selected`;"
-        },
-        {
-          "line": 795,
-          "block": 56,
-          "branch": 1,
-          "source": "if (max != null && labels.length > max) return `${this.currentValues().length} selected`;"
-        },
-        {
-          "line": 796,
-          "block": 58,
-          "branch": 0,
-          "source": "return labels.length ? labels.join(', ') : this.currentValues().length ? `${this.currentValues().length} selected` : null;"
-        },
-        {
-          "line": 812,
-          "block": 61,
-          "branch": 1,
-          "source": "return max == null ? this.selectedOptions() : this.selectedOptions().slice(0, Math.max(0, max));"
-        },
-        {
-          "line": 814,
-          "block": 62,
-          "branch": 1,
-          "source": "readonly scopedOptions = computed(() =>"
-        },
-        {
-          "line": 825,
-          "block": 65,
-          "branch": 0,
-          "source": "return selected === null ? null : this.optionDomId(selected);"
-        },
-        {
-          "line": 825,
-          "block": 65,
-          "branch": 1,
-          "source": "return selected === null ? null : this.optionDomId(selected);"
-        },
-        {
-          "line": 847,
-          "block": 69,
-          "branch": 0,
-          "source": "if (explicit != null && Number.isFinite(explicit)) return Math.max(1, explicit);"
-        },
-        {
-          "line": 847,
-          "block": 70,
-          "branch": 1,
-          "source": "if (explicit != null && Number.isFinite(explicit)) return Math.max(1, explicit);"
-        },
-        {
-          "line": 892,
-          "block": 76,
-          "branch": 0,
-          "source": "if (this.isOpen() || this.isDisabledFinal()) return;"
-        },
-        {
-          "line": 898,
-          "block": 79,
-          "branch": 0,
-          "source": "if ("
-        },
-        {
-          "line": 912,
-          "block": 82,
-          "branch": 0,
-          "source": "if (!this.overlaySession.open(origin)) return;"
-        },
-        {
-          "line": 915,
-          "block": 83,
-          "branch": 1,
-          "source": "this._openedScrollPosition = view ? { x: view.scrollX, y: view.scrollY } : null;"
-        },
-        {
-          "line": 921,
-          "block": 84,
-          "branch": 0,
-          "source": "if (this.lazy()) this.emitLazyRequest('initial', this.virtualFirst());"
-        },
-        {
-          "line": 923,
-          "block": 85,
-          "branch": 0,
-          "source": "if (this.autofocusFilter() && this.filterEnabled()) {"
-        },
-        {
-          "line": 923,
-          "block": 86,
-          "branch": 1,
-          "source": "if (this.autofocusFilter() && this.filterEnabled()) {"
-        },
-        {
-          "line": 929,
-          "block": 87,
-          "branch": 1,
-          "source": "if (view) {"
-        },
-        {
-          "line": 947,
-          "block": 88,
-          "branch": 0,
-          "source": "if (!this.isOpen() || this._scrollDismissGeneration !== generation) return;"
-        },
-        {
-          "line": 950,
-          "block": 90,
-          "branch": 1,
-          "source": "current.x === previous.x && current.y === previous.y ? stableFrames + 1 : 0;"
-        },
-        {
-          "line": 966,
-          "block": 95,
-          "branch": 1,
-          "source": "else if (this.filterValue() === null) this.searchQuery.set('');"
-        },
-        {
-          "line": 980,
-          "block": 97,
-          "branch": 0,
-          "source": "if (this.isDisabledFinal()) return;"
-        },
-        {
-          "line": 982,
-          "block": 98,
-          "branch": 1,
-          "source": "if (!this.focusVisitActive) {"
-        },
-        {
-          "line": 990,
-          "block": 100,
-          "branch": 2,
-          "source": "if (related && (this.elementRef.nativeElement.contains(related) || this._document.getElementById(this._panelId)?.contains(related))) return;"
-        },
-        {
-          "line": 1019,
-          "block": 104,
-          "branch": 0,
-          "source": "if ((event as KeyboardEvent & { __neuSelectHandled?: boolean }).__neuSelectHandled) return;"
-        },
-        {
-          "line": 1020,
-          "block": 105,
-          "branch": 0,
-          "source": "if (this.isDisabledFinal()) return;"
-        },
-        {
-          "line": 1023,
-          "block": 107,
-          "branch": 1,
-          "source": "if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {"
-        },
-        {
-          "line": 1026,
-          "block": 108,
-          "branch": 0,
-          "source": "if (event.key === 'ArrowUp') this.applyActiveRow(this.activeRowController.last(), true);"
-        },
-        {
-          "line": 1032,
-          "block": 109,
-          "branch": 0,
-          "source": "switch (event.key) {"
-        },
-        {
-          "line": 1037,
-          "block": 110,
-          "branch": 0,
-          "source": "event.key === 'ArrowDown'"
-        },
-        {
-          "line": 1044,
-          "block": 111,
-          "branch": 0,
-          "source": "if (false && event.target instanceof HTMLInputElement) return;"
-        },
-        {
-          "line": 1062,
-          "block": 114,
-          "branch": 0,
-          "source": "if (false && event.key === ' ' && event.target instanceof HTMLInputElement)"
-        },
-        {
-          "line": 1067,
-          "block": 116,
-          "branch": 1,
-          "source": "if (row?.kind === 'option') this.selectRow(event, row, next);"
-        },
-        {
-          "line": 1077,
-          "block": 117,
-          "branch": 1,
-          "source": "if ("
-        },
-        {
-          "line": 1085,
-          "block": 119,
-          "branch": 0,
-          "source": "if (result.rowIndex !== -1) {"
-        },
-        {
-          "line": 1097,
-          "block": 120,
-          "branch": 0,
-          "source": "if (!this.isDisabledFinal()) this.focusTrigger();"
-        },
-        {
-          "line": 1097,
-          "block": 120,
-          "branch": 1,
-          "source": "if (!this.isDisabledFinal()) this.focusTrigger();"
-        },
-        {
-          "line": 1105,
-          "block": 121,
-          "branch": 0,
-          "source": "if (this.isOpen()) this.proposeOpen(false);"
-        },
-        {
-          "line": 1134,
-          "block": 130,
-          "branch": 1,
-          "source": "if (row?.kind === 'option' && !row.disabled) this.selectRow(null, row, rowIndex, false);"
-        },
-        {
-          "line": 1149,
-          "block": 138,
-          "branch": 1,
-          "source": "if (closePanel && !this.multiple()) this.requestClose(originalEvent ?? undefined);"
-        },
-        {
-          "line": 1174,
-          "block": 146,
-          "branch": 1,
-          "source": "if (this.filterValue() === null) this.searchQuery.set(value);"
-        },
-        {
-          "line": 1180,
-          "block": 149,
-          "branch": 1,
-          "source": "if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);"
-        },
-        {
-          "line": 1228,
-          "block": 158,
-          "branch": 1,
-          "source": "return ("
-        },
-        {
-          "line": 1230,
-          "block": 159,
-          "branch": 0,
-          "source": "logicalOffset: this.lazy() ? this.dataFirst() : 0,"
-        },
-        {
-          "line": 1238,
-          "block": 161,
-          "branch": 1,
-          "source": "const first = this.renderedRows()[0]?.rowIndex ?? 0;"
-        },
-        {
-          "line": 1239,
-          "block": 162,
-          "branch": 0,
-          "source": "return (this.lazy() ? this.dataFirst() : first) * this.effectiveVirtualScrollItemSize();"
-        },
-        {
-          "line": 1246,
-          "block": 165,
-          "branch": 0,
-          "source": "const last = this.lazy()"
-        },
-        {
-          "line": 1248,
-          "block": 166,
-          "branch": 1,
-          "source": ": (rendered.at(-1)?.rowIndex ?? -1) + 1;"
-        },
-        {
-          "line": 1269,
-          "block": 167,
-          "branch": 1,
-          "source": "value: values[0] ?? null,"
-        },
-        {
-          "line": 1318,
-          "block": 175,
-          "branch": 0,
-          "source": "clear(event: Event = new Event('clear')): void {"
-        },
-        {
-          "line": 1419,
-          "block": 197,
-          "branch": 0,
-          "source": "if ("
-        },
-        {
-          "line": 1436,
-          "block": 203,
-          "branch": 0,
-          "source": "if (!isPlatformBrowser(this._platformId)) return;"
-        },
-        {
-          "line": 1438,
-          "block": 204,
-          "branch": 0,
-          "source": "if (!view) return;"
-        },
-        {
-          "line": 1474,
-          "block": 212,
-          "branch": 1,
-          "source": "if (!firstEnabled) {"
-        },
-        {
-          "line": 1561,
-          "block": 226,
-          "branch": 0,
-          "source": "return this.asModelValue(this.multiple() ? [] : null);"
-        },
-        {
-          "line": 1571,
-          "block": 231,
-          "branch": 1,
-          "source": "return this.multiple() ? null : ((this.value() ?? null) as V | null);"
-        },
-        {
-          "line": 1580,
-          "block": 234,
-          "branch": 1,
-          "source": "const rightValues = Array.isArray(right) ? (right as readonly V[]) : [];"
-        },
-        {
-          "line": 1603,
-          "block": 238,
-          "branch": 1,
-          "source": ").flatMap((row) => (row.kind === 'option' ? [row.option] : []));"
-        },
-        {
-          "line": 1635,
-          "block": 248,
-          "branch": 0,
-          "source": "const next = selected"
-        },
-        {
-          "line": 1651,
-          "block": 251,
-          "branch": 1,
-          "source": ": this.autoOptionFocus()"
-        },
-        {
-          "line": 1658,
-          "block": 254,
-          "branch": 1,
-          "source": "if (row?.kind === 'option') this.selectRow(null, row, next, false);"
-        },
-        {
-          "line": 1673,
-          "block": 258,
-          "branch": 1,
-          "source": "if (row?.kind === 'option') this.selectRow(event, row, next, false);"
-        },
-        {
-          "line": 1681,
-          "block": 261,
-          "branch": 1,
-          "source": "const first = rendered[0]?.rowIndex ?? 0;"
-        },
-        {
-          "line": 1682,
-          "block": 262,
-          "branch": 1,
-          "source": "const last = rendered.at(-1)?.rowIndex ?? -1;"
-        },
-        {
-          "line": 1683,
-          "block": 263,
-          "branch": 0,
-          "source": "if (rowIndex < first || rowIndex > last) this.virtualFirst.set(rowIndex);"
-        },
-        {
-          "line": 1687,
-          "block": 265,
-          "branch": 0,
-          "source": "if (!isPlatformBrowser(this._platformId)) return;"
-        },
-        {
-          "line": 1689,
-          "block": 266,
-          "branch": 1,
-          "source": "const element = row?.kind === 'option' ? this._document.getElementById(this.rowId(row)) : null;"
-        },
-        {
-          "line": 1691,
-          "block": 267,
-          "branch": 0,
-          "source": "if (!element || !list) return;"
-        },
-        {
-          "line": 1695,
-          "block": 269,
-          "branch": 0,
-          "source": "if (optionRect.top < listRect.top) {"
-        },
-        {
-          "line": 1712,
-          "block": 272,
-          "branch": 0,
-          "source": "total == null ? first + count : Math.min(total, first + count),"
-        },
-        {
-          "line": 1737,
-          "block": 276,
-          "branch": 1,
-          "source": "reason: reason === 'scroll' ? 'viewport' : reason === 'filter' || reason === 'reset' ? 'query' : 'initial',"
-        },
-        {
-          "line": 1737,
-          "block": 277,
-          "branch": 1,
-          "source": "reason: reason === 'scroll' ? 'viewport' : reason === 'filter' || reason === 'reset' ? 'query' : 'initial',"
-        },
-        {
-          "line": 1743,
-          "block": 278,
-          "branch": 1,
-          "source": "if (signalIndex === this.activeRowController.activeRowIndex) return;"
-        },
-        {
-          "line": 1744,
-          "block": 279,
-          "branch": 0,
-          "source": "if (signalIndex === -1) this.activeRowController.clear();"
-        },
-        {
-          "line": 1744,
-          "block": 279,
-          "branch": 1,
-          "source": "if (signalIndex === -1) this.activeRowController.clear();"
-        },
-        {
-          "line": 1764,
-          "block": 283,
-          "branch": 0,
-          "source": "if (!isPlatformBrowser(this._platformId)) return;"
-        },
-        {
-          "line": 1774,
-          "block": 285,
-          "branch": 0,
-          "source": "if (!this.overlaySession.isOpen) {"
-        },
-        {
-          "line": 1801,
-          "block": 289,
-          "branch": 1,
-          "source": "if (keyIntent.preventDefault) event.preventDefault();"
-        },
-        {
-          "line": 1807,
-          "block": 290,
-          "branch": 1,
-          "source": "if (!origin || !isPlatformBrowser(this._platformId)) return;"
-        },
-        {
-          "line": 1807,
-          "block": 291,
-          "branch": 1,
-          "source": "if (!origin || !isPlatformBrowser(this._platformId)) return;"
-        },
-        {
-          "line": 1809,
-          "block": 292,
-          "branch": 0,
-          "source": "if (!view) return;"
-        },
-        {
-          "line": 1809,
-          "block": 292,
-          "branch": 1,
-          "source": "if (!view) return;"
-        },
-        {
-          "line": 1814,
-          "block": 293,
-          "branch": 0,
-          "source": "if (origin.isConnected) origin.focus();"
-        },
-        {
-          "line": 1814,
-          "block": 293,
-          "branch": 1,
-          "source": "if (origin.isConnected) origin.focus();"
-        },
-        {
-          "line": 1816,
-          "block": 294,
-          "branch": 0,
-          "source": "this.focusRestorationFrameId = completedSynchronously ? null : frameId;"
-        },
-        {
-          "line": 1816,
-          "block": 294,
-          "branch": 1,
-          "source": "this.focusRestorationFrameId = completedSynchronously ? null : frameId;"
-        },
-        {
-          "line": 1820,
-          "block": 295,
-          "branch": 1,
-          "source": "if (this.focusRestorationFrameId == null) return;"
-        }
-      ],
-      "uncoveredFunctions": [
-        {
-          "name": "NeuSelectComponent_Template_div_focus_3_listener",
-          "line": 159,
-          "hits": 0
-        },
-        {
-          "name": "NeuSelectComponent_Template_div_blur_3_listener",
-          "line": 160,
-          "hits": 0
-        },
-        {
-          "name": "NeuSelectComponent_Conditional_6_For_2_Conditional_2_Template_button_click_0_listener",
-          "line": 182,
-          "hits": 0
-        },
-        {
-          "name": "NeuSelectComponent_ng_template_13_Conditional_2_Conditional_2_Template_input_keydown_1_listener",
-          "line": 303,
-          "hits": 0
-        },
-        {
-          "name": "NeuSelectComponent_ng_template_13_Conditional_3_Template_button_click_0_listener",
-          "line": 316,
-          "hits": 0
-        },
-        {
-          "name": "NeuSelectComponent_ng_template_13_Template_div_scroll_5_listener",
-          "line": 333,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_13)",
-          "line": 487,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_14)",
-          "line": 488,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_48)",
-          "line": 785,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_58)",
-          "line": 817,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_61)",
-          "line": 823,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_79)",
-          "line": 997,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_84)",
-          "line": 1096,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_107)",
-          "line": 1293,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_108)",
-          "line": 1294,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_111)",
-          "line": 1318,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_124)",
-          "line": 1378,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_152)",
-          "line": 1583,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_159)",
-          "line": 1636,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_168)",
-          "line": 1750,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_177)",
-          "line": 1811,
-          "hits": 0
-        }
-      ],
-      "absoluteGap": 275
-    },
     {
       "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
       "metrics": {
@@ -1846,31 +895,31 @@
       "metrics": {
         "statements": {
           "total": 649,
-          "covered": 559,
+          "covered": 560,
           "skipped": 0,
-          "pct": 86.13,
-          "uncovered": 90
+          "pct": 86.28,
+          "uncovered": 89
         },
         "branches": {
           "total": 451,
-          "covered": 324,
+          "covered": 326,
           "skipped": 0,
-          "pct": 71.84,
-          "uncovered": 127
+          "pct": 72.28,
+          "uncovered": 125
         },
         "functions": {
           "total": 114,
-          "covered": 102,
+          "covered": 103,
           "skipped": 0,
-          "pct": 89.47,
-          "uncovered": 12
+          "pct": 90.35,
+          "uncovered": 11
         },
         "lines": {
           "total": 549,
-          "covered": 504,
+          "covered": 505,
           "skipped": 0,
-          "pct": 91.8,
-          "uncovered": 45
+          "pct": 91.98,
+          "uncovered": 44
         }
       },
       "uncoveredLineRanges": [
@@ -1901,10 +950,6 @@
         [
           485,
           485
-        ],
-        [
-          523,
-          523
         ],
         [
           553,
@@ -2119,18 +1164,6 @@
           "block": 49,
           "branch": 0,
           "source": "if (current === nextValue) return;"
-        },
-        {
-          "line": 523,
-          "block": 56,
-          "branch": 0,
-          "source": "return this.footerTemplates().get(columnId) ?? null;"
-        },
-        {
-          "line": 523,
-          "block": 56,
-          "branch": 1,
-          "source": "return this.footerTemplates().get(columnId) ?? null;"
         },
         {
           "line": 590,
@@ -2766,11 +1799,6 @@
           "hits": 0
         },
         {
-          "name": "(anonymous_53)",
-          "line": 522,
-          "hits": 0
-        },
-        {
           "name": "(anonymous_57)",
           "line": 553,
           "hits": 0
@@ -2801,49 +1829,899 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 274
+      "absoluteGap": 269
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "metrics": {
+        "statements": {
+          "total": 954,
+          "covered": 878,
+          "skipped": 0,
+          "pct": 92.03,
+          "uncovered": 76
+        },
+        "branches": {
+          "total": 655,
+          "covered": 556,
+          "skipped": 0,
+          "pct": 84.88,
+          "uncovered": 99
+        },
+        "functions": {
+          "total": 191,
+          "covered": 175,
+          "skipped": 0,
+          "pct": 91.62,
+          "uncovered": 16
+        },
+        "lines": {
+          "total": 781,
+          "covered": 730,
+          "skipped": 0,
+          "pct": 93.46,
+          "uncovered": 51
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          211,
+          212
+        ],
+        [
+          233,
+          233
+        ],
+        [
+          235,
+          236
+        ],
+        [
+          288,
+          289
+        ],
+        [
+          294,
+          294
+        ],
+        [
+          333,
+          333
+        ],
+        [
+          336,
+          336
+        ],
+        [
+          339,
+          339
+        ],
+        [
+          356,
+          356
+        ],
+        [
+          367,
+          367
+        ],
+        [
+          487,
+          487
+        ],
+        [
+          489,
+          489
+        ],
+        [
+          743,
+          743
+        ],
+        [
+          786,
+          788
+        ],
+        [
+          817,
+          817
+        ],
+        [
+          824,
+          825
+        ],
+        [
+          905,
+          905
+        ],
+        [
+          924,
+          924
+        ],
+        [
+          997,
+          997
+        ],
+        [
+          1063,
+          1063
+        ],
+        [
+          1086,
+          1086
+        ],
+        [
+          1097,
+          1097
+        ],
+        [
+          1293,
+          1294
+        ],
+        [
+          1319,
+          1319
+        ],
+        [
+          1379,
+          1379
+        ],
+        [
+          1424,
+          1424
+        ],
+        [
+          1478,
+          1478
+        ],
+        [
+          1583,
+          1583
+        ],
+        [
+          1636,
+          1636
+        ],
+        [
+          1696,
+          1696
+        ],
+        [
+          1744,
+          1745
+        ],
+        [
+          1750,
+          1750
+        ],
+        [
+          1775,
+          1776
+        ],
+        [
+          1808,
+          1814
+        ],
+        [
+          1816,
+          1816
+        ],
+        [
+          1821,
+          1821
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 210,
+          "block": 2,
+          "branch": 0,
+          "source": "@if (clearIconTpl()) {"
+        },
+        {
+          "line": 293,
+          "block": 3,
+          "branch": 0,
+          "source": "@if (filterIconTpl()) {"
+        },
+        {
+          "line": 287,
+          "block": 4,
+          "branch": 0,
+          "source": "@if (filterTpl()) {"
+        },
+        {
+          "line": 350,
+          "block": 7,
+          "branch": 1,
+          "source": "@if (groupTpl()) {"
+        },
+        {
+          "line": 361,
+          "block": 8,
+          "branch": 1,
+          "source": "@if (loaderTpl()) {"
+        },
+        {
+          "line": 420,
+          "block": 12,
+          "branch": 1,
+          "source": "{{ currentFilter() ? noResultsMessage() : emptyMessage() }}"
+        },
+        {
+          "line": 335,
+          "block": 20,
+          "branch": 0,
+          "source": "@if (virtualTopHeight() > 0) {"
+        },
+        {
+          "line": 663,
+          "block": 27,
+          "branch": 1,
+          "source": "request: (callback) => this._document.defaultView?.requestAnimationFrame(callback) ?? -1,"
+        },
+        {
+          "line": 700,
+          "block": 29,
+          "branch": 0,
+          "source": "if (this.ariaDescribedBy()) return this.ariaDescribedBy();"
+        },
+        {
+          "line": 742,
+          "block": 44,
+          "branch": 0,
+          "source": "if (this.options().some((option) => resolveNeuOptionGroup(option) !== undefined))"
+        },
+        {
+          "line": 770,
+          "block": 48,
+          "branch": 0,
+          "source": "this.lazy()"
+        },
+        {
+          "line": 771,
+          "block": 49,
+          "branch": 0,
+          "source": "? (this.totalItems() ?? this.filteredOptions().length)"
+        },
+        {
+          "line": 771,
+          "block": 49,
+          "branch": 1,
+          "source": "? (this.totalItems() ?? this.filteredOptions().length)"
+        },
+        {
+          "line": 787,
+          "block": 52,
+          "branch": 0,
+          "source": "const previous = index > 0 ? this.filteredOptions()[index - 1] : undefined;"
+        },
+        {
+          "line": 787,
+          "block": 52,
+          "branch": 1,
+          "source": "const previous = index > 0 ? this.filteredOptions()[index - 1] : undefined;"
+        },
+        {
+          "line": 788,
+          "block": 53,
+          "branch": 0,
+          "source": "return previous === undefined ? undefined : this.optionGroup(previous);"
+        },
+        {
+          "line": 788,
+          "block": 53,
+          "branch": 1,
+          "source": "return previous === undefined ? undefined : this.optionGroup(previous);"
+        },
+        {
+          "line": 795,
+          "block": 55,
+          "branch": 0,
+          "source": "if (max != null && labels.length > max) return `${this.currentValues().length} selected`;"
+        },
+        {
+          "line": 795,
+          "block": 56,
+          "branch": 1,
+          "source": "if (max != null && labels.length > max) return `${this.currentValues().length} selected`;"
+        },
+        {
+          "line": 796,
+          "block": 58,
+          "branch": 0,
+          "source": "return labels.length ? labels.join(', ') : this.currentValues().length ? `${this.currentValues().length} selected` : null;"
+        },
+        {
+          "line": 812,
+          "block": 61,
+          "branch": 1,
+          "source": "return max == null ? this.selectedOptions() : this.selectedOptions().slice(0, Math.max(0, max));"
+        },
+        {
+          "line": 814,
+          "block": 62,
+          "branch": 1,
+          "source": "readonly scopedOptions = computed(() =>"
+        },
+        {
+          "line": 825,
+          "block": 65,
+          "branch": 0,
+          "source": "return selected === null ? null : this.optionDomId(selected);"
+        },
+        {
+          "line": 825,
+          "block": 65,
+          "branch": 1,
+          "source": "return selected === null ? null : this.optionDomId(selected);"
+        },
+        {
+          "line": 847,
+          "block": 69,
+          "branch": 0,
+          "source": "if (explicit != null && Number.isFinite(explicit)) return Math.max(1, explicit);"
+        },
+        {
+          "line": 847,
+          "block": 70,
+          "branch": 1,
+          "source": "if (explicit != null && Number.isFinite(explicit)) return Math.max(1, explicit);"
+        },
+        {
+          "line": 892,
+          "block": 76,
+          "branch": 0,
+          "source": "if (this.isOpen() || this.isDisabledFinal()) return;"
+        },
+        {
+          "line": 898,
+          "block": 79,
+          "branch": 0,
+          "source": "if ("
+        },
+        {
+          "line": 912,
+          "block": 82,
+          "branch": 0,
+          "source": "if (!this.overlaySession.open(origin)) return;"
+        },
+        {
+          "line": 915,
+          "block": 83,
+          "branch": 1,
+          "source": "this._openedScrollPosition = view ? { x: view.scrollX, y: view.scrollY } : null;"
+        },
+        {
+          "line": 921,
+          "block": 84,
+          "branch": 0,
+          "source": "if (this.lazy()) this.emitLazyRequest('initial', this.virtualFirst());"
+        },
+        {
+          "line": 923,
+          "block": 85,
+          "branch": 0,
+          "source": "if (this.autofocusFilter() && this.filterEnabled()) {"
+        },
+        {
+          "line": 923,
+          "block": 86,
+          "branch": 1,
+          "source": "if (this.autofocusFilter() && this.filterEnabled()) {"
+        },
+        {
+          "line": 929,
+          "block": 87,
+          "branch": 1,
+          "source": "if (view) {"
+        },
+        {
+          "line": 950,
+          "block": 90,
+          "branch": 1,
+          "source": "current.x === previous.x && current.y === previous.y ? stableFrames + 1 : 0;"
+        },
+        {
+          "line": 966,
+          "block": 95,
+          "branch": 1,
+          "source": "else if (this.filterValue() === null) this.searchQuery.set('');"
+        },
+        {
+          "line": 980,
+          "block": 97,
+          "branch": 0,
+          "source": "if (this.isDisabledFinal()) return;"
+        },
+        {
+          "line": 982,
+          "block": 98,
+          "branch": 1,
+          "source": "if (!this.focusVisitActive) {"
+        },
+        {
+          "line": 1019,
+          "block": 104,
+          "branch": 0,
+          "source": "if ((event as KeyboardEvent & { __neuSelectHandled?: boolean }).__neuSelectHandled) return;"
+        },
+        {
+          "line": 1020,
+          "block": 105,
+          "branch": 0,
+          "source": "if (this.isDisabledFinal()) return;"
+        },
+        {
+          "line": 1023,
+          "block": 107,
+          "branch": 1,
+          "source": "if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {"
+        },
+        {
+          "line": 1026,
+          "block": 108,
+          "branch": 0,
+          "source": "if (event.key === 'ArrowUp') this.applyActiveRow(this.activeRowController.last(), true);"
+        },
+        {
+          "line": 1032,
+          "block": 109,
+          "branch": 0,
+          "source": "switch (event.key) {"
+        },
+        {
+          "line": 1037,
+          "block": 110,
+          "branch": 0,
+          "source": "event.key === 'ArrowDown'"
+        },
+        {
+          "line": 1044,
+          "block": 111,
+          "branch": 0,
+          "source": "if (false && event.target instanceof HTMLInputElement) return;"
+        },
+        {
+          "line": 1062,
+          "block": 114,
+          "branch": 0,
+          "source": "if (false && event.key === ' ' && event.target instanceof HTMLInputElement)"
+        },
+        {
+          "line": 1067,
+          "block": 116,
+          "branch": 1,
+          "source": "if (row?.kind === 'option') this.selectRow(event, row, next);"
+        },
+        {
+          "line": 1077,
+          "block": 117,
+          "branch": 1,
+          "source": "if ("
+        },
+        {
+          "line": 1085,
+          "block": 119,
+          "branch": 0,
+          "source": "if (result.rowIndex !== -1) {"
+        },
+        {
+          "line": 1097,
+          "block": 120,
+          "branch": 0,
+          "source": "if (!this.isDisabledFinal()) this.focusTrigger();"
+        },
+        {
+          "line": 1097,
+          "block": 120,
+          "branch": 1,
+          "source": "if (!this.isDisabledFinal()) this.focusTrigger();"
+        },
+        {
+          "line": 1105,
+          "block": 121,
+          "branch": 0,
+          "source": "if (this.isOpen()) this.proposeOpen(false);"
+        },
+        {
+          "line": 1134,
+          "block": 130,
+          "branch": 1,
+          "source": "if (row?.kind === 'option' && !row.disabled) this.selectRow(null, row, rowIndex, false);"
+        },
+        {
+          "line": 1149,
+          "block": 138,
+          "branch": 1,
+          "source": "if (closePanel && !this.multiple()) this.requestClose(originalEvent ?? undefined);"
+        },
+        {
+          "line": 1174,
+          "block": 146,
+          "branch": 1,
+          "source": "if (this.filterValue() === null) this.searchQuery.set(value);"
+        },
+        {
+          "line": 1180,
+          "block": 149,
+          "branch": 1,
+          "source": "if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);"
+        },
+        {
+          "line": 1228,
+          "block": 158,
+          "branch": 1,
+          "source": "return ("
+        },
+        {
+          "line": 1230,
+          "block": 159,
+          "branch": 0,
+          "source": "logicalOffset: this.lazy() ? this.dataFirst() : 0,"
+        },
+        {
+          "line": 1238,
+          "block": 161,
+          "branch": 1,
+          "source": "const first = this.renderedRows()[0]?.rowIndex ?? 0;"
+        },
+        {
+          "line": 1239,
+          "block": 162,
+          "branch": 0,
+          "source": "return (this.lazy() ? this.dataFirst() : first) * this.effectiveVirtualScrollItemSize();"
+        },
+        {
+          "line": 1246,
+          "block": 165,
+          "branch": 0,
+          "source": "const last = this.lazy()"
+        },
+        {
+          "line": 1248,
+          "block": 166,
+          "branch": 1,
+          "source": ": (rendered.at(-1)?.rowIndex ?? -1) + 1;"
+        },
+        {
+          "line": 1269,
+          "block": 167,
+          "branch": 1,
+          "source": "value: values[0] ?? null,"
+        },
+        {
+          "line": 1318,
+          "block": 175,
+          "branch": 0,
+          "source": "clear(event: Event = new Event('clear')): void {"
+        },
+        {
+          "line": 1419,
+          "block": 197,
+          "branch": 0,
+          "source": "if ("
+        },
+        {
+          "line": 1436,
+          "block": 203,
+          "branch": 0,
+          "source": "if (!isPlatformBrowser(this._platformId)) return;"
+        },
+        {
+          "line": 1438,
+          "block": 204,
+          "branch": 0,
+          "source": "if (!view) return;"
+        },
+        {
+          "line": 1474,
+          "block": 212,
+          "branch": 1,
+          "source": "if (!firstEnabled) {"
+        },
+        {
+          "line": 1561,
+          "block": 226,
+          "branch": 0,
+          "source": "return this.asModelValue(this.multiple() ? [] : null);"
+        },
+        {
+          "line": 1571,
+          "block": 231,
+          "branch": 1,
+          "source": "return this.multiple() ? null : ((this.value() ?? null) as V | null);"
+        },
+        {
+          "line": 1580,
+          "block": 234,
+          "branch": 1,
+          "source": "const rightValues = Array.isArray(right) ? (right as readonly V[]) : [];"
+        },
+        {
+          "line": 1603,
+          "block": 238,
+          "branch": 1,
+          "source": ").flatMap((row) => (row.kind === 'option' ? [row.option] : []));"
+        },
+        {
+          "line": 1635,
+          "block": 248,
+          "branch": 0,
+          "source": "const next = selected"
+        },
+        {
+          "line": 1651,
+          "block": 251,
+          "branch": 1,
+          "source": ": this.autoOptionFocus()"
+        },
+        {
+          "line": 1658,
+          "block": 254,
+          "branch": 1,
+          "source": "if (row?.kind === 'option') this.selectRow(null, row, next, false);"
+        },
+        {
+          "line": 1673,
+          "block": 258,
+          "branch": 1,
+          "source": "if (row?.kind === 'option') this.selectRow(event, row, next, false);"
+        },
+        {
+          "line": 1681,
+          "block": 261,
+          "branch": 1,
+          "source": "const first = rendered[0]?.rowIndex ?? 0;"
+        },
+        {
+          "line": 1682,
+          "block": 262,
+          "branch": 1,
+          "source": "const last = rendered.at(-1)?.rowIndex ?? -1;"
+        },
+        {
+          "line": 1683,
+          "block": 263,
+          "branch": 0,
+          "source": "if (rowIndex < first || rowIndex > last) this.virtualFirst.set(rowIndex);"
+        },
+        {
+          "line": 1687,
+          "block": 265,
+          "branch": 0,
+          "source": "if (!isPlatformBrowser(this._platformId)) return;"
+        },
+        {
+          "line": 1695,
+          "block": 269,
+          "branch": 0,
+          "source": "if (optionRect.top < listRect.top) {"
+        },
+        {
+          "line": 1712,
+          "block": 272,
+          "branch": 0,
+          "source": "total == null ? first + count : Math.min(total, first + count),"
+        },
+        {
+          "line": 1737,
+          "block": 276,
+          "branch": 1,
+          "source": "reason: reason === 'scroll' ? 'viewport' : reason === 'filter' || reason === 'reset' ? 'query' : 'initial',"
+        },
+        {
+          "line": 1737,
+          "block": 277,
+          "branch": 1,
+          "source": "reason: reason === 'scroll' ? 'viewport' : reason === 'filter' || reason === 'reset' ? 'query' : 'initial',"
+        },
+        {
+          "line": 1743,
+          "block": 278,
+          "branch": 1,
+          "source": "if (signalIndex === this.activeRowController.activeRowIndex) return;"
+        },
+        {
+          "line": 1744,
+          "block": 279,
+          "branch": 0,
+          "source": "if (signalIndex === -1) this.activeRowController.clear();"
+        },
+        {
+          "line": 1744,
+          "block": 279,
+          "branch": 1,
+          "source": "if (signalIndex === -1) this.activeRowController.clear();"
+        },
+        {
+          "line": 1764,
+          "block": 283,
+          "branch": 0,
+          "source": "if (!isPlatformBrowser(this._platformId)) return;"
+        },
+        {
+          "line": 1774,
+          "block": 285,
+          "branch": 0,
+          "source": "if (!this.overlaySession.isOpen) {"
+        },
+        {
+          "line": 1801,
+          "block": 289,
+          "branch": 1,
+          "source": "if (keyIntent.preventDefault) event.preventDefault();"
+        },
+        {
+          "line": 1807,
+          "block": 290,
+          "branch": 1,
+          "source": "if (!origin || !isPlatformBrowser(this._platformId)) return;"
+        },
+        {
+          "line": 1807,
+          "block": 291,
+          "branch": 1,
+          "source": "if (!origin || !isPlatformBrowser(this._platformId)) return;"
+        },
+        {
+          "line": 1809,
+          "block": 292,
+          "branch": 0,
+          "source": "if (!view) return;"
+        },
+        {
+          "line": 1809,
+          "block": 292,
+          "branch": 1,
+          "source": "if (!view) return;"
+        },
+        {
+          "line": 1814,
+          "block": 293,
+          "branch": 0,
+          "source": "if (origin.isConnected) origin.focus();"
+        },
+        {
+          "line": 1814,
+          "block": 293,
+          "branch": 1,
+          "source": "if (origin.isConnected) origin.focus();"
+        },
+        {
+          "line": 1816,
+          "block": 294,
+          "branch": 0,
+          "source": "this.focusRestorationFrameId = completedSynchronously ? null : frameId;"
+        },
+        {
+          "line": 1816,
+          "block": 294,
+          "branch": 1,
+          "source": "this.focusRestorationFrameId = completedSynchronously ? null : frameId;"
+        },
+        {
+          "line": 1820,
+          "block": 295,
+          "branch": 1,
+          "source": "if (this.focusRestorationFrameId == null) return;"
+        }
+      ],
+      "uncoveredFunctions": [
+        {
+          "name": "NeuSelectComponent_ng_template_13_Template_div_scroll_5_listener",
+          "line": 333,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_13)",
+          "line": 487,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_14)",
+          "line": 488,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_48)",
+          "line": 785,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_58)",
+          "line": 817,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_61)",
+          "line": 823,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_79)",
+          "line": 997,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_84)",
+          "line": 1096,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_107)",
+          "line": 1293,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_108)",
+          "line": 1294,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_111)",
+          "line": 1318,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_124)",
+          "line": 1378,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_152)",
+          "line": 1583,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_159)",
+          "line": 1636,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_168)",
+          "line": 1750,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_177)",
+          "line": 1811,
+          "hits": 0
+        }
+      ],
+      "absoluteGap": 242
     },
     {
       "file": "projects/ui-core/date-input/neu-date-input.component.ts",
       "metrics": {
         "statements": {
           "total": 917,
-          "covered": 834,
+          "covered": 842,
           "skipped": 0,
-          "pct": 90.94,
-          "uncovered": 83
+          "pct": 91.82,
+          "uncovered": 75
         },
         "branches": {
           "total": 620,
-          "covered": 541,
+          "covered": 552,
           "skipped": 0,
-          "pct": 87.25,
-          "uncovered": 79
+          "pct": 89.03,
+          "uncovered": 68
         },
         "functions": {
           "total": 152,
-          "covered": 133,
+          "covered": 136,
           "skipped": 0,
-          "pct": 87.5,
-          "uncovered": 19
+          "pct": 89.47,
+          "uncovered": 16
         },
         "lines": {
           "total": 678,
-          "covered": 639,
+          "covered": 641,
           "skipped": 0,
-          "pct": 94.24,
-          "uncovered": 39
+          "pct": 94.54,
+          "uncovered": 37
         }
       },
       "uncoveredLineRanges": [
-        [
-          148,
-          148
-        ],
-        [
-          161,
-          161
-        ],
         [
           188,
           188
@@ -2933,12 +2811,6 @@
           "source": "(mouseenter)=\"hoverDate.set(cell.disabled ? null : cell.civil)\""
         },
         {
-          "line": 323,
-          "block": 3,
-          "branch": 1,
-          "source": "(mouseenter)=\"hoverDate.set(cell.disabled ? null : cell.civil)\""
-        },
-        {
           "line": 213,
           "block": 8,
           "branch": 0,
@@ -3023,12 +2895,6 @@
           "source": "} else if (event.key === 'Escape') {"
         },
         {
-          "line": 682,
-          "block": 61,
-          "branch": 0,
-          "source": "if (this.isOpen()) this.close(true);"
-        },
-        {
           "line": 705,
           "block": 72,
           "branch": 0,
@@ -3051,12 +2917,6 @@
           "block": 79,
           "branch": 1,
           "source": "if (!this.disabled() && !this.destroyed) this.focusVisitActive = true;"
-        },
-        {
-          "line": 743,
-          "block": 85,
-          "branch": 0,
-          "source": "if (insideHost || insidePanel) return;"
         },
         {
           "line": 753,
@@ -3105,12 +2965,6 @@
           "block": 105,
           "branch": 0,
           "source": "if (this.mode() === 'month' || this.mode() === 'year') return;"
-        },
-        {
-          "line": 825,
-          "block": 116,
-          "branch": 1,
-          "source": "this.commit(localDateTime(`${date}T${this.readCurrentTime() ?? '00:00'}`));"
         },
         {
           "line": 834,
@@ -3288,57 +3142,15 @@
         },
         {
           "line": 1122,
-          "block": 228,
-          "branch": 0,
-          "source": "range.start && previewEnd ? (range.start < previewEnd ? range.start : previewEnd) : null;"
-        },
-        {
-          "line": 1122,
-          "block": 230,
-          "branch": 0,
-          "source": "range.start && previewEnd ? (range.start < previewEnd ? range.start : previewEnd) : null;"
-        },
-        {
-          "line": 1122,
           "block": 230,
           "branch": 1,
           "source": "range.start && previewEnd ? (range.start < previewEnd ? range.start : previewEnd) : null;"
         },
         {
           "line": 1124,
-          "block": 231,
-          "branch": 0,
-          "source": "range.start && previewEnd ? (range.start < previewEnd ? previewEnd : range.start) : null;"
-        },
-        {
-          "line": 1124,
-          "block": 233,
-          "branch": 0,
-          "source": "range.start && previewEnd ? (range.start < previewEnd ? previewEnd : range.start) : null;"
-        },
-        {
-          "line": 1124,
           "block": 233,
           "branch": 1,
           "source": "range.start && previewEnd ? (range.start < previewEnd ? previewEnd : range.start) : null;"
-        },
-        {
-          "line": 1133,
-          "block": 234,
-          "branch": 1,
-          "source": "inRange: !!lower && !!upper && value > lower && value < upper,"
-        },
-        {
-          "line": 1133,
-          "block": 234,
-          "branch": 2,
-          "source": "inRange: !!lower && !!upper && value > lower && value < upper,"
-        },
-        {
-          "line": 1133,
-          "block": 234,
-          "branch": 3,
-          "source": "inRange: !!lower && !!upper && value > lower && value < upper,"
         },
         {
           "line": 1182,
@@ -3403,16 +3215,6 @@
       ],
       "uncoveredFunctions": [
         {
-          "name": "NeuDateInputControl_Conditional_8_Template_button_click_0_listener",
-          "line": 148,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_Conditional_9_Template_button_click_0_listener",
-          "line": 161,
-          "hits": 0
-        },
-        {
           "name": "NeuDateInputControl_ng_template_13_Template_div_keydown_escape_0_listener",
           "line": 188,
           "hits": 0
@@ -3430,11 +3232,6 @@
         {
           "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_5_Template_select_change_4_listener",
           "line": 237,
-          "hits": 0
-        },
-        {
-          "name": "NeuDateInputControl_ng_template_13_Conditional_2_Conditional_11_For_6_For_3_Template_button_mouseenter_0_listener",
-          "line": 322,
           "hits": 0
         },
         {
@@ -3498,7 +3295,7 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 220
+      "absoluteGap": 196
     },
     {
       "file": "projects/ui-core/color-picker/neu-color-picker.component.ts",
@@ -3955,528 +3752,6 @@
       "absoluteGap": 164
     },
     {
-      "file": "projects/ui-core/tree/neu-tree.component.ts",
-      "metrics": {
-        "statements": {
-          "total": 302,
-          "covered": 247,
-          "skipped": 0,
-          "pct": 81.78,
-          "uncovered": 55
-        },
-        "branches": {
-          "total": 215,
-          "covered": 152,
-          "skipped": 0,
-          "pct": 70.69,
-          "uncovered": 63
-        },
-        "functions": {
-          "total": 61,
-          "covered": 49,
-          "skipped": 0,
-          "pct": 80.32,
-          "uncovered": 12
-        },
-        "lines": {
-          "total": 233,
-          "covered": 203,
-          "skipped": 0,
-          "pct": 87.12,
-          "uncovered": 30
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          103,
-          103
-        ],
-        [
-          177,
-          180
-        ],
-        [
-          182,
-          183
-        ],
-        [
-          254,
-          259
-        ],
-        [
-          327,
-          327
-        ],
-        [
-          331,
-          331
-        ],
-        [
-          334,
-          337
-        ],
-        [
-          341,
-          347
-        ],
-        [
-          415,
-          416
-        ],
-        [
-          420,
-          420
-        ],
-        [
-          424,
-          424
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 114,
-          "block": 2,
-          "branch": 1,
-          "source": "protected readonly virtualItemSize = computed(() => Math.max(1, this.virtualization()?.itemSize ?? 1));"
-        },
-        {
-          "line": 118,
-          "block": 3,
-          "branch": 0,
-          "source": "if (!options) return { start: 0, end: total, total };"
-        },
-        {
-          "line": 120,
-          "block": 4,
-          "branch": 1,
-          "source": "const buffer = Math.max(0, Math.floor(options.buffer ?? 3));"
-        },
-        {
-          "line": 133,
-          "block": 7,
-          "branch": 1,
-          "source": "return visible[0]?.key ?? null;"
-        },
-        {
-          "line": 155,
-          "block": 10,
-          "branch": 1,
-          "source": "if (issue && isDevMode()) console.error(`[NeuTree] ${issue.code}: ${String(issue.key)}`);"
-        },
-        {
-          "line": 158,
-          "block": 12,
-          "branch": 0,
-          "source": "if (!this.browser) return;"
-        },
-        {
-          "line": 170,
-          "block": 18,
-          "branch": 0,
-          "source": "if (this.requestSeen.get(token) === model.revision) continue;"
-        },
-        {
-          "line": 176,
-          "block": 19,
-          "branch": 1,
-          "source": "if (!this.browser || !this.hadTreeFocus) return;"
-        },
-        {
-          "line": 179,
-          "block": 21,
-          "branch": 0,
-          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
-        },
-        {
-          "line": 179,
-          "block": 21,
-          "branch": 1,
-          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
-        },
-        {
-          "line": 179,
-          "block": 22,
-          "branch": 0,
-          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
-        },
-        {
-          "line": 179,
-          "block": 22,
-          "branch": 1,
-          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
-        },
-        {
-          "line": 180,
-          "block": 23,
-          "branch": 0,
-          "source": "const fallback = this.focusPath.find((key) => visible.some((entry) => treeToken(entry.key) === treeToken(key))) ?? visible[0]?.key;"
-        },
-        {
-          "line": 180,
-          "block": 23,
-          "branch": 1,
-          "source": "const fallback = this.focusPath.find((key) => visible.some((entry) => treeToken(entry.key) === treeToken(key))) ?? visible[0]?.key;"
-        },
-        {
-          "line": 181,
-          "block": 24,
-          "branch": 0,
-          "source": "if (fallback === undefined) return;"
-        },
-        {
-          "line": 197,
-          "block": 28,
-          "branch": 1,
-          "source": "return this.checkboxStates().get(treeToken(key)) ?? 'unchecked';"
-        },
-        {
-          "line": 202,
-          "block": 29,
-          "branch": 0,
-          "source": "return state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false';"
-        },
-        {
-          "line": 221,
-          "block": 32,
-          "branch": 1,
-          "source": "return child ? [child] : [];"
-        },
-        {
-          "line": 238,
-          "block": 34,
-          "branch": 0,
-          "source": "if (!this.virtualization()) return;"
-        },
-        {
-          "line": 249,
-          "block": 35,
-          "branch": 0,
-          "source": "if (this.model().byKey.get(treeToken(key))?.relation?.state !== 'error') return;"
-        },
-        {
-          "line": 263,
-          "block": 36,
-          "branch": 0,
-          "source": "if (this.isInteractiveDescendant(event.target, event.currentTarget)) return;"
-        },
-        {
-          "line": 283,
-          "block": 39,
-          "branch": 0,
-          "source": "if (next instanceof Node && !this.host.contains(next)) this.hadTreeFocus = false;"
-        },
-        {
-          "line": 293,
-          "block": 43,
-          "branch": 0,
-          "source": "const forward = rtl ? 'ArrowLeft' : 'ArrowRight';"
-        },
-        {
-          "line": 294,
-          "block": 44,
-          "branch": 0,
-          "source": "const back = rtl ? 'ArrowRight' : 'ArrowLeft';"
-        },
-        {
-          "line": 299,
-          "block": 48,
-          "branch": 0,
-          "source": "else if (event.key === 'End') nextIndex = visible.length - 1;"
-        },
-        {
-          "line": 303,
-          "block": 52,
-          "branch": 1,
-          "source": "else if (entry.expanded && visible[index + 1]?.parentKey !== null &&"
-        },
-        {
-          "line": 309,
-          "block": 57,
-          "branch": 1,
-          "source": "} else if (entry.parentKey !== null) nextIndex = visible.findIndex((item) => treeToken(item.key) === treeToken(entry.parentKey!));"
-        },
-        {
-          "line": 335,
-          "block": 65,
-          "branch": 0,
-          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
-        },
-        {
-          "line": 335,
-          "block": 65,
-          "branch": 1,
-          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
-        },
-        {
-          "line": 335,
-          "block": 66,
-          "branch": 0,
-          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
-        },
-        {
-          "line": 335,
-          "block": 66,
-          "branch": 1,
-          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
-        },
-        {
-          "line": 335,
-          "block": 66,
-          "branch": 2,
-          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
-        },
-        {
-          "line": 336,
-          "block": 67,
-          "branch": 0,
-          "source": "if (data.owner !== this.dragOwner) return false;"
-        },
-        {
-          "line": 336,
-          "block": 67,
-          "branch": 1,
-          "source": "if (data.owner !== this.dragOwner) return false;"
-        },
-        {
-          "line": 341,
-          "block": 68,
-          "branch": 0,
-          "source": "if (!event || typeof event !== 'object') return;"
-        },
-        {
-          "line": 341,
-          "block": 68,
-          "branch": 1,
-          "source": "if (!event || typeof event !== 'object') return;"
-        },
-        {
-          "line": 341,
-          "block": 69,
-          "branch": 0,
-          "source": "if (!event || typeof event !== 'object') return;"
-        },
-        {
-          "line": 341,
-          "block": 69,
-          "branch": 1,
-          "source": "if (!event || typeof event !== 'object') return;"
-        },
-        {
-          "line": 343,
-          "block": 70,
-          "branch": 0,
-          "source": "if (!this.acceptDrop(candidate.data, candidate.targetData)) return;"
-        },
-        {
-          "line": 343,
-          "block": 70,
-          "branch": 1,
-          "source": "if (!this.acceptDrop(candidate.data, candidate.targetData)) return;"
-        },
-        {
-          "line": 347,
-          "block": 71,
-          "branch": 0,
-          "source": "if (move) this.nodeMove.emit(move);"
-        },
-        {
-          "line": 347,
-          "block": 71,
-          "branch": 1,
-          "source": "if (move) this.nodeMove.emit(move);"
-        },
-        {
-          "line": 352,
-          "block": 72,
-          "branch": 0,
-          "source": "if (!entry || !entry.relation || entry.relation.state === 'loaded' && entry.relation.keys.length === 0) return;"
-        },
-        {
-          "line": 367,
-          "block": 77,
-          "branch": 0,
-          "source": "if (!this.browser || this.destroyRef.destroyed) return;"
-        },
-        {
-          "line": 373,
-          "block": 79,
-          "branch": 0,
-          "source": "if (key === undefined) return;"
-        },
-        {
-          "line": 378,
-          "block": 81,
-          "branch": 1,
-          "source": "if (index < range.start || index >= range.end) {"
-        },
-        {
-          "line": 381,
-          "block": 83,
-          "branch": 1,
-          "source": "if (viewport) viewport.scrollTop = top;"
-        },
-        {
-          "line": 389,
-          "block": 84,
-          "branch": 0,
-          "source": "if (!this.browser) return;"
-        },
-        {
-          "line": 394,
-          "block": 86,
-          "branch": 0,
-          "source": "if (index < 0) return;"
-        },
-        {
-          "line": 414,
-          "block": 89,
-          "branch": 1,
-          "source": "if (!(target instanceof Element) || !(current instanceof Element) || target === current) return false;"
-        },
-        {
-          "line": 416,
-          "block": 91,
-          "branch": 0,
-          "source": "return interactive !== null && current.contains(interactive);"
-        },
-        {
-          "line": 416,
-          "block": 91,
-          "branch": 1,
-          "source": "return interactive !== null && current.contains(interactive);"
-        },
-        {
-          "line": 420,
-          "block": 92,
-          "branch": 0,
-          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
-        },
-        {
-          "line": 420,
-          "block": 92,
-          "branch": 1,
-          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
-        },
-        {
-          "line": 420,
-          "block": 92,
-          "branch": 2,
-          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
-        },
-        {
-          "line": 420,
-          "block": 92,
-          "branch": 3,
-          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 0,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 1,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 2,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 3,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 4,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 5,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        },
-        {
-          "line": 424,
-          "block": 93,
-          "branch": 6,
-          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
-        }
-      ],
-      "uncoveredFunctions": [
-        {
-          "name": "(anonymous_60)",
-          "line": 99,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_1)",
-          "line": 103,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_19)",
-          "line": 179,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_20)",
-          "line": 180,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_21)",
-          "line": 180,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_35)",
-          "line": 253,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_42)",
-          "line": 326,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_43)",
-          "line": 330,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_44)",
-          "line": 334,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_45)",
-          "line": 340,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_57)",
-          "line": 419,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_58)",
-          "line": 423,
-          "hits": 0
-        }
-      ],
-      "absoluteGap": 160
-    },
-    {
       "file": "projects/ui-core/mega-menu/neu-mega-menu.component.ts",
       "metrics": {
         "statements": {
@@ -4920,1192 +4195,508 @@
       "absoluteGap": 156
     },
     {
-      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
       "metrics": {
         "statements": {
-          "total": 384,
-          "covered": 325,
+          "total": 302,
+          "covered": 248,
           "skipped": 0,
-          "pct": 84.63,
-          "uncovered": 59
+          "pct": 82.11,
+          "uncovered": 54
         },
         "branches": {
-          "total": 167,
-          "covered": 131,
+          "total": 215,
+          "covered": 155,
           "skipped": 0,
-          "pct": 78.44,
-          "uncovered": 36
+          "pct": 72.09,
+          "uncovered": 60
         },
         "functions": {
-          "total": 63,
-          "covered": 51,
+          "total": 61,
+          "covered": 49,
           "skipped": 0,
-          "pct": 80.95,
+          "pct": 80.32,
           "uncovered": 12
         },
         "lines": {
-          "total": 315,
-          "covered": 282,
+          "total": 233,
+          "covered": 203,
           "skipped": 0,
-          "pct": 89.52,
-          "uncovered": 33
+          "pct": 87.12,
+          "uncovered": 30
         }
       },
       "uncoveredLineRanges": [
         [
-          84,
-          84
-        ],
-        [
-          128,
-          128
-        ],
-        [
-          149,
-          149
-        ],
-        [
-          155,
-          157
-        ],
-        [
-          162,
-          162
-        ],
-        [
-          169,
-          169
+          103,
+          103
         ],
         [
           177,
-          178
+          180
         ],
         [
-          187,
-          187
+          182,
+          183
         ],
         [
-          191,
-          192
+          254,
+          259
         ],
         [
-          200,
-          200
+          327,
+          327
         ],
         [
-          203,
-          203
+          331,
+          331
         ],
         [
-          205,
-          205
+          334,
+          337
         ],
         [
-          207,
-          208
-        ],
-        [
-          215,
-          215
-        ],
-        [
-          241,
-          241
-        ],
-        [
-          361,
-          361
-        ],
-        [
-          369,
-          369
-        ],
-        [
-          391,
-          393
-        ],
-        [
-          408,
-          410
+          341,
+          347
         ],
         [
           415,
-          415
+          416
         ],
         [
-          423,
-          423
+          420,
+          420
         ],
         [
-          444,
-          444
-        ],
-        [
-          645,
-          645
-        ],
-        [
-          653,
-          653
+          424,
+          424
         ]
       ],
       "uncoveredBranchLocations": [
         {
-          "line": 157,
-          "block": 2,
-          "branch": 0,
-          "source": "[value]=\"progress() ?? 0\""
-        },
-        {
-          "line": 157,
+          "line": 114,
           "block": 2,
           "branch": 1,
-          "source": "[value]=\"progress() ?? 0\""
+          "source": "protected readonly virtualItemSize = computed(() => Math.max(1, this.virtualization()?.itemSize ?? 1));"
+        },
+        {
+          "line": 118,
+          "block": 3,
+          "branch": 0,
+          "source": "if (!options) return { start: 0, end: total, total };"
+        },
+        {
+          "line": 120,
+          "block": 4,
+          "branch": 1,
+          "source": "const buffer = Math.max(0, Math.floor(options.buffer ?? 3));"
+        },
+        {
+          "line": 133,
+          "block": 7,
+          "branch": 1,
+          "source": "return visible[0]?.key ?? null;"
+        },
+        {
+          "line": 155,
+          "block": 10,
+          "branch": 1,
+          "source": "if (issue && isDevMode()) console.error(`[NeuTree] ${issue.code}: ${String(issue.key)}`);"
+        },
+        {
+          "line": 158,
+          "block": 12,
+          "branch": 0,
+          "source": "if (!this.browser) return;"
+        },
+        {
+          "line": 170,
+          "block": 18,
+          "branch": 0,
+          "source": "if (this.requestSeen.get(token) === model.revision) continue;"
         },
         {
           "line": 176,
-          "block": 3,
-          "branch": 0,
-          "source": "@if (previewTemplate()) {"
-        },
-        {
-          "line": 186,
-          "block": 4,
-          "branch": 0,
-          "source": "@if (item.error) {"
-        },
-        {
-          "line": 190,
-          "block": 5,
-          "branch": 0,
-          "source": "@if (item.progress !== null) {"
-        },
-        {
-          "line": 199,
-          "block": 6,
-          "branch": 0,
-          "source": "@if (item.status === 'error') {"
-        },
-        {
-          "line": 168,
-          "block": 7,
-          "branch": 0,
-          "source": "@if (maxFiles() !== null) {"
-        },
-        {
-          "line": 333,
-          "block": 14,
-          "branch": 0,
-          "source": "this.showPickerText() && this.chooseLabel() ? null : this.chooseLabel(),"
-        },
-        {
-          "line": 333,
-          "block": 15,
+          "block": 19,
           "branch": 1,
-          "source": "this.showPickerText() && this.chooseLabel() ? null : this.chooseLabel(),"
+          "source": "if (!this.browser || !this.hadTreeFocus) return;"
         },
         {
-          "line": 339,
-          "block": 17,
+          "line": 179,
+          "block": 21,
           "branch": 0,
-          "source": "return this.hint() ? `${this.inputId()}-hint` : null;"
+          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
         },
         {
-          "line": 345,
-          "block": 20,
+          "line": 179,
+          "block": 21,
           "branch": 1,
-          "source": "const parts: string[] = [this.dropzone() ? this.placeholder() : this.pickerDescription()];"
+          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
         },
         {
-          "line": 350,
+          "line": 179,
+          "block": 22,
+          "branch": 0,
+          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
+        },
+        {
+          "line": 179,
+          "block": 22,
+          "branch": 1,
+          "source": "if (active === null || visible.some((entry) => treeToken(entry.key) === treeToken(active))) return;"
+        },
+        {
+          "line": 180,
+          "block": 23,
+          "branch": 0,
+          "source": "const fallback = this.focusPath.find((key) => visible.some((entry) => treeToken(entry.key) === treeToken(key))) ?? visible[0]?.key;"
+        },
+        {
+          "line": 180,
           "block": 23,
           "branch": 1,
-          "source": "parts.push(`${this.maxFileSizeTextLabel()}: ${this.formatBytes(this.maxFileSize() ?? 0)}`);"
+          "source": "const fallback = this.focusPath.find((key) => visible.some((entry) => treeToken(entry.key) === treeToken(key))) ?? visible[0]?.key;"
         },
         {
-          "line": 360,
-          "block": 25,
+          "line": 181,
+          "block": 24,
           "branch": 0,
-          "source": "if (this.errorMessage()) {"
+          "source": "if (fallback === undefined) return;"
         },
         {
-          "line": 368,
-          "block": 27,
-          "branch": 0,
-          "source": "if (this.isInteractionBlocked()) {"
-        },
-        {
-          "line": 375,
+          "line": 197,
           "block": 28,
+          "branch": 1,
+          "source": "return this.checkboxStates().get(treeToken(key)) ?? 'unchecked';"
+        },
+        {
+          "line": 202,
+          "block": 29,
           "branch": 0,
-          "source": "if (this.isInteractionBlocked()) return;"
+          "source": "return state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false';"
+        },
+        {
+          "line": 221,
+          "block": 32,
+          "branch": 1,
+          "source": "return child ? [child] : [];"
+        },
+        {
+          "line": 238,
+          "block": 34,
+          "branch": 0,
+          "source": "if (!this.virtualization()) return;"
+        },
+        {
+          "line": 249,
+          "block": 35,
+          "branch": 0,
+          "source": "if (this.model().byKey.get(treeToken(key))?.relation?.state !== 'error') return;"
+        },
+        {
+          "line": 263,
+          "block": 36,
+          "branch": 0,
+          "source": "if (this.isInteractiveDescendant(event.target, event.currentTarget)) return;"
+        },
+        {
+          "line": 283,
+          "block": 39,
+          "branch": 0,
+          "source": "if (next instanceof Node && !this.host.contains(next)) this.hadTreeFocus = false;"
+        },
+        {
+          "line": 303,
+          "block": 52,
+          "branch": 1,
+          "source": "else if (entry.expanded && visible[index + 1]?.parentKey !== null &&"
+        },
+        {
+          "line": 309,
+          "block": 57,
+          "branch": 1,
+          "source": "} else if (entry.parentKey !== null) nextIndex = visible.findIndex((item) => treeToken(item.key) === treeToken(entry.parentKey!));"
+        },
+        {
+          "line": 335,
+          "block": 65,
+          "branch": 0,
+          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
+        },
+        {
+          "line": 335,
+          "block": 65,
+          "branch": 1,
+          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
+        },
+        {
+          "line": 335,
+          "block": 66,
+          "branch": 0,
+          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
+        },
+        {
+          "line": 335,
+          "block": 66,
+          "branch": 1,
+          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
+        },
+        {
+          "line": 335,
+          "block": 66,
+          "branch": 2,
+          "source": "if (!this.reorderable() || !this.isTreeDragData(data) || !this.isTreeDropTarget(target)) return false;"
+        },
+        {
+          "line": 336,
+          "block": 67,
+          "branch": 0,
+          "source": "if (data.owner !== this.dragOwner) return false;"
+        },
+        {
+          "line": 336,
+          "block": 67,
+          "branch": 1,
+          "source": "if (data.owner !== this.dragOwner) return false;"
+        },
+        {
+          "line": 341,
+          "block": 68,
+          "branch": 0,
+          "source": "if (!event || typeof event !== 'object') return;"
+        },
+        {
+          "line": 341,
+          "block": 68,
+          "branch": 1,
+          "source": "if (!event || typeof event !== 'object') return;"
+        },
+        {
+          "line": 341,
+          "block": 69,
+          "branch": 0,
+          "source": "if (!event || typeof event !== 'object') return;"
+        },
+        {
+          "line": 341,
+          "block": 69,
+          "branch": 1,
+          "source": "if (!event || typeof event !== 'object') return;"
+        },
+        {
+          "line": 343,
+          "block": 70,
+          "branch": 0,
+          "source": "if (!this.acceptDrop(candidate.data, candidate.targetData)) return;"
+        },
+        {
+          "line": 343,
+          "block": 70,
+          "branch": 1,
+          "source": "if (!this.acceptDrop(candidate.data, candidate.targetData)) return;"
+        },
+        {
+          "line": 347,
+          "block": 71,
+          "branch": 0,
+          "source": "if (move) this.nodeMove.emit(move);"
+        },
+        {
+          "line": 347,
+          "block": 71,
+          "branch": 1,
+          "source": "if (move) this.nodeMove.emit(move);"
+        },
+        {
+          "line": 352,
+          "block": 72,
+          "branch": 0,
+          "source": "if (!entry || !entry.relation || entry.relation.state === 'loaded' && entry.relation.keys.length === 0) return;"
+        },
+        {
+          "line": 367,
+          "block": 77,
+          "branch": 0,
+          "source": "if (!this.browser || this.destroyRef.destroyed) return;"
+        },
+        {
+          "line": 373,
+          "block": 79,
+          "branch": 0,
+          "source": "if (key === undefined) return;"
+        },
+        {
+          "line": 378,
+          "block": 81,
+          "branch": 1,
+          "source": "if (index < range.start || index >= range.end) {"
         },
         {
           "line": 381,
-          "block": 29,
+          "block": 83,
           "branch": 1,
-          "source": "if (!this.disabled()) this.touchSent = false;"
+          "source": "if (viewport) viewport.scrollTop = top;"
         },
         {
-          "line": 386,
-          "block": 30,
+          "line": 389,
+          "block": 84,
           "branch": 0,
-          "source": "if (next && (event.currentTarget as HTMLElement).contains(next)) return;"
+          "source": "if (!this.browser) return;"
         },
         {
-          "line": 386,
-          "block": 31,
-          "branch": 1,
-          "source": "if (next && (event.currentTarget as HTMLElement).contains(next)) return;"
-        },
-        {
-          "line": 391,
-          "block": 32,
+          "line": 394,
+          "block": 86,
           "branch": 0,
-          "source": "if (this.disabled()) return;"
-        },
-        {
-          "line": 391,
-          "block": 32,
-          "branch": 1,
-          "source": "if (this.disabled()) return;"
-        },
-        {
-          "line": 392,
-          "block": 33,
-          "branch": 0,
-          "source": "const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';"
-        },
-        {
-          "line": 392,
-          "block": 33,
-          "branch": 1,
-          "source": "const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';"
+          "source": "if (index < 0) return;"
         },
         {
           "line": 414,
-          "block": 34,
-          "branch": 0,
-          "source": "if (!this.dropzone() || this.isInteractionBlocked()) {"
-        },
-        {
-          "line": 422,
-          "block": 36,
-          "branch": 0,
-          "source": "if (!this.dropzone()) {"
-        },
-        {
-          "line": 435,
-          "block": 39,
+          "block": 89,
           "branch": 1,
-          "source": "this.consumeFiles(event.dataTransfer?.files ?? null);"
+          "source": "if (!(target instanceof Element) || !(current instanceof Element) || target === current) return false;"
         },
         {
-          "line": 443,
-          "block": 41,
-          "branch": 0,
-          "source": "if (!match) {"
-        },
-        {
-          "line": 457,
-          "block": 42,
-          "branch": 0,
-          "source": "if (this.isInteractionBlocked()) return;"
-        },
-        {
-          "line": 459,
-          "block": 43,
-          "branch": 0,
-          "source": "if (!item) return;"
-        },
-        {
-          "line": 526,
-          "block": 57,
-          "branch": 1,
-          "source": "if (this.maxFileSize() !== null && file.size > (this.maxFileSize() ?? 0)) {"
-        },
-        {
-          "line": 544,
-          "block": 61,
-          "branch": 1,
-          "source": "if (this.maxFiles() !== null && nextFiles.length >= (this.maxFiles() ?? 0)) {"
-        },
-        {
-          "line": 549,
-          "block": 62,
-          "branch": 1,
-          "source": "maxFiles: String(this.maxFiles() ?? 0),"
-        },
-        {
-          "line": 564,
-          "block": 64,
-          "branch": 1,
-          "source": "if (accepted.length > 0) {"
-        },
-        {
-          "line": 583,
-          "block": 66,
-          "branch": 0,
-          "source": "status: this.progress() !== null ? 'uploading' : 'idle',"
-        },
-        {
-          "line": 644,
-          "block": 72,
-          "branch": 0,
-          "source": "if (rule.startsWith('.')) {"
-        },
-        {
-          "line": 648,
-          "block": 73,
-          "branch": 1,
-          "source": "if (rule.endsWith('/*')) {"
-        },
-        {
-          "line": 154,
-          "block": 78,
-          "branch": 0,
-          "source": "@if (shouldShowProgress()) {"
-        }
-      ],
-      "uncoveredFunctions": [
-        {
-          "name": "NeuUploaderComponent_Template_input_change_1_listener",
-          "line": 64,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_4_Template_div_click_0_listener",
-          "line": 83,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_4_Template_div_keydown_enter_0_listener",
-          "line": 83,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_4_Template_div_keydown_space_0_listener",
-          "line": 84,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_4_Template_button_click_12_listener",
-          "line": 117,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_4_Conditional_14_Template_button_click_0_listener",
-          "line": 128,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_7_For_6_Conditional_9_Template_button_click_0_listener",
-          "line": 205,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_Conditional_7_For_6_Template_button_click_10_listener",
-          "line": 215,
-          "hits": 0
-        },
-        {
-          "name": "NeuUploaderComponent_focusin_HostBindingHandler",
-          "line": 246,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_15)",
-          "line": 323,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_32)",
-          "line": 390,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_34)",
-          "line": 407,
-          "hits": 0
-        }
-      ],
-      "absoluteGap": 140
-    },
-    {
-      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
-      "metrics": {
-        "statements": {
-          "total": 524,
-          "covered": 468,
-          "skipped": 0,
-          "pct": 89.31,
-          "uncovered": 56
-        },
-        "branches": {
-          "total": 147,
-          "covered": 119,
-          "skipped": 0,
-          "pct": 80.95,
-          "uncovered": 28
-        },
-        "functions": {
-          "total": 58,
-          "covered": 40,
-          "skipped": 0,
-          "pct": 68.96,
-          "uncovered": 18
-        },
-        "lines": {
-          "total": 358,
-          "covered": 332,
-          "skipped": 0,
-          "pct": 92.73,
-          "uncovered": 26
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          7,
-          7
-        ],
-        [
-          29,
-          29
-        ],
-        [
-          37,
-          37
-        ],
-        [
-          57,
-          57
-        ],
-        [
-          135,
-          135
-        ],
-        [
-          179,
-          179
-        ],
-        [
-          202,
-          202
-        ],
-        [
-          215,
-          216
-        ],
-        [
-          272,
-          272
-        ],
-        [
-          299,
-          299
-        ],
-        [
-          301,
-          301
-        ],
-        [
-          343,
-          343
-        ],
-        [
-          346,
-          346
-        ],
-        [
-          357,
-          357
-        ],
-        [
-          384,
-          384
-        ],
-        [
-          419,
-          419
-        ],
-        [
-          421,
-          421
-        ],
-        [
-          483,
-          484
-        ],
-        [
-          634,
-          637
-        ],
-        [
-          669,
-          669
-        ],
-        [
-          672,
-          672
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 56,
-          "block": 1,
-          "branch": 0,
-          "source": "@if (!appliedPageSizeConfigured()) {"
-        },
-        {
-          "line": 37,
-          "block": 2,
-          "branch": 0,
-          "source": "(click)=\"changePage((pagination().pageCount ?? 1) - 1)\""
-        },
-        {
-          "line": 37,
-          "block": 2,
-          "branch": 1,
-          "source": "(click)=\"changePage((pagination().pageCount ?? 1) - 1)\""
-        },
-        {
-          "line": 52,
-          "block": 5,
-          "branch": 1,
-          "source": "@if (pageSizeOptions().length > 0) {"
-        },
-        {
-          "line": 80,
-          "block": 7,
-          "branch": 0,
-          "source": "[value]=\"searchEditing() ? searchDraft() : query().search\""
-        },
-        {
-          "line": 73,
-          "block": 9,
-          "branch": 1,
-          "source": "@if (hasGlobalSearch()) {"
-        },
-        {
-          "line": 168,
-          "block": 12,
-          "branch": 1,
-          "source": "@if (selectionIndicator() === 'checkbox') {"
-        },
-        {
-          "line": 214,
-          "block": 14,
-          "branch": 0,
-          "source": "@if (headerTemplate(column.id); as template) {"
-        },
-        {
-          "line": 322,
-          "block": 18,
-          "branch": 1,
-          "source": "@if (filterNeedsValue(filterDraftRule())) {"
-        },
-        {
-          "line": 192,
-          "block": 20,
-          "branch": 0,
-          "source": "\""
-        },
-        {
-          "line": 364,
-          "block": 24,
-          "branch": 1,
-          "source": "@if (filterNeedsValue(filterRule(column))) {"
-        },
-        {
-          "line": 377,
-          "block": 25,
-          "branch": 1,
-          "source": "@if (filterOptions().commit === 'explicit') {"
-        },
-        {
-          "line": 342,
-          "block": 28,
-          "branch": 0,
-          "source": "@if (expansionActive()) {"
-        },
-        {
-          "line": 345,
-          "block": 29,
-          "branch": 0,
-          "source": "@if (hasSelectionColumn()) {"
-        },
-        {
-          "line": 426,
-          "block": 31,
-          "branch": 1,
-          "source": "@if (rowExpandable(renderRow)) {"
-        },
-        {
-          "line": 493,
-          "block": 32,
-          "branch": 1,
-          "source": "[errors]=\"context.errors()\""
-        },
-        {
-          "line": 482,
-          "block": 33,
-          "branch": 0,
-          "source": "@if (editorTemplate(column.id); as template) {"
-        },
-        {
-          "line": 480,
-          "block": 34,
-          "branch": 1,
-          "source": "@if (editorContext(renderRow, column); as context) {"
-        },
-        {
-          "line": 469,
-          "block": 36,
-          "branch": 0,
-          "source": "\""
-        },
-        {
-          "line": 455,
-          "block": 38,
-          "branch": 1,
-          "source": "@if (groupingCellVisible(presentationNode, column)) {"
-        },
-        {
-          "line": 420,
-          "block": 40,
-          "branch": 0,
-          "source": "(dragover)=\"rowOptions().reorderable && $event.preventDefault()\""
-        },
-        {
-          "line": 420,
-          "block": 40,
-          "branch": 1,
-          "source": "(dragover)=\"rowOptions().reorderable && $event.preventDefault()\""
-        },
-        {
-          "line": 668,
-          "block": 54,
-          "branch": 0,
-          "source": "@if (expansionActive()) {"
-        },
-        {
-          "line": 671,
-          "block": 55,
-          "branch": 0,
-          "source": "@if (hasSelectionColumn()) {"
-        },
-        {
-          "line": 666,
-          "block": 56,
-          "branch": 1,
-          "source": "@if (footerTemplates().size > 0) {"
-        },
-        {
-          "line": 686,
-          "block": 57,
-          "branch": 1,
-          "source": "@if (summaryTemplate(); as template) {"
-        },
-        {
-          "line": 130,
-          "block": 61,
-          "branch": 0,
-          "source": "@if ("
-        },
-        {
-          "line": 698,
-          "block": 70,
-          "branch": 3,
-          "source": "@if ("
-        }
-      ],
-      "uncoveredFunctions": [
-        {
-          "name": "NeuTableBasicRendererComponent_ng_template_0_Template_button_click_1_listener",
-          "line": 7,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_ng_template_0_Template_button_click_8_listener",
-          "line": 29,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_ng_template_0_Template_button_click_10_listener",
-          "line": 37,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_Conditional_12_Conditional_1_Template_input_keydown_enter_0_listener",
-          "line": 175,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Template_th_dragover_0_listener",
-          "line": 200,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Template_th_dragend_0_listener",
-          "line": 202,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Template_button_click_8_listener",
-          "line": 272,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Template_button_keydown_arrowleft_14_listener",
-          "line": 299,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Template_button_keydown_escape_14_listener",
-          "line": 301,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Conditional_15_Template_form_keydown_escape_0_listener",
-          "line": 311,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_For_14_Conditional_15_Template_select_change_3_listener",
-          "line": 316,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Template_select_change_4_listener",
-          "line": 357,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_7_Template_input_input_3_listener",
-          "line": 372,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_7_Template_input_keydown_enter_3_listener",
-          "line": 372,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_8_Template_button_click_0_listener",
-          "line": 378,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_9_Template_button_click_0_listener",
-          "line": 384,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_ng_template_17_Template_tr_dragover_0_listener",
-          "line": 419,
-          "hits": 0
-        },
-        {
-          "name": "NeuTableBasicRendererComponent_ng_template_17_Template_tr_dragend_0_listener",
-          "line": 421,
-          "hits": 0
-        }
-      ],
-      "absoluteGap": 128
-    },
-    {
-      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
-      "metrics": {
-        "statements": {
-          "total": 509,
-          "covered": 459,
-          "skipped": 0,
-          "pct": 90.17,
-          "uncovered": 50
-        },
-        "branches": {
-          "total": 292,
-          "covered": 254,
-          "skipped": 0,
-          "pct": 86.98,
-          "uncovered": 38
-        },
-        "functions": {
-          "total": 108,
-          "covered": 94,
-          "skipped": 0,
-          "pct": 87.03,
-          "uncovered": 14
-        },
-        "lines": {
-          "total": 403,
-          "covered": 380,
-          "skipped": 0,
-          "pct": 94.29,
-          "uncovered": 23
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          161,
-          161
-        ],
-        [
-          185,
-          185
-        ],
-        [
-          222,
-          222
-        ],
-        [
-          229,
-          229
-        ],
-        [
-          283,
-          283
-        ],
-        [
-          494,
-          494
-        ],
-        [
-          529,
-          529
-        ],
-        [
-          602,
-          602
-        ],
-        [
-          652,
-          657
-        ],
-        [
-          685,
-          685
-        ],
-        [
-          855,
-          857
-        ],
-        [
-          883,
-          883
-        ],
-        [
-          887,
-          887
-        ],
-        [
-          899,
-          901
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 282,
-          "block": 7,
-          "branch": 0,
-          "source": "@if (emptyTpl()) {"
-        },
-        {
-          "line": 61,
-          "block": 13,
-          "branch": 0,
-          "source": "return typeof value === 'number' && Object.is(value, -0) ? NEGATIVE_ZERO_TOKEN : value;"
-        },
-        {
-          "line": 433,
-          "block": 40,
-          "branch": 1,
-          "source": "readonly selectedNode = computed(() => this.selectedNodes()[0] ?? null);"
-        },
-        {
-          "line": 462,
-          "block": 52,
-          "branch": 1,
-          "source": "const childStates = children.map((child) => states.get(child.trackBy) ?? 'unchecked');"
-        },
-        {
-          "line": 475,
-          "block": 57,
-          "branch": 0,
-          "source": "if (!this.effectiveVirtualization().enabled) return this.visibleNodes();"
-        },
-        {
-          "line": 489,
-          "block": 59,
-          "branch": 0,
-          "source": "this.open() ? this.close() : this.openPanel(false);"
-        },
-        {
-          "line": 494,
-          "block": 60,
-          "branch": 0,
-          "source": "if (!this.isDisabled()) this.trigger()?.nativeElement.focus({ preventScroll: true });"
-        },
-        {
-          "line": 494,
-          "block": 60,
-          "branch": 1,
-          "source": "if (!this.isDisabled()) this.trigger()?.nativeElement.focus({ preventScroll: true });"
-        },
-        {
-          "line": 498,
-          "block": 61,
-          "branch": 0,
-          "source": "if (this.query()) this.queryRevision.update((revision) => revision + 1);"
-        },
-        {
-          "line": 522,
-          "block": 66,
-          "branch": 0,
-          "source": "if ("
-        },
-        {
-          "line": 530,
-          "block": 67,
-          "branch": 0,
-          "source": "if (!this.open()) return;"
-        },
-        {
-          "line": 550,
-          "block": 71,
-          "branch": 1,
-          "source": "return this.selectionStates().get(item.trackBy) ?? 'unchecked';"
-        },
-        {
-          "line": 606,
-          "block": 86,
-          "branch": 0,
-          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
-        },
-        {
-          "line": 639,
+          "line": 416,
           "block": 91,
           "branch": 0,
-          "source": "if (first === this.virtualStart()) return;"
+          "source": "return interactive !== null && current.contains(interactive);"
         },
         {
-          "line": 652,
+          "line": 416,
+          "block": 91,
+          "branch": 1,
+          "source": "return interactive !== null && current.contains(interactive);"
+        },
+        {
+          "line": 420,
+          "block": 92,
+          "branch": 0,
+          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
+        },
+        {
+          "line": 420,
+          "block": 92,
+          "branch": 1,
+          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
+        },
+        {
+          "line": 420,
+          "block": 92,
+          "branch": 2,
+          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
+        },
+        {
+          "line": 420,
+          "block": 92,
+          "branch": 3,
+          "source": "return !!value && typeof value === 'object' && 'owner' in value && 'key' in value;"
+        },
+        {
+          "line": 424,
           "block": 93,
           "branch": 0,
-          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         },
         {
-          "line": 652,
+          "line": 424,
           "block": 93,
           "branch": 1,
-          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         },
         {
-          "line": 652,
-          "block": 94,
-          "branch": 0,
-          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+          "line": 424,
+          "block": 93,
+          "branch": 2,
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         },
         {
-          "line": 652,
-          "block": 94,
-          "branch": 1,
-          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+          "line": 424,
+          "block": 93,
+          "branch": 3,
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         },
         {
-          "line": 655,
-          "block": 95,
-          "branch": 0,
-          "source": "if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());"
+          "line": 424,
+          "block": 93,
+          "branch": 4,
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         },
         {
-          "line": 655,
-          "block": 95,
-          "branch": 1,
-          "source": "if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());"
+          "line": 424,
+          "block": 93,
+          "branch": 5,
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         },
         {
-          "line": 674,
-          "block": 96,
-          "branch": 0,
-          "source": "this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });"
-        },
-        {
-          "line": 676,
-          "block": 97,
-          "branch": 0,
-          "source": "if (!result.handled) return;"
-        },
-        {
-          "line": 681,
-          "block": 100,
-          "branch": 1,
-          "source": "if (result.action === 'activate') {"
-        },
-        {
-          "line": 704,
-          "block": 102,
-          "branch": 1,
-          "source": ": this.isRecord(node)"
-        },
-        {
-          "line": 712,
-          "block": 104,
-          "branch": 1,
-          "source": "return this.isRecord(node) ? Boolean((node as UnknownRecord)['lazy']) : false;"
-        },
-        {
-          "line": 725,
-          "block": 107,
-          "branch": 0,
-          "source": "if (!root) return [...this.currentValues()];"
-        },
-        {
-          "line": 748,
-          "block": 111,
-          "branch": 0,
-          "source": "if (!parent || parent.disabled) break;"
-        },
-        {
-          "line": 749,
-          "block": 113,
-          "branch": 1,
-          "source": "const children = (childrenByParent.get(parentTrack) ?? []).filter("
-        },
-        {
-          "line": 848,
-          "block": 121,
-          "branch": 0,
-          "source": "if (this.eventDestroyRef.destroyed || this.isDisabled() || this.open()) return;"
-        },
-        {
-          "line": 855,
-          "block": 123,
-          "branch": 0,
-          "source": "if (!this.open()) return;"
-        },
-        {
-          "line": 855,
-          "block": 123,
-          "branch": 1,
-          "source": "if (!this.open()) return;"
-        },
-        {
-          "line": 861,
-          "block": 124,
-          "branch": 1,
-          "source": "const width = this.trigger()?.nativeElement.getBoundingClientRect().width ?? 0;"
-        },
-        {
-          "line": 862,
-          "block": 125,
-          "branch": 0,
-          "source": "this.panelWidth.set(width > 0 ? Math.round(width) : '');"
-        },
-        {
-          "line": 881,
-          "block": 127,
-          "branch": 1,
-          "source": "if (!this.visibleNodes()[index]?.disabled) return index;"
-        },
-        {
-          "line": 892,
-          "block": 128,
-          "branch": 0,
-          "source": "if (!overlay) return;"
-        },
-        {
-          "line": 898,
-          "block": 130,
-          "branch": 0,
-          "source": "if (index < this.virtualStart() || index >= this.virtualStart() + count) {"
-        },
-        {
-          "line": 901,
-          "block": 132,
-          "branch": 0,
-          "source": "if (viewport) viewport.scrollTop = this.virtualStart() * this.effectiveVirtualization().itemSize;"
-        },
-        {
-          "line": 901,
-          "block": 132,
-          "branch": 1,
-          "source": "if (viewport) viewport.scrollTop = this.virtualStart() * this.effectiveVirtualization().itemSize;"
+          "line": 424,
+          "block": 93,
+          "branch": 6,
+          "source": "return !!value && typeof value === 'object' && 'key' in value && 'position' in value &&"
         }
       ],
       "uncoveredFunctions": [
         {
-          "name": "NeuTreeSelectComponent_Template_button_click_2_listener",
-          "line": 129,
+          "name": "(anonymous_60)",
+          "line": 99,
           "hits": 0
         },
         {
-          "name": "NeuTreeSelectComponent_Conditional_11_Template_button_click_0_listener",
-          "line": 161,
+          "name": "(anonymous_1)",
+          "line": 103,
           "hits": 0
         },
         {
-          "name": "NeuTreeSelectComponent_Template_ng_template_backdropClick_12_listener",
-          "line": 174,
+          "name": "(anonymous_19)",
+          "line": 179,
           "hits": 0
         },
         {
-          "name": "NeuTreeSelectComponent_ng_template_12_Template_div_focusout_0_listener",
-          "line": 185,
+          "name": "(anonymous_20)",
+          "line": 180,
           "hits": 0
         },
         {
-          "name": "NeuTreeSelectComponent_ng_template_12_Conditional_2_Template_input_keydown_0_listener",
-          "line": 198,
+          "name": "(anonymous_21)",
+          "line": 180,
           "hits": 0
         },
         {
-          "name": "NeuTreeSelectComponent_ng_template_12_ng_template_3_Template_button_click_0_listener",
-          "line": 222,
+          "name": "(anonymous_35)",
+          "line": 253,
           "hits": 0
         },
         {
-          "name": "NeuTreeSelectComponent_ng_template_12_ng_template_3_Conditional_1_Template_span_click_0_listener",
-          "line": 229,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_41)",
-          "line": 493,
+          "name": "(anonymous_42)",
+          "line": 326,
           "hits": 0
         },
         {
           "name": "(anonymous_43)",
-          "line": 498,
+          "line": 330,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_44)",
+          "line": 334,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_45)",
+          "line": 340,
           "hits": 0
         },
         {
           "name": "(anonymous_57)",
-          "line": 601,
+          "line": 419,
           "hits": 0
         },
         {
-          "name": "(anonymous_63)",
-          "line": 651,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_91)",
-          "line": 854,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_96)",
-          "line": 886,
-          "hits": 0
-        },
-        {
-          "name": "(anonymous_97)",
-          "line": 887,
+          "name": "(anonymous_58)",
+          "line": 423,
           "hits": 0
         }
       ],
-      "absoluteGap": 125
+      "absoluteGap": 156
     },
     {
       "file": "projects/ui-core/kanban/neu-kanban.component.ts",
@@ -6500,6 +5091,708 @@
         }
       ],
       "absoluteGap": 117
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.html",
+      "metrics": {
+        "statements": {
+          "total": 524,
+          "covered": 474,
+          "skipped": 0,
+          "pct": 90.45,
+          "uncovered": 50
+        },
+        "branches": {
+          "total": 147,
+          "covered": 120,
+          "skipped": 0,
+          "pct": 81.63,
+          "uncovered": 27
+        },
+        "functions": {
+          "total": 58,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 74.13,
+          "uncovered": 15
+        },
+        "lines": {
+          "total": 358,
+          "covered": 335,
+          "skipped": 0,
+          "pct": 93.57,
+          "uncovered": 23
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          57,
+          57
+        ],
+        [
+          135,
+          135
+        ],
+        [
+          179,
+          179
+        ],
+        [
+          202,
+          202
+        ],
+        [
+          215,
+          216
+        ],
+        [
+          272,
+          272
+        ],
+        [
+          299,
+          299
+        ],
+        [
+          301,
+          301
+        ],
+        [
+          343,
+          343
+        ],
+        [
+          346,
+          346
+        ],
+        [
+          357,
+          357
+        ],
+        [
+          384,
+          384
+        ],
+        [
+          419,
+          419
+        ],
+        [
+          421,
+          421
+        ],
+        [
+          483,
+          484
+        ],
+        [
+          634,
+          637
+        ],
+        [
+          669,
+          669
+        ],
+        [
+          672,
+          672
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 56,
+          "block": 1,
+          "branch": 0,
+          "source": "@if (!appliedPageSizeConfigured()) {"
+        },
+        {
+          "line": 37,
+          "block": 2,
+          "branch": 1,
+          "source": "(click)=\"changePage((pagination().pageCount ?? 1) - 1)\""
+        },
+        {
+          "line": 52,
+          "block": 5,
+          "branch": 1,
+          "source": "@if (pageSizeOptions().length > 0) {"
+        },
+        {
+          "line": 80,
+          "block": 7,
+          "branch": 0,
+          "source": "[value]=\"searchEditing() ? searchDraft() : query().search\""
+        },
+        {
+          "line": 73,
+          "block": 9,
+          "branch": 1,
+          "source": "@if (hasGlobalSearch()) {"
+        },
+        {
+          "line": 168,
+          "block": 12,
+          "branch": 1,
+          "source": "@if (selectionIndicator() === 'checkbox') {"
+        },
+        {
+          "line": 214,
+          "block": 14,
+          "branch": 0,
+          "source": "@if (headerTemplate(column.id); as template) {"
+        },
+        {
+          "line": 322,
+          "block": 18,
+          "branch": 1,
+          "source": "@if (filterNeedsValue(filterDraftRule())) {"
+        },
+        {
+          "line": 192,
+          "block": 20,
+          "branch": 0,
+          "source": "\""
+        },
+        {
+          "line": 364,
+          "block": 24,
+          "branch": 1,
+          "source": "@if (filterNeedsValue(filterRule(column))) {"
+        },
+        {
+          "line": 377,
+          "block": 25,
+          "branch": 1,
+          "source": "@if (filterOptions().commit === 'explicit') {"
+        },
+        {
+          "line": 342,
+          "block": 28,
+          "branch": 0,
+          "source": "@if (expansionActive()) {"
+        },
+        {
+          "line": 345,
+          "block": 29,
+          "branch": 0,
+          "source": "@if (hasSelectionColumn()) {"
+        },
+        {
+          "line": 426,
+          "block": 31,
+          "branch": 1,
+          "source": "@if (rowExpandable(renderRow)) {"
+        },
+        {
+          "line": 493,
+          "block": 32,
+          "branch": 1,
+          "source": "[errors]=\"context.errors()\""
+        },
+        {
+          "line": 482,
+          "block": 33,
+          "branch": 0,
+          "source": "@if (editorTemplate(column.id); as template) {"
+        },
+        {
+          "line": 480,
+          "block": 34,
+          "branch": 1,
+          "source": "@if (editorContext(renderRow, column); as context) {"
+        },
+        {
+          "line": 469,
+          "block": 36,
+          "branch": 0,
+          "source": "\""
+        },
+        {
+          "line": 455,
+          "block": 38,
+          "branch": 1,
+          "source": "@if (groupingCellVisible(presentationNode, column)) {"
+        },
+        {
+          "line": 420,
+          "block": 40,
+          "branch": 0,
+          "source": "(dragover)=\"rowOptions().reorderable && $event.preventDefault()\""
+        },
+        {
+          "line": 420,
+          "block": 40,
+          "branch": 1,
+          "source": "(dragover)=\"rowOptions().reorderable && $event.preventDefault()\""
+        },
+        {
+          "line": 668,
+          "block": 54,
+          "branch": 0,
+          "source": "@if (expansionActive()) {"
+        },
+        {
+          "line": 671,
+          "block": 55,
+          "branch": 0,
+          "source": "@if (hasSelectionColumn()) {"
+        },
+        {
+          "line": 666,
+          "block": 56,
+          "branch": 1,
+          "source": "@if (footerTemplates().size > 0) {"
+        },
+        {
+          "line": 686,
+          "block": 57,
+          "branch": 1,
+          "source": "@if (summaryTemplate(); as template) {"
+        },
+        {
+          "line": 130,
+          "block": 61,
+          "branch": 0,
+          "source": "@if ("
+        },
+        {
+          "line": 698,
+          "block": 70,
+          "branch": 3,
+          "source": "@if ("
+        }
+      ],
+      "uncoveredFunctions": [
+        {
+          "name": "NeuTableBasicRendererComponent_Conditional_12_Conditional_1_Template_input_keydown_enter_0_listener",
+          "line": 175,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Template_th_dragover_0_listener",
+          "line": 200,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Template_th_dragend_0_listener",
+          "line": 202,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Template_button_click_8_listener",
+          "line": 272,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Template_button_keydown_arrowleft_14_listener",
+          "line": 299,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Template_button_keydown_escape_14_listener",
+          "line": 301,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Conditional_15_Template_form_keydown_escape_0_listener",
+          "line": 311,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_For_14_Conditional_15_Template_select_change_3_listener",
+          "line": 316,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Template_select_change_4_listener",
+          "line": 357,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_7_Template_input_input_3_listener",
+          "line": 372,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_7_Template_input_keydown_enter_3_listener",
+          "line": 372,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_8_Template_button_click_0_listener",
+          "line": 378,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_Conditional_15_For_4_Conditional_1_Conditional_9_Template_button_click_0_listener",
+          "line": 384,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_ng_template_17_Template_tr_dragover_0_listener",
+          "line": 419,
+          "hits": 0
+        },
+        {
+          "name": "NeuTableBasicRendererComponent_ng_template_17_Template_tr_dragend_0_listener",
+          "line": 421,
+          "hits": 0
+        }
+      ],
+      "absoluteGap": 115
+    },
+    {
+      "file": "projects/ui-core/tree-select/neu-tree-select.component.ts",
+      "metrics": {
+        "statements": {
+          "total": 509,
+          "covered": 468,
+          "skipped": 0,
+          "pct": 91.94,
+          "uncovered": 41
+        },
+        "branches": {
+          "total": 292,
+          "covered": 254,
+          "skipped": 0,
+          "pct": 86.98,
+          "uncovered": 38
+        },
+        "functions": {
+          "total": 108,
+          "covered": 99,
+          "skipped": 0,
+          "pct": 91.66,
+          "uncovered": 9
+        },
+        "lines": {
+          "total": 403,
+          "covered": 384,
+          "skipped": 0,
+          "pct": 95.28,
+          "uncovered": 19
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          283,
+          283
+        ],
+        [
+          494,
+          494
+        ],
+        [
+          529,
+          529
+        ],
+        [
+          602,
+          602
+        ],
+        [
+          652,
+          657
+        ],
+        [
+          685,
+          685
+        ],
+        [
+          855,
+          857
+        ],
+        [
+          883,
+          883
+        ],
+        [
+          887,
+          887
+        ],
+        [
+          899,
+          901
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 282,
+          "block": 7,
+          "branch": 0,
+          "source": "@if (emptyTpl()) {"
+        },
+        {
+          "line": 61,
+          "block": 13,
+          "branch": 0,
+          "source": "return typeof value === 'number' && Object.is(value, -0) ? NEGATIVE_ZERO_TOKEN : value;"
+        },
+        {
+          "line": 433,
+          "block": 40,
+          "branch": 1,
+          "source": "readonly selectedNode = computed(() => this.selectedNodes()[0] ?? null);"
+        },
+        {
+          "line": 462,
+          "block": 52,
+          "branch": 1,
+          "source": "const childStates = children.map((child) => states.get(child.trackBy) ?? 'unchecked');"
+        },
+        {
+          "line": 475,
+          "block": 57,
+          "branch": 0,
+          "source": "if (!this.effectiveVirtualization().enabled) return this.visibleNodes();"
+        },
+        {
+          "line": 489,
+          "block": 59,
+          "branch": 0,
+          "source": "this.open() ? this.close() : this.openPanel(false);"
+        },
+        {
+          "line": 494,
+          "block": 60,
+          "branch": 0,
+          "source": "if (!this.isDisabled()) this.trigger()?.nativeElement.focus({ preventScroll: true });"
+        },
+        {
+          "line": 494,
+          "block": 60,
+          "branch": 1,
+          "source": "if (!this.isDisabled()) this.trigger()?.nativeElement.focus({ preventScroll: true });"
+        },
+        {
+          "line": 498,
+          "block": 61,
+          "branch": 0,
+          "source": "if (this.query()) this.queryRevision.update((revision) => revision + 1);"
+        },
+        {
+          "line": 522,
+          "block": 66,
+          "branch": 0,
+          "source": "if ("
+        },
+        {
+          "line": 530,
+          "block": 67,
+          "branch": 0,
+          "source": "if (!this.open()) return;"
+        },
+        {
+          "line": 550,
+          "block": 71,
+          "branch": 1,
+          "source": "return this.selectionStates().get(item.trackBy) ?? 'unchecked';"
+        },
+        {
+          "line": 606,
+          "block": 86,
+          "branch": 0,
+          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+        },
+        {
+          "line": 639,
+          "block": 91,
+          "branch": 0,
+          "source": "if (first === this.virtualStart()) return;"
+        },
+        {
+          "line": 652,
+          "block": 93,
+          "branch": 0,
+          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+        },
+        {
+          "line": 652,
+          "block": 93,
+          "branch": 1,
+          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+        },
+        {
+          "line": 652,
+          "block": 94,
+          "branch": 0,
+          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+        },
+        {
+          "line": 652,
+          "block": 94,
+          "branch": 1,
+          "source": "if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;"
+        },
+        {
+          "line": 655,
+          "block": 95,
+          "branch": 0,
+          "source": "if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());"
+        },
+        {
+          "line": 655,
+          "block": 95,
+          "branch": 1,
+          "source": "if (event.key === 'ArrowUp') this.navigation.setActiveIndex(this.lastEligibleIndex());"
+        },
+        {
+          "line": 674,
+          "block": 96,
+          "branch": 0,
+          "source": "this.navigation.configure({ direction: direction === 'rtl' ? 'rtl' : 'ltr' });"
+        },
+        {
+          "line": 676,
+          "block": 97,
+          "branch": 0,
+          "source": "if (!result.handled) return;"
+        },
+        {
+          "line": 681,
+          "block": 100,
+          "branch": 1,
+          "source": "if (result.action === 'activate') {"
+        },
+        {
+          "line": 704,
+          "block": 102,
+          "branch": 1,
+          "source": ": this.isRecord(node)"
+        },
+        {
+          "line": 712,
+          "block": 104,
+          "branch": 1,
+          "source": "return this.isRecord(node) ? Boolean((node as UnknownRecord)['lazy']) : false;"
+        },
+        {
+          "line": 725,
+          "block": 107,
+          "branch": 0,
+          "source": "if (!root) return [...this.currentValues()];"
+        },
+        {
+          "line": 748,
+          "block": 111,
+          "branch": 0,
+          "source": "if (!parent || parent.disabled) break;"
+        },
+        {
+          "line": 749,
+          "block": 113,
+          "branch": 1,
+          "source": "const children = (childrenByParent.get(parentTrack) ?? []).filter("
+        },
+        {
+          "line": 848,
+          "block": 121,
+          "branch": 0,
+          "source": "if (this.eventDestroyRef.destroyed || this.isDisabled() || this.open()) return;"
+        },
+        {
+          "line": 855,
+          "block": 123,
+          "branch": 0,
+          "source": "if (!this.open()) return;"
+        },
+        {
+          "line": 855,
+          "block": 123,
+          "branch": 1,
+          "source": "if (!this.open()) return;"
+        },
+        {
+          "line": 861,
+          "block": 124,
+          "branch": 1,
+          "source": "const width = this.trigger()?.nativeElement.getBoundingClientRect().width ?? 0;"
+        },
+        {
+          "line": 862,
+          "block": 125,
+          "branch": 0,
+          "source": "this.panelWidth.set(width > 0 ? Math.round(width) : '');"
+        },
+        {
+          "line": 881,
+          "block": 127,
+          "branch": 1,
+          "source": "if (!this.visibleNodes()[index]?.disabled) return index;"
+        },
+        {
+          "line": 892,
+          "block": 128,
+          "branch": 0,
+          "source": "if (!overlay) return;"
+        },
+        {
+          "line": 898,
+          "block": 130,
+          "branch": 0,
+          "source": "if (index < this.virtualStart() || index >= this.virtualStart() + count) {"
+        },
+        {
+          "line": 901,
+          "block": 132,
+          "branch": 0,
+          "source": "if (viewport) viewport.scrollTop = this.virtualStart() * this.effectiveVirtualization().itemSize;"
+        },
+        {
+          "line": 901,
+          "block": 132,
+          "branch": 1,
+          "source": "if (viewport) viewport.scrollTop = this.virtualStart() * this.effectiveVirtualization().itemSize;"
+        }
+      ],
+      "uncoveredFunctions": [
+        {
+          "name": "NeuTreeSelectComponent_Template_ng_template_backdropClick_12_listener",
+          "line": 174,
+          "hits": 0
+        },
+        {
+          "name": "NeuTreeSelectComponent_ng_template_12_Conditional_2_Template_input_keydown_0_listener",
+          "line": 198,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_41)",
+          "line": 493,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_43)",
+          "line": 498,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_57)",
+          "line": 601,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_63)",
+          "line": 651,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_91)",
+          "line": 854,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_96)",
+          "line": 886,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_97)",
+          "line": 887,
+          "hits": 0
+        }
+      ],
+      "absoluteGap": 107
     },
     {
       "file": "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts",
@@ -7097,6 +6390,320 @@
         }
       ],
       "absoluteGap": 97
+    },
+    {
+      "file": "projects/ui-core/uploader/neu-uploader.component.ts",
+      "metrics": {
+        "statements": {
+          "total": 384,
+          "covered": 350,
+          "skipped": 0,
+          "pct": 91.14,
+          "uncovered": 34
+        },
+        "branches": {
+          "total": 167,
+          "covered": 134,
+          "skipped": 0,
+          "pct": 80.23,
+          "uncovered": 33
+        },
+        "functions": {
+          "total": 63,
+          "covered": 59,
+          "skipped": 0,
+          "pct": 93.65,
+          "uncovered": 4
+        },
+        "lines": {
+          "total": 315,
+          "covered": 295,
+          "skipped": 0,
+          "pct": 93.65,
+          "uncovered": 20
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          149,
+          149
+        ],
+        [
+          155,
+          157
+        ],
+        [
+          162,
+          162
+        ],
+        [
+          177,
+          178
+        ],
+        [
+          191,
+          192
+        ],
+        [
+          241,
+          241
+        ],
+        [
+          361,
+          361
+        ],
+        [
+          369,
+          369
+        ],
+        [
+          391,
+          393
+        ],
+        [
+          415,
+          415
+        ],
+        [
+          423,
+          423
+        ],
+        [
+          444,
+          444
+        ],
+        [
+          645,
+          645
+        ],
+        [
+          653,
+          653
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 157,
+          "block": 2,
+          "branch": 0,
+          "source": "[value]=\"progress() ?? 0\""
+        },
+        {
+          "line": 157,
+          "block": 2,
+          "branch": 1,
+          "source": "[value]=\"progress() ?? 0\""
+        },
+        {
+          "line": 176,
+          "block": 3,
+          "branch": 0,
+          "source": "@if (previewTemplate()) {"
+        },
+        {
+          "line": 190,
+          "block": 5,
+          "branch": 0,
+          "source": "@if (item.progress !== null) {"
+        },
+        {
+          "line": 333,
+          "block": 14,
+          "branch": 0,
+          "source": "this.showPickerText() && this.chooseLabel() ? null : this.chooseLabel(),"
+        },
+        {
+          "line": 333,
+          "block": 15,
+          "branch": 1,
+          "source": "this.showPickerText() && this.chooseLabel() ? null : this.chooseLabel(),"
+        },
+        {
+          "line": 339,
+          "block": 17,
+          "branch": 0,
+          "source": "return this.hint() ? `${this.inputId()}-hint` : null;"
+        },
+        {
+          "line": 345,
+          "block": 20,
+          "branch": 1,
+          "source": "const parts: string[] = [this.dropzone() ? this.placeholder() : this.pickerDescription()];"
+        },
+        {
+          "line": 350,
+          "block": 23,
+          "branch": 1,
+          "source": "parts.push(`${this.maxFileSizeTextLabel()}: ${this.formatBytes(this.maxFileSize() ?? 0)}`);"
+        },
+        {
+          "line": 360,
+          "block": 25,
+          "branch": 0,
+          "source": "if (this.errorMessage()) {"
+        },
+        {
+          "line": 368,
+          "block": 27,
+          "branch": 0,
+          "source": "if (this.isInteractionBlocked()) {"
+        },
+        {
+          "line": 375,
+          "block": 28,
+          "branch": 0,
+          "source": "if (this.isInteractionBlocked()) return;"
+        },
+        {
+          "line": 381,
+          "block": 29,
+          "branch": 1,
+          "source": "if (!this.disabled()) this.touchSent = false;"
+        },
+        {
+          "line": 386,
+          "block": 30,
+          "branch": 0,
+          "source": "if (next && (event.currentTarget as HTMLElement).contains(next)) return;"
+        },
+        {
+          "line": 386,
+          "block": 31,
+          "branch": 1,
+          "source": "if (next && (event.currentTarget as HTMLElement).contains(next)) return;"
+        },
+        {
+          "line": 391,
+          "block": 32,
+          "branch": 0,
+          "source": "if (this.disabled()) return;"
+        },
+        {
+          "line": 391,
+          "block": 32,
+          "branch": 1,
+          "source": "if (this.disabled()) return;"
+        },
+        {
+          "line": 392,
+          "block": 33,
+          "branch": 0,
+          "source": "const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';"
+        },
+        {
+          "line": 392,
+          "block": 33,
+          "branch": 1,
+          "source": "const selector = this.dropzone() ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger';"
+        },
+        {
+          "line": 414,
+          "block": 34,
+          "branch": 0,
+          "source": "if (!this.dropzone() || this.isInteractionBlocked()) {"
+        },
+        {
+          "line": 422,
+          "block": 36,
+          "branch": 0,
+          "source": "if (!this.dropzone()) {"
+        },
+        {
+          "line": 435,
+          "block": 39,
+          "branch": 1,
+          "source": "this.consumeFiles(event.dataTransfer?.files ?? null);"
+        },
+        {
+          "line": 443,
+          "block": 41,
+          "branch": 0,
+          "source": "if (!match) {"
+        },
+        {
+          "line": 457,
+          "block": 42,
+          "branch": 0,
+          "source": "if (this.isInteractionBlocked()) return;"
+        },
+        {
+          "line": 459,
+          "block": 43,
+          "branch": 0,
+          "source": "if (!item) return;"
+        },
+        {
+          "line": 526,
+          "block": 57,
+          "branch": 1,
+          "source": "if (this.maxFileSize() !== null && file.size > (this.maxFileSize() ?? 0)) {"
+        },
+        {
+          "line": 544,
+          "block": 61,
+          "branch": 1,
+          "source": "if (this.maxFiles() !== null && nextFiles.length >= (this.maxFiles() ?? 0)) {"
+        },
+        {
+          "line": 549,
+          "block": 62,
+          "branch": 1,
+          "source": "maxFiles: String(this.maxFiles() ?? 0),"
+        },
+        {
+          "line": 564,
+          "block": 64,
+          "branch": 1,
+          "source": "if (accepted.length > 0) {"
+        },
+        {
+          "line": 583,
+          "block": 66,
+          "branch": 0,
+          "source": "status: this.progress() !== null ? 'uploading' : 'idle',"
+        },
+        {
+          "line": 644,
+          "block": 72,
+          "branch": 0,
+          "source": "if (rule.startsWith('.')) {"
+        },
+        {
+          "line": 648,
+          "block": 73,
+          "branch": 1,
+          "source": "if (rule.endsWith('/*')) {"
+        },
+        {
+          "line": 154,
+          "block": 78,
+          "branch": 0,
+          "source": "@if (shouldShowProgress()) {"
+        }
+      ],
+      "uncoveredFunctions": [
+        {
+          "name": "NeuUploaderComponent_Conditional_4_Template_div_keydown_enter_0_listener",
+          "line": 83,
+          "hits": 0
+        },
+        {
+          "name": "NeuUploaderComponent_focusin_HostBindingHandler",
+          "line": 246,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_15)",
+          "line": 323,
+          "hits": 0
+        },
+        {
+          "name": "(anonymous_32)",
+          "line": 390,
+          "hits": 0
+        }
+      ],
+      "absoluteGap": 91
     },
     {
       "file": "projects/ui-core/table/public/neu-table.component-contract.ts",
@@ -8054,155 +7661,6 @@
         }
       ],
       "absoluteGap": 80
-    },
-    {
-      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.html",
-      "metrics": {
-        "statements": {
-          "total": 169,
-          "covered": 136,
-          "skipped": 0,
-          "pct": 80.47,
-          "uncovered": 33
-        },
-        "branches": {
-          "total": 48,
-          "covered": 37,
-          "skipped": 0,
-          "pct": 77.08,
-          "uncovered": 11
-        },
-        "functions": {
-          "total": 9,
-          "covered": 9,
-          "skipped": 0,
-          "pct": 100,
-          "uncovered": 0
-        },
-        "lines": {
-          "total": 134,
-          "covered": 105,
-          "skipped": 0,
-          "pct": 78.35,
-          "uncovered": 29
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          2,
-          4
-        ],
-        [
-          42,
-          44
-        ],
-        [
-          92,
-          93
-        ],
-        [
-          132,
-          132
-        ],
-        [
-          204,
-          205
-        ],
-        [
-          261,
-          262
-        ],
-        [
-          300,
-          307
-        ],
-        [
-          311,
-          311
-        ],
-        [
-          313,
-          313
-        ],
-        [
-          315,
-          319
-        ],
-        [
-          322,
-          322
-        ]
-      ],
-      "uncoveredBranchLocations": [
-        {
-          "line": 126,
-          "block": 4,
-          "branch": 1,
-          "source": "@if (loadingTemplate(); as template) {"
-        },
-        {
-          "line": 203,
-          "block": 7,
-          "branch": 0,
-          "source": "@if (editorTemplate(column.id); as template) {"
-        },
-        {
-          "line": 305,
-          "block": 15,
-          "branch": 0,
-          "source": "@if (footerTemplate(column.id); as template) {"
-        },
-        {
-          "line": 305,
-          "block": 15,
-          "branch": 1,
-          "source": "@if (footerTemplate(column.id); as template) {"
-        },
-        {
-          "line": 301,
-          "block": 16,
-          "branch": 0,
-          "source": "@if (footerTemplates().size > 0) {"
-        },
-        {
-          "line": 301,
-          "block": 16,
-          "branch": 1,
-          "source": "@if (footerTemplates().size > 0) {"
-        },
-        {
-          "line": 315,
-          "block": 17,
-          "branch": 0,
-          "source": "@if (summaryTemplate(); as template) {"
-        },
-        {
-          "line": 315,
-          "block": 17,
-          "branch": 1,
-          "source": "@if (summaryTemplate(); as template) {"
-        },
-        {
-          "line": 1,
-          "block": 18,
-          "branch": 0,
-          "source": "@if (toolbarTemplate(); as template) {"
-        },
-        {
-          "line": 41,
-          "block": 20,
-          "branch": 0,
-          "source": "@if (captionTemplate(); as template) {"
-        },
-        {
-          "line": 299,
-          "block": 23,
-          "branch": 0,
-          "source": "@if (hasFooter()) {"
-        }
-      ],
-      "uncoveredFunctions": [],
-      "absoluteGap": 73
     },
     {
       "file": "projects/ui-core/tree-table/public/neu-tree-table.component-contract.ts",
@@ -14940,6 +14398,75 @@
       "absoluteGap": 15
     },
     {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.html",
+      "metrics": {
+        "statements": {
+          "total": 169,
+          "covered": 163,
+          "skipped": 0,
+          "pct": 96.44,
+          "uncovered": 6
+        },
+        "branches": {
+          "total": 48,
+          "covered": 45,
+          "skipped": 0,
+          "pct": 93.75,
+          "uncovered": 3
+        },
+        "functions": {
+          "total": 9,
+          "covered": 9,
+          "skipped": 0,
+          "pct": 100,
+          "uncovered": 0
+        },
+        "lines": {
+          "total": 134,
+          "covered": 128,
+          "skipped": 0,
+          "pct": 95.52,
+          "uncovered": 6
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          92,
+          93
+        ],
+        [
+          204,
+          205
+        ],
+        [
+          261,
+          262
+        ]
+      ],
+      "uncoveredBranchLocations": [
+        {
+          "line": 203,
+          "block": 7,
+          "branch": 0,
+          "source": "@if (editorTemplate(column.id); as template) {"
+        },
+        {
+          "line": 301,
+          "block": 16,
+          "branch": 1,
+          "source": "@if (footerTemplates().size > 0) {"
+        },
+        {
+          "line": 315,
+          "block": 17,
+          "branch": 1,
+          "source": "@if (summaryTemplate(); as template) {"
+        }
+      ],
+      "uncoveredFunctions": [],
+      "absoluteGap": 15
+    },
+    {
       "file": "projects/ui-core/animate-on-scroll/neu-animate-on-scroll.directive.ts",
       "metrics": {
         "statements": {
@@ -15774,6 +15301,68 @@
       "absoluteGap": 12
     },
     {
+      "file": "projects/ui-core/tree-table/public/neu-tree-table-template-contracts.ts",
+      "metrics": {
+        "statements": {
+          "total": 55,
+          "covered": 49,
+          "skipped": 0,
+          "pct": 89.09,
+          "uncovered": 6
+        },
+        "branches": {
+          "total": 59,
+          "covered": 59,
+          "skipped": 0,
+          "pct": 100,
+          "uncovered": 0
+        },
+        "functions": {
+          "total": 7,
+          "covered": 7,
+          "skipped": 0,
+          "pct": 100,
+          "uncovered": 0
+        },
+        "lines": {
+          "total": 33,
+          "covered": 27,
+          "skipped": 0,
+          "pct": 81.81,
+          "uncovered": 6
+        }
+      },
+      "uncoveredLineRanges": [
+        [
+          34,
+          34
+        ],
+        [
+          49,
+          49
+        ],
+        [
+          66,
+          66
+        ],
+        [
+          82,
+          82
+        ],
+        [
+          104,
+          104
+        ],
+        [
+          116,
+          116
+        ]
+      ],
+      "uncoveredBranchLocations": [],
+      "uncoveredFunctions": [],
+      "absoluteGap": 12
+    },
+    {
       "file": "projects/ui-core/context-menu/neu-context-menu.component.ts",
       "metrics": {
         "statements": {
@@ -16077,64 +15666,6 @@
           "hits": 0
         }
       ],
-      "absoluteGap": 10
-    },
-    {
-      "file": "projects/ui-core/tree-table/public/neu-tree-table-template-contracts.ts",
-      "metrics": {
-        "statements": {
-          "total": 55,
-          "covered": 50,
-          "skipped": 0,
-          "pct": 90.9,
-          "uncovered": 5
-        },
-        "branches": {
-          "total": 59,
-          "covered": 59,
-          "skipped": 0,
-          "pct": 100,
-          "uncovered": 0
-        },
-        "functions": {
-          "total": 7,
-          "covered": 7,
-          "skipped": 0,
-          "pct": 100,
-          "uncovered": 0
-        },
-        "lines": {
-          "total": 33,
-          "covered": 28,
-          "skipped": 0,
-          "pct": 84.84,
-          "uncovered": 5
-        }
-      },
-      "uncoveredLineRanges": [
-        [
-          34,
-          34
-        ],
-        [
-          49,
-          49
-        ],
-        [
-          66,
-          66
-        ],
-        [
-          104,
-          104
-        ],
-        [
-          116,
-          116
-        ]
-      ],
-      "uncoveredBranchLocations": [],
-      "uncoveredFunctions": [],
       "absoluteGap": 10
     },
     {

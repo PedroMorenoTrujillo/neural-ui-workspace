@@ -331,6 +331,30 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(host.layoutEvents).toBe(0);
   });
 
+  it.each([
+    { start: 2, action: 'First page', expected: 0 },
+    { start: 1, action: 'Next page', expected: 2 },
+    { start: 0, action: 'Last page', expected: 2 },
+  ])('navigates from page $start with the rendered $action action', async ({ start, action, expected }) => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    host.accept = true;
+    host.query.set({ ...host.query(), page: start });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const button = native.querySelector<HTMLButtonElement>(`button[aria-label="${action}"]`)!;
+    expect(button.disabled).toBe(false);
+
+    button.click();
+    await fixture.whenStable();
+    expect(host.query().page).toBe(expected);
+    expect(host.queryEvents).toHaveLength(1);
+    expect(native.querySelector('[aria-current="page"]')?.textContent).toContain(`Page ${expected + 1}`);
+    expect(host.selectionEvents).toBe(0);
+    expect(host.layoutEvents).toBe(0);
+  });
+
   it('loads the private advanced builder only on demand and proposes one AST snapshot', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();

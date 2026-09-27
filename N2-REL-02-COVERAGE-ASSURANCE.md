@@ -2,9 +2,9 @@
 
 ## 1. Status
 
-**REL-02 REMEDIATION REQUIRED.** In the REL-02B final run, all 2,539 tests pass and lines reach 95.58%, while statements (93.18%), branches (88.55%) and functions (92.43%) remain below the unchanged 95.01% gate. Reachable behavior remains in the residual. All REL-02 work remains uncommitted and unstaged.
+**REL-02 REMEDIATION REQUIRED.** In the REL-02C final run, all 2,562 tests pass and lines reach 95.84%, while statements (93.54%), branches (88.79%) and functions (92.97%) remain below the unchanged 95.01% gate. The REL-02A/B checkpoint is committed locally as `b78cfa67232e0b0d8ad6c35db8865dda586cda3b`; REL-02C changes remain unstaged and uncommitted.
 
-Sections 2–25 below preserve the earlier REL-02A checkpoint. The REL-02B addendum at the end is the authoritative final measurement and recommendation.
+Sections 2–25 preserve the earlier REL-02A checkpoint. The REL-02B addendum preserves its historical measurement. The REL-02C addendum at the end is the authoritative final measurement and recommendation.
 
 ## 2. Starting commit
 
@@ -20,7 +20,7 @@ The first fresh `ng test ui-core --watch=false --coverage` run used the canonica
 
 ## 5. File gap inventory
 
-The final fresh report covers 180 production source records, including instrumented Angular templates. 130 files have at least one gap, down from 131 initially. The [machine inventory](N2-REL-02-COVERAGE-INVENTORY.json) contains every file's four percentages and counts, uncovered line ranges, branch locations with source snippets and uncovered function names where LCOV resolves them. The [human inventory](N2-REL-02-COVERAGE-INVENTORY.md) ranks files by absolute missed units. That sum is a prioritization proxy; statement, branch, function and line units overlap.
+The final fresh report covers 180 production source records, including instrumented Angular templates. 130 files have at least one gap, down from 131 initially. The [machine inventory](N2-REL-02-COVERAGE-INVENTORY.json) contains each gap file's four percentages and counts, uncovered line ranges, branch locations with source snippets and uncovered function names where LCOV resolves them. The [human inventory](N2-REL-02-COVERAGE-INVENTORY.md) ranks gap files by absolute missed units. That sum is a prioritization proxy; statement, branch, function and line units overlap.
 
 ## 6. Statement gaps
 
@@ -231,3 +231,145 @@ The subsequent clean `ng test ui-core --watch=false --coverage` run passed 188/1
 ### B25. Recommendation
 
 **REL-02 REMEDIATION REQUIRED.** Keep the 95.01% policy and all REL-02 work unstaged and uncommitted. The residual includes live renderer, selection and platform behavior, so a policy-review-only disposition is unsupported. Continue with broad behavioral scenarios in the largest remaining branch clusters, measure each substantial wave with a fresh canonical run, and declare PASS only when all four unchanged gates pass.
+
+## REL-02C — coverage matrix remediation (final measurement)
+
+### C1. Strategy and checkpoint
+
+REL-02B improved branches by 115 over 18 tests (6.4 per test). REL-02C uses representative state transitions and parameterized DOM scenarios to reach multiple live branches per fixture. The verified REL-02A/B work was committed locally as `b78cfa67232e0b0d8ad6c35db8865dda586cda3b` (parent `cd2cf16690c3b23842888150694c0dd3b256dbf9`) with the exact message `test(coverage): expand Neural UI 2 behavioral coverage`. The foreign TreeTable file was excluded. New REL-02C work remains unstaged and uncommitted.
+
+### C2. Starting metrics and ranked residual
+
+Start: statements 22,889/24,564 (93.18%; 450 more to gate), branches 13,024/14,708 (88.55%; 951 more), functions 4,340/4,695 (92.43%; 121 more), lines 18,218/19,060 (95.58%; gate passed). The ranked top 15 by missed branches, then functions, from the final REL-02B inventory are:
+
+| Rank | Source cluster | Missed B | Missed F | Missed S |
+|---:|---|---:|---:|---:|
+| 1 | TreeTable renderer | 127 | 12 | 90 |
+| 2 | Select | 107 | 21 | 90 |
+| 3 | Table basic renderer | 105 | 18 | 92 |
+| 4 | DateInput | 79 | 19 | 83 |
+| 5 | Tree | 63 | 12 | 55 |
+| 6 | ColorPicker | 46 | 14 | 69 |
+| 7 | MegaMenu | 45 | 13 | 64 |
+| 8 | Kanban | 41 | 12 | 47 |
+| 9 | TreeSelect | 38 | 14 | 50 |
+| 10 | Table client pipeline | 37 | 1 | 15 |
+| 11 | Uploader | 36 | 12 | 59 |
+| 12 | Slider | 36 | 3 | 27 |
+| 13 | Table public contract | 30 | 17 | 30 |
+| 14 | Listbox | 30 | 9 | 23 |
+| 15 | Autocomplete | 30 | 1 | 11 |
+
+### C3. Compact state matrices
+
+The following are selected representative combinations, not a cartesian product. Each row names a currently missed branch area, an observable assertion, and the reason its state differs from existing baseline coverage. Source line numbers refer to the committed inventory.
+
+| Cluster | Representative state transition | Branch target | Observable assertion and distinction |
+|---|---|---|---|
+| TreeTable renderer | Empty/loading/error versus populated; collapsed parent versus visible child; editing accepted/rejected | template states; focus, edit and projection guards | State row or exact focused node and proposal count; separates applied state from an emitted proposal. |
+| Select | Empty/grouped/lazy options; single versus multiple; controlled open accepted/rejected | projected templates, bulk action, filter/overlay guards | DOM/ARIA option state, model and typed output; distinguishes local filtering from transport and accepted state from proposal. |
+| Table basic renderer | First/middle/last page; filter menu versus row filter; selected/disabled rows | pagination listeners, filter rules, selection templates | Page model and current-page text or filter/selection output; includes boundary controls previously unactivated through DOM. |
+| DateInput | Date/time/datetime/multiple/range; empty, partial and complete; enabled/readonly | calendar hover, picker, footer and drum listeners | Canonical civil value, range preview, disabled state or overlay closure; distinguishes navigation from commit. |
+| Tree | Empty versus loaded; expanded versus hidden child; disabled versus selectable | visible projection, focus and selection guards | Focused key, visible node count and proposal; distinguishes structural expansion from selection. |
+| ColorPicker | Invalid/valid draft; alpha shown/hidden; browser sampling success/error | error template and channel/gesture alternatives | Error status, serialized color and one commit; distinguishes draft from applied value. |
+| MegaMenu | Horizontal/vertical and LTR/RTL; item link versus action; open/closed | orientation and link template branches | Panel position/ARIA, action output and dismissal; distinguishes route link from command. |
+| Kanban | Loaded/empty card; disabled/enabled move; same/different column | card template and drag proposal guards | Visible metadata and move proposal count; distinguishes rejected moves from accepted intent. |
+| TreeSelect | Leaf/parent; collapsed/expanded; disabled/enabled; selected/missing | nested check and overlay branches | Node ARIA/model and expansion proposal; distinguishes parent propagation from leaf action. |
+| Table client pipeline | Equal/different nested filters; empty/matching result; local/remote | filter equality and normalization | Stable query/result and request count; distinguishes semantic equality from a changed filter. |
+| Uploader | Empty/selected/uploading/error; picker/drop; disabled/readonly | preview, progress and action listeners | File list, progress/error DOM and output; distinguishes a blocked gesture from a real selection. |
+| Slider | Empty/bounded/nonfinite input; keyboard edge; value shown/hidden | normalization and keyboard branches | Value, ARIA and displayed range; distinguishes boundary clamping from ordinary increment. |
+| Table public contract | Edit closed/valid/invalid; expansion allowed/blocked; remote/local | edit session and expansion guards | Edit/expansion proposal and applied state; distinguishes rejected editing from commit. |
+| Listbox | Single/multiple; meta modifier; virtual boundary; selected/unselected | selection and active-row branches | Model, active descendant and option ARIA; distinguishes modifier toggling from simple selection. |
+| Autocomplete | Empty/matched/grouped/lazy; keyboard accept/reject; overlay states | group template and replacement guards | Suggestion DOM, selected value and open state; distinguishes no-match from accepted suggestion. |
+
+### C4. Behavioral scenarios actually added
+
+REL-02C adds 23 scenarios in seven existing spec files: Table page controls (3), DateInput rendered selection/range/clear controls (6), Select bulk/filter/focus paths (3), Uploader native selection and picker controls (2), TreeSelect parent/disabled/filter paths (3), Tree RTL and focus boundaries (2), and TreeTable default/projected state templates (4). Parameterized cases share fixtures and assert applied model, rendered DOM/ARIA, or exact output; no expectation merely repeats an implementation branch.
+
+### C5. Directed verification
+
+All seven changed directed suites passed after their edits: Table 12/12, DateInput 53/53, Select 101/101, Uploader 14/14, TreeSelect 20/20, Tree 31/31, TreeTable 24/24. The full no-coverage suite later passed 188/188 files and 2,562/2,562 tests.
+
+### C6. First global checkpoint
+
+After 23 new scenarios, a fresh canonical V8 run passed all 2,562 tests but failed the unchanged gates: statements 22,978/24,564 (93.54%), branches 13,058/14,708 (88.78%), functions 4,365/4,695 (92.97%), lines 18,269/19,060 (95.84%). Relative to REL-02B, this gained 89 statements, 34 branches, 25 functions and 51 lines. The midpoint targets of 94.5% statements, 92.5% branches and 94% functions were missed.
+
+### C7. Scenario efficiency decision
+
+The first checkpoint yielded 34/23 = 1.48 additional branches per scenario, below both REL-02B's 6.4 and the REL-02C target of about 15. REL-02C stopped adding tests at that point and audited source-mapped coverage units. This avoids inventing a large number of similar tests to chase a percentage.
+
+### C8. Final source identity and denominator
+
+The clean final run and the checked-in baseline both count the same 180 production records and denominators: 24,564 statements, 14,708 branches, 4,695 functions and 19,060 lines. The inventory generator reads the canonical `coverage/ui-core/coverage-summary.json` and LCOV output. It does not alter the 95.01% gate, provider, inclusions or exclusions.
+
+### C9. Attribution A — authored TypeScript
+
+Of 1,648 final missed branch slots, 1,547 map to lines of authored TypeScript outside component template literals. This is a source-origin count, **not** a claim that every slot is easy to trigger. The largest residuals remain TreeTable renderer (125), Table basic renderer (105), Select (99), DateInput (68) and Tree (60). Their source snippets include live filter, focus, navigation, selection, export and guard decisions; the inventory gives exact file/line/block/branch identities for continued targeted work.
+
+### C10. Attribution B — authored templates
+
+The other 101 missed branch slots map to external `.html` templates or to template literals identified through the TypeScript syntax tree. This includes 27 in the Table renderer HTML and 11 in the DateInput inline template. The TreeTable projected/default-state scenarios covered eight branches in its HTML template; the remaining template slots still need rendered-state tests tied to visible assertions.
+
+### C11. Attribution C — compiler structural output
+
+No missed slot is proven compiler-only by this audit. Multiple branch slots can share one source line (for example the repeated RTL alternatives in MegaMenu), but source-map co-location alone does not establish a compiler-only branch. REL-02C therefore assigns **zero proven** units to this category and leaves unresolved structural attribution open in the inventory rather than subtracting it from the denominator.
+
+### C12. Attribution D — browser/SSR environment
+
+44 missed slots on 39 lines match narrow browser/SSR guard patterns such as `isPlatformBrowser`, a nullable browser handle, `defaultView` or optional browser APIs. This is a **candidate** subset of the 1,547 TypeScript slots, not 44 proven unreachable units. Some guards are reachable in the unit fixture, and browser/SSR scripts do not automatically satisfy the canonical V8 counters.
+
+### C13. Attribution E — defensive/error paths
+
+507 missed slots contain a null/undefined, runtime-type, invalid/error, destruction or throw guard pattern. This is a broad triage subset which overlaps D and includes ordinary reachable boundary behavior; it is **not** an exclusion request or a proof of impossibility. Such lines require an individually valid public input or state transition before a test is added.
+
+### C14. Attribution F — contract-impossible paths
+
+Two missed slots are attached to literal `false &&` conditions in `select/neu-select.component.ts` at lines 1044 and 1062. Their right operands cannot execute as written. No other branch is classified as contract-impossible without an explicit invariant proof. Even these two units are far below the 915 branches needed at the final gate.
+
+### C15. Function attribution
+
+The final run misses 330 of 4,695 functions. Of those, 107 have Angular generated template/listener name shapes in LCOV and 223 have other names. A generated listener name identifies a rendered interaction to inspect; it does not prove an artificial function. The new Uploader, Select and TreeSelect interactions gained 8, 5 and 5 functions respectively.
+
+### C16. Final gate shortfall
+
+At 95.01% with unchanged denominators, the final run still needs 360 statements, 915 branches and 96 functions; lines already pass. The first and final global runs differ by two branch hits and one statement hit, without a denominator change or source edit, so the final clean run is authoritative. The small variation does not affect the gate decision.
+
+### C17. Browser coverage feasibility
+
+The existing hydration scripts exercise built browser bundles as separate assurance. There is no repository pipeline that proves identical source identities, source maps, counter semantics and denominators between those bundles and the canonical `ng test ui-core` V8 report. Consequently their results are not merged into the four global percentages. A future merge would first need a fixture that covers one known source branch in both runners and verifies a single merged source record, branch identity, hit count and unchanged denominator.
+
+### C18. SSR coverage feasibility
+
+The SSR smoke script imports built `dist` entry points and checks server-side package behavior. It does not emit compatible canonical V8 source counters or a validated remap to the unit-test source records. Its outcome is reported separately; no SSR hit is imputed to the global gate.
+
+### C19. Browser-directed assurance
+
+`test:n2-date-input-hydration`, `test:n2-tree-select-hydration` and `test:n2-tree-table-hydration` passed in Chromium after a fixture-only stylesheet correction. The two latter fixture preparers had inherited a package Sass import that could not resolve in copied source fixtures. TreeSelect now loads the copied library `styles.scss`; TreeTable, which only copies its component subtree, uses the fixture CSS. These fixes change no production source or canonical coverage counter. The browser assertions cover DOM reuse, first proposals and hydration errors; their results remain separate from the unit coverage gate.
+
+### C20. SSR-directed assurance
+
+`test:ssr-smoke` passed for 100 built package entry points. The DateInput, TreeSelect and TreeTable hydration scripts also built and rendered SSR fixtures before Chromium checks. No SSR coverage percentage is claimed.
+
+### C21. Final inventory and residual priority
+
+The synchronized [machine inventory](N2-REL-02-COVERAGE-INVENTORY.json) and [human inventory](N2-REL-02-COVERAGE-INVENTORY.md) summarize 180 production records and detail the 130 with at least one gap. The next useful work is exact branch targeting in TreeTable renderer (125 missed B), Table renderer (105), Select (99), DateInput (68) and Tree (60), using each inventory block/branch identity and a visible behavioral assertion. Repeating broad state matrices at 1.48 branches per scenario is not an efficient gate strategy.
+
+### C22. Final no-coverage suite
+
+`ng test ui-core --watch=false --no-coverage` exited 0: 188/188 files and 2,562/2,562 tests passed. The 23 REL-02C scenarios are included.
+
+### C23. Final fresh coverage suite
+
+After deleting the prior coverage output, `ng test ui-core --watch=false --coverage` passed 188/188 files and 2,562/2,562 tests, then exited 1 solely on the unchanged global thresholds. Final counts: statements 22,979/24,564 (93.54%, +90 from REL-02B), branches 13,060/14,708 (88.79%, +36), functions 4,365/4,695 (92.97%, +25), lines 18,269/19,060 (95.84%, +51). The final branch yield is 36/23 = 1.57 per scenario.
+
+### C24. Build
+
+`ng build ui-core` exited 0 and generated the library's partial-compiled FESM and declaration bundles. No production source was modified for REL-02C.
+
+### C25. Quality and repository state
+
+Branch `v2` remains at checkpoint commit `b78cfa67232e0b0d8ad6c35db8865dda586cda3b`; staging is empty and all REL-02C test, fixture and evidence changes are unstaged. `git diff --check` passes. The foreign untracked `projects/ui-core/tree-table/public_api 2.ts` retains SHA-256 `c125dde6541cf65f1936dcc6d0468c84da4391234e2a162ba10f889d1936b644`. No changed file is a symlink or temporary artifact, and no production source, gate, exclusion or provider was changed. No push, tag, release or publication was made.
+
+### C26. Recommendation
+
+**REL-02 REMEDIATION REQUIRED.** The final clean canonical report remains below 95.01% in statements, branches and functions. The A/B source-origin attribution and narrow C/D/F evidence do not prove that compiler, browser/SSR or contract-impossible units dominate the 915-branch gate shortfall; a policy review would be premature. Continue only with branch-identity-specific behavioral work that shows materially better yield, or gather a reproducible counter/source-map proof before proposing any policy change.

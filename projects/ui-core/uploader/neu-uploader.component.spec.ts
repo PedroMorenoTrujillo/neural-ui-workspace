@@ -236,6 +236,62 @@ describe('NeuUploaderComponent N2-009', () => {
     expect(component.value()).toEqual([]);
   });
 
+  it('accepts a native file selection and exposes retry, remove and clear actions in the rendered list', async () => {
+    const fixture = await setup({ maxFiles: 2 });
+    const component = fixture.componentInstance;
+    const first = file('report.txt');
+    const input = fixture.nativeElement.querySelector('.neu-uploader__native-input') as HTMLInputElement;
+    Object.defineProperty(input, 'files', { configurable: true, value: [first] });
+    const selected = vi.fn();
+    const retried = vi.fn();
+    const removed = vi.fn();
+    const cleared = vi.fn();
+    component.filesSelected.subscribe(selected);
+    component.fileRetry.subscribe(retried);
+    component.fileRemoved.subscribe(removed);
+    component.cleared.subscribe(cleared);
+
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(component.value()).toEqual([first]);
+    expect(selected).toHaveBeenCalledExactlyOnceWith([first]);
+    expect(fixture.nativeElement.querySelector('.neu-uploader__summary')?.textContent).toContain('1/2');
+    const id = component['fileItems']()[0].id;
+    component.setFileState(id, { status: 'error', error: 'Network failed' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-uploader__item-meta')?.textContent).toContain('Network failed');
+    (fixture.nativeElement.querySelector('.neu-uploader__retry') as HTMLButtonElement).click();
+    expect(retried).toHaveBeenCalledTimes(1);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-uploader__item--uploading')).not.toBeNull();
+    (fixture.nativeElement.querySelector('.neu-uploader__remove') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.value()).toEqual([]);
+    expect(removed).toHaveBeenCalledExactlyOnceWith(first);
+
+    Object.defineProperty(input, 'files', { configurable: true, value: [file('again.txt')] });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.neu-uploader__actions button:last-child') as HTMLButtonElement).click();
+    expect(component.value()).toEqual([]);
+    expect(cleared).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the file picker from the dropzone body, choose button and Space key', async () => {
+    const fixture = await setup();
+    const input = fixture.nativeElement.querySelector('.neu-uploader__native-input') as HTMLInputElement;
+    const picker = vi.spyOn(input, 'click');
+    const dropzone = fixture.nativeElement.querySelector('.neu-uploader__dropzone') as HTMLElement;
+    dropzone.click();
+    expect(picker).toHaveBeenCalledTimes(1);
+    (dropzone.querySelector('.neu-uploader__actions button') as HTMLButtonElement).click();
+    expect(picker).toHaveBeenCalledTimes(2);
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    dropzone.dispatchEvent(space);
+    expect(space.defaultPrevented).toBe(true);
+    expect(picker).toHaveBeenCalledTimes(3);
+  });
+
   it('reports an empty selection and formats byte values', async () => {
     const fixture = await setup();
     const rejected = vi.fn();

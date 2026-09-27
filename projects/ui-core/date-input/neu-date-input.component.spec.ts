@@ -716,6 +716,70 @@ describe('NeuDateInputComponent', () => {
     fixture.destroy();
   });
 
+  it.each(['date', 'datetime', 'multiple', 'range'] as const)(
+    'selects a civil day through the rendered %s calendar with the mode-specific value',
+    async (mode) => {
+      const fixture = create(mode);
+      (fixture.nativeElement.querySelector('.neu-date-input__open') as HTMLButtonElement).click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+      const prefix = `${fixture.componentInstance.viewYear()}-${String(fixture.componentInstance.viewMonth() + 1).padStart(2, '0')}-`;
+      const day = Array.from(panel.querySelectorAll<HTMLButtonElement>('.neu-date-input__cal-day'))
+        .find((button) => button.dataset['civilDate']?.startsWith(prefix) && !button.disabled)!;
+      const civil = day.dataset['civilDate']!;
+
+      day.click();
+      fixture.detectChanges();
+      if (mode === 'date') expect(fixture.componentInstance.value()).toBe(civil);
+      if (mode === 'datetime') expect(fixture.componentInstance.value()).toBe(`${civil}T00:00`);
+      if (mode === 'multiple') expect(fixture.componentInstance.value()).toEqual([civil]);
+      if (mode === 'range') {
+        expect(fixture.componentInstance.value()).toEqual({ start: civil, end: null });
+        expect(panel.querySelector('.neu-date-input__range-announcement')?.textContent).toContain(String(Number(civil.slice(-2))));
+      }
+      fixture.destroy();
+    },
+  );
+
+  it('previews a partial range on hover and commits its second endpoint from the grid', async () => {
+    const fixture = create('range');
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+    const prefix = `${fixture.componentInstance.viewYear()}-${String(fixture.componentInstance.viewMonth() + 1).padStart(2, '0')}-`;
+    const days = Array.from(panel.querySelectorAll<HTMLButtonElement>('.neu-date-input__cal-day'))
+      .filter((button) => button.dataset['civilDate']?.startsWith(prefix) && !button.disabled);
+    const start = days[2].dataset['civilDate']!;
+    const end = days[5].dataset['civilDate']!;
+    days[2].click();
+    days[5].dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+    fixture.detectChanges();
+    expect(panel.querySelectorAll('.neu-drp__cell--in-range').length).toBeGreaterThan(0);
+    expect(fixture.componentInstance.value()).toEqual({ start, end: null });
+    days[5].click();
+    expect(fixture.componentInstance.value()).toEqual({ start, end });
+    fixture.destroy();
+  });
+
+  it('clears a populated date through the field action and toggles the panel from its trigger', async () => {
+    const fixture = create();
+    fixture.componentInstance.value.set(civilDate('2026-03-29') as never);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.neu-date-input__clear') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBeNull();
+    const trigger = fixture.nativeElement.querySelector('.neu-date-input__open') as HTMLButtonElement;
+    trigger.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    trigger.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    fixture.destroy();
+  });
+
   it('month and year navigation emits only while open and only on a changed interval', () => {
     const fixture = create();
     const views: NeuDateViewChangeEvent[] = [];

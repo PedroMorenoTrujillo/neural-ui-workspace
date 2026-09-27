@@ -82,6 +82,7 @@ Object.assign(config.projects['compatibility-consumer'].architect.build.options,
   server: 'src/main.server.ts',
   ssr: { entry: 'src/server.ts' },
   prerender: false,
+  styles: ['src/styles.css'],
 });
 writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 const tsPath = join(fixture, 'tsconfig.app.json');

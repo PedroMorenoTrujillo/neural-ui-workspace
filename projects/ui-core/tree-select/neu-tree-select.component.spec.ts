@@ -274,6 +274,61 @@ describe('NeuTreeSelectComponent N2-019', () => {
     expect(component.isExpanded('engineering')).toBe(true);
   });
 
+  it('selects a parent through the rendered multiple list and clears the propagated value', async () => {
+    const { fixture, component } = createTreeSelect<'multiple'>({
+      mode: 'multiple', selectionStrategy: 'propagated', expandedKeys: ['engineering'], clearable: true,
+    });
+    (fixture.nativeElement.querySelector('.neu-tree-select__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const root = document.querySelector<HTMLElement>('[data-neu-tree-select-index="0"]')!;
+    expect(root.textContent).toContain('Engineering');
+    root.click();
+    fixture.detectChanges();
+    expect(component.value()).toEqual(['engineering', 'platform']);
+    expect(component.value()).not.toContain('disabled');
+    expect(root.getAttribute('aria-checked')).toBe('checked');
+    (fixture.nativeElement.querySelector('.neu-tree-select__clear') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.value()).toEqual([]);
+  });
+
+  it('blocks a disabled rendered branch and accepts an enabled leaf after expansion', async () => {
+    const { fixture, component } = createTreeSelect({ expandedKeys: ['engineering'] });
+    (fixture.nativeElement.querySelector('.neu-tree-select__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const items = Array.from(document.querySelectorAll<HTMLElement>('.neu-tree-select__node'));
+    const disabled = items.find((item) => item.textContent?.includes('Disabled branch'))!;
+    disabled.click();
+    expect(component.value()).toBeNull();
+    const platform = items.find((item) => item.textContent?.includes('Platform'))!;
+    platform.click();
+    expect(component.value()).toBe('platform');
+  });
+
+  it('shows no filtered nodes and restores the collapsed parent without selecting it', async () => {
+    const { fixture, component } = createTreeSelect({ searchable: true });
+    const expansions = vi.fn();
+    component.expandedKeysChange.subscribe(expansions);
+    (fixture.nativeElement.querySelector('.neu-tree-select__trigger') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const search = document.querySelector('.neu-tree-select__search') as HTMLInputElement;
+    search.value = 'no department';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(document.querySelector('.neu-tree-select__empty')).not.toBeNull();
+    search.value = '';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    const twisty = document.querySelector('.neu-tree-select__twisty') as HTMLButtonElement;
+    twisty.click();
+    expect(expansions).toHaveBeenLastCalledWith(['engineering']);
+    expect(component.value()).toBeNull();
+    expect(document.querySelectorAll('.neu-tree-select__node')).toHaveLength(2);
+  });
+
   it('emits touch only after focus leaves the composite control', () => {
     const { fixture, component } = createTreeSelect();
     const touched = vi.fn();

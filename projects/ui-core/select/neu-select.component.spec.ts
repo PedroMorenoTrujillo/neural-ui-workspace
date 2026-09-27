@@ -1454,6 +1454,67 @@ describe('NeuSelectComponent', () => {
     expect(document.querySelector('.neu-select__list')?.getAttribute('aria-busy')).toBe('true');
   });
 
+  it('toggles all eligible options and removes a chip through the rendered multiple controls', async () => {
+    const { f, comp } = await setup({
+      multiple: true,
+      selectionOptions: { chips: true, selectionLimit: 2, toggleAll: true },
+    });
+    (f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement).click();
+    await f.whenStable();
+    const toggle = document.querySelector('.neu-select__toggle-all') as HTMLButtonElement;
+    expect(toggle.textContent).toContain('Select all');
+    toggle.click();
+    f.detectChanges();
+    expect(comp.value()).toEqual(['es', 'mx']);
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    const remove = f.nativeElement.querySelector('.neu-select__chip-remove') as HTMLButtonElement;
+    remove.click();
+    f.detectChanges();
+    expect(comp.value()).toHaveLength(1);
+    expect(toggle.textContent).toContain('Select all');
+    toggle.click();
+    f.detectChanges();
+    expect(comp.value()).toEqual(['mx', 'es']);
+  });
+
+  it('uses the rendered filter keyboard path to navigate results and close without selecting', async () => {
+    const { f, comp } = await setup({ searchable: true });
+    (f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement).click();
+    await f.whenStable();
+    const search = document.querySelector('.neu-select__search-input') as HTMLInputElement;
+    search.value = 'méx';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    await f.whenStable();
+    expect(document.querySelectorAll('.neu-select__option')).toHaveLength(1);
+    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    f.detectChanges();
+    expect(document.querySelector('.neu-select__option')?.getAttribute('aria-selected')).toBe('false');
+    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await f.whenStable();
+    expect(comp.value()).toBeNull();
+    expect(comp.isOpen()).toBe(false);
+  });
+
+  it('treats focus inside the trigger as one visit and emits touch only on exit', async () => {
+    const { f, comp } = await setup();
+    const entered = vi.fn();
+    const left = vi.fn();
+    const touch = vi.fn();
+    comp.focusEntered.subscribe(entered);
+    comp.focusLeft.subscribe(left);
+    comp.touch.subscribe(touch);
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const inside = trigger.querySelector('.neu-select__value') as HTMLElement;
+    const outside = document.createElement('button');
+    trigger.dispatchEvent(new FocusEvent('focus'));
+    trigger.dispatchEvent(new FocusEvent('blur', { relatedTarget: inside }));
+    expect(entered).toHaveBeenCalledTimes(1);
+    expect(touch).not.toHaveBeenCalled();
+    trigger.dispatchEvent(new FocusEvent('blur', { relatedTarget: outside }));
+    expect(left).toHaveBeenCalledTimes(1);
+    expect(touch).toHaveBeenCalledTimes(1);
+  });
+
   it('hides the clear action while loading so trigger actions cannot overlap', async () => {
     const { f, comp } = await setup({ clearable: true, loading: true });
     comp.value.set('es');

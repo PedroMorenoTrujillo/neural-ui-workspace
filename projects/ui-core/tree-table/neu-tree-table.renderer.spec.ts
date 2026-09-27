@@ -3,12 +3,16 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NeuTreeTableComponent } from './public/neu-tree-table.component-contract';
 import {
+  NeuTreeTableCaptionDirective,
   NeuTreeTableCellDirective,
   NeuTreeTableEmptyDirective,
   NeuTreeTableErrorDirective,
+  NeuTreeTableFooterDirective,
   NeuTreeTableHeaderDirective,
   NeuTreeTableLoadingDirective,
   NeuTreeTableNodeDirective,
+  NeuTreeTableSummaryDirective,
+  NeuTreeTableToolbarDirective,
 } from './public/neu-tree-table-template-contracts';
 import type {
   NeuTreeLoadedRelation,
@@ -78,9 +82,13 @@ const emptyLayout: NeuTreeTableLayoutState = {
   standalone: true,
   imports: [
     NeuTreeTableComponent,
+    NeuTreeTableCaptionDirective,
     NeuTreeTableHeaderDirective,
     NeuTreeTableNodeDirective,
     NeuTreeTableCellDirective,
+    NeuTreeTableFooterDirective,
+    NeuTreeTableSummaryDirective,
+    NeuTreeTableToolbarDirective,
     NeuTreeTableEmptyDirective,
     NeuTreeTableLoadingDirective,
     NeuTreeTableErrorDirective,
@@ -114,14 +122,24 @@ const emptyLayout: NeuTreeTableLayoutState = {
         <ng-template neuTreeTableCell="value" let-row let-index="logicalIndex">
           {{ index }}={{ row.value }}
         </ng-template>
-        <ng-template neuTreeTableEmpty>Custom empty</ng-template>
-        <ng-template neuTreeTableLoading>Custom loading</ng-template>
-        <ng-template neuTreeTableError>Custom error</ng-template>
+        @if (stateTemplates()) {
+          <ng-template neuTreeTableEmpty>Custom empty</ng-template>
+          <ng-template neuTreeTableLoading>Custom loading</ng-template>
+          <ng-template neuTreeTableError>Custom error</ng-template>
+        }
+        @if (showChrome()) {
+          <ng-template neuTreeTableCaption>Quarterly tree</ng-template>
+          <ng-template neuTreeTableToolbar>Tree actions</ng-template>
+          <ng-template neuTreeTableFooter="name" let-column="column">Total {{ column.header }}</ng-template>
+          <ng-template neuTreeTableSummary>Three nodes available</ng-template>
+        }
       </neu-tree-table>
     </div>
   `,
 })
 class HostComponent {
+  readonly stateTemplates = signal(true);
+  readonly showChrome = signal(false);
   readonly rows = signal(rows);
   readonly hierarchy = signal(initialHierarchy);
   readonly columns = signal(columns);
@@ -726,6 +744,53 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector<HTMLTableElement>('table')?.tabIndex,
     ).toBe(0);
+  });
+
+  it.each([
+    { state: 'empty', expected: 'No data' },
+    { state: 'loading', expected: 'Loading' },
+    { state: 'error', expected: 'Unable to load tree data' },
+  ] as const)('renders the default $state state when no custom state template is projected', async ({ state, expected }) => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.stateTemplates.set(false);
+    host.rows.set([]);
+    if (state === 'empty') {
+      host.hierarchy.set({ ...initialHierarchy, roots: loaded([]), children: [] });
+    } else if (state === 'loading') {
+      host.hierarchy.set({ ...initialHierarchy, roots: {
+        status: 'loading', keys: [], relationRevision: 2, appliedRequestId: 1, total: null,
+      }, children: [] });
+    } else {
+      host.hierarchy.set({ ...initialHierarchy, roots: {
+        status: 'error', keys: [], relationRevision: 2, appliedRequestId: 1, total: null,
+        error: new Error('remote'),
+      }, children: [] });
+    }
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const row = native.querySelector(`[data-state="${state}"]`);
+    expect(row?.textContent?.trim()).toBe(expected);
+    expect(row?.getAttribute('role')).toBe('row');
+    expect(native.querySelectorAll('tr[data-node-key]')).toHaveLength(0);
+    expect(host.queryChanges()).toEqual([]);
+  });
+
+  it('renders projected caption, toolbar, column footer and summary without changing the applied tree', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.showChrome.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    expect(native.querySelector('caption')?.textContent).toContain('Quarterly tree');
+    expect(native.querySelector('.neu-tree-table2__toolbar')?.textContent).toContain('Tree actions');
+    expect(native.querySelector('tfoot')?.textContent).toContain('Total Name');
+    expect(native.querySelector('tfoot')?.textContent).toContain('Three nodes available');
+    expect(row(native, 'string:a')).not.toBeNull();
+    expect(host.queryChanges()).toEqual([]);
+    expect(host.expansionChanges()).toEqual([]);
   });
 
   it('renders applied hierarchical search with transient ancestor reveal and zero expansion echo', async () => {
