@@ -7,6 +7,23 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const packageRoot = join(root, 'dist/neural-ui/core');
 const baselinePath = join(root, 'baselines/n2-release/rel-01-package-bundle.json');
 const update = process.argv.includes('--update');
+const compressionEnvironment = {
+  node: process.versions.node,
+  zlib: process.versions.zlib,
+  brotli: process.versions.brotli ?? null,
+  platform: process.platform,
+  arch: process.arch,
+};
+const canonicalCodec = { node: '22.22.3', zlib: '1.2.12', brotli: '1.2.0' };
+if (Object.entries(canonicalCodec).some(([key, value]) => compressionEnvironment[key] !== value)) {
+  throw new Error(`REL-01 requires canonical compression runtime ${JSON.stringify(canonicalCodec)}; got ${JSON.stringify(compressionEnvironment)}.`);
+}
+const expected = update
+  ? undefined
+  : JSON.parse(readFileSync(baselinePath, 'utf8'));
+if (expected && JSON.stringify(expected.compressionEnvironment) !== JSON.stringify(compressionEnvironment)) {
+  throw new Error(`REL-01 compression environment differs: expected ${JSON.stringify(expected.compressionEnvironment)}, got ${JSON.stringify(compressionEnvironment)}.`);
+}
 
 const cases = [
   ['root', '@neural-ui/core', 'provideNeuralUI'],
@@ -68,6 +85,7 @@ for (const name of harnesses) {
 
 const evidence = {
   method: 'built-package export map; JavaScript loader; empty tsconfig aliases; metafile inputs before tree-shaking; invalid and used controls',
+  compressionEnvironment,
   measurements,
   auditedRootUnusedHarnesses: harnesses,
 };
@@ -75,8 +93,6 @@ const evidence = {
 if (update) {
   writeFileSync(baselinePath, `${JSON.stringify(evidence, null, 2)}\n`);
 } else {
-  if (!existsSync(baselinePath)) throw new Error('REL-01 baseline missing. Use --update once after review.');
-  const expected = JSON.parse(readFileSync(baselinePath, 'utf8'));
   if (JSON.stringify(evidence) !== JSON.stringify(expected)) {
     throw new Error('Built package or harness inventory differs from REL-01 evidence baseline.');
   }

@@ -359,6 +359,28 @@ function consumerBudget(baseline, metric, override) {
 if (!['pr', 'main', 'release'].includes(profile)) fail(`unknown profile ${profile}`);
 if (!existsSync(resolve(packageRoot, 'package.json')))
   fail('dist package missing; run npm run build');
+const measurementEnvironment = {
+  node: process.versions.node,
+  zlib: process.versions.zlib,
+  brotli: process.versions.brotli ?? null,
+  platform: process.platform,
+  arch: process.arch,
+};
+const policy = calibrating
+  ? undefined
+  : JSON.parse(readFileSync(policyPath, 'utf8'));
+if (policy) {
+  const expected = {
+    node: policy.toolchain.node,
+    zlib: policy.toolchain.gzip?.match(/Node zlib ([^,]+)/)?.[1],
+    brotli: policy.toolchain.brotli?.match(/Node Brotli ([^,]+)/)?.[1],
+  };
+  if (expected.node !== measurementEnvironment.node
+    || expected.zlib !== measurementEnvironment.zlib
+    || expected.brotli !== measurementEnvironment.brotli) {
+    fail(`compression environment differs: expected ${JSON.stringify(expected)}, got ${JSON.stringify(measurementEnvironment)}`);
+  }
+}
 
 const selectedNames = profile === 'pr' ? [...prScenarios] : Object.keys(scenarios);
 const current = await measureScenarios(packageRoot, selectedNames);
@@ -379,6 +401,7 @@ if (calibrating) {
   console.log(
     JSON.stringify(
       {
+        measurementEnvironment,
         methodology: {
           consumer:
             'minified ESM; Angular, CDK and RxJS external; Button additionally externalizes neural-icons; split Table measures static initial closure per output',
@@ -400,8 +423,6 @@ if (calibrating) {
   process.exit(architecture.length ? 1 : 0);
 }
 
-if (!existsSync(policyPath)) fail('scripts/h9-b4-bundle-policy.json is missing');
-const policy = JSON.parse(readFileSync(policyPath, 'utf8'));
 const rows = [];
 for (const name of selectedNames) {
   const measurement = current[name];
@@ -445,6 +466,7 @@ console.log(
     {
       profile,
       toolchain: policy.toolchain,
+      measurementEnvironment,
       diagnostics: {
         buttonEndUserClosure,
         tableInitialClosure: current['table-basic']?.closure,

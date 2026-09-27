@@ -101,7 +101,15 @@ async function probe(symbol, entrypoint, mode) {
   };
 }
 
-const report = {};
+const report = {
+  compressionEnvironment: {
+    node: process.versions.node,
+    zlib: process.versions.zlib,
+    brotli: process.versions.brotli ?? null,
+    platform: process.platform,
+    arch: process.arch,
+  },
+};
 for (const [name, symbol, entrypoint] of [
   ['kanban', 'NeuKanbanComponent', 'kanban'],
   ['color-picker-basic', 'NeuColorPickerComponent', 'color-picker'],

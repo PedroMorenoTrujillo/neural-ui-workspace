@@ -1,0 +1,395 @@
+{
+  "environment": {
+    "node": "22.22.3",
+    "zlib": "1.2.12",
+    "brotli": "1.2.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "scenarios": {
+    "kanban": {
+      "size": {
+        "raw": 46636,
+        "gzip": 8436,
+        "brotli": 7379
+      },
+      "inputs": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-kanban.mjs",
+          "bytesInOutput": 40798
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 317
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5497
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 0
+        }
+      ],
+      "retained": {
+        "temporalStateKey": true,
+        "responsiveMatchMedia": true
+      },
+      "metafile": {
+        "inputs": {
+          "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs": {
+            "bytes": 4008,
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs": {
+            "bytes": 5142,
+            "imports": [],
+            "format": "esm"
+          },
+          "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs": {
+            "bytes": 53049,
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/common",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/foundation"
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/option-api"
+              }
+            ],
+            "format": "esm"
+          },
+          "dist/neural-ui/core/fesm2022/neural-ui-core-kanban.mjs": {
+            "bytes": 50090,
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/cdk/drag-drop",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/common",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/foundation"
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/internal"
+              }
+            ],
+            "format": "esm"
+          },
+          "<stdin>": {
+            "bytes": 95,
+            "imports": [
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-kanban.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/kanban"
+              }
+            ],
+            "format": "esm"
+          }
+        },
+        "outputs": {
+          "stdin.js": {
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/cdk/drag-drop",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/common",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/common",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "exports": [
+              "retained0"
+            ],
+            "entryPoint": "<stdin>",
+            "inputs": {
+              "dist/neural-ui/core/fesm2022/neural-ui-core-kanban.mjs": {
+                "bytesInOutput": 40798
+              },
+              "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs": {
+                "bytesInOutput": 317
+              },
+              "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs": {
+                "bytesInOutput": 5497
+              },
+              "<stdin>": {
+                "bytesInOutput": 0
+              }
+            },
+            "bytes": 46636
+          }
+        }
+      }
+    },
+    "color-picker": {
+      "size": {
+        "raw": 63004,
+        "gzip": 12579,
+        "brotli": 11039
+      },
+      "inputs": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-color-picker.mjs",
+          "bytesInOutput": 57078
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5513
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 389
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 0
+        }
+      ],
+      "retained": {
+        "temporalStateKey": true,
+        "responsiveMatchMedia": true
+      },
+      "metafile": {
+        "inputs": {
+          "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs": {
+            "bytes": 4008,
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs": {
+            "bytes": 5142,
+            "imports": [],
+            "format": "esm"
+          },
+          "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs": {
+            "bytes": 53049,
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/common",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/foundation"
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-option-api.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/option-api"
+              }
+            ],
+            "format": "esm"
+          },
+          "dist/neural-ui/core/fesm2022/neural-ui-core-color-picker.mjs": {
+            "bytes": 78838,
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/cdk/overlay",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/cdk/overlay",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/internal"
+              },
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/foundation"
+              }
+            ],
+            "format": "esm"
+          },
+          "<stdin>": {
+            "bytes": 106,
+            "imports": [
+              {
+                "path": "dist/neural-ui/core/fesm2022/neural-ui-core-color-picker.mjs",
+                "kind": "import-statement",
+                "original": "@neural-ui/core/color-picker"
+              }
+            ],
+            "format": "esm"
+          }
+        },
+        "outputs": {
+          "stdin.js": {
+            "imports": [
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/cdk/overlay",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/cdk/overlay",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/common",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@angular/core",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "exports": [
+              "retained0"
+            ],
+            "entryPoint": "<stdin>",
+            "inputs": {
+              "dist/neural-ui/core/fesm2022/neural-ui-core-color-picker.mjs": {
+                "bytesInOutput": 57078
+              },
+              "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs": {
+                "bytesInOutput": 5513
+              },
+              "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs": {
+                "bytesInOutput": 389
+              },
+              "<stdin>": {
+                "bytesInOutput": 0
+              }
+            },
+            "bytes": 63004
+          }
+        }
+      }
+    }
+  }
+}
