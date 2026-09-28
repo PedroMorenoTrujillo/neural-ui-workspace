@@ -41,6 +41,8 @@ const policyPath = resolve(workspaceRoot, 'scripts/h9-b4-bundle-policy.json');
 const profileArgument = process.argv.find((value) => value.startsWith('--profile='));
 const profile = profileArgument?.slice('--profile='.length) ?? 'main';
 const calibrating = process.argv.includes('--calibrate');
+const attributing = calibrating && process.argv.includes('--attribution');
+const legacyBaselineIcons = calibrating && process.argv.includes('--legacy-baseline-icons');
 const baselineArgument = process.argv.find((value) => value.startsWith('--baseline='));
 const baselineRoot = baselineArgument
   ? resolve(baselineArgument.slice('--baseline='.length))
@@ -53,7 +55,6 @@ const scenarios = {
   provider: { imports: [['provideNeuralUI', '']] },
   button: {
     imports: [['NeuButtonComponent', 'button']],
-    extraExternal: ['@neural-icons/*'],
     iconBoundary: true,
   },
   select: { imports: [['NeuSelectComponent', 'select']] },
@@ -147,7 +148,7 @@ function compressOutputs(result, keys) {
   );
 }
 
-async function measureScenario(root, definition) {
+async function measureScenario(root, definition, enforceIconBoundary = true) {
   const source = scenarioSource(definition);
   const result = await build({
     absWorkingDir: workspaceRoot,
@@ -169,7 +170,7 @@ async function measureScenario(root, definition) {
     write: false,
   });
   assertPackageOnlyBundle(result.metafile, root, source, workspaceRoot);
-  if (definition.iconBoundary) assertButtonIconBoundary(result.metafile);
+  if (definition.iconBoundary && enforceIconBoundary) assertButtonIconBoundary(result.metafile);
   if (definition.split) {
     const initial = outputClosure(result.metafile);
     const boundary = assertTableInitialBoundary(result.metafile, initial);
@@ -193,12 +194,21 @@ async function measureScenario(root, definition) {
         : {}),
     };
   }
-  return compress(Buffer.concat(result.outputFiles.map(({ contents }) => contents)));
+  const size = compress(Buffer.concat(result.outputFiles.map(({ contents }) => contents)));
+  if (!attributing) return size;
+  const inputs = Object.values(result.metafile.outputs)
+    .flatMap((output) => Object.entries(output.inputs))
+    .reduce((totals, [path, detail]) => {
+      totals[path] = (totals[path] ?? 0) + detail.bytesInOutput;
+      return totals;
+    }, {});
+  return { ...size, inputs };
 }
 
-async function measureScenarios(root, names) {
+async function measureScenarios(root, names, enforceIconBoundary = true) {
   const measured = {};
-  for (const name of names) measured[name] = await measureScenario(root, scenarios[name]);
+  for (const name of names)
+    measured[name] = await measureScenario(root, scenarios[name], enforceIconBoundary);
   return measured;
 }
 
@@ -395,7 +405,11 @@ if (calibrating) {
   if (!baselineRoot || !existsSync(resolve(baselineRoot, 'package.json'))) {
     fail('--calibrate requires --baseline=/absolute/path/to/dist/neural-ui/core');
   }
-  const baseline = await measureScenarios(baselineRoot, Object.keys(scenarios));
+  const baseline = await measureScenarios(
+    baselineRoot,
+    Object.keys(scenarios),
+    !legacyBaselineIcons,
+  );
   const baselineAggregate = measureAggregate(baselineRoot);
   const baselinePackage = measurePackage(baselineRoot);
   console.log(
@@ -404,7 +418,7 @@ if (calibrating) {
         measurementEnvironment,
         methodology: {
           consumer:
-            'minified ESM; Angular, CDK and RxJS external; Button additionally externalizes neural-icons; split Table measures static initial closure per output',
+            'minified ESM; Angular, CDK and RxJS external; Button must not retain or import neural-icons; split Table measures static initial closure per output',
           raw: 'canonical strict bytes',
           gzip: compression.gzip,
           brotli: compression.brotli,

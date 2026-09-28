@@ -3,9 +3,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NeuTableComponent } from './public/neu-table.component-contract';
 import {
+  NeuTableFooterDirective,
   NeuTableGroupFooterDirective,
   NeuTableGroupHeaderDirective,
+  NeuTableHeaderDirective,
   NeuTableRowDetailDirective,
+  NeuTableSummaryDirective,
 } from './public/neu-table-template-contracts';
 import type {
   NeuTableColumn,
@@ -14,12 +17,15 @@ import type {
   NeuTableEditChange,
   NeuTableEditCommit,
   NeuTableEditingOptions,
+  NeuTableExpansionOptions,
   NeuTableEditState,
   NeuTableExpandedKeysChange,
   NeuTableGroupingChange,
   NeuTableGroupingState,
   NeuTableMetadata,
+  NeuTablePaginationOptions,
   NeuTableQuery,
+  NeuTableSelectionOptions,
   NeuTableVirtualizationOptions,
 } from './public/neu-table.types';
 
@@ -123,6 +129,45 @@ class InteractionHostComponent {
   readonly expansionChanges: NeuTableExpandedKeysChange<number>[] = [];
   readonly groupingChanges: NeuTableGroupingChange<Field>[] = [];
   dataRequests = 0;
+}
+
+@Component({
+  standalone: true,
+  imports: [NeuTableComponent, NeuTableHeaderDirective, NeuTableFooterDirective, NeuTableSummaryDirective],
+  template: `<neu-table [data]="rows" [columns]="columns" [metadata]="metadata"
+    [query]="query" [rowKey]="rowKey" [paginationOptions]="paginationOptions()"
+    [selectionOptions]="selectionOptions()" [expansionOptions]="expansionOptions()">
+    <ng-template neuTableHeader="name">Projected name header</ng-template>
+    @if (showFooter()) {
+      <ng-template neuTableFooter="name">Projected name footer</ng-template>
+    }
+    @if (showSummary()) {
+      <ng-template neuTableSummary>Projected summary</ng-template>
+    }
+  </neu-table>`,
+})
+class TableSlotsHostComponent {
+  readonly paginationOptions = signal<NeuTablePaginationOptions>({
+    enabled: false, pageSizeOptions: [], position: 'bottom', report: 'none', showPageJump: false,
+  });
+  readonly selectionOptions = signal<NeuTableSelectionOptions<Row>>({ mode: 'none' });
+  readonly expansionOptions = signal<NeuTableExpansionOptions<Row>>({
+    enabled: false, toggleOnRowClick: false,
+  });
+  readonly showFooter = signal(true);
+  readonly showSummary = signal(true);
+  readonly rows = baseRows;
+  readonly columns: readonly NeuTableColumn<Row, Field>[] = [
+    { id: 'id', header: 'ID', field: 'id' },
+    { id: 'name', header: 'Name', field: 'name' },
+  ];
+  readonly metadata: NeuTableMetadata = {
+    totalItems: 3, loading: false, error: null, queryRevision: 0, appliedRequestId: null,
+  };
+  readonly query: NeuTableQuery<Field> = {
+    page: 0, pageSize: 25, search: '', sort: [], filters: null,
+  };
+  readonly rowKey = (row: Row) => row.id;
 }
 
 function table(
@@ -412,6 +457,8 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     host.virtualizationOptions.set({ enabled: false });
     await render(fixture);
     expect(native.querySelector('.neu-table2__detail-row')?.textContent).toContain('Detail Ada');
+    click(native.querySelector('tr[data-row-key="1"] .neu-table2__expansion-column button'));
+    expect(host.expansionChanges.at(-1)).toMatchObject({ next: [], key: 1, expanded: false });
   });
 
   it('groups only loaded domain rows and restores applied grouping after virtual mode', async () => {
@@ -445,5 +492,87 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     host.virtualizationOptions.set({ enabled: false });
     await render(fixture);
     expect(native.querySelectorAll('.neu-table2__group-row')).toHaveLength(2);
+  });
+
+  it('renders projected header, column footer and summary slots together', async () => {
+    await TestBed.configureTestingModule({ imports: [TableSlotsHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(TableSlotsHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    expect(native.querySelector('thead')?.textContent).toContain('Projected name header');
+    expect(native.querySelector('tfoot')?.textContent).toContain('Projected name footer');
+    expect(native.querySelector('tfoot')?.textContent).toContain('Projected summary');
+    expect(native.querySelectorAll('tfoot tr')).toHaveLength(2);
+  });
+
+  it('renders footer columns alongside expansion and selection, including empty page-size choices', async () => {
+    await TestBed.configureTestingModule({ imports: [TableSlotsHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(TableSlotsHostComponent);
+    const host = fixture.componentInstance;
+    host.paginationOptions.set({
+      enabled: true, pageSizeOptions: [], position: 'bottom', report: 'none', showPageJump: false,
+    });
+    host.selectionOptions.set({
+      mode: 'multiple', indicator: 'checkbox', selectOnRowClick: false,
+      modifier: 'replace', range: false, toggleAllScope: 'rendered',
+    });
+    host.expansionOptions.set({ enabled: true, toggleOnRowClick: false });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    expect(native.querySelector('tfoot .neu-table2__expansion-column')).not.toBeNull();
+    expect(native.querySelector('tfoot .neu-table2__selection-column')).not.toBeNull();
+    expect(native.querySelector('select')).toBeNull();
+
+    host.showFooter.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(native.querySelectorAll('tfoot tr')).toHaveLength(1);
+    host.showFooter.set(true);
+    host.showSummary.set(false);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(native.querySelectorAll('tfoot tr')).toHaveLength(1);
+  });
+
+  it('proposes row editing from a cell gesture when row mode is active', async () => {
+    const fixture = TestBed.createComponent(InteractionHostComponent);
+    const host = fixture.componentInstance;
+    host.editingOptions.set({ mode: 'row', activation: 'click', commitOnBlur: false });
+    await render(fixture);
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const row = renderer.rows()[0];
+    const column = host.columns()[1];
+    renderer.startEdit(row, column, 'pointer', new MouseEvent('click', { cancelable: true }));
+    expect(host.editChanges.at(-1)?.next).toEqual({ kind: 'row', key: 1 });
+  });
+
+  it('proposes expansion from a noninteractive row click when configured', async () => {
+    const fixture = TestBed.createComponent(InteractionHostComponent);
+    const host = fixture.componentInstance;
+    (host as any).expansionOptions = { enabled: true, toggleOnRowClick: true };
+    await render(fixture);
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    renderer.onRowClick(renderer.rows()[0], new MouseEvent('click'));
+    expect(host.expansionChanges.at(-1)?.next).toEqual([1]);
+  });
+
+  it('shows grouped rowspan cells only at the first row of each group', async () => {
+    const fixture = TestBed.createComponent(InteractionHostComponent);
+    (fixture.componentInstance as any).groupingOptions = { mode: 'rowspan', scope: 'loaded' };
+    fixture.componentInstance.grouping.set({ by: ['team'], expandedGroupIds: [] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const row = renderer.rows()[0];
+    const node = { kind: 'row', row, track: row.track, rowspan: new Map<string, number>() };
+    const team = fixture.componentInstance.columns()[2]!;
+    expect(renderer.groupingCellVisible(node, team)).toBe(false);
+    node.rowspan.set('team', 2);
+    expect(renderer.groupingCellVisible(node, team)).toBe(true);
+    expect(renderer.groupingCellVisible(node, fixture.componentInstance.columns()[1])).toBe(true);
+    expect(renderer.groupingCellVisible(node, { id: 'computed', header: 'Computed' })).toBe(true);
+    expect(renderer.groupingCellVisible({ kind: 'header' }, team)).toBe(true);
   });
 });

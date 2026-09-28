@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNeuralIcons } from '@neural-icons/angular';
-import { iconEdit } from '@neural-icons/core/icons/edit';
 import {
   NeuMenuButtonComponent,
   NeuMenuComponent,
@@ -61,7 +59,6 @@ describe('NeuMenuComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NeuMenuComponent, CustomMenuItemHostComponent],
-      providers: [provideNeuralIcons(iconEdit)],
     }).compileComponents();
     fixture = TestBed.createComponent(NeuMenuComponent);
     fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit' }]);
@@ -78,11 +75,11 @@ describe('NeuMenuComponent', () => {
     expect(spy).toHaveBeenCalledWith({ key: 'edit', label: 'Edit' });
   });
 
-  it('renders registered item icons instead of their names', () => {
+  it('renders a provider-neutral item affordance instead of its key', () => {
     fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit', icon: 'edit' }]);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.querySelector('.neu-menu__icon svg')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('neu-icon-outlet.neu-menu__icon')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.neu-menu__icon')?.textContent).not.toContain(
       'edit',
     );

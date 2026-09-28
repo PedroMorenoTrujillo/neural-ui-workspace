@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1467,
-    "bindingDelta": 300,
+    "declarationBindings": 1473,
+    "bindingDelta": 306,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 843,
+    "newlyDiscovered": 849,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 426,
+      "declaration-or-selector-was-not-recorded": 432,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 387
     }
@@ -3943,6 +3943,30 @@
     },
     {
       "id": "./gallery#NeuGalleryComponent.output:zoomChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:fallbackPath",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:fallbackText",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:icon",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:label",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:size",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:strokeWidth",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

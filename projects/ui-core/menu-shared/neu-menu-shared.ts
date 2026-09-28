@@ -1,10 +1,10 @@
 import { Directive, TemplateRef } from '@angular/core';
-import type { NeuralIconName } from '@neural-icons/core';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
 
 export interface NeuMenuItem {
   key: string;
   label: string;
-  icon?: NeuralIconName;
+  icon?: NeuIconKey;
   badge?: string | number;
   active?: boolean;
   command?: (event: { originalEvent: Event; item: NeuMenuItem }) => void;

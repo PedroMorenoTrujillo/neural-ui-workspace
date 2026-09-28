@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
+import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
 
 export interface NeuBreadcrumbItem {
   /** Etiqueta visible / Visible label */
@@ -11,7 +11,7 @@ export interface NeuBreadcrumbItem {
   /** URL externa / External URL */
   url?: string;
   /** Optional neural-icons name. */
-  icon?: NeuralIconName;
+  icon?: NeuIconKey;
 }
 
 /**
@@ -31,7 +31,7 @@ export interface NeuBreadcrumbItem {
  */
 @Component({
   selector: 'neu-breadcrumb',
-  imports: [RouterLink, NeuralIcon],
+  imports: [RouterLink, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   template: `
     <nav class="neu-breadcrumb" aria-label="Breadcrumb">
@@ -41,24 +41,24 @@ export interface NeuBreadcrumbItem {
             @if (!last) {
               @if (item.route) {
                 <a class="neu-breadcrumb__link" [routerLink]="item.route">
-                  @if (item.icon) { <neural-icon [icon]="item.icon" aria-hidden="true" /> }
+                  @if (item.icon) { <neu-icon-outlet [icon]="item.icon" aria-hidden="true" /> }
                   {{ item.label }}
                 </a>
               } @else if (item.url) {
                 <a class="neu-breadcrumb__link" [href]="item.url" target="_blank" rel="noopener noreferrer">
-                  @if (item.icon) { <neural-icon [icon]="item.icon" aria-hidden="true" /> }
+                  @if (item.icon) { <neu-icon-outlet [icon]="item.icon" aria-hidden="true" /> }
                   {{ item.label }}
                 </a>
               } @else {
                 <span class="neu-breadcrumb__link">
-                  @if (item.icon) { <neural-icon [icon]="item.icon" aria-hidden="true" /> }
+                  @if (item.icon) { <neu-icon-outlet [icon]="item.icon" aria-hidden="true" /> }
                   {{ item.label }}
                 </span>
               }
               <span class="neu-breadcrumb__separator" aria-hidden="true">{{ separator() }}</span>
             } @else {
               <span class="neu-breadcrumb__current" aria-current="page">
-                @if (item.icon) { <neural-icon [icon]="item.icon" aria-hidden="true" /> }
+                @if (item.icon) { <neu-icon-outlet [icon]="item.icon" aria-hidden="true" /> }
                 {{ item.label }}
               </span>
             }

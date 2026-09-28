@@ -1485,4 +1485,21 @@ describe('NeuNavComponent', () => {
     expect((f.componentInstance as any)._flyoutTimer).toBeNull();
     vi.useRealTimers();
   });
+
+  it('renders top-level route and external badges with the neutral fallback', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      { id: 'route-badge', label: 'Updates', icon: 'chevron-right', route: '/updates', badge: '3' },
+      { id: 'external-badge', label: 'Docs', icon: 'external-link', href: 'https://example.com', badge: 'New' },
+      { id: 'disabled-external', label: 'Disabled', icon: 'external-link', href: 'https://example.com', disabled: true },
+    ] satisfies NeuNavItem[]);
+    f.detectChanges();
+    await f.whenStable();
+    const badges = f.nativeElement.querySelectorAll('.neu-nav__item-badge--neutral') as NodeListOf<HTMLElement>;
+    expect([...badges].map((badge) => badge.textContent?.trim())).toEqual(['3', 'New']);
+    const disabled = [...(f.nativeElement.querySelectorAll('a.neu-nav__item') as NodeListOf<HTMLAnchorElement>)]
+      .find((link) => link.textContent?.includes('Disabled'));
+    expect(disabled?.getAttribute('href')).toBe('');
+    expect(disabled?.getAttribute('aria-disabled')).toBe('true');
+  });
 });

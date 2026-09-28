@@ -38,6 +38,22 @@ describe('NeuCarouselComponent', () => {
     expect(fixture.componentInstance.page()).toBe(1);
   });
 
+  it('lets projected item keys pass through and ignores a short swipe', () => {
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2, 3]);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const item = fixture.nativeElement.querySelector('.neu-carousel__item') as HTMLElement;
+    component.onKeydown({ key: 'ArrowRight', target: item, currentTarget: fixture.nativeElement, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+    expect(component.page()).toBe(0);
+    component.onPointerDown(new PointerEvent('pointerdown', { clientX: 100 }));
+    component.onPointerUp(new PointerEvent('pointerup', { clientX: 80 }));
+    expect(component.page()).toBe(0);
+    component.onPointerDown(new PointerEvent('pointerdown', { clientX: 20 }));
+    component.onPointerUp(new PointerEvent('pointerup', { clientX: 100 }));
+    expect(component.page()).toBe(0);
+  });
+
   it('covers carousel labels, edge states, orientation, and dynamic page reconciliation', () => {
     const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
     fixture.componentRef.setInput('items', []); fixture.detectChanges();

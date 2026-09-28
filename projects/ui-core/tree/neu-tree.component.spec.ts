@@ -615,4 +615,124 @@ describe('NeuTreeComponent controlled C6', () => {
     console.log(`N2_C6_INTERACTION_PERFORMANCE:${JSON.stringify({ keyboard100: quantiles(keyboardMs), lazy100: quantiles(lazyMs) })}`);
     fixture.destroy();
   });
+
+  it('rejects malformed and foreign drag payloads and emits only a valid move', () => {
+    const fixture = create();
+    const tree = fixture.componentInstance as unknown as {
+      dragData(key: string): unknown;
+      dropTarget(key: string, position: 'before' | 'inside' | 'after'): unknown;
+      acceptDrop(data: unknown, target: unknown): boolean;
+      onDrop(event: unknown): void;
+    };
+    const moves: unknown[] = [];
+    fixture.componentInstance.nodeMove.subscribe((move) => moves.push(move));
+    const data = tree.dragData('child');
+    const target = tree.dropTarget('root', 'after');
+    expect(tree.acceptDrop(data, target)).toBe(false);
+    fixture.componentRef.setInput('reorderable', true);
+    fixture.detectChanges();
+    for (const invalid of [null, false, 0, {}, { key: 'child' }, { owner: {}, key: 'child' }]) {
+      expect(tree.acceptDrop(invalid, target)).toBe(false);
+    }
+    for (const invalid of [null, false, 0, {}, { key: 'disabled' },
+      { key: 'disabled', position: 'middle' }]) {
+      expect(tree.acceptDrop(data, invalid)).toBe(false);
+    }
+    expect(tree.acceptDrop({ owner: {}, key: 'child' }, target)).toBe(false);
+    expect(tree.acceptDrop(data, tree.dropTarget('child', 'inside'))).toBe(false);
+    tree.onDrop(null);
+    tree.onDrop({ data, targetData: { key: 'disabled', position: 'middle' } });
+    expect(moves).toEqual([]);
+    expect(tree.acceptDrop(data, target)).toBe(true);
+    tree.onDrop({ data, targetData: target });
+    expect(moves).toHaveLength(1);
+    expect(moves[0]).toMatchObject({ sourceKey: 'child', targetKey: 'root', position: 'after' });
+  });
+
+  it('keeps empty-tree focus and virtual scrolling bounded', () => {
+    const fixture = create({ nodes: [], hierarchy: {
+      revision: 1, roots: [], children: [],
+    } });
+    const tree = fixture.componentInstance as unknown as {
+      tabbableKey(): string | null;
+      virtualRange(): { start: number; end: number; total: number };
+      focusIndex(index: number): void;
+      onScroll(event: Event): void;
+    };
+    expect(tree.tabbableKey()).toBeNull();
+    expect(tree.virtualRange()).toEqual({ start: 0, end: 0, total: 0 });
+    tree.focusIndex(9);
+    tree.onScroll(new Event('scroll'));
+    expect(tree.tabbableKey()).toBeNull();
+    fixture.componentRef.setInput('virtualization', { itemSize: 0, viewportHeight: 0, buffer: -1 });
+    fixture.detectChanges();
+    expect(tree.virtualRange()).toEqual({ start: 0, end: 0, total: 0 });
+  });
+
+  it('returns unchecked state for an unknown checkbox key', () => {
+    const fixture = create();
+    const tree = fixture.componentInstance as any;
+    expect(tree.checkboxState('missing')).toBe('unchecked');
+    expect(tree.checkboxAria('missing')).toBe('false');
+  });
+
+  it('ignores retry requests for a relation without an error', () => {
+    const fixture = create();
+    const requests = vi.fn();
+    fixture.componentInstance.childrenRequest.subscribe(requests);
+    (fixture.componentInstance as any).onRetryClick('root', new MouseEvent('click'));
+    expect(requests).not.toHaveBeenCalled();
+  });
+
+  it('keeps nested interactive controls from selecting the enclosing row', () => {
+    const fixture = create({ selection: { mode: 'single', key: null } });
+    const tree = fixture.componentInstance as any;
+    const row = rows(fixture)[0]!;
+    const button = row.querySelector('button')!;
+    const proposals = vi.fn();
+    fixture.componentInstance.selectionChange.subscribe(proposals);
+    tree.onContentClick(tree.visibleNodes()[0], { target: button, currentTarget: row } as unknown as MouseEvent);
+    expect(proposals).not.toHaveBeenCalled();
+    expect(tree.isInteractiveDescendant(button, row)).toBe(true);
+    expect(tree.isInteractiveDescendant(row, row)).toBe(false);
+  });
+
+  it('drops the remembered focus visit when focus leaves the tree', () => {
+    const fixture = create();
+    const tree = fixture.componentInstance as any;
+    tree.onNodeFocus('root');
+    expect(tree.hadTreeFocus).toBe(true);
+    const external = document.createElement('button');
+    tree.onFocusOut(new FocusEvent('focusout', { relatedTarget: external }));
+    expect(tree.hadTreeFocus).toBe(false);
+  });
+
+  it('refuses expansion for unknown and known leaf nodes', () => {
+    const fixture = create();
+    const tree = fixture.componentInstance as any;
+    const proposals = vi.fn();
+    fixture.componentInstance.expandedKeysChange.subscribe(proposals);
+    tree.proposeExpansion('missing', 'keyboard');
+    tree.proposeExpansion('grandchild', 'keyboard');
+    expect(proposals).not.toHaveBeenCalled();
+  });
+
+  it('moves a virtual focus target into view when it falls beyond the window', () => {
+    const fixture = flatTree(Array.from({ length: 10 }, (_, index) => ({ key: String(index), label: `Row ${index}` })));
+    fixture.componentRef.setInput('virtualization', { itemSize: 20, viewportHeight: 20, buffer: 0 });
+    fixture.detectChanges();
+    const tree = fixture.componentInstance as any;
+    tree.focusIndex(8);
+    expect(tree.scrollTop()).toBe(160);
+    expect(tree.activeKey()).toBe('8');
+  });
+
+  it('uses the default virtual buffer when none is configured', () => {
+    const fixture = flatTree(Array.from({ length: 10 }, (_, index) => ({ key: String(index), label: `Row ${index}` })));
+    fixture.componentRef.setInput('virtualization', { itemSize: 20, viewportHeight: 20 });
+    fixture.detectChanges();
+    const tree = fixture.componentInstance as any;
+    tree.scrollTop.set(100);
+    expect(tree.virtualRange()).toEqual({ start: 2, end: 9, total: 10 });
+  });
 });

@@ -22,6 +22,14 @@ describe('NeuPanelComponent', () => {
     expect(fixture.nativeElement.querySelector('.neu-panel__body')).toBeTruthy();
   });
 
+  it('keeps a plain panel expansion request inert', () => {
+    fixture.detectChanges();
+    const changes = vi.spyOn(fixture.componentInstance.collapsedChange, 'emit');
+    fixture.componentInstance.toggle();
+    expect(changes).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.effectiveCollapsed()).toBe(false);
+  });
+
   it('toggles collapsible content, labels and the public collapsed change', () => {
     const component = fixture.componentInstance;
     const emitted = vi.spyOn(component.collapsedChange, 'emit');
@@ -304,10 +312,23 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
+  it('keeps zero-sized scroll tracks and idle pointer movement bounded', async () => {
+    await TestBed.configureTestingModule({ imports: [EnhancedScrollAreaHostComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(EnhancedScrollAreaHostComponent);
+    fixture.detectChanges();
+    const area = fixture.debugElement.children[0].componentInstance as NeuScrollAreaComponent;
+    const viewport = fixture.nativeElement.querySelector('.neu-scroll-area__viewport') as HTMLElement;
+    const bar = fixture.nativeElement.querySelector('.neu-scroll-area__bar--y') as HTMLElement;
+    bar.getBoundingClientRect = () => ({ top: 0, left: 0, width: 0, height: 0 }) as DOMRect;
+    area.onTrackPointerMove('y', { buttons: 0, currentTarget: bar } as unknown as PointerEvent);
+    area.moveBy('y', { currentTarget: bar, clientY: 50 } as unknown as MouseEvent);
+    expect(viewport.scrollTop).toBe(0);
+  });
+
   it('uses browser scrolling APIs and cleans up its ResizeObserver', async () => {
     const observer = { observe: vi.fn(), disconnect: vi.fn() };
     let resizeCallback: ResizeObserverCallback | undefined;
-    const previous = window.ResizeObserver;
+    const previousDescriptor = Object.getOwnPropertyDescriptor(window, 'ResizeObserver');
     class TestResizeObserver {
       observe = observer.observe;
       disconnect = observer.disconnect;
@@ -317,6 +338,7 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     }
     Object.defineProperty(window, 'ResizeObserver', {
       configurable: true,
+      writable: true,
       value: TestResizeObserver,
     });
     await TestBed.configureTestingModule({
@@ -338,6 +360,7 @@ describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
     expect(observer.observe).toHaveBeenCalledWith(viewport);
     fixture.destroy();
     expect(observer.disconnect).toHaveBeenCalled();
-    Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: previous });
+    if (previousDescriptor) Object.defineProperty(window, 'ResizeObserver', previousDescriptor);
+    else Reflect.deleteProperty(window, 'ResizeObserver');
   });
 });

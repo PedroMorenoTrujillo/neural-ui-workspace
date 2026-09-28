@@ -50,6 +50,24 @@ describe('NeuTreeTable 2 pure expansion and focus engine', () => {
     expect(applied).toEqual([1, '1']);
   });
 
+  it('does not duplicate an already expanded exact key', () => {
+    const applied = Object.freeze<readonly (string | number)[]>([1, '1']);
+    const proposal = proposeNeuTreeTableExpansion(applied, '1', false, 'toggle');
+    expect(proposal.next).toEqual([1, '1']);
+    expect(proposal.next).not.toBe(applied);
+  });
+
+  it('returns bounded focus targets for an empty tree and a root without children', () => {
+    const single = project([{ id: 'root' }], ['root']);
+    const root = single.visible[0]!;
+    expect(moveNeuTreeTableFocus(single, root, 'previous')).toBeNull();
+    expect(moveNeuTreeTableFocus(single, root, 'parent')).toBeNull();
+    expect(moveNeuTreeTableFocus(single, root, 'first-child')).toBeNull();
+    const empty = project([], []);
+    expect(moveNeuTreeTableFocus(empty, root, 'first')).toBeNull();
+    expect(moveNeuTreeTableFocus(empty, root, 'last')).toBeNull();
+  });
+
   it('moves over the flattened projection without changing hierarchy state', () => {
     const projection = project(
       [{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }],

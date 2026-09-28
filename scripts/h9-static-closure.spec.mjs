@@ -83,11 +83,11 @@ test('missing graph outputs and bytes fail closed', () => {
   );
 });
 
-test('Button component-only icon dependency must remain external', () => {
+test('Button component-only closure has no Neural Icons package dependency', () => {
   assert.doesNotThrow(() =>
     assertButtonIconBoundary({
       inputs: { 'dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs': {} },
-      outputs: { 'out.js': { imports: [{ path: '@neural-icons/angular', external: true }] } },
+      outputs: { 'out.js': { imports: [] } },
     }),
   );
   assert.throws(
@@ -102,8 +102,8 @@ test('Button component-only icon dependency must remain external', () => {
     () =>
       assertButtonIconBoundary({
         inputs: {},
-        outputs: { 'out.js': { imports: [] } },
+        outputs: { 'out.js': { imports: [{ path: '@neural-icons/angular', external: true }] } },
       }),
-    /was not externalized/,
+    /still imports icon package/,
   );
 });

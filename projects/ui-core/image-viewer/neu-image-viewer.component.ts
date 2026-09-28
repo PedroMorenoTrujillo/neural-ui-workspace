@@ -19,17 +19,17 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { InternalNeuMediaPreviewAdapter } from '@neural-ui/core/internal';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
-import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
-import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
-import { iconRotateCw } from '@neural-icons/core/icons/rotate-cw';
-import { iconFlipHorizontal } from '@neural-icons/core/icons/flip-horizontal';
-import { iconFlipVertical } from '@neural-icons/core/icons/flip-vertical';
-import { iconDownload } from '@neural-icons/core/icons/download';
-import { iconX } from '@neural-icons/core/icons/x';
-import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
-import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconChevronLeft as iconChevronLeft } from '@neural-ui/core/internal';
+import { neuIconChevronRight as iconChevronRight } from '@neural-ui/core/internal';
+import { neuIconRotateCcw as iconRotateCcw } from '@neural-ui/core/internal';
+import { neuIconRotateCw as iconRotateCw } from '@neural-ui/core/internal';
+import { neuIconFlipHorizontal as iconFlipHorizontal } from '@neural-ui/core/internal';
+import { neuIconFlipVertical as iconFlipVertical } from '@neural-ui/core/internal';
+import { neuIconDownload as iconDownload } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
+import { neuIconZoomIn as iconZoomIn } from '@neural-ui/core/internal';
+import { neuIconZoomOut as iconZoomOut } from '@neural-ui/core/internal';
 
 export interface NeuImageViewerItem {
   src: string;
@@ -56,7 +56,7 @@ interface _NeuIvData {
  */
 @Component({
   selector: 'neu-image-viewer-overlay',
-  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NgTemplateOutlet, NeuralIcon],
+  imports: [NeuFocusTrapDirective, NeuModalFocusDirective, NgTemplateOutlet, InternalNeuIconOutletComponent],
   hostDirectives: [NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -81,7 +81,7 @@ interface _NeuIvData {
             [attr.title]="_label('zoomIn')"
             (click)="_zoom(0.25)"
           >
-            <neural-icon [icon]="iconZoomIn" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconZoomIn" [fallbackPath]="iconFallbackPath(iconZoomIn)" [fallbackText]="iconFallbackText(iconZoomIn)" size="1.25rem" />
           </button>
           <button
             type="button"
@@ -90,7 +90,7 @@ interface _NeuIvData {
             [attr.title]="_label('zoomOut')"
             (click)="_zoom(-0.25)"
           >
-            <neural-icon [icon]="iconZoomOut" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconZoomOut" [fallbackPath]="iconFallbackPath(iconZoomOut)" [fallbackText]="iconFallbackText(iconZoomOut)" size="1.25rem" />
           </button>
           @if (_galleryHost) {
             <button
@@ -100,7 +100,7 @@ interface _NeuIvData {
               [attr.title]="_label('rotateLeft')"
               (click)="_rotate(-90)"
             >
-              <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconRotateCcw" [fallbackPath]="iconFallbackPath(iconRotateCcw)" [fallbackText]="iconFallbackText(iconRotateCcw)" size="1.25rem" />
             </button>
             <button
               type="button"
@@ -109,7 +109,7 @@ interface _NeuIvData {
               [attr.title]="_label('rotateRight')"
               (click)="_rotate(90)"
             >
-              <neural-icon [icon]="iconRotateCw" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconRotateCw" [fallbackPath]="iconFallbackPath(iconRotateCw)" [fallbackText]="iconFallbackText(iconRotateCw)" size="1.25rem" />
             </button>
             <button
               type="button"
@@ -118,7 +118,7 @@ interface _NeuIvData {
               [attr.title]="_label('flipHorizontal')"
               (click)="_flipAxis('x')"
             >
-              <neural-icon [icon]="iconFlipHorizontal" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconFlipHorizontal" [fallbackPath]="iconFallbackPath(iconFlipHorizontal)" [fallbackText]="iconFallbackText(iconFlipHorizontal)" size="1.25rem" />
             </button>
             <button
               type="button"
@@ -127,7 +127,7 @@ interface _NeuIvData {
               [attr.title]="_label('flipVertical')"
               (click)="_flipAxis('y')"
             >
-              <neural-icon [icon]="iconFlipVertical" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconFlipVertical" [fallbackPath]="iconFallbackPath(iconFlipVertical)" [fallbackText]="iconFallbackText(iconFlipVertical)" size="1.25rem" />
             </button>
             <a
               class="neu-iv__btn"
@@ -136,7 +136,7 @@ interface _NeuIvData {
               [attr.aria-label]="_label('download')"
               [attr.title]="_label('download')"
             >
-              <neural-icon [icon]="iconDownload" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconDownload" [fallbackPath]="iconFallbackPath(iconDownload)" [fallbackText]="iconFallbackText(iconDownload)" size="1.25rem" />
             </a>
           }
           <button
@@ -146,7 +146,7 @@ interface _NeuIvData {
             [attr.title]="_label('reset')"
             (click)="_resetTransform()"
           >
-            <neural-icon [icon]="iconRotateCcw" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconRotateCcw" [fallbackPath]="iconFallbackPath(iconRotateCcw)" [fallbackText]="iconFallbackText(iconRotateCcw)" size="1.25rem" />
           </button>
           <button
             type="button"
@@ -155,7 +155,7 @@ interface _NeuIvData {
             [attr.title]="_label('close')"
             (click)="_data.close()"
           >
-            <neural-icon [icon]="iconX" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1.25rem" />
           </button>
         </div>
       </div>
@@ -200,7 +200,7 @@ interface _NeuIvData {
           [disabled]="!_canNavigate(-1)"
           (click)="_navigate(-1)"
         >
-          <neural-icon [icon]="iconChevronLeft" size="1.25rem" />
+          <neu-icon-outlet [icon]="iconChevronLeft" [fallbackPath]="iconFallbackPath(iconChevronLeft)" [fallbackText]="iconFallbackText(iconChevronLeft)" size="1.25rem" />
         </button>
         <button
           type="button"
@@ -209,7 +209,7 @@ interface _NeuIvData {
           [disabled]="!_canNavigate(1)"
           (click)="_navigate(1)"
         >
-          <neural-icon [icon]="iconChevronRight" size="1.25rem" />
+          <neu-icon-outlet [icon]="iconChevronRight" [fallbackPath]="iconFallbackPath(iconChevronRight)" [fallbackText]="iconFallbackText(iconChevronRight)" size="1.25rem" />
         </button>
       }
     </div>
@@ -217,6 +217,8 @@ interface _NeuIvData {
   styleUrl: './neu-image-viewer.component.scss',
 })
 export class NeuImageViewerOverlayComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconChevronLeft = iconChevronLeft;
   protected readonly iconChevronRight = iconChevronRight;
   protected readonly iconDownload = iconDownload;

@@ -21,8 +21,8 @@ import {
 import { RouterLink } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconPlus } from '@neural-icons/core/icons/plus';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconPlus as iconPlus } from '@neural-ui/core/internal';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
@@ -121,7 +121,7 @@ export class NeuSpeedDialTriggerDirective {
     NgTemplateOutlet,
     RouterLink,
     NeuBadgeComponent,
-    NeuralIcon,
+    InternalNeuIconOutletComponent,
     NeuTooltipDirective,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -254,10 +254,10 @@ export class NeuSpeedDialTriggerDirective {
             [ngTemplateOutletContext]="triggerContext()"
           />
         } @else {
-          <neural-icon
+          <neu-icon-outlet
             class="neu-speed-dial__trigger-icon"
             [class.neu-speed-dial__trigger-icon--rotate]="rotateTrigger() && isOpen()"
-            [icon]="iconPlus"
+            [icon]="iconPlus" [fallbackPath]="iconFallbackPath(iconPlus)"
             size="1.35rem"
             aria-hidden="true"
           />
@@ -267,7 +267,7 @@ export class NeuSpeedDialTriggerDirective {
 
     <ng-template #defaultItem let-item let-index="index">
       @if (item.icon) {
-        <neural-icon [icon]="item.icon" size="1.2rem" aria-hidden="true" />
+        <neu-icon-outlet [icon]="item.icon" [fallbackPath]="iconFallbackPath(item.icon)" size="1.2rem" aria-hidden="true" />
       }
       <span class="neu-speed-dial__label">{{ item.label }}</span>
       @if (item.badge != null) {
@@ -278,6 +278,7 @@ export class NeuSpeedDialTriggerDirective {
   styleUrl: './neu-speed-dial.component.scss',
 })
 export class NeuSpeedDialComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconPlus = iconPlus;
   private readonly platformId = inject(PLATFORM_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);

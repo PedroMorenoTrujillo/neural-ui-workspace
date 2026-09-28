@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NEURAL_TIME_ZONE } from '@neural-ui/core/foundation';
 import { vi } from 'vitest';
@@ -35,7 +35,7 @@ describe('NeuCalendarComponent', () => {
   it('projects the event template in the calendar views', async () => {
     @Component({
       imports: [NeuCalendarComponent, NeuCalendarEventDirective],
-      template: `<neu-calendar [events]="events" selectedDate="2026-05-14"
+       template: `<neu-calendar [events]="events" [view]="view()" selectedDate="2026-05-14"
         ><ng-template neuCalendarEvent let-event let-view="view"
           >CUSTOM:{{ view }}:{{ event.title }}</ng-template
         ></neu-calendar
@@ -43,6 +43,7 @@ describe('NeuCalendarComponent', () => {
     })
     class Host {
       events = EVENTS;
+      view = signal<'month' | 'week'>('month');
     }
     await TestBed.resetTestingModule()
       .configureTestingModule({ providers: [provideZonelessChangeDetection()], imports: [Host] })
@@ -50,6 +51,9 @@ describe('NeuCalendarComponent', () => {
     const host = TestBed.createComponent(Host);
     host.detectChanges();
     expect(host.nativeElement.textContent).toContain('CUSTOM:month:Kickoff');
+    host.componentInstance.view.set('week');
+    host.detectChanges();
+    expect(host.nativeElement.textContent).toContain('CUSTOM:week:Kickoff');
   });
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -875,5 +879,24 @@ describe('NeuCalendarComponent', () => {
     await fixture.whenStable();
 
     expect(fixture.nativeElement.querySelector('.neu-calendar__header')).toBeNull();
+  });
+
+  it('shows event descriptions in agenda view and accepts the literal Space key', () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('view', 'agenda');
+    fixture.componentRef.setInput('events', [{
+      id: 'notes', title: 'Planning', start: '2026-05-14T09:00:00', description: 'Bring notes',
+    }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Bring notes');
+    const space = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+    fixture.componentInstance.onDayKeydown(space, new Date('2026-05-14'));
+    expect(space.defaultPrevented).toBe(true);
+  });
+
+  it('uses the current time for an invalid event date', () => {
+    const fixture = setup();
+    const date = (fixture.componentInstance as any).coerceEventDate('not-a-date') as Date;
+    expect(Number.isFinite(date.getTime())).toBe(true);
   });
 });

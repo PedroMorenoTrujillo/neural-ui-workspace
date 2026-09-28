@@ -188,6 +188,45 @@ describe('NeuSliderComponent', () => {
     expect(document.activeElement).not.toBe(thumbs[1]);
   });
 
+  it('supports range page, arrow and boundary keys with bounded proposals', () => {
+    const { fixture, component } = mount({ value: [20, 80] as const, step: 10,
+      minStepsBetweenThumbs: 1 });
+    const thumb = fixture.nativeElement.querySelector('[role="slider"]') as HTMLElement;
+    const press = (key: string) => thumb.dispatchEvent(new KeyboardEvent('keydown', {
+      key, bubbles: true, cancelable: true,
+    }));
+    press('PageUp');
+    expect(component.value()).toEqual([70, 80]);
+    press('PageDown');
+    expect(component.value()).toEqual([0, 80]);
+    press('ArrowRight');
+    expect(component.value()).toEqual([10, 80]);
+    press('ArrowLeft');
+    expect(component.value()).toEqual([0, 80]);
+    press('ArrowUp');
+    expect(component.value()).toEqual([10, 80]);
+    press('ArrowDown');
+    expect(component.value()).toEqual([0, 80]);
+    press('End');
+    expect(component.value()).toEqual([70, 80]);
+    press('Home');
+    expect(component.value()).toEqual([0, 80]);
+    press('Delete');
+    expect(component.value()).toEqual([0, 80]);
+  });
+
+  it('retains focus within a range and emits touch when leaving the whole control', () => {
+    const { fixture, component } = mount({ value: [20, 80] as const });
+    const wrap = fixture.nativeElement.querySelector('.neu-slider__track-wrap') as HTMLElement;
+    const thumbs = wrap.querySelectorAll('[role="slider"]') as NodeListOf<HTMLElement>;
+    const touches = vi.fn();
+    component.touch.subscribe(touches);
+    thumbs[0].dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: thumbs[1] }));
+    expect(touches).not.toHaveBeenCalled();
+    thumbs[1].dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body }));
+    expect(touches).toHaveBeenCalledTimes(1);
+  });
+
   it('normalizes an invalid external tuple only for view, then emits a canonical user edit', () => {
     const { fixture, component } = mount({ value: [90, 10] as const, step: 10 });
     const changes = vi.fn();
@@ -232,5 +271,149 @@ describe('NeuSliderComponent', () => {
     expect(component.value()).toBe(45);
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
     expect(component.value()).toBe(40);
+  });
+
+  it('normalizes non-finite bounds, step and gap without changing the supplied model', () => {
+    const { component, fixture } = mount({
+      value: [Number.NaN, 200] as const,
+      minValue: Number.NaN,
+      maxValue: Number.POSITIVE_INFINITY,
+      step: 0,
+      minStepsBetweenThumbs: Number.NaN,
+      showValue: true,
+    });
+    expect(component.resolvedMin()).toBe(0);
+    expect(component.resolvedMax()).toBe(100);
+    expect(component.resolvedStep()).toBe(1);
+    expect(component.resolvedGap()).toBe(0);
+    expect(component.value()).toEqual([Number.NaN, 200]);
+    expect(fixture.nativeElement.textContent).toContain('100');
+
+    fixture.componentRef.setInput('minValue', 20);
+    fixture.componentRef.setInput('maxValue', 10);
+    fixture.componentRef.setInput('minStepsBetweenThumbs', 500);
+    fixture.detectChanges();
+    expect(component.resolvedMax()).toBe(20);
+    expect(component.resolvedGap()).toBe(0);
+    expect(component.rangeThumbPercent(0)).toBe(0);
+  });
+
+  it('ends a range pointer drag on cancellation and keeps the selected thumb stable', () => {
+    const { fixture, component } = mount({ value: [20, 80] as const, step: 10 });
+    const wrap = fixture.nativeElement.querySelector('.neu-slider__track-wrap') as HTMLElement;
+    vi.spyOn(wrap, 'getBoundingClientRect').mockReturnValue({
+      left: 0, right: 100, top: 0, bottom: 20, width: 100, height: 20,
+    } as DOMRect);
+    const down = pointer('pointerdown', 7);
+    Object.defineProperty(down, 'clientX', { value: 50 });
+    wrap.dispatchEvent(down);
+    const cancelled = pointer('pointercancel', 7);
+    wrap.dispatchEvent(cancelled);
+    const staleMove = pointer('pointermove', 7);
+    Object.defineProperty(staleMove, 'clientX', { value: 90 });
+    wrap.dispatchEvent(staleMove);
+    expect(component.value()).toEqual([50, 80]);
+
+    const upperDown = pointer('pointerdown', 8);
+    Object.defineProperty(upperDown, 'clientX', { value: 90 });
+    wrap.dispatchEvent(upperDown);
+    expect(component.value()).toEqual([50, 90]);
+    wrap.dispatchEvent(pointer('lostpointercapture', 8));
+  });
+
+  it('renders the optional scalar value label when requested', () => {
+    const { fixture } = mount({ value: 35, showValue: true });
+    expect(fixture.nativeElement.textContent).toContain('35');
+  });
+
+  it('uses zero percent when the scalar track has no numeric span', () => {
+    const { component } = mount({ value: 5, minValue: 5, maxValue: 5 });
+    expect(component.fillPercent()).toBe(0);
+  });
+
+  it('rejects nonfinite scalar and range candidates without writing the model', () => {
+    const scalar = mount({ value: 25 });
+    (scalar.component as any).commit(Number.NaN);
+    expect(scalar.component.value()).toBe(25);
+    const range = mount({ value: [20, 80] as const });
+    (range.component as any).commitRange(0, Number.POSITIVE_INFINITY);
+    expect(range.component.value()).toEqual([20, 80]);
+  });
+
+  it('blocks range keyboard and pointer changes while disabled or readonly', () => {
+    const { fixture, component } = mount({ value: [20, 80] as const, disabled: true });
+    const key = new KeyboardEvent('keydown', { key: 'End', cancelable: true });
+    component.onRangeKeyDown(0, key);
+    expect(key.defaultPrevented).toBe(false);
+    const down = pointer('pointerdown');
+    component.onRangePointerDown(down);
+    expect(down.defaultPrevented).toBe(true);
+    fixture.componentRef.setInput('disabled', false);
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    const readonlyKey = new KeyboardEvent('keydown', { key: 'End', cancelable: true });
+    component.onRangeKeyDown(0, readonlyKey);
+    expect(readonlyKey.defaultPrevented).toBe(true);
+    expect(component.value()).toEqual([20, 80]);
+  });
+
+  it('ignores a pointer move from another pointer and resets active drag state', () => {
+    const { component } = mount({ value: [20, 80] as const });
+    (component as any).activePointerId = 1;
+    component.onRangePointerMove(pointer('pointermove', 2));
+    expect(component.value()).toEqual([20, 80]);
+    component.reset();
+    expect((component as any).activePointerId).toBeNull();
+  });
+
+  it('commits the scalar End key and releases only the active pointer', () => {
+    const { component } = mount({ value: 25 });
+    component.onKeyDown(new KeyboardEvent('keydown', { key: 'End', cancelable: true }));
+    expect(component.value()).toBe(100);
+    component.onPointerDown(pointer('pointerdown', 7));
+    component.onPointerEnd(pointer('pointerup', 8));
+    expect((component as any).activePointerId).toBe(7);
+    component.onPointerEnd(pointer('pointerup', 7));
+    expect((component as any).activePointerId).toBeNull();
+  });
+
+  it('keeps a started range drag inert after readonly becomes applied', () => {
+    const { fixture, component } = mount({ value: [20, 80] as const });
+    (component as any).activePointerId = 3;
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    component.onRangePointerMove(pointer('pointermove', 3));
+    expect(component.value()).toEqual([20, 80]);
+  });
+
+  it('releases an owned range pointer capture and focuses the last active thumb', () => {
+    const { component } = mount({ value: [20, 80] as const });
+    const wrap = document.createElement('div');
+    const releasePointerCapture = vi.fn();
+    Object.assign(wrap, { hasPointerCapture: () => true, releasePointerCapture });
+    (component as any).activePointerId = 7;
+    (component as any).lastFocusedThumb = 1;
+    component.onRangePointerEnd({ pointerId: 7, currentTarget: wrap } as unknown as PointerEvent);
+    expect(releasePointerCapture).toHaveBeenCalledExactlyOnceWith(7);
+    expect((component as any).activePointerId).toBeNull();
+    const thumb = (component as any).rangeThumbs()[1]!.nativeElement as HTMLElement;
+    const focus = vi.spyOn(thumb, 'focus');
+    component.focus({ preventScroll: true });
+    expect(focus).toHaveBeenCalledOnce();
+    focus.mockRestore();
+  });
+
+  it('keeps vertical and horizontal pointer values finite on zero-area tracks', () => {
+    const { fixture, component } = mount({ value: [20, 80] as const, orientation: 'vertical' });
+    const target = document.createElement('div');
+    target.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0, right: 0, bottom: 0,
+      width: 0, height: 0, toJSON: () => ({}),
+    } as DOMRect);
+    const event = { currentTarget: target, clientX: 0, clientY: 0 } as unknown as PointerEvent;
+    expect(Number.isFinite((component as any).pointerValue(event))).toBe(true);
+    fixture.componentRef.setInput('orientation', 'horizontal');
+    fixture.detectChanges();
+    expect(Number.isFinite((component as any).pointerValue(event))).toBe(true);
   });
 });

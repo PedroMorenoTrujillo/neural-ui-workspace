@@ -196,4 +196,30 @@ describe('NeuRatingComponent', () => {
     expect(component.resolvedStep()).toBe(1);
     expect(buttons()).toHaveLength(5);
   });
+
+  it('falls back from a nonfinite star count and previews only editable hover values', () => {
+    const { fixture, component, buttons } = mount({ stars: Number.NaN });
+    expect(buttons()).toHaveLength(5);
+    component.onHover(3);
+    expect(component.getFill(3)).toBe('currentColor');
+    component.onLeave();
+    expect(component.getFill(3)).toBe('transparent');
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    component.onHover(4);
+    expect(component.getFill(4)).toBe('transparent');
+  });
+
+  it('supports upward and backward keyboard movement while leaving other keys alone', () => {
+    const { component, buttons } = mount({ value: 3 });
+    const ignored = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    component.onKeyDown(3, ignored);
+    expect(ignored.defaultPrevented).toBe(false);
+    buttons()[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(2);
+    buttons()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(1);
+    component.focus();
+    expect(document.activeElement).toBe(buttons()[0]);
+  });
 });

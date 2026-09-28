@@ -292,6 +292,41 @@ describe('NeuTabsComponent N2-021', () => {
     expect(tabs[1].tabIndex).toBe(0);
   });
 
+  it('starts keyboard focus from the first enabled tab when the current key is absent', () => {
+    const { fixture, component } = controlledFixture();
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    (component as unknown as { onTabKeydown(event: KeyboardEvent, id: string): void })
+      .onTabKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 'missing');
+    expect(document.activeElement).toBe(tabs[1]);
+    const unrelated = new KeyboardEvent('keydown', { key: 'PageDown', cancelable: true });
+    (component as unknown as { onTabKeydown(event: KeyboardEvent, id: string): void })
+      .onTabKeydown(unrelated, 'preview');
+    expect(unrelated.defaultPrevented).toBe(false);
+  });
+
+  it('keeps keyboard navigation inert when every tab is disabled', () => {
+    const { fixture, host, component } = controlledFixture();
+    host.tabs.set([{ id: 'api', label: 'API', disabled: true }]);
+    fixture.detectChanges();
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true });
+    (component as unknown as { onTabKeydown(event: KeyboardEvent, id: string): void })
+      .onTabKeydown(event, 'api');
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('reveals clipped tabs at either edge of the navigation strip', () => {
+    const { fixture } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    vi.spyOn(nav, 'getBoundingClientRect').mockReturnValue({ left: 0, right: 100 } as DOMRect);
+    vi.spyOn(tabs[1], 'getBoundingClientRect').mockReturnValue({ left: 110, right: 130 } as DOMRect);
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(nav.scrollLeft).toBe(30);
+    vi.spyOn(tabs[0], 'getBoundingClientRect').mockReturnValue({ left: -20, right: 20 } as DOMRect);
+    tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(nav.scrollLeft).toBe(10);
+  });
+
   it('supports Home/End and skips disabled tabs', () => {
     const { fixture } = controlledFixture();
     const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
@@ -315,6 +350,45 @@ describe('NeuTabsComponent N2-021', () => {
     tabs[0].focus();
     tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     expect(document.activeElement).toBe(tabs[2]);
+  });
+
+  it('wraps left arrow focus in LTR and advances left arrow focus in RTL', () => {
+    const { fixture } = controlledFixture();
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[1]);
+    fixture.nativeElement.querySelector('neu-tabs').setAttribute('dir', 'rtl');
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[1]);
+  });
+
+  it('ignores invalid drag starts, unrelated pointers and movement below the drag threshold', () => {
+    const { fixture, component, host } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tab = fixture.nativeElement.querySelector('.neu-tabs__tab') as HTMLElement;
+    const capture = vi.fn();
+    const release = vi.fn();
+    Object.assign(nav, { setPointerCapture: capture, hasPointerCapture: () => true,
+      releasePointerCapture: release });
+    const start = (pointerType: string, button: number, target: HTMLElement) =>
+      component.startNavDrag({ pointerType, button, pointerId: 4, clientX: 100,
+        currentTarget: nav, target } as unknown as PointerEvent);
+    start('mouse', 2, nav);
+    start('touch', 0, tab);
+    expect(capture).not.toHaveBeenCalled();
+    start('touch', 0, nav);
+    component.moveNavDrag({ pointerId: 9, clientX: 50, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
+    component.moveNavDrag({ pointerId: 4, clientX: 97, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
+    expect(nav.scrollLeft).toBe(0);
+    component.endNavDrag({ pointerId: 9, currentTarget: nav } as unknown as PointerEvent);
+    expect(release).not.toHaveBeenCalled();
+    component.endNavDrag({ pointerId: 4, currentTarget: nav } as unknown as PointerEvent);
+    expect(release).toHaveBeenCalledWith(4);
+    expect(host.proposals).toEqual([]);
   });
 
   it('ignores modified arrow shortcuts', () => {

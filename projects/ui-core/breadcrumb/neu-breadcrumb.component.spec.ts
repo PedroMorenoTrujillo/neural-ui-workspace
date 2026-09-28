@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { NeuBreadcrumbComponent, NeuBreadcrumbItem } from './neu-breadcrumb.component';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
 
 const ITEMS: NeuBreadcrumbItem[] = [
   { label: 'Inicio', route: '/' },
@@ -25,7 +27,7 @@ describe('NeuBreadcrumbComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideNeuralIcons(iconChevronRight)],
     }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
     host = fixture.componentInstance;
@@ -100,5 +102,20 @@ describe('NeuBreadcrumbComponent', () => {
     await df.whenStable();
     const spans = df.nativeElement.querySelectorAll('span.neu-breadcrumb__link');
     expect(spans.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('renders an icon in route, external, plain and current breadcrumb items', async () => {
+    const df = TestBed.createComponent(NeuBreadcrumbComponent);
+    df.componentRef.setInput('items', [
+      { label: 'Home', route: '/', icon: 'chevron-right' },
+      { label: 'Docs', url: 'https://example.com', icon: 'chevron-right' },
+      { label: 'Section', icon: 'chevron-right' },
+      { label: 'Current', icon: 'chevron-right' },
+    ] satisfies NeuBreadcrumbItem[]);
+    df.detectChanges();
+    await df.whenStable();
+    const items = df.nativeElement.querySelectorAll('.neu-breadcrumb__item') as NodeListOf<HTMLElement>;
+    expect(items).toHaveLength(4);
+    expect([...items].every((item) => item.querySelector('neu-icon-outlet') !== null)).toBe(true);
   });
 });

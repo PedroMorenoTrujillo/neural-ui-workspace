@@ -18,10 +18,12 @@ import type {
   NeuTreeLoadedRelation,
   NeuTreeTableColumn,
   NeuTreeTableExpandedKeysChange,
+  NeuTreeTableEditingOptions,
   NeuTreeTableFeatureError,
   NeuTreeTableFilterOptions,
   NeuTreeTableHierarchy,
   NeuTreeTableLayoutState,
+  NeuTreeTableInteractionOptions,
   NeuTreeTableSelection,
   NeuTreeTableSelectionChange,
   NeuTreeTableSelectionOptions,
@@ -103,6 +105,8 @@ const emptyLayout: NeuTreeTableLayoutState = {
         [expandedKeys]="expanded()"
         [selection]="selection()"
         [selectionOptions]="selectionOptions()"
+        [editingOptions]="editingOptions()"
+        [interactionOptions]="interactionOptions()"
         [query]="query()"
         [sortOptions]="sortOptions"
         [filterOptions]="filterOptions()"
@@ -147,6 +151,10 @@ class HostComponent {
   readonly layout = signal(emptyLayout);
   readonly selection = signal<NeuTreeTableSelection<string>>({ kind: 'keys', keys: [] });
   readonly selectionOptions = signal<NeuTreeTableSelectionOptions<Row>>({ mode: 'none' });
+  readonly editingOptions = signal<NeuTreeTableEditingOptions<Row, string, Field>>({ mode: 'none' });
+  readonly interactionOptions = signal<NeuTreeTableInteractionOptions>({
+    navigation: 'row', wrapFocus: false, announceChanges: false, contextMenuAction: false,
+  });
   readonly query = signal<NeuTreeTableQuery<Field>>({
     page: 0,
     pageSize: 25,
@@ -220,6 +228,143 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
       imports: [HostComponent],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
+  });
+
+  it('tests explicit search and filter drafts against controlled parent query changes', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.filterOptions.set({ ...fixture.componentInstance.filterOptions(),
+      surfaces: ['row'], commit: 'explicit' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as {
+        searchValue(): string;
+        filterValue(column: NeuTreeTableColumn<Row, Field>): string;
+        onSearchInput(event: Event): void;
+        onSearchCommit(event: Event): void;
+        onFilterInput(column: NeuTreeTableColumn<Row, Field>, event: Event): void;
+        onFilterCommit(column: NeuTreeTableColumn<Row, Field>, event: Event): void;
+      };
+    const search = document.createElement('input');
+    search.value = 'Alpha';
+    renderer.onSearchInput({ target: search } as unknown as Event);
+    expect(renderer.searchValue()).toBe('Alpha');
+    renderer.onSearchCommit({ target: search } as unknown as Event);
+    expect(fixture.componentInstance.queryChanges().at(-1)).toMatchObject({ search: 'Alpha', page: 0 });
+    expect(search.value).toBe('');
+
+    search.value = 'Stale';
+    renderer.onSearchInput({ target: search } as unknown as Event);
+    fixture.componentInstance.query.update((current) => ({ ...current, search: 'Parent' }));
+    fixture.detectChanges();
+    const proposals = fixture.componentInstance.queryChanges().length;
+    renderer.onSearchCommit({ target: search } as unknown as Event);
+    expect(fixture.componentInstance.queryChanges()).toHaveLength(proposals);
+    expect(search.value).toBe('Parent');
+
+    const column = columns[0]!;
+    const field = document.createElement('input');
+    field.value = 'Beta';
+    renderer.onFilterInput(column, { target: field } as unknown as Event);
+    expect(renderer.filterValue(column)).toBe('Beta');
+    renderer.onFilterCommit(column, { target: field } as unknown as Event);
+    expect(fixture.componentInstance.queryChanges().at(-1)?.filters)
+      .toEqual({ kind: 'condition', field: 'name', rule: 'contains', value: 'Beta' });
+    expect(field.value).toBe('');
+
+    fixture.componentInstance.query.update((current) => ({ ...current,
+      filters: { kind: 'condition', field: 'name', rule: 'contains', value: 'Original' },
+    }));
+    fixture.detectChanges();
+    field.value = 'Stale';
+    renderer.onFilterInput(column, { target: field } as unknown as Event);
+    fixture.componentInstance.query.update((current) => ({ ...current,
+      filters: { kind: 'condition', field: 'name', rule: 'contains', value: 42 },
+    }));
+    fixture.detectChanges();
+    const filterProposals = fixture.componentInstance.queryChanges().length;
+    renderer.onFilterCommit(column, { target: field } as unknown as Event);
+    expect(fixture.componentInstance.queryChanges()).toHaveLength(filterProposals);
+    expect(field.value).toBe('42');
+  });
+
+  it('projects sortable headers and rejects sorting without a declared sort field', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as {
+        ariaSort(column: NeuTreeTableColumn<Row, Field>): string | null;
+        sortPriority(column: NeuTreeTableColumn<Row, Field>): number | null;
+        onSort(column: NeuTreeTableColumn<Row, Field>): void;
+      };
+    const plain: NeuTreeTableColumn<Row, Field> = { id: 'plain', header: 'Plain', field: 'name' };
+    expect(renderer.ariaSort(plain)).toBeNull();
+    expect(renderer.sortPriority(plain)).toBeNull();
+    renderer.onSort(plain);
+    expect(fixture.componentInstance.queryChanges()).toEqual([]);
+    expect(renderer.ariaSort(columns[0]!)).toBe('none');
+    renderer.onSort(columns[0]!);
+    expect(fixture.componentInstance.queryChanges().at(-1)?.sort)
+      .toEqual([{ field: 'name', direction: 'asc' }]);
+    fixture.componentInstance.query.update((current) => ({ ...current,
+      sort: [{ field: 'name', direction: 'desc' }],
+    }));
+    fixture.detectChanges();
+    expect(renderer.ariaSort(columns[0]!)).toBe('descending');
+    expect(renderer.sortPriority(columns[0]!)).toBe(1);
+  });
+
+  it('bounds index, key and offset scrolling to the applied visible tree', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as {
+        scrollToTarget(target: { kind: 'offset'; offset: number; behavior?: ScrollBehavior } |
+          { kind: 'index'; index: number; behavior?: ScrollBehavior } |
+          { kind: 'node'; key: string; behavior?: ScrollBehavior }): void;
+      };
+    const viewport = fixture.nativeElement.querySelector('.neu-tree-table2__viewport') as HTMLElement;
+    renderer.scrollToTarget({ kind: 'offset', offset: 15 });
+    expect(viewport.scrollTop).toBe(3);
+    renderer.scrollToTarget({ kind: 'offset', offset: Number.NaN });
+    expect(viewport.scrollTop).toBe(3);
+    renderer.scrollToTarget({ kind: 'index', index: 1 });
+    expect(viewport.scrollTop).toBe(1);
+    const previous = viewport.scrollTop;
+    renderer.scrollToTarget({ kind: 'index', index: -1 });
+    renderer.scrollToTarget({ kind: 'index', index: 99 });
+    renderer.scrollToTarget({ kind: 'node', key: 'unknown' });
+    expect(viewport.scrollTop).toBe(previous);
+    renderer.scrollToTarget({ kind: 'node', key: 'b' });
+    expect(viewport.scrollTop).toBe(1);
+  });
+
+  it('focuses first, last and keyed rows while ignoring an unknown key', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as {
+        focusTarget(target: { kind: 'first' | 'last' } | { kind: 'node'; key: string }): void;
+      };
+    renderer.focusTarget({ kind: 'first' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:a');
+    renderer.focusTarget({ kind: 'last' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:c');
+    renderer.focusTarget({ kind: 'node', key: 'b' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:b');
+    renderer.focusTarget({ kind: 'node', key: 'missing' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(activeToken()).toBe('string:b');
   });
 
   it('renders native treegrid semantics, depth-first applied expansion and typed templates', async () => {
@@ -1058,5 +1203,446 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     filter.dispatchEvent(new Event('change', { bubbles: true }));
     await fixture.whenStable();
     expect(host.queryChanges()).toHaveLength(1);
+  });
+
+  it.each([
+    ['string', 'Alpha', 'Alpha'],
+    ['number', 0, 0],
+    ['boolean', false, 'false'],
+    ['bigint', 7n, '7'],
+    ['null', null, null],
+    ['undefined', undefined, null],
+    ['object', { nested: true }, null],
+  ])('presents %s field values without coercing unsupported domain data', (_kind, value, expected) => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as { present(value: unknown, column: unknown): unknown };
+    expect(renderer.present({ name: value }, { id: 'name', header: 'Name', field: 'name' }))
+      .toBe(expected);
+  });
+
+  it('resolves row and cell events only inside the current applied tree', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        nodeFromEvent(event: Event): { key: string } | null;
+        columnFromEvent(event: Event): { id: string } | null;
+      };
+    const eventAt = (target: EventTarget) => {
+      const event = new Event('probe');
+      Object.defineProperty(event, 'target', { value: target });
+      return event;
+    };
+    const actual = row(native, 'string:a');
+    const cell = actual.querySelector<HTMLElement>('td[data-column-id="name"]')!;
+    expect(renderer.nodeFromEvent(eventAt(cell))?.key).toBe('a');
+    expect(renderer.columnFromEvent(eventAt(cell))?.id).toBe('name');
+    expect(renderer.nodeFromEvent(eventAt(document.createElement('span')))).toBeNull();
+    expect(renderer.columnFromEvent(eventAt(document.createElement('span')))).toBeNull();
+
+    const outside = actual.cloneNode(true) as HTMLTableRowElement;
+    expect(renderer.nodeFromEvent(eventAt(outside))).toBeNull();
+    expect(renderer.columnFromEvent(eventAt(outside.querySelector('td')!))).toBeNull();
+    const priorIndex = actual.dataset['logicalIndex'];
+    const priorToken = actual.dataset['nodeKey'];
+    actual.dataset['logicalIndex'] = '-1';
+    expect(renderer.nodeFromEvent(eventAt(cell))).toBeNull();
+    actual.dataset['logicalIndex'] = '999';
+    expect(renderer.nodeFromEvent(eventAt(cell))).toBeNull();
+    actual.dataset['logicalIndex'] = priorIndex!;
+    actual.dataset['nodeKey'] = 'stale';
+    expect(renderer.nodeFromEvent(eventAt(cell))).toBeNull();
+    actual.dataset['nodeKey'] = priorToken!;
+  });
+
+  it('uses declared row direction and falls back to computed style for detached targets', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as { rowDirection(target: EventTarget | null): 'ltr' | 'rtl' };
+    const actual = row(fixture.nativeElement, 'string:a');
+    expect(renderer.rowDirection(actual)).toBe('ltr');
+    fixture.componentInstance.direction.set('rtl');
+    fixture.detectChanges();
+    expect(renderer.rowDirection(actual)).toBe('rtl');
+    const detached = document.createElement('span');
+    detached.style.direction = 'rtl';
+    expect(renderer.rowDirection(detached)).toBe('rtl');
+    expect(renderer.rowDirection(null)).toBe('ltr');
+  });
+
+  it('keeps absent edit sessions inert and uses native smooth scrolling when requested', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        updateEditDraft(columnId: string, value: unknown): void;
+        commitEdit(columnId: string | null): void;
+        cancelEdit(reason: 'escape' | 'gesture'): void;
+        scrollToTarget(target: { kind: 'offset'; offset: number; behavior?: ScrollBehavior }): void;
+      };
+    const viewport = fixture.nativeElement.querySelector('.neu-tree-table2__viewport') as HTMLElement;
+    const scrollTo = vi.fn();
+    viewport.scrollTo = scrollTo;
+    renderer.updateEditDraft('name', 'unapplied');
+    renderer.commitEdit('name');
+    renderer.cancelEdit('escape');
+    renderer.scrollToTarget({ kind: 'offset', offset: 2, behavior: 'smooth' });
+    expect(scrollTo).toHaveBeenCalledOnce();
+    expect(scrollTo).toHaveBeenCalledWith({ top: expect.any(Number), behavior: 'smooth' });
+    expect(fixture.componentInstance.rows()).toBe(rows);
+  });
+
+  it.each([
+    ['without modifier', undefined, false, false],
+    ['with Shift', { shiftKey: true }, true, false],
+    ['with Control', { ctrlKey: true }, false, true],
+    ['with Meta', { metaKey: true }, false, true],
+  ])('preserves selection intent %s without changing the applied selection',
+    (_label, init, shiftKey, platformModifier) => {
+      const fixture = TestBed.createComponent(HostComponent);
+      fixture.detectChanges();
+      const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+        .componentInstance as unknown as {
+          projection(): { visible: readonly unknown[] };
+          proposeSelection(node: unknown, source: 'keyboard', event?: KeyboardEvent): void;
+          selectionIntent: { subscribe(next: (value: { shiftKey: boolean; platformModifier: boolean }) => void): void };
+        };
+      const intents: { shiftKey: boolean; platformModifier: boolean }[] = [];
+      renderer.selectionIntent.subscribe((value) => intents.push(value));
+      renderer.proposeSelection(renderer.projection().visible[0], 'keyboard',
+        init === undefined ? undefined : new KeyboardEvent('keydown', init));
+      expect(intents).toHaveLength(1);
+      expect(intents[0]).toMatchObject({ shiftKey, platformModifier });
+      expect(fixture.componentInstance.selection()).toEqual({ kind: 'keys', keys: [] });
+    });
+
+  it('emits the radio source from its rendered native selection control', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.selectionOptions.set({
+      mode: 'single', indicator: 'radio', selectOnRowClick: false, allowClear: true,
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const indicator = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+      'input[data-selection-indicator][type="radio"]',
+    )!;
+    expect(indicator).not.toBeNull();
+    indicator.click();
+    expect(fixture.componentInstance.selectionChanges()).toHaveLength(1);
+    expect(fixture.componentInstance.selectionChanges()[0]?.source).toBe('radio');
+    expect(fixture.componentInstance.selection()).toEqual({ kind: 'keys', keys: [] });
+  });
+
+  it('treats absent filter metadata and an immediate search commit as no-ops', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        filterValue(column: unknown): string;
+        onFilterInput(column: unknown, event: Event): void;
+        onSearchCommit(event: Event): void;
+        commitFilter(column: unknown, value: string, target: HTMLInputElement, base: unknown): void;
+      };
+    const unfiltered = { id: 'plain', header: 'Plain', field: 'name' };
+    const input = document.createElement('input');
+    input.value = 'ignored';
+    expect(renderer.filterValue(unfiltered)).toBe('');
+    renderer.onFilterInput(unfiltered, { target: input } as unknown as Event);
+    renderer.onSearchCommit({ target: input } as unknown as Event);
+    renderer.commitFilter(unfiltered, 'ignored', input, null);
+    expect(fixture.componentInstance.queryChanges()).toEqual([]);
+    expect(input.value).toBe('ignored');
+  });
+
+  it('debounces repeated search edits to the latest proposal', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.filterOptions.set({
+      surfaces: ['row'], globalFields: ['name'], predicates: {}, debounceMs: 15,
+      commit: 'immediate',
+    });
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as { onSearchInput(event: Event): void };
+    const input = document.createElement('input');
+    input.value = 'Al';
+    renderer.onSearchInput({ target: input } as unknown as Event);
+    input.value = 'Alpha';
+    renderer.onSearchInput({ target: input } as unknown as Event);
+    await new Promise((resolve) => setTimeout(resolve, 35));
+    expect(fixture.componentInstance.queryChanges()).toHaveLength(1);
+    expect(fixture.componentInstance.queryChanges()[0]?.search).toBe('Alpha');
+    expect(fixture.componentInstance.query().search).toBe('');
+  });
+
+  it('debounces repeated field edits to one controlled filter proposal', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.filterOptions.set({
+      surfaces: ['row'], globalFields: [], predicates: {}, debounceMs: 15,
+      commit: 'immediate',
+    });
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as { onFilterInput(column: unknown, event: Event): void };
+    const input = document.createElement('input');
+    input.value = 'Al';
+    renderer.onFilterInput(columns[0], { target: input } as unknown as Event);
+    input.value = 'Alpha';
+    renderer.onFilterInput(columns[0], { target: input } as unknown as Event);
+    await new Promise((resolve) => setTimeout(resolve, 35));
+    expect(fixture.componentInstance.queryChanges()).toHaveLength(1);
+    expect(fixture.componentInstance.queryChanges()[0]?.filters).toMatchObject({
+      kind: 'condition', field: 'name', value: 'Alpha',
+    });
+  });
+
+  it('suppresses a search commit equal to the applied query', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        commitSearch(value: string, target: HTMLInputElement, base: string): void;
+      };
+    const input = document.createElement('input');
+    renderer.commitSearch('', input, '');
+    expect(fixture.componentInstance.queryChanges()).toEqual([]);
+    expect(input.value).toBe('');
+  });
+
+  it.each([
+    ['number', 42, '42'],
+    ['boolean', true, ''],
+    ['null', null, ''],
+  ])('restores a stale filter draft from a %s parent value', (_kind, applied, expected) => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.query.update((query) => ({
+      ...query, filters: { kind: 'condition', field: 'name', rule: 'contains', value: applied },
+    }));
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        commitFilter(column: unknown, value: string, target: HTMLInputElement, base: unknown): void;
+      };
+    const input = document.createElement('input');
+    input.value = 'stale';
+    renderer.commitFilter(columns[0], 'stale', input, 'older');
+    expect(input.value).toBe(expected);
+    expect(fixture.componentInstance.queryChanges()).toEqual([]);
+  });
+
+  it('derives a roving focus token from a current, stale, and empty tree', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        focusedKey: { set(value: string | null): void };
+        rovingToken(): string | null;
+      };
+    renderer.focusedKey.set('b');
+    expect(renderer.rovingToken()).toBe('string:b');
+    renderer.focusedKey.set('removed');
+    expect(renderer.rovingToken()).toBe('string:a');
+    fixture.componentInstance.rows.set([]);
+    fixture.componentInstance.hierarchy.set({
+      hierarchyRevision: 2, queryRevision: 0, roots: loaded([]), children: [],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(renderer.rovingToken()).toBeNull();
+  });
+
+  it('focuses the treegrid container when the applied hierarchy is empty', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.rows.set([]);
+    fixture.componentInstance.hierarchy.set({
+      hierarchyRevision: 2, queryRevision: 0, roots: loaded([]), children: [],
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as { focusTarget(target: { kind: 'first' }): void };
+    renderer.focusTarget({ kind: 'first' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).querySelector('[role="treegrid"]')).toBe(document.activeElement);
+  });
+
+  it('ignores stale sort buttons and focus targets outside an applied row', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        onTableClick(event: MouseEvent): void;
+        onBodyFocus(event: FocusEvent): void;
+      };
+    const stale = document.createElement('button');
+    stale.dataset['sortColumn'] = 'removed';
+    const click = new MouseEvent('click');
+    Object.defineProperty(click, 'target', { value: stale });
+    renderer.onTableClick(click);
+    const focus = new FocusEvent('focusin');
+    Object.defineProperty(focus, 'target', { value: stale });
+    renderer.onBodyFocus(focus);
+    expect(fixture.componentInstance.queryChanges()).toEqual([]);
+    expect(fixture.componentInstance.expansionChanges()).toEqual([]);
+  });
+
+  it('rejects expansion of a loaded leaf without an output proposal', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer'))
+      .componentInstance as unknown as {
+        projection(): { visible: readonly { key: string }[] };
+        proposeExpansion(node: unknown, source: 'keyboard'): void;
+      };
+    const leaf = renderer.projection().visible.find((node) => node.key === 'c')!;
+    renderer.proposeExpansion(leaf, 'keyboard');
+    expect(fixture.componentInstance.expansionChanges()).toEqual([]);
+  });
+
+  it('ignores a table click that does not belong to a projected row', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const event = new MouseEvent('click');
+    Object.defineProperty(event, 'target', { value: document.createElement('div') });
+    renderer.onTableClick(event);
+    expect(fixture.componentInstance.selectionChanges()).toEqual([]);
+    expect(fixture.componentInstance.expansionChanges()).toEqual([]);
+  });
+
+  it('ignores double-clicks outside a row and on its interactive controls', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const actions = vi.fn();
+    renderer.rowActionIntent.subscribe(actions);
+    const outside = new MouseEvent('dblclick');
+    Object.defineProperty(outside, 'target', { value: document.createElement('div') });
+    renderer.onTableDoubleClick(outside);
+    const button = (fixture.nativeElement as HTMLElement).querySelector('tr[data-node-key] button')!;
+    const nested = new MouseEvent('dblclick');
+    Object.defineProperty(nested, 'target', { value: button });
+    renderer.onTableDoubleClick(nested);
+    expect(actions).not.toHaveBeenCalled();
+  });
+
+  it('does not offer a context action when that feature is disabled', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const event = new MouseEvent('contextmenu', { cancelable: true });
+    renderer.onTableContextMenu(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('leaves F2 unhandled without an editable column and activates on Enter', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const row = (fixture.nativeElement as HTMLElement).querySelector('tr[data-node-key]')!;
+    const actions = vi.fn();
+    renderer.rowActionIntent.subscribe(actions);
+    const f2 = new KeyboardEvent('keydown', { key: 'F2', cancelable: true });
+    Object.defineProperty(f2, 'target', { value: row });
+    renderer.onBodyKeydown(f2);
+    expect(f2.defaultPrevented).toBe(false);
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    Object.defineProperty(enter, 'target', { value: row });
+    renderer.onBodyKeydown(enter);
+    expect(enter.defaultPrevented).toBe(true);
+    expect(actions).toHaveBeenCalledOnce();
+  });
+
+  it('proposes collapse for a visibly expanded root using the backward key', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const row = (fixture.nativeElement as HTMLElement).querySelector('tr[data-node-key="string:a"]')!;
+    const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true });
+    Object.defineProperty(event, 'target', { value: row });
+    renderer.onBodyKeydown(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.expansionChanges()).toHaveLength(1);
+  });
+
+  it('emits a context action for a row but ignores its interactive controls', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.interactionOptions.update((value) => ({ ...value, contextMenuAction: true }));
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const actions = vi.fn();
+    renderer.rowActionIntent.subscribe(actions);
+    const row = (fixture.nativeElement as HTMLElement).querySelector('tr[data-node-key="string:a"]') as HTMLElement;
+    const event = new MouseEvent('contextmenu', { cancelable: true });
+    Object.defineProperty(event, 'target', { value: row });
+    renderer.onTableContextMenu(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(actions).toHaveBeenCalledExactlyOnceWith({ key: 'a', value: rows[0], source: 'context-menu' });
+    const button = row.querySelector('button') as HTMLButtonElement;
+    const interactive = new MouseEvent('contextmenu', { cancelable: true });
+    Object.defineProperty(interactive, 'target', { value: button });
+    renderer.onTableContextMenu(interactive);
+    expect(interactive.defaultPrevented).toBe(false);
+    expect(actions).toHaveBeenCalledOnce();
+  });
+
+  it('offers row and cell edits only where an editable column exists', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.editingOptions.set({ mode: 'row' });
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const node = renderer.projection().visible[0];
+    const proposals = vi.fn();
+    renderer.editStateProposal.subscribe(proposals);
+    expect(renderer.proposeEditStart(node, null, 'gesture')).toBe(false);
+    fixture.componentInstance.columns.set([
+      { ...columns[0]!, edit: { field: 'name' } }, columns[1]!,
+    ]);
+    fixture.detectChanges();
+    expect(renderer.proposeEditStart(node, null, 'gesture')).toBe(true);
+    expect(proposals).toHaveBeenCalledWith({ next: { kind: 'row', key: 'a' }, source: 'gesture' });
+    fixture.componentInstance.editingOptions.set({ mode: 'cell' });
+    fixture.detectChanges();
+    expect(renderer.proposeEditStart(node, columns[1], 'keyboard')).toBe(false);
+    expect(renderer.proposeEditStart(node, fixture.componentInstance.columns()[0], 'keyboard')).toBe(true);
+    expect(proposals).toHaveBeenCalledWith({
+      next: { kind: 'cell', key: 'a', columnId: 'name' }, source: 'keyboard',
+    });
+  });
+
+  it('cancels a pending single-click action when the same row is double-clicked', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    const node = renderer.projection().visible[0];
+    const actions = vi.fn();
+    renderer.rowActionIntent.subscribe(actions);
+    renderer.scheduleClickAction(node);
+    renderer.scheduleClickAction(node);
+    const row = (fixture.nativeElement as HTMLElement).querySelector('tr[data-node-key="string:a"]')!;
+    const event = new MouseEvent('dblclick');
+    Object.defineProperty(event, 'target', { value: row });
+    renderer.onTableDoubleClick(event);
+    expect(actions).toHaveBeenCalledExactlyOnceWith({ key: 'a', value: rows[0], source: 'double-click' });
+    expect(renderer.rowActionTimer).toBeNull();
+  });
+
+  it('returns container focus when the last requested row disappears', () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.componentInstance.rows.set([]);
+    fixture.componentInstance.hierarchy.set({
+      ...initialHierarchy, roots: loaded([]), children: [],
+    });
+    fixture.detectChanges();
+    const renderer = fixture.debugElement.query(By.css('neu-tree-table-private-renderer')).componentInstance as any;
+    renderer.focusTarget({ kind: 'last' });
+    expect(renderer.projection().visible).toHaveLength(0);
   });
 });

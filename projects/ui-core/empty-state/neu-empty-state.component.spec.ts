@@ -1,7 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { provideNeuralIcons } from '@neural-icons/angular';
-import { iconInbox } from '@neural-icons/core/icons/inbox';
 import { NeuEmptyStateComponent } from './neu-empty-state.component';
 
 @Component({
@@ -27,7 +25,6 @@ describe('NeuEmptyStateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [provideNeuralIcons(iconInbox)],
     }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
     host = fixture.componentInstance;
@@ -36,8 +33,8 @@ describe('NeuEmptyStateComponent', () => {
 
   it('should render title', () => {
     expect(fixture.nativeElement.textContent).toContain('No hay datos');
-    expect(fixture.nativeElement.querySelector('neural-icon svg')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(fixture.nativeElement.querySelector('neu-icon-outlet')?.textContent?.trim()).toBe('—');
+    expect(fixture.nativeElement.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should show description when provided', async () => {
@@ -77,5 +74,17 @@ describe('NeuEmptyStateComponent', () => {
     expect(button.type).toBe('button');
     button.click();
     expect(clicked).toBe(1);
+  });
+
+  it('omits an absent icon and does not invent geometry for an unregistered consumer icon', async () => {
+    const df = TestBed.createComponent(NeuEmptyStateComponent);
+    df.componentRef.setInput('icon', null);
+    df.detectChanges();
+    expect(df.nativeElement.querySelector('neu-icon-outlet')).toBeNull();
+    df.componentRef.setInput('icon', 'next');
+    df.detectChanges();
+    await df.whenStable();
+    expect(df.nativeElement.querySelector('neu-icon-outlet')).not.toBeNull();
+    expect(df.nativeElement.querySelector('neu-icon-outlet svg')).toBeNull();
   });
 });

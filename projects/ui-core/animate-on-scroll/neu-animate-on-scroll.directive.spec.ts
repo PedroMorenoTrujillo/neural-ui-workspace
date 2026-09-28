@@ -131,4 +131,28 @@ describe('NeuAnimateOnScrollDirective', () => {
     section.dispatchEvent(new Event('animationend'));
     expect(section.classList).not.toContain('enter-animation');
   });
+
+  it('keeps an entered one-shot animation when a later observer report leaves the viewport', () => {
+    fixture.componentInstance.once.set(true);
+    fixture.detectChanges();
+    const observer = IntersectionObserverMock.instances.at(-1)!;
+    const section = fixture.nativeElement.querySelector('section') as HTMLElement;
+    observer.trigger(true);
+    observer.trigger(false);
+    observer.trigger(true);
+    expect(section.classList).toContain('enter-animation');
+    expect(section.classList).not.toContain('leave-animation');
+  });
+
+  it('does not add an animation class when only a leave class is configured', () => {
+    fixture.componentInstance.enter.set(undefined as unknown as string);
+    fixture.detectChanges();
+    const observer = IntersectionObserverMock.instances.at(-1)!;
+    const section = fixture.nativeElement.querySelector('section') as HTMLElement;
+    observer.trigger(true);
+    observer.trigger(false);
+    observer.trigger(false);
+    expect(section.classList).toContain('leave-animation');
+    expect(section.classList).not.toContain('enter-animation');
+  });
 });

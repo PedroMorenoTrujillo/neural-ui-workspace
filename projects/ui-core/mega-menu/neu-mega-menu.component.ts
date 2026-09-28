@@ -22,8 +22,8 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
+import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
 import { NeuIdGenerator, NeuResponsiveState, type NeuTextDirection } from '@neural-ui/core/internal';
 
 export type NeuMegaMenuOrientation = 'horizontal' | 'vertical';
@@ -31,7 +31,7 @@ export type NeuMegaMenuOrientation = 'horizontal' | 'vertical';
 interface NeuMegaMenuEntry {
   readonly key: string;
   readonly label: string;
-  readonly icon?: NeuralIconName;
+  readonly icon?: NeuIconKey;
   readonly badge?: string | number;
   readonly active?: boolean;
   readonly disabled?: boolean;
@@ -103,7 +103,7 @@ interface ValidatedMegaMenu {
 
 @Component({
   selector: 'neu-mega-menu',
-  imports: [NgTemplateOutlet, OverlayModule, RouterLink, NeuBadgeComponent, NeuralIcon],
+  imports: [NgTemplateOutlet, OverlayModule, RouterLink, NeuBadgeComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-mega-menu',
@@ -278,7 +278,7 @@ interface ValidatedMegaMenu {
 
     <ng-template #defaultItem let-item>
       @if (item.icon) {
-        <neural-icon class="neu-mega-menu__icon" [icon]="item.icon" size="1rem" aria-hidden="true" />
+        <neu-icon-outlet class="neu-mega-menu__icon" [icon]="item.icon" size="1rem" aria-hidden="true" />
       }
       <span class="neu-mega-menu__label">{{ item.label }}</span>
       @if (item.badge != null) {

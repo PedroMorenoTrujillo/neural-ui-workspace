@@ -303,4 +303,93 @@ describe('NeuUploaderComponent N2-009', () => {
     expect(fixture.componentInstance.formatBytes(0)).toBe('0 B');
     expect(fixture.componentInstance.formatBytes(1536)).toBe('1.5 KB');
   });
+
+  it('matches file extensions and exact MIME types without accepting unrelated files', async () => {
+    const fixture = await setup({ accept: '.csv, application/json', multiple: true });
+    const csv = file('REPORT.CSV', 'application/octet-stream');
+    const json = file('data.bin', 'application/json');
+    const rejected = file('photo.png', 'image/png');
+    select(fixture.componentInstance, [csv, json, rejected]);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual([csv, json]);
+    expect(fixture.nativeElement.querySelectorAll('.neu-uploader__item')).toHaveLength(2);
+  });
+
+  it('renders explicit progress, item progress, hint and the validation error state', async () => {
+    const fixture = await setup({ hint: 'Upload a receipt', showProgress: true, progress: 25 });
+    const component = fixture.componentInstance;
+    const dropzone = fixture.nativeElement.querySelector('.neu-uploader__dropzone') as HTMLElement;
+    expect(dropzone.getAttribute('aria-describedby')).toBe(`${component.inputId()}-hint`);
+    const receipt = file('receipt.pdf', 'application/pdf');
+    select(component, [receipt]);
+    const id = component['fileItems']()[0].id;
+    component.setFileState(id, { progress: 50, status: 'uploading' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-uploader__progress')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.neu-uploader__item neu-progress-bar')).toBeTruthy();
+    fixture.componentRef.setInput('errorMessage', 'Upload failed');
+    fixture.detectChanges();
+    expect(dropzone.getAttribute('aria-describedby')).toBe(`${component.inputId()}-error`);
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('Upload failed');
+  });
+
+  it('keeps the picker inert while disabled and records one logical focus exit', async () => {
+    const fixture = await setup({ disabled: true, dropzone: false });
+    const picker = vi.spyOn(fixture.componentInstance.fileInput().nativeElement, 'click');
+    const touched = vi.fn();
+    fixture.componentInstance.touch.subscribe(touched);
+    fixture.componentInstance.openFilePicker();
+    fixture.componentInstance.onBoundaryFocusIn();
+    fixture.componentInstance.onBoundaryFocusOut({
+      relatedTarget: null, currentTarget: fixture.nativeElement,
+    } as unknown as FocusEvent);
+    fixture.componentInstance.onBoundaryFocusOut({
+      relatedTarget: null, currentTarget: fixture.nativeElement,
+    } as unknown as FocusEvent);
+    expect(picker).not.toHaveBeenCalled();
+    expect(touched).toHaveBeenCalledOnce();
+  });
+
+  it('derives picker labels and non-dropzone descriptions from applied inputs', async () => {
+    const fixture = await setup({ dropzone: false, showPickerText: false, chooseLabel: 'Browse', accept: '.pdf', maxFileSize: 1024 });
+    const component = fixture.componentInstance;
+    expect(component.pickerButtonAriaLabel()).toBe('Browse');
+    expect(component.descriptionText()).toContain('.pdf');
+    expect(component.descriptionText()).toContain('1.0 KB');
+    fixture.componentRef.setInput('showPickerText', true);
+    fixture.detectChanges();
+    expect(component.pickerButtonAriaLabel()).toBeNull();
+  });
+
+  it('does not open the picker from a readonly dropzone key', async () => {
+    const fixture = await setup({ readonly: true });
+    const picker = vi.spyOn(fixture.componentInstance.fileInput().nativeElement, 'click');
+    const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    fixture.componentInstance.onDropzoneKey(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(picker).not.toHaveBeenCalled();
+  });
+
+  it('keeps focus within the composite without emitting touch', async () => {
+    const fixture = await setup();
+    const touched = vi.fn();
+    fixture.componentInstance.touch.subscribe(touched);
+    const root = fixture.nativeElement as HTMLElement;
+    const child = root.querySelector('.neu-uploader__native-input') as HTMLElement;
+    fixture.componentInstance.onBoundaryFocusOut({ relatedTarget: child, currentTarget: root } as unknown as FocusEvent);
+    expect(touched).not.toHaveBeenCalled();
+  });
+
+  it('ignores drag and retry gestures when there is no dropzone or matching file', async () => {
+    const fixture = await setup({ dropzone: false });
+    const component = fixture.componentInstance;
+    const preventDefault = vi.fn();
+    component.onDragOver({ preventDefault } as unknown as DragEvent);
+    component.onDragLeave({ preventDefault } as unknown as DragEvent);
+    component.onDrop({ preventDefault } as unknown as DragEvent);
+    component.retryFile('missing');
+    component.removeFile('missing');
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(component.value()).toEqual([]);
+  });
 });

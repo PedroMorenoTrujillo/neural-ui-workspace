@@ -354,12 +354,12 @@ describe('NeuImageViewerDirective', () => {
       ),
     );
     expect(controls).toHaveLength(6);
-    expect(controls.every((control) => control.querySelector('neural-icon'))).toBe(true);
-    expect(controls.every((control) => !control.textContent?.trim())).toBe(true);
+    expect(controls.every((control) => control.querySelector('neu-icon-outlet'))).toBe(true);
+    expect(controls.every((control) => !!control.getAttribute('aria-label'))).toBe(true);
     expect(
       controls.every(
         (control) =>
-          control.querySelector('neural-icon svg')?.getAttribute('width') === '1.25rem',
+          (control.querySelector('neu-icon-outlet') as HTMLElement | null)?.style.width === '1.25rem',
       ),
     ).toBe(true);
   });
@@ -574,5 +574,46 @@ describe('NeuImageViewerDirective', () => {
     dir.open();
     expect(createSpy).not.toHaveBeenCalled();
     expect(dir._overlayRef).toBeNull();
+  });
+
+  it('keeps no-op transforms and wheel edges stable', () => {
+    const { f } = setupOverlay();
+    const viewer = f.componentInstance;
+    const unchangedWheel = { deltaY: 0, preventDefault: vi.fn() } as unknown as WheelEvent;
+    viewer._onWheel(unchangedWheel);
+    expect(unchangedWheel.preventDefault).not.toHaveBeenCalled();
+    viewer._zoom(0);
+    viewer._rotate(360);
+    expect(viewer._scale()).toBe(1);
+    expect(viewer._rotation()).toBe(0);
+    viewer._zoom(10);
+    const atMaximum = { deltaY: -1, preventDefault: vi.fn() } as unknown as WheelEvent;
+    viewer._onWheel(atMaximum);
+    expect(atMaximum.preventDefault).not.toHaveBeenCalled();
+    viewer._index.set(100);
+    expect(viewer._current()).toEqual({ src: '', alt: '' });
+    expect(viewer._downloadName()).toBe('image');
+  });
+
+  it('ignores mismatched and cancelled gestures and respects a prevented Escape', () => {
+    const { f, data } = setupOverlay();
+    const viewer = f.componentInstance;
+    viewer._onPointerMove({ pointerId: 1 } as PointerEvent);
+    viewer._onPointerUp({ pointerId: 1 } as PointerEvent);
+    const pointer = { button: 0, pointerId: 2, clientX: 100, clientY: 20 } as PointerEvent;
+    viewer._onPointerDown(pointer);
+    viewer._onPointerDown(pointer);
+    viewer._zoom(0.5);
+    viewer._onPointerMove({ pointerId: 3, clientX: 20, clientY: 20 } as PointerEvent);
+    expect(viewer._panX()).toBe(0);
+    viewer._onPointerUp({ pointerId: 3, clientX: 20 } as PointerEvent);
+    viewer._onPointerDown(pointer);
+    viewer._onPointerCancel();
+    viewer._onPointerMove({ pointerId: 2, clientX: 20, clientY: 20 } as PointerEvent);
+    expect(viewer._panX()).toBe(0);
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    escape.preventDefault();
+    viewer._onKey(escape);
+    expect(data.close).not.toHaveBeenCalled();
   });
 });

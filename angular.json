@@ -42,6 +42,7 @@
               "text",
               "html",
               "lcov",
+              "json",
               "json-summary"
             ],
             "coverageThresholds": {

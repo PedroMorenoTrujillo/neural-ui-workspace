@@ -1,10 +1,10 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconArrowDown } from '@neural-icons/core/icons/arrow-down';
-import { iconArrowLeft } from '@neural-icons/core/icons/arrow-left';
-import { iconArrowRight } from '@neural-icons/core/icons/arrow-right';
-import { iconArrowUp } from '@neural-icons/core/icons/arrow-up';
-import { iconDrag } from '@neural-icons/core/icons/drag';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconArrowDown as iconArrowDown } from '@neural-ui/core/internal';
+import { neuIconArrowLeft as iconArrowLeft } from '@neural-ui/core/internal';
+import { neuIconArrowRight as iconArrowRight } from '@neural-ui/core/internal';
+import { neuIconArrowUp as iconArrowUp } from '@neural-ui/core/internal';
+import { neuIconDrag as iconDrag } from '@neural-ui/core/internal';
 import {
   Component,
   DestroyRef,
@@ -133,7 +133,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
   selector: 'neu-pick-list',
   imports: [
     NgTemplateOutlet,
-    NeuralIcon,
+    InternalNeuIconOutletComponent,
     NeuButtonComponent,
     NeuDragDropGroupDirective,
     NeuDragHandleDirective,
@@ -212,7 +212,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                     [iconOnly]="true"
                     [ariaLabel]="'Drag ' + optionLabelOf(item)"
                     [disabled]="isOptionDisabled(item)"
-                  ><neural-icon [icon]="iconDrag" size="1em" aria-hidden="true" /></button>
+                  ><neu-icon-outlet [icon]="iconDrag" [fallbackPath]="iconFallbackPath(iconDrag)" [fallbackText]="iconFallbackText(iconDrag)" size="1em" aria-hidden="true" /></button>
                 }
               </div>
             } @empty {
@@ -232,9 +232,9 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                 [disabled]="!hasLocationSelection(location)"
                 (click)="reorderSelection(location, move)"
               >
-                <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+                <neu-icon-outlet [icon]="moveIcon(move)" [fallbackPath]="iconFallbackPath(moveIcon(move))" [fallbackText]="iconFallbackText(moveIcon(move))" size="1em" aria-hidden="true" />
                 @if (move === 'top' || move === 'bottom') {
-                  <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+                  <neu-icon-outlet [icon]="moveIcon(move)" [fallbackPath]="iconFallbackPath(moveIcon(move))" [fallbackText]="iconFallbackText(moveIcon(move))" size="1em" aria-hidden="true" />
                 }
               </button>
             }
@@ -254,9 +254,9 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                 [disabled]="!pickActionEnabled(action)"
                 (click)="runPickAction(action)"
               >
-                <neural-icon [icon]="pickActionIcon(action)" size="1em" aria-hidden="true" />
+                <neu-icon-outlet [icon]="pickActionIcon(action)" [fallbackPath]="iconFallbackPath(pickActionIcon(action))" [fallbackText]="iconFallbackText(pickActionIcon(action))" size="1em" aria-hidden="true" />
                 @if (action === 'all-to-target' || action === 'all-to-source') {
-                  <neural-icon [icon]="pickActionIcon(action)" size="1em" aria-hidden="true" />
+                  <neu-icon-outlet [icon]="pickActionIcon(action)" [fallbackPath]="iconFallbackPath(pickActionIcon(action))" [fallbackText]="iconFallbackText(pickActionIcon(action))" size="1em" aria-hidden="true" />
                 }
               </button>
             }
@@ -268,6 +268,8 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconDrag = iconDrag;
   protected readonly listLocations = NEU_LIST_LOCATIONS;
   protected readonly listMoves = NEU_LIST_MOVES;
@@ -725,7 +727,7 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   selector: 'neu-order-list',
   imports: [
     NgTemplateOutlet,
-    NeuralIcon,
+    InternalNeuIconOutletComponent,
     NeuButtonComponent,
     NeuDragDropGroupDirective,
     NeuDragHandleDirective,
@@ -802,7 +804,7 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
                 [iconOnly]="true"
                 [ariaLabel]="'Drag ' + optionLabelOf(item)"
                 [disabled]="isOptionDisabled(item)"
-              ><neural-icon [icon]="iconDrag" size="1em" aria-hidden="true" /></button>
+              ><neu-icon-outlet [icon]="iconDrag" [fallbackPath]="iconFallbackPath(iconDrag)" [fallbackText]="iconFallbackText(iconDrag)" size="1em" aria-hidden="true" /></button>
             }
             @for (direction of directions; track direction) {
               <button
@@ -816,7 +818,7 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
                 [disabled]="!canMove(index, direction)"
                 (click)="$event.stopPropagation(); move(index, direction)"
               >
-                <neural-icon [icon]="direction === -1 ? iconArrowUp : iconArrowDown" size="1em" aria-hidden="true" />
+                <neu-icon-outlet [icon]="direction === -1 ? iconArrowUp : iconArrowDown" [fallbackPath]="iconFallbackPath(direction === -1 ? iconArrowUp : iconArrowDown)" [fallbackText]="iconFallbackText(direction === -1 ? iconArrowUp : iconArrowDown)" size="1em" aria-hidden="true" />
               </button>
             }
           </div>
@@ -838,9 +840,9 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
             [ariaLabel]="orderActionLabel(move)"
             (click)="moveSelection(move)"
           >
-            <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+            <neu-icon-outlet [icon]="moveIcon(move)" [fallbackPath]="iconFallbackPath(moveIcon(move))" [fallbackText]="iconFallbackText(moveIcon(move))" size="1em" aria-hidden="true" />
             @if (move === 'top' || move === 'bottom') {
-              <neural-icon [icon]="moveIcon(move)" size="1em" aria-hidden="true" />
+              <neu-icon-outlet [icon]="moveIcon(move)" [fallbackPath]="iconFallbackPath(moveIcon(move))" [fallbackText]="iconFallbackText(moveIcon(move))" size="1em" aria-hidden="true" />
             }
           </button>
         }
@@ -850,6 +852,8 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconArrowUp = iconArrowUp;
   protected readonly iconArrowDown = iconArrowDown;
   protected readonly iconDrag = iconDrag;

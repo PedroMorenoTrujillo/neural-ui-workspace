@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "authority": "H9-B4",
   "methodology": {
-    "consumer": "Minified ESM with Angular, CDK, ng-icons and RxJS external; esbuild tree shaking and package sideEffects semantics.",
+    "consumer": "Minified ESM with Angular, CDK and RxJS external; esbuild tree shaking and package sideEffects semantics. Optional icon providers are bundled only when imported by the consumer.",
     "raw": "Canonical strict bytes. Warning is baseline + max(128 B, 1%); failure is baseline + max(256 B, 2.5%).",
     "compressed": "Node zlib per-output compression. Warning is baseline + max(64 B, 2%); failure is baseline + max(128 B, 5%).",
     "atomicTemplates": "Angular standalone component templates retain one component implementation; input bindings do not create distinct basic and advanced closures.",
@@ -11,7 +11,13 @@
   "provenance": {
     "h9B3LibraryCommit": "38b75030290b63041cc3a574066759b5bbb83dde",
     "h9B3LibraryTree": "78be43648df2aa58956eeb6f0ca2d3a3bc363aba",
-    "calibration": "Neural UI 1.15.0 release candidate after the reviewed component, accessibility, composition, and documentation expansion"
+    "calibration": "Neural UI 1.15.0 release candidate after the reviewed component, accessibility, composition, and documentation expansion",
+    "n2IconRebaseline": {
+      "coreBaseCommit": "63de8dc0f1c030722acaae7bdca08f5750151f53",
+      "scope": ["button", "pick-list-order-list"],
+      "reason": "Provider-agnostic Core icon outlet; measured package-only consumer closures after isolating the outlet secondary entrypoint. The historical Button budget excluded its mandatory Neural Icons peer, whereas the N2 Button closure includes its own renderer and no icon provider. Historical baselines are retained per scenario.",
+      "measurement": "Two identical full H9 calibrations on Node 22.22.3, Angular 22.1.6, Angular CLI 22.1.8, esbuild 0.27.3, zlib 1.2.12, Brotli 1.2.0, darwin arm64; strict observed bytes with no padding."
+    }
   },
   "toolchain": {
     "node": "22.22.3",
@@ -26,7 +32,7 @@
   "scenarios": {
     "root-unused": { "baseline": { "raw": 0, "gzip": 20, "brotli": 1 } },
     "provider": { "baseline": { "raw": 2178, "gzip": 948, "brotli": 854 } },
-    "button": { "baseline": { "raw": 18064, "gzip": 3148, "brotli": 2672 } },
+    "button": { "baseline": { "raw": 21806, "gzip": 3788, "brotli": 3221 }, "historicalBaseline": { "raw": 18064, "gzip": 3148, "brotli": 2672 } },
     "select": { "baseline": { "raw": 125947, "gzip": 22311, "brotli": 19379 } },
     "table-basic": { "baseline": { "raw": 174439, "gzip": 34670, "brotli": 25692 } },
     "table-advanced-lazy": { "baseline": { "raw": 954019, "gzip": 165462, "brotli": 103647 } },
@@ -44,7 +50,7 @@
     "dialog-all-advanced": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
     "color-picker-basic": { "baseline": { "raw": 59866, "gzip": 11735, "brotli": 10288 } },
     "color-picker-advanced": { "baseline": { "raw": 59866, "gzip": 11735, "brotli": 10288 } },
-    "pick-list-order-list": { "baseline": { "raw": 106805, "gzip": 16529, "brotli": 13916 } },
+    "pick-list-order-list": { "baseline": { "raw": 109514, "gzip": 17059, "brotli": 14166 }, "historicalBaseline": { "raw": 106805, "gzip": 16529, "brotli": 13916 } },
     "menu": { "baseline": { "raw": 70946, "gzip": 10266, "brotli": 8913 } },
     "pagination": { "baseline": { "raw": 140883, "gzip": 24933, "brotli": 21379 } }
   },

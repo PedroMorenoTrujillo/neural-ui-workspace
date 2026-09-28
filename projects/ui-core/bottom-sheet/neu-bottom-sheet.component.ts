@@ -10,8 +10,8 @@ import {
   output,
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconX } from '@neural-icons/core/icons/x';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { NeuCloseReason, NeuCloseRequest } from '@neural-ui/core/foundation';
 import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
@@ -20,7 +20,7 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
 
 @Component({
   selector: 'neu-bottom-sheet',
-  imports: [NeuButtonComponent, NeuralIcon, NeuFocusTrapDirective, NeuModalFocusDirective],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-bottom-sheet-host',
@@ -60,7 +60,7 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
               [ariaLabel]="closeLabel()"
               [disabled]="disableClose()"
               (click)="requestClose('action', $event)"
-            ><neural-icon [icon]="iconX" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" size="1em" /></button>
           </header>
         }
         <div class="neu-bottom-sheet__body"><ng-content /></div>
@@ -70,6 +70,7 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
   styleUrl: './neu-bottom-sheet.component.scss',
 })
 export class NeuBottomSheetComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconX = iconX;
   readonly open = input(false);
   readonly title = input('');

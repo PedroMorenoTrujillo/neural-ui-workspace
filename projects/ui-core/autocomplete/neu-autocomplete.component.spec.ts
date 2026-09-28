@@ -34,6 +34,7 @@ import {
     <neu-autocomplete
       mode="free-text"
       [options]="options"
+      [groups]="groups"
       [loading]="loading"
       [lazy]="lazy"
       [dropdown]="true"
@@ -45,7 +46,7 @@ import {
         ><span class="auto-item">{{ option.label }}</span></ng-template
       >
       <ng-template neuAutocompleteGroup let-group
-        ><span class="auto-group">{{ group }}</span></ng-template
+        ><span class="auto-group">{{ $any(group).label }}</span></ng-template
       >
       <ng-template neuAutocompleteLoader let-index="logicalIndex"
         ><span class="auto-loader">{{ index }}</span></ng-template
@@ -61,6 +62,7 @@ import {
 })
 class AutocompleteTemplatesHost {
   options = OPTIONS;
+  groups: Array<{ label: string; items: readonly NeuAutocompleteOption[] }> = [];
   loading = false;
   lazy = false;
 }
@@ -1054,6 +1056,15 @@ describe('NeuAutocompleteComponent', () => {
     emptyComponent.openAll();
     emptyHost.detectChanges();
     expect(document.querySelector('.auto-empty')?.textContent).toContain('Empty');
+
+    const groupedHost = TestBed.createComponent(AutocompleteTemplatesHost);
+    groupedHost.componentInstance.groups = [{ label: 'Frameworks', items: OPTIONS }];
+    groupedHost.detectChanges();
+    const grouped = groupedHost.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    grouped.openAll();
+    groupedHost.detectChanges();
+    expect(document.querySelector('.auto-group')?.textContent).toContain('Frameworks');
   });
 
   it('covers disabled keys, lazy deduplication, focus containment and frame fallbacks', () => {
@@ -1111,5 +1122,131 @@ describe('NeuAutocompleteComponent', () => {
       if (cancelDescriptor) Object.defineProperty(view, 'cancelAnimationFrame', cancelDescriptor);
       else delete (view as any).cancelAnimationFrame;
     }
+  });
+
+  it('truncates completed composition at maxLength and proposes the truncated query', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    f.componentRef.setInput('maxLength', 3);
+    f.detectChanges();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    component.compositionMode = true;
+    component.composing = true;
+    input.value = 'Angular';
+    component.onCompositionEnd({ target: input } as unknown as Event);
+    expect(input.value).toBe('Ang');
+    expect(component._query()).toBe('Ang');
+  });
+
+  it('keeps repeated blur within one focus visit to a single touch event', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    const touches = vi.fn();
+    component.touch.subscribe(touches);
+    component._focused.set(true);
+    component._onBlur(new FocusEvent('blur'));
+    component._onBlur(new FocusEvent('blur'));
+    expect(touches).toHaveBeenCalledOnce();
+  });
+
+  it('opens the suggestion panel using both closed arrow directions', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    component._query.set('a');
+    component.filterQuery.set('a');
+    const down = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    component.onKeyDown(down);
+    expect(down.defaultPrevented).toBe(true);
+    expect(component._isOpen()).toBe(true);
+    component.close();
+    const up = new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true });
+    component.onKeyDown(up);
+    expect(up.defaultPrevented).toBe(true);
+    expect(component._isOpen()).toBe(true);
+  });
+
+  it('maps overlay close intents for direct reasons and disabled fallback', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    for (const reason of ['escape', 'tab', 'outside', 'selection']) {
+      expect(component.overlayCloseReason(reason)).toBe(reason);
+    }
+    expect(component.overlayCloseReason('dropdown')).toBe('programmatic');
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    expect(component.overlayCloseReason('dropdown')).toBe('disabled');
+  });
+
+  it('does not force a strict selection in free-text mode or while readonly', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    f.componentRef.setInput('mode', 'free-text');
+    f.detectChanges();
+    component._query.set('Unknown');
+    component.commitForceSelection(null);
+    expect(component._query()).toBe('Unknown');
+    f.componentRef.setInput('mode', 'strict');
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    component.commitForceSelection(null);
+    expect(component._query()).toBe('Unknown');
+  });
+
+  it('extends native text selection with Shift Home and Shift End', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    const input = document.createElement('input');
+    input.value = 'Alpha';
+    const home = new KeyboardEvent('keydown', { key: 'Home', shiftKey: true, cancelable: true });
+    Object.defineProperty(home, 'currentTarget', { value: input });
+    component.onKeyDown(home);
+    expect(home.defaultPrevented).toBe(true);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(5);
+    const end = new KeyboardEvent('keydown', { key: 'End', shiftKey: true, cancelable: true });
+    Object.defineProperty(end, 'currentTarget', { value: input });
+    component.onKeyDown(end);
+    expect(end.defaultPrevented).toBe(true);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(5);
+  });
+
+  it('collapses Home and End selection without Shift and tolerates a missing event target', () => {
+    const component = setup().componentInstance as any;
+    const input = document.createElement('input');
+    input.value = 'Alpha';
+    const home = new KeyboardEvent('keydown', { key: 'Home', cancelable: true });
+    Object.defineProperty(home, 'currentTarget', { value: input });
+    component.onKeyDown(home);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([0, 0]);
+    const end = new KeyboardEvent('keydown', { key: 'End', cancelable: true });
+    Object.defineProperty(end, 'currentTarget', { value: input });
+    component.onKeyDown(end);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([5, 5]);
+    expect(() => component.onKeyDown(new KeyboardEvent('keydown', { key: 'End' }))).not.toThrow();
+  });
+
+  it('moves the compatibility active row in both directions', () => {
+    const component = setup().componentInstance as any;
+    component.onQueryChange('a');
+    component._moveActiveIndex(1);
+    expect(component._activeIndex()).toBe(0);
+    component._moveActiveIndex(-1);
+    expect(component._activeIndex()).toBeGreaterThanOrEqual(0);
+  });
+
+  it('clears unmatched strict text when Enter has no active option', () => {
+    const f = setup();
+    f.componentRef.setInput('mode', 'strict');
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    component._query.set('Unknown');
+    component.filterQuery.set('Unknown');
+    component.open();
+    component.setActiveIndex(-1);
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    component.onKeyDown(enter);
+    expect(enter.defaultPrevented).toBe(true);
+    expect(component._query()).toBe('');
   });
 });

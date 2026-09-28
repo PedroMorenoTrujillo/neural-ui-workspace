@@ -64,6 +64,7 @@ describe('NeuMegaMenuComponent — C3 navigation-first contract', () => {
     fixtures.length = 0;
     document.querySelectorAll('.cdk-overlay-container').forEach((node) => node.replaceChildren());
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   function create(data: readonly NeuMegaMenuItem[] = items): ComponentFixture<NeuMegaMenuComponent> {
@@ -77,6 +78,32 @@ describe('NeuMegaMenuComponent — C3 navigation-first contract', () => {
   function rootButtons(fixture: ComponentFixture<NeuMegaMenuComponent>): HTMLButtonElement[] {
     return Array.from(fixture.nativeElement.querySelectorAll('.neu-mega-menu__root-action[type="button"]'));
   }
+
+  it('places horizontal and vertical overlays on the correct visual side in both directions', () => {
+    const fixture = create();
+    const menu = fixture.componentInstance as unknown as {
+      overlayPositions(): readonly { originX: string; overlayX: string; originY: string;
+        overlayY: string; offsetX?: number; offsetY?: number }[];
+    };
+    expect(menu.overlayPositions()[0]).toMatchObject({ originX: 'start', overlayX: 'start',
+      originY: 'bottom', overlayY: 'top', offsetY: 8 });
+    fixture.componentRef.setInput('direction', 'rtl');
+    fixture.detectChanges();
+    expect(menu.overlayPositions()[0]).toMatchObject({ originX: 'end', overlayX: 'end',
+      originY: 'bottom', overlayY: 'top', offsetY: 8 });
+    fixture.componentRef.setInput('orientation', 'vertical');
+    fixture.detectChanges();
+    expect(menu.overlayPositions()).toEqual([
+      { originX: 'start', originY: 'top', overlayX: 'end', overlayY: 'top', offsetX: -8 },
+      { originX: 'end', originY: 'top', overlayX: 'start', overlayY: 'top', offsetX: 8 },
+    ]);
+    fixture.componentRef.setInput('direction', 'ltr');
+    fixture.detectChanges();
+    expect(menu.overlayPositions()).toEqual([
+      { originX: 'end', originY: 'top', overlayX: 'start', overlayY: 'top', offsetX: 8 },
+      { originX: 'start', originY: 'top', overlayX: 'end', overlayY: 'top', offsetX: -8 },
+    ]);
+  });
 
   async function open(fixture: ComponentFixture<NeuMegaMenuComponent>, index = 0): Promise<HTMLElement> {
     rootButtons(fixture)[index].click();
@@ -97,6 +124,45 @@ describe('NeuMegaMenuComponent — C3 navigation-first contract', () => {
     expect(nav.querySelector('.neu-mega-menu__panel')).toBeNull();
     expect(nav.querySelector('button[aria-expanded="false"]')).toBeTruthy();
     expect(nav.querySelector('a[aria-expanded]')).toBeNull();
+  });
+
+  it('ignores link and disabled panel roots while allowing a valid panel toggle', async () => {
+    const disabledPanel: NeuMegaMenuItem = {
+      key: 'disabled-panel', label: 'Disabled', kind: 'panel', disabled: true,
+      panel: { columns: [] },
+    };
+    const fixture = create([...items, disabledPanel]);
+    const menu = fixture.componentInstance as unknown as {
+      toggleRoot(root: NeuMegaMenuItem): void;
+      openRoot(): NeuMegaMenuItem | undefined;
+    };
+    menu.toggleRoot(items[1]);
+    menu.toggleRoot(disabledPanel);
+    expect(menu.openRoot()).toBeUndefined();
+    menu.toggleRoot(items[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(menu.openRoot()?.key).toBe('products');
+    menu.toggleRoot(items[0]);
+    fixture.detectChanges();
+    expect(menu.openRoot()).toBeUndefined();
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    menu.toggleRoot(items[0]);
+    expect(menu.openRoot()).toBeUndefined();
+  });
+
+  it('leaves modified root Tab and non-Escape panel keys to the browser', async () => {
+    const fixture = create();
+    const panel = await open(fixture);
+    const root = rootButtons(fixture)[0];
+    const shiftTab = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true });
+    root.dispatchEvent(shiftTab);
+    expect(shiftTab.defaultPrevented).toBe(false);
+    const ordinaryKey = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true });
+    panel.dispatchEvent(ordinaryKey);
+    expect(ordinaryKey.defaultPrevented).toBe(false);
+    expect(document.querySelector('.cdk-overlay-container .neu-mega-menu__panel')).toBeTruthy();
   });
 
   it('mounts only the active grouped panel in a CDK overlay', async () => {
@@ -205,6 +271,63 @@ describe('NeuMegaMenuComponent — C3 navigation-first contract', () => {
     (panel.querySelector('button') as HTMLButtonElement).click();
     expect(command).toHaveBeenCalledOnce();
     expect(emitted).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders badges and icons, skips invisible leaves, and activates native destinations', async () => {
+    const fixture = create([
+      { key: 'home', label: 'Home', kind: 'link', url: '#home', icon: 'star', badge: 2 },
+      { key: 'panel', label: 'Panel', kind: 'panel', panel: { columns: [
+        { key: 'main', groups: [{ key: 'links', items: [
+          { key: 'hidden', label: 'Hidden', kind: 'link', url: '#hidden', visible: false },
+          { key: 'guide', label: 'Guide', kind: 'link', url: '#guide', badge: 'New' },
+          { key: 'route', label: 'Route', kind: 'link', routerLink: '/route' },
+        ] }] },
+      ] } },
+    ]);
+    const emitted = vi.spyOn(fixture.componentInstance.itemClick, 'emit');
+    expect(fixture.nativeElement.querySelector('.neu-mega-menu__icon')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.neu-mega-menu__badge')?.textContent).toContain('2');
+    const home = fixture.nativeElement.querySelector('a[href="#home"]') as HTMLAnchorElement;
+    home.addEventListener('click', (event) => event.preventDefault());
+    home.click();
+    expect(emitted).toHaveBeenCalledTimes(1);
+    const panel = await open(fixture);
+    expect(panel.textContent).not.toContain('Hidden');
+    expect(panel.querySelector('.neu-mega-menu__badge')?.textContent).toContain('New');
+    const guide = panel.querySelector('a[href="#guide"]') as HTMLAnchorElement;
+    guide.addEventListener('click', (event) => event.preventDefault());
+    guide.click();
+    fixture.detectChanges();
+    expect(emitted).toHaveBeenCalledTimes(2);
+    expect(document.querySelector('.cdk-overlay-container .neu-mega-menu__panel')).toBeNull();
+  });
+
+  it('opens and closes the mobile root list through its rendered toggle and Escape key', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('max-width'), media: query, onchange: null,
+      addListener: vi.fn(), removeListener: vi.fn(), addEventListener: vi.fn(),
+      removeEventListener: vi.fn(), dispatchEvent: vi.fn(),
+    } as MediaQueryList));
+    const fixture = create();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const toggle = fixture.nativeElement.querySelector('.neu-mega-menu__toggle') as HTMLButtonElement;
+    const list = fixture.nativeElement.querySelector('.neu-mega-menu__root-list') as HTMLElement;
+    expect(list.hidden).toBe(true);
+    toggle.click();
+    fixture.detectChanges();
+    expect(list.hidden).toBe(false);
+    rootButtons(fixture)[0].click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-mega-menu__panel')).toBeTruthy();
+    toggle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(list.hidden).toBe(true);
+    expect(fixture.nativeElement.querySelector('.neu-mega-menu__panel')).toBeNull();
+    toggle.click();
+    toggle.click();
+    fixture.detectChanges();
+    expect(list.hidden).toBe(true);
   });
 
   it('renders disabled destinations as non-interactive presentation', async () => {

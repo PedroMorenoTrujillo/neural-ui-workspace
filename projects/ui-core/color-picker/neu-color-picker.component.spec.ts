@@ -239,6 +239,37 @@ describe('NeuColorPickerComponent N2-009', () => {
     expect(changes.mock.calls.length).toBeGreaterThanOrEqual(3);
   });
 
+  it('applies every HSL, OKLCH and RGB channel through the bounded channel editor', () => {
+    const cases = [
+      ['hsl', 'hue', '180'], ['hsl', 'saturation', '10'], ['hsl', 'lightness', '10'],
+      ['oklch', 'hue', '180'], ['oklch', 'chroma', '0.02'], ['oklch', 'lightness', '0.2'],
+      ['rgb', 'red', '10'], ['rgb', 'green', '10'], ['rgb', 'blue', '10'],
+      ['rgb', 'alpha', '25'],
+    ] as const;
+    for (const [mode, channel, text] of cases) {
+      const fixture = setup({ value: '#336699', mode, showAlpha: true, showChannels: true });
+      const component = fixture.componentInstance;
+      const before = component.value();
+      component['beginColorChange']();
+      component['_onChannelInput'](channel, text);
+      component['_onChannelBlur']();
+      expect(component.value()).not.toBe(before);
+      fixture.destroy();
+    }
+  });
+
+  it('ignores invalid or empty channel text and keeps the applied color', () => {
+    const fixture = setup({ value: '#336699', mode: 'hsl' });
+    const component = fixture.componentInstance;
+    component['beginColorChange']();
+    component['_onChannelInput']('hue', '');
+    component['_onChannelInput']('hue', 'not-a-number');
+    expect(component.value()).toBe('#336699');
+    component['_onTextKeydown'](new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    expect(component.value()).toBe('#336699');
+    fixture.destroy();
+  });
+
   it('edits color through the rendered format, channel, slider and swatch controls', async () => {
     const fixture = await openPanel(setup({ value: '#336699', showAlpha: true, showChannels: true }));
     const component = fixture.componentInstance;
@@ -271,6 +302,46 @@ describe('NeuColorPickerComponent N2-009', () => {
     expect((fixture.nativeElement.querySelector('.neu-cp__hex-label') as HTMLElement).textContent?.trim())
       .toBe(`${swatch.getAttribute('aria-label')!.replace('Color ', '')}ff`);
     expect(committed).toHaveBeenCalledTimes(3);
+    fixture.destroy();
+  });
+
+  it('handles rendered cancellation, blur and typed color events without committing stale edits', async () => {
+    const fixture = setup({ value: '#336699', showAlpha: true, showChannels: true });
+    (fixture.nativeElement.querySelector('.neu-cp__trigger') as HTMLButtonElement)
+      .dispatchEvent(new FocusEvent('focus'));
+    const panelFixture = await openPanel(fixture);
+    const panel = document.querySelector('.neu-cp__panel') as HTMLElement;
+    const hue = panel.querySelector('.neu-cp__hue-slider') as HTMLInputElement;
+    const alpha = panel.querySelector('.neu-cp__alpha-slider') as HTMLInputElement;
+    const area = panel.querySelector('.neu-cp__canvas-wrap') as HTMLElement;
+    for (const control of [hue, alpha, area]) {
+      control.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true }));
+      control.dispatchEvent(new PointerEvent('lostpointercapture', { bubbles: true }));
+    }
+    const channel = panel.querySelector('.neu-cp__channel input') as HTMLInputElement;
+    channel.dispatchEvent(new FocusEvent('focus'));
+    channel.dispatchEvent(new FocusEvent('blur'));
+    const text = panel.querySelector('.neu-cp__text-input') as HTMLInputElement;
+    text.dispatchEvent(new FocusEvent('focus'));
+    text.value = 'not-a-color';
+    text.dispatchEvent(new Event('input', { bubbles: true }));
+    panelFixture.detectChanges();
+    expect(text.getAttribute('aria-invalid')).toBe('true');
+    expect(panel.querySelector('[role="status"]')?.textContent).toContain('valid');
+    text.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    panelFixture.detectChanges();
+    expect(text.getAttribute('aria-invalid')).toBeNull();
+    expect(panelFixture.componentInstance.value()).toBe('#336699');
+    fixture.destroy();
+  });
+
+  it('starts screen sampling from its visible action button', async () => {
+    const open = vi.fn(async () => ({ sRGBHex: '#abcdef' }));
+    vi.stubGlobal('EyeDropper', class { open = open; });
+    const fixture = await openPanel(setup({ value: '#336699' }));
+    (document.querySelector('.neu-cp__sample-button') as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(fixture.componentInstance.value()).toBe('#abcdef'));
+    expect(open).toHaveBeenCalledOnce();
     fixture.destroy();
   });
 
@@ -467,5 +538,64 @@ describe('NeuColorPickerComponent N2-009', () => {
       pointer: percentiles(pointerSamples),
       keyboard: percentiles(keyboardSamples),
     }));
+  });
+
+  it('ignores zero-area pointer surfaces without changing the color', () => {
+    const fixture = setup({ value: '#336699' });
+    const component = fixture.componentInstance as any;
+    const target = pointerTarget(0, 100);
+    component._canvasDown({ pointerId: 1, clientX: 50, clientY: 50, currentTarget: target } as unknown as PointerEvent);
+    expect(component.value()).toBe('#336699');
+    component._canvasUp({ pointerId: 1, currentTarget: target } as unknown as PointerEvent);
+  });
+
+  it('does not accept nonfinite slider values or malformed swatches', () => {
+    const fixture = setup({ value: '#336699' });
+    const component = fixture.componentInstance as any;
+    component._onHueChange(Number.NaN);
+    component._onAlphaChange(Number.POSITIVE_INFINITY);
+    component._pickSwatch('not-a-color');
+    expect(component.value()).toBe('#336699');
+  });
+
+  it('rejects pointer and keyboard color mutations while readonly', () => {
+    const fixture = setup({ value: '#336699', readonly: true });
+    const component = fixture.componentInstance as any;
+    const target = pointerTarget();
+    component._canvasDown({ pointerId: 4, clientX: 70, clientY: 10, currentTarget: target } as unknown as PointerEvent);
+    component._canvasDrag({ pointerId: 4, clientX: 90, clientY: 10, currentTarget: target } as unknown as PointerEvent);
+    component._onAreaKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }));
+    component._onHueChange(45);
+    component._onAlphaChange(0.4);
+    component._onTextChange('#ffffff');
+    component._onChannelInput('red', '255');
+    expect(component.value()).toBe('#336699');
+  });
+
+  it('keeps duplicate color commits silent and does not focus a disabled trigger', () => {
+    const fixture = setup({ value: '#336699' });
+    const component = fixture.componentInstance as any;
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    expect(component.commitColor(component._color())).toBe(false);
+    expect(changes).not.toHaveBeenCalled();
+    const trigger = fixture.nativeElement.querySelector('.neu-cp__trigger') as HTMLElement;
+    const focus = vi.spyOn(trigger, 'focus');
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    component.focus();
+    expect(focus).not.toHaveBeenCalled();
+  });
+
+  it('shows an explicit sample error when the eyedropper returns an invalid color', async () => {
+    vi.stubGlobal('EyeDropper', class {
+      open = async () => ({ sRGBHex: 'invalid-color' });
+    });
+    const fixture = await openPanel(setup({ value: '#336699' }));
+    const component = fixture.componentInstance as any;
+    await component._sampleScreenColor();
+    fixture.detectChanges();
+    expect(component._sampleError()).toBe(true);
+    expect(fixture.nativeElement.textContent + document.body.textContent).toContain('Screen sampling is unavailable');
   });
 });

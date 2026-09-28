@@ -22,9 +22,9 @@ import {
 } from '@angular/cdk/overlay';
 import { NeuButtonComponent, NeuButtonSize, NeuButtonTone, NeuButtonVariant } from '@neural-ui/core/button';
 import { NeuIdGenerator, NeuRovingMenuController } from '@neural-ui/core/internal';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
-import { iconChevronDown } from '@neural-icons/core/icons/chevron-down';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconChevronDown as iconChevronDown } from '@neural-ui/core/internal';
 
 export interface NeuSplitButtonAction {
   /** Identificador único de la acción / Unique action identifier */
@@ -32,7 +32,7 @@ export interface NeuSplitButtonAction {
   /** Texto visible / Visible text */
   label: string;
   /** Canonical registered neural-icons name. */
-  icon?: NeuralIconName;
+  icon?: NeuIconKey;
   /** Deshabilita esta acción individualmente / Disables this action individually */
   disabled?: boolean;
   /** Separador visual encima de este item / Visual separator above this item */
@@ -58,7 +58,7 @@ export class NeuSplitButtonItemDirective {
  */
 @Component({
   selector: 'neu-split-button',
-  imports: [OverlayModule, NgTemplateOutlet, NeuButtonComponent, NeuralIcon],
+  imports: [OverlayModule, NgTemplateOutlet, NeuButtonComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-split-button-host',
@@ -105,7 +105,7 @@ export class NeuSplitButtonItemDirective {
         (neuClick)="toggleDropdown($event)"
         (keydown)="onTriggerKeydown($event)"
       >
-        <neural-icon [icon]="iconChevronDown" aria-hidden="true" />
+        <neu-icon-outlet [icon]="iconChevronDown" [fallbackPath]="iconFallbackPath(iconChevronDown)" aria-hidden="true" />
       </button>
 
       <!-- Dropdown de acciones -->
@@ -155,7 +155,7 @@ export class NeuSplitButtonItemDirective {
                 />
               } @else {
                 @if (action.icon) {
-                  <neural-icon [icon]="action.icon" aria-hidden="true" />
+                  <neu-icon-outlet [icon]="action.icon" [fallbackPath]="iconFallbackPath(action.icon)" aria-hidden="true" />
                 }
                 {{ action.label }}
               }
@@ -168,6 +168,7 @@ export class NeuSplitButtonItemDirective {
   styleUrl: './neu-split-button.component.scss',
 })
 export class NeuSplitButtonComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconChevronDown = iconChevronDown;
   protected readonly panelId = inject(NeuIdGenerator).getId('neu-split-menu-');
   /* v8 ignore start -- Angular signal-query factory; projected-item behavior is covered. */

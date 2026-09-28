@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNeuralIcons } from '@neural-icons/angular';
-import { iconCheck } from '@neural-icons/core/icons/check';
 import { NeuTagComponent, NeuTagIconDirective } from './neu-tag.component';
 
 @Component({
@@ -19,7 +17,7 @@ describe('NeuTagComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [HostComponent], providers: [provideNeuralIcons(iconCheck)] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
     fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
   });
@@ -53,16 +51,16 @@ describe('NeuTagComponent', () => {
     expect(direct.nativeElement.classList).toContain('neu-tag--rounded');
   });
 
-  it('uses the registered icon and an explicit accessible name', () => {
+  it('uses a provider-neutral affordance and an explicit accessible name', () => {
     const direct = TestBed.createComponent(NeuTagComponent);
     direct.componentRef.setInput('value', 'Deploying');
-    direct.componentRef.setInput('icon', 'check');
+    direct.componentRef.setInput('icon', 'confirm');
     direct.componentRef.setInput('ariaLabel', 'Deployment status');
     direct.detectChanges();
 
-    expect(direct.nativeElement.querySelector('neural-icon')).toBeTruthy();
-    expect(direct.nativeElement.querySelector('neural-icon svg')).toBeTruthy();
-    expect(direct.nativeElement.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(direct.nativeElement.querySelector('neu-icon-outlet')).toBeTruthy();
+    expect(direct.nativeElement.querySelector('neu-icon-outlet svg')).toBeNull();
+    expect(direct.nativeElement.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
     expect(direct.nativeElement.getAttribute('aria-label')).toBe('Deployment status');
     expect(direct.componentInstance.iconTemplate).toBeUndefined();
   });

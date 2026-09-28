@@ -229,6 +229,27 @@ describe('NeuAccordionComponent N2-020', () => {
     expect(document.activeElement).toBe(headers[1]);
   });
 
+  it('moves downward across enabled headers and ignores modified navigation', () => {
+    const { fixture } = createAccordion();
+    const headers = [...fixture.nativeElement.querySelectorAll('.neu-accordion__header')] as HTMLButtonElement[];
+    headers[0].focus();
+    headers[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(headers[1]);
+    const modified = new KeyboardEvent('keydown', { key: 'ArrowUp', ctrlKey: true, bubbles: true, cancelable: true });
+    headers[1].dispatchEvent(modified);
+    expect(modified.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(headers[1]);
+  });
+
+  it('does not consume navigation when no accordion header is enabled', () => {
+    const { fixture, component } = createAccordion({ items: [{ id: 'only', title: 'Only', disabled: true }] });
+    const event = new KeyboardEvent('keydown', { key: 'End', cancelable: true });
+    (component as unknown as { onHeaderKeydown(index: number, event: KeyboardEvent): void })
+      .onHeaderKeydown(0, event);
+    expect(event.defaultPrevented).toBe(false);
+    fixture.destroy();
+  });
+
   it('creates unique namespaced relationships across instances', () => {
     const fixture = TestBed.createComponent(MultipleInstanceHost);
     fixture.detectChanges();

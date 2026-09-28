@@ -78,4 +78,11 @@ describe('InputMask private slot engine', () => {
     expect(JSON.stringify(mask)).toBe(units);
     expect(current).toBe('12/34');
   });
+
+  it('normalizes reversed selections and ignores insertion beyond the final slot', () => {
+    expect(insertIntoMask(date, '12/34', '56', 5, 3).value).toBe('12/56');
+    expect(insertIntoMask(date, '12/34/2026', '7', 99)).toEqual({
+      value: '12/34/2026', caret: 10,
+    });
+  });
 });

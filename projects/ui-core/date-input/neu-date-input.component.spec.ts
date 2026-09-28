@@ -102,6 +102,53 @@ describe('NeuDateInput N2-025 periods and presentation', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }));
   afterEach(() => TestBed.inject(OverlayContainer).getContainerElement().replaceChildren());
 
+  it('distinguishes complete, partial and impossible typed input by mode', () => {
+    for (const [mode, partial, invalid, valid] of [
+      ['date', '2026-02-', '2026-02-30', '2024-02-29'],
+      ['time', '12:', '25:00', '12:15'],
+      ['datetime', '2026-02-', '2026-02-30T12:15', '2024-02-29T12:15'],
+    ] as const) {
+      const fixture = create(mode);
+      const date = fixture.componentInstance as unknown as {
+        parseAndCommit(raw: string): 'valid' | 'invalid' | 'incomplete';
+        isIncompleteText(raw: string): boolean;
+      };
+      expect(date.parseAndCommit(partial)).toBe('incomplete');
+      expect(date.isIncompleteText('bad')).toBe(false);
+      expect(date.parseAndCommit(invalid)).toBe('invalid');
+      expect(date.parseAndCommit(valid)).toBe('valid');
+      expect(fixture.componentInstance.value()).toBe(valid);
+      fixture.destroy();
+    }
+    const range = create('range');
+    const date = range.componentInstance as unknown as { parseAndCommit(raw: string): string };
+    expect(date.parseAndCommit('2024-02-29')).toBe('invalid');
+    range.destroy();
+  });
+
+  it('bounds initial month and year views to configured civil periods', () => {
+    const cases = [
+      { mode: 'month' as const, input: 'min', bound: { year: 9999, month: 12 },
+        expected: { year: 9999, monthIndex: 11 } },
+      { mode: 'month' as const, input: 'max', bound: { year: 1, month: 1 },
+        expected: { year: 1, monthIndex: 0 } },
+      { mode: 'year' as const, input: 'min', bound: { year: 9999 }, expectedYear: 9999 },
+      { mode: 'year' as const, input: 'max', bound: { year: 1 }, expectedYear: 1 },
+    ];
+    for (const item of cases) {
+      const fixture = create(item.mode);
+      fixture.componentRef.setInput(item.input, item.bound);
+      fixture.detectChanges();
+      const date = fixture.componentInstance as unknown as {
+        initialViewAnchor(): { year: number; monthIndex: number };
+      };
+      const anchor = date.initialViewAnchor();
+      if (item.expected) expect(anchor).toEqual(item.expected);
+      else expect(anchor.year).toBe(item.expectedYear);
+      fixture.destroy();
+    }
+  });
+
   it('renders one inline month surface with no overlay trigger or lifecycle echo', () => {
     const fixture = create('month');
     const opened = vi.fn();
@@ -716,6 +763,62 @@ describe('NeuDateInputComponent', () => {
     fixture.destroy();
   });
 
+  it('applies a rendered range preset and clears it from the calendar footer', async () => {
+    const fixture = create('range');
+    fixture.componentRef.setInput('presets', [{
+      label: 'First week',
+      range: { start: civilDate('2026-03-01'), end: civilDate('2026-03-07') },
+    }]);
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+
+    (panel.querySelector('.neu-drp__preset') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.value()).toEqual({ start: '2026-03-01', end: '2026-03-07' });
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    (panel.querySelector('.neu-date-input__cal-footer-btn') as HTMLButtonElement).click();
+    expect(fixture.componentInstance.value()).toEqual({ start: null, end: null });
+    fixture.destroy();
+  });
+
+  it('uses the year picker and Today action from the rendered calendar', async () => {
+    const fixture = create();
+    fixture.componentRef.setInput('showMonthYearPicker', true);
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+    const yearPicker = panel.querySelectorAll<HTMLSelectElement>('.neu-date-input__picker')[1];
+    const nextYear = String(fixture.componentInstance.viewYear() + 1);
+    yearPicker.value = nextYear;
+    yearPicker.dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.viewYear()).toBe(Number(nextYear));
+
+    (panel.querySelector('.neu-date-input__cal-footer-btn--today') as HTMLButtonElement).click();
+    expect(isCivilDate(fixture.componentInstance.value())).toBe(true);
+    fixture.destroy();
+  });
+
+  it('selects hour and minute slots in the rendered time drums', async () => {
+    const fixture = create('time');
+    fixture.componentInstance.value.set(localTime('12:30') as never);
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
+    const drums = panel.querySelectorAll<HTMLElement>('.neu-date-input__drum');
+    const hourSlots = drums[0].querySelectorAll<HTMLButtonElement>('.neu-date-input__drum-item');
+    const minuteSlots = drums[1].querySelectorAll<HTMLButtonElement>('.neu-date-input__drum-item');
+    hourSlots[hourSlots.length - 1].click();
+    expect(fixture.componentInstance.value()).toMatch(/^\d{2}:30$/);
+    minuteSlots[0].click();
+    expect(fixture.componentInstance.value()).toMatch(/^\d{2}:\d{2}$/);
+    fixture.destroy();
+  });
+
   it.each(['date', 'datetime', 'multiple', 'range'] as const)(
     'selects a civil day through the rendered %s calendar with the mode-specific value',
     async (mode) => {
@@ -950,5 +1053,198 @@ describe('NeuDateInputComponent', () => {
     year.click();
     await fixture.whenStable();
     expect(fixture.componentInstance.value()).toEqual({ year: 2026 });
+  });
+
+  it('rejects invalid month and year selections without changing the visible period', () => {
+    const fixture = create();
+    const date = fixture.componentInstance;
+    const before = [date.viewYear(), date.viewMonth()];
+    for (const value of ['bad', '-1', '12']) {
+      date.onMonthSelect({ target: { value } } as unknown as Event);
+      expect([date.viewYear(), date.viewMonth()]).toEqual(before);
+    }
+    for (const value of ['bad', '0', '10000']) {
+      date.onYearSelect({ target: { value } } as unknown as Event);
+      expect([date.viewYear(), date.viewMonth()]).toEqual(before);
+    }
+    date.onYearSelect({ target: { value: '2030' } } as unknown as Event);
+    expect(date.viewYear()).toBe(2030);
+  });
+
+  it('blocks period navigation outside the supported civil year range', () => {
+    const month = create('month').componentInstance;
+    month.viewYear.set(1);
+    month.viewMonth.set(0);
+    month.navigateMonth(-1);
+    expect([month.viewYear(), month.viewMonth()]).toEqual([1, 0]);
+    const year = create('year').componentInstance;
+    year.viewYear.set(9999);
+    year.navigateMonth(12);
+    expect(year.viewYear()).toBe(9999);
+  });
+
+  it('recognizes invalid month and year candidates before boundary checks', () => {
+    const month = create('month').componentInstance;
+    expect(month.isMonthDisabled(0)).toBe(true);
+    expect(month.isMonthDisabled(13)).toBe(true);
+    expect(month.isMonthDisabled(6)).toBe(false);
+    const year = create('year').componentInstance;
+    expect(year.isYearDisabled(0)).toBe(true);
+    expect(year.isYearDisabled(10000)).toBe(true);
+    expect(year.isYearDisabled(2026)).toBe(false);
+  });
+
+  it('ignores unrelated period keys and refuses out-of-range year navigation', () => {
+    const month = create('month').componentInstance;
+    const monthEvent = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    month.onMonthKeydown(monthEvent, 3);
+    expect(monthEvent.defaultPrevented).toBe(false);
+    const year = create('year').componentInstance;
+    const unrelated = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    year.onYearKeydown(unrelated, 2026);
+    expect(unrelated.defaultPrevented).toBe(false);
+    const outOfRange = new KeyboardEvent('keydown', { key: 'PageUp', cancelable: true });
+    year.onYearKeydown(outOfRange, 1);
+    expect(outOfRange.defaultPrevented).toBe(false);
+  });
+
+  it('keeps inline picker escape local and overlay escape dismisses the panel', () => {
+    const inlineFixture = create();
+    inlineFixture.componentRef.setInput('presentation', 'inline');
+    inlineFixture.detectChanges();
+    const inlineEvent = new Event('escape', { bubbles: true });
+    const stop = vi.spyOn(inlineEvent, 'stopPropagation');
+    inlineFixture.componentInstance.onPickerEscape(inlineEvent);
+    expect(stop).not.toHaveBeenCalled();
+    const overlay = create().componentInstance;
+    overlay.open();
+    const overlayEvent = new Event('escape', { bubbles: true });
+    const overlayStop = vi.spyOn(overlayEvent, 'stopPropagation');
+    overlay.onPickerEscape(overlayEvent);
+    expect(overlayStop).toHaveBeenCalledOnce();
+    expect(overlay.isOpen()).toBe(false);
+  });
+
+  it('formats a range with only an end and previews a reversed hover interval', () => {
+    const fixture = create('range');
+    const date = fixture.componentInstance as any;
+    date.value.set({ start: null, end: civilDate('2026-07-20') });
+    expect(date.formatValue()).toContain('20');
+    date.value.set({ start: civilDate('2026-07-20'), end: null });
+    date.hoverDate.set(civilDate('2026-07-10'));
+    date.viewYear.set(2026);
+    date.viewMonth.set(6);
+    const days = date.buildCalendarDays();
+    expect(days.find((cell: { civil: string }) => cell.civil === '2026-07-15')?.inRange).toBe(true);
+  });
+
+  it('commits Enter and discards Escape in the text field', () => {
+    const fixture = create();
+    const date = fixture.componentInstance;
+    typeText(fixture, '2026-02-');
+    date.onInputKeydown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    date.onInputKeydown(escape);
+    expect(escape.defaultPrevented).toBe(true);
+    expect(date.draftState()).toBe('valid');
+  });
+
+  it('ignores month and year selector events while disabled', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    const date = fixture.componentInstance;
+    const before = [date.viewYear(), date.viewMonth()];
+    date.onMonthSelect({ target: { value: '11' } } as unknown as Event);
+    date.onYearSelect({ target: { value: '2030' } } as unknown as Event);
+    expect([date.viewYear(), date.viewMonth()]).toEqual(before);
+  });
+
+  it('rejects day selection in month and year modes', () => {
+    for (const mode of ['month', 'year'] as const) {
+      const fixture = create(mode);
+      fixture.componentInstance.selectCivilDate(civilDate('2026-07-20'));
+      expect(fixture.componentInstance.value()).toBeNull();
+    }
+  });
+
+  it('commits inline month and year selections without opening a panel', () => {
+    const monthFixture = create('month');
+    monthFixture.componentRef.setInput('presentation', 'inline');
+    monthFixture.detectChanges();
+    const month = monthFixture.componentInstance;
+    month.viewYear.set(2026);
+    month.selectMonth(7);
+    expect(month.value()).toEqual({ year: 2026, month: 7 });
+    expect(month.isOpen()).toBe(false);
+    const yearFixture = create('year');
+    yearFixture.componentRef.setInput('presentation', 'inline');
+    yearFixture.detectChanges();
+    yearFixture.componentInstance.selectYear(2027);
+    expect(yearFixture.componentInstance.value()).toEqual({ year: 2027 });
+    expect(yearFixture.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('activates a year through its keyboard Enter shortcut', () => {
+    const fixture = create('year');
+    const date = fixture.componentInstance;
+    const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    date.onYearKeydown(event, 2026);
+    expect(event.defaultPrevented).toBe(true);
+    expect(date.value()).toEqual({ year: 2026 });
+  });
+
+  it('ignores calendar keys when disabled and selects a date with Space when enabled', () => {
+    const fixture = create();
+    const date = fixture.componentInstance;
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    const blocked = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+    date.onCalendarKeydown(blocked, civilDate('2026-07-20'));
+    expect(blocked.defaultPrevented).toBe(false);
+    fixture.componentRef.setInput('disabled', false);
+    fixture.detectChanges();
+    const space = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+    date.onCalendarKeydown(space, civilDate('2026-07-20'));
+    expect(space.defaultPrevented).toBe(true);
+    expect(date.value()).toBe('2026-07-20');
+  });
+
+  it('does not close an inline presentation when clearing its value', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', civilDate('2026-07-20'));
+    fixture.detectChanges();
+    fixture.componentInstance.clear();
+    expect(fixture.componentInstance.value()).toBeNull();
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+  });
+
+  it('keeps disabled day hover inert and handles the calendar previous-month control', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('value', civilDate('2026-03-29'));
+    fixture.componentRef.setInput('disabledDates', [civilDate('2026-03-04')]);
+    fixture.detectChanges();
+    const native = fixture.nativeElement as HTMLElement;
+    native.querySelector<HTMLElement>('[data-civil-date="2026-03-04"]')!
+      .dispatchEvent(new MouseEvent('mouseenter'));
+    expect(fixture.componentInstance.hoverDate()).toBeNull();
+    native.querySelector<HTMLElement>('[data-civil-date="2026-03-05"]')!
+      .dispatchEvent(new MouseEvent('mouseenter'));
+    expect(fixture.componentInstance.hoverDate()).toBe('2026-03-05');
+    const previousMonth = fixture.componentInstance.viewMonth();
+    native.querySelector<HTMLButtonElement>('.neu-date-input__cal-arrow')!.click();
+    expect(fixture.componentInstance.viewMonth()).toBe(previousMonth === 1 ? 12 : previousMonth - 1);
+  });
+
+  it('leaves unrelated input and calendar keys untouched', () => {
+    const date = create().componentInstance;
+    const inputKey = new KeyboardEvent('keydown', { key: 'F2', cancelable: true });
+    const calendarKey = new KeyboardEvent('keydown', { key: 'F2', cancelable: true });
+    date.onInputKeydown(inputKey);
+    date.onCalendarKeydown(calendarKey, civilDate('2026-03-29'));
+    expect(inputKey.defaultPrevented).toBe(false);
+    expect(calendarKey.defaultPrevented).toBe(false);
   });
 });

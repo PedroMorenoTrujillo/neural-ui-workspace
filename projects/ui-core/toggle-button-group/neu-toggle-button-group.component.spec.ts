@@ -57,7 +57,7 @@ describe('NeuToggleButtonGroupComponent', () => {
       { label: 'Cal', value: 'cal', icon: 'calendar' },
     ];
     const { f } = mk({ options: opts });
-    expect(f.nativeElement.querySelector('neural-icon')).toBeTruthy();
+    expect(f.nativeElement.querySelector('neu-icon-outlet')).toBeTruthy();
   });
 
   // ── Single selection ──────────────────────────────────────────────────────

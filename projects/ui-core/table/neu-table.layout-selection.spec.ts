@@ -395,4 +395,121 @@ describe('NeuTable 2 pure controlled selection', () => {
     });
     expect(selectBackend?.addedKeys).toEqual([]);
   });
+
+  it('applies single selection clear policy and preserves a rejected repeated proposal', () => {
+    const options = { mode: 'single' as const, indicator: 'radio' as const,
+      selectOnRowClick: true, allowClear: true };
+    const base = {
+      selection: { kind: 'keys' as const, keys: [2] }, selectionOptions: options, rowOptions,
+      intent: { row: rows[1]!, key: 2, source: 'row' as const,
+        shiftKey: false, platformModifier: false },
+      rangeRows: selectionRows, loadedRows: selectionRows, anchor: null,
+      columns, filterOptions: filters,
+    };
+    expect(proposeNeuTableRowSelection(base).change?.next).toEqual({ kind: 'keys', keys: [] });
+    expect(proposeNeuTableRowSelection({ ...base, selectionOptions: { ...options, allowClear: false } }).change).toBeNull();
+    expect(proposeNeuTableRowSelection({ ...base, selection: { kind: 'keys', keys: [] } }).change?.next)
+      .toEqual({ kind: 'keys', keys: [2] });
+    expect(proposeNeuTableRowSelection({ ...base, selection: {
+      kind: 'all-matching', scope: createNeuTableSelectionScope(query, filters), excludedKeys: [],
+    } }).change?.next).toEqual({ kind: 'keys', keys: [2] });
+  });
+
+  it('covers reverse range and additive platform selection without disabled rows', () => {
+    const selection = { kind: 'keys' as const, keys: [99, 4] };
+    const base = {
+      selection, selectionOptions: multiple({ modifier: 'replace' }), rowOptions,
+      intent: { row: rows[0]!, key: 1, source: 'row' as const,
+        shiftKey: true, platformModifier: true },
+      rangeRows: selectionRows, loadedRows: selectionRows, anchor: 4,
+      columns, filterOptions: filters,
+    };
+    expect(proposeNeuTableRowSelection(base).change?.next).toEqual({ kind: 'keys', keys: [99, 4, 1, 2] });
+    expect(proposeNeuTableRowSelection({ ...base, intent: {
+      ...base.intent, key: 88, row: rows[0]!, shiftKey: false,
+    } }).change?.next).toEqual({ kind: 'keys', keys: [88] });
+  });
+
+  it('projects partial headers and all-matching exclusions across current scopes', () => {
+    const scope = createNeuTableSelectionScope(query, filters);
+    const base = { selectionOptions: multiple(), rowOptions, rows: selectionRows,
+      headerRows: selectionRows, columns, filterOptions: filters, currentScope: scope };
+    expect(projectNeuTableSelection({ ...base, selection: { kind: 'keys', keys: [1] } }).headerState)
+      .toBe('indeterminate');
+    expect(projectNeuTableSelection({ ...base, selection: { kind: 'keys', keys: [] } }).headerState)
+      .toBe('unchecked');
+    const backend = { ...base, selectionOptions: multiple({ toggleAllScope: 'all-matching' }) };
+    expect(projectNeuTableSelection({ ...backend, selection: {
+      kind: 'all-matching', scope, excludedKeys: [],
+    } }).headerState).toBe('checked');
+    expect(projectNeuTableSelection({ ...backend, selection: {
+      kind: 'keys', keys: [1],
+    } }).headerState).toBe('indeterminate');
+  });
+
+  it('toggles an all-matching scope off and clears only selectable page keys', () => {
+    const scope = createNeuTableSelectionScope(query, filters);
+    const base = { selectionOptions: multiple({ toggleAllScope: 'all-matching' }), rowOptions,
+      rows: selectionRows, loadedRows: selectionRows, currentScope: scope, columns,
+      filterOptions: filters };
+    expect(proposeNeuTableToggleAll({ ...base, selection: {
+      kind: 'all-matching', scope, excludedKeys: [],
+    } })?.next).toEqual({ kind: 'keys', keys: [] });
+    expect(proposeNeuTableToggleAll({ ...base, selection: {
+      kind: 'all-matching', scope, excludedKeys: [2],
+    } })?.next).toEqual({ kind: 'all-matching', scope, excludedKeys: [] });
+    expect(proposeNeuTableToggleAll({ ...base, selectionOptions: multiple(),
+      selection: { kind: 'keys', keys: [1] }, rows: [],
+    })).toBeNull();
+    expect(proposeNeuTableToggleAll({ ...base, selectionOptions: multiple(),
+      selection: { kind: 'keys', keys: [1] },
+    })?.next).toEqual({ kind: 'keys', keys: [1, 2, 4] });
+  });
+
+  it('rejects a changed filter kind and a changed all-matching selection scope', () => {
+    const condition = { kind: 'condition' as const, field: 'score' as const, rule: 'greaterThan' as const, value: 20 };
+    const first: NeuTableSelectionScope<Field> = {
+      search: '', globalFields: ['name'], filters: condition,
+    };
+    const second: NeuTableSelectionScope<Field> = {
+      ...first, filters: { kind: 'group', operator: 'and', children: [condition] },
+    };
+    expect(areNeuTableSelectionScopesEqual(first, second)).toBe(false);
+    expect(areNeuTableSelectionsEqual(
+      { kind: 'all-matching', scope: first, excludedKeys: [] },
+      { kind: 'all-matching', scope: second, excludedKeys: [] },
+    )).toBe(false);
+  });
+
+  it('keeps toggle-all unavailable in single-selection mode', () => {
+    const scope = createNeuTableSelectionScope(query, filters);
+    expect(proposeNeuTableToggleAll({
+      selection: { kind: 'keys', keys: [1] },
+      selectionOptions: { mode: 'single', indicator: 'radio', selectOnRowClick: true, allowClear: true },
+      rowOptions,
+      rows: selectionRows,
+      loadedRows: selectionRows,
+      currentScope: scope,
+      columns,
+      filterOptions: filters,
+    })).toBeNull();
+  });
+
+  it('toggles page exclusions against an applied all-matching selection', () => {
+    const scope = createNeuTableSelectionScope(query, filters);
+    const base = {
+      selectionOptions: multiple({ toggleAllScope: 'page' }), rowOptions,
+      rows: selectionRows.slice(0, 2), loadedRows: selectionRows.slice(0, 2),
+      currentScope: scope, columns, filterOptions: filters,
+    };
+    const applied: NeuTableSelection<number, Field> = {
+      kind: 'all-matching', scope, excludedKeys: [],
+    };
+    const excluded = proposeNeuTableToggleAll({ ...base, selection: applied });
+    expect(excluded?.next).toEqual({ ...applied, excludedKeys: [1, 2] });
+    const restored = proposeNeuTableToggleAll({
+      ...base, selection: excluded!.next,
+    });
+    expect(restored?.next).toEqual(applied);
+  });
 });

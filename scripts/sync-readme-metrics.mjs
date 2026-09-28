@@ -1,38 +1,24 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import ts from 'typescript';
 
 const root = new URL('..', import.meta.url).pathname;
 const update = process.argv.includes('--update');
 const packageJson = JSON.parse(readFileSync(join(root, 'projects/ui-core/package.json'), 'utf8'));
 const coveragePath = join(root, 'coverage/ui-core/coverage-summary.json');
-if (!existsSync(coveragePath)) {
-  console.error('README audit requires coverage/ui-core/coverage-summary.json. Run npm test first.');
+const runPath = join(root, 'coverage/ui-core/n2-coverage-run.json');
+if (!existsSync(coveragePath) || !existsSync(runPath)) {
+  console.error('README audit requires a complete N2 coverage run. Run npm run test:coverage first.');
   process.exit(1);
 }
 const coverage = JSON.parse(readFileSync(coveragePath, 'utf8')).total;
+const run = JSON.parse(readFileSync(runPath, 'utf8'));
+if (run.exitCode !== 0 || !Number.isSafeInteger(run.tests) || run.tests < 1) {
+  throw new Error('Canonical N2 test count is missing from the coverage run');
+}
 const entryPoints = readdirSync(join(root, 'projects/ui-core'), { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && existsSync(join(root, 'projects/ui-core', entry.name, 'ng-package.json')))
   .length;
-const specFiles = readdirSync(join(root, 'projects/ui-core'), { recursive: true }).filter(
-  (name) => typeof name === 'string' && name.endsWith('.spec.ts'),
-);
-let tests = 0;
-for (const name of specFiles) {
-  const path = join(root, 'projects/ui-core', name);
-  const sourceFile = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true);
-  const visit = (node) => {
-    if (
-      ts.isCallExpression(node) &&
-      ts.isIdentifier(node.expression) &&
-      (node.expression.text === 'it' || node.expression.text === 'test')
-    ) {
-      tests += 1;
-    }
-    ts.forEachChild(node, visit);
-  };
-  visit(sourceFile);
-}
+const tests = run.tests;
 const block = [
   '<!-- neural-ui-metrics:start -->',
   `- **Version:** ${packageJson.version}`,

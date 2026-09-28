@@ -1,6 +1,9 @@
 import {
   appendNeuTableFilterCondition,
+  areNeuTableQuerySlicesEqual,
   createNeuTablePaginationPresentation,
+  effectiveNeuTablePage,
+  neuTableFilterValueFromText,
   proposeNeuTableFilters,
   proposeNeuTablePage,
   proposeNeuTablePageSize,
@@ -41,6 +44,49 @@ const query = (overrides: Partial<NeuTableQuery<Field>> = {}): NeuTableQuery<Fie
 });
 
 describe('NeuTable 2 query UI pure transitions', () => {
+  it('compares filter condition semantics with an explicit value comparator', () => {
+    const condition = (field: Field, rule: 'equals' | 'notEquals', value: unknown): NeuFilterExpression<Field> =>
+      ({ kind: 'condition', field, rule, value });
+    const base = query({ filters: condition('name', 'equals', 'Ada') });
+    expect(areNeuTableQuerySlicesEqual(base, query({ filters: condition('name', 'equals', 'ada') }),
+      sortOptions, (left, right) => String(left).toLowerCase() === String(right).toLowerCase()))
+      .toBe(true);
+    for (const filters of [
+      condition('score', 'equals', 'Ada'),
+      condition('name', 'notEquals', 'Ada'),
+      condition('name', 'equals', 'Grace'),
+      { kind: 'group' as const, operator: 'and' as const,
+        children: [condition('name', 'equals', 'Ada')] },
+    ]) {
+      expect(areNeuTableQuerySlicesEqual(base, query({ filters }), sortOptions)).toBe(false);
+    }
+    const group = query({ filters: { kind: 'group', operator: 'or',
+      children: [condition('name', 'equals', 'Ada')] } });
+    expect(areNeuTableQuerySlicesEqual(group, query({ filters: { kind: 'group', operator: 'or',
+      children: [condition('name', 'equals', 'Ada')] } }), sortOptions)).toBe(true);
+    expect(areNeuTableQuerySlicesEqual(group, query({ filters: { kind: 'group', operator: 'or',
+      children: [condition('name', 'equals', 'Grace')] } }), sortOptions)).toBe(false);
+  });
+
+  it('normalizes nonfinite pages and parses unary or list filter text', () => {
+    expect(effectiveNeuTablePage(Number.NaN)).toBe(0);
+    expect(effectiveNeuTablePage(2.9)).toBe(2);
+    expect(neuTableFilterValueFromText('isNull', 'ignored')).toBeNull();
+    expect(neuTableFilterValueFromText('between', ' a, , b ')).toEqual(['a', 'b']);
+    expect(neuTableFilterValueFromText('in', 'one,two')).toEqual(['one', 'two']);
+    expect(neuTableFilterValueFromText('contains', 'Ada')).toBe('Ada');
+  });
+
+  it('handles empty nested removal and appends to a matching filter group', () => {
+    const item: NeuFilterExpression<Field> = { kind: 'condition', field: 'name', rule: 'equals', value: 'Ada' };
+    const group: NeuFilterExpression<Field> = { kind: 'group', operator: 'and', children: [item] };
+    expect(removeNeuTableFilterField(group, 'name')).toBeNull();
+    expect(removeNeuTableFilterField(null, 'name')).toBeNull();
+    expect(setNeuTableFilterCondition(null, item)).toEqual(item);
+    expect(appendNeuTableFilterCondition(group, { kind: 'condition', field: 'score',
+      rule: 'equals', value: 1 }, 'and')).toEqual({ kind: 'group', operator: 'and',
+      children: [item, { kind: 'condition', field: 'score', rule: 'equals', value: 1 }] });
+  });
   it('cycles single sort using default direction, removable policy and immutable snapshots', () => {
     const source = query();
     const ascending = proposeNeuTableSort({
@@ -133,6 +179,19 @@ describe('NeuTable 2 query UI pure transitions', () => {
     })!;
     expect(filtered.search).toBe('Ada');
     expect(filtered.filters).not.toBe(filters);
+  });
+
+  it('retains the current page for sort, search and filter changes when configured', () => {
+    const noReset = { ...sortOptions, resetPageOnChange: false };
+    const source = query();
+    expect(proposeNeuTableSort({ query: source, field: 'name', sortOptions: noReset, additive: false })?.page).toBe(4);
+    expect(proposeNeuTableSearch({ query: source, search: 'Grace', sortOptions: noReset })?.page).toBe(4);
+    expect(proposeNeuTableFilters({
+      query: source,
+      filters: { kind: 'condition', field: 'score', rule: 'equals', value: 10 },
+      sortOptions: noReset,
+      filterOptions,
+    })?.page).toBe(4);
   });
 
   it('adds, edits and removes one filter without flattening nested AND/OR branches', () => {

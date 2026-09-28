@@ -228,6 +228,37 @@ describe('NeuTable private export serializers', () => {
     ]);
   });
 
+  it('serializes mixed scalar, date, array and non-plain values without losing column positions', () => {
+    const values = [undefined, Number.NaN, Number.POSITIVE_INFINITY, 42n,
+      new Date('2026-03-29T00:00:00.000Z'), [1, undefined, { b: 2, a: 1 }],
+      new Map([['a', 1]])];
+    const exported = serializeNeuTableJson({
+      columns: values.map((_, index) => ({ key: `c${index}`, header: `Column ${index}` })),
+      rows: [values],
+    });
+    expect(JSON.parse(new TextDecoder().decode(exported.bytes))).toEqual([{
+      c0: null, c1: null, c2: null, c3: '42',
+      c4: '2026-03-29T00:00:00.000Z', c5: [1, null, { a: 1, b: 2 }],
+      c6: '[object Map]',
+    }]);
+  });
+
+  it('rejects cycles in either arrays or objects while allowing repeated shared values', () => {
+    const cyclicArray: unknown[] = [];
+    cyclicArray.push(cyclicArray);
+    const cyclicObject: Record<string, unknown> = {};
+    cyclicObject['self'] = cyclicObject;
+    const oneColumn = { columns: [{ key: 'value', header: 'Value' }] };
+    expect(() => serializeNeuTableJson({ ...oneColumn, rows: [[cyclicArray]] }))
+      .toThrow('Circular export value');
+    expect(() => serializeNeuTableJson({ ...oneColumn, rows: [[cyclicObject]] }))
+      .toThrow('Circular export value');
+    const shared = { name: 'same' };
+    expect(JSON.parse(new TextDecoder().decode(serializeNeuTableJson({
+      ...oneColumn, rows: [[[shared, shared]]],
+    }).bytes))).toEqual([{ value: [{ name: 'same' }, { name: 'same' }] }]);
+  });
+
   it('creates a valid stored XLSX archive without implicit formulas', () => {
     const result = serializeNeuTableXlsx(matrix);
     const archiveText = new TextDecoder().decode(result.bytes);

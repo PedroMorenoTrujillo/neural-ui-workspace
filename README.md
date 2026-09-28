@@ -36,19 +36,20 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 
 <!-- neural-ui-metrics:start -->
 - **Version:** 1.15.0
-- **Entry points:** 103
-- **Automated tests:** 3270
-- **Coverage:** 98.12% statements · 95.96% branches · 98.6% functions · 98.88% lines
+- **Entry points:** 99
+- **Automated tests:** 2889
+- **Coverage:** 96.96% statements · 95.02% branches · 96.06% functions · 98.14% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model
 - BEM as the required styling convention for component and demo SCSS
 - Zoneless-oriented test setup
-- Global coverage above 90% in all main metrics and across covered `ui-core` source files
+- Neural UI 2 release coverage passes the exact 95.01% floor on statements, branches, functions and lines in the full canonical run
 - Strong accessibility baseline validated in showcase and reinforced in core components
 
 For the current quality checklist and accessibility audit snapshot, see [projects/ui-core/QUALITY_STATUS.md](projects/ui-core/QUALITY_STATUS.md).
+The exact-count coverage gate is enforced by `npm run test:coverage` and the release verifier.
 
 ---
 

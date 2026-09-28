@@ -600,4 +600,35 @@ describe('NeuCascadeSelectComponent', () => {
     component.onOverlayPositionChange({ connectionPair: { originY: 'bottom' } } as any);
     expect(component.isPanelAbove()).toBe(false);
   });
+
+  it('sizes the panel from the available space above a trigger near the viewport bottom', () => {
+    const component = fixture.componentInstance as any;
+    const trigger = fixture.nativeElement.querySelector('.neu-cascade-select__trigger') as HTMLElement;
+    const rect = vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      x: 12, y: 700, left: 12, top: 700, right: 212, bottom: 730,
+      width: 200, height: 30, toJSON: () => ({}),
+    } as DOMRect);
+    try {
+      component.syncPanelPosition();
+      expect(component.panelPosition().width).toMatch(/px$/);
+      expect(Number.parseFloat(component.panelPosition().maxHeight)).toBeGreaterThanOrEqual(180);
+    } finally {
+      rect.mockRestore();
+    }
+  });
+
+  it('closes an open panel on option Escape and clears an open selection once', () => {
+    const component = fixture.componentInstance;
+    component.openPanel();
+    expect(component.open()).toBe(true);
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    component.onOptionKeydown(escape, 0);
+    expect(escape.defaultPrevented).toBe(true);
+    expect(component.open()).toBe(false);
+    component.value.set(1);
+    component.openPanel();
+    component.clear(new Event('clear'));
+    expect(component.value()).toBeNull();
+    expect(component.open()).toBe(false);
+  });
 });

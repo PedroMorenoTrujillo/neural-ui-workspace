@@ -149,4 +149,61 @@ describe('NeuVirtualListComponent fixed-height window', () => {
       fixture.destroy();
     }
   });
+
+  it('coalesces scroll and resize notifications and disconnects the observer on destroy', async () => {
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    let resize: (() => void) | undefined;
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resize = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    });
+    const cancel = vi.fn();
+    try {
+      const fixture = mount(Array.from({ length: 100 }, (_, i) => i));
+      await fixture.whenStable();
+      vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => frames.push(callback));
+      vi.stubGlobal('cancelAnimationFrame', cancel);
+      const viewport = viewportOf(fixture.nativeElement);
+      expect(observe).toHaveBeenCalledWith(viewport);
+      viewport.scrollTop = 400;
+      viewport.dispatchEvent(new Event('scroll'));
+      resize?.();
+      expect(frames).toHaveLength(1);
+      frames.shift()?.(0);
+      fixture.detectChanges();
+      expect(rendered(fixture.nativeElement)[0].getAttribute('aria-posinset')).toBe('7');
+      viewport.dispatchEvent(new Event('scroll'));
+      fixture.destroy();
+      expect(disconnect).toHaveBeenCalledTimes(1);
+      expect(cancel).toHaveBeenCalledWith(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('aligns valid key targets to center and nearest without overscrolling the list', async () => {
+    const fixture = mount(Array.from({ length: 20 }, (_, i) => i));
+    fixture.componentRef.setInput('itemSize', 0);
+    fixture.componentRef.setInput('visibleRows', Number.NaN);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.scrollTo({ key: 10, align: 'center' })).toBe(true);
+    expect(viewportOf(fixture.nativeElement).scrollTop).toBeGreaterThan(0);
+    expect(fixture.componentInstance.scrollTo({ key: 0 })).toBe(true);
+    expect(viewportOf(fixture.nativeElement).scrollTop).toBe(0);
+  });
+
+  it('reveals later items with nearest alignment and rejects scrolling after destroy', async () => {
+    const fixture = mount(Array.from({ length: 30 }, (_, i) => i));
+    await fixture.whenStable();
+    const viewport = viewportOf(fixture.nativeElement);
+    expect(fixture.componentInstance.scrollTo({ index: 25 })).toBe(true);
+    expect(viewport.scrollTop).toBeGreaterThan(0);
+    expect(fixture.componentInstance.scrollTo({ index: 20, align: 'end' })).toBe(true);
+    fixture.destroy();
+    expect(fixture.componentInstance.scrollTo({ index: 1 })).toBe(false);
+  });
 });

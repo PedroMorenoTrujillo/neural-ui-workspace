@@ -183,6 +183,37 @@ describe('NeuRichTextEditorComponent N2-009', () => {
     prompt.mockRestore();
   });
 
+  it('routes native toolbar, variable and editor events through the rendered controls', async () => {
+    const fixture = await setup({ label: 'Notes', hint: 'Write a note', variables: ['{{account}}'] });
+    const component = fixture.componentInstance;
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.test')
+      .mockReturnValueOnce('Example')
+      .mockReturnValueOnce('https://example.test/image.png')
+      .mockReturnValueOnce('Photo');
+    const buttons = fixture.nativeElement.querySelectorAll(
+      '.neu-rich-text-editor__toolbar button',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(buttons).toHaveLength(8);
+    for (const button of buttons) button.click();
+    (fixture.nativeElement.querySelector('.neu-rich-text-editor__variable') as HTMLButtonElement).click();
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLElement;
+    editor.dispatchEvent(new FocusEvent('focus'));
+    editor.dispatchEvent(new FocusEvent('blur'));
+    editor.dispatchEvent(new Event('paste', { bubbles: true, cancelable: true }));
+
+    expect(document.execCommand).toHaveBeenCalledWith('bold');
+    expect(document.execCommand).toHaveBeenCalledWith('italic');
+    expect(document.execCommand).toHaveBeenCalledWith('underline');
+    expect(document.execCommand).toHaveBeenCalledWith('insertUnorderedList');
+    expect(document.execCommand).toHaveBeenCalledWith('insertOrderedList');
+    expect(document.execCommand).toHaveBeenCalledWith('removeFormat');
+    expect(component.value()).toContain('https://example.test');
+    expect(component.value()).toContain('{{account}}');
+    expect(editor.getAttribute('aria-describedby')).toBe(`${component.editorId()}-hint`);
+    prompt.mockRestore();
+  });
+
   it('rejects oversized pasted images with domain detail', async () => {
     const fixture = await setup({ maxPastedImageBytes: 1 });
     const rejected = vi.fn();
@@ -277,5 +308,47 @@ describe('NeuRichTextEditorComponent N2-009', () => {
     fixture.destroy();
     expect(abort).toHaveBeenCalledTimes(1);
     expect(fixture.componentInstance['activeReaders'].size).toBe(0);
+  });
+
+  it('uses the URL as link text when no separate label is entered', async () => {
+    const fixture = await setup();
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.test/reference')
+      .mockReturnValueOnce('');
+    fixture.componentInstance.addLink();
+    const link = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface a') as HTMLAnchorElement;
+    expect(link.textContent).toBe('https://example.test/reference');
+    prompt.mockRestore();
+  });
+
+  it('leaves content intact when image URL entry is cancelled or edits are readonly', async () => {
+    const fixture = await setup({ value: '<p>Original</p>' });
+    const prompt = vi.spyOn(window, 'prompt').mockReturnValue(null);
+    fixture.componentInstance.addImageUrl();
+    expect(fixture.componentInstance.value()).toBe('<p>Original</p>');
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    fixture.componentInstance.format('bold');
+    fixture.componentInstance.addLink();
+    fixture.componentInstance.addImageUrl();
+    expect(fixture.componentInstance.value()).toBe('<p>Original</p>');
+    prompt.mockRestore();
+  });
+
+  it('reports one touch without a commit when focus leaves unchanged content', async () => {
+    const fixture = await setup({ value: '<p>Original</p>' });
+    const component = fixture.componentInstance;
+    const touch = vi.fn();
+    const committed = vi.fn();
+    component.touch.subscribe(touch);
+    component.valueCommitted.subscribe(committed);
+    component.onBoundaryFocusIn();
+    component.onBoundaryFocusIn();
+    component.onBoundaryFocusOut({ relatedTarget: null, currentTarget: fixture.nativeElement } as unknown as FocusEvent);
+    await fixture.whenStable();
+    component.onBoundaryFocusOut({ relatedTarget: null, currentTarget: fixture.nativeElement } as unknown as FocusEvent);
+    await fixture.whenStable();
+    expect(touch).toHaveBeenCalledTimes(1);
+    expect(committed).not.toHaveBeenCalled();
   });
 });

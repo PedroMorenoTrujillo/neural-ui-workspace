@@ -1,4 +1,8 @@
-import { sanitizeRichTextHtml } from './neu-rich-text-editor.utils';
+import {
+  normalizeRichTextHtml,
+  plainTextToRichTextHtml,
+  sanitizeRichTextHtml,
+} from './neu-rich-text-editor.utils';
 
 function semanticAnchor(html: string): HTMLAnchorElement {
   const host = document.createElement('div');
@@ -61,5 +65,31 @@ describe('RichTextEditor attribute integrity', () => {
   it('keeps the existing tag and event-handler restrictions', () => {
     expect(sanitizeRichTextHtml('<script>alert(1)</script><a onclick="bad()" href="javascript:bad()">safe</a>'))
       .toBe('<a>safe</a>');
+  });
+
+  it('normalizes empty, plain and rich text with paragraph breaks', () => {
+    expect(normalizeRichTextHtml('  ')).toBe('');
+    expect(normalizeRichTextHtml(' First < second\nline two\n\nNext '))
+      .toBe('<p>First &lt; second<br>line two</p><p>Next</p>');
+    expect(plainTextToRichTextHtml('A & B')).toBe('<p>A &amp; B</p>');
+    expect(normalizeRichTextHtml(' <strong>Ready</strong> ')).toBe('<strong>Ready</strong>');
+  });
+
+  it('retains safe link, image and table attributes while removing unsafe values', () => {
+    expect(sanitizeRichTextHtml('<a href="{{ user.profile }}" title=Open target=_self rel=opener>Open</a>'))
+      .toBe('<a href="{{ user.profile }}" target="_blank" rel="noopener noreferrer" title="Open">Open</a>');
+    expect(sanitizeRichTextHtml('<img src="data:image/png;base64,YQ==" alt="logo" width="24" height="bad" onerror="bad()">'))
+      .toBe('<img src="data:image/png;base64,YQ==" alt="logo" width="24">');
+    expect(sanitizeRichTextHtml('<td colspan="2" rowspan="3" style="color:red" title="cell">A</td>'))
+      .toBe('<td colspan="2" rowspan="3" title="cell">A</td>');
+  });
+
+  it('drops unknown and void closing tags and replaces invalid numeric entities in attributes', () => {
+    expect(sanitizeRichTextHtml('<custom>x</custom><br></br><img src="ftp://bad">'))
+      .toBe('x<br><img>');
+    for (const entity of ['&#0;', '&#1114112;', '&#55296;']) {
+      const html = sanitizeRichTextHtml(`<span title="${entity}">x</span>`);
+      expect(semanticAnchor(`<a>${html}</a>`).querySelector('span')?.title).toBe('\uFFFD');
+    }
   });
 });

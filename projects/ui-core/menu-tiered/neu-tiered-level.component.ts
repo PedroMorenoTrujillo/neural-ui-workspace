@@ -10,7 +10,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { NeuralIcon } from '@neural-icons/angular';
+import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuRovingMenuController } from '@neural-ui/core/internal';
 import type { NeuMenuItem } from '@neural-ui/core/menu-shared';
@@ -29,7 +29,7 @@ export interface NeuTieredOwner {
 /** Private focus/renderer context: one roving controller per visible menu level. */
 @Component({
   selector: 'neu-tiered-level',
-  imports: [OverlayModule, NeuButtonComponent, NeuralIcon, NgTemplateOutlet, forwardRef(() => NeuTieredLevelComponent)],
+  imports: [OverlayModule, NeuButtonComponent, InternalNeuIconOutletComponent, NgTemplateOutlet, forwardRef(() => NeuTieredLevelComponent)],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-tiered-level' },
   template: `
@@ -71,7 +71,7 @@ export interface NeuTieredOwner {
               </span>
             } @else {
               @if (item.icon) {
-                <neural-icon class="neu-menu__icon" [icon]="item.icon" size="1rem" aria-hidden="true" />
+                <neu-icon-outlet class="neu-menu__icon" [icon]="item.icon" size="1rem" aria-hidden="true" />
               }
               <span class="neu-menu__label">{{ item.label }}</span>
               @if (item.shortcut) { <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd> }

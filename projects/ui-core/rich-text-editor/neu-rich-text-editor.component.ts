@@ -15,15 +15,15 @@ import {
 import { DOCUMENT } from '@angular/common';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconBold } from '@neural-icons/core/icons/bold';
-import { iconItalic } from '@neural-icons/core/icons/italic';
-import { iconUnderline } from '@neural-icons/core/icons/underline';
-import { iconList } from '@neural-icons/core/icons/list';
-import { iconListOrdered } from '@neural-icons/core/icons/list-ordered';
-import { iconLink } from '@neural-icons/core/icons/link';
-import { iconImage } from '@neural-icons/core/icons/image';
-import { iconEraser } from '@neural-icons/core/icons/eraser';
+import { InternalNeuIconOutletComponent, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconBold as iconBold } from '@neural-ui/core/internal';
+import { neuIconItalic as iconItalic } from '@neural-ui/core/internal';
+import { neuIconUnderline as iconUnderline } from '@neural-ui/core/internal';
+import { neuIconList as iconList } from '@neural-ui/core/internal';
+import { neuIconListOrdered as iconListOrdered } from '@neural-ui/core/internal';
+import { neuIconLink as iconLink } from '@neural-ui/core/internal';
+import { neuIconImage as iconImage } from '@neural-ui/core/internal';
+import { neuIconEraser as iconEraser } from '@neural-ui/core/internal';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   escapeRichTextAttribute,
@@ -94,7 +94,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
 
 @Component({
   selector: 'neu-rich-text-editor',
-  imports: [NeuButtonComponent, NeuralIcon],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-rich-text-editor-host',
@@ -137,7 +137,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().bold"
               [disabled]="isInteractionBlocked()"
               (click)="format('bold')"
-            ><neural-icon [icon]="iconBold" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconBold" [fallbackText]="iconFallbackText(iconBold)" size="1em" /></button>
             <button
               neu-button
               type="button"
@@ -148,7 +148,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().italic"
               [disabled]="isInteractionBlocked()"
               (click)="format('italic')"
-            ><neural-icon [icon]="iconItalic" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconItalic" [fallbackText]="iconFallbackText(iconItalic)" size="1em" /></button>
             <button
               neu-button
               type="button"
@@ -159,7 +159,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().underline"
               [disabled]="isInteractionBlocked()"
               (click)="format('underline')"
-            ><neural-icon [icon]="iconUnderline" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconUnderline" [fallbackText]="iconFallbackText(iconUnderline)" size="1em" /></button>
           </div>
 
           <div
@@ -177,7 +177,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().unorderedList"
               [disabled]="isInteractionBlocked()"
               (click)="format('insertUnorderedList')"
-            ><neural-icon [icon]="iconList" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconList" [fallbackText]="iconFallbackText(iconList)" size="1em" /></button>
             <button
               neu-button
               type="button"
@@ -188,7 +188,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().orderedList"
               [disabled]="isInteractionBlocked()"
               (click)="format('insertOrderedList')"
-            ><neural-icon [icon]="iconListOrdered" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconListOrdered" [fallbackText]="iconFallbackText(iconListOrdered)" size="1em" /></button>
           </div>
 
           <div
@@ -206,7 +206,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().addLink"
               [disabled]="isInteractionBlocked()"
               (click)="addLink()"
-            ><neural-icon [icon]="iconLink" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconLink" [fallbackText]="iconFallbackText(iconLink)" size="1em" /></button>
             <button
               neu-button
               type="button"
@@ -217,7 +217,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().addImageUrl"
               [disabled]="isInteractionBlocked()"
               (click)="addImageUrl()"
-            ><neural-icon [icon]="iconImage" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconImage" [fallbackText]="iconFallbackText(iconImage)" size="1em" /></button>
           </div>
 
           <div
@@ -235,7 +235,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
               [title]="mergedLabels().clearFormat"
               [disabled]="isInteractionBlocked()"
               (click)="format('removeFormat')"
-            ><neural-icon [icon]="iconEraser" size="1em" /></button>
+            ><neu-icon-outlet [icon]="iconEraser" [fallbackText]="iconFallbackText(iconEraser)" size="1em" /></button>
           </div>
         </div>
 
@@ -297,6 +297,7 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
   styleUrl: './neu-rich-text-editor.component.scss',
 })
 export class NeuRichTextEditorComponent implements FormValueControl<string> {
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconBold = iconBold;
   protected readonly iconItalic = iconItalic;
   protected readonly iconUnderline = iconUnderline;

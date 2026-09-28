@@ -15,9 +15,9 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
-import { iconChevronUp } from '@neural-icons/core/icons/chevron-up';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconChevronUp as iconChevronUp } from '@neural-ui/core/internal';
 
 export type NeuScrollTopTarget = 'window' | 'parent';
 export type NeuScrollTopBehavior = 'auto' | 'smooth';
@@ -31,7 +31,7 @@ export class NeuScrollTopIconDirective {
 /** A browser-safe button that returns either the window or its parent scroller to the top. */
 @Component({
   selector: 'neu-scroll-top',
-  imports: [NeuralIcon, NgTemplateOutlet],
+  imports: [InternalNeuIconOutletComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: { '[class]': 'hostClasses()' },
   template: `
@@ -41,7 +41,7 @@ export class NeuScrollTopIconDirective {
         @if (iconTemplate) {
           <ng-container [ngTemplateOutlet]="iconTemplate.templateRef" />
         } @else {
-          <neural-icon [icon]="icon() === 'chevron-up' ? iconChevronUp : icon()" size="1.125rem" aria-hidden="true" />
+          <neu-icon-outlet [icon]="icon() === 'chevron-up' ? iconChevronUp : icon()" [fallbackPath]="iconFallbackPath(icon() === 'chevron-up' ? iconChevronUp : icon())" size="1.125rem" aria-hidden="true" />
         }
       </button>
     }
@@ -49,6 +49,7 @@ export class NeuScrollTopIconDirective {
   styleUrl: './neu-scroll-top.component.scss',
 })
 export class NeuScrollTopComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconChevronUp = iconChevronUp;
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
@@ -65,7 +66,7 @@ export class NeuScrollTopComponent {
   /** Requested scroll behavior; smooth is reduced to auto for reduced-motion users. */
   behavior = input<NeuScrollTopBehavior>('smooth');
   /** Registered Neural icon name. */
-  icon = input<NeuralIconName>('chevron-up');
+  icon = input<NeuIconKey>('chevron-up');
   /** Accessible action label on the native button. */
   buttonAriaLabel = input<string>('Scroll to top');
 

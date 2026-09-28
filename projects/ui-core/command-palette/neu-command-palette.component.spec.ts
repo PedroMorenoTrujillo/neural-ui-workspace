@@ -68,6 +68,40 @@ beforeEach(() => {
 });
 
 describe('NeuCommandPaletteComponent — Neural 2', () => {
+  it('ignores non-input query events and disabled highlight requests', () => {
+    const fixture = openDefault();
+    const palette = fixture.componentInstance.palette() as unknown as {
+      onQueryInput(event: Event): void;
+      highlight(id: string): void;
+      highlightedId(): string | null;
+      query(): string;
+    };
+    palette.onQueryInput({ target: document.createElement('button') } as unknown as Event);
+    palette.highlight('disabled');
+    palette.highlight('missing');
+    expect(palette.query()).toBe('');
+    expect(palette.highlightedId()).not.toBe('disabled');
+    palette.highlight('action');
+    expect(palette.highlightedId()).toBe('action');
+  });
+
+  it('moves from a result to both boundaries and leaves closed actions inert', () => {
+    const fixture = openDefault();
+    const palette = fixture.componentInstance.palette() as unknown as {
+      onResultKeydown(event: KeyboardEvent, id: string): void;
+      highlightedId(): string | null;
+      activateAction(command: NeuCommandAction): void;
+      close(): void;
+    };
+    palette.onResultKeydown(new KeyboardEvent('keydown', { key: 'End', cancelable: true }), 'action');
+    expect(palette.highlightedId()).toBe('link');
+    palette.onResultKeydown(new KeyboardEvent('keydown', { key: 'Home', cancelable: true }), 'link');
+    expect(palette.highlightedId()).toBe('action');
+    palette.close();
+    palette.close();
+    palette.activateAction(COMMANDS[0] as NeuCommandAction);
+    expect(fixture.componentInstance.actions).toEqual([]);
+  });
   it('is closed by default and owns a local per-instance open/close session', () => {
     const fixture = setupDefault();
     expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
@@ -183,6 +217,33 @@ describe('NeuCommandPaletteComponent — Neural 2', () => {
     expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('link');
     document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
     expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('action');
+  });
+
+  it('supports reverse search and result navigation while rendering command icons', () => {
+    const fixture = setupDefault();
+    fixture.componentInstance.commands.set([
+      { id: 'first', kind: 'action', label: 'First', icon: 'star' },
+      { id: 'blocked', kind: 'action', label: 'Blocked', disabled: true },
+      { id: 'last', kind: 'action', label: 'Last', icon: 'check' },
+    ]);
+    fixture.componentInstance.palette().open();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.neu-cmd__item-icon').length).toBe(2);
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('last');
+    document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'ArrowUp', bubbles: true, cancelable: true,
+    }));
+    expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('first');
+    document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'ArrowDown', bubbles: true, cancelable: true,
+    }));
+    expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('last');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
+    expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('first');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    expect((document.activeElement as HTMLElement).dataset['commandId']).toBe('last');
   });
 
   it('uses stable semantic identity across reconstructed command inputs', () => {

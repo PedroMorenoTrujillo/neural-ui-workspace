@@ -113,6 +113,35 @@ describe('NeuInlineEditorComponent N2-009', () => {
     expect(component.value()).toBe('Saved');
   });
 
+  it('starts in edit mode and saves or cancels through native controls', async () => {
+    const fixture = await setup({ value: 'Draft', startInEdit: true });
+    const component = fixture.componentInstance;
+    expect(component.editing()).toBe(true);
+    const input = fixture.nativeElement.querySelector('.neu-inline-editor__control') as HTMLInputElement;
+    input.value = 'Published';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(component.value()).toBe('Draft');
+    (fixture.nativeElement.querySelector('.neu-inline-editor__actions button') as HTMLButtonElement).click();
+    await detectStableChanges(fixture);
+    expect(component.value()).toBe('Published');
+    (fixture.nativeElement.querySelector('.neu-inline-editor__display') as HTMLButtonElement).click();
+    await detectStableChanges(fixture);
+    expect(component.editing()).toBe(true);
+    const controls = fixture.nativeElement.querySelectorAll('.neu-inline-editor__actions button') as NodeListOf<HTMLButtonElement>;
+    controls[1].click();
+    await detectStableChanges(fixture);
+    expect(component.editing()).toBe(false);
+    expect(component.value()).toBe('Published');
+  });
+
+  it('shows a decimal input mode while editing a numeric value', async () => {
+    const fixture = await setup({ type: 'number', value: 3 });
+    (fixture.nativeElement.querySelector('.neu-inline-editor__display') as HTMLButtonElement).click();
+    await detectStableChanges(fixture);
+    const input = fixture.nativeElement.querySelector('.neu-inline-editor__control') as HTMLInputElement;
+    expect(input.inputMode).toBe('decimal');
+  });
+
   it('commits on true boundary exit only when saveOnBlur is enabled', async () => {
     const fixture = await setup({ value: 'Draft', saveOnBlur: true });
     const component = fixture.componentInstance;
@@ -161,5 +190,38 @@ describe('NeuInlineEditorComponent N2-009', () => {
       }),
     );
     expect(fixture.componentInstance.value()).toBe('');
+  });
+
+  it('keeps idle cancel, blur and draft input inert until an edit begins', async () => {
+    const fixture = await setup({ value: 'Original' });
+    const component = fixture.componentInstance;
+    const cancelled = vi.fn();
+    component.editCancel.subscribe(cancelled);
+    component.cancel();
+    component.onEditFocusout({ relatedTarget: null } as FocusEvent);
+    component.commit();
+    expect(cancelled).not.toHaveBeenCalled();
+    component.beginEdit();
+    fixture.componentRef.setInput('readonly', true);
+    await detectStableChanges(fixture);
+    component.onDraftInput('Blocked');
+    expect(component.draft()).toBe('Original');
+    component.cancel();
+    expect(component.value()).toBe('Original');
+  });
+
+  it('focuses the visible editor or display control and ignores focus while disabled', async () => {
+    const fixture = await setup({ value: 'Original' });
+    const component = fixture.componentInstance;
+    component.focus();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.neu-inline-editor__display'));
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    component.focus();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
+    fixture.componentRef.setInput('disabled', true);
+    await detectStableChanges(fixture);
+    component.focus();
+    expect(component.value()).toBe('Original');
   });
 });

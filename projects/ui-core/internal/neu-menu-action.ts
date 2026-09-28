@@ -1,4 +1,4 @@
-import type { NeuralIconName } from '@neural-icons/core';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
 
 export type NeuMenuRouterLink = string | unknown[];
 
@@ -12,7 +12,7 @@ export interface NeuMenuActionLike<TSelf = unknown> {
   key?: string;
   id?: string;
   label?: string;
-  icon?: NeuralIconName;
+  icon?: NeuIconKey;
   badge?: string | number;
   active?: boolean;
   disabled?: boolean;
@@ -32,7 +32,7 @@ export interface NeuResolvedMenuAction<T> {
   readonly original: T;
   readonly key: string;
   readonly label: string;
-  readonly icon?: NeuralIconName;
+  readonly icon?: NeuIconKey;
   readonly badge?: string | number;
   readonly tooltip?: string;
   readonly active: boolean;

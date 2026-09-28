@@ -28,8 +28,8 @@ export interface NeuralUIThemeConfig {
 
 /**
  * Registra los providers de configuración de Neural UI.
- * Los iconos internos usan definiciones directas; los nombres elegidos por la aplicación
- * se registran selectivamente con provideNeuralIcons de @neural-icons/angular.
+ * Los iconos estructurales tienen fallback en Core; la aplicación puede configurar
+ * un proveedor opcional mediante provideNeuIconResolver de @neural-ui/core/foundation.
  * @example
  * // app.config.ts
  * export const appConfig: ApplicationConfig = {

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import {
   createNeuTreeTableRemoteState,
   destroyNeuTreeTableRemote,
+  fingerprintNeuTreeTableQuery,
   reduceNeuTreeTableRemote,
   retryNeuTreeTableRemote,
   type TreeRemoteCoordinatorState,
@@ -81,6 +82,35 @@ const snapshot = <K extends string | number>(
   expandedKeys: [],
   knownKeys: [],
   ...overrides,
+});
+
+describe('remote query structural fingerprints', () => {
+  const fingerprint = (value: unknown) => fingerprintNeuTreeTableQuery(query({
+    filters: { kind: 'condition', field: 'name', rule: 'equals', value },
+  }));
+
+  it('distinguishes primitive and nonfinite values without JSON coercion', () => {
+    expect(fingerprint(0)).not.toBe(fingerprint(-0));
+    expect(fingerprint(Number.NaN)).not.toBe(fingerprint(null));
+    expect(fingerprint(Infinity)).not.toBe(fingerprint(-Infinity));
+    expect(fingerprint(2n)).not.toBe(fingerprint(2));
+    expect(fingerprint(true)).not.toBe(fingerprint('true'));
+    expect(fingerprint(undefined)).not.toBe(fingerprint(null));
+    expect(fingerprint(Symbol())).toBe(fingerprint(Symbol()));
+    expect(fingerprint(Symbol('a'))).not.toBe(fingerprint(Symbol('b')));
+  });
+
+  it('preserves object structure, dates and shared references deterministically', () => {
+    expect(fingerprint(new Date('2026-01-01T00:00:00Z')))
+      .not.toBe(fingerprint(new Date('invalid')));
+    expect(fingerprint({ a: 1, b: [2, 3] })).toBe(fingerprint({ b: [2, 3], a: 1 }));
+    const shared = { id: 1 };
+    expect(fingerprint([shared, shared])).not.toBe(fingerprint([{ id: 1 }, { id: 1 }]));
+    const circular: { self?: unknown } = {};
+    circular.self = circular;
+    expect(fingerprint(circular)).toBe(fingerprint(circular));
+    expect(fingerprint(function namedAction() {})).not.toBe(fingerprint(function otherAction() {}));
+  });
 });
 
 function advance<K extends string | number>(

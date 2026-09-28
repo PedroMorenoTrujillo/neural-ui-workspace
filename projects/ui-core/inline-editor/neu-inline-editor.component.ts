@@ -13,10 +13,10 @@ import {
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconEdit } from '@neural-icons/core/icons/edit';
-import { iconCheck } from '@neural-icons/core/icons/check';
-import { iconX } from '@neural-icons/core/icons/x';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconEdit as iconEdit } from '@neural-ui/core/internal';
+import { neuIconCheck as iconCheck } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
 
 export type NeuInlineMode = 'text' | 'number';
 export type NeuInlineEditorType = NeuInlineMode | 'select' | 'textarea' | 'date';
@@ -37,7 +37,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
 
 @Component({
   selector: 'neu-inline-editor',
-  imports: [NeuButtonComponent, NeuralIcon],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
@@ -73,7 +73,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
             [ariaLabel]="saveLabel()"
             [disabled]="disabled() || readonly() || !draftValid()"
             (click)="commit()"
-          ><neural-icon [icon]="iconCheck" size="1em" /></button>
+          ><neu-icon-outlet [icon]="iconCheck" [fallbackPath]="iconFallbackPath(iconCheck)" [fallbackText]="iconFallbackText(iconCheck)" size="1em" /></button>
           <button
             neu-button
             type="button"
@@ -83,7 +83,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
             [ariaLabel]="cancelLabel()"
             [disabled]="disabled()"
             (click)="cancel()"
-          ><neural-icon [icon]="iconX" size="1em" /></button>
+          ><neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1em" /></button>
         </div>
       </div>
     } @else {
@@ -102,7 +102,7 @@ interface NeuInlineEditorValueCommitEvent<V> {
           {{ displayValue() }}
         </span>
         @if (!readonly()) {
-          <neural-icon [icon]="iconEdit" size="14px" aria-hidden="true" />
+          <neu-icon-outlet [icon]="iconEdit" [fallbackPath]="iconFallbackPath(iconEdit)" [fallbackText]="iconFallbackText(iconEdit)" size="14px" aria-hidden="true" />
         }
       </button>
     }
@@ -110,6 +110,8 @@ interface NeuInlineEditorValueCommitEvent<V> {
   styleUrl: './neu-inline-editor.component.scss',
 })
 export class NeuInlineEditorControl<V = string | number | null> implements FormValueControl<V> {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconCheck = iconCheck;
   protected readonly iconEdit = iconEdit;
   protected readonly iconX = iconX;

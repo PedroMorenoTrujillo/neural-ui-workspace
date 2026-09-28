@@ -15,8 +15,8 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconUpload } from '@neural-icons/core/icons/upload';
+import { InternalNeuIconOutletComponent, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconUpload as iconUpload } from '@neural-ui/core/internal';
 import { NeuProgressBarComponent } from '@neural-ui/core/progress-bar';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import type {
@@ -35,7 +35,7 @@ export type {
 
 @Component({
   selector: 'neu-uploader',
-  imports: [NgTemplateOutlet, NeuButtonComponent, NeuProgressBarComponent, NeuralIcon],
+  imports: [NgTemplateOutlet, NeuButtonComponent, NeuProgressBarComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-uploader-host',
@@ -144,7 +144,7 @@ export type {
           [attr.aria-describedby]="describedBy()"
           (click)="openFilePicker()"
         >
-          <neural-icon [icon]="iconUpload" size="1em" aria-hidden="true" />
+          <neu-icon-outlet [icon]="iconUpload" [fallbackText]="iconFallbackText(iconUpload)" size="1em" aria-hidden="true" />
           @if (showPickerText() && chooseLabel()) {
             {{ chooseLabel() }}
           }
@@ -244,6 +244,7 @@ export type {
   styleUrl: './neu-uploader.component.scss',
 })
 export class NeuUploaderComponent implements FormValueControl<readonly File[]> {
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconUpload = iconUpload;
   readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
   readonly value = model<readonly File[]>([]);

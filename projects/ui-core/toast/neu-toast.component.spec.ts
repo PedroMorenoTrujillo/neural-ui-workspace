@@ -85,7 +85,7 @@ describe('NeuToastContainerComponent', () => {
     const closeBtn: HTMLButtonElement = f.nativeElement.querySelector('.neu-toast__close');
     expect(closeBtn.type).toBe('button');
     expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar');
-    expect(closeBtn.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(closeBtn.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
     closeBtn.click();
     f.detectChanges();
     expect(service.toasts().find((t) => t.id === id)).toBeUndefined();
@@ -156,13 +156,13 @@ describe('NeuToastContainerComponent', () => {
     const { f } = setup();
     const comp = f.componentInstance;
     const cases: [NeuToastTone, string][] = [
-      ['success', 'circle-check'],
-      ['danger', 'circle-x'],
-      ['warning', 'warning'],
-      ['info', 'info'],
+      ['success', 'status-success'],
+      ['danger', 'status-error'],
+      ['warning', 'status-warning'],
+      ['info', 'status-info'],
     ];
     for (const [type, icon] of cases) {
-      expect(comp.getIcon(type).name).toBe(icon);
+      expect(comp.getIcon(type)).toBe(icon);
     }
   });
 

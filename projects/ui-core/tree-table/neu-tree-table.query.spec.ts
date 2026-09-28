@@ -140,6 +140,58 @@ function deepFreeze<T>(value: T): T {
 }
 
 describe('NeuTreeTable 2 pure hierarchical query engine', () => {
+  it('handles scalar search and filter operands across boolean, bigint and invalid values', () => {
+    const rules = { ...filterOptions };
+    const check = (rule: NeuTreeFilterConstraint<Field>['rule'], candidate: unknown,
+      expected: boolean, value: unknown = null) =>
+      expect(evaluateNeuTreeFilter({ kind: 'condition', field: 'rank', rule, value },
+        candidate, rowsForFilter, rules)).toBe(expected);
+    const rowsForFilter: Row = { id: 'sample', name: 'Sample', rank: 1, group: 'x' };
+    check('equals', true, true, true);
+    check('equals', 2n, true, 2n);
+    check('lessThan', 'a', true, 'b');
+    check('greaterThan', 'b', true, 'a');
+    check('between', 2n, true, [1n, 3n]);
+    check('between', Number.NaN, false, [1, 3]);
+    check('endsWith', 'Sample', true, 'ple');
+    check('endsWith', 2, false, '2');
+    check('isEmpty', [], true);
+    check('isNotEmpty', [], false);
+  });
+
+  it('honors sort policy when cycling single and multiple fields', () => {
+    const initial = emptyQuery();
+    const descending = { ...sortOptions, defaultDirection: 'desc' as const,
+      mode: 'single' as const, resetRootPageOnChange: false };
+    const first = proposeNeuTreeTableSort(initial, 'rank', descending);
+    expect(first.sort).toEqual([{ field: 'rank', direction: 'desc' }]);
+    expect(first.page).toBe(3);
+    const second = proposeNeuTreeTableSort(first, 'rank', descending);
+    expect(second.sort).toEqual([{ field: 'rank', direction: 'asc' }]);
+    expect(proposeNeuTreeTableSort(second, 'rank', descending).sort).toEqual([]);
+    expect(proposeNeuTreeTableSort(second, 'rank', { ...descending, removable: false }).sort)
+      .toEqual([{ field: 'rank', direction: 'desc' }]);
+    expect(proposeNeuTreeTableSort(second, 'name', { ...descending, mode: 'multiple' }).sort)
+      .toEqual([{ field: 'rank', direction: 'asc' }, { field: 'name', direction: 'desc' }]);
+  });
+
+  it('collapses an emptied nested filter and retains unrelated siblings', () => {
+    const rank: NeuTreeFilterConstraint<Field> = {
+      kind: 'condition', field: 'rank', rule: 'equals', value: 1,
+    };
+    const name: NeuTreeFilterConstraint<Field> = {
+      kind: 'condition', field: 'name', rule: 'equals', value: 'Ada',
+    };
+    const nested = { kind: 'group' as const, operator: 'and' as const, children: [
+      { kind: 'group' as const, operator: 'or' as const, children: [rank] }, name,
+    ] };
+    expect(replaceNeuTreeTableFilter(nested, 'rank', null)).toEqual(name);
+    expect(replaceNeuTreeTableFilter(rank, 'rank', null)).toBeNull();
+    expect(replaceNeuTreeTableFilter(name, 'rank', rank)).toEqual({
+      kind: 'group', operator: 'and', children: [name, rank],
+    });
+    expect(readNeuTreeTableFilterValue(nested, 'missing' as Field)).toBeUndefined();
+  });
   it('normalizes search once and searches only declared scalar global fields', () => {
     expect(normalizeNeuTreeSearch('  Ａlpha\n  NODE ')).toBe('alpha node');
     const rows: readonly Row[] = [
@@ -551,5 +603,89 @@ describe('NeuTreeTable 2 pure hierarchical query engine', () => {
       rule: 'contains',
       value: 'a',
     });
+  });
+
+  it.each([
+    ['boolean equality', true, 'equals', true, true],
+    ['bigint equality', 3n, 'equals', 3n, true],
+    ['number identity', -0, 'equals', 0, false],
+    ['normalized suffix', '  UPPER  Case ', 'endsWith', 'case', true],
+    ['nonmatching suffix', 'Alpha', 'endsWith', 'beta', false],
+  ] as const)('evaluates %s without coercing domain values', (_label, candidate, rule, value, expected) => {
+    expect(evaluateNeuTreeFilter({ kind: 'condition', field: 'name', rule, value }, candidate, {} as Row, filterOptions)).toBe(expected);
+  });
+
+  it('searches numeric, boolean and bigint fields while refusing object values', () => {
+    const rows = [
+      { id: 'number', name: 'n', rank: 42, group: 'x' },
+      { id: 'boolean', name: 'b', rank: true, group: 'x' },
+      { id: 'bigint', name: 'g', rank: 42n, group: 'x' },
+      { id: 'object', name: 'o', rank: { value: 42 }, group: 'x' },
+    ] as unknown as readonly Row[];
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy(rows.map((row) => row.id)));
+    const project = (search: string) => buildNeuTreeTableQueryProjection({
+      normalized, query: { ...emptyQuery(), search }, columns,
+      filterOptions: { ...filterOptions, globalFields: ['rank'] }, sortOptions, dataMode: 'client',
+    }).roots;
+    expect(project('42')).toEqual(['string:number', 'string:bigint']);
+    expect(project('true')).toEqual(['string:boolean']);
+    expect(project('value')).toEqual([]);
+  });
+
+  it('treats unknown filter columns and unsupported rules as nonmatches', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'Alpha', rank: 1, group: 'x' }];
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy(['a']));
+    const query = (field: Field, rule: NeuTreeFilterConstraint<Field>['rule']) =>
+      buildNeuTreeTableQueryProjection({
+        normalized, query: { ...emptyQuery(), filters: { kind: 'condition', field, rule, value: 'Alpha' } },
+        columns: columns.filter((column) => column.id === 'name'), filterOptions, sortOptions, dataMode: 'client',
+      }).roots;
+    expect(query('group', 'equals')).toEqual([]);
+    expect(query('name', 'between')).toEqual([]);
+    expect(query('name', 'equals')).toEqual(['string:a']);
+  });
+
+  it('gives empty AND and OR groups their respective logical identities', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'Alpha', rank: 1, group: 'x' }];
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy(['a']));
+    const project = (operator: 'and' | 'or') => buildNeuTreeTableQueryProjection({
+      normalized, query: { ...emptyQuery(), filters: { kind: 'group', operator, children: [] } },
+      columns, filterOptions, sortOptions, dataMode: 'client',
+    }).roots;
+    expect(project('and')).toEqual(['string:a']);
+    expect(project('or')).toEqual([]);
+  });
+
+  it('deduplicates sort fields and lets single sort mode retain only the first', () => {
+    const rows: readonly Row[] = [
+      { id: 'a', name: 'Zulu', rank: 1, group: 'x' },
+      { id: 'b', name: 'Alpha', rank: 2, group: 'x' },
+    ];
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy(['a', 'b']));
+    const entries = [
+      { field: 'name' as const, direction: 'asc' as const },
+      { field: 'name' as const, direction: 'desc' as const },
+      { field: 'rank' as const, direction: 'asc' as const },
+    ];
+    const project = (mode: 'single' | 'multiple') => buildNeuTreeTableQueryProjection({
+      normalized, query: { ...emptyQuery(), sort: entries }, columns,
+      filterOptions, sortOptions: { ...sortOptions, mode }, dataMode: 'client',
+    }).roots;
+    expect(project('single')).toEqual(['string:b', 'string:a']);
+    expect(project('multiple')).toEqual(['string:b', 'string:a']);
+  });
+
+  it('does not turn an absent global-search column into a match', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'Alpha', rank: 1, group: 'x' }];
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy(['a']));
+    const projection = buildNeuTreeTableQueryProjection({
+      normalized,
+      query: { ...emptyQuery(), search: 'Alpha' },
+      columns: columns.filter((column) => column.id === 'rank'),
+      filterOptions: { ...filterOptions, globalFields: ['name'] },
+      sortOptions,
+      dataMode: 'client',
+    });
+    expect(projection.roots).toEqual([]);
   });
 });

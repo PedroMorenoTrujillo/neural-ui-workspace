@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "major": 2,
+  "policyVersion": "n2-ratchet-v1",
+  "sourceCommit": "fab8ac7e79980a286150da9363d9c14aec4c1580",
+  "testCount": 2568,
+  "testFileCount": 188,
+  "productionRecordCount": 180,
+  "coverageProvider": "v8",
+  "toolchain": {
+    "angularCore": "22.1.6",
+    "angularBuild": "22.1.8",
+    "vitest": "4.1.4",
+    "coverageV8": "4.1.4",
+    "nodeMajor": 22
+  },
+  "canonicalCommand": "npm run test:coverage",
+  "collectionCommand": "ng test ui-core --watch=false --coverage",
+  "targetAllMetrics": 95.01,
+  "hardLineFloor": 95.01,
+  "materialDenominatorChangePercent": 5,
+  "materialRecordChangePercent": 5,
+  "testConfig": {
+    "builder": "@angular/build:unit-test",
+    "tsConfig": "projects/ui-core/tsconfig.spec.json",
+    "runnerConfig": "vitest.coverage.config.mts",
+    "include": null,
+    "exclude": ["**/*.stress.spec.ts"],
+    "coverage": true,
+    "coverageReporters": ["text", "html", "lcov", "json-summary"],
+    "coverageThresholds": {
+      "lines": 95.01,
+      "perFile": false
+    },
+    "runnerConfigSha256": "bceb15051bae50c3fdd5913c0a03e9598580582cafa4ff9eaa3fffd3af58dede",
+    "specTsconfigSha256": "f3e60bbc3ee3daf06278e2bf513f2e43c196d1c636bf833ef4753234751eb66b",
+    "packageScripts": {
+      "test": "npm run test:coverage",
+      "testUnit": "ng test ui-core --watch=false --no-coverage",
+      "testCoverage": "node scripts/run-n2-coverage-gate.mjs",
+      "testCoverageGate": "node --test scripts/n2-coverage-ratchet.spec.mjs",
+      "auditCoverage": "node scripts/audit-n2-coverage-ratchet.mjs"
+    },
+    "releaseVerifierSha256": "5efeb6b579b1e2d9db205b54f778889c2ac7a74d37c0f26d49822defff5a52c6"
+  },
+  "metrics": {
+    "statements": { "covered": 23002, "total": 24564, "percentage": 93.64, "missed": 1562 },
+    "branches": { "covered": 13086, "total": 14708, "percentage": 88.97, "missed": 1622 },
+    "functions": { "covered": 4368, "total": 4695, "percentage": 93.03, "missed": 327 },
+    "lines": { "covered": 18283, "total": 19060, "percentage": 95.92, "missed": 777 }
+  },
+  "observedRuns": [
+    {
+      "command": "ng test ui-core --watch=false --coverage",
+      "testFiles": 188,
+      "tests": 2568,
+      "statementsCovered": 23002,
+      "statementsTotal": 24564,
+      "branchesCovered": 13086,
+      "branchesTotal": 14708,
+      "functionsCovered": 4368,
+      "functionsTotal": 4695,
+      "linesCovered": 18283,
+      "linesTotal": 19060
+    },
+    {
+      "command": "ng test ui-core --watch=false --coverage",
+      "testFiles": 188,
+      "tests": 2568,
+      "statementsCovered": 23002,
+      "statementsTotal": 24564,
+      "branchesCovered": 13086,
+      "branchesTotal": 14708,
+      "functionsCovered": 4368,
+      "functionsTotal": 4695,
+      "linesCovered": 18283,
+      "linesTotal": 19060
+    }
+  ],
+  "provenance": {
+    "report": "N2-REL-02-COVERAGE-ASSURANCE.md",
+    "historicalThresholdCommit": "470eaac03144d1c2d2dac3cd887d7cbbde91b79a",
+    "historicalAllMetricPassCommit": "bd1b168a6d2b185e20370225329a2546440a5ab4",
+    "historicalComparability": "partial",
+    "selection": "minimum covered count of two fresh canonical runs with identical denominators"
+  }
+}

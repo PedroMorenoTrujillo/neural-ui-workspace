@@ -5,8 +5,8 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
+import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
 
 export type NeuButtonTone = 'neutral' | 'brand' | 'danger';
 export type NeuButtonVariant = 'solid' | 'outline' | 'ghost';
@@ -25,7 +25,7 @@ export type NeuButtonIconPosition = 'start' | 'end';
  */
 @Component({
   selector: 'button[neu-button]',
-  imports: [NeuralIcon],
+  imports: [InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     type: 'button',
@@ -54,11 +54,11 @@ export type NeuButtonIconPosition = 'start' | 'end';
       </span>
     }
     @if (hasIcon() && iconPosition() === 'start') {
-      <neural-icon [icon]="icon()!" [size]="iconSize()" [strokeWidth]="2" aria-hidden="true" />
+      <neu-icon-outlet [icon]="icon()!" [fallbackPath]="iconFallbackPath()" [size]="iconSize()" [strokeWidth]="2" aria-hidden="true" />
     }
     <ng-content />
     @if (hasIcon() && iconPosition() === 'end') {
-      <neural-icon [icon]="icon()!" [size]="iconSize()" [strokeWidth]="2" aria-hidden="true" />
+      <neu-icon-outlet [icon]="icon()!" [fallbackPath]="iconFallbackPath()" [size]="iconSize()" [strokeWidth]="2" aria-hidden="true" />
     }
   `,
   styleUrl: './neu-button.component.scss',
@@ -83,7 +83,7 @@ export class NeuButtonComponent {
   fullWidth = input<boolean>(false);
 
   /** Canonical registered Neural icon name. Project custom icon content as an escape hatch. */
-  icon = input<NeuralIconName | null>(null);
+  icon = input<NeuIconKey | null>(null);
 
   /** Posición del icono respecto al texto */
   iconPosition = input<NeuButtonIconPosition>('start');
@@ -106,6 +106,9 @@ export class NeuButtonComponent {
 
   readonly isDisabled = computed(() => this.disabled() || this.loading());
   readonly hasIcon = computed(() => !!this.icon());
+  protected readonly iconFallbackPath = computed(() =>
+    this.icon() === 'add' ? 'M12 4v16M4 12h16' : null,
+  );
 
   readonly iconSize = computed(() => {
     const map: Record<NeuButtonSize, string> = { sm: '14px', md: '16px', lg: '18px' };

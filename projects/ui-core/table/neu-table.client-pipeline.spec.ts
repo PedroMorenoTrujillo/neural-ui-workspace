@@ -200,6 +200,76 @@ describe('NeuTable 2 pure client pipeline', () => {
     expect(areNeuTableQueriesSemanticallyEqual(effective, { ...effective })).toBe(true);
   });
 
+  it('compares each query field and nested filter decision independently', () => {
+    const condition = (field: Field, value: unknown, rule: 'equals' | 'notEquals' = 'equals'): NeuFilterExpression<Field> =>
+      ({ kind: 'condition', field, rule, value });
+    const base = normalizeNeuTableQuery(query({
+      sort: [{ field: 'name', direction: 'asc' }],
+      filters: { kind: 'group', operator: 'and', children: [condition('name', 'Ada')] },
+    }), sortOptions);
+    expect(areNeuTableQueriesSemanticallyEqual(base, { ...base, filters: {
+      kind: 'group', operator: 'and', children: [condition('name', 'Ada')],
+    } })).toBe(true);
+    for (const changed of [
+      { ...base, page: 1 },
+      { ...base, pageSize: 50 },
+      { ...base, search: 'ada' },
+      { ...base, sort: [] },
+      { ...base, sort: [{ field: 'score' as Field, direction: 'asc' as const }] },
+      { ...base, sort: [{ field: 'name' as Field, direction: 'desc' as const }] },
+      { ...base, filters: null },
+      { ...base, filters: condition('name', 'Ada') },
+      { ...base, filters: { kind: 'group' as const, operator: 'or' as const, children: [condition('name', 'Ada')] } },
+      { ...base, filters: { kind: 'group' as const, operator: 'and' as const, children: [condition('name', 'Ada'), condition('score', 1)] } },
+      { ...base, filters: { kind: 'group' as const, operator: 'and' as const, children: [condition('name', 'Grace')] } },
+    ]) {
+      expect(areNeuTableQueriesSemanticallyEqual(base, changed)).toBe(false);
+    }
+    const sameCondition = normalizeNeuTableQuery(query({ filters: condition('name', 'Ada') }), sortOptions);
+    expect(areNeuTableQueriesSemanticallyEqual(sameCondition, {
+      ...sameCondition, filters: condition('name', 'Ada'),
+    })).toBe(true);
+    expect(areNeuTableQueriesSemanticallyEqual(sameCondition, {
+      ...sameCondition, filters: condition('score', 'Ada'),
+    })).toBe(false);
+    expect(areNeuTableQueriesSemanticallyEqual(sameCondition, {
+      ...sameCondition, filters: condition('name', 'Grace'),
+    })).toBe(false);
+    expect(areNeuTableQueriesSemanticallyEqual(sameCondition, {
+      ...sameCondition, filters: condition('name', 'Ada', 'notEquals'),
+    })).toBe(false);
+  });
+
+  it('normalizes malformed filter children and duplicate multi-sort entries safely', () => {
+    const malformed = { kind: 'group', operator: 'and', children: [
+      null, { kind: 'unknown' }, { kind: 'condition', field: 'name', rule: 'equals', value: 'Ada' },
+    ] } as unknown as NeuFilterExpression<Field>;
+    const effective = normalizeNeuTableQuery(query({
+      sort: [{ field: 'score', direction: 'asc' }, { field: 'score', direction: 'desc' }, { field: 'name', direction: 'asc' }],
+      filters: malformed,
+    }), sortOptions);
+    expect(effective.sort).toEqual([
+      { field: 'score', direction: 'asc' }, { field: 'name', direction: 'asc' },
+    ]);
+    expect(effective.filters).toEqual({ kind: 'group', operator: 'and', children: [
+      { kind: 'condition', field: 'name', rule: 'equals', value: 'Ada' },
+    ] });
+  });
+
+  it('handles numeric and string boundary comparisons and primitive equality', () => {
+    expect(evaluateNeuTableFilterRule(Number.NaN, 'between', [0, 1])).toBe(false);
+    expect(evaluateNeuTableFilterRule(1, 'between', [Number.NaN, 2])).toBe(false);
+    expect(evaluateNeuTableFilterRule(1n, 'between', [0n, 2n])).toBe(true);
+    expect(evaluateNeuTableFilterRule(2n, 'between', [0n, 2n])).toBe(true);
+    expect(evaluateNeuTableFilterRule('a', 'between', ['a', 'z'])).toBe(true);
+    expect(evaluateNeuTableFilterRule('z', 'between', ['a', 'z'])).toBe(true);
+    expect(evaluateNeuTableFilterRule('', 'isEmpty', null)).toBe(true);
+    expect(evaluateNeuTableFilterRule(undefined, 'equals', undefined)).toBe(true);
+    expect(evaluateNeuTableFilterRule(true, 'equals', true)).toBe(true);
+    expect(evaluateNeuTableFilterRule(1n, 'equals', 1n)).toBe(true);
+    expect(evaluateNeuTableFilterRule(1, 'equals', '1')).toBe(false);
+  });
+
   it('sorts stably across default categories, nullish and non-comparable values', () => {
     const values: readonly Row[] = [
       { id: 1, name: 'one', score: 0, enabled: false, value: null },

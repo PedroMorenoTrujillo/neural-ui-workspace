@@ -76,6 +76,7 @@ export function assertButtonIconBoundary(metafile) {
     throw new Error(`Button component-only bundle retained icon package: ${bundled.join(', ')}`);
   const external = Object.values(metafile.outputs)
     .flatMap((output) => output.imports ?? [])
-    .some((dependency) => dependency.external && dependency.path.startsWith('@neural-icons/'));
-  if (!external) throw new Error('Button icon dependency was not externalized');
+    .filter((dependency) => dependency.external && dependency.path.startsWith('@neural-icons/'));
+  if (external.length)
+    throw new Error(`Button component-only bundle still imports icon package: ${external.map((dependency) => dependency.path).join(', ')}`);
 }

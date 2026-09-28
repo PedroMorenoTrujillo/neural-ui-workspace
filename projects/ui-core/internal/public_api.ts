@@ -8,6 +8,7 @@
  * generated code.
  */
 export * from './neu-hydration-internals';
+export * from './neu-semantic-icons';
 export { NeuInitialTemporalState, NeuResponsiveState } from '@neural-ui/core/internal-state';
 export * from './neu-menu-action';
 export * from './neu-menu-adapters';

@@ -22,6 +22,25 @@ const rows = [
 const options = { mode: 'subheader' as const, scope: 'loaded' as const };
 
 describe('NeuTable loaded-only grouping engine', () => {
+  it('preserves type and negative-zero identity in group headers', () => {
+    interface TypedRow { readonly group: unknown }
+    const typedRows = [null, undefined, -0, 0, true, 2n, '2', { id: 2 }]
+      .map((group, index) => ({ row: { group } satisfies TypedRow, track: index }));
+    const grouped = projectNeuTableGrouping({
+      rows: typedRows,
+      grouping: { by: ['group'], expandedGroupIds: [] },
+      options: { mode: 'subheader', scope: 'loaded' },
+      columns: [{ id: 'group', header: 'Group', field: 'group' }],
+    });
+    const headers = grouped.flatMap((node) => node.kind === 'group-header' ? [node] : []);
+    expect(headers).toHaveLength(8);
+    expect(headers.map((node) => node.context.value)).toEqual(
+      [null, undefined, -0, 0, true, 2n, '2', { id: 2 }],
+    );
+    expect(headers[2]?.id).not.toBe(headers[3]?.id);
+    expect(headers[5]?.id).not.toBe(headers[6]?.id);
+    expect(proposeNeuTableGroupToggle(null, 'missing')).toBeNull();
+  });
   it('creates deterministic private groups and immutable controlled toggles', () => {
     const collapsed = projectNeuTableGrouping({
       rows,
@@ -111,5 +130,49 @@ describe('NeuTable loaded-only grouping engine', () => {
 
     expect(header?.context.rows).toHaveLength(2);
     expect(grouped.filter((node) => node.kind === 'row')).toHaveLength(1);
+  });
+
+  it('passes rows through when grouping is empty and removes an expanded group on toggle', () => {
+    for (const grouping of [null, { by: [] as Field[], expandedGroupIds: [] }]) {
+      const projected = projectNeuTableGrouping({ rows, grouping, options, columns });
+      expect(projected.map((node) => node.kind)).toEqual(['row', 'row', 'row']);
+      expect(projected.map((node) => node.track)).toEqual(['1', '2', '3']);
+    }
+    const expanded = { by: ['team'] as const, expandedGroupIds: ['group:team=string%3Ax'] };
+    expect(proposeNeuTableGroupToggle(expanded, expanded.expandedGroupIds[0])?.next.expandedGroupIds)
+      .toEqual([]);
+    expect(expanded.expandedGroupIds).toHaveLength(1);
+  });
+
+  it('groups by a custom value even when the field has no column', () => {
+    const grouping = { by: ['team'] as const, expandedGroupIds: ['group:team=string%3AX'] };
+    const projected = projectNeuTableGrouping({
+      rows,
+      grouping,
+      options: { ...options, value: (row: Row) => row.team?.toUpperCase() },
+      columns: [],
+    });
+    const headers = projected.flatMap((node) => node.kind === 'group-header' ? [node] : []);
+    expect(headers.map((node) => node.context.value)).toEqual(['X', 'Y']);
+    expect(projected.filter((node) => node.kind === 'row')).toHaveLength(2);
+  });
+
+  it('builds context for a displayed group missing from the domain and supports two levels', () => {
+    const grouping = {
+      by: ['team', 'id'] as const,
+      expandedGroupIds: ['group:team=string%3Ax', 'group:team=string%3Ax/id=number%3A1'],
+    };
+    const projected = projectNeuTableGrouping({
+      rows: rows.slice(0, 1),
+      domainRows: rows.slice(2),
+      grouping,
+      options,
+      columns: [columns[0], { id: 'id', header: 'ID', field: 'id' }],
+    });
+    const headers = projected.flatMap((node) => node.kind === 'group-header' ? [node] : []);
+    expect(headers.map((node) => node.context.value)).toEqual(['x', 1]);
+    expect(headers[0].context.rows).toEqual([rows[0].row]);
+    expect(projected.filter((node) => node.kind === 'row')).toHaveLength(1);
+    expect(projected.filter((node) => node.kind === 'group-footer')).toHaveLength(2);
   });
 });

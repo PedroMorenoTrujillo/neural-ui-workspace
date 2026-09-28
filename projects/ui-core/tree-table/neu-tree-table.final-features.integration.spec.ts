@@ -6,6 +6,7 @@ import type {
   NeuTreeTableEditChange,
   NeuTreeTableEditCommit,
   NeuTreeTableEditState,
+  NeuTreeTableEditingOptions,
   NeuTreeTableExpandedKeysChange,
   NeuTreeTableHierarchy,
   NeuTreeTableRowAction,
@@ -21,14 +22,14 @@ interface Row {
   imports: [NeuTreeTableComponent],
   template: `
     <neu-tree-table
-      [data]="rows"
+      [data]="rows()"
       [hierarchy]="hierarchy"
       [columns]="columns"
       [rowKey]="rowKey"
       [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 16 }"
       [expandedKeys]="expandedKeys()"
       [editState]="editState()"
-      [editingOptions]="{ mode: 'cell', validate: validate }"
+      [editingOptions]="editingOptions()"
       [interactionOptions]="{
         navigation: 'row',
         wrapFocus: false,
@@ -44,10 +45,10 @@ interface Row {
   `,
 })
 class FinalFeaturesHostComponent {
-  readonly rows: readonly Row[] = [
+  readonly rows = signal<readonly Row[]>([
     { id: 1, name: 'Root' },
     { id: 2, name: 'Child' },
-  ];
+  ]);
   readonly hierarchy: NeuTreeTableHierarchy<number> = {
     hierarchyRevision: 1,
     queryRevision: 1,
@@ -87,15 +88,17 @@ class FinalFeaturesHostComponent {
     },
   ] as const;
   readonly expandedKeys = signal<readonly number[]>([1]);
+  readonly validate = ({ draft }: { readonly draft: Readonly<Partial<Row>> }) =>
+    draft.name === '' ? 'Name is required' : true;
   readonly editState = signal<NeuTreeTableEditState<number>>({ kind: 'none' });
+  readonly editingOptions = signal<NeuTreeTableEditingOptions<Row, number, 'name'>>({
+    mode: 'cell', validate: this.validate,
+  });
   readonly changes = signal<readonly NeuTreeTableEditChange<number>[]>([]);
   readonly commits = signal<readonly NeuTreeTableEditCommit<Row, number, 'name'>[]>([]);
   readonly cancels = signal<readonly NeuTreeTableEditCancel<Row, number>[]>([]);
   readonly actions = signal<readonly NeuTreeTableRowAction<Row, number>[]>([]);
   readonly rowKey = (row: Row) => row.id;
-  readonly validate = ({ draft }: { readonly draft: Readonly<Partial<Row>> }) =>
-    draft.name === '' ? 'Name is required' : true;
-
   acceptExpansion(change: NeuTreeTableExpandedKeysChange<number>): void {
     this.expandedKeys.set(change.next);
   }
@@ -150,7 +153,7 @@ describe('NeuTreeTable 2 final feature integration', () => {
     await fixture.whenStable();
     expect(fixture.componentInstance.commits()).toHaveLength(1);
     expect(fixture.componentInstance.commits()[0]?.value).toEqual({ id: 1, name: 'Renamed' });
-    expect(fixture.componentInstance.rows[0]?.name).toBe('Root');
+    expect(fixture.componentInstance.rows()[0]?.name).toBe('Root');
     expect(fixture.componentInstance.editState()).toEqual({ kind: 'none' });
   });
 
@@ -168,6 +171,68 @@ describe('NeuTreeTable 2 final feature integration', () => {
     expect(fixture.componentInstance.cancels()).toHaveLength(1);
     expect(fixture.componentInstance.cancels()[0]?.reason).toBe('hidden');
     expect(fixture.componentInstance.changes().filter((change) => change.source === 'hidden')).toHaveLength(1);
+  });
+
+  it('keeps an invalid edit open until the user cancels it', async () => {
+    const fixture = TestBed.createComponent(FinalFeaturesHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const cell = fixture.nativeElement.querySelector('tr[data-node-key] td') as HTMLTableCellElement;
+    cell.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const editor = fixture.nativeElement.querySelector('[data-tree-editor]') as HTMLInputElement;
+    editor.value = '';
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+    const actions = fixture.nativeElement.querySelectorAll('.neu-tree-table2__editor-actions button') as NodeListOf<HTMLButtonElement>;
+    actions[0]!.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.commits()).toHaveLength(0);
+    expect(fixture.componentInstance.editState()).toMatchObject({ kind: 'cell', key: 1 });
+    actions[1]!.click();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.cancels()).toHaveLength(1);
+    expect(fixture.componentInstance.editState()).toEqual({ kind: 'none' });
+  });
+
+  it('rejects a stale edit key without fabricating an edited row', async () => {
+    const fixture = TestBed.createComponent(FinalFeaturesHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.componentInstance.editState.set({ kind: 'cell', key: 999, columnId: 'name' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.editState()).toEqual({ kind: 'none' });
+    expect(fixture.componentInstance.changes().filter((change) => change.source === 'hidden')).toHaveLength(1);
+    expect(fixture.componentInstance.cancels()).toHaveLength(0);
+  });
+
+  it('reconciles a pristine editor with a parent row replacement', async () => {
+    const fixture = TestBed.createComponent(FinalFeaturesHostComponent);
+    fixture.componentInstance.editState.set({ kind: 'cell', key: 1, columnId: 'name' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const editor = fixture.nativeElement.querySelector('[data-tree-editor]') as HTMLInputElement;
+    expect(editor.value).toBe('Root');
+    fixture.componentInstance.rows.set([{ id: 1, name: 'Server update' }, { id: 2, name: 'Child' }]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect((fixture.nativeElement.querySelector('[data-tree-editor]') as HTMLInputElement).value)
+      .toBe('Server update');
+    expect(fixture.componentInstance.commits()).toHaveLength(0);
+  });
+
+  it('opens a row editor only when an editable column is present', async () => {
+    const fixture = TestBed.createComponent(FinalFeaturesHostComponent);
+    fixture.componentInstance.editingOptions.set({ mode: 'row', validate: fixture.componentInstance.validate });
+    fixture.componentInstance.editState.set({ kind: 'row', key: 1 });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-tree-editor]')).not.toBeNull();
+    expect(fixture.componentInstance.editState()).toEqual({ kind: 'row', key: 1 });
   });
 
   it('releases 100 editing/action instances without late outputs', async () => {

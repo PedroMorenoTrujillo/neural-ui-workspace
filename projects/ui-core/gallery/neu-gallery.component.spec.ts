@@ -48,6 +48,58 @@ describe('NeuGalleryComponent', () => {
     }).compileComponents(),
   );
 
+  it('ignores cancelled and short swipes, then navigates in both directions', () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.detectChanges();
+    const gallery = fixture.componentInstance;
+    gallery.onPointerUp(new PointerEvent('pointerup', { clientX: 20 }));
+    gallery.onPointerDown(new PointerEvent('pointerdown', { clientX: 100 }));
+    gallery.onPointerUp(new PointerEvent('pointerup', { clientX: 80 }));
+    expect(gallery.activeIndex()).toBe(0);
+    gallery.onPointerDown(new PointerEvent('pointerdown', { clientX: 100 }));
+    gallery.onPointerCancel();
+    gallery.onPointerUp(new PointerEvent('pointerup', { clientX: 20 }));
+    expect(gallery.activeIndex()).toBe(0);
+    gallery.onPointerDown(new PointerEvent('pointerdown', { clientX: 100 }));
+    gallery.onPointerUp(new PointerEvent('pointerup', { clientX: 20 }));
+    expect(gallery.activeIndex()).toBe(1);
+    gallery.onPointerDown(new PointerEvent('pointerdown', { clientX: 20 }));
+    gallery.onPointerUp(new PointerEvent('pointerup', { clientX: 100 }));
+    expect(gallery.activeIndex()).toBe(0);
+  });
+
+  it('handles absent and malformed items without emitting false image errors', () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.detectChanges();
+    const gallery = fixture.componentInstance;
+    const errors: number[] = [];
+    gallery.imageError.subscribe((event) => errors.push(event.index));
+    gallery.onImageError();
+    gallery.setActiveIndex(Number.POSITIVE_INFINITY);
+    expect(gallery.activeIndex()).toBe(0);
+    expect(gallery.downloadName()).toBe('image');
+    expect(errors).toEqual([]);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.detectChanges();
+    gallery.onImageError();
+    expect(errors).toEqual([0]);
+  });
+
+  it('keeps preview status events idempotent', () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.detectChanges();
+    const gallery = fixture.componentInstance;
+    const states: boolean[] = [];
+    gallery.previewChange.subscribe((value) => states.push(value));
+    gallery.openPreview();
+    gallery.openPreview();
+    gallery.closePreview();
+    gallery.closePreview();
+    expect(states).toEqual([true, false]);
+  });
+
   it('renders an accessible active image and changes only on user navigation', () => {
     const fixture = TestBed.createComponent(NeuGalleryComponent);
     fixture.componentRef.setInput('items', ITEMS);
@@ -288,8 +340,8 @@ describe('NeuGalleryComponent', () => {
     expect(controls.map((control) => control.getAttribute('title'))).toEqual(
       controls.map((control) => control.getAttribute('aria-label')),
     );
-    expect(controls.every((control) => control.querySelector('neural-icon'))).toBe(true);
-    expect(controls.every((control) => !control.textContent?.trim())).toBe(true);
+    expect(controls.every((control) => control.querySelector('neu-icon-outlet'))).toBe(true);
+    expect(controls.every((control) => !!control.getAttribute('aria-label'))).toBe(true);
   });
 
   it('renders strict projected item and caption templates', () => {
@@ -444,5 +496,25 @@ describe('NeuGalleryComponent', () => {
     expect(changes).toHaveLength(100);
     fixture.destroy();
     expect(document.querySelector('.neu-iv')).toBeNull();
+  });
+
+  it('reports a failed active image and cancels a swipe without changing selection', () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.detectChanges();
+    const errors: unknown[] = [];
+    fixture.componentInstance.imageError.subscribe((event) => errors.push(event));
+    const stage = fixture.nativeElement.querySelector('.neu-gallery__stage') as HTMLElement;
+    stage.querySelector('img')!.dispatchEvent(new Event('error'));
+    expect(errors).toEqual([{ item: ITEMS[0], index: 0 }]);
+    const down = new Event('pointerdown', { bubbles: true });
+    Object.defineProperty(down, 'clientX', { value: 20 });
+    Object.defineProperty(down, 'clientY', { value: 0 });
+    stage.dispatchEvent(down);
+    stage.dispatchEvent(new Event('pointercancel', { bubbles: true }));
+    const up = new Event('pointerup', { bubbles: true });
+    Object.defineProperty(up, 'clientX', { value: 100 });
+    stage.dispatchEvent(up);
+    expect(fixture.componentInstance.activeIndex()).toBe(0);
   });
 });

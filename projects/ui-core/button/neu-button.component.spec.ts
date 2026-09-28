@@ -118,7 +118,7 @@ describe('NeuButtonComponent', () => {
     await fixture.whenStable();
 
     const host: HTMLButtonElement = fixture.nativeElement;
-    const icon = host.querySelector('neural-icon');
+    const icon = host.querySelector('neu-icon-outlet');
 
     expect(host.classList).toContain('neu-button--icon-only');
     expect(host.getAttribute('aria-label')).toBe('Crear');
@@ -126,17 +126,18 @@ describe('NeuButtonComponent', () => {
     expect(host.textContent?.trim()).toBe('');
   });
 
-  it('should pass the expected icon size to neural-icons in iconOnly mode', async () => {
+  it('sizes the provider-neutral icon outlet in iconOnly mode', async () => {
     const fixture = TestBed.createComponent(NeuButtonComponent);
-    fixture.componentRef.setInput('icon', 'plus');
+    fixture.componentRef.setInput('icon', 'add');
     fixture.componentRef.setInput('iconOnly', true);
     fixture.componentRef.setInput('size', 'md');
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const neuralIcon = fixture.nativeElement.querySelector('neural-icon svg');
+    const icon = fixture.nativeElement.querySelector('neu-icon-outlet');
 
-    expect(neuralIcon?.getAttribute('width')).toBe('16px');
+    expect(icon?.style.width).toBe('16px');
+    expect(icon?.querySelector('svg')).toBeTruthy();
   });
 
   it('should emit neuClick when clicked and not disabled', () => {
@@ -192,7 +193,7 @@ describe('NeuButtonComponent', () => {
     fixture.componentRef.setInput('icon', 'save');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('neural-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(fixture.nativeElement.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
     expect(fixture.nativeElement.getAttribute('aria-label')).toBeNull();
   });
 
@@ -202,7 +203,7 @@ describe('NeuButtonComponent', () => {
     fixture.componentRef.setInput('iconPosition', 'end');
     fixture.detectChanges();
     await fixture.whenStable();
-    const icon = fixture.nativeElement.querySelector('neural-icon');
+    const icon = fixture.nativeElement.querySelector('neu-icon-outlet');
     expect(icon).toBeTruthy();
   });
 
@@ -211,6 +212,6 @@ describe('NeuButtonComponent', () => {
     fixture.componentRef.setInput('icon', 'trash');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.nativeElement.querySelector('neural-icon svg')).toBeNull();
+    expect(fixture.nativeElement.querySelector('neu-icon-outlet svg')).toBeNull();
   });
 });

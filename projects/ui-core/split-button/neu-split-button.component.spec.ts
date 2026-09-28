@@ -320,7 +320,7 @@ describe('NeuSplitButtonComponent', () => {
     const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
     expect(primary.classList).toContain('neu-button');
     expect(trigger.classList).toContain('neu-button--icon-only');
-    expect(trigger.querySelector('neural-icon')).toBeTruthy();
+    expect(trigger.querySelector('neu-icon-outlet')).toBeTruthy();
     const targetId = trigger.getAttribute('aria-controls');
     trigger.click();
     fixture.detectChanges();

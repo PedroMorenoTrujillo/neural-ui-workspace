@@ -7,19 +7,19 @@ import {
   signal,
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconDefinition, NeuralIconName } from '@neural-icons/core';
-import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
-import { iconCircleX } from '@neural-icons/core/icons/circle-x';
-import { iconInfo } from '@neural-icons/core/icons/info';
-import { iconWarning } from '@neural-icons/core/icons/warning';
-import { iconX } from '@neural-icons/core/icons/x';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconCircleCheck as iconCircleCheck } from '@neural-ui/core/internal';
+import { neuIconCircleX as iconCircleX } from '@neural-ui/core/internal';
+import { neuIconInfo as iconInfo } from '@neural-ui/core/internal';
+import { neuIconWarning as iconWarning } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
 
 export type NeuAlertTone = 'info' | 'success' | 'warning' | 'danger';
 export type NeuAlertVariant = 'soft' | 'outline';
 
 /** Icono por defecto para cada tipo */
-const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuralIconDefinition> = {
+const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuIconKey> = {
   info: iconInfo,
   success: iconCircleCheck,
   warning: iconWarning,
@@ -36,7 +36,7 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuralIconDefinition> = {
  */
 @Component({
   selector: 'neu-alert',
-  imports: [NeuButtonComponent, NeuralIcon],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
@@ -48,9 +48,9 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuralIconDefinition> = {
       @if (showIcon()) {
         <span class="neu-alert__icon" aria-hidden="true">
           @if (icon()) {
-            <neural-icon [icon]="icon()!" size="1.1em" />
+            <neu-icon-outlet [icon]="icon()!" [fallbackPath]="iconFallbackPath(icon()!)" [fallbackText]="iconFallbackText(icon()!)" size="1.1em" />
           } @else {
-            <neural-icon [icon]="_defaultIconName()" size="1.1em" />
+            <neu-icon-outlet [icon]="_defaultIconName()" [fallbackPath]="iconFallbackPath(_defaultIconName())" [fallbackText]="iconFallbackText(_defaultIconName())" size="1.1em" />
           }
         </span>
       }
@@ -74,13 +74,15 @@ const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuralIconDefinition> = {
           [ariaLabel]="closeLabel()"
           [attr.aria-label]="closeLabel()"
           (neuClick)="dismiss()"
-        ><neural-icon [icon]="iconX" size="14px" aria-hidden="true" /></button>
+        ><neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="14px" aria-hidden="true" /></button>
       }
     }
   `,
   styleUrl: './neu-alert.component.scss',
 })
 export class NeuAlertComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   /** Intención semántica / Semantic intent */
   readonly tone = input<NeuAlertTone>('info');
 
@@ -88,7 +90,7 @@ export class NeuAlertComponent {
   readonly title = input<string>('');
 
   /** Icono personalizado. Vacío = usa el icono por defecto del tipo / Custom icon. Empty = use default type icon */
-  readonly icon = input<NeuralIconName | null>(null);
+  readonly icon = input<NeuIconKey | null>(null);
 
   /** Muestra el icono / Shows the icon */
   readonly showIcon = input<boolean>(true);

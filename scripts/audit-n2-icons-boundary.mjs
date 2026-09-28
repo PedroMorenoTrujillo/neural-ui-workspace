@@ -13,14 +13,8 @@ function inspect(source, filename) {
     const specifier = node.moduleSpecifier;
     if (!specifier || !ts.isStringLiteral(specifier)) continue;
     const moduleName = specifier.text;
-    const isTypeOnly = node.isTypeOnly || (ts.isImportDeclaration(node) && (
-      node.importClause?.isTypeOnly ||
-      (node.importClause?.namedBindings && ts.isNamedImports(node.importClause.namedBindings) &&
-        node.importClause.namedBindings.elements.length > 0 &&
-        node.importClause.namedBindings.elements.every((element) => element.isTypeOnly))
-    ));
-    if (moduleName === '@neural-icons/core' && !isTypeOnly) {
-      failures.push(`${filename}: runtime Core root import retains the full icon catalog`);
+    if (moduleName.startsWith('@neural-icons/')) {
+      failures.push(`${filename}: productive Core import/export retains Neural Icons dependency ${moduleName}`);
     }
     if (moduleName.startsWith('@ng-icons/') || moduleName === '@neural-ui/core/icon') {
       failures.push(`${filename}: retired icon runtime import ${moduleName}`);
@@ -29,8 +23,8 @@ function inspect(source, filename) {
   if (source.includes('NeuIconComponent') || source.includes('provideAllNeuralIcons(')) {
     failures.push(`${filename}: retired wrapper or full-catalog registration`);
   }
-  if (/import\s*\(\s*['"]@neural-icons\/core['"]\s*\)/.test(source)) {
-    failures.push(`${filename}: dynamic Core root import retains the full icon catalog`);
+  if (/import\s*\(\s*['"]@neural-icons\//.test(source)) {
+    failures.push(`${filename}: dynamic Neural Icons import remains`);
   }
 }
 
@@ -45,23 +39,20 @@ function walk(directory) {
   }
 }
 
-inspect("import { iconSave } from '@neural-icons/core';", 'synthetic-root-value.ts');
-if (failures.length !== 1) throw new Error('A0.2 boundary self-test did not reject a root value import.');
+inspect("import { iconSave } from '@neural-icons/core/icons/save';", 'synthetic-subpath-value.ts');
+if (failures.length !== 1) throw new Error('N2 boundary self-test did not reject a value subpath import.');
 failures.length = 0;
 inspect("import type { NeuralIconName } from '@neural-icons/core';", 'synthetic-root-type.ts');
-if (failures.length) throw new Error('A0.2 boundary self-test rejected a type-only import.');
-const typeOnlyJs = ts.transpileModule(
-  "import type { NeuralIconName } from '@neural-icons/core'; export type Example = NeuralIconName;",
-  { compilerOptions: { module: ts.ModuleKind.ESNext } },
-).outputText;
-if (typeOnlyJs.includes('@neural-icons/core')) {
-  throw new Error('A0.2 type-only Core root import was not erased from JavaScript.');
-}
+if (failures.length !== 1) throw new Error('N2 boundary self-test did not reject a type-only import.');
+failures.length = 0;
+inspect("export type { NeuralIconName } from '@neural-icons/core';", 'synthetic-reexport.ts');
+if (failures.length !== 1) throw new Error('N2 boundary self-test did not reject a type re-export.');
+failures.length = 0;
 
 walk(root);
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exitCode = 1;
 } else {
-  console.log('N2 icon import boundary PASS: no runtime Core root imports or retired icon graph.');
+  console.log('N2 icon import boundary PASS: no productive runtime/type imports or exports from Neural Icons.');
 }

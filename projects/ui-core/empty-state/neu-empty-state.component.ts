@@ -4,9 +4,9 @@ import {
   input,
   output,
 } from '@angular/core';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
-import { iconInbox } from '@neural-icons/core/icons/inbox';
+import { InternalNeuIconOutletComponent, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconInbox as iconInbox } from '@neural-ui/core/internal';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import type { NeuDensity } from '@neural-ui/core';
 
@@ -27,14 +27,14 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
  */
 @Component({
   selector: 'neu-empty-state',
-  imports: [NeuralIcon, NeuButtonComponent],
+  imports: [InternalNeuIconOutletComponent, NeuButtonComponent],
   encapsulation: ViewEncapsulation.None,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-empty-state__inner">
       @if (icon()) {
         <span class="neu-empty-state__icon">
-          <neural-icon [icon]="icon() === 'inbox' ? iconInbox : icon()!" [size]="iconSize()" aria-hidden="true" />
+          <neu-icon-outlet [icon]="icon() === 'inbox' ? iconInbox : icon()!" [fallbackText]="iconFallbackText(icon() === 'inbox' ? iconInbox : icon()!)" [size]="iconSize()" aria-hidden="true" />
         </span>
       }
 
@@ -54,9 +54,10 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
   styleUrl: './neu-empty-state.component.scss',
 })
 export class NeuEmptyStateComponent {
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconInbox = iconInbox;
   /** Canonical Neural icon name; the built-in inbox icon needs no registration. */
-  icon = input<NeuralIconName | null>('inbox');
+  icon = input<NeuIconKey | null>('inbox');
   /** Tamaño del icono. Por defecto 3rem. / Icon size. Default 3rem. */
   iconSize = input<string>('3rem');
   /** Título principal del estado vacío. / Main title of the empty state. */

@@ -11,7 +11,7 @@
     "ngTemplateContextGuard"
   ],
   "closedMemberKinds": ["component", "directive", "service"],
-  "internalEntrypoints": ["./internal", "./internal-state", "./menu-shared", "./menu-tiered"],
+  "internalEntrypoints": ["./icon-outlet-internal", "./internal", "./internal-state", "./menu-shared", "./menu-tiered"],
   "internalDeclarations": [
     "./focus-trap#NeuModalFocusDirective",
     "./focus-trap#NeuModalInitialFocus"

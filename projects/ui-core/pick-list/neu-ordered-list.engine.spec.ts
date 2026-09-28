@@ -90,4 +90,13 @@ describe('private ordered-list engine', () => {
     expect([...pruneSelectedKeys(new Set(['A', 'B']), [rows[1]!], keyOf)!]).toEqual(['B']);
     expect(pruneSelectedKeys(new Set(['B']), [{ id: 'B' }], keyOf)).toBeNull();
   });
+
+  it('rejects stale visible projections before a reorder or insertion can alter applied rows', () => {
+    const stale = { id: 'missing' };
+    expect(reorderVisible(rows, [rows[0]!, stale], 'missing', 0, keyOf, disabled)).toBeNull();
+    expect(moveSelectedVisible(rows, [rows[0]!, stale], ['A'], 'bottom', keyOf, disabled)).toBeNull();
+    expect(visibleAnchorIndex(rows, [stale], 0, keyOf)).toBeNull();
+    expect(reorderVisible(rows, rows, 'missing', 0, keyOf, disabled)).toBeNull();
+    expect(ids(rows)).toEqual(['A', 'B', 'C', 'D']);
+  });
 });

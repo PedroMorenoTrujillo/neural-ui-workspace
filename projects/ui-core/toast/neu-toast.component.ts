@@ -1,16 +1,16 @@
 import { Component, ViewEncapsulation, inject } from '@angular/core';
 import { NeuToastService } from './neu-toast.service';
 import { NeuToastTone } from './neu-toast.types';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconDefinition } from '@neural-icons/core';
-import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
-import { iconCircleX } from '@neural-icons/core/icons/circle-x';
-import { iconInfo } from '@neural-icons/core/icons/info';
-import { iconWarning } from '@neural-icons/core/icons/warning';
-import { iconX } from '@neural-icons/core/icons/x';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconCircleCheck as iconCircleCheck } from '@neural-ui/core/internal';
+import { neuIconCircleX as iconCircleX } from '@neural-ui/core/internal';
+import { neuIconInfo as iconInfo } from '@neural-ui/core/internal';
+import { neuIconWarning as iconWarning } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
 
 /** Static internal icons are definitions, not global registrations. */
-const TOAST_ICONS: Record<NeuToastTone, NeuralIconDefinition> = {
+const TOAST_ICONS: Record<NeuToastTone, NeuIconKey> = {
   success: iconCircleCheck,
   danger: iconCircleX,
   warning: iconWarning,
@@ -34,7 +34,7 @@ const TOAST_ICONS: Record<NeuToastTone, NeuralIconDefinition> = {
 @Component({
   selector: 'neu-toast-container',
   encapsulation: ViewEncapsulation.None,
-  imports: [NeuralIcon],
+  imports: [InternalNeuIconOutletComponent],
   host: {
     class: 'neu-toast-container',
     '[class.neu-toast-container--top-right]': 'toastService.position() === "top-right"',
@@ -53,7 +53,7 @@ const TOAST_ICONS: Record<NeuToastTone, NeuralIconDefinition> = {
         "
       >
         <span class="neu-toast__icon-wrap" aria-hidden="true">
-          <neural-icon [icon]="getIcon(toast.tone)" size="1rem" />
+          <neu-icon-outlet [icon]="getIcon(toast.tone)" [fallbackPath]="iconFallbackPath(getIcon(toast.tone))" [fallbackText]="iconFallbackText(getIcon(toast.tone))" size="1rem" />
         </span>
         <div class="neu-toast__body">
           @if (toast.title) {
@@ -67,7 +67,7 @@ const TOAST_ICONS: Record<NeuToastTone, NeuralIconDefinition> = {
           [attr.aria-label]="'Cerrar'"
           (click)="toastService.dismiss(toast.id)"
         >
-          <neural-icon [icon]="iconX" size="1rem" aria-hidden="true" />
+          <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1rem" aria-hidden="true" />
         </button>
       </div>
     }
@@ -75,10 +75,12 @@ const TOAST_ICONS: Record<NeuToastTone, NeuralIconDefinition> = {
   styleUrl: './neu-toast.component.scss',
 })
 export class NeuToastContainerComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconX = iconX;
   readonly toastService = inject(NeuToastService);
 
-  getIcon(tone: NeuToastTone): NeuralIconDefinition {
+  getIcon(tone: NeuToastTone): NeuIconKey {
     return TOAST_ICONS[tone];
   }
 }

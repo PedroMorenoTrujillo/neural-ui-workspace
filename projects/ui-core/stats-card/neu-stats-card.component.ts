@@ -1,9 +1,9 @@
 import { Component, ViewEncapsulation, input } from '@angular/core';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconName } from '@neural-icons/core';
-import { iconMinus } from '@neural-icons/core/icons/minus';
-import { iconTrendingDown } from '@neural-icons/core/icons/trending-down';
-import { iconTrendingUp } from '@neural-icons/core/icons/trending-up';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconMinus as iconMinus } from '@neural-ui/core/internal';
+import { neuIconTrendingDown as iconTrendingDown } from '@neural-ui/core/internal';
+import { neuIconTrendingUp as iconTrendingUp } from '@neural-ui/core/internal';
 
 export type NeuStatsTrend = 'up' | 'down' | 'neutral';
 
@@ -21,7 +21,7 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
  */
 @Component({
   selector: 'neu-stats-card',
-  imports: [NeuralIcon],
+  imports: [InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-stats-card' },
   template: `
@@ -30,7 +30,7 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
       <div class="neu-stats-card__header">
         @if (icon()) {
           <span class="neu-stats-card__icon">
-            <neural-icon [icon]="icon()!" size="1.125rem" aria-hidden="true" />
+            <neu-icon-outlet [icon]="icon()!" [fallbackPath]="iconFallbackPath(icon()!)" [fallbackText]="iconFallbackText(icon()!)" size="1.125rem" aria-hidden="true" />
           </span>
         }
         <span class="neu-stats-card__title">{{ title() }}</span>
@@ -44,11 +44,11 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
         @if (change()) {
           <span class="neu-stats-card__change neu-stats-card__change--{{ trend() }}">
             @if (trend() === 'up') {
-              <neural-icon [icon]="iconTrendingUp" size="0.875rem" aria-hidden="true" />
+              <neu-icon-outlet [icon]="iconTrendingUp" [fallbackPath]="iconFallbackPath(iconTrendingUp)" [fallbackText]="iconFallbackText(iconTrendingUp)" size="0.875rem" aria-hidden="true" />
             } @else if (trend() === 'down') {
-              <neural-icon [icon]="iconTrendingDown" size="0.875rem" aria-hidden="true" />
+              <neu-icon-outlet [icon]="iconTrendingDown" [fallbackPath]="iconFallbackPath(iconTrendingDown)" [fallbackText]="iconFallbackText(iconTrendingDown)" size="0.875rem" aria-hidden="true" />
             } @else {
-              <neural-icon [icon]="iconMinus" size="0.875rem" aria-hidden="true" />
+              <neu-icon-outlet [icon]="iconMinus" [fallbackPath]="iconFallbackPath(iconMinus)" [fallbackText]="iconFallbackText(iconMinus)" size="0.875rem" aria-hidden="true" />
             }
             {{ change() }}
           </span>
@@ -64,6 +64,8 @@ export type NeuStatsTrend = 'up' | 'down' | 'neutral';
   styleUrl: './neu-stats-card.component.scss',
 })
 export class NeuStatsCardComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconMinus = iconMinus;
   protected readonly iconTrendingDown = iconTrendingDown;
   protected readonly iconTrendingUp = iconTrendingUp;
@@ -78,5 +80,5 @@ export class NeuStatsCardComponent {
   /** Texto auxiliar bajo el cambio (p.ej. "vs. mes anterior"). / Auxiliary text below the change (e.g. "vs. previous month"). */
   label = input<string>('');
   /** Nombre del icono Neural para el encabezado. / Neural icon name for the header. */
-  icon = input<NeuralIconName | null>(null);
+  icon = input<NeuIconKey | null>(null);
 }

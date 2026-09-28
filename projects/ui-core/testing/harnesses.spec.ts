@@ -158,4 +158,47 @@ describe('Neural UI public harnesses', () => {
     expect(await dialog.getBodyText()).toBe('Continue?');
     await dialog.close();
   });
+
+  it('returns absent optional content and leaves already closed controls closed', async () => {
+    const fixture = TestBed.createComponent(StaticHarnessHostComponent);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    host.querySelector('.neu-input__static-label')?.remove();
+    host.querySelector('.neu-input__error')?.remove();
+    host.querySelector('.neu-dialog__title')?.remove();
+    host.querySelector('.neu-dialog__body')?.remove();
+    host.querySelector('.neu-dialog__close')?.remove();
+    host.querySelector('.neu-dialog__panel')?.remove();
+    host.querySelector('.neu-select__trigger')?.setAttribute('aria-expanded', 'false');
+    host.querySelector('.neu-date-input__field')?.setAttribute('aria-expanded', 'false');
+
+    const loader = TestbedHarnessEnvironment.loader(fixture);
+    const input = await loader.getHarness(NeuInputHarness);
+    expect(await input.getLabel()).toBeNull();
+    expect(await input.getError()).toBeNull();
+
+    const select = await loader.getHarness(NeuSelectHarness);
+    expect(await select.isOpen()).toBe(false);
+    await select.close();
+    const trigger = host.querySelector('.neu-select__trigger') as HTMLButtonElement;
+    const selectClick = vi.fn();
+    trigger.addEventListener('click', selectClick);
+    await select.open();
+    expect(selectClick).toHaveBeenCalledOnce();
+
+    const date = await loader.getHarness(NeuDateInputHarness);
+    expect(await date.isOpen()).toBe(false);
+    await date.close();
+    const openButton = host.querySelector('.neu-date-input__open') as HTMLButtonElement;
+    const dateClick = vi.fn();
+    openButton.addEventListener('click', dateClick);
+    await date.open();
+    expect(dateClick).toHaveBeenCalledOnce();
+
+    const dialog = await loader.getHarness(NeuDialogHarness);
+    expect(await dialog.isOpen()).toBe(false);
+    expect(await dialog.getTitle()).toBeNull();
+    expect(await dialog.getBodyText()).toBeNull();
+    await dialog.close();
+  });
 });

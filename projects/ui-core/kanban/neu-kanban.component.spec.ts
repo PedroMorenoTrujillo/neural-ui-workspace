@@ -33,6 +33,48 @@ describe('NeuKanbanComponent controlled board', () => {
     return { fixture, proposals };
   }
 
+  it('bounds keyboard destinations and rejects unknown keys or removed columns', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as unknown as {
+      keyboardDestination(move: { cardId: string; cardTitle: string; fromColumnId: string;
+        previousIndex: number; toColumnId: string; currentIndex: number }, key: string):
+        { toColumnId: string; currentIndex: number } | null;
+    };
+    const move = { cardId: 'a', cardTitle: 'Alpha', fromColumnId: 'todo',
+      previousIndex: 0, toColumnId: 'todo', currentIndex: 0 };
+    expect(board.keyboardDestination(move, 'ArrowLeft')).toMatchObject({ toColumnId: 'todo', currentIndex: 0 });
+    expect(board.keyboardDestination(move, 'ArrowRight')).toMatchObject({ toColumnId: 'doing', currentIndex: 0 });
+    expect(board.keyboardDestination(move, 'ArrowUp')).toMatchObject({ toColumnId: 'todo', currentIndex: 0 });
+    expect(board.keyboardDestination(move, 'ArrowDown')).toMatchObject({ toColumnId: 'todo', currentIndex: 1 });
+    expect(board.keyboardDestination(move, 'End')).toMatchObject({ toColumnId: 'todo', currentIndex: 2 });
+    expect(board.keyboardDestination({ ...move, currentIndex: 2 }, 'Home'))
+      .toMatchObject({ toColumnId: 'todo', currentIndex: 0 });
+    expect(board.keyboardDestination(move, 'Delete')).toBeNull();
+    expect(board.keyboardDestination({ ...move, toColumnId: 'missing' }, 'End')).toBeNull();
+  });
+
+  it('provides the Spanish move labels and follows the visual RTL direction', () => {
+    document.documentElement.lang = 'es-ES';
+    const { fixture } = setup();
+    const board = fixture.componentInstance as unknown as {
+      resolvedMoveButtonLabel(): string;
+      moveDirectionLabel(cardTitle: string, direction: 'left' | 'right' | 'up' | 'down'): string;
+      visualColumnDelta(direction: 'left' | 'right'): number;
+    };
+    expect(board.resolvedMoveButtonLabel()).toBe('Mover');
+    expect(board.moveDirectionLabel('Alpha', 'left')).toContain('izquierda');
+    expect(board.moveDirectionLabel('Alpha', 'right')).toContain('derecha');
+    expect(board.moveDirectionLabel('Alpha', 'up')).toContain('arriba');
+    expect(board.moveDirectionLabel('Alpha', 'down')).toContain('abajo');
+    expect(board.visualColumnDelta('left')).toBe(-1);
+    (fixture.nativeElement as HTMLElement).style.direction = 'rtl';
+    expect(board.visualColumnDelta('left')).toBe(1);
+    expect(board.visualColumnDelta('right')).toBe(-1);
+    fixture.componentRef.setInput('moveButtonLabel', 'Shift');
+    fixture.detectChanges();
+    expect(board.resolvedMoveButtonLabel()).toBe('Shift');
+  });
+
   function card(host: HTMLElement, id: string): HTMLElement {
     const found = Array.from(host.querySelectorAll<HTMLElement>('[data-neu-kanban-card-id]'))
       .find((node) => node.dataset['neuKanbanCardId'] === id);
@@ -210,6 +252,19 @@ describe('NeuKanbanComponent controlled board', () => {
     expect(proposals[1]).toEqual(proposals[0]);
   });
 
+  it('routes every enabled directional action through one immutable move proposal', () => {
+    const { fixture, proposals } = setup();
+    action(fixture, 'a', 'down');
+    action(fixture, 'c', 'up');
+    action(fixture, 'd', 'left');
+    expect(proposals).toEqual([
+      { kind: 'reorder', cardId: 'a', columnId: 'todo', fromIndex: 0, toIndex: 1 },
+      { kind: 'reorder', cardId: 'c', columnId: 'todo', fromIndex: 2, toIndex: 1 },
+      { kind: 'transfer', cardId: 'd', fromColumnId: 'doing', toColumnId: 'todo', fromIndex: 0, toIndex: 0 },
+    ]);
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('.neu-kanban__card')).toHaveLength(4);
+  });
+
   it('supports keyboard Home/End, cancel and no-op boundaries', () => {
     const { fixture, proposals } = setup();
     const host = fixture.nativeElement as HTMLElement;
@@ -277,5 +332,84 @@ describe('NeuKanbanComponent controlled board', () => {
     expect(proposals).toHaveLength(1);
     expect(JSON.stringify(applied)).toBe(before);
     fixture.destroy();
+  });
+
+  it('uses supplied assignee initials before deriving initials from a name', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    expect(board.assigneeInitials({ name: 'Alice Martin', initials: 'AM' })).toBe('AM');
+    expect(board.assigneeInitials({ name: 'Alice Martin' })).toBe('AM');
+  });
+
+  it('ignores a drag event with no card payload', () => {
+    const { fixture, proposals } = setup();
+    const board = fixture.componentInstance as any;
+    board.onCardDrop({ item: { data: undefined } }, 'doing');
+    expect(proposals).toEqual([]);
+  });
+
+  it('refuses move controls for unknown and disabled cards', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    board.openMoveMenu('missing');
+    board.openMoveMenu('b');
+    expect(board.activeMoveCardId()).toBeNull();
+    expect(board.canMove('missing', 'right')).toBe(false);
+    expect(board.canMove('b', 'right')).toBe(false);
+  });
+
+  it('toggles the same move menu closed and ignores unrelated menu keys', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    const click = new MouseEvent('click', { cancelable: true });
+    board.toggleMoveMenu('a', click);
+    expect(board.isMoveMenuOpen('a')).toBe(true);
+    const tab = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    board.onMoveMenuKeydown('a', tab);
+    expect(tab.defaultPrevented).toBe(false);
+    board.toggleMoveMenu('a', click);
+    expect(board.isMoveMenuOpen('a')).toBe(false);
+  });
+
+  it('keeps move controls open for pointer activity inside their active card', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    board.openMoveMenu('a');
+    fixture.detectChanges();
+    const controls = (fixture.nativeElement as HTMLElement).querySelector('[data-neu-kanban-move-card-id="a"]')!;
+    const target = controls.querySelector('button') ?? controls;
+    board.onDocumentPointerDown({ target } as unknown as PointerEvent);
+    expect(board.isMoveMenuOpen('a')).toBe(true);
+  });
+
+  it('does not begin keyboard movement with an unrelated key', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    const event = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    board.onCardKeydown(BOARD[0]!.cards[0], 'todo', 0, event);
+    expect(board.keyboardMove()).toBeNull();
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it('ignores keyboard movement from another card and unsupported destination keys', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    board.onCardKeydown(BOARD[0]!.cards[0], 'todo', 0,
+      new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    expect(board.keyboardMove()?.cardId).toBe('a');
+    board.onCardKeydown(BOARD[1]!.cards[0], 'doing', 0,
+      new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true }));
+    expect(board.keyboardMove()?.cardId).toBe('a');
+    const unsupported = new KeyboardEvent('keydown', { key: 'Delete', cancelable: true });
+    board.onCardKeydown(BOARD[0]!.cards[0], 'todo', 0, unsupported);
+    expect(unsupported.defaultPrevented).toBe(false);
+  });
+
+  it('does not announce a target from a column removed by a parent write', () => {
+    const { fixture } = setup();
+    const board = fixture.componentInstance as any;
+    const before = board.liveMessage();
+    board.announceKeyboardTarget({ cardTitle: 'Alpha', toColumnId: 'removed', currentIndex: 0 });
+    expect(board.liveMessage()).toBe(before);
   });
 });

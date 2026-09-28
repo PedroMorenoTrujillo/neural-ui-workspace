@@ -59,6 +59,43 @@ describe('NeuSpeedDialComponent', () => {
     return fixture;
   }
 
+  it('emits programmatic owner changes with the fallback reason and no proposal', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const opened: NeuSpeedDialVisibilityEvent[] = [];
+    const closed: NeuSpeedDialVisibilityEvent[] = [];
+    const proposals: boolean[] = [];
+    component.opened.subscribe((event) => opened.push(event));
+    component.closed.subscribe((event) => closed.push(event));
+    component.openChange.subscribe((state) => proposals.push(state));
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    expect(opened).toEqual([{ originalEvent: null, reason: 'programmatic' }]);
+    expect(closed).toEqual([{ originalEvent: null, reason: 'programmatic' }]);
+    expect(proposals).toEqual([]);
+  });
+
+  it('keeps disabled and unmatched trigger transitions inert', () => {
+    const fixture = setup();
+    const component = fixture.componentInstance;
+    const trigger = fixture.nativeElement.querySelector('.neu-speed-dial__trigger') as HTMLButtonElement;
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    trigger.click();
+    component.open();
+    expect(component.isOpen()).toBe(false);
+    fixture.componentRef.setInput('disabled', false);
+    fixture.detectChanges();
+    component.open();
+    expect(component.isOpen()).toBe(true);
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(component.isOpen()).toBe(false);
+  });
+
   it('uses one controlled open owner with accessible trigger relationships and mask close', () => {
     const fixture = TestBed.createComponent(SpeedDialHost);
     fixture.detectChanges();

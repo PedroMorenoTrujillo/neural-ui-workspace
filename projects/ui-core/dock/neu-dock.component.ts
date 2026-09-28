@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NeuBadgeComponent } from '@neural-ui/core/badge';
-import { NeuralIcon } from '@neural-icons/angular';
+import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
 import {
   NeuMenuActionLike,
   NeuResolvedMenuAction,
@@ -55,7 +55,7 @@ export class NeuDockItemDirective {
     NgTemplateOutlet,
     RouterLink,
     NeuBadgeComponent,
-    NeuralIcon,
+    InternalNeuIconOutletComponent,
     NeuTooltipDirective,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -169,7 +169,7 @@ export class NeuDockItemDirective {
 
     <ng-template #defaultItem let-item let-index="index" let-active="active">
       @if (item.icon) {
-        <neural-icon class="neu-dock__icon" [icon]="item.icon" size="1.5rem" aria-hidden="true" />
+        <neu-icon-outlet class="neu-dock__icon" [icon]="item.icon" size="1.5rem" aria-hidden="true" />
       } @else {
         <span class="neu-dock__fallback" aria-hidden="true">{{ item.label.slice(0, 1) }}</span>
       }

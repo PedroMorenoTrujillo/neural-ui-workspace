@@ -8,20 +8,29 @@ import { assertDirectFesmInputs, verifyUnusedPackageExport } from './lib/rel-01-
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
 const fesm = join(root, 'dist/neural-ui/core/fesm2022');
+const foundation = join(fesm, 'neural-ui-core-foundation.mjs');
 const icon = (name) => `@neural-icons/core/icons/${name}`;
 const cases = {
   oneStatic: `import {iconSave} from '${icon('save')}'; export const icon=iconSave;`,
+  coreButtonOnly: `import {NeuButtonComponent} from '${join(fesm, 'neural-ui-core-button.mjs')}';
+    export const component=NeuButtonComponent;`,
   buttonSave: `import {NeuButtonComponent} from '${join(fesm, 'neural-ui-core-button.mjs')}';
-    import {provideNeuralIcons} from '@neural-icons/angular';
+    import {provideNeuIconResolver} from '${foundation}';
+    import {NeuralIcon} from '@neural-icons/angular';
     import {iconSave} from '${icon('save')}';
-    export const component=NeuButtonComponent; export const providers=provideNeuralIcons(iconSave);`,
+    export const component=NeuButtonComponent;
+    export const providers=provideNeuIconResolver(({key,size,strokeWidth})=>
+      key==='save'?{component:NeuralIcon,inputs:{icon:iconSave,size,strokeWidth}}:null);`,
   buttonThree: `import {NeuButtonComponent} from '${join(fesm, 'neural-ui-core-button.mjs')}';
-    import {provideNeuralIcons} from '@neural-icons/angular';
+    import {provideNeuIconResolver} from '${foundation}';
+    import {NeuralIcon} from '@neural-icons/angular';
     import {iconSave} from '${icon('save')}';
     import {iconDownload} from '${icon('download')}';
     import {iconTrash} from '${icon('trash')}';
     export const component=NeuButtonComponent;
-    export const providers=provideNeuralIcons(iconSave,iconDownload,iconTrash);`,
+    const icons={save:iconSave,download:iconDownload,trash:iconTrash};
+    export const providers=provideNeuIconResolver(({key,size,strokeWidth})=>
+      icons[key]?{component:NeuralIcon,inputs:{icon:icons[key],size,strokeWidth}}:null);`,
   representative: `import {NeuAlertComponent} from '${join(fesm, 'neural-ui-core-alert.mjs')}';
     import {NeuButtonComponent} from '${join(fesm, 'neural-ui-core-button.mjs')}';
     import {NeuDialogComponent} from '${join(fesm, 'neural-ui-core-modal.mjs')}';
@@ -44,7 +53,12 @@ for (const [name, contents] of Object.entries(cases)) {
       });
     } }],
   });
-  assertDirectFesmInputs(bundle.metafile, join(root, 'dist/neural-ui/core'), contents);
+  if (name !== 'oneStatic')
+    assertDirectFesmInputs(bundle.metafile, join(root, 'dist/neural-ui/core'), contents);
+  if (name === 'coreButtonOnly' || name === 'representative') {
+    const iconInputs = Object.keys(bundle.metafile.inputs).filter((input) => input.includes('/@neural-icons/'));
+    if (iconInputs.length) throw new Error(`${name}: Core-only bundle retained Neural Icons: ${iconInputs.join(', ')}`);
+  }
   const bytes = Buffer.concat(bundle.outputFiles.map((file) => Buffer.from(file.contents)));
   const code = bytes.toString('utf8');
   results[name] = {
@@ -59,8 +73,10 @@ for (const [name, contents] of Object.entries(cases)) {
 if (results.rootUnused.raw !== 0) throw new Error('A0.2 root-unused must be 0 raw bytes.');
 for (const [name, expected] of Object.entries({
   oneStatic: ['save'],
+  coreButtonOnly: [],
   buttonSave: ['save'],
   buttonThree: ['download', 'save', 'trash'],
+  representative: [],
 })) {
   if (JSON.stringify(results[name].iconNames) !== JSON.stringify(expected)) {
     throw new Error(`${name}: unexpected icon geometry ${results[name].iconNames.join(', ')}`);

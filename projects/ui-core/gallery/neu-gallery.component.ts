@@ -14,9 +14,9 @@ import { NgTemplateOutlet } from '@angular/common';
 import { InternalNeuMediaPreviewAdapter } from '@neural-ui/core/internal';
 import { NeuImageViewerDirective } from '@neural-ui/core/image-viewer';
 import type { NeuImageViewerItem } from '@neural-ui/core/image-viewer';
-import { NeuralIcon } from '@neural-icons/angular';
-import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
-import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconChevronLeft as iconChevronLeft } from '@neural-ui/core/internal';
+import { neuIconChevronRight as iconChevronRight } from '@neural-ui/core/internal';
 
 /** Gallery's canonical public media-item name; one shared object shape. */
 export type NeuGalleryItem = NeuImageViewerItem;
@@ -45,7 +45,7 @@ export class NeuGalleryCaptionDirective {
 /** A positional media gallery with a single shared, private CDK preview engine. */
 @Component({
   selector: 'neu-gallery',
-  imports: [NgTemplateOutlet, NeuImageViewerDirective, NeuralIcon],
+  imports: [NgTemplateOutlet, NeuImageViewerDirective, InternalNeuIconOutletComponent],
   providers: [InternalNeuMediaPreviewAdapter],
   host: { class: 'neu-gallery', '[class.neu-gallery--fullscreen]': 'isPreviewOpen()' },
   template: `
@@ -70,7 +70,7 @@ export class NeuGalleryCaptionDirective {
               [attr.aria-label]="previousLabel()"
               (click)="previous()"
             >
-              <neural-icon [icon]="iconChevronLeft" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconChevronLeft" [fallbackPath]="iconFallbackPath(iconChevronLeft)" size="1.25rem" />
             </button>
           }
           @if (previewEnabled()) {
@@ -126,7 +126,7 @@ export class NeuGalleryCaptionDirective {
               [attr.aria-label]="nextLabel()"
               (click)="next()"
             >
-              <neural-icon [icon]="iconChevronRight" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconChevronRight" [fallbackPath]="iconFallbackPath(iconChevronRight)" size="1.25rem" />
             </button>
           }
           @if (showCounter() || captionTemplate || activeItem().caption) {
@@ -176,6 +176,7 @@ export class NeuGalleryCaptionDirective {
   styleUrl: './neu-gallery.component.scss',
 })
 export class NeuGalleryComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconChevronLeft = iconChevronLeft;
   protected readonly iconChevronRight = iconChevronRight;
 

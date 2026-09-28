@@ -347,4 +347,49 @@ describe('NeuTreeTable 2 pure selection engine', () => {
     expect(first).toEqual(second);
     expect(JSON.stringify({ selection: state.applied, options })).toBe(before);
   });
+
+  it('falls back to the clicked node when a range anchor is no longer visible', () => {
+    const options = checkboxOptions<Row>({ propagation: 'none', range: true });
+    const state = fixture([], [], options);
+    const change = proposeNeuTreeTableSelection({
+      model: state.model,
+      selection: state.applied,
+      selectionOptions: options,
+      intent: nodeIntent('d', 'keyboard', { anchorKey: 'b', shiftKey: true }),
+    });
+    expect(change?.next.keys).toEqual(['d']);
+    expect(change?.source).toBe('keyboard');
+  });
+
+  it('retains an applied disabled key when single selection moves to another node', () => {
+    const options: NeuTreeTableSelectionOptions<Row> = {
+      mode: 'single', indicator: 'radio', selectOnRowClick: true, allowClear: false,
+      isNodeDisabled: (row) => row.disabled === true,
+    };
+    const rows: readonly Row[] = [
+      { id: 'blocked', name: 'Blocked', disabled: true },
+      { id: 'available', name: 'Available' },
+    ];
+    const projection = projectNeuTreeTableHierarchy(rows, keyOf, hierarchy(['blocked', 'available']), []);
+    const selection = { kind: 'keys' as const, keys: ['blocked'] };
+    const model = buildNeuTreeTableSelectionModel(projection, selection, options);
+    const change = proposeNeuTreeTableSelection({
+      model, selection, selectionOptions: options, intent: nodeIntent('available', 'radio'),
+    });
+    expect(change?.next.keys).toEqual(['blocked', 'available']);
+    expect(change?.addedKeys).toEqual(['available']);
+  });
+
+  it('does not clear a selected radio node when clearing is disabled', () => {
+    const options: NeuTreeTableSelectionOptions<Row> = {
+      mode: 'single', indicator: 'radio', selectOnRowClick: true, allowClear: false,
+    };
+    const state = fixture(['a'], [], options);
+    expect(proposeNeuTreeTableSelection({
+      model: state.model,
+      selection: state.applied,
+      selectionOptions: options,
+      intent: nodeIntent('a', 'radio'),
+    })).toBeNull();
+  });
 });

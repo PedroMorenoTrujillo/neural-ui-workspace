@@ -10,6 +10,7 @@ import {
   NeuListboxFooterDirective,
   NeuListboxGroupDirective,
   NeuListboxHeaderDirective,
+  NeuListboxIndicatorDirective,
   NeuListboxItemDirective,
   NeuListboxLoaderDirective,
 } from './neu-listbox.directives';
@@ -747,6 +748,7 @@ describe('NeuListboxComponent', () => {
         NeuListboxComponent,
         NeuListboxItemDirective,
         NeuListboxGroupDirective,
+        NeuListboxIndicatorDirective,
         NeuListboxFilterDirective,
         NeuListboxLoaderDirective,
         NeuListboxHeaderDirective,
@@ -759,6 +761,7 @@ describe('NeuListboxComponent', () => {
           [groups]="groups"
           [groupConfig]="groupConfig"
           [searchable]="true"
+          [checkbox]="true"
           [filterValue]="filterValue"
           [lazy]="lazy"
           [loading]="loading"
@@ -788,6 +791,9 @@ describe('NeuListboxComponent', () => {
             let-selected="selected"
           >
             Item {{ option.label }} {{ active }} {{ selected }}
+          </ng-template>
+          <ng-template [neuListboxIndicator]="itemOptions" let-selected="selected">
+            <span class="projected-indicator">{{ selected ? 'chosen' : 'available' }}</span>
           </ng-template>
           <ng-template neuListboxLoader let-index="logicalIndex" let-count="count">
             Loader {{ index }} / {{ count }}
@@ -826,6 +832,7 @@ describe('NeuListboxComponent', () => {
     expect(host.nativeElement.textContent).toContain('Group Core false');
     expect(host.nativeElement.textContent).toContain('Group Locked true');
     expect(host.nativeElement.textContent).toContain('Item Alpha');
+    expect(host.nativeElement.querySelector('.projected-indicator')?.textContent).toContain('available');
 
     const projectedListbox = host.debugElement.children[0].componentInstance as NeuListboxComponent;
     projectedListbox['filterTemplateContext']().filter('beta');
@@ -1182,4 +1189,84 @@ describe('NeuListboxComponent', () => {
       expect(fixture.componentInstance.renderedRows().length).toBeLessThanOrEqual(12);
     }
   });
+
+  it('preserves the distinct identity of positive and negative zero', () => {
+    fixture.componentRef.setInput('options', [
+      { value: -0, label: 'Negative zero' }, { value: 0, label: 'Positive zero' },
+    ]);
+    fixture.componentRef.setInput('value', -0);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    expect(component.isSelected(-0)).toBe(true);
+    expect(component.isSelected(0)).toBe(false);
+    expect(component.isOptionSelected(component.visibleRows()[0].option)).toBe(true);
+    expect(component.isOptionSelected(component.visibleRows()[1].option)).toBe(false);
+  });
+
+  it('requires a modifier before deselecting the current item in single meta mode', () => {
+    fixture.componentRef.setInput('metaKeySelection', true);
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.value.set('a');
+    component.selectOption(new MouseEvent('click'), component.visibleRows()[0], 0);
+    expect(component.value()).toBe('a');
+    component.selectOption(new MouseEvent('click', { ctrlKey: true }), component.visibleRows()[0], 0);
+    expect(component.value()).toBeNull();
+  });
+
+  it('anchors a range at its endpoint when no option is currently active', () => {
+    fixture.componentRef.setInput('mode', 'multiple');
+    fixture.detectChanges();
+    const component = fixture.componentInstance as any;
+    component.activeIndex.set(-1);
+    component.rangeAnchorLogicalIndex = null;
+    component.selectRange(new Event('range'), 1);
+    expect(component.values()).toEqual(['b']);
+  });
+
+  it('derives scalar and collection model values from applied selection', () => {
+    const component = fixture.componentInstance as any;
+    expect(component.modelValue()).toBeNull();
+    component.value.set('a');
+    expect(component.modelValue()).toBe('a');
+    fixture.componentRef.setInput('mode', 'multiple');
+    fixture.detectChanges();
+    component.value.set(['a', 'b']);
+    expect(component.modelValue()).toEqual(['a', 'b']);
+  });
+
+  it('focuses the selected option without automatic first-option fallback', () => {
+    const component = fixture.componentInstance as any;
+    fixture.componentRef.setInput('autoOptionFocus', false);
+    fixture.componentRef.setInput('value', 'b');
+    fixture.detectChanges();
+    component.activeIndex.set(-1);
+    component.onListFocus(new FocusEvent('focus'));
+    expect(component.activeIndex()).toBe(1);
+    component.activeIndex.set(-1);
+    fixture.componentRef.setInput('value', null);
+    fixture.detectChanges();
+    component.onListFocus(new FocusEvent('focus'));
+    expect(component.activeIndex()).toBe(-1);
+    fixture.componentRef.setInput('autoOptionFocus', true);
+    fixture.detectChanges();
+    component.onListFocus(new FocusEvent('focus'));
+    expect(component.activeIndex()).toBe(0);
+  });
+
+  it('announces deselection and clearing, and skips group headers in the option model', () => {
+    const component = fixture.componentInstance as any;
+    component.commitSelection(['a'], new MouseEvent('click'), options[0], false);
+    expect(component.liveMessage()).toContain('unselected');
+    component.commitSelection([], new MouseEvent('click'), null, false);
+    expect(component.liveMessage()).toBe('Selection cleared');
+
+    fixture.componentRef.setInput('groups', [{ label: 'Letters', items: options }]);
+    fixture.componentRef.setInput('groupConfig', {
+      labelAccessor: 'label', childrenAccessor: 'items',
+    });
+    fixture.detectChanges();
+    expect(component.allOptions()).toEqual(options);
+  });
+
 });

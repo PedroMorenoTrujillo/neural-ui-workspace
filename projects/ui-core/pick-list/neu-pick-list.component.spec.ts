@@ -79,6 +79,32 @@ describe('NeuPickListComponent', () => {
     });
   });
 
+  it('restores focus to the transferred option after the parent applies the move', async () => {
+    const host = fixture.nativeElement as HTMLElement;
+    document.body.append(host);
+    try {
+      const component = fixture.componentInstance;
+      const sourceOption = host.querySelector('.neu-pick-list__column button[role="option"]') as HTMLButtonElement;
+      sourceOption.focus();
+      expect(document.activeElement).toBe(sourceOption);
+      sourceOption.click();
+      const proposals = vi.spyOn(component.itemsChange, 'emit');
+      component.moveToTarget();
+      const next = proposals.mock.calls.at(-1)?.[0];
+      expect(next?.source).toEqual([beta]);
+      fixture.componentRef.setInput('source', next!.source);
+      fixture.componentRef.setInput('target', next!.target);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const destination = [...host.querySelectorAll<HTMLButtonElement>('.neu-pick-list__column button[role="option"]')]
+        .find((button) => button.textContent?.includes('Alpha'));
+      expect(destination).toBeDefined();
+      expect(document.activeElement).toBe(destination);
+    } finally {
+      host.remove();
+    }
+  });
+
   it('keeps action selection after an unapplied transfer proposal', () => {
     const component = fixture.componentInstance;
     component.toggleTarget('d');
@@ -302,6 +328,47 @@ describe('NeuPickListComponent', () => {
       'target',
     );
     expect(drops).toHaveLength(1);
+  });
+
+  it('reorders the target side and transfers a target item back to source', () => {
+    const component = fixture.componentInstance;
+    const gamma: NeuTransferItem = { value: 'c', label: 'Gamma' };
+    fixture.componentRef.setInput('target', [gamma, { value: 'd', label: 'Delta' }]);
+    fixture.componentRef.setInput('targetSelectionKeys', ['d']);
+    fixture.detectChanges();
+    const targets: string[][] = [];
+    const sources: string[][] = [];
+    component.targetChange.subscribe((items) => targets.push(items.map((item) => item.value)));
+    component.sourceChange.subscribe((items) => sources.push(items.map((item) => item.value)));
+    component.reorderSelection('target', 'top');
+    expect(targets.at(-1)).toEqual(['d', 'c']);
+    const drop = (item: NeuTransferItem, target: 'source' | 'target', index: number) =>
+      component.onDrop({
+        data: component.dragData(item, 'target'),
+        targetData: target,
+        scope: ['neu-pick-list'],
+        effect: 'move',
+        interaction: 'keyboard',
+        originalEvent: null,
+        currentIndex: index,
+      }, target);
+    drop(gamma, 'target', 1);
+    expect(targets.at(-1)).toEqual(['d', 'c']);
+    drop(gamma, 'source', 1);
+    expect(sources.at(-1)).toEqual(['a', 'c', 'b']);
+    expect(targets.at(-1)).toEqual(['d']);
+  });
+
+  it('prunes stale target selection only after the applied target changes', () => {
+    const component = fixture.componentInstance;
+    const target: NeuTransferItem = { value: 'c', label: 'Gamma' };
+    fixture.componentRef.setInput('target', [target]);
+    fixture.detectChanges();
+    component.toggleTarget('c');
+    expect(component.targetSelection().has('c')).toBe(true);
+    fixture.componentRef.setInput('target', []);
+    fixture.detectChanges();
+    expect(component.targetSelection().size).toBe(0);
   });
 
   it('does not reorder a single visible item in a 10k filtered source', () => {

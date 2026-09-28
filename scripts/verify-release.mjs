@@ -8,7 +8,8 @@ if (!['pr', 'main', 'release'].includes(bundleProfile)) {
   throw new Error(`Unsupported NEURAL_UI_BUNDLE_PROFILE: ${bundleProfile}`);
 }
 const commands = [
-  ['npm', ['test']],
+  ['npm', ['run', 'test:coverage:gate']],
+  ['npm', ['run', 'test:coverage']],
   ['npm', ['run', 'test:release-artifacts']],
   ['npm', ['run', 'build']],
   ['npm', ['run', 'prepare:release-artifacts']],

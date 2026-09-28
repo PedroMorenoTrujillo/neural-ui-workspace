@@ -147,6 +147,61 @@ describe('NeuCompareComponent', () => {
     expect(changed).not.toHaveBeenCalled();
   });
 
+  it('cancels only the active drag and ignores unrelated pointer completion', () => {
+    vi.spyOn(fixture.nativeElement, 'getBoundingClientRect').mockReturnValue({
+      left: 0, top: 0, width: 100, height: 100,
+    } as DOMRect);
+    const ended = vi.spyOn(component.valueChangeEnd, 'emit');
+    const down = { pointerId: 7, button: 0, clientX: 70, clientY: 10 } as PointerEvent;
+    component.onRootPointerDown(down);
+    component.onRootPointerUp({ pointerId: 8 } as PointerEvent);
+    expect(component.dragging()).toBe(true);
+    component.onRootPointerCancel({ pointerId: 8 } as PointerEvent);
+    expect(component.dragging()).toBe(true);
+    component.onRootPointerCancel(down);
+    expect(component.dragging()).toBe(false);
+    expect(ended).not.toHaveBeenCalled();
+    component.onRootPointerCancel(down);
+  });
+
+  it('maps orientation and text direction to the expected keyboard proposals', () => {
+    const changed = vi.spyOn(component.valueChange, 'emit');
+    const ended = vi.spyOn(component.valueChangeEnd, 'emit');
+    fixture.nativeElement.setAttribute('dir', 'RTL');
+    for (const [key, value] of [['ArrowRight', 49], ['ArrowLeft', 51]] as const) {
+      const event = new KeyboardEvent('keydown', { key, cancelable: true });
+      component.onHandleKeyDown(event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ value }));
+      expect(ended).toHaveBeenLastCalledWith(expect.objectContaining({ value }));
+    }
+    fixture.componentRef.setInput('orientation', 'vertical');
+    fixture.detectChanges();
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ value: 51 }));
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ value: 49 }));
+    fixture.componentRef.setInput('orientation', 'horizontal');
+    fixture.detectChanges();
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'Home' }));
+    expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ value: 0 }));
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'End' }));
+    expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ value: 100 }));
+  });
+
+  it('keeps keyboard completion silent when the proposed value is already applied', () => {
+    const ended = vi.spyOn(component.valueChangeEnd, 'emit');
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'Tab' }));
+    fixture.componentRef.setInput('value', 0);
+    fixture.detectChanges();
+    component.onHandleKeyDown(new KeyboardEvent('keydown', { key: 'Home' }));
+    expect(ended).not.toHaveBeenCalled();
+  });
+
   it('renders the composable item, handle and range indicator with proper ARIA', async () => {
     @Component({
       imports: [

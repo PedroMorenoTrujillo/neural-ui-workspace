@@ -1,18 +1,20 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-08-05
+Last reviewed: 2026-09-28
 
 ## Executive Summary
 
-Neural UI Core is currently aligned with the project's main engineering standards: signals-first APIs, standalone Angular components, OnPush change detection, zoneless-oriented testing, and global coverage above the requested threshold.
+Neural UI Core is aligned with the project's main engineering standards: signals-first APIs, standalone Angular components, OnPush change detection, and zoneless-oriented testing. Neural UI 2 passes the exact 95.01% hard coverage gate on all four metrics.
 
 Validated coverage snapshot:
 
-- Statements: 97.50%
-- Branches: 96.83%
-- Functions: 95.48%
-- Lines: 99.56%
-- Unit tests: 2095 passing tests in ui-core
+- Statements: 23,819/24,565 (96.96%; 746 missed)
+- Branches: 13,976/14,708 (95.02%; 732 missed)
+- Functions: 4,511/4,696 (96.06%; 185 missed)
+- Lines: 18,707/19,061 (98.14%; 354 missed)
+- Unit tests: 2,889 passing tests in `ui-core`
+
+The blocking release policy requires **at least 95.01% on all four metrics** in the full canonical run. `npm run test:coverage` collects fresh coverage and audits exact covered/total counts; `npm run test:coverage:gate` tests that arithmetic. The current branch passes. The [REL-02 assurance report](../../N2-REL-02-COVERAGE-ASSURANCE.md) retains historical checkpoint evidence and the REL-02G closeout.
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -35,8 +37,8 @@ The library presents a strong accessibility baseline across interactive componen
 
 ### Testing
 
-- Global coverage above 95%: yes
-- Enforced global coverage floor of 95% across the library: yes
+- Global coverage above 95.01% on all four metrics: yes; branches are 95.02%
+- Enforced release coverage policy: 95.01% exact hard floor on all four metrics
 - Residual low-return hotspots still present: yes
   - `virtual-list`
   - `dashboard-grid`
@@ -107,6 +109,6 @@ This is a rapid engineering audit, not a full WCAG certification.
 
 Use this wording in documentation or internal reporting:
 
-"Neural UI Core is aligned with a signals-first, standalone, OnPush and zoneless-oriented Angular architecture, uses BEM as its required styling convention, exceeds 95% global coverage in every main metric, and maintains a strong accessibility baseline with ARIA, keyboard navigation and focus management across its main interactive components. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
+"Neural UI Core uses signals-first, standalone, OnPush and zoneless-oriented Angular architecture and BEM styling. Neural UI 2 currently has 95.52% statement, 91.68% branch, 95.20% function and 97.35% line coverage. Its release gate requires 95.01% on all four metrics and currently blocks release because branch coverage is below that threshold. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
 
 For styling standards, component and demo styles are expected to follow BEM naming and BEM-oriented SCSS grouping rather than flat ad hoc selector organization.

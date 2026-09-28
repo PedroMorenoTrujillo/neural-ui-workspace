@@ -408,4 +408,109 @@ describe('NeuTreeSelectComponent N2-019', () => {
       'Engineering',
     );
   });
+
+  it('distinguishes negative zero from positive zero in selection tokens', () => {
+    const { component } = createTreeSelect({
+      nodes: [{ value: -0, label: 'Negative zero' }, { value: 0, label: 'Positive zero' }],
+      value: -0,
+    });
+    expect(component.isSelected(-0 as unknown as string)).toBe(true);
+    expect(component.isSelected(0 as unknown as string)).toBe(false);
+  });
+
+  it('closes an already open panel and clears a stale search on reset', () => {
+    const { component } = createTreeSelect({ searchable: true });
+    component.query.set('platform');
+    component.toggle();
+    expect(component.open()).toBe(true);
+    const revision = (component as any).queryRevision();
+    component.reset();
+    expect(component.query()).toBe('');
+    expect((component as any).queryRevision()).toBe(revision + 1);
+    expect(component.open()).toBe(false);
+  });
+
+  it('ignores unrelated trigger and search keys while opening upward from the search', async () => {
+    const { fixture, component } = createTreeSelect({ searchable: true });
+    const unrelated = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    component.onTriggerKeydown(unrelated);
+    component.onSearchKeydown(unrelated);
+    expect(unrelated.defaultPrevented).toBe(false);
+    component.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const up = new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true });
+    component.onSearchKeydown(up);
+    expect(up.defaultPrevented).toBe(true);
+    const down = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    component.onSearchKeydown(down);
+    expect(down.defaultPrevented).toBe(true);
+  });
+
+  it('keeps selection unchanged when propagation starts from a detached node', () => {
+    const { component } = createTreeSelect<'multiple'>({
+      mode: 'multiple', selectionStrategy: 'propagated', value: ['platform'],
+    });
+    const detached = { value: 'platform', label: 'Detached copy' };
+    expect((component as any).propagatedSelection(detached, true)).toEqual(['platform']);
+  });
+
+  it('does not close a panel that is already closed or react to viewport resize', () => {
+    const { component } = createTreeSelect();
+    component.close();
+    (component as any).onViewportResize();
+    expect(component.open()).toBe(false);
+    expect((component as any).panelWidth()).toBe('');
+  });
+
+  it('does not emit a second virtual range for the same first visible row', () => {
+    const { component } = createTreeSelect({
+      virtualizationOptions: { enabled: true, itemSize: 24, viewportHeight: 48, buffer: 0 },
+    });
+    const ranges = vi.fn();
+    component.rangeChange.subscribe(ranges);
+    component.onVirtualScroll({ currentTarget: { scrollTop: 0 } } as unknown as Event);
+    expect(ranges).not.toHaveBeenCalled();
+    component.onVirtualScroll({ currentTarget: { scrollTop: 48 } } as unknown as Event);
+    expect(component.virtualStart()).toBe(1);
+    expect(ranges).toHaveBeenCalledOnce();
+  });
+
+  it('measures a visible trigger width when opening its panel', () => {
+    const { fixture, component } = createTreeSelect();
+    const trigger = fixture.nativeElement.querySelector('.neu-tree-select__trigger') as HTMLElement;
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({ width: 187.6 } as DOMRect);
+    component.toggle();
+    expect((component as any).panelWidth()).toBe(188);
+  });
+
+  it('renders the projected empty state after a query with no matching nodes', async () => {
+    const fixture = TestBed.createComponent(TemplateHost);
+    fixture.detectChanges();
+    const component = fixture.debugElement.query(By.directive(NeuTreeSelectComponent))
+      .componentInstance as NeuTreeSelectComponent<NeuTreeSelectNode, string>;
+    component.toggle();
+    component.query.set('not a department');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('.neu-tree-select__empty')?.textContent).toContain('Empty');
+  });
+
+  it('closes from a second toggle and navigates a collapsed parent in RTL', () => {
+    const { fixture, component } = createTreeSelect();
+    component.toggle();
+    expect(component.open()).toBe(true);
+    component.toggle();
+    expect(component.open()).toBe(false);
+    (fixture.nativeElement as HTMLElement).style.direction = 'rtl';
+    const expand = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true });
+    component.onNodeKeydown(component.visibleNodes()[0], 0, expand);
+    expect(expand.defaultPrevented).toBe(true);
+  });
+
+  it('treats primitive option nodes as leaves without lazy children', () => {
+    const { component } = createTreeSelect();
+    expect((component as any).childrenOf('leaf')).toEqual([]);
+    expect((component as any).isLazyNode('leaf')).toBe(false);
+  });
 });

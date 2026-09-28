@@ -1,4 +1,4 @@
-import { projectNeuTreeTableHierarchy } from './internal/hierarchy/neu-tree-table-hierarchy';
+import { normalizeNeuTreeTableHierarchy, projectNeuTreeTableHierarchy, projectNormalizedNeuTreeTableHierarchy } from './internal/hierarchy/neu-tree-table-hierarchy';
 import type { NeuTreeLoadedRelation, NeuTreeTableHierarchy } from './public/neu-tree-table.types';
 
 interface Row {
@@ -179,5 +179,60 @@ describe('NeuTreeTable 2 pure hierarchy engine', () => {
     const projected = projectNeuTreeTableHierarchy(rows, keyOf, state, expanded);
     expect(projected.visible.map((node) => node.key)).toEqual(['a', 'b']);
     expect(JSON.stringify({ rows, state, expanded })).toBe(before);
+  });
+
+  it('derives exact sibling counts from a complete relation with unknown total', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }];
+    const state = hierarchy(['a', 'b']);
+    const complete = { ...state, roots: loaded(['a', 'b'], null, 'complete') };
+    const partial = { ...state, roots: loaded(['a', 'b'], null, 'partial') };
+    expect(projectNeuTreeTableHierarchy(rows, keyOf, complete, []).visible.map((node) => node.siblingCount)).toEqual([2, 2]);
+    expect(projectNeuTreeTableHierarchy(rows, keyOf, partial, []).visible.map((node) => node.siblingCount)).toEqual([null, null]);
+  });
+
+  it('reports duplicate relation ownership only once for the same parent', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }];
+    const state = hierarchy(['a'], [
+      { parentKey: 'a', relation: loaded(['b']) },
+      { parentKey: 'a', relation: loaded([]) },
+    ]);
+    const projection = projectNeuTreeTableHierarchy(rows, keyOf, state, ['a']);
+    expect(projection.visible.map((node) => node.key)).toEqual(['a', 'b']);
+    expect(projection.diagnostics.filter((entry) => entry.code === 'duplicate-child')).toHaveLength(1);
+  });
+
+  it('keeps orphan diagnostics tied to a known but unreachable parent', () => {
+    const rows: readonly Row[] = [
+      { id: 'root', name: 'Root' }, { id: 'orphan-parent', name: 'Parent' }, { id: 'child', name: 'Child' },
+    ];
+    const state = hierarchy(['root'], [{ parentKey: 'orphan-parent', relation: loaded(['child']) }]);
+    const projection = projectNeuTreeTableHierarchy(rows, keyOf, state, []);
+    expect(projection.visible.map((node) => node.key)).toEqual(['root']);
+    expect(projection.diagnostics).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: 'orphan', key: 'child', parentKey: 'orphan-parent' }),
+    ]));
+  });
+
+  it('uses filtered root count only for complete loaded roots', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'A' }];
+    const filtered = {
+      roots: ['string:a'], children: new Map<string, readonly string[]>(),
+      retained: new Set(['string:a']), transientReveal: new Set<string>(), filtering: true,
+    };
+    const complete = normalizeNeuTreeTableHierarchy(rows, keyOf, hierarchy(['a']));
+    expect(projectNormalizedNeuTreeTableHierarchy(complete, [], filtered).visible[0]?.siblingCount).toBe(1);
+    const partialState = { ...hierarchy(['a']), roots: loaded(['a'], null, 'partial') };
+    const partial = normalizeNeuTreeTableHierarchy(rows, keyOf, partialState);
+    expect(projectNormalizedNeuTreeTableHierarchy(partial, [], filtered).visible[0]?.siblingCount).toBeNull();
+  });
+
+  it('skips stale query projection roots without fabricating missing rows', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'A' }];
+    const normalized = normalizeNeuTreeTableHierarchy(rows, keyOf, hierarchy(['a']));
+    const stale = {
+      roots: ['string:missing', 'string:a'], children: new Map<string, readonly string[]>(),
+      retained: new Set(['string:a']), transientReveal: new Set<string>(), filtering: true,
+    };
+    expect(projectNormalizedNeuTreeTableHierarchy(normalized, [], stale).visible.map((node) => node.key)).toEqual(['a']);
   });
 });

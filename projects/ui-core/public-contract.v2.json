@@ -438,9 +438,14 @@
       "exports": [
         "./foundation#allowsNeuOverlayDismissal",
         "./foundation#defineNeuPreset",
+        "./foundation#NEU_ICON_RESOLVER",
         "./foundation#NEU_OVERLAY_DISMISS_GUARD",
         "./foundation#NeuCloseReason",
         "./foundation#NeuCloseRequest",
+        "./foundation#NeuIconKey",
+        "./foundation#NeuIconRender",
+        "./foundation#NeuIconRenderContext",
+        "./foundation#NeuIconResolver",
         "./foundation#NeuNow",
         "./foundation#NeuOverlayDismissContext",
         "./foundation#NeuOverlayDismissGuard",
@@ -454,6 +459,7 @@
         "./foundation#NEURAL_NOW",
         "./foundation#NEURAL_TIME_ZONE",
         "./foundation#NeuTokenName",
+        "./foundation#provideNeuIconResolver",
         "./foundation#provideNeuOverlayDismissGuard"
       ]
     },
@@ -467,6 +473,15 @@
         "./gallery#NeuGalleryItem",
         "./gallery#NeuGalleryItemContext",
         "./gallery#NeuGalleryItemDirective"
+      ]
+    },
+    {
+      "entrypoint": "./icon-outlet-internal",
+      "types": "./types/neural-ui-core-icon-outlet-internal.d.ts",
+      "exports": [
+        "./icon-outlet-internal#InternalNeuIconOutletComponent",
+        "./icon-outlet-internal#neuSemanticIconText",
+        "./icon-outlet-internal#neuStructuralIconPath"
       ]
     },
     {
@@ -568,6 +583,47 @@
         "./internal#InternalNeuOverlayStack",
         "./internal#InternalNeuTreeTraversalEntry",
         "./internal#InternalNeuTreeTraversalOptions",
+        "./internal#neuIconArrowDown",
+        "./internal#neuIconArrowLeft",
+        "./internal#neuIconArrowRight",
+        "./internal#neuIconArrowUp",
+        "./internal#neuIconBell",
+        "./internal#neuIconBold",
+        "./internal#neuIconCheck",
+        "./internal#neuIconChevronDown",
+        "./internal#neuIconChevronLeft",
+        "./internal#neuIconChevronRight",
+        "./internal#neuIconChevronUp",
+        "./internal#neuIconCircleAlert",
+        "./internal#neuIconCircleCheck",
+        "./internal#neuIconCircleX",
+        "./internal#neuIconDollarSign",
+        "./internal#neuIconDownload",
+        "./internal#neuIconDrag",
+        "./internal#neuIconEdit",
+        "./internal#neuIconEraser",
+        "./internal#neuIconExternalLink",
+        "./internal#neuIconFlipHorizontal",
+        "./internal#neuIconFlipVertical",
+        "./internal#neuIconImage",
+        "./internal#neuIconInbox",
+        "./internal#neuIconInfo",
+        "./internal#neuIconItalic",
+        "./internal#neuIconLink",
+        "./internal#neuIconList",
+        "./internal#neuIconListOrdered",
+        "./internal#neuIconMinus",
+        "./internal#neuIconPlus",
+        "./internal#neuIconRotateCcw",
+        "./internal#neuIconRotateCw",
+        "./internal#neuIconTrendingDown",
+        "./internal#neuIconTrendingUp",
+        "./internal#neuIconUnderline",
+        "./internal#neuIconUpload",
+        "./internal#neuIconWarning",
+        "./internal#neuIconX",
+        "./internal#neuIconZoomIn",
+        "./internal#neuIconZoomOut",
         "./internal#NeuIdGenerator",
         "./internal#NeuInitialTemporalState",
         "./internal#NeuMenuActionKind",
@@ -1809,7 +1865,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly icon: _angular_core.InputSignal<\"info\" | \"success\" | \"warning\" | \"file\" | \"navigation\" | \"circle-check\" | \"check\" | \"circle-x\" | \"x\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"help\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+          "signature": "readonly icon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./alert#NeuAlertComponent.input:showIcon",
@@ -1875,7 +1931,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly alertRole: _angular_core.Signal<\"status\" | \"alert\">;"
+          "signature": "readonly alertRole: _angular_core.Signal<\"alert\" | \"status\">;"
         },
         {
           "id": "./alert#NeuAlertComponent.property:hostClasses",
@@ -4776,7 +4832,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./breadcrumb#NeuBreadcrumbItem.property:label",
@@ -4935,7 +4991,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon: _angular_core.InputSignal<\"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+          "signature": "icon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./button#NeuButtonComponent.input:iconOnly",
@@ -12649,7 +12705,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon: _angular_core.InputSignal<\"info\" | \"warning\" | \"success\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"help\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+          "signature": "icon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./empty-state#NeuEmptyStateComponent.input:iconSize",
@@ -13289,6 +13345,15 @@
       "members": []
     },
     {
+      "id": "./foundation#NEU_ICON_RESOLVER",
+      "entrypoint": "./foundation",
+      "name": "NEU_ICON_RESOLVER",
+      "kind": "token",
+      "status": "SUPPORTED",
+      "signature": "const NEU_ICON_RESOLVER: InjectionToken<NeuIconResolver>;",
+      "members": []
+    },
+    {
       "id": "./foundation#NEU_OVERLAY_DISMISS_GUARD",
       "entrypoint": "./foundation",
       "name": "NEU_OVERLAY_DISMISS_GUARD",
@@ -13331,6 +13396,92 @@
           "signature": "readonly reason: NeuCloseReason;"
         }
       ]
+    },
+    {
+      "id": "./foundation#NeuIconKey",
+      "entrypoint": "./foundation",
+      "name": "NeuIconKey",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuIconKey = string;",
+      "members": []
+    },
+    {
+      "id": "./foundation#NeuIconRender",
+      "entrypoint": "./foundation",
+      "name": "NeuIconRender",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuIconRender {\n}",
+      "members": [
+        {
+          "id": "./foundation#NeuIconRender.property:component",
+          "name": "component",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly component: Type<unknown>;"
+        },
+        {
+          "id": "./foundation#NeuIconRender.property:inputs",
+          "name": "inputs",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly inputs?: Readonly<Record<string, unknown>>;"
+        }
+      ]
+    },
+    {
+      "id": "./foundation#NeuIconRenderContext",
+      "entrypoint": "./foundation",
+      "name": "NeuIconRenderContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuIconRenderContext {\n}",
+      "members": [
+        {
+          "id": "./foundation#NeuIconRenderContext.property:key",
+          "name": "key",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly key: NeuIconKey;"
+        },
+        {
+          "id": "./foundation#NeuIconRenderContext.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: string | null;"
+        },
+        {
+          "id": "./foundation#NeuIconRenderContext.property:size",
+          "name": "size",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly size: string | number;"
+        },
+        {
+          "id": "./foundation#NeuIconRenderContext.property:strokeWidth",
+          "name": "strokeWidth",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly strokeWidth: number;"
+        }
+      ]
+    },
+    {
+      "id": "./foundation#NeuIconResolver",
+      "entrypoint": "./foundation",
+      "name": "NeuIconResolver",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuIconResolver = (context: NeuIconRenderContext) => NeuIconRender | null;",
+      "members": []
     },
     {
       "id": "./foundation#NeuNow",
@@ -13506,6 +13657,15 @@
       "kind": "type",
       "status": "SUPPORTED",
       "signature": "type NeuTokenName = '--neu-accent' | '--neu-alert-danger-bg' | '--neu-alert-danger-border' | '--neu-alert-danger-text' | '--neu-alert-dismiss-hover-bg' | '--neu-alert-error-bg' | '--neu-alert-error-border' | '--neu-alert-error-text' | '--neu-alert-info-bg' | '--neu-alert-info-border' | '--neu-alert-info-text' | '--neu-alert-success-bg' | '--neu-alert-success-border' | '--neu-alert-success-text' | '--neu-alert-warning-bg' | '--neu-alert-warning-border' | '--neu-alert-warning-text' | '--neu-autocomplete-option-height' | '--neu-bg' | '--neu-block-ui-bg' | '--neu-block-ui-radius' | '--neu-border' | '--neu-border-color' | '--neu-border-focus' | '--neu-border-hover' | '--neu-border-subtle' | '--neu-button-background' | '--neu-button-background-hover' | '--neu-button-border' | '--neu-button-foreground' | '--neu-cmd-bg' | '--neu-cmd-highlight' | '--neu-cmd-radius' | '--neu-cmd-shadow' | '--neu-code-block-accent' | '--neu-code-block-bar-bg' | '--neu-code-block-bg' | '--neu-code-block-border' | '--neu-code-block-copy-bg' | '--neu-code-block-copy-border' | '--neu-code-block-copy-hover-bg' | '--neu-code-block-copy-hover-border' | '--neu-code-block-copy-hover-text' | '--neu-code-block-copy-text' | '--neu-code-block-muted' | '--neu-code-block-text' | '--neu-context-menu-bg' | '--neu-context-menu-border' | '--neu-context-menu-color' | '--neu-context-menu-disabled-color' | '--neu-context-menu-hover' | '--neu-context-menu-radius' | '--neu-context-menu-shadow' | '--neu-dialog-body-flex' | '--neu-dialog-body-max-height' | '--neu-dialog-body-padding' | '--neu-dialog-footer-padding' | '--neu-dialog-footer-wrap' | '--neu-dialog-height' | '--neu-dialog-inset' | '--neu-dialog-margin' | '--neu-dialog-max-height' | '--neu-dialog-width-full' | '--neu-dialog-width-lg' | '--neu-dialog-width-md' | '--neu-dialog-width-sm' | '--neu-dialog-width-xl' | '--neu-error' | '--neu-error-bg' | '--neu-error-text' | '--neu-focus-color' | '--neu-focus-ring' | '--neu-focus-ring-alpha' | '--neu-focus-ring-color' | '--neu-focus-ring-offset' | '--neu-focus-ring-strong' | '--neu-focus-ring-strong-alpha' | '--neu-focus-ring-width' | '--neu-font-mono' | '--neu-font-sans' | '--neu-header-height' | '--neu-image-viewer-arrow-bg' | '--neu-image-viewer-arrow-hover' | '--neu-image-viewer-bg' | '--neu-image-viewer-btn-hover' | '--neu-image-viewer-caption' | '--neu-image-viewer-muted' | '--neu-info' | '--neu-info-bg' | '--neu-info-text' | '--neu-input-background' | '--neu-input-border' | '--neu-input-focus-border' | '--neu-input-focus-ring' | '--neu-knob-display-color' | '--neu-knob-label-color' | '--neu-knob-track' | '--neu-meter-radius' | '--neu-meter-track' | '--neu-meter-track-bg' | '--neu-nav-toggle-bg' | '--neu-nav-toggle-bg-hover' | '--neu-nav-toggle-border' | '--neu-nav-toggle-color' | '--neu-nav-toggle-offset-top' | '--neu-nav-toggle-shadow' | '--neu-nav-toggle-size' | '--neu-notification-unread-bg' | '--neu-number-input-btn-size' | '--neu-number-input-height' | '--neu-number-input-stacked-min-width' | '--neu-number-input-width' | '--neu-on-primary' | '--neu-otp-cell-bg' | '--neu-otp-cell-border' | '--neu-otp-cell-focus-border' | '--neu-otp-cell-radius' | '--neu-otp-cell-size' | '--neu-otp-gap' | '--neu-overlay-bg' | '--neu-overlay-bg-soft' | '--neu-popover-bg' | '--neu-popover-border' | '--neu-popover-color' | '--neu-popover-max-width' | '--neu-popover-min-width' | '--neu-popover-padding' | '--neu-popover-radius' | '--neu-popover-shadow' | '--neu-primary' | '--neu-primary-100' | '--neu-primary-200' | '--neu-primary-50' | '--neu-primary-alpha' | '--neu-primary-contrast' | '--neu-primary-dark' | '--neu-primary-fg' | '--neu-primary-light' | '--neu-primary-soft' | '--neu-primary-solid' | '--neu-primary-solid-fg' | '--neu-primary-solid-hover' | '--neu-radius' | '--neu-radius-2xl' | '--neu-radius-full' | '--neu-radius-lg' | '--neu-radius-sm' | '--neu-radius-xl' | '--neu-radius-xs' | '--neu-scroll-area-thumb' | '--neu-secondary' | '--neu-secondary-dark' | '--neu-secondary-fg' | '--neu-select-option-height' | '--neu-shadow' | '--neu-shadow-glow' | '--neu-shadow-lg' | '--neu-shadow-sm' | '--neu-shadow-xs' | '--neu-sidebar-bg' | '--neu-sidebar-collapsed-width' | '--neu-sidebar-width' | '--neu-space-1' | '--neu-space-10' | '--neu-space-12' | '--neu-space-16' | '--neu-space-2' | '--neu-space-3' | '--neu-space-4' | '--neu-space-5' | '--neu-space-6' | '--neu-space-8' | '--neu-spinner-track' | '--neu-split-button-primary-divider' | '--neu-splitter-handle-bg' | '--neu-splitter-handle-size' | '--neu-stepper-connector-gap' | '--neu-stepper-indicator-radius' | '--neu-stepper-indicator-size' | '--neu-success' | '--neu-success-bg' | '--neu-success-text' | '--neu-surface' | '--neu-surface-1' | '--neu-surface-2' | '--neu-surface-3' | '--neu-surface-hover' | '--neu-surface-inverse' | '--neu-surface-muted' | '--neu-surface-raised' | '--neu-surface-rgb' | '--neu-table-badge-danger-bg' | '--neu-table-badge-danger-text' | '--neu-table-badge-success-bg' | '--neu-table-badge-success-text' | '--neu-table-badge-warning-bg' | '--neu-table-badge-warning-text' | '--neu-table-cell-block' | '--neu-table-cell-block-compact' | '--neu-table-cell-block-relaxed' | '--neu-table-cell-inline' | '--neu-table-density-compact-padding' | '--neu-table-density-relaxed-padding' | '--neu-table-group-background' | '--neu-table-header-height' | '--neu-table-max-height' | '--neu-table-selected-background' | '--neu-table-space-sm' | '--neu-table-space-xs' | '--neu-table-state-block' | '--neu-table-sticky-offset' | '--neu-table-stripe-background' | '--neu-table-virtual-block-size' | '--neu-terminal-bg' | '--neu-terminal-border' | '--neu-terminal-error' | '--neu-terminal-font' | '--neu-terminal-muted' | '--neu-terminal-prompt' | '--neu-terminal-text' | '--neu-text' | '--neu-text-2xl' | '--neu-text-3xl' | '--neu-text-4xl' | '--neu-text-base' | '--neu-text-disabled' | '--neu-text-inverse' | '--neu-text-lg' | '--neu-text-muted' | '--neu-text-primary' | '--neu-text-secondary' | '--neu-text-sm' | '--neu-text-xl' | '--neu-text-xs' | '--neu-toast-bg' | '--neu-toast-radius' | '--neu-toast-shadow' | '--neu-toolbar-bg' | '--neu-toolbar-color' | '--neu-toolbar-primary-bg' | '--neu-toolbar-primary-color' | '--neu-tooltip-bg' | '--neu-tooltip-fg' | '--neu-tooltip-radius' | '--neu-tooltip-shadow' | '--neu-transition' | '--neu-transition-bounce' | '--neu-transition-slow' | '--neu-tree-table-virtual-block-size' | '--neu-warning' | '--neu-warning-bg' | '--neu-warning-text' | '--neu-z-base' | '--neu-z-dropdown' | '--neu-z-modal' | '--neu-z-overlay' | '--neu-z-sidebar' | '--neu-z-sticky' | '--neu-z-toast';",
+      "members": []
+    },
+    {
+      "id": "./foundation#provideNeuIconResolver",
+      "entrypoint": "./foundation",
+      "name": "provideNeuIconResolver",
+      "kind": "function",
+      "status": "SUPPORTED",
+      "signature": "declare function provideNeuIconResolver(resolver: NeuIconResolver): EnvironmentProviders;",
       "members": []
     },
     {
@@ -14228,6 +14388,111 @@
           "signature": "readonly templateRef: TemplateRef<NeuGalleryItemContext>;"
         }
       ]
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "InternalNeuIconOutletComponent",
+      "kind": "component",
+      "status": "INTERNAL/UNSUPPORTED",
+      "selector": "neu-icon-outlet",
+      "signature": "declare class InternalNeuIconOutletComponent {\n}",
+      "members": [
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:fallbackPath",
+          "name": "fallbackPath",
+          "kind": "input",
+          "publicName": "fallbackPath",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly fallbackPath: _angular_core.InputSignal<string | null>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:fallbackText",
+          "name": "fallbackText",
+          "kind": "input",
+          "publicName": "fallbackText",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly fallbackText: _angular_core.InputSignal<string | null>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:icon",
+          "name": "icon",
+          "kind": "input",
+          "publicName": "icon",
+          "required": true,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly icon: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:label",
+          "name": "label",
+          "kind": "input",
+          "publicName": "label",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly label: _angular_core.InputSignal<string | null>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:size",
+          "name": "size",
+          "kind": "input",
+          "publicName": "size",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly size: _angular_core.InputSignal<string | number>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:strokeWidth",
+          "name": "strokeWidth",
+          "kind": "input",
+          "publicName": "strokeWidth",
+          "required": false,
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "readonly strokeWidth: _angular_core.InputSignal<number>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<InternalNeuIconOutletComponent, \"neu-icon-outlet\", never, {\n    \"icon\": {\n        \"alias\": \"icon\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"strokeWidth\": {\n        \"alias\": \"strokeWidth\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fallbackPath\": {\n        \"alias\": \"fallbackPath\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"fallbackText\": {\n        \"alias\": \"fallbackText\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {}, never, never, true, never>;"
+        },
+        {
+          "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<InternalNeuIconOutletComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./icon-outlet-internal#neuSemanticIconText",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuSemanticIconText",
+      "kind": "function",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare function neuSemanticIconText(key: string): string | null;",
+      "members": []
+    },
+    {
+      "id": "./icon-outlet-internal#neuStructuralIconPath",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuStructuralIconPath",
+      "kind": "function",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "declare function neuStructuralIconPath(key: string): string | null;",
+      "members": []
     },
     {
       "id": "./image-viewer#NeuImageViewerDirective",
@@ -17074,7 +17339,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "readonly icon: _angular_core.InputSignal<\"password\" | \"search\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+          "signature": "readonly icon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./input#NeuInputComponent.input:iconPosition",
@@ -18539,6 +18804,375 @@
       ]
     },
     {
+      "id": "./internal#neuIconArrowDown",
+      "entrypoint": "./internal",
+      "name": "neuIconArrowDown",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconArrowDown = \"move-down\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconArrowLeft",
+      "entrypoint": "./internal",
+      "name": "neuIconArrowLeft",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconArrowLeft = \"move-left\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconArrowRight",
+      "entrypoint": "./internal",
+      "name": "neuIconArrowRight",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconArrowRight = \"move-right\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconArrowUp",
+      "entrypoint": "./internal",
+      "name": "neuIconArrowUp",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconArrowUp = \"move-up\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconBell",
+      "entrypoint": "./internal",
+      "name": "neuIconBell",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconBell = \"notifications\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconBold",
+      "entrypoint": "./internal",
+      "name": "neuIconBold",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconBold = \"format-bold\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconCheck",
+      "entrypoint": "./internal",
+      "name": "neuIconCheck",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconCheck = \"confirm\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconChevronDown",
+      "entrypoint": "./internal",
+      "name": "neuIconChevronDown",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconChevronDown = \"disclosure-down\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconChevronLeft",
+      "entrypoint": "./internal",
+      "name": "neuIconChevronLeft",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconChevronLeft = \"previous\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconChevronRight",
+      "entrypoint": "./internal",
+      "name": "neuIconChevronRight",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconChevronRight = \"next\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconChevronUp",
+      "entrypoint": "./internal",
+      "name": "neuIconChevronUp",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconChevronUp = \"disclosure-up\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconCircleAlert",
+      "entrypoint": "./internal",
+      "name": "neuIconCircleAlert",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconCircleAlert = \"validation-error\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconCircleCheck",
+      "entrypoint": "./internal",
+      "name": "neuIconCircleCheck",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconCircleCheck = \"status-success\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconCircleX",
+      "entrypoint": "./internal",
+      "name": "neuIconCircleX",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconCircleX = \"status-error\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconDollarSign",
+      "entrypoint": "./internal",
+      "name": "neuIconDollarSign",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconDollarSign = \"currency\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconDownload",
+      "entrypoint": "./internal",
+      "name": "neuIconDownload",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconDownload = \"download\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconDrag",
+      "entrypoint": "./internal",
+      "name": "neuIconDrag",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconDrag = \"drag-handle\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconEdit",
+      "entrypoint": "./internal",
+      "name": "neuIconEdit",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconEdit = \"edit\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconEraser",
+      "entrypoint": "./internal",
+      "name": "neuIconEraser",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconEraser = \"clear-format\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconExternalLink",
+      "entrypoint": "./internal",
+      "name": "neuIconExternalLink",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconExternalLink = \"external-link\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconFlipHorizontal",
+      "entrypoint": "./internal",
+      "name": "neuIconFlipHorizontal",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconFlipHorizontal = \"flip-horizontal\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconFlipVertical",
+      "entrypoint": "./internal",
+      "name": "neuIconFlipVertical",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconFlipVertical = \"flip-vertical\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconImage",
+      "entrypoint": "./internal",
+      "name": "neuIconImage",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconImage = \"insert-image\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconInbox",
+      "entrypoint": "./internal",
+      "name": "neuIconInbox",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconInbox = \"empty-inbox\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconInfo",
+      "entrypoint": "./internal",
+      "name": "neuIconInfo",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconInfo = \"status-info\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconItalic",
+      "entrypoint": "./internal",
+      "name": "neuIconItalic",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconItalic = \"format-italic\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconLink",
+      "entrypoint": "./internal",
+      "name": "neuIconLink",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconLink = \"insert-link\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconList",
+      "entrypoint": "./internal",
+      "name": "neuIconList",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconList = \"list-unordered\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconListOrdered",
+      "entrypoint": "./internal",
+      "name": "neuIconListOrdered",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconListOrdered = \"list-ordered\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconMinus",
+      "entrypoint": "./internal",
+      "name": "neuIconMinus",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconMinus = \"neutral-trend\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconPlus",
+      "entrypoint": "./internal",
+      "name": "neuIconPlus",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconPlus = \"add\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconRotateCcw",
+      "entrypoint": "./internal",
+      "name": "neuIconRotateCcw",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconRotateCcw = \"rotate-counterclockwise\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconRotateCw",
+      "entrypoint": "./internal",
+      "name": "neuIconRotateCw",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconRotateCw = \"rotate-clockwise\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconTrendingDown",
+      "entrypoint": "./internal",
+      "name": "neuIconTrendingDown",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconTrendingDown = \"trend-down\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconTrendingUp",
+      "entrypoint": "./internal",
+      "name": "neuIconTrendingUp",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconTrendingUp = \"trend-up\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconUnderline",
+      "entrypoint": "./internal",
+      "name": "neuIconUnderline",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconUnderline = \"format-underline\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconUpload",
+      "entrypoint": "./internal",
+      "name": "neuIconUpload",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconUpload = \"upload\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconWarning",
+      "entrypoint": "./internal",
+      "name": "neuIconWarning",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconWarning = \"status-warning\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconX",
+      "entrypoint": "./internal",
+      "name": "neuIconX",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconX = \"close\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconZoomIn",
+      "entrypoint": "./internal",
+      "name": "neuIconZoomIn",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconZoomIn = \"zoom-in\";",
+      "members": []
+    },
+    {
+      "id": "./internal#neuIconZoomOut",
+      "entrypoint": "./internal",
+      "name": "neuIconZoomOut",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuIconZoomOut = \"zoom-out\";",
+      "members": []
+    },
+    {
       "id": "./internal#NeuIdGenerator",
       "entrypoint": "./internal",
       "name": "NeuIdGenerator",
@@ -18686,7 +19320,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./internal#NeuMenuActionLike.property:id",
@@ -18851,7 +19485,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly icon?: NeuralIconName;"
+          "signature": "readonly icon?: NeuIconKey;"
         },
         {
           "id": "./internal#NeuResolvedMenuAction.property:key",
@@ -22758,7 +23392,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./menu-shared#NeuMenuItem.property:key",
@@ -23422,7 +24056,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./menu#NeuMenuItem.property:key",
@@ -24361,7 +24995,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon: NeuralIconName;"
+          "signature": "icon: NeuIconKey;"
         },
         {
           "id": "./nav#NeuNavItem.property:id",
@@ -24411,7 +25045,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./notification-center#NeuNotification.property:id",
@@ -29942,7 +30576,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon: _angular_core.InputSignal<\"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\">;"
+          "signature": "icon: _angular_core.InputSignal<string>;"
         },
         {
           "id": "./scroll-top#NeuScrollTopComponent.input:target",
@@ -34130,7 +34764,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./split-button#NeuSplitButtonAction.property:id",
@@ -34617,7 +35251,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon: _angular_core.InputSignal<\"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+          "signature": "icon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./stats-card#NeuStatsCardComponent.input:label",
@@ -38599,7 +39233,7 @@
           "required": false,
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon: _angular_core.InputSignal<\"success\" | \"info\" | \"warning\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"help\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+          "signature": "icon: _angular_core.InputSignal<string | null>;"
         },
         {
           "id": "./tag#NeuTagComponent.input:rounded",
@@ -40682,7 +41316,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "getIcon(tone: NeuToastTone): NeuralIconDefinition;"
+          "signature": "getIcon(tone: NeuToastTone): NeuIconKey;"
         },
         {
           "id": "./toast#NeuToastContainerComponent.property:ɵcmp",
@@ -41177,7 +41811,7 @@
           "kind": "method",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "optionIconOf(option: NeuToggleOptionModel<T, V>): NeuralIconName | null;"
+          "signature": "optionIconOf(option: NeuToggleOptionModel<T, V>): NeuIconKey | null;"
         },
         {
           "id": "./toggle-button-group#NeuToggleButtonGroupComponent.method:optionLabelOf",
@@ -41349,7 +41983,7 @@
           "kind": "property",
           "static": false,
           "status": "SUPPORTED",
-          "signature": "icon?: NeuralIconName;"
+          "signature": "icon?: NeuIconKey;"
         },
         {
           "id": "./toggle-button-group#NeuToggleOption.property:label",
@@ -47864,7 +48498,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly icon: _angular_core.InputSignal<\"info\" | \"success\" | \"warning\" | \"file\" | \"navigation\" | \"circle-check\" | \"check\" | \"circle-x\" | \"x\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"help\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+      "signature": "readonly icon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./alert#NeuAlertComponent.input:showIcon",
@@ -49497,7 +50131,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "icon: _angular_core.InputSignal<\"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+      "signature": "icon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./button#NeuButtonComponent.input:iconOnly",
@@ -52621,7 +53255,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "icon: _angular_core.InputSignal<\"info\" | \"warning\" | \"success\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"help\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+      "signature": "icon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./empty-state#NeuEmptyStateComponent.input:iconSize",
@@ -53330,6 +53964,78 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly zoomChange: _angular_core.OutputEmitterRef<number>;"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:fallbackPath",
+      "entrypoint": "./icon-outlet-internal",
+      "declaration": "InternalNeuIconOutletComponent",
+      "selector": "neu-icon-outlet",
+      "propertyName": "fallbackPath",
+      "publicName": "fallbackPath",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly fallbackPath: _angular_core.InputSignal<string | null>;"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:fallbackText",
+      "entrypoint": "./icon-outlet-internal",
+      "declaration": "InternalNeuIconOutletComponent",
+      "selector": "neu-icon-outlet",
+      "propertyName": "fallbackText",
+      "publicName": "fallbackText",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly fallbackText: _angular_core.InputSignal<string | null>;"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:icon",
+      "entrypoint": "./icon-outlet-internal",
+      "declaration": "InternalNeuIconOutletComponent",
+      "selector": "neu-icon-outlet",
+      "propertyName": "icon",
+      "publicName": "icon",
+      "kind": "input",
+      "required": true,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly icon: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:label",
+      "entrypoint": "./icon-outlet-internal",
+      "declaration": "InternalNeuIconOutletComponent",
+      "selector": "neu-icon-outlet",
+      "propertyName": "label",
+      "publicName": "label",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly label: _angular_core.InputSignal<string | null>;"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:size",
+      "entrypoint": "./icon-outlet-internal",
+      "declaration": "InternalNeuIconOutletComponent",
+      "selector": "neu-icon-outlet",
+      "propertyName": "size",
+      "publicName": "size",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly size: _angular_core.InputSignal<string | number>;"
+    },
+    {
+      "id": "./icon-outlet-internal#InternalNeuIconOutletComponent.input:strokeWidth",
+      "entrypoint": "./icon-outlet-internal",
+      "declaration": "InternalNeuIconOutletComponent",
+      "selector": "neu-icon-outlet",
+      "propertyName": "strokeWidth",
+      "publicName": "strokeWidth",
+      "kind": "input",
+      "required": false,
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "readonly strokeWidth: _angular_core.InputSignal<number>;"
     },
     {
       "id": "./image-viewer#NeuImageViewerDirective.input:neuImageViewer",
@@ -55013,7 +55719,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "readonly icon: _angular_core.InputSignal<\"password\" | \"search\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+      "signature": "readonly icon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./input#NeuInputComponent.input:iconPosition",
@@ -59749,7 +60455,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "icon: _angular_core.InputSignal<\"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\">;"
+      "signature": "icon: _angular_core.InputSignal<string>;"
     },
     {
       "id": "./scroll-top#NeuScrollTopComponent.input:target",
@@ -61767,7 +62473,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "icon: _angular_core.InputSignal<\"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"info\" | \"warning\" | \"help\" | \"success\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+      "signature": "icon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./stats-card#NeuStatsCardComponent.input:label",
@@ -62656,7 +63362,7 @@
       "kind": "input",
       "required": false,
       "status": "SUPPORTED",
-      "signature": "icon: _angular_core.InputSignal<\"success\" | \"info\" | \"warning\" | \"arrow-left\" | \"arrow-right\" | \"arrow-up\" | \"arrow-down\" | \"chevron-left\" | \"chevron-right\" | \"chevron-up\" | \"chevron-down\" | \"check\" | \"x\" | \"plus\" | \"minus\" | \"search\" | \"menu\" | \"more-horizontal\" | \"more-vertical\" | \"home\" | \"settings\" | \"user\" | \"users\" | \"heart\" | \"star\" | \"bell\" | \"help\" | \"error\" | \"eye\" | \"eye-off\" | \"edit\" | \"trash\" | \"copy\" | \"download\" | \"upload\" | \"calendar\" | \"clock\" | \"filter\" | \"sort-ascending\" | \"lock\" | \"unlock\" | \"mail\" | \"external-link\" | \"folder\" | \"file\" | \"refresh\" | \"loader\" | \"logout\" | \"dashboard\" | \"grid\" | \"list\" | \"sidebar\" | \"panel-left\" | \"panel-right\" | \"maximize\" | \"minimize\" | \"expand\" | \"collapse\" | \"arrow-up-right\" | \"arrow-up-left\" | \"arrow-down-right\" | \"arrow-down-left\" | \"corner-up-left\" | \"corner-up-right\" | \"corner-down-left\" | \"corner-down-right\" | \"compass\" | \"map\" | \"pin\" | \"location\" | \"route\" | \"navigation\" | \"link\" | \"unlink\" | \"globe\" | \"save\" | \"share\" | \"send\" | \"play\" | \"pause\" | \"skip-back\" | \"skip-forward\" | \"rewind\" | \"fast-forward\" | \"rotate-cw\" | \"rotate-ccw\" | \"undo\" | \"redo\" | \"zoom-in\" | \"zoom-out\" | \"select\" | \"cursor\" | \"drag\" | \"wand\" | \"sparkles\" | \"command\" | \"keyboard\" | \"scan\" | \"qr-code\" | \"print\" | \"archive\" | \"bookmark\" | \"flag\" | \"tag\" | \"paperclip\" | \"attach\" | \"clipboard\" | \"paste\" | \"crop\" | \"align-left\" | \"align-center\" | \"align-right\" | \"message\" | \"messages\" | \"chat\" | \"phone\" | \"video\" | \"mic\" | \"mic-off\" | \"camera\" | \"camera-off\" | \"inbox\" | \"mention\" | \"bell-off\" | \"volume\" | \"volume-off\" | \"rss\" | \"wifi\" | \"wifi-off\" | \"circle-check\" | \"circle-x\" | \"circle-info\" | \"circle-alert\" | \"shield\" | \"shield-check\" | \"shield-off\" | \"key\" | \"password\" | \"login\" | \"user-plus\" | \"user-minus\" | \"user-check\" | \"user-x\" | \"group\" | \"database\" | \"server\" | \"cloud\" | \"cloud-upload\" | \"cloud-download\" | \"hard-drive\" | \"cpu\" | \"terminal\" | \"code\" | \"bug\" | \"zap\" | \"activity\" | \"chart\" | \"analytics\" | \"file-plus\" | \"file-minus\" | \"file-check\" | \"file-x\" | \"file-text\" | \"file-code\" | \"file-image\" | \"file-video\" | \"file-audio\" | \"file-archive\" | \"file-spreadsheet\" | \"files\" | \"folder-plus\" | \"folder-minus\" | \"folder-check\" | \"folder-x\" | \"folder-open\" | \"folder-tree\" | \"table\" | \"list-check\" | \"list-plus\" | \"list-minus\" | \"sort-descending\" | \"funnel\" | \"calendar-plus\" | \"calendar-minus\" | \"calendar-check\" | \"calendar-x\" | \"clock-plus\" | \"clock-x\" | \"bold\" | \"dollar-sign\" | \"eraser\" | \"flip-horizontal\" | \"flip-vertical\" | \"image\" | \"italic\" | \"list-ordered\" | \"trending-down\" | \"trending-up\" | \"underline\" | \"arrow-left-filled\" | \"arrow-right-filled\" | \"arrow-up-filled\" | \"arrow-down-filled\" | \"chevron-left-filled\" | \"chevron-right-filled\" | \"chevron-up-filled\" | \"chevron-down-filled\" | \"check-filled\" | \"x-filled\" | \"plus-filled\" | \"minus-filled\" | \"search-filled\" | \"menu-filled\" | \"more-horizontal-filled\" | \"more-vertical-filled\" | \"home-filled\" | \"settings-filled\" | \"user-filled\" | \"users-filled\" | \"heart-filled\" | \"star-filled\" | \"bell-filled\" | \"info-filled\" | \"warning-filled\" | \"help-filled\" | \"success-filled\" | \"error-filled\" | \"eye-filled\" | \"eye-off-filled\" | \"edit-filled\" | \"trash-filled\" | \"copy-filled\" | \"download-filled\" | \"upload-filled\" | \"calendar-filled\" | \"clock-filled\" | \"filter-filled\" | \"sort-ascending-filled\" | \"lock-filled\" | \"unlock-filled\" | \"mail-filled\" | \"external-link-filled\" | \"folder-filled\" | \"file-filled\" | \"refresh-filled\" | \"loader-filled\" | \"logout-filled\" | \"dashboard-filled\" | \"grid-filled\" | \"list-filled\" | \"sidebar-filled\" | \"panel-left-filled\" | \"panel-right-filled\" | \"maximize-filled\" | \"minimize-filled\" | \"expand-filled\" | \"collapse-filled\" | \"arrow-up-right-filled\" | \"arrow-up-left-filled\" | \"arrow-down-right-filled\" | \"arrow-down-left-filled\" | \"corner-up-left-filled\" | \"corner-up-right-filled\" | \"corner-down-left-filled\" | \"corner-down-right-filled\" | \"compass-filled\" | \"map-filled\" | \"pin-filled\" | \"location-filled\" | \"route-filled\" | \"navigation-filled\" | \"link-filled\" | \"unlink-filled\" | \"globe-filled\" | \"save-filled\" | \"share-filled\" | \"send-filled\" | \"play-filled\" | \"pause-filled\" | \"skip-back-filled\" | \"skip-forward-filled\" | \"rewind-filled\" | \"fast-forward-filled\" | \"rotate-cw-filled\" | \"rotate-ccw-filled\" | \"undo-filled\" | \"redo-filled\" | \"zoom-in-filled\" | \"zoom-out-filled\" | \"select-filled\" | \"cursor-filled\" | \"drag-filled\" | \"wand-filled\" | \"sparkles-filled\" | \"command-filled\" | \"keyboard-filled\" | \"scan-filled\" | \"qr-code-filled\" | \"print-filled\" | \"archive-filled\" | \"bookmark-filled\" | \"flag-filled\" | \"tag-filled\" | \"paperclip-filled\" | \"attach-filled\" | \"clipboard-filled\" | \"paste-filled\" | \"crop-filled\" | \"align-left-filled\" | \"align-center-filled\" | \"align-right-filled\" | \"message-filled\" | \"messages-filled\" | \"chat-filled\" | \"phone-filled\" | \"video-filled\" | \"mic-filled\" | \"mic-off-filled\" | \"camera-filled\" | \"camera-off-filled\" | \"inbox-filled\" | \"mention-filled\" | \"bell-off-filled\" | \"volume-filled\" | \"volume-off-filled\" | \"rss-filled\" | \"wifi-filled\" | \"wifi-off-filled\" | \"circle-check-filled\" | \"circle-x-filled\" | \"circle-info-filled\" | \"circle-alert-filled\" | \"shield-filled\" | \"shield-check-filled\" | \"shield-off-filled\" | \"key-filled\" | \"password-filled\" | \"login-filled\" | \"user-plus-filled\" | \"user-minus-filled\" | \"user-check-filled\" | \"user-x-filled\" | \"group-filled\" | \"database-filled\" | \"server-filled\" | \"cloud-filled\" | \"cloud-upload-filled\" | \"cloud-download-filled\" | \"hard-drive-filled\" | \"cpu-filled\" | \"terminal-filled\" | \"code-filled\" | \"bug-filled\" | \"zap-filled\" | \"activity-filled\" | \"chart-filled\" | \"analytics-filled\" | \"file-plus-filled\" | \"file-minus-filled\" | \"file-check-filled\" | \"file-x-filled\" | \"file-text-filled\" | \"file-code-filled\" | \"file-image-filled\" | \"file-video-filled\" | \"file-audio-filled\" | \"file-archive-filled\" | \"file-spreadsheet-filled\" | \"files-filled\" | \"folder-plus-filled\" | \"folder-minus-filled\" | \"folder-check-filled\" | \"folder-x-filled\" | \"folder-open-filled\" | \"folder-tree-filled\" | \"table-filled\" | \"list-check-filled\" | \"list-plus-filled\" | \"list-minus-filled\" | \"sort-descending-filled\" | \"funnel-filled\" | \"calendar-plus-filled\" | \"calendar-minus-filled\" | \"calendar-check-filled\" | \"calendar-x-filled\" | \"clock-plus-filled\" | \"clock-x-filled\" | \"bold-filled\" | \"dollar-sign-filled\" | \"eraser-filled\" | \"flip-horizontal-filled\" | \"flip-vertical-filled\" | \"image-filled\" | \"italic-filled\" | \"list-ordered-filled\" | \"trending-down-filled\" | \"trending-up-filled\" | \"underline-filled\" | null>;"
+      "signature": "icon: _angular_core.InputSignal<string | null>;"
     },
     {
       "id": "./tag#NeuTagComponent.input:rounded",
@@ -65629,33 +66335,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 100,
-    "exportedDeclarations": 818,
+    "entrypoints": 101,
+    "exportedDeclarations": 868,
     "declarationKinds": {
       "class": 15,
-      "component": 95,
+      "component": 96,
       "directive": 119,
-      "function": 53,
-      "interface": 275,
+      "function": 56,
+      "interface": 277,
       "reexport": 48,
       "service": 12,
-      "token": 4,
-      "type": 196,
-      "variable": 1
+      "token": 5,
+      "type": 198,
+      "variable": 42
     },
-    "publicSymbols": 5220,
+    "publicSymbols": 5284,
     "statuses": {
-      "SUPPORTED": 3305,
+      "SUPPORTED": 3317,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1915,
+      "INTERNAL/UNSUPPORTED": 1967,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1215,
+      "input": 1221,
       "output": 228,
       "model": 24,
-      "total": 1467
+      "total": 1473
     },
     "designTokens": 251
   }

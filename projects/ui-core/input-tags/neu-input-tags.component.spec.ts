@@ -396,6 +396,29 @@ describe('NeuInputTagsComponent', () => {
     vi.useRealTimers();
   });
 
+  it('handles missing clipboard data and a rejected separator draft without changing tags', () => {
+    const paste = new Event('paste', { cancelable: true }) as ClipboardEvent;
+    component.onPaste(paste);
+    expect(paste.defaultPrevented).toBe(false);
+    fixture.componentRef.setInput('textValue', () => undefined);
+    fixture.detectChanges();
+    component.draft.set('unknown,another');
+    component.commitDraft(new Event('commit'));
+    expect(component.value()).toEqual([]);
+    expect(component.liveMessage()).toContain('rejected');
+  });
+
+  it('uses a text parser when a matching option is disabled and ignores stale hover options', () => {
+    fixture.componentRef.setInput('textValue', (text: string) => text === 'React' ? 42 : undefined);
+    fixture.componentRef.setInput('focusOnHover', true);
+    fixture.detectChanges();
+    component.onOptionHover({ label: 'Missing', id: 99 });
+    expect(component.activeIndex()).toBe(-1);
+    component.draft.set('React');
+    component.commitDraft(new Event('commit'));
+    expect(component.value()).toEqual([42]);
+  });
+
   it('wires native DOM events, default rendering and projected removal callbacks', () => {
     fixture.componentRef.setInput('label', 'Skills');
     fixture.componentRef.setInput('hint', 'Choose skills');

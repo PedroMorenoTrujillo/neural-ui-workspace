@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   buildNeuTreeTableEditCommit,
   createNeuTreeTableEditSession,
+  neuTreeTableEditDraft,
+  reconcileNeuTreeTableEditSession,
+  treeEditStateToken,
   updateNeuTreeTableEditDraft,
   validateNeuTreeTableEdit,
 } from './internal/editing/neu-tree-table-editing';
@@ -84,6 +87,48 @@ const hierarchy: NeuTreeTableHierarchy<number> = {
 };
 
 describe('NeuTreeTable 2 final P1 features', () => {
+  it('rejects absent and non-editable columns while allowing a row editing session', () => {
+    expect(treeEditStateToken({ kind: 'none' })).toBeNull();
+    expect(treeEditStateToken({ kind: 'row', key: 1 })).toContain('row|');
+    expect(createNeuTreeTableEditSession({ kind: 'cell', key: 1, columnId: 'missing' }, rows[0]!, columns))
+      .toBeNull();
+    expect(createNeuTreeTableEditSession({ kind: 'cell', key: 1, columnId: 'amount' }, rows[0]!, columns))
+      .toBeNull();
+    expect(createNeuTreeTableEditSession({ kind: 'row', key: 1 }, rows[0]!, columns)?.entries.size)
+      .toBe(1);
+    expect(createNeuTreeTableEditSession({ kind: 'row', key: 1 }, rows[0]!, columns.slice(1)))
+      .toBeNull();
+  });
+
+  it('reconciles parent value replacement without erasing a dirty edit', () => {
+    const session = createNeuTreeTableEditSession({ kind: 'cell', key: 1, columnId: 'name' }, rows[0]!, columns)!;
+    expect(reconcileNeuTreeTableEditSession(session, rows[0]!, columns)).toBe(session);
+    const replaced = { ...rows[0]!, name: 'Parent update' };
+    const clean = reconcileNeuTreeTableEditSession(session, replaced, columns);
+    expect(clean.entries.get('name')).toMatchObject({ previous: 'Parent update', value: 'Parent update' });
+    const dirty = updateNeuTreeTableEditDraft(session, 'name', 'Consumer draft');
+    expect(updateNeuTreeTableEditDraft(dirty, 'name', 'Consumer draft')).toBe(dirty);
+    expect(updateNeuTreeTableEditDraft(dirty, 'missing', 'ignored')).toBe(dirty);
+    const reconciled = reconcileNeuTreeTableEditSession(dirty, replaced, columns);
+    expect(reconciled.entries.get('name')).toMatchObject({ previous: 'Parent update', value: 'Consumer draft' });
+    expect(reconcileNeuTreeTableEditSession(dirty, replaced, columns.slice(1)).entries.size).toBe(0);
+    expect(neuTreeTableEditDraft(reconciled)).toMatchObject({ name: 'Consumer draft' });
+  });
+
+  it('validates missing fields and preserves a row edit when no custom validator exists', () => {
+    const session = createNeuTreeTableEditSession({ kind: 'row', key: 1 }, rows[0]!, columns)!;
+    expect(validateNeuTreeTableEdit(session, { mode: 'row' }, null))
+      .toEqual({ session, valid: true });
+    const calls: unknown[] = [];
+    const validated = validateNeuTreeTableEdit(session, { mode: 'row', validate: (context) => {
+      calls.push(context.field);
+      return true;
+    } }, 'missing');
+    expect(validated.valid).toBe(true);
+    expect(calls).toEqual([null]);
+    const commit = buildNeuTreeTableEditCommit(session, columns);
+    expect(commit).toMatchObject({ key: 1, value: rows[0], field: null, source: 'row' });
+  });
   it('keeps edit drafts private and builds an immutable consumer replacement', () => {
     const state = { kind: 'cell', key: 1, columnId: 'name' } as const;
     const session = createNeuTreeTableEditSession(state, rows[0]!, columns);
@@ -179,6 +224,22 @@ describe('NeuTreeTable 2 final P1 features', () => {
     expect(xlsx).not.toContain('<f>');
   });
 
+  it('preserves typed spreadsheet cells and escapes mixed text values', () => {
+    const bytes = serializeNeuTreeTableXlsx({
+      columns: [{ key: 'value', header: 'Value' }],
+      rows: [[true], [false], [new Date('2026-03-29T00:00:00.000Z')],
+        [42n], [{ name: 'A&B' }], [Symbol('sample')], ['<x>"\'&'], [undefined]],
+    }).bytes;
+    const archive = new TextDecoder().decode(bytes);
+    expect(archive).toContain('<c r="A2" t="b"><v>1</v></c>');
+    expect(archive).toContain('<c r="A3" t="b"><v>0</v></c>');
+    expect(archive).toContain('2026-03-29T00:00:00.000Z');
+    expect(archive).toContain('Symbol(sample)');
+    expect(archive).toContain('&lt;x&gt;&quot;&apos;&amp;');
+    expect(archive).toContain('{&quot;name&quot;:&quot;A&amp;B&quot;}');
+    expect(archive).not.toContain('<f>');
+  });
+
   it('normalizes unusual JSON values and rejects circular export data', () => {
     const repeated = { z: 1, a: undefined };
     const matrix = {
@@ -251,5 +312,72 @@ describe('NeuTreeTable 2 final P1 features', () => {
     await expect(
       executeNeuTreeTableExport({ ...snapshot, active: () => false }),
     ).resolves.toMatchObject({ kind: 'outcome', outcome: { status: 'failed' } });
+  });
+
+  it('delegates a remote export when selected keys are outside the loaded tree', async () => {
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy);
+    const projection = projectNormalizedNeuTreeTableHierarchy(normalized, []);
+    await expect(executeNeuTreeTableExport({
+      browser: true,
+      active: () => true,
+      mode: 'remote',
+      request: { format: 'csv', scope: 'selected', query: { page: 0, pageSize: 25, search: '', sort: [], filters: null } },
+      options: { formats: ['csv'], defaultFilename: 'tree-table.csv' },
+      columns,
+      projection,
+      normalized,
+      selection: { kind: 'keys', keys: [1_000_000] },
+    })).resolves.toEqual({ kind: 'delegated' });
+  });
+
+  it('serializes dates, booleans, bigint and structured values without losing CSV cell boundaries', () => {
+    const result = serializeNeuTreeTableCsv({
+      columns: [
+        { key: 'date', header: 'Date' },
+        { key: 'flag', header: 'Flag' },
+        { key: 'count', header: 'Count' },
+        { key: 'meta', header: 'Meta' },
+      ],
+      rows: [[new Date('2020-01-02T03:04:05.000Z'), true, 42n, { note: 'a,b' }]],
+    });
+    const text = new TextDecoder().decode(result.bytes);
+    expect(text).toContain('2020-01-02T03:04:05.000Z');
+    expect(text).toContain('"true","42"');
+    expect(text).toContain('"{""note"":""a,b""}"');
+  });
+
+  it('downloads the selected export with the configured fallback filename', async () => {
+    const normalized = normalizeNeuTreeTableHierarchy(rows, (row) => row.id, hierarchy);
+    const projection = projectNormalizedNeuTreeTableHierarchy(normalized, []);
+    const createObjectURL = vi.fn(() => 'blob:neu-export');
+    const revokeObjectURL = vi.fn();
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const previousCreate = Object.getOwnPropertyDescriptor(URL, 'createObjectURL');
+    const previousRevoke = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL');
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, writable: true, value: createObjectURL });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, writable: true, value: revokeObjectURL });
+    try {
+      const result = await executeNeuTreeTableExport({
+        browser: true,
+        active: () => true,
+        mode: 'client',
+        request: { format: 'csv', scope: 'selected', query: { page: 0, pageSize: 25, search: '', sort: [], filters: null } },
+        options: { formats: ['csv'], defaultFilename: 'selected.csv' },
+        columns,
+        projection,
+        normalized,
+        selection: { kind: 'keys', keys: [1, 1, 2] },
+      });
+      expect(result).toMatchObject({ kind: 'outcome', outcome: { status: 'downloaded', filename: 'selected.csv', rowCount: 2 } });
+      expect(click).toHaveBeenCalledOnce();
+      expect(createObjectURL).toHaveBeenCalledOnce();
+      expect(revokeObjectURL).toHaveBeenCalledWith('blob:neu-export');
+    } finally {
+      if (previousCreate) Object.defineProperty(URL, 'createObjectURL', previousCreate);
+      else Reflect.deleteProperty(URL, 'createObjectURL');
+      if (previousRevoke) Object.defineProperty(URL, 'revokeObjectURL', previousRevoke);
+      else Reflect.deleteProperty(URL, 'revokeObjectURL');
+      click.mockRestore();
+    }
   });
 });

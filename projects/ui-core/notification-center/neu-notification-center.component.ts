@@ -12,14 +12,14 @@ import {
   viewChild,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
-import { NeuralIcon } from '@neural-icons/angular';
-import type { NeuralIconDefinition, NeuralIconName } from '@neural-icons/core';
-import { iconBell } from '@neural-icons/core/icons/bell';
-import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
-import { iconCircleX } from '@neural-icons/core/icons/circle-x';
-import { iconInfo } from '@neural-icons/core/icons/info';
-import { iconWarning } from '@neural-icons/core/icons/warning';
-import { iconX } from '@neural-icons/core/icons/x';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconBell as iconBell } from '@neural-ui/core/internal';
+import { neuIconCircleCheck as iconCircleCheck } from '@neural-ui/core/internal';
+import { neuIconCircleX as iconCircleX } from '@neural-ui/core/internal';
+import { neuIconInfo as iconInfo } from '@neural-ui/core/internal';
+import { neuIconWarning as iconWarning } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 export type NeuNotificationTone = 'info' | 'success' | 'warning' | 'danger';
@@ -32,7 +32,7 @@ export interface NeuNotification {
   /** Auto-dismiss duration in ms (0 = persistent) */
   duration?: number;
   /** Optional consumer-registered neural icon name. */
-  icon?: NeuralIconName;
+  icon?: NeuIconKey;
   timestamp: Date;
   read: boolean;
 }
@@ -42,7 +42,7 @@ export interface NeuNotificationOptions extends Omit<
   'id' | 'timestamp' | 'read'
 > {}
 
-const DEFAULT_ICONS: Record<NeuNotificationTone, NeuralIconDefinition> = {
+const DEFAULT_ICONS: Record<NeuNotificationTone, NeuIconKey> = {
   info: iconInfo,
   success: iconCircleCheck,
   warning: iconWarning,
@@ -136,7 +136,7 @@ export class NeuNotificationService {
  */
 @Component({
   selector: 'neu-notification-center',
-  imports: [OverlayModule, NeuralIcon],
+  imports: [OverlayModule, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-nc',
@@ -155,7 +155,7 @@ export class NeuNotificationService {
       [attr.aria-label]="'Notificaciones. ' + _svc.unreadCount() + ' sin leer'"
       (click)="_toggle()"
     >
-      <neural-icon class="neu-nc__bell-icon" [icon]="iconBell" size="1.2rem" aria-hidden="true" />
+      <neu-icon-outlet class="neu-nc__bell-icon" [icon]="iconBell" [fallbackPath]="iconFallbackPath(iconBell)" [fallbackText]="iconFallbackText(iconBell)" size="1.2rem" aria-hidden="true" />
       @if (_svc.unreadCount() > 0) {
         <span class="neu-nc__badge" aria-hidden="true">{{
           _svc.unreadCount() > 99 ? '99+' : _svc.unreadCount()
@@ -216,7 +216,7 @@ export class NeuNotificationService {
               [class]="'neu-nc__item--' + n.tone"
             >
               <span class="neu-nc__item-icon" aria-hidden="true">
-                <neural-icon [icon]="n.icon ?? defaultIcon(n.tone)" size="1rem" />
+                <neu-icon-outlet [icon]="n.icon ?? defaultIcon(n.tone)" [fallbackPath]="iconFallbackPath(n.icon ?? defaultIcon(n.tone))" [fallbackText]="iconFallbackText(n.icon ?? defaultIcon(n.tone))" size="1rem" />
               </span>
               <div class="neu-nc__item-body">
                 @if (n.title) {
@@ -233,7 +233,7 @@ export class NeuNotificationService {
                 [attr.aria-label]="'Cerrar notificación: ' + (n.title ?? n.message)"
                 (click)="_svc.remove(n.id)"
               >
-                <neural-icon [icon]="iconX" size="1rem" aria-hidden="true" />
+                <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1rem" aria-hidden="true" />
               </button>
             </div>
           }
@@ -244,6 +244,8 @@ export class NeuNotificationService {
   styleUrl: './neu-notification-center.component.scss',
 })
 export class NeuNotificationCenterComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconBell = iconBell;
   protected readonly iconX = iconX;
   protected readonly _svc = inject(NeuNotificationService);
@@ -355,7 +357,7 @@ export class NeuNotificationCenterComponent {
     return `Hace ${Math.floor(hours / 24)}d`;
   }
 
-  protected defaultIcon(tone: NeuNotificationTone): NeuralIconDefinition {
+  protected defaultIcon(tone: NeuNotificationTone): NeuIconKey {
     return DEFAULT_ICONS[tone];
   }
 }

@@ -135,7 +135,7 @@ describe('NeuStatsCardComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-stats-card__icon')).toBeTruthy();
-    expect(f.nativeElement.querySelector('.neu-stats-card__icon neural-icon')?.getAttribute('aria-hidden')).toBe('true');
+    expect(f.nativeElement.querySelector('.neu-stats-card__icon neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
   });
 });
 
