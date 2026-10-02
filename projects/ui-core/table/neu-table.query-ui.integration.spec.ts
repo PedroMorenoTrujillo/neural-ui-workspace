@@ -726,12 +726,15 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
       .componentInstance as any;
     expect(renderer.paginationReport()).toMatch(/^Page 1 of /);
+    const controls = fixture.debugElement.query(
+      By.css('.neu-table2__pagination neu-table-query-controls'),
+    ).componentInstance as any;
     const input = document.createElement('input');
     input.value = 'unavailable';
-    renderer.jumpToPage({ currentTarget: input } as unknown as Event);
+    controls.jump({ currentTarget: input } as unknown as Event);
     expect(fixture.componentInstance.queryEvents).toHaveLength(0);
     input.value = '2';
-    renderer.jumpToPage({ currentTarget: input } as unknown as Event);
+    controls.jump({ currentTarget: input } as unknown as Event);
     expect(fixture.componentInstance.queryEvents.at(-1)?.page).toBe(1);
   });
 

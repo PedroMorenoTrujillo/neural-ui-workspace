@@ -16,9 +16,17 @@ import {
   type TemplateRef,
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
-import { tableMessage } from '../semantics/neu-table-labels';
+import {
+  tableRendererMessage,
+  type TableRendererMessage,
+} from '../semantics/neu-table-renderer-labels';
 import { NeuTableAdvancedFilterBuilderComponent } from '../features/advanced-filters/neu-table-advanced-filter-builder.component';
 import { NeuTableActiveEditorComponent } from '../features/editing/neu-table-active-editor.component';
+import {
+  type TableFilterControls,
+  type TableColumnControls,
+} from '../features/query-controls/neu-table-query-controls.component';
+import { NeuTableQueryHostComponent } from '../features/query-controls/neu-table-query-host.component';
 import { neuTableEditValueSignal, type NeuTableEditSession } from '../editing/neu-table-editing';
 import {
   projectNeuTableGrouping,
@@ -72,7 +80,6 @@ import type {
   NeuTableCellContext,
   NeuTableColumn,
   NeuTableColumnOptions,
-  NeuTableMessage,
   NeuTableInteractionOptions,
   NeuTableDataMode,
   NeuTableDetailContext,
@@ -115,6 +122,7 @@ import type {
     NgTemplateOutlet,
     NeuTableAdvancedFilterBuilderComponent,
     NeuTableActiveEditorComponent,
+    NeuTableQueryHostComponent,
   ],
   templateUrl: './neu-table-basic-renderer.component.html',
   styleUrl: './neu-table-basic-renderer.component.scss',
@@ -187,13 +195,18 @@ export class NeuTableBasicRendererComponent<
   protected readonly navigationTabIndex = (
     row: NeuTableRenderRow<T, K>,
     columnId?: string,
+    node?: NeuTableGroupingNode<T, NeuTableRenderRow<T, K>>,
   ): number => {
-    const key = this.rows().some((item) => item.key === this.focusedRowKey())
+    const visibleRows = this.navigationRows();
+    const key = visibleRows.some((item) => item.key === this.focusedRowKey())
       ? this.focusedRowKey()
-      : this.rows()[0]?.key;
-    const column = this.columns().some((item) => item.id === this.focusedColumnId())
+      : visibleRows[0]?.key;
+    const columns = node
+      ? this.columns().filter((column) => this.groupingCellVisible(node, column))
+      : this.columns();
+    const column = columns.some((item) => item.id === this.focusedColumnId())
       ? this.focusedColumnId()
-      : this.columns()[0]?.id;
+      : columns[0]?.id;
     return row.key === key && (columnId === undefined || columnId === column) ? 0 : -1;
   };
   protected readonly rememberFocus = (row: NeuTableRenderRow<T, K>, columnId?: string) => {
@@ -260,9 +273,9 @@ export class NeuTableBasicRendererComponent<
     target?.focus();
   };
   protected readonly text = (
-    key: NeuTableMessage,
+    key: TableRendererMessage,
     values: Readonly<Record<string, string | number>> = {},
-  ) => tableMessage(this.labels().messages, key, values);
+  ) => tableRendererMessage(this.labels().messages, key, values);
   readonly filterTemplates = input<ReadonlyMap<string, TemplateRef<NeuTableFilterContext<T, F>>>>(
     new Map(),
   );
@@ -395,9 +408,6 @@ export class NeuTableBasicRendererComponent<
         .map((value) => Math.floor(value)),
     ),
   ]);
-  protected readonly appliedPageSizeConfigured = computed(() =>
-    this.pageSizeOptions().includes(this.pagination().pageSize),
-  );
   protected readonly paginatorContext = computed<NeuTablePaginatorContext>(() => ({
     ...this.pagination(),
     pageSizeOptions: this.pageSizeOptions(),
@@ -440,6 +450,12 @@ export class NeuTableBasicRendererComponent<
           rowspan: new Map<string, number>(),
         })),
   );
+
+  private readonly navigationRows = computed(() => [
+    ...this.pinnedStartRows(),
+    ...this.normalPresentation().flatMap((node) => (node.kind === 'row' ? [node.row] : [])),
+    ...this.pinnedEndRows(),
+  ]);
 
   constructor() {
     effect((onCleanup) => {
@@ -720,6 +736,73 @@ export class NeuTableBasicRendererComponent<
     this.filterValueText(this.appliedFilter(column)?.value);
   protected readonly filterNeedsValue = (rule: NeuTableFilterRule) =>
     !['isNull', 'isNotNull', 'isEmpty', 'isNotEmpty'].includes(rule);
+  protected readonly queryFilterControls = (
+    column: NeuTableColumn<T, F>,
+    menu: boolean,
+  ): TableFilterControls => {
+    const rule = menu ? this.filterDraftRule() : this.filterRule(column);
+    return {
+      column: column.header,
+      menu,
+      rule,
+      rules: this.filterRules(column),
+      value: menu ? this.filterDraftValue() : this.filterValue(column),
+      needsValue: this.filterNeedsValue(rule),
+      explicit: this.filterOptions().commit === 'explicit',
+      canClear: this.appliedFilter(column) !== null,
+      setRule: (event) => (menu ? this.setMenuRule(event) : this.setRowFilterRule(column, event)),
+      setValue: (event) =>
+        menu ? this.setMenuValue(event) : this.setRowFilterValue(column, event),
+      apply: (event) => (menu ? this.applyFilterMenu(event) : this.commitRowFilter(column, event)),
+      clear: () => this.clearFilter(column),
+      cancel: () => this.closeFilterMenu(),
+    };
+  };
+  protected readonly queryColumnControls = (column: NeuTableColumn<T, F>): TableColumnControls => ({
+    id: column.id,
+    name: column.header,
+    options: this.columnOptions(),
+    filter: this.hasMenuFilters() && column.filter !== undefined,
+    open: this.openFilterColumnId() === column.id,
+    filtered: this.appliedFilter(column) !== null,
+    action: (action, event) => {
+      switch (action) {
+        case 'filter':
+          this.openFilterMenu(column, event as MouseEvent);
+          break;
+        case 'left':
+          this.moveColumn(column.id, -1, event as MouseEvent);
+          break;
+        case 'right':
+          this.moveColumn(column.id, 1, event as MouseEvent);
+          break;
+        case 'pin':
+          this.cycleColumnPin(column);
+          break;
+        case 'hide':
+          this.hideColumn(column.id);
+          break;
+        case 'resizeStart':
+          this.onResizeStart(column, event as PointerEvent);
+          break;
+        case 'resizeMove':
+          this.onResizeMove(event as PointerEvent);
+          break;
+        case 'resizeCommit':
+          this.commitResize();
+          break;
+        case 'resizeCancel':
+          this.cancelResize();
+          break;
+        case 'resizeLeft':
+          this.resizeWithKeyboard(column, -1, event as KeyboardEvent);
+          break;
+        case 'resizeRight':
+          this.resizeWithKeyboard(column, 1, event as KeyboardEvent);
+          break;
+      }
+    },
+  });
   protected readonly setRowFilterRule = (column: NeuTableColumn<T, F>, event: Event) => {
     const rule = (event.currentTarget as HTMLSelectElement).value;
     if (!isNeuTableFilterRule(rule) || !this.filterRules(column).includes(rule)) return;
@@ -901,8 +984,6 @@ export class NeuTableBasicRendererComponent<
       }),
     );
   };
-  protected readonly changePageSize = (event: Event) =>
-    this.proposePageSize(Number((event.currentTarget as HTMLSelectElement).value));
   protected readonly proposePageSize = (pageSize: number) =>
     this.proposeQuery()(
       proposeNeuTablePageSize({
@@ -912,10 +993,6 @@ export class NeuTableBasicRendererComponent<
         allowedPageSizes: this.paginationOptions().pageSizeOptions,
       }),
     );
-  protected readonly jumpToPage = (event: Event) => {
-    const page = Number((event.currentTarget as HTMLInputElement).value) - 1;
-    if (Number.isFinite(page)) this.changePage(page);
-  };
   protected readonly paginationReport = () => {
     const state = this.pagination();
     if (this.paginationOptions().report === 'summary') {

@@ -11,6 +11,7 @@ import type {
   NeuTableFilterContext,
   NeuTablePaginatorContext,
   NeuTableQuery,
+  NeuTableGroupingState,
 } from './public/neu-table.types';
 import { tableMessage } from './internal/semantics/neu-table-labels';
 
@@ -21,6 +22,8 @@ import { tableMessage } from './internal/semantics/neu-table-labels';
     [columns]="columns"
     [rowKey]="rowKey"
     [query]="query()"
+    [grouping]="grouping()"
+    [groupingOptions]="{ mode: groupingMode(), scope: 'loaded' }"
     [interactionOptions]="{ navigation: navigation(), wrapFocus: wrap(), announceChanges: true }"
     [dataMode]="remote() ? 'remote' : 'client'"
     [metadata]="{
@@ -82,6 +85,8 @@ import { tableMessage } from './internal/semantics/neu-table-labels';
   </neu-table>`,
 })
 class TemplateHost {
+  readonly groupingMode = signal<'subheader' | 'rowspan'>('subheader');
+  readonly grouping = signal<NeuTableGroupingState<'name'> | null>(null);
   readonly navigation = signal<'native' | 'rows' | 'cells'>('native');
   readonly wrap = signal(false);
   readonly rows = signal([
@@ -89,7 +94,7 @@ class TemplateHost {
     { id: 2, name: 'Bea' },
     { id: 3, name: 'Cy' },
   ]);
-  readonly columns: readonly NeuTableColumn<{ id: number; name: string }, 'name'>[] = [
+  columns: readonly NeuTableColumn<{ id: number; name: string }, 'name'>[] = [
     {
       id: 'name',
       field: 'name',
@@ -364,5 +369,46 @@ describe('NeuTable public filter and paginator templates', () => {
     await key(cells[0]!, 'ArrowDown');
     expect(document.activeElement).toBe(nested);
     expect(element.querySelector('[role="status"]')?.textContent).toContain('3 rows; page 1');
+  });
+
+  it('keeps a reachable tab stop when the first data group is collapsed', async () => {
+    const { host, fixture, element } = await setup();
+    host.enabled.set(false);
+    host.navigation.set('rows');
+    host.grouping.set({ by: ['name'], expandedGroupIds: ['group:name=string%3ABea'] });
+    await fixture.whenStable();
+    const row = element.querySelector<HTMLElement>('tbody tr[data-row-key]')!;
+    expect(row.textContent).toContain('Bea');
+    expect(row.tabIndex).toBe(0);
+    row.focus();
+    host.grouping.set({ by: ['name'], expandedGroupIds: ['group:name=string%3ACy'] });
+    await fixture.whenStable();
+    const next = element.querySelector<HTMLElement>('tbody tr[data-row-key]')!;
+    expect(next.textContent).toContain('Cy');
+    expect(next.tabIndex).toBe(0);
+  });
+
+  it('moves the tab stop to a rendered cell when grouping merges the focused column', async () => {
+    const fixture = TestBed.createComponent(TemplateHost);
+    const host = fixture.componentInstance;
+    host.enabled.set(false);
+    host.navigation.set('cells');
+    host.columns = [...host.columns, { id: 'id', header: 'ID', value: (row) => row.id }];
+    host.rows.set([
+      { id: 1, name: 'Ada' },
+      { id: 2, name: 'Ada' },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLElement>('tr[data-row-key="2"] td[data-column-id="name"]')!.focus();
+    host.groupingMode.set('rowspan');
+    host.grouping.set({ by: ['name'], expandedGroupIds: ['group:name=string%3AAda'] });
+    await fixture.whenStable();
+    expect(element.querySelector('tr[data-row-key="2"] td[data-column-id="name"]')).toBeNull();
+    expect(
+      element.querySelector<HTMLElement>('tr[data-row-key="2"] td[data-column-id="id"]')!.tabIndex,
+    ).toBe(0);
+    expect(element.querySelectorAll('tbody td[tabindex="0"]').length).toBe(1);
   });
 });

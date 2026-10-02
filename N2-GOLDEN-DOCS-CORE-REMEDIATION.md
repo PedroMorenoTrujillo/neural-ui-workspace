@@ -4,7 +4,7 @@ Date: 2026-10-02. Branch: `v2`. Starting authority: `11524ed630246753fe0d05655eb
 
 ## Status and scope
 
-### Table closure follow-up (2026-10-02)
+### Table closure follow-up (2026-10-03)
 
 Pedro authorized resolving the remaining Table contract defects before publication. The previous filter/paginator blocker is corrected in Core, not worked around in Showcase:
 
@@ -14,11 +14,14 @@ Pedro authorized resolving the remaining Table contract defects before publicati
 - `labels.messages` translates built-in controls, filter rules, editors, pagination and announcements. Missing keys retain English defaults.
 - Previously disconnected `interactionOptions` now controls native/row/cell navigation within rendered data, optional wrapping and polite state announcements. Nested inputs retain their own keyboard handling; RTL reverses horizontal movement.
 - Resize controls now have an actual 2rem minimum height, removing the conflicting 1.5rem rule.
-- Directed Table suite: 189/189. New tests cover template replacement, controlled acceptance/rejection, empty/remote states, positions, dynamic removal, keyboard and translation fallback. The prior full-suite run passed 2945 tests before the final navigation change; final recertification is recorded in the Showcase closure report and release artifacts, not inferred from this earlier run.
+- Directed Table suite: 193/193 across 25 files. Tests cover template replacement, controlled acceptance/rejection, empty/remote states, positions, dynamic removal, keyboard and translation fallback. A reachable tab stop is preserved when the first group is collapsed or a focused column becomes a merged cell.
+- Optional query controls and their messages are loaded separately from the basic renderer. SSR renders and hydrates them immediately with Angular 22's normal client-hydration configuration. CSR uses ordinary deferred loading and does not require hydration providers; its regression test confirms no NG0508 warning.
 
 No new CSS token, second Table facade, Icons dependency, release or publication was introduced. The sections below preserve prior remediation evidence; the measured resize dimensions and template-blocker findings from the earlier snapshot are superseded by this follow-up.
 
-Final implementation recertification: 2946/2946 tests across 193 files; statements 96.9774%, branches 95.0460%, functions 95.9882%, lines 98.1569%. The >=95.01 gate remains unchanged. Table SSR/hydration now additionally exercises the actual custom filter and paginator with accepted query proposals and zero mechanical accessibility violations. That run exposed and fixed filter controls incorrectly marked as empty table headers: they now use data cells. Contract accounting is 25 inputs, 14 outputs, 4 public methods, 70 types and 15 directives; the four added types describe column controls, messages and the corrected filter/paginator contexts.
+Final implementation recertification: 2950/2950 tests across 194 files; statements 96.9663%, branches 95.0638%, functions 96.0017%, lines 98.1518%. The >=95.01 gate remains unchanged. Table SSR/hydration exercises the actual custom filter and paginator with accepted query proposals, DOM reuse, zero NG050x errors and zero mechanical accessibility violations. That run exposed and fixed filter controls incorrectly marked as empty table headers: they now use data cells. Contract accounting is 25 inputs, 14 outputs, 4 public methods, 70 types and 15 directives; the four added types describe column controls, messages and the corrected filter/paginator contexts.
+
+H9 release enforcement passes with the original budgets: basic Table is 177354 raw / 32470 gzip / 26965 brotli bytes, below failure limits 178800 / 36404 / 26977. Raw and brotli remain above warning thresholds; this is recorded as WARN, not a warning-free result. All 23 consumer scenarios and architectural boundaries pass. The artifact's source SHA, tarball SHA-256 and file count are recorded in the release manifest and Showcase closure report after preparation from the clean source commit.
 
 Core remediation gates passed on the source tree recorded by the local commit containing this report. This is **not** a declaration that the Showcase golden pages are complete. No release, tag, push or npm publication is authorized or performed. Neural Icons and the V1 Showcase are untouched.
 

@@ -1,25 +1,18 @@
 import type { NeuTableLabels, NeuTableMessage } from '../../public/neu-table.types';
+import { formatTableMessage, tableRendererMessages } from './neu-table-renderer-labels';
 
 const messages: Record<NeuTableMessage, string> = {
-  stateAnnouncement: '{count} rows; page {page}; {selected} selected; sort: {sort}',
+  ...tableRendererMessages,
   firstPage: 'First page',
   previousPage: 'Previous page',
   nextPage: 'Next page',
   lastPage: 'Last page',
-  page: 'Page',
-  of: 'of',
   goToPage: 'Go to page',
   rowsPerPage: 'Rows per page',
   searchTable: 'Search table',
   search: 'Search',
   clearSearch: 'Clear table search',
   clear: 'Clear',
-  advancedFilters: 'Advanced filters',
-  hiddenColumns: 'Hidden columns',
-  showColumn: 'Show {column}',
-  expansion: 'Expansion',
-  selectAll: 'Select all rows',
-  filterColumn: 'Filter {column}',
   filter: 'Filter',
   moveLeft: 'Move {column} left',
   moveRight: 'Move {column} right',
@@ -36,13 +29,6 @@ const messages: Record<NeuTableMessage, string> = {
   filterRule: 'Filter rule for {column}',
   filterValue: 'Filter value for {column}',
   apply: 'Apply',
-  collapseRow: 'Collapse row {key}',
-  expandRow: 'Expand row {key}',
-  selectRow: 'Select row {key}',
-  sortAction: 'Sort {column}; current {current}; activate for {next}',
-  ascending: 'ascending',
-  descending: 'descending',
-  none: 'none',
   field: 'Field',
   join: 'Join',
   and: 'AND',
@@ -77,7 +63,5 @@ export function tableMessage(
   key: NeuTableMessage,
   values: Readonly<Record<string, string | number>> = {},
 ): string {
-  return (overrides?.[key] ?? messages[key]).replace(/\{(\w+)\}/g, (match, name: string) =>
-    String(values[name] ?? match),
-  );
+  return formatTableMessage(overrides?.[key] ?? messages[key], values);
 }

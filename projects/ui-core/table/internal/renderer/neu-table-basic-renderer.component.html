@@ -6,71 +6,14 @@
         [ngTemplateOutletContext]="paginatorContext()"
       />
     } @else {
-      <button
-        type="button"
-        [attr.aria-label]="text('firstPage')"
-        [disabled]="!pagination().canFirst"
-        (click)="changePage(0)"
-      >
-        «
-      </button>
-      <button
-        type="button"
-        [attr.aria-label]="text('previousPage')"
-        [disabled]="!pagination().canPrevious"
-        (click)="changePage(pagination().page - 1)"
-      >
-        ‹
-      </button>
-      <span aria-current="page">
-        {{ text('page') }} {{ pagination().humanPage }}
-        @if (pagination().pageCount !== null) {
-          {{ text('of') }} {{ pagination().pageCount || 1 }}
-        }
-      </span>
-      <button
-        type="button"
-        [attr.aria-label]="text('nextPage')"
-        [disabled]="!pagination().canNext"
-        (click)="changePage(pagination().page + 1)"
-      >
-        ›
-      </button>
-      <button
-        type="button"
-        [attr.aria-label]="text('lastPage')"
-        [disabled]="!pagination().canLast"
-        (click)="changePage((pagination().pageCount ?? 1) - 1)"
-      >
-        »
-      </button>
-      @if (paginationOptions().showPageJump) {
-        <label>
-          {{ text('goToPage') }}
-          <input
-            type="number"
-            min="1"
-            [value]="pagination().humanPage"
-            (change)="jumpToPage($event)"
-          />
-        </label>
-      }
-      @if (pageSizeOptions().length > 0) {
-        <label>
-          {{ text('rowsPerPage') }}
-          <select [value]="pagination().pageSize" (change)="changePageSize($event)">
-            @if (!appliedPageSizeConfigured()) {
-              <option [value]="pagination().pageSize" disabled>{{ pagination().pageSize }}</option>
-            }
-            @for (size of pageSizeOptions(); track size) {
-              <option [value]="size">{{ size }}</option>
-            }
-          </select>
-        </label>
-      }
-      @if (paginationReport()) {
-        <span class="neu-table2__pagination-report">{{ paginationReport() }}</span>
-      }
+      <neu-table-query-host
+        [controls]="{
+          pagination: paginatorContext(),
+          options: paginationOptions(),
+          report: paginationReport(),
+          messages: labels().messages,
+        }"
+      />
     }
   </nav>
 </ng-template>
@@ -84,23 +27,19 @@
 @if (hasGlobalSearch() || hasBuilder() || toolbarTemplate()) {
   <div class="neu-table2__query-toolbar">
     @if (hasGlobalSearch()) {
-      <form class="neu-table2__search" role="search" (submit)="commitSearch($event)">
-        <label>
-          <span class="neu-table2__visually-hidden">{{ text('searchTable') }}</span>
-          <input
-            type="search"
-            [attr.aria-label]="text('searchTable')"
-            [value]="searchEditing() ? searchDraft() : query().search"
-            (focus)="beginSearch()"
-            (input)="updateSearchDraft($event)"
-            (keydown.escape)="cancelSearch($event)"
-          />
-        </label>
-        <button type="submit">{{ text('search') }}</button>
-        <button type="button" [attr.aria-label]="text('clearSearch')" (click)="clearSearch($event)">
-          {{ text('clear') }}
-        </button>
-      </form>
+      <neu-table-query-host
+        [controls]="{
+          search: {
+            value: searchEditing() ? searchDraft() : query().search,
+            begin: beginSearch,
+            update: updateSearchDraft,
+            cancel: cancelSearch,
+            commit: commitSearch,
+            clear: clearSearch,
+          },
+          messages: labels().messages,
+        }"
+      />
     }
     @if (toolbarTemplate(); as template) {
       <div class="neu-table2__toolbar">
@@ -261,71 +200,16 @@
                   }
                 </span>
               }
-              <span class="neu-table2__column-actions" data-neu-selection-stop>
-                @if (hasMenuFilters() && column.filter !== undefined) {
-                  <button
-                    type="button"
-                    aria-haspopup="dialog"
-                    [attr.aria-expanded]="openFilterColumnId() === column.id"
-                    [attr.aria-pressed]="appliedFilter(column) !== null"
-                    [attr.aria-label]="text('filterColumn', { column: column.header })"
-                    (click)="openFilterMenu(column, $event)"
-                  >
-                    {{ text('filter') }}
-                  </button>
-                }
-                @if (columnOptions().reorderable) {
-                  <button
-                    type="button"
-                    [attr.data-layout-focus]="'move:' + column.id + ':-1'"
-                    [attr.aria-label]="text('moveLeft', { column: column.header })"
-                    (click)="moveColumn(column.id, -1, $event)"
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    [attr.data-layout-focus]="'move:' + column.id + ':1'"
-                    [attr.aria-label]="text('moveRight', { column: column.header })"
-                    (click)="moveColumn(column.id, 1, $event)"
-                  >
-                    →
-                  </button>
-                }
-                @if (columnOptions().pinnable) {
-                  <button
-                    type="button"
-                    [attr.aria-label]="text('pinColumn', { column: column.header })"
-                    (click)="cycleColumnPin(column)"
-                  >
-                    {{ text('pin') }}
-                  </button>
-                }
-                @if (columnOptions().hideable) {
-                  <button
-                    type="button"
-                    [attr.aria-label]="text('hideColumn', { column: column.header })"
-                    (click)="hideColumn(column.id)"
-                  >
-                    {{ text('hide') }}
-                  </button>
-                }
-              </span>
-              @if (columnOptions().resizable) {
-                <button
-                  type="button"
-                  class="neu-table2__resize-handle"
-                  [attr.aria-label]="text('resizeColumn', { column: column.header })"
-                  (pointerdown)="onResizeStart(column, $event)"
-                  (pointermove)="onResizeMove($event)"
-                  (pointerup)="commitResize()"
-                  (pointercancel)="cancelResize()"
-                  (keydown.arrowleft)="resizeWithKeyboard(column, -1, $event)"
-                  (keydown.arrowright)="resizeWithKeyboard(column, 1, $event)"
-                  (keydown.escape)="cancelResize()"
-                >
-                  <span aria-hidden="true">↔</span>
-                </button>
+              @if (
+                hasMenuFilters() ||
+                columnOptions().reorderable ||
+                columnOptions().pinnable ||
+                columnOptions().hideable ||
+                columnOptions().resizable
+              ) {
+                <neu-table-query-host
+                  [controls]="{ column: queryColumnControls(column), messages: labels().messages }"
+                />
               }
             </div>
             @if (openFilterColumnId() === column.id) {
@@ -345,31 +229,12 @@
                     [ngTemplateOutletContext]="filterContext(column)"
                   />
                 } @else {
-                  <label>
-                    {{ text('rule') }}
-                    <select [value]="filterDraftRule()" (change)="setMenuRule($event)">
-                      @for (rule of filterRules(column); track rule) {
-                        <option [value]="rule">{{ text(rule) }}</option>
-                      }
-                    </select>
-                  </label>
-                  @if (filterNeedsValue(filterDraftRule())) {
-                    <label>
-                      {{ text('value') }}
-                      <input [value]="filterDraftValue()" (input)="setMenuValue($event)" />
-                    </label>
-                  }
-                  <div class="neu-table2__filter-actions">
-                    <button type="submit">
-                      {{ text('applyColumnFilter', { column: column.header }) }}
-                    </button>
-                    <button type="button" (click)="clearFilter(column)">
-                      {{ text('clearColumnFilter', { column: column.header }) }}
-                    </button>
-                    <button type="button" (click)="closeFilterMenu()">
-                      {{ text('cancelFilter') }}
-                    </button>
-                  </div>
+                  <neu-table-query-host
+                    [controls]="{
+                      filter: queryFilterControls(column, true),
+                      messages: labels().messages,
+                    }"
+                  />
                 }
               </form>
             }
@@ -394,47 +259,12 @@
                       [ngTemplateOutletContext]="filterContext(column)"
                     />
                   } @else {
-                    <label>
-                      <span class="neu-table2__visually-hidden">{{
-                        text('filterRule', { column: column.header })
-                      }}</span>
-                      <select
-                        [attr.aria-label]="text('filterRule', { column: column.header })"
-                        [value]="filterRule(column)"
-                        (change)="setRowFilterRule(column, $event)"
-                      >
-                        @for (rule of filterRules(column); track rule) {
-                          <option [value]="rule">{{ text(rule) }}</option>
-                        }
-                      </select>
-                    </label>
-                    @if (filterNeedsValue(filterRule(column))) {
-                      <label>
-                        <span class="neu-table2__visually-hidden">{{
-                          text('filterValue', { column: column.header })
-                        }}</span>
-                        <input
-                          [attr.aria-label]="text('filterValue', { column: column.header })"
-                          [value]="filterValue(column)"
-                          (input)="setRowFilterValue(column, $event)"
-                          (keydown.enter)="commitRowFilter(column, $event)"
-                        />
-                      </label>
-                    }
-                    @if (filterOptions().commit === 'explicit') {
-                      <button type="button" (click)="commitRowFilter(column)">
-                        {{ text('apply') }}
-                      </button>
-                    }
-                    @if (appliedFilter(column) !== null) {
-                      <button
-                        type="button"
-                        [attr.aria-label]="text('clearColumnFilter', { column: column.header })"
-                        (click)="clearFilter(column)"
-                      >
-                        {{ text('clear') }}
-                      </button>
-                    }
+                    <neu-table-query-host
+                      [controls]="{
+                        filter: queryFilterControls(column, false),
+                        messages: labels().messages,
+                      }"
+                    />
                   }
                 </div>
               }
@@ -512,7 +342,7 @@
               <td
                 [attr.tabindex]="
                   interactionOptions().navigation === 'cells'
-                    ? navigationTabIndex(renderRow, column.id)
+                    ? navigationTabIndex(renderRow, column.id, presentationNode)
                     : virtualizationOptions().enabled
                       ? -1
                       : editingOptions().mode !== 'none' && column.edit !== undefined
