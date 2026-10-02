@@ -455,11 +455,14 @@ try {
   );
   assert.deepEqual(errors, []);
   await page.locator('#n2-custom-next').click();
+  await page.waitForFunction(() => document.querySelector('#n2-custom-state')?.textContent?.startsWith('1:'));
   assert.match(await page.locator('#n2-custom-state').textContent(), /^1:/);
   await page.locator('#n2-custom-filter').click();
+  await page.waitForFunction(() => document.querySelector('#n2-custom-state')?.textContent === '0:1');
   assert.equal(await page.locator('#n2-custom-state').textContent(), '0:1');
   assert.equal(await page.locator('#n2-custom-next').isDisabled(), true);
   await page.locator('#n2-custom-clear').click();
+  await page.waitForFunction(() => !(document.querySelector('#n2-custom-next')?.disabled));
   assert.equal(await page.locator('#n2-custom-next').isDisabled(), false);
   assert.deepEqual(errors, []);
   const evidenceDirectory = process.env.NEU_N2_TABLE_EVIDENCE_DIR ?? '/tmp/n2-table-j-playwright';
