@@ -16,10 +16,10 @@ import {
 import { validateLegacyLedger, validateTargetContracts } from './lib/n2-table-contracts.mjs';
 
 test('freezes the exact 82-symbol target and 24/14/4 member surface', () => {
-  assert.equal(targetTypes.length, 66);
+  assert.equal(targetTypes.length, 70);
   assert.equal(targetFilterRules.length, 17);
   assert.equal(targetDirectives.length, 15);
-  assert.equal(targetInputs.length, 24);
+  assert.equal(targetInputs.length, 25);
   assert.equal(targetOutputs.length, 14);
   assert.equal(targetMethods.length, 4);
   assert.deepEqual(validateTargetContracts(), []);

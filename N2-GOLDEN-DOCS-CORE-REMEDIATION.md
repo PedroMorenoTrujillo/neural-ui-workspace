@@ -18,6 +18,8 @@ Pedro authorized resolving the remaining Table contract defects before publicati
 
 No new CSS token, second Table facade, Icons dependency, release or publication was introduced. The sections below preserve prior remediation evidence; the measured resize dimensions and template-blocker findings from the earlier snapshot are superseded by this follow-up.
 
+Final implementation recertification: 2946/2946 tests across 193 files; statements 96.9774%, branches 95.0460%, functions 95.9882%, lines 98.1569%. The >=95.01 gate remains unchanged. Table SSR/hydration now additionally exercises the actual custom filter and paginator with accepted query proposals and zero mechanical accessibility violations. That run exposed and fixed filter controls incorrectly marked as empty table headers: they now use data cells. Contract accounting is 25 inputs, 14 outputs, 4 public methods, 70 types and 15 directives; the four added types describe column controls, messages and the corrected filter/paginator contexts.
+
 Core remediation gates passed on the source tree recorded by the local commit containing this report. This is **not** a declaration that the Showcase golden pages are complete. No release, tag, push or npm publication is authorized or performed. Neural Icons and the V1 Showcase are untouched.
 
 The starting Core tree was clean. Recoverable archives and full command logs are under `/Users/pedromorenotrujillo/Documents/Codex/2026-10-02/neural-ui-golden-implementation/`. The pre-existing Showcase changes were separately archived before implementation.

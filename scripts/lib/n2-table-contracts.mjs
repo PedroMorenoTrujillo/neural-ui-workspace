@@ -206,11 +206,11 @@ export function validateTargetContracts() {
       }
     }
   }
-  if (targetInputs.length !== 24 || targetOutputs.length !== 14 || targetMethods.length !== 4) {
-    violations.push('target surface is not 24 inputs / 14 outputs / 4 methods');
+  if (targetInputs.length !== 25 || targetOutputs.length !== 14 || targetMethods.length !== 4) {
+    violations.push('target surface is not 25 inputs / 14 outputs / 4 methods');
   }
-  if (targetTypes.length + targetDirectives.length + 1 !== 82) {
-    violations.push('target export ledger is not exactly 82 symbols');
+  if (targetTypes.length + targetDirectives.length + 1 !== 86) {
+    violations.push('target export ledger is not exactly 86 symbols');
   }
   if (
     new Set(manifestMembers.map((member) => `${member.category}:${member.name}`)).size !==
