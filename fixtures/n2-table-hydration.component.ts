@@ -9,6 +9,8 @@ import {
   NeuTableGroupHeaderDirective,
   NeuTableHeaderDirective,
   NeuTableLoadingDirective,
+  NeuTableFilterDirective,
+  NeuTablePaginatorDirective,
   NeuTableRowDetailDirective,
   type NeuTableColumn,
   type NeuTableDataRequest,
@@ -76,6 +78,8 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     NeuTableCellDirective,
     NeuTableEmptyDirective,
     NeuTableLoadingDirective,
+    NeuTableFilterDirective,
+    NeuTablePaginatorDirective,
     NeuTableErrorDirective,
     NeuTableEditorDirective,
     NeuTableGroupFooterDirective,
@@ -83,6 +87,20 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
     NeuTableRowDetailDirective,
   ],
   template: `
+    <section id="n2-table-custom-templates">
+      <neu-table [data]="rows()" [columns]="columns" [rowKey]="rowKey" [query]="templateQuery()" (queryChange)="templateQuery.set($event)"
+        [filterOptions]="{surfaces:['row'],globalFields:[],predicates:{},debounceMs:0,commit:'explicit'}"
+        [paginationOptions]="{enabled:true,pageSizeOptions:[2],position:'bottom',report:'none',showPageJump:false}">
+        <ng-template neuTableFilter="name" let-apply="apply" let-clear="clear">
+          <button id="n2-custom-filter" type="button" (click)="apply('Ada')">Filter Ada</button>
+          <button id="n2-custom-clear" type="button" (click)="clear()">Clear custom filter</button>
+        </ng-template>
+        <ng-template neuTablePaginator let-page="page" let-total="total" let-next="canNext" let-change="changePage">
+          <span id="n2-custom-state">{{page}}:{{total}}</span>
+          <button id="n2-custom-next" type="button" [disabled]="!next" (click)="change(page+1)">Next custom page</button>
+        </ng-template>
+      </neu-table>
+    </section>
     <button id="n2-reconstruct" type="button" (click)="applyParentQuery()">
       Apply parent query
     </button>
@@ -178,6 +196,7 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
         [paginationOptions]="paginationOptions"
         [rowKey]="rowKey"
         [layout]="layout()"
+        [columnOptions]="{reorderable:true,resizable:true,hideable:true,pinnable:true}"
         [selection]="selection()"
         [selectionOptions]="selectionOptions"
         (queryChange)="record('queryChange')"
@@ -331,6 +350,7 @@ const metadata = (overrides: Partial<NeuTableMetadata> = {}): NeuTableMetadata =
   `,
 })
 export class N2TableHydrationComponent {
+  readonly templateQuery = signal<NeuTableQuery<HydrationField>>({page:0,pageSize:2,search:'',sort:[],filters:null});
   readonly ready = signal(false);
   readonly interactions = signal(0);
   readonly outputEvents = signal('[]');

@@ -454,6 +454,14 @@ try {
     false,
   );
   assert.deepEqual(errors, []);
+  await page.locator('#n2-custom-next').click();
+  assert.match(await page.locator('#n2-custom-state').textContent(), /^1:/);
+  await page.locator('#n2-custom-filter').click();
+  assert.equal(await page.locator('#n2-custom-state').textContent(), '0:1');
+  assert.equal(await page.locator('#n2-custom-next').isDisabled(), true);
+  await page.locator('#n2-custom-clear').click();
+  assert.equal(await page.locator('#n2-custom-next').isDisabled(), false);
+  assert.deepEqual(errors, []);
   const evidenceDirectory = process.env.NEU_N2_TABLE_EVIDENCE_DIR ?? '/tmp/n2-table-j-playwright';
   mkdirSync(evidenceDirectory, { recursive: true });
   await page.setViewportSize({ width: 1440, height: 900 });
