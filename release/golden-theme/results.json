@@ -14,11 +14,17 @@
       "engine": "chromium",
       "theme": "light",
       "component": "button",
-      "variant": "outline",
+      "variant": "solid",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
-        "foreground": "rgb(0, 95, 204)",
-        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 110, 230)",
+        "ratio": 4.802188302088832
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 95, 204)",
         "ratio": 5.984934612252126
       }
     },
@@ -26,11 +32,161 @@
       "engine": "chromium",
       "theme": "light",
       "component": "button",
-      "variant": "ghost",
+      "variant": "solid",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(15, 23, 42)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(13, 19, 35)",
+        "ratio": 18.50983662088959
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "solid",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(220, 38, 38)",
+        "ratio": 4.829404522659002
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(180, 31, 31)",
+        "ratio": 6.6530646884042
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(0, 95, 204)",
         "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      },
+      "hoverContrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(239, 246, 255)",
+        "ratio": 5.499428549577682
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(241, 245, 249)",
+        "ratio": 16.295987899750777
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 8.310050481211189
+      },
+      "hoverContrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(254, 226, 226)",
+        "ratio": 6.802728419777387
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "brand",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(239, 246, 255)",
+        "ratio": 16.404312965565975
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(241, 245, 249)",
+        "ratio": 16.295987899750777
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 8.310050481211189
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(254, 226, 226)",
+        "ratio": 14.614345271719618
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "solid",
+      "tone": "brand",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 110, 230)",
+        "ratio": 4.802188302088832
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 95, 204)",
         "ratio": 5.984934612252126
       }
     },
@@ -38,12 +194,90 @@
       "engine": "chromium",
       "theme": "dark",
       "component": "button",
+      "variant": "solid",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(22, 27, 34)",
+        "background": "rgb(230, 237, 243)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(22, 27, 34)",
+        "background": "rgb(193, 199, 204)",
+        "ratio": 10.139147368044343
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "solid",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(220, 38, 38)",
+        "ratio": 4.829404522659002
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(180, 31, 31)",
+        "ratio": 6.6530646884042
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
       "variant": "outline",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(51, 157, 255)",
         "background": "rgb(22, 27, 34)",
         "ratio": 6.101838965378733
+      },
+      "hoverContrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(19.32549019607843, 38.67058823529412, 60.86666666666667)",
+        "ratio": 5.362560353603897
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(33, 38, 45)",
+        "ratio": 12.880440753133499
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 9.114158809600024
+      },
+      "hoverContrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(54.78431372549019, 32.96078431372549, 38.91764705882353)",
+        "ratio": 7.8609399817685315
       }
     },
     {
@@ -51,11 +285,53 @@
       "theme": "dark",
       "component": "button",
       "variant": "ghost",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(51, 157, 255)",
         "background": "rgb(22, 27, 34)",
         "ratio": 6.101838965378733
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(19.32549019607843, 38.67058823529412, 60.86666666666667)",
+        "ratio": 12.866066891276473
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(33, 38, 45)",
+        "ratio": 12.880440753133499
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 9.114158809600024
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(54.78431372549019, 32.96078431372549, 38.91764705882353)",
+        "ratio": 12.626769211992068
       }
     },
     {
@@ -2654,11 +2930,17 @@
       "engine": "firefox",
       "theme": "light",
       "component": "button",
-      "variant": "outline",
+      "variant": "solid",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
-        "foreground": "rgb(0, 95, 204)",
-        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 110, 230)",
+        "ratio": 4.802188302088832
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 95, 204)",
         "ratio": 5.984934612252126
       }
     },
@@ -2666,11 +2948,161 @@
       "engine": "firefox",
       "theme": "light",
       "component": "button",
-      "variant": "ghost",
+      "variant": "solid",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(15, 23, 42)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(13, 19, 35)",
+        "ratio": 18.50983662088959
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "solid",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(220, 38, 38)",
+        "ratio": 4.829404522659002
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(180, 31, 31)",
+        "ratio": 6.6530646884042
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(0, 95, 204)",
         "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      },
+      "hoverContrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(239, 246, 255)",
+        "ratio": 5.499428549577682
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(241, 245, 249)",
+        "ratio": 16.295987899750777
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 8.310050481211189
+      },
+      "hoverContrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(254, 226, 226)",
+        "ratio": 6.802728419777387
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "brand",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(239, 246, 255)",
+        "ratio": 16.404312965565975
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(241, 245, 249)",
+        "ratio": 16.295987899750777
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 8.310050481211189
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(254, 226, 226)",
+        "ratio": 14.614345271719618
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "solid",
+      "tone": "brand",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 110, 230)",
+        "ratio": 4.802188302088832
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 95, 204)",
         "ratio": 5.984934612252126
       }
     },
@@ -2678,12 +3110,90 @@
       "engine": "firefox",
       "theme": "dark",
       "component": "button",
+      "variant": "solid",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(22, 27, 34)",
+        "background": "rgb(230, 237, 243)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(22, 27, 34)",
+        "background": "rgb(193, 199, 204)",
+        "ratio": 10.139147368044343
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "solid",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(220, 38, 38)",
+        "ratio": 4.829404522659002
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(180, 31, 31)",
+        "ratio": 6.6530646884042
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
       "variant": "outline",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(51, 157, 255)",
         "background": "rgb(22, 27, 34)",
         "ratio": 6.101838965378733
+      },
+      "hoverContrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(19.32549019607843, 38.67058823529412, 60.86666666666667)",
+        "ratio": 5.362560353603897
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(33, 38, 45)",
+        "ratio": 12.880440753133499
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 9.114158809600024
+      },
+      "hoverContrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(54.635294117647064, 32.96078431372549, 38.91764705882353)",
+        "ratio": 7.86561593101789
       }
     },
     {
@@ -2691,11 +3201,53 @@
       "theme": "dark",
       "component": "button",
       "variant": "ghost",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(51, 157, 255)",
         "background": "rgb(22, 27, 34)",
         "ratio": 6.101838965378733
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(19.32549019607843, 38.67058823529412, 60.86666666666667)",
+        "ratio": 12.866066891276473
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(33, 38, 45)",
+        "ratio": 12.880440753133499
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 9.114158809600024
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(54.635294117647064, 32.96078431372549, 38.91764705882353)",
+        "ratio": 12.634280035399394
       }
     },
     {
@@ -5294,11 +5846,17 @@
       "engine": "webkit",
       "theme": "light",
       "component": "button",
-      "variant": "outline",
+      "variant": "solid",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
-        "foreground": "rgb(0, 95, 204)",
-        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 110, 230)",
+        "ratio": 4.802188302088832
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 95, 204)",
         "ratio": 5.984934612252126
       }
     },
@@ -5306,11 +5864,161 @@
       "engine": "webkit",
       "theme": "light",
       "component": "button",
-      "variant": "ghost",
+      "variant": "solid",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(15, 23, 42)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(13, 19, 35)",
+        "ratio": 18.50983662088959
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "solid",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(220, 38, 38)",
+        "ratio": 4.829404522659002
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(180, 31, 31)",
+        "ratio": 6.6530646884042
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(0, 95, 204)",
         "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      },
+      "hoverContrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(239, 246, 255)",
+        "ratio": 5.499428549577682
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(241, 245, 249)",
+        "ratio": 16.295987899750777
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 8.310050481211189
+      },
+      "hoverContrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(254, 226, 226)",
+        "ratio": 6.802728419777387
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "brand",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(239, 246, 255)",
+        "ratio": 16.404312965565975
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 17.85253496299567
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(241, 245, 249)",
+        "ratio": 16.295987899750777
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(153, 27, 27)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 8.310050481211189
+      },
+      "hoverContrast": {
+        "foreground": "rgb(15, 23, 42)",
+        "background": "rgb(254, 226, 226)",
+        "ratio": 14.614345271719618
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "solid",
+      "tone": "brand",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 110, 230)",
+        "ratio": 4.802188302088832
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(0, 95, 204)",
         "ratio": 5.984934612252126
       }
     },
@@ -5318,12 +6026,90 @@
       "engine": "webkit",
       "theme": "dark",
       "component": "button",
+      "variant": "solid",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(22, 27, 34)",
+        "background": "rgb(230, 237, 243)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(22, 27, 34)",
+        "background": "rgb(193, 199, 204)",
+        "ratio": 10.139147368044343
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "solid",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(220, 38, 38)",
+        "ratio": 4.829404522659002
+      },
+      "hoverContrast": {
+        "foreground": "rgb(255, 255, 255)",
+        "background": "rgb(180, 31, 31)",
+        "ratio": 6.6530646884042
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
       "variant": "outline",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(51, 157, 255)",
         "background": "rgb(22, 27, 34)",
         "ratio": 6.101838965378733
+      },
+      "hoverContrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(19.32549019607843, 38.67058823529412, 60.86666666666667)",
+        "ratio": 5.362560353603897
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(33, 38, 45)",
+        "ratio": 12.880440753133499
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 9.114158809600024
+      },
+      "hoverContrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(54.78431372549019, 32.96078431372549, 38.91764705882353)",
+        "ratio": 7.8609399817685315
       }
     },
     {
@@ -5331,11 +6117,53 @@
       "theme": "dark",
       "component": "button",
       "variant": "ghost",
+      "tone": "brand",
       "preset": "default",
       "contrast": {
         "foreground": "rgb(51, 157, 255)",
         "background": "rgb(22, 27, 34)",
         "ratio": 6.101838965378733
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(19.32549019607843, 38.67058823529412, 60.86666666666667)",
+        "ratio": 12.866066891276473
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "neutral",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 14.639773375342953
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(33, 38, 45)",
+        "ratio": 12.880440753133499
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "tone": "danger",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(252, 165, 165)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 9.114158809600024
+      },
+      "hoverContrast": {
+        "foreground": "rgb(230, 237, 243)",
+        "background": "rgb(54.78431372549019, 32.96078431372549, 38.91764705882353)",
+        "ratio": 12.626769211992068
       }
     },
     {

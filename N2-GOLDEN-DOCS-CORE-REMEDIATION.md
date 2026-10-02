@@ -137,10 +137,18 @@ Evidence: `a11y-*.log` and `core-a11y-focused.log` in `/Users/pedromorenotrujill
 
 These Core checks do not certify the complete Showcase pages. The missing Table filter/paginator templates, the paginator-context approval, column-action localization/ownership and the remaining golden interaction matrix are separate outstanding work.
 
-## Button dark-foreground follow-up — current artifact
+## Button dark-foreground follow-up — 2c236d7 (superseded below)
 
 Consumer axe verification isolated the remaining dark-page contrast failure to brand outline/ghost Buttons, not DateInput. They used `--neu-primary-dark` on dark surfaces. These variants now use the existing `--neu-primary-light` token under the dark theme and retain `--neu-primary-dark` in light mode. Solid variant hooks and public inputs/outputs are unchanged; no new token was added. Consumer presets can supply both shades without hardcoded component colors.
 
 The CSS suite now contains 228 records, adding default-palette foreground contrast regression checks for both variants and both themes in Chromium/Firefox/WebKit. Default contrast is 5.98:1 in light and 6.10:1 in dark. The two non-default palettes continue to pass. Full tests pass again (2938/2938); all four coverage metrics remain identical to the accessibility follow-up above. Build, package, contract/unit drift tests, public-contract audit, token audit, imports, SSR import smoke, publint and H9 PR/main/release were rerun and pass (`dark-button-*.log`). The canonical hydration checks recorded in the preceding follow-up remain applicable to unchanged component logic; Showcase rechecks the new package in its real pages.
 
 Current canonical tarball: `dist/release/neural-ui-core-1.15.0.tgz`, SHA-256 `3c22240ecf567ce3819b297b90d2e801e275fe25e0cd640d6646c198ec2b04a6`, 336 files, 654937 packed bytes, 4348250 unpacked bytes, zero published maps/references. Earlier hashes above are historical. A clean post-commit rebuild and preparation must match this hash before installation. ATTW remains uncertified; no global golden-documentation PASS, publication, push or deployment is claimed.
+
+## Complete default Button contrast regression — current artifact
+
+The expanded consumer matrix found danger ghost text still using the fill-oriented `--neu-error` color. Danger outline/ghost now use the existing `--neu-error-text` foreground token in both themes. This also fixes outline hover contrast on the default light error surface. Solid danger fills remain unchanged. No new public token or API was added.
+
+The CSS suite passes 270 evidence records: the original two customized palettes plus all 3 tones × 3 variants × 2 themes × 3 engines in both normal and hover states. The default-palette minimum is 4.80:1 at rest and 5.36:1 on hover, above the unchanged 4.5:1 requirement. The probe normalizes browser CSS Color 4 serialization and composites transparent backgrounds; an earlier numeric-only parser incorrectly read `color(srgb …)` as byte-valued RGB. That test-harness failure and the real preceding danger-hover failure remain in the logs; neither required lowering a threshold.
+
+Full tests pass again (2938/2938), with unchanged coverage 96.9807/95.0405/96.0263/98.1556%. Build, package, public-contract tests/audit, token audit, imports, SSR import smoke, publint and all three H9 profiles pass (`button-certified-*.log`). Current artifact: SHA-256 `8865339fe0c092420a8ff47e5736b92469b050cb4ae0f61457e00593abf34d54`, 336 files, 654948 packed bytes, 4348556 unpacked bytes, zero published maps/references. Post-commit preparation supplies the exact clean source provenance. The previous hashes are retained for recovery, not active package identity. Showcase browser evidence is recorded separately; Table's public-template decision remains open.

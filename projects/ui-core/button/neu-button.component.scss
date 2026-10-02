@@ -110,7 +110,7 @@
   }
 
   &--outline.neu-button--danger {
-    color: var(--neu-error);
+    color: var(--neu-error-text, var(--neu-error));
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
       background: var(--neu-error-bg);
@@ -141,7 +141,7 @@
   }
 
   &--ghost.neu-button--danger {
-    color: var(--neu-error);
+    color: var(--neu-error-text, var(--neu-error));
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
       background: var(--neu-error-bg);

@@ -2061,6 +2061,7 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
@@ -2073,6 +2074,7 @@
         "projects/ui-core/uploader/neu-uploader.component.scss"
       ],
       "cssConsumedIn": [
+        "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/chip/neu-chip.component.scss",
         "projects/ui-core/date-input/neu-date-input.component.scss",
         "projects/ui-core/input/neu-input.component.scss",
