@@ -442,6 +442,8 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     await render(fixture);
     const native = fixture.nativeElement as HTMLElement;
     const toggle = native.querySelector('tr[data-row-key="1"] .neu-table2__expansion-column button');
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(native.querySelector('tr[data-row-key="1"]')?.hasAttribute('aria-expanded')).toBe(false);
     click(toggle);
     expect(host.expansionChanges.at(-1)).toMatchObject({ key: 1, expanded: true });
     expect(native.querySelector('.neu-table2__detail-row')).toBeNull();
@@ -449,6 +451,8 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     host.expandedKeys.set([1]);
     await render(fixture);
     expect(native.querySelector('.neu-table2__detail-row')?.textContent).toContain('Detail Ada');
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(native.querySelector('tr[data-row-key="1"]')?.hasAttribute('aria-expanded')).toBe(false);
     host.virtualizationOptions.set({ enabled: true, itemSize: 24, overscan: 1 });
     await render(fixture);
     expect(native.querySelector('.neu-table2__expansion-column')).toBeNull();

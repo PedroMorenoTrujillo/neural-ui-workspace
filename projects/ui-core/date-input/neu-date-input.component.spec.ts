@@ -413,6 +413,20 @@ describe('NeuDateInputComponent', () => {
       field.id,
     );
     expect(field.getAttribute('aria-describedby')).toBe(`${field.id}-hint`);
+    expect(field.getAttribute('role')).toBe('combobox');
+    expect(field.getAttribute('aria-autocomplete')).toBe('none');
+    expect(field.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(field.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('keeps inline input semantics separate from the overlay combobox', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.detectChanges();
+    const field = input(fixture);
+    for (const attribute of ['role', 'aria-autocomplete', 'aria-haspopup', 'aria-expanded', 'aria-controls']) {
+      expect(field.hasAttribute(attribute)).toBe(false);
+    }
   });
 
   it('honours explicit ids, names, labels and placeholder precedence', () => {

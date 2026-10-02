@@ -174,6 +174,11 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     const native = fixture.nativeElement as HTMLElement;
     const table = native.querySelector('table');
     expect(table?.getAttribute('aria-label')).toBe('Data table');
+    expect(table?.getAttribute('role')).toBe('table');
+    const resize = native.querySelector('.neu-table2__resize-handle');
+    expect(resize?.tagName).toBe('BUTTON');
+    expect(resize?.hasAttribute('aria-orientation')).toBe(false);
+    expect(resize?.querySelector('[aria-hidden="true"]')?.textContent).toBe('↔');
     expect(native.querySelector('caption')?.textContent?.trim()).toBe('People');
     expect(native.querySelector('.neu-table2__toolbar')?.textContent?.trim()).toBe('Directory');
     expect([...native.querySelectorAll('th')].map((cell) => cell.getAttribute('scope'))).toEqual([

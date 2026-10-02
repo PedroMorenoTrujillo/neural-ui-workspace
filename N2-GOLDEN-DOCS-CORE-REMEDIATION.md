@@ -108,7 +108,7 @@ Hydration fixture preparation now copies the neutral Sass dependencies it needs.
 
 ATTW's previously reported debt is not certified fixed by publint, build or H9. No ATTW PASS is claimed here.
 
-## Local package identity
+## Initial local package identity (62d45aa; superseded below)
 
 Product generation is V2. The historical manifest version remains `1.15.0`; it is not an npm V2 release and was not changed for the Showcase.
 
@@ -119,3 +119,20 @@ Product generation is V2. The historical manifest version remains `1.15.0`; it i
 - Exact committed source SHA, tree and clean/dirty provenance are emitted by the post-commit preparation into `dist/release/release-manifest.json`; the Showcase snapshot must pin that SHA plus this tarball hash.
 
 The preliminary pack from the raw build has 449 files and is **not** the certified consumer artifact. Install only the canonical 336-file prepared tarball after confirming its post-commit provenance and hash. The local artifact is not published.
+
+## Accessibility follow-up — 2026-10-02
+
+The overlay DateInput field now exposes combobox semantics with a dialog popup; inline presentation remains a native text field. Floating labels use the semantic text token, with the semantic error-text token for invalid states. Table row expansion is exposed on its expander button, not on a native table row. Resize buttons no longer carry an inapplicable orientation attribute, have a visible decorative affordance, and share a minimum 32px target and visible keyboard focus with the column actions. No public API or paginator context was changed.
+
+Verification on this follow-up source tree:
+
+- Focused DateInput/Table tests: 97/97; full suite: 2938/2938 in 192 files.
+- Coverage: statements 96.9807%, branches 95.0405%, functions 96.0263%, lines 98.1556%; all hard gates unchanged and passing.
+- Build, package verification, public-contract audit, token drift, 101 imports, SSR import smoke and publint: PASS.
+- CSS contracts: 216 records across both presets, both themes and three engines; Input projection hydration: all three engines; DateInput, Table and TreeTable canonical Chromium hydration: PASS.
+- H9 PR/main/release: PASS, 7/23/23 consumer scenarios, 113 chunks, zero architecture failures. ATTW remains uncertified.
+- Canonical local tarball: `dist/release/neural-ui-core-1.15.0.tgz`; SHA-256 `d14901fd1c234fb99e59eef6fe7194eca2a55796b876c96f2ae868e9d832062c`; 336 files, 654820 packed bytes, 4347272 unpacked bytes, zero published maps/references; 113 debug maps separated. Post-commit preparation records the exact clean source commit in `dist/release/release-manifest.json`.
+
+Evidence: `a11y-*.log` and `core-a11y-focused.log` in `/Users/pedromorenotrujillo/Documents/Codex/2026-10-02/neural-ui-golden-implementation/logs`. Two initial publint invocations used incorrect local paths; the corrected `a11y-publint-package.log` records the successful check. No threshold or accessibility rule was suppressed.
+
+These Core checks do not certify the complete Showcase pages. The missing Table filter/paginator templates, the paginator-context approval, column-action localization/ownership and the remaining golden interaction matrix are separate outstanding work.

@@ -292,7 +292,6 @@
               <button
                 type="button"
                 class="neu-table2__resize-handle"
-                aria-orientation="vertical"
                 [attr.aria-label]="'Resize ' + column.header"
                 (pointerdown)="onResizeStart(column, $event)"
                 (pointermove)="onResizeMove($event)"
@@ -301,7 +300,7 @@
                 (keydown.arrowleft)="resizeWithKeyboard(column, -1, $event)"
                 (keydown.arrowright)="resizeWithKeyboard(column, 1, $event)"
                 (keydown.escape)="cancelResize()"
-              ></button>
+              ><span aria-hidden="true">↔</span></button>
             </div>
             @if (openFilterColumnId() === column.id) {
               <form
@@ -411,7 +410,6 @@
           [attr.data-selected]="rowSelected(renderRow) || null"
           [attr.aria-selected]="selectionOptions().mode === 'none' ? null : rowSelected(renderRow)"
           [attr.aria-disabled]="rowDisabled(renderRow) || null"
-          [attr.aria-expanded]="rowExpandable(renderRow) ? rowExpanded(renderRow) : null"
           [attr.draggable]="rowOptions().reorderable ? 'true' : null"
           [class]="rowClass(renderRow)"
           (click)="onRowClick(renderRow, $event)"

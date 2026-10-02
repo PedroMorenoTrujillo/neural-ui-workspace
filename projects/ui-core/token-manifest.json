@@ -691,6 +691,7 @@
         "projects/ui-core/pick-list/neu-pick-list.component.scss",
         "projects/ui-core/radio/neu-radio.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
       ],
       "cssConsumedIn": [
@@ -705,6 +706,7 @@
         "projects/ui-core/pick-list/neu-pick-list.component.scss",
         "projects/ui-core/radio/neu-radio.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/uploader/neu-uploader.component.scss"
       ],
       "typescriptConsumedIn": [],
@@ -2237,12 +2239,14 @@
       "consumedIn": [
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
-        "projects/ui-core/speed-dial/neu-speed-dial.component.scss"
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "cssConsumedIn": [
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/scroll-top/neu-scroll-top.component.scss",
-        "projects/ui-core/speed-dial/neu-speed-dial.component.scss"
+        "projects/ui-core/speed-dial/neu-speed-dial.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss"
       ],
       "typescriptConsumedIn": [],
       "public": true,
@@ -4404,6 +4408,7 @@
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/skeleton/neu-skeleton.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss",
@@ -4423,6 +4428,7 @@
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/select/neu-select.component.scss",
         "projects/ui-core/skeleton/neu-skeleton.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/toast/neu-toast.component.scss",
@@ -5849,6 +5855,7 @@
         "projects/ui-core/split-button/neu-split-button.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",
@@ -5897,6 +5904,7 @@
         "projects/ui-core/split-button/neu-split-button.component.scss",
         "projects/ui-core/stats-card/neu-stats-card.component.scss",
         "projects/ui-core/stepper/neu-stepper.component.scss",
+        "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tag/neu-tag.component.scss",
         "projects/ui-core/textarea/neu-textarea.component.scss",

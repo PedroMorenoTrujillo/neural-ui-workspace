@@ -127,6 +127,8 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
           [attr.readonly]="textReadonly() ? '' : null"
           [attr.aria-label]="label() || ariaLabel() || null"
           [attr.aria-describedby]="resolvedDescribedBy() || null"
+          [attr.role]="presentation() === 'overlay' ? 'combobox' : null"
+          [attr.aria-autocomplete]="presentation() === 'overlay' ? 'none' : null"
           [attr.aria-expanded]="presentation() === 'overlay' ? isOpen() : null"
           [attr.aria-haspopup]="presentation() === 'overlay' ? 'dialog' : null"
           [attr.aria-controls]="presentation() === 'overlay' ? panelId() : null"

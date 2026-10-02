@@ -60,6 +60,42 @@ th {
   flex: 1 1 auto;
 }
 
+.neu-table2__header-content {
+  flex-wrap: wrap;
+}
+
+.neu-table2__column-actions button,
+.neu-table2__resize-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2rem;
+  min-block-size: 2rem;
+  padding: 0.25rem 0.375rem;
+  border: 1px solid var(--neu-border, currentColor);
+  border-radius: var(--neu-radius-sm, 0.25rem);
+  color: var(--neu-text, CanvasText);
+  background: var(--neu-surface, Canvas);
+  font: inherit;
+  font-weight: 400;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--neu-surface-2, Canvas);
+    border-color: var(--neu-border-hover, currentColor);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-focus-ring-color, currentColor);
+    outline-offset: 2px;
+  }
+}
+
+.neu-table2__resize-handle {
+  cursor: col-resize;
+  touch-action: none;
+}
+
 .neu-table2__sort-button {
   display: inline-flex;
   flex: 1 1 auto;
