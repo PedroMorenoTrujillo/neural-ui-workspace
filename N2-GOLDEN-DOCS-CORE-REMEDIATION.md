@@ -136,3 +136,11 @@ Verification on this follow-up source tree:
 Evidence: `a11y-*.log` and `core-a11y-focused.log` in `/Users/pedromorenotrujillo/Documents/Codex/2026-10-02/neural-ui-golden-implementation/logs`. Two initial publint invocations used incorrect local paths; the corrected `a11y-publint-package.log` records the successful check. No threshold or accessibility rule was suppressed.
 
 These Core checks do not certify the complete Showcase pages. The missing Table filter/paginator templates, the paginator-context approval, column-action localization/ownership and the remaining golden interaction matrix are separate outstanding work.
+
+## Button dark-foreground follow-up — current artifact
+
+Consumer axe verification isolated the remaining dark-page contrast failure to brand outline/ghost Buttons, not DateInput. They used `--neu-primary-dark` on dark surfaces. These variants now use the existing `--neu-primary-light` token under the dark theme and retain `--neu-primary-dark` in light mode. Solid variant hooks and public inputs/outputs are unchanged; no new token was added. Consumer presets can supply both shades without hardcoded component colors.
+
+The CSS suite now contains 228 records, adding default-palette foreground contrast regression checks for both variants and both themes in Chromium/Firefox/WebKit. Default contrast is 5.98:1 in light and 6.10:1 in dark. The two non-default palettes continue to pass. Full tests pass again (2938/2938); all four coverage metrics remain identical to the accessibility follow-up above. Build, package, contract/unit drift tests, public-contract audit, token audit, imports, SSR import smoke, publint and H9 PR/main/release were rerun and pass (`dark-button-*.log`). The canonical hydration checks recorded in the preceding follow-up remain applicable to unchanged component logic; Showcase rechecks the new package in its real pages.
+
+Current canonical tarball: `dist/release/neural-ui-core-1.15.0.tgz`, SHA-256 `3c22240ecf567ce3819b297b90d2e801e275fe25e0cd640d6646c198ec2b04a6`, 336 files, 654937 packed bytes, 4348250 unpacked bytes, zero published maps/references. Earlier hashes above are historical. A clean post-commit rebuild and preparation must match this hash before installation. ATTW remains uncertified; no global golden-documentation PASS, publication, push or deployment is claimed.

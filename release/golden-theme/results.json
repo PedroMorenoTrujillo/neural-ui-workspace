@@ -12,6 +12,54 @@
   "evidence": [
     {
       "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 6.101838965378733
+      }
+    },
+    {
+      "engine": "chromium",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 6.101838965378733
+      }
+    },
+    {
+      "engine": "chromium",
       "index": 0,
       "theme": "light",
       "component": "button",
@@ -2604,6 +2652,54 @@
     },
     {
       "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 6.101838965378733
+      }
+    },
+    {
+      "engine": "firefox",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 6.101838965378733
+      }
+    },
+    {
+      "engine": "firefox",
       "index": 0,
       "theme": "light",
       "component": "button",
@@ -5193,6 +5289,54 @@
       "component": "tree-table",
       "density": "relaxed",
       "padding": "28px"
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "outline",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "light",
+      "component": "button",
+      "variant": "ghost",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(0, 95, 204)",
+        "background": "rgb(255, 255, 255)",
+        "ratio": 5.984934612252126
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "outline",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 6.101838965378733
+      }
+    },
+    {
+      "engine": "webkit",
+      "theme": "dark",
+      "component": "button",
+      "variant": "ghost",
+      "preset": "default",
+      "contrast": {
+        "foreground": "rgb(51, 157, 255)",
+        "background": "rgb(22, 27, 34)",
+        "ratio": 6.101838965378733
+      }
     },
     {
       "engine": "webkit",

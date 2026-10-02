@@ -29,11 +29,27 @@ for (const [engine, launcher] of Object.entries({ chromium, firefox, webkit })) 
   const browser = await launcher.launch({ headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    // Default foreground tokens must also work without a consumer preset.
+    for (const theme of ['light', 'dark']) for (const variant of ['outline', 'ghost']) {
+      await page.setContent(`<html data-theme="${theme}"><head><style>${base}\n${css.button}\nbody{background:var(--neu-surface)}</style></head><body><button class="neu-button neu-button--md neu-button--${variant} neu-button--brand">Copy</button></body></html>`);
+      const contrast = await page.locator('button').evaluate(el => {
+        const foreground = getComputedStyle(el).color;
+        const background = getComputedStyle(document.body).backgroundColor;
+        const luminance = value => value.match(/[\d.]+/g).slice(0, 3).map(Number).map(v => {
+          const c = v / 255;
+          return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+        const a = luminance(foreground), b = luminance(background);
+        return { foreground, background, ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
+      });
+      assert.ok(contrast.ratio >= 4.5, `${engine}/${theme}/${variant} default contrast ${contrast.ratio}`);
+      evidence.push({ engine, theme, component: 'button', variant, preset: 'default', contrast });
+    }
     for (const [index, palette] of palettes.entries()) for (const theme of ['light', 'dark']) {
       const tokens = `--neu-surface:${palette.surface};--neu-text:${palette.text};--neu-primary:${palette.brand};--neu-primary-dark:${palette.brand};--neu-primary-solid:${palette.brand};--neu-primary-solid-fg:${palette.foreground};--neu-primary-fg:${palette.foreground};--neu-primary-solid-hover:${palette.hover};--neu-error:${palette.error};--neu-border:${palette.hover};--neu-border-focus:${palette.brand};--neu-input-focus-border:${palette.brand};--neu-focus-ring-width:5px;--neu-focus-ring-alpha:0.4;`;
       async function mount(component, html, local = '') {
         await page.setViewportSize({ width: 1440, height: 900 });
-        await page.setContent(`<html data-theme="${theme}"><head><style>${base}\n${css[component]}\n*,*::before,*::after{transition:none!important;animation:none!important}</style></head><body><main style="${tokens}${local}">${html}</main></body></html>`);
+        await page.setContent(`<html data-theme="${theme}"><head><style>${base}\n${css[component]}\n*,*::before,*::after{transition:none!important;animation:none!important}</style></head><body><main style="${tokens}--neu-primary-light:${palette.brand};${local}">${html}</main></body></html>`);
         await page.mouse.move(1400, 850);
       }
       const styles = selector => page.locator(selector).first().evaluate(el => {

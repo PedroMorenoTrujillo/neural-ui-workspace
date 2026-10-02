@@ -3999,12 +3999,14 @@
       ],
       "defaultSource": "root",
       "consumedIn": [
+        "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",
         "projects/ui-core/tree/neu-tree.component.scss"
       ],
       "cssConsumedIn": [
+        "projects/ui-core/button/neu-button.component.scss",
         "projects/ui-core/notification-center/neu-notification-center.component.scss",
         "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.scss",
         "projects/ui-core/tabs/neu-tabs.component.scss",

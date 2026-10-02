@@ -100,6 +100,10 @@
   &--outline.neu-button--brand {
     color: var(--neu-primary-dark, var(--neu-primary));
 
+    [data-theme='dark'] & {
+      color: var(--neu-primary-light, var(--neu-primary));
+    }
+
     &:hover:not(:disabled):not(.neu-button--disabled) {
       background: var(--neu-primary-50);
     }
@@ -126,6 +130,10 @@
 
   &--ghost.neu-button--brand {
     color: var(--neu-primary-dark, var(--neu-primary));
+
+    [data-theme='dark'] & {
+      color: var(--neu-primary-light, var(--neu-primary));
+    }
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
       background: var(--neu-primary-50);
