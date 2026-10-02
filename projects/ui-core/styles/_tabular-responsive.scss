@@ -1,0 +1,28 @@
+// Layout primitive shared by independent renderers, not a Table-private style.
+// Fixed-height virtual windows must keep their measured row layout.
+@mixin stacked($viewport, $virtual) {
+  @media (max-width: 40rem) {
+    #{$viewport}[data-responsive='stacked']:not(#{$virtual}) {
+      table, thead, tbody { display: block; }
+      thead { position: static; }
+      thead tr { display: flex; flex-wrap: wrap; }
+      thead th { flex: 1 1 auto; }
+      tbody tr { display: grid; }
+      tbody td {
+        position: static;
+        display: block;
+        inline-size: auto !important;
+        min-inline-size: 0 !important;
+        max-inline-size: none !important;
+      }
+      td[data-column-header]::before {
+        content: attr(data-column-header);
+        display: block;
+        margin-block-end: var(--neu-space-1, 0.25rem);
+        color: var(--neu-text-muted);
+        font-size: var(--neu-text-sm);
+        font-weight: 600;
+      }
+    }
+  }
+}

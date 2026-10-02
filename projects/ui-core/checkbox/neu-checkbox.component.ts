@@ -60,7 +60,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
             <path
               class="neu-checkbox__check-mark neu-checkbox__check-mark--visible"
               d="M2 5H10"
-              stroke="white"
+              stroke="currentColor"
               stroke-width="1.8"
               stroke-linecap="round"
             />
@@ -69,7 +69,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
               class="neu-checkbox__check-mark"
               [class.neu-checkbox__check-mark--visible]="checked()"
               d="M1 5L4.5 8.5L11 1"
-              stroke="white"
+              stroke="currentColor"
               stroke-width="1.8"
               stroke-linecap="round"
               stroke-linejoin="round"

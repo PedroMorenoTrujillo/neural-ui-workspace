@@ -62,17 +62,6 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
       @if (startIcon()) {
         <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
           <ng-content select="[neu-input-start]" />
-          @if (!hasStartContent()) {
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              [innerHTML]="startIconPath()"
-            ></svg>
-          }
         </span>
       }
 

@@ -5,6 +5,7 @@
 @use '../styles/breakpoints' as *;
 @use '../styles/floating-label' as floating;
 @use '../styles/text-overflow' as text;
+@use '../styles/focus-state' as focus;
 
 $input-height: 48px; // md — default
 $input-height-sm: 36px; // sm
@@ -59,7 +60,7 @@ $label-font-floating: 12px;
     border-color: var(--neu-error);
 
     &.neu-input__wrapper--focused {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+      @include focus.invalid-focus;
     }
   }
 
@@ -145,7 +146,7 @@ $label-font-floating: 12px;
     font-size: $label-font-floating;
     font-weight: 600;
     letter-spacing: 0.01em;
-    background: var(--neu-surface);
+    background: var(--neu-input-background, var(--neu-surface));
     padding: 0 4px;
     inset-inline-start: calc(var(--neu-space-3) - 4px);
   }

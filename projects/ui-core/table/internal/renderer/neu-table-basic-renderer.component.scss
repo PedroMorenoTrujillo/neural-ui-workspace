@@ -1,3 +1,5 @@
+@use '../../../styles/tabular-responsive' as responsive;
+
 :host {
   display: block;
   min-inline-size: 0;
@@ -177,6 +179,7 @@ select:focus-visible {
 
 .neu-table2__viewport {
   max-inline-size: 100%;
+  max-block-size: var(--neu-table-max-height, none);
   overflow: auto;
 }
 
@@ -190,6 +193,10 @@ select:focus-visible {
   border-collapse: collapse;
   color: var(--neu-text, currentColor);
   background: var(--neu-surface, transparent);
+}
+
+thead th {
+  block-size: var(--neu-table-header-height, 44px);
 }
 
 th,
@@ -246,13 +253,13 @@ tr[aria-selected='true'] {
   border-inline-end: 1px solid var(--neu-border, currentColor);
 }
 
-.neu-table2__viewport--striped tbody tr:nth-child(even):not(.neu-table2__state-row) {
+.neu-table2__viewport--striped tbody tr:nth-child(even):not(.neu-table2__state-row):not([aria-selected='true']) {
   background: var(--neu-table-stripe-background, color-mix(in srgb, currentColor 4%, transparent));
 }
 
 .neu-table2__viewport--sticky-header thead {
   position: sticky;
-  inset-block-start: 0;
+  inset-block-start: var(--neu-table-sticky-offset, 0);
   z-index: 1;
   background: var(--neu-surface, Canvas);
 }
@@ -261,3 +268,5 @@ tr[aria-selected='true'] {
   padding: var(--neu-table-state-block, 1.5rem);
   text-align: center;
 }
+
+@include responsive.stacked('.neu-table2__viewport', '.neu-table2__viewport--virtual');

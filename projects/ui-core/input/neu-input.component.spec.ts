@@ -43,11 +43,29 @@ class NgModelInitialValueHost {
   }
 }
 
+@Component({
+  imports: [NeuInputComponent],
+  template: `<neu-input label="Account" [startIcon]="true" [endIcon]="true">
+    <span neu-input-start>€</span><span neu-input-end>EUR</span>
+  </neu-input>`,
+})
+class ProjectedContentHost {}
+
 describe('NeuInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [provideNeuralIcons(iconCircleAlert, iconSearch, iconUser)],
     }).compileComponents();
+  });
+
+  it('renders projected start/end content without an empty SVG HTML fallback', () => {
+    const fixture = TestBed.createComponent(ProjectedContentHost);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.neu-input__icon--start')?.textContent).toContain('€');
+    expect(host.querySelector('input')).toBeTruthy();
+    expect(host.querySelector('.neu-input__icon--end')?.textContent).toContain('EUR');
+    expect(host.querySelector('.neu-input__icon--start svg')).toBeNull();
   });
 
   it('preserves ngModel initialization without reporting empty DOM as autofill', async () => {

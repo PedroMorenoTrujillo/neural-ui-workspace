@@ -121,6 +121,12 @@ class QueryLifecycleHost {
 }
 
 describe('NeuTreeTable 2 query performance', () => {
+  const metrics: Record<string, { p50Ms: number; p95Ms: number }> = {};
+
+  afterAll(() => {
+    console.info(`N2_TREE_TABLE_E_PERFORMANCE:${JSON.stringify(metrics)}`);
+  });
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [QueryLifecycleHost],
@@ -188,7 +194,7 @@ describe('NeuTreeTable 2 query performance', () => {
         },
       ],
     };
-    const metrics = {
+    Object.assign(metrics, {
       search1kNoMatch: samples(() => run(normalized1k, query({ search: 'absent' }))),
       search1kSparse: samples(() => run(normalized1k, query({ search: 'needle 990' }))),
       search10kNoMatch: samples(() => run(normalized10k, query({ search: 'absent' })), 11),
@@ -253,14 +259,7 @@ describe('NeuTreeTable 2 query performance', () => {
           run(normalized1k, query({ search: index % 2 === 0 ? 'node' : 'needle' }));
         }
       }, 7),
-      destroy50: samples(() => {
-        for (let index = 0; index < 50; index += 1) {
-          const fixture = TestBed.createComponent(QueryLifecycleHost);
-          fixture.detectChanges();
-          fixture.destroy();
-        }
-      }, 7),
-    };
+    });
 
     expect(
       buildNeuTreeTableQueryProjection({
@@ -272,6 +271,17 @@ describe('NeuTreeTable 2 query performance', () => {
         dataMode: 'client',
       }).retained.size,
     ).toBe(1_001);
-    console.info(`N2_TREE_TABLE_E_PERFORMANCE:${JSON.stringify(metrics)}`);
+  });
+
+  // Lifecycle rendering is independent of query projection. Keep the original
+  // sample counts and per-test timeout, including under coverage instrumentation.
+  it('captures the create/render/destroy lifecycle baseline', () => {
+    metrics['destroy50'] = samples(() => {
+      for (let index = 0; index < 50; index += 1) {
+        const fixture = TestBed.createComponent(QueryLifecycleHost);
+        fixture.detectChanges();
+        fixture.destroy();
+      }
+    }, 7);
   });
 });

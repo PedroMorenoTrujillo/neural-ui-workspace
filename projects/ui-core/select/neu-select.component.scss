@@ -5,6 +5,7 @@
 @use '../styles/breakpoints' as *;
 @use '../styles/floating-label' as floating;
 @use '../styles/text-overflow' as text;
+@use '../styles/focus-state' as focus;
 
 $select-height: 48px;
 
@@ -97,7 +98,7 @@ $select-height: 48px;
     border-color: var(--neu-error);
 
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+      @include focus.invalid-focus;
     }
   }
 }
@@ -493,7 +494,7 @@ $select-height: 48px;
 
   &:focus {
     border-color: var(--neu-primary);
-    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.12);
+    box-shadow: var(--neu-focus-ring);
   }
 
   &::placeholder {

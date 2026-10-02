@@ -10,6 +10,7 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 }
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-tree-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+cpSync(join(root, 'projects/ui-core/styles'), join(fixture, 'src/ui-core/styles'), { recursive: true });
 const trackedTreeTableFiles = new Set(
   execFileSync('git', ['ls-files', '--', 'projects/ui-core/tree-table'], {
     cwd: root,

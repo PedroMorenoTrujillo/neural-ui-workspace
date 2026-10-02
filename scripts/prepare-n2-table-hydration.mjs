@@ -9,6 +9,14 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 }
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+cpSync(join(root, 'projects/ui-core/styles'), join(fixture, 'src/styles'), { recursive: true });
+const resolutionPath = join(fixture, 'tsconfig.json');
+const resolution = JSON.parse(readFileSync(resolutionPath, 'utf8'));
+resolution.compilerOptions.paths = {
+  '@neural-ui/core': [join(root, 'dist/neural-ui/core')],
+  '@neural-ui/core/*': [join(root, 'dist/neural-ui/core/*')],
+};
+writeFileSync(resolutionPath, `${JSON.stringify(resolution, null, 2)}\n`);
 cpSync(join(root, 'projects/ui-core/table'), join(fixture, 'src/neu-table'), {
   recursive: true,
   dereference: true,

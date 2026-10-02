@@ -1,3 +1,5 @@
+@use '../../../styles/tabular-responsive' as responsive;
+
 :host {
   display: block;
   min-inline-size: 0;
@@ -42,6 +44,44 @@
 .neu-tree-table2__table {
   inline-size: 100%;
   border-collapse: collapse;
+  color: var(--neu-text, currentColor);
+  background: var(--neu-surface, transparent);
+}
+
+th, td {
+  padding: var(--neu-tree-table-cell-block, 0.625rem) var(--neu-tree-table-cell-inline, var(--neu-space-3, 0.75rem));
+  text-align: start;
+  vertical-align: middle;
+}
+
+[data-density='compact'] th, [data-density='compact'] td {
+  padding-block: calc(var(--neu-tree-table-cell-block, 0.625rem) * 0.6);
+}
+
+[data-density='relaxed'] th, [data-density='relaxed'] td {
+  padding-block: calc(var(--neu-tree-table-cell-block, 0.625rem) * 1.4);
+}
+
+[data-borders='rows'] th, [data-borders='rows'] td,
+[data-borders='cells'] th, [data-borders='cells'] td {
+  border-block-end: 1px solid var(--neu-border, currentColor);
+}
+
+[data-borders='cells'] th, [data-borders='cells'] td {
+  border-inline-end: 1px solid var(--neu-border, currentColor);
+}
+
+.neu-tree-table2__viewport--striped tbody tr:nth-child(even):not(.neu-tree-table2__state-row):not([aria-selected='true']) {
+  background: var(--neu-surface-2, transparent);
+}
+
+tr[aria-selected='true'] {
+  background: var(--neu-tree-table-selected-background, color-mix(in srgb, currentColor 9%, transparent));
+}
+
+tr:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--neu-focus-color, currentColor);
+  outline-offset: 2px;
 }
 
 .neu-tree-table2__virtual-spacer {
@@ -56,6 +96,8 @@
 .neu-tree-table2__viewport--sticky-header thead {
   position: sticky;
   inset-block-start: 0;
+  z-index: 1;
+  background: var(--neu-surface, Canvas);
 }
 
 .neu-tree-table2__tree-cell {
@@ -108,3 +150,5 @@
 .neu-tree-table2__state-row > td {
   text-align: center;
 }
+
+@include responsive.stacked('.neu-tree-table2__viewport', '.neu-tree-table2__viewport--virtual');

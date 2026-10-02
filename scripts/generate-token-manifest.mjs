@@ -47,6 +47,9 @@ const PUBLIC_COMPONENT_FALLBACKS = new Map([
   ['--neu-input-border', 'var(--neu-border)'],
   ['--neu-input-focus-border', 'var(--neu-primary)'],
   ['--neu-input-focus-ring', 'var(--neu-focus-ring)'],
+  ['--neu-tree-table-cell-block', '0.625rem'],
+  ['--neu-tree-table-cell-inline', 'var(--neu-space-3)'],
+  ['--neu-tree-table-selected-background', 'color-mix(in srgb, currentColor 9%, transparent)'],
 ]);
 
 const COMPONENT_PREFIXES = [
@@ -60,6 +63,7 @@ const COMPONENT_PREFIXES = [
   'context-menu',
   'dialog',
   'image-viewer',
+  'input',
   'knob',
   'meter',
   'nav',
@@ -79,6 +83,7 @@ const COMPONENT_PREFIXES = [
   'toolbar',
   'toast',
   'tooltip',
+  'tree-table',
 ];
 
 function filesIn(directory) {
@@ -135,12 +140,26 @@ function description(token, tokenCategory) {
 const allFiles = filesIn(SOURCE);
 const references = new Map();
 const declaredIn = new Map();
+const cssConsumers = new Map();
+const runtimeConsumers = new Map();
 for (const file of allFiles) {
   const source = readFileSync(join(ROOT, file), 'utf8');
   for (const token of tokenNames(source))
     (references.get(token) ?? references.set(token, new Set()).get(token)).add(file);
   for (const { token } of declarations(source))
     (declaredIn.get(token) ?? declaredIn.set(token, new Set()).get(token)).add(file);
+  // Declarations and comments are not evidence that a renderer consumes a token.
+  // Keep CSS reads (including inline styles) separate from computed-style reads.
+  const productive = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+    .replace(/--neu-[a-z0-9-]+\s*:\s*[^;]+;/gi, '');
+  for (const match of productive.matchAll(/var\(\s*(--neu-[a-z0-9-]+)/gi)) {
+    const token = match[1];
+    (cssConsumers.get(token) ?? cssConsumers.set(token, new Set()).get(token)).add(file);
+  }
+  for (const match of productive.matchAll(/getPropertyValue\(\s*['"](--neu-[a-z0-9-]+)['"]/gi)) {
+    const token = match[1];
+    (runtimeConsumers.get(token) ?? runtimeConsumers.set(token, new Set()).get(token)).add(file);
+  }
 }
 
 const tokenSource = readFileSync(join(ROOT, TOKENS_FILE), 'utf8');
@@ -178,7 +197,9 @@ const tokens = [...new Set([...references.keys(), ...rootDefaults.keys()])].sort
       : PUBLIC_COMPONENT_FALLBACKS.has(token)
         ? 'component-fallback'
         : null,
-    consumedIn: [...(references.get(token) ?? [])].sort(),
+    consumedIn: [...new Set([...(cssConsumers.get(token) ?? []), ...(runtimeConsumers.get(token) ?? [])])].sort(),
+    cssConsumedIn: [...(cssConsumers.get(token) ?? [])].sort(),
+    typescriptConsumedIn: [...(runtimeConsumers.get(token) ?? [])].sort(),
     public: !runtimeInternal && !componentLocal,
     documented: !runtimeInternal && !componentLocal && defaultValue !== null,
     status: runtimeInternal

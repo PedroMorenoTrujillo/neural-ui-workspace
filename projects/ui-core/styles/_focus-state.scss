@@ -1,0 +1,6 @@
+// Shared invalid/focused derivation; intentionally not a public token.
+@mixin invalid-focus {
+  border-color: var(--neu-error);
+  box-shadow: 0 0 0 var(--neu-focus-ring-width, 3px)
+    color-mix(in srgb, var(--neu-error) calc(var(--neu-focus-ring-alpha, 0.25) * 100%), transparent);
+}

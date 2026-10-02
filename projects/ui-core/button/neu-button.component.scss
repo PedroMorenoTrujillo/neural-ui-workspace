@@ -206,28 +206,6 @@
   }
 }
 
-html[data-theme='dark'] {
-  .neu-button--outline.neu-button--brand {
-    color: #d8ebff;
-    border-color: #65b7ff;
-  }
-
-  .neu-button--outline.neu-button--brand:hover:not(:disabled):not(.neu-button--disabled) {
-    background: rgba(101, 183, 255, 0.18);
-    color: #ffffff;
-    border-color: #9ecbff;
-  }
-
-  .neu-button--ghost {
-    color: #f2f7fb;
-  }
-
-  .neu-button--ghost:hover:not(:disabled):not(.neu-button--disabled) {
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-  }
-}
-
 // ---- Spinner ----
 .neu-button__spinner {
   display: inline-flex;
