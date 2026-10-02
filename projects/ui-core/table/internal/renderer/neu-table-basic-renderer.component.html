@@ -379,13 +379,13 @@
       @if (hasRowFilters()) {
         <tr class="neu-table2__filter-row">
           @if (expansionActive()) {
-            <th class="neu-table2__expansion-column"></th>
+            <td class="neu-table2__expansion-column"></td>
           }
           @if (hasSelectionColumn()) {
-            <th class="neu-table2__selection-column"></th>
+            <td class="neu-table2__selection-column"></td>
           }
           @for (column of columns(); track column.id) {
-            <th [attr.data-column-id]="column.id">
+            <td [attr.data-column-id]="column.id">
               @if (column.filter !== undefined) {
                 <div class="neu-table2__row-filter">
                   @if (filterTemplate(column.id); as customFilter) {
@@ -438,7 +438,7 @@
                   }
                 </div>
               }
-            </th>
+            </td>
           }
         </tr>
       }

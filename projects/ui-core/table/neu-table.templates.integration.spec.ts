@@ -153,6 +153,7 @@ describe('NeuTable public filter and paginator templates', () => {
     const { host, element, renderer, click } = await setup();
     expect(element.querySelector('[aria-label="Next page"]')).toBeNull();
     expect(element.querySelector('[aria-label="Filter value for Name"]')).toBeNull();
+    expect(element.querySelector('.neu-table2__filter-row th')).toBeNull();
     expect(element.querySelector('.neu-table2__resize-handle')).toBeNull();
     expect(element.querySelector('[data-layout-focus]')).toBeNull();
     expect(element.querySelector('th[data-column-id]')?.getAttribute('draggable')).toBe('false');
