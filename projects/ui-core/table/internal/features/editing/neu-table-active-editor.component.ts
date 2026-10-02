@@ -1,13 +1,18 @@
 import { Component, input, signal, type InputSignal, type OnChanges } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
-import type { NeuTableEditError } from '../../../public/neu-table.types';
+import type {
+  NeuTableEditError,
+  NeuTableLabels,
+  NeuTableMessage,
+} from '../../../public/neu-table.types';
+import { tableMessage } from '../../semantics/neu-table-labels';
 
 @Component({
   selector: 'neu-table-active-editor',
   standalone: true,
   imports: [FormField],
   template: `
-    <label class="neu-table2__editor-label" [for]="editorId()">Edit {{ label() }}</label>
+    <label class="neu-table2__editor-label" [for]="editorId()">{{ text('edit') }}</label>
     <input
       [id]="editorId()"
       [formField]="fields.value"
@@ -20,11 +25,11 @@ import type { NeuTableEditError } from '../../../public/neu-table.types';
       (blur)="blur($event)"
     />
     <span class="neu-table2__editor-actions" data-neu-selection-stop>
-      <button type="button" [disabled]="pending()" (click)="commit()()">Save</button>
-      <button type="button" (click)="cancel()('consumer')">Cancel</button>
+      <button type="button" [disabled]="pending()" (click)="commit()()">{{ text('save') }}</button>
+      <button type="button" (click)="cancel()('consumer')">{{ text('cancel') }}</button>
     </span>
     @if (pending()) {
-      <span role="status">Validating</span>
+      <span role="status">{{ text('validating') }}</span>
     }
     @if (errors().length > 0) {
       <span [id]="editorId() + '-errors'" role="alert">
@@ -36,6 +41,9 @@ import type { NeuTableEditError } from '../../../public/neu-table.types';
   `,
 })
 export class NeuTableActiveEditorComponent implements OnChanges {
+  readonly messages = input<NeuTableLabels['messages']>();
+  protected readonly text = (key: NeuTableMessage) =>
+    tableMessage(this.messages(), key, { column: this.label() });
   readonly editorId: InputSignal<string> = input.required();
   readonly label: InputSignal<string> = input.required();
   readonly value: InputSignal<unknown> = input.required();

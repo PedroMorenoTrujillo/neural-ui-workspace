@@ -1118,6 +1118,7 @@
         "./table#NeuTableCellContext",
         "./table#NeuTableCellDirective",
         "./table#NeuTableColumn",
+        "./table#NeuTableColumnOptions",
         "./table#NeuTableComponent",
         "./table#NeuTableDataMode",
         "./table#NeuTableDataRequest",
@@ -1145,6 +1146,7 @@
         "./table#NeuTableExportScope",
         "./table#NeuTableFeatureError",
         "./table#NeuTableFilterColumn",
+        "./table#NeuTableFilterContext",
         "./table#NeuTableFilterDirective",
         "./table#NeuTableFilterOptions",
         "./table#NeuTableFilterPredicate",
@@ -1165,8 +1167,10 @@
         "./table#NeuTableLayoutChange",
         "./table#NeuTableLayoutState",
         "./table#NeuTableLoadingDirective",
+        "./table#NeuTableMessage",
         "./table#NeuTableMetadata",
         "./table#NeuTablePaginationOptions",
+        "./table#NeuTablePaginatorContext",
         "./table#NeuTablePaginatorDirective",
         "./table#NeuTableQuery",
         "./table#NeuTableRange",
@@ -36111,6 +36115,48 @@
       ]
     },
     {
+      "id": "./table#NeuTableColumnOptions",
+      "entrypoint": "./table",
+      "name": "NeuTableColumnOptions",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTableColumnOptions {\n}",
+      "members": [
+        {
+          "id": "./table#NeuTableColumnOptions.property:hideable",
+          "name": "hideable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hideable?: boolean;"
+        },
+        {
+          "id": "./table#NeuTableColumnOptions.property:pinnable",
+          "name": "pinnable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pinnable?: boolean;"
+        },
+        {
+          "id": "./table#NeuTableColumnOptions.property:reorderable",
+          "name": "reorderable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reorderable?: boolean;"
+        },
+        {
+          "id": "./table#NeuTableColumnOptions.property:resizable",
+          "name": "resizable",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly resizable?: boolean;"
+        }
+      ]
+    },
+    {
       "id": "./table#NeuTableComponent",
       "entrypoint": "./table",
       "name": "NeuTableComponent",
@@ -36128,6 +36174,16 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "readonly appearance: InputSignal<NeuTableAppearance>;"
+        },
+        {
+          "id": "./table#NeuTableComponent.input:columnOptions",
+          "name": "columnOptions",
+          "kind": "input",
+          "publicName": "columnOptions",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly columnOptions: InputSignal<NeuTableColumnOptions>;"
         },
         {
           "id": "./table#NeuTableComponent.input:columns",
@@ -36537,7 +36593,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTableComponent<any, any, any>, \"neu-table\", never, {\n    \"dataMode\": {\n        \"alias\": \"dataMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"data\": {\n        \"alias\": \"data\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"metadata\": {\n        \"alias\": \"metadata\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"query\": {\n        \"alias\": \"query\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowKey\": {\n        \"alias\": \"rowKey\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"rowTrackBy\": {\n        \"alias\": \"rowTrackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editState\": {\n        \"alias\": \"editState\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"grouping\": {\n        \"alias\": \"grouping\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortOptions\": {\n        \"alias\": \"sortOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterOptions\": {\n        \"alias\": \"filterOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationOptions\": {\n        \"alias\": \"paginationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionOptions\": {\n        \"alias\": \"selectionOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualizationOptions\": {\n        \"alias\": \"virtualizationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editingOptions\": {\n        \"alias\": \"editingOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expansionOptions\": {\n        \"alias\": \"expansionOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupingOptions\": {\n        \"alias\": \"groupingOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowOptions\": {\n        \"alias\": \"rowOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"appearance\": {\n        \"alias\": \"appearance\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"interactionOptions\": {\n        \"alias\": \"interactionOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"queryChange\": \"queryChange\";\n    \"selectionChange\": \"selectionChange\";\n    \"layoutChange\": \"layoutChange\";\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"editStateChange\": \"editStateChange\";\n    \"groupingChange\": \"groupingChange\";\n    \"dataRequest\": \"dataRequest\";\n    \"rangeChange\": \"rangeChange\";\n    \"rowAction\": \"rowAction\";\n    \"editCommit\": \"editCommit\";\n    \"editCancel\": \"editCancel\";\n    \"rowReorder\": \"rowReorder\";\n    \"exportRequest\": \"exportRequest\";\n    \"featureError\": \"featureError\";\n}, [\n    \"captionDirectives\",\n    \"toolbarDirectives\",\n    \"headerDirectives\",\n    \"cellDirectives\",\n    \"footerDirectives\",\n    \"summaryDirectives\",\n    \"emptyDirectives\",\n    \"loadingDirectives\",\n    \"errorDirectives\",\n    \"rowDetailDirectives\",\n    \"editorDirectives\",\n    \"groupHeaderDirectives\",\n    \"groupFooterDirectives\"\n], never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTableComponent<any, any, any>, \"neu-table\", never, {\n    \"dataMode\": {\n        \"alias\": \"dataMode\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"data\": {\n        \"alias\": \"data\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"metadata\": {\n        \"alias\": \"metadata\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columns\": {\n        \"alias\": \"columns\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"query\": {\n        \"alias\": \"query\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowKey\": {\n        \"alias\": \"rowKey\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"rowTrackBy\": {\n        \"alias\": \"rowTrackBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selection\": {\n        \"alias\": \"selection\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expandedKeys\": {\n        \"alias\": \"expandedKeys\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editState\": {\n        \"alias\": \"editState\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"grouping\": {\n        \"alias\": \"grouping\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"sortOptions\": {\n        \"alias\": \"sortOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"filterOptions\": {\n        \"alias\": \"filterOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"paginationOptions\": {\n        \"alias\": \"paginationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"selectionOptions\": {\n        \"alias\": \"selectionOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"virtualizationOptions\": {\n        \"alias\": \"virtualizationOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editingOptions\": {\n        \"alias\": \"editingOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"expansionOptions\": {\n        \"alias\": \"expansionOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"groupingOptions\": {\n        \"alias\": \"groupingOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"columnOptions\": {\n        \"alias\": \"columnOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rowOptions\": {\n        \"alias\": \"rowOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"appearance\": {\n        \"alias\": \"appearance\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"interactionOptions\": {\n        \"alias\": \"interactionOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"queryChange\": \"queryChange\";\n    \"selectionChange\": \"selectionChange\";\n    \"layoutChange\": \"layoutChange\";\n    \"expandedKeysChange\": \"expandedKeysChange\";\n    \"editStateChange\": \"editStateChange\";\n    \"groupingChange\": \"groupingChange\";\n    \"dataRequest\": \"dataRequest\";\n    \"rangeChange\": \"rangeChange\";\n    \"rowAction\": \"rowAction\";\n    \"editCommit\": \"editCommit\";\n    \"editCancel\": \"editCancel\";\n    \"rowReorder\": \"rowReorder\";\n    \"exportRequest\": \"exportRequest\";\n    \"featureError\": \"featureError\";\n}, [\n    \"captionDirectives\",\n    \"toolbarDirectives\",\n    \"headerDirectives\",\n    \"cellDirectives\",\n    \"footerDirectives\",\n    \"summaryDirectives\",\n    \"emptyDirectives\",\n    \"loadingDirectives\",\n    \"errorDirectives\",\n    \"rowDetailDirectives\",\n    \"editorDirectives\",\n    \"groupHeaderDirectives\",\n    \"groupFooterDirectives\",\n    \"filterDirectives\",\n    \"paginatorDirectives\"\n], never, true, never>;"
         },
         {
           "id": "./table#NeuTableComponent.property:ɵfac",
@@ -37294,6 +37350,48 @@
       ]
     },
     {
+      "id": "./table#NeuTableFilterContext",
+      "entrypoint": "./table",
+      "name": "NeuTableFilterContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTableFilterContext<T, F extends string> extends NeuTableHeaderContext<T, F> {\n}",
+      "members": [
+        {
+          "id": "./table#NeuTableFilterContext.property:apply",
+          "name": "apply",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly apply: (value: unknown, rule?: NeuFilterConstraint<F>['rule']) => void;"
+        },
+        {
+          "id": "./table#NeuTableFilterContext.property:clear",
+          "name": "clear",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly clear: () => void;"
+        },
+        {
+          "id": "./table#NeuTableFilterContext.property:rule",
+          "name": "rule",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rule: NeuFilterConstraint<F>['rule'];"
+        },
+        {
+          "id": "./table#NeuTableFilterContext.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: unknown;"
+        }
+      ]
+    },
+    {
       "id": "./table#NeuTableFilterDirective",
       "entrypoint": "./table",
       "name": "NeuTableFilterDirective",
@@ -37318,7 +37416,7 @@
           "kind": "method",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ngTemplateContextGuard<T extends object, F extends string>(directive: NeuTableFilterDirective<T, F>, context: unknown): context is NeuTableHeaderContext<T, F>;"
+          "signature": "static ngTemplateContextGuard<T extends object, F extends string>(directive: NeuTableFilterDirective<T, F>, context: unknown): context is NeuTableFilterContext<T, F>;"
         },
         {
           "id": "./table#NeuTableFilterDirective.property:ɵdir",
@@ -37342,7 +37440,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly template: TemplateRef<NeuTableHeaderContext<T, F>>;"
+          "signature": "readonly template: TemplateRef<NeuTableFilterContext<T, F>>;"
         }
       ]
     },
@@ -37910,6 +38008,14 @@
           "signature": "readonly loading: string;"
         },
         {
+          "id": "./table#NeuTableLabels.property:messages",
+          "name": "messages",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly messages?: Partial<Record<NeuTableMessage, string>>;"
+        },
+        {
           "id": "./table#NeuTableLabels.property:pagination",
           "name": "pagination",
           "kind": "property",
@@ -38055,6 +38161,15 @@
       ]
     },
     {
+      "id": "./table#NeuTableMessage",
+      "entrypoint": "./table",
+      "name": "NeuTableMessage",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "type NeuTableMessage = 'stateAnnouncement' | 'firstPage' | 'previousPage' | 'nextPage' | 'lastPage' | 'page' | 'of' | 'goToPage' | 'rowsPerPage' | 'searchTable' | 'search' | 'clearSearch' | 'clear' | 'advancedFilters' | 'hiddenColumns' | 'showColumn' | 'expansion' | 'selectAll' | 'filterColumn' | 'filter' | 'moveLeft' | 'moveRight' | 'pinColumn' | 'pin' | 'hideColumn' | 'hide' | 'resizeColumn' | 'rule' | 'value' | 'applyColumnFilter' | 'clearColumnFilter' | 'cancelFilter' | 'filterRule' | 'filterValue' | 'apply' | 'collapseRow' | 'expandRow' | 'selectRow' | 'sortAction' | 'ascending' | 'descending' | 'none' | 'field' | 'join' | 'and' | 'or' | 'applyAdvancedFilter' | 'cancelAdvancedFilter' | 'edit' | 'save' | 'cancel' | 'validating' | NeuFilterConstraint<string>['rule'];",
+      "members": []
+    },
+    {
       "id": "./table#NeuTableMetadata",
       "entrypoint": "./table",
       "name": "NeuTableMetadata",
@@ -38163,21 +38278,151 @@
       ]
     },
     {
+      "id": "./table#NeuTablePaginatorContext",
+      "entrypoint": "./table",
+      "name": "NeuTablePaginatorContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTablePaginatorContext {\n}",
+      "members": [
+        {
+          "id": "./table#NeuTablePaginatorContext.property:canFirst",
+          "name": "canFirst",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly canFirst: boolean;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:canLast",
+          "name": "canLast",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly canLast: boolean;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:canNext",
+          "name": "canNext",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly canNext: boolean;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:canPrevious",
+          "name": "canPrevious",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly canPrevious: boolean;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:changePage",
+          "name": "changePage",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly changePage: (page: number) => void;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:changePageSize",
+          "name": "changePageSize",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly changePageSize: (pageSize: number) => void;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:humanPage",
+          "name": "humanPage",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly humanPage: number;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:page",
+          "name": "page",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly page: number;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:pageCount",
+          "name": "pageCount",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pageCount: number | null;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:pageSize",
+          "name": "pageSize",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pageSize: number;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:pageSizeOptions",
+          "name": "pageSizeOptions",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly pageSizeOptions: readonly number[];"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:rangeEnd",
+          "name": "rangeEnd",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rangeEnd: number;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:rangeStart",
+          "name": "rangeStart",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rangeStart: number;"
+        },
+        {
+          "id": "./table#NeuTablePaginatorContext.property:total",
+          "name": "total",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly total: number | null;"
+        }
+      ]
+    },
+    {
       "id": "./table#NeuTablePaginatorDirective",
       "entrypoint": "./table",
       "name": "NeuTablePaginatorDirective",
       "kind": "directive",
       "status": "SUPPORTED",
       "selector": "ng-template[neuTablePaginator]",
-      "signature": "declare class NeuTablePaginatorDirective<T extends object, K extends NeuTableKey> {\n}",
+      "signature": "declare class NeuTablePaginatorDirective {\n}",
       "members": [
+        {
+          "id": "./table#NeuTablePaginatorDirective.method:ngTemplateContextGuard",
+          "name": "ngTemplateContextGuard",
+          "kind": "method",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ngTemplateContextGuard(directive: NeuTablePaginatorDirective, context: unknown): context is NeuTablePaginatorContext;"
+        },
         {
           "id": "./table#NeuTablePaginatorDirective.property:ɵdir",
           "name": "ɵdir",
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTablePaginatorDirective<any, any>, \"ng-template[neuTablePaginator]\", never, {}, {}, never, never, true, never>;"
+          "signature": "static ɵdir: _angular_core.ɵɵDirectiveDeclaration<NeuTablePaginatorDirective, \"ng-template[neuTablePaginator]\", never, {}, {}, never, never, true, never>;"
         },
         {
           "id": "./table#NeuTablePaginatorDirective.property:ɵfac",
@@ -38185,7 +38430,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTablePaginatorDirective<any, any>, never>;"
+          "signature": "static ɵfac: _angular_core.ɵɵFactoryDeclaration<NeuTablePaginatorDirective, never>;"
         },
         {
           "id": "./table#NeuTablePaginatorDirective.property:template",
@@ -38193,7 +38438,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly template: TemplateRef<NeuTableRowContext<T, K>>;"
+          "signature": "readonly template: TemplateRef<NeuTablePaginatorContext>;"
         }
       ]
     },
@@ -62765,6 +63010,18 @@
       "signature": "readonly appearance: InputSignal<NeuTableAppearance>;"
     },
     {
+      "id": "./table#NeuTableComponent.input:columnOptions",
+      "entrypoint": "./table",
+      "declaration": "NeuTableComponent",
+      "selector": "neu-table",
+      "propertyName": "columnOptions",
+      "publicName": "columnOptions",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly columnOptions: InputSignal<NeuTableColumnOptions>;"
+    },
+    {
       "id": "./table#NeuTableComponent.input:columns",
       "entrypoint": "./table",
       "declaration": "NeuTableComponent",
@@ -66336,32 +66593,32 @@
   ],
   "summary": {
     "entrypoints": 101,
-    "exportedDeclarations": 868,
+    "exportedDeclarations": 872,
     "declarationKinds": {
       "class": 15,
       "component": 96,
       "directive": 119,
       "function": 56,
-      "interface": 277,
+      "interface": 280,
       "reexport": 48,
       "service": 12,
       "token": 5,
-      "type": 198,
+      "type": 199,
       "variable": 42
     },
-    "publicSymbols": 5284,
+    "publicSymbols": 5313,
     "statuses": {
-      "SUPPORTED": 3317,
+      "SUPPORTED": 3345,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1967,
+      "INTERNAL/UNSUPPORTED": 1968,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1221,
+      "input": 1222,
       "output": 228,
       "model": 24,
-      "total": 1473
+      "total": 1474
     },
     "designTokens": 251
   }

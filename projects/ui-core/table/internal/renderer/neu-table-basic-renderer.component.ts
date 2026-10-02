@@ -16,6 +16,7 @@ import {
   type TemplateRef,
 } from '@angular/core';
 import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { tableMessage } from '../semantics/neu-table-labels';
 import { NeuTableAdvancedFilterBuilderComponent } from '../features/advanced-filters/neu-table-advanced-filter-builder.component';
 import { NeuTableActiveEditorComponent } from '../features/editing/neu-table-active-editor.component';
 import { neuTableEditValueSignal, type NeuTableEditSession } from '../editing/neu-table-editing';
@@ -70,6 +71,9 @@ import type {
   NeuTableAppearance,
   NeuTableCellContext,
   NeuTableColumn,
+  NeuTableColumnOptions,
+  NeuTableMessage,
+  NeuTableInteractionOptions,
   NeuTableDataMode,
   NeuTableDetailContext,
   NeuTableEditChange,
@@ -79,6 +83,8 @@ import type {
   NeuTableExpandedKeysChange,
   NeuTableExpansionOptions,
   NeuTableFilterOptions,
+  NeuTableFilterContext,
+  NeuTablePaginatorContext,
   NeuTableGroupContext,
   NeuTableGroupingChange,
   NeuTableGroupingOptions,
@@ -156,6 +162,111 @@ export class NeuTableBasicRendererComponent<
   readonly appearance: InputSignal<NeuTableAppearance> = input.required();
   readonly labels: InputSignal<NeuTableLabels> = input.required();
   readonly captionTemplate: InputSignal<TemplateRef<never> | undefined> = input();
+  readonly columnOptions = input<NeuTableColumnOptions>({});
+  readonly interactionOptions = input<NeuTableInteractionOptions>({
+    navigation: 'native',
+    wrapFocus: false,
+    announceChanges: false,
+  });
+  private readonly focusedRowKey = signal<K | null>(null);
+  private readonly focusedColumnId = signal<string | null>(null);
+  protected readonly announcement = computed(() =>
+    this.text('stateAnnouncement', {
+      count: this.matchedNormalCount(),
+      page: this.pagination().humanPage,
+      selected: this.rows().filter((row) => this.rowSelected(row)).length,
+      sort:
+        this.sort()
+          .map(
+            (entry) =>
+              `${entry.field} ${this.text(entry.direction === 'asc' ? 'ascending' : 'descending')}`,
+          )
+          .join(', ') || this.text('none'),
+    }),
+  );
+  protected readonly navigationTabIndex = (
+    row: NeuTableRenderRow<T, K>,
+    columnId?: string,
+  ): number => {
+    const key = this.rows().some((item) => item.key === this.focusedRowKey())
+      ? this.focusedRowKey()
+      : this.rows()[0]?.key;
+    const column = this.columns().some((item) => item.id === this.focusedColumnId())
+      ? this.focusedColumnId()
+      : this.columns()[0]?.id;
+    return row.key === key && (columnId === undefined || columnId === column) ? 0 : -1;
+  };
+  protected readonly rememberFocus = (row: NeuTableRenderRow<T, K>, columnId?: string) => {
+    this.focusedRowKey.set(row.key);
+    this.focusedColumnId.set(columnId ?? null);
+  };
+  protected readonly navigate = (event: KeyboardEvent): void => {
+    const mode = this.interactionOptions().navigation;
+    if (mode === 'native' || event.target !== event.currentTarget || event.altKey || event.metaKey)
+      return;
+    const current = event.currentTarget as HTMLElement;
+    const table = current.closest('table');
+    if (table === null) return;
+    const rows = [...table.querySelectorAll<HTMLElement>('tbody tr[data-row-key]')].filter(
+      (row) => row.closest('table') === table,
+    );
+    const row = current.closest<HTMLElement>('tr[data-row-key]');
+    if (row === null) return;
+    const cells = (item: HTMLElement) => [
+      ...item.querySelectorAll<HTMLElement>(':scope > td[data-column-id]'),
+    ];
+    let rowIndex = rows.indexOf(row);
+    let columnIndex = mode === 'cells' ? cells(row).indexOf(current) : 0;
+    const rtl = getComputedStyle(table).direction === 'rtl';
+    switch (event.key) {
+      case 'ArrowDown':
+        rowIndex++;
+        break;
+      case 'ArrowUp':
+        rowIndex--;
+        break;
+      case 'ArrowRight':
+        if (mode !== 'cells') return;
+        columnIndex += rtl ? -1 : 1;
+        break;
+      case 'ArrowLeft':
+        if (mode !== 'cells') return;
+        columnIndex += rtl ? 1 : -1;
+        break;
+      case 'Home':
+        if (mode === 'rows' || event.ctrlKey) rowIndex = 0;
+        columnIndex = 0;
+        break;
+      case 'End':
+        if (mode === 'rows' || event.ctrlKey) rowIndex = rows.length - 1;
+        columnIndex = Infinity;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    const bounded = (value: number, length: number) =>
+      !Number.isFinite(value)
+        ? length - 1
+        : this.interactionOptions().wrapFocus
+          ? ((value % length) + length) % length
+          : Math.max(0, Math.min(value, length - 1));
+    const targetRow = rows[bounded(rowIndex, rows.length)];
+    if (targetRow === undefined) return;
+    const targetCells = cells(targetRow);
+    const target =
+      mode === 'rows' ? targetRow : targetCells[bounded(columnIndex, targetCells.length)];
+    target?.focus();
+  };
+  protected readonly text = (
+    key: NeuTableMessage,
+    values: Readonly<Record<string, string | number>> = {},
+  ) => tableMessage(this.labels().messages, key, values);
+  readonly filterTemplates = input<ReadonlyMap<string, TemplateRef<NeuTableFilterContext<T, F>>>>(
+    new Map(),
+  );
+  readonly paginatorTemplate = input<TemplateRef<NeuTablePaginatorContext>>();
   readonly toolbarTemplate: InputSignal<TemplateRef<never> | undefined> = input();
   readonly summaryTemplate: InputSignal<TemplateRef<never> | undefined> = input();
   readonly emptyTemplate: InputSignal<TemplateRef<never> | undefined> = input();
@@ -287,6 +398,12 @@ export class NeuTableBasicRendererComponent<
   protected readonly appliedPageSizeConfigured = computed(() =>
     this.pageSizeOptions().includes(this.pagination().pageSize),
   );
+  protected readonly paginatorContext = computed<NeuTablePaginatorContext>(() => ({
+    ...this.pagination(),
+    pageSizeOptions: this.pageSizeOptions(),
+    changePage: this.changePage,
+    changePageSize: this.proposePageSize,
+  }));
   protected readonly hasGlobalSearch = computed(() => this.filterOptions().globalFields.length > 0);
   protected readonly hasRowFilters = computed(() => this.filterOptions().surfaces.includes('row'));
   protected readonly hasMenuFilters = computed(() =>
@@ -435,6 +552,33 @@ export class NeuTableBasicRendererComponent<
   }
 
   protected readonly headerTemplate = (columnId: string) => this.headerTemplates().get(columnId);
+  protected readonly filterTemplate = (columnId: string) => this.filterTemplates().get(columnId);
+  protected readonly filterContext = (
+    column: NeuTableColumn<T, F>,
+  ): NeuTableFilterContext<T, F> => ({
+    column,
+    sort: this.sort(),
+    value: this.appliedFilter(column)?.value,
+    rule: this.filterRule(column),
+    apply: (value, rule = this.filterRule(column)) => {
+      if (column.filter === undefined || !this.filterRules(column).includes(rule)) return;
+      this.proposeQuery()(
+        proposeNeuTableFilters({
+          query: this.query(),
+          filters: setNeuTableFilterCondition(this.query().filters, {
+            kind: 'condition',
+            field: column.filter.field,
+            rule,
+            value,
+          }),
+          sortOptions: this.sortOptions(),
+          filterOptions: this.filterOptions(),
+        }),
+      );
+      this.closeFilterMenu();
+    },
+    clear: () => this.clearFilter(column),
+  });
   protected readonly cellTemplate = (columnId: string) => this.cellTemplates().get(columnId);
   protected readonly footerTemplate = (columnId: string) => this.footerTemplates().get(columnId);
   protected readonly headerContext = (
@@ -468,7 +612,11 @@ export class NeuTableBasicRendererComponent<
           : this.sortOptions().removable
             ? 'none'
             : defaultState;
-    return `Sort ${column.header}; current ${current ?? 'none'}; activate for ${next}`;
+    return this.text('sortAction', {
+      column: column.header,
+      current: this.text(current ?? 'none'),
+      next: this.text(next),
+    });
   };
   protected readonly sortColumn = (column: NeuTableColumn<T, F>, event: MouseEvent) => {
     if (column.sort === undefined) return;
@@ -738,19 +886,28 @@ export class NeuTableBasicRendererComponent<
         filterOptions: this.filterOptions(),
       }),
     );
-  protected readonly changePage = (page: number) =>
+  protected readonly changePage = (page: number) => {
+    if (!Number.isFinite(page)) return;
+    const count = this.pagination().pageCount;
+    const boundedPage = Math.max(
+      0,
+      Math.min(Math.floor(page), count === null ? Infinity : Math.max(0, count - 1)),
+    );
     this.proposeQuery()(
       proposeNeuTablePage({
         query: this.query(),
-        page,
+        page: boundedPage,
         sortOptions: this.sortOptions(),
       }),
     );
+  };
   protected readonly changePageSize = (event: Event) =>
+    this.proposePageSize(Number((event.currentTarget as HTMLSelectElement).value));
+  protected readonly proposePageSize = (pageSize: number) =>
     this.proposeQuery()(
       proposeNeuTablePageSize({
         query: this.query(),
-        pageSize: Number((event.currentTarget as HTMLSelectElement).value),
+        pageSize,
         sortOptions: this.sortOptions(),
         allowedPageSizes: this.paginationOptions().pageSizeOptions,
       }),
@@ -763,13 +920,13 @@ export class NeuTableBasicRendererComponent<
     const state = this.pagination();
     if (this.paginationOptions().report === 'summary') {
       return state.total === null
-        ? `Page ${state.humanPage}`
-        : `Page ${state.humanPage} of ${Math.max(1, state.pageCount ?? 1)}`;
+        ? `${this.text('page')} ${state.humanPage}`
+        : `${this.text('page')} ${state.humanPage} ${this.text('of')} ${Math.max(1, state.pageCount ?? 1)}`;
     }
     if (this.paginationOptions().report === 'range') {
       return state.total === null
         ? `${state.rangeStart}–${state.rangeEnd}`
-        : `${state.rangeStart}–${state.rangeEnd} of ${state.total}`;
+        : `${state.rangeStart}–${state.rangeEnd} ${this.text('of')} ${state.total}`;
     }
     return '';
   };
@@ -938,6 +1095,7 @@ export class NeuTableBasicRendererComponent<
     event: KeyboardEvent,
   ) => {
     if (event.target !== event.currentTarget) return;
+    this.navigate(event);
     const options = this.editingOptions();
     if (
       options.mode !== 'none' &&

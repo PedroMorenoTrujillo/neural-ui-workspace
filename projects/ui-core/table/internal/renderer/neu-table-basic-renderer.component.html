@@ -1,91 +1,104 @@
 <ng-template #paginator>
   <nav class="neu-table2__pagination" [attr.aria-label]="labels().pagination">
-    <button
-      type="button"
-      aria-label="First page"
-      [disabled]="!pagination().canFirst"
-      (click)="changePage(0)"
-    >
-      «
-    </button>
-    <button
-      type="button"
-      aria-label="Previous page"
-      [disabled]="!pagination().canPrevious"
-      (click)="changePage(pagination().page - 1)"
-    >
-      ‹
-    </button>
-    <span aria-current="page">
-      Page {{ pagination().humanPage }}
-      @if (pagination().pageCount !== null) {
-        of {{ pagination().pageCount || 1 }}
+    @if (paginatorTemplate(); as customPaginator) {
+      <ng-container
+        [ngTemplateOutlet]="customPaginator"
+        [ngTemplateOutletContext]="paginatorContext()"
+      />
+    } @else {
+      <button
+        type="button"
+        [attr.aria-label]="text('firstPage')"
+        [disabled]="!pagination().canFirst"
+        (click)="changePage(0)"
+      >
+        «
+      </button>
+      <button
+        type="button"
+        [attr.aria-label]="text('previousPage')"
+        [disabled]="!pagination().canPrevious"
+        (click)="changePage(pagination().page - 1)"
+      >
+        ‹
+      </button>
+      <span aria-current="page">
+        {{ text('page') }} {{ pagination().humanPage }}
+        @if (pagination().pageCount !== null) {
+          {{ text('of') }} {{ pagination().pageCount || 1 }}
+        }
+      </span>
+      <button
+        type="button"
+        [attr.aria-label]="text('nextPage')"
+        [disabled]="!pagination().canNext"
+        (click)="changePage(pagination().page + 1)"
+      >
+        ›
+      </button>
+      <button
+        type="button"
+        [attr.aria-label]="text('lastPage')"
+        [disabled]="!pagination().canLast"
+        (click)="changePage((pagination().pageCount ?? 1) - 1)"
+      >
+        »
+      </button>
+      @if (paginationOptions().showPageJump) {
+        <label>
+          {{ text('goToPage') }}
+          <input
+            type="number"
+            min="1"
+            [value]="pagination().humanPage"
+            (change)="jumpToPage($event)"
+          />
+        </label>
       }
-    </span>
-    <button
-      type="button"
-      aria-label="Next page"
-      [disabled]="!pagination().canNext"
-      (click)="changePage(pagination().page + 1)"
-    >
-      ›
-    </button>
-    <button
-      type="button"
-      aria-label="Last page"
-      [disabled]="!pagination().canLast"
-      (click)="changePage((pagination().pageCount ?? 1) - 1)"
-    >
-      »
-    </button>
-    @if (paginationOptions().showPageJump) {
-      <label>
-        Go to page
-        <input
-          type="number"
-          min="1"
-          [value]="pagination().humanPage"
-          (change)="jumpToPage($event)"
-        />
-      </label>
-    }
-    @if (pageSizeOptions().length > 0) {
-      <label>
-        Rows per page
-        <select [value]="pagination().pageSize" (change)="changePageSize($event)">
-          @if (!appliedPageSizeConfigured()) {
-            <option [value]="pagination().pageSize" disabled>{{ pagination().pageSize }}</option>
-          }
-          @for (size of pageSizeOptions(); track size) {
-            <option [value]="size">{{ size }}</option>
-          }
-        </select>
-      </label>
-    }
-    @if (paginationReport()) {
-      <span class="neu-table2__pagination-report">{{ paginationReport() }}</span>
+      @if (pageSizeOptions().length > 0) {
+        <label>
+          {{ text('rowsPerPage') }}
+          <select [value]="pagination().pageSize" (change)="changePageSize($event)">
+            @if (!appliedPageSizeConfigured()) {
+              <option [value]="pagination().pageSize" disabled>{{ pagination().pageSize }}</option>
+            }
+            @for (size of pageSizeOptions(); track size) {
+              <option [value]="size">{{ size }}</option>
+            }
+          </select>
+        </label>
+      }
+      @if (paginationReport()) {
+        <span class="neu-table2__pagination-report">{{ paginationReport() }}</span>
+      }
     }
   </nav>
 </ng-template>
+
+@if (interactionOptions().announceChanges) {
+  <span class="neu-table2__visually-hidden" role="status" aria-live="polite" aria-atomic="true">{{
+    announcement()
+  }}</span>
+}
 
 @if (hasGlobalSearch() || hasBuilder() || toolbarTemplate()) {
   <div class="neu-table2__query-toolbar">
     @if (hasGlobalSearch()) {
       <form class="neu-table2__search" role="search" (submit)="commitSearch($event)">
         <label>
-          <span class="neu-table2__visually-hidden">Search table</span>
+          <span class="neu-table2__visually-hidden">{{ text('searchTable') }}</span>
           <input
             type="search"
-            aria-label="Search table"
+            [attr.aria-label]="text('searchTable')"
             [value]="searchEditing() ? searchDraft() : query().search"
             (focus)="beginSearch()"
             (input)="updateSearchDraft($event)"
             (keydown.escape)="cancelSearch($event)"
           />
         </label>
-        <button type="submit">Search</button>
-        <button type="button" aria-label="Clear table search" (click)="clearSearch($event)">
-          Clear
+        <button type="submit">{{ text('search') }}</button>
+        <button type="button" [attr.aria-label]="text('clearSearch')" (click)="clearSearch($event)">
+          {{ text('clear') }}
         </button>
       </form>
     }
@@ -102,11 +115,12 @@
           [attr.aria-expanded]="builderOpen()"
           (click)="openBuilder($event)"
         >
-          Advanced filters
+          {{ text('advancedFilters') }}
         </button>
         @defer (when builderOpen()) {
           @if (builderOpen()) {
             <neu-table-advanced-filter-builder
+              [messages]="labels().messages"
               [columns]="allColumns()"
               [filters]="query().filters"
               [applyFilters]="applyAdvancedFilters"
@@ -119,10 +133,12 @@
   </div>
 }
 
-@if (hiddenColumns().length > 0) {
-  <div class="neu-table2__hidden-columns" aria-label="Hidden columns">
+@if (columnOptions().hideable && hiddenColumns().length > 0) {
+  <div class="neu-table2__hidden-columns" [attr.aria-label]="text('hiddenColumns')">
     @for (column of hiddenColumns(); track column.id) {
-      <button type="button" (click)="showColumn(column.id)">Show {{ column.header }}</button>
+      <button type="button" (click)="showColumn(column.id)">
+        {{ text('showColumn', { column: column.header }) }}
+      </button>
     }
   </div>
 }
@@ -161,7 +177,7 @@
       <tr>
         @if (expansionActive()) {
           <th scope="col" class="neu-table2__expansion-column">
-            <span class="neu-table2__visually-hidden">Expansion</span>
+            <span class="neu-table2__visually-hidden">{{ text('expansion') }}</span>
           </th>
         }
         @if (hasSelectionColumn()) {
@@ -169,7 +185,7 @@
             @if (selectionIndicator() === 'checkbox') {
               <input
                 type="checkbox"
-                aria-label="Select all rows"
+                [attr.aria-label]="text('selectAll')"
                 [checked]="selectionProjection().headerState === 'checked'"
                 [indeterminate]="selectionProjection().headerState === 'indeterminate'"
                 [disabled]="selectionProjection().selectableCount === 0"
@@ -177,14 +193,14 @@
                 (keydown.enter)="onHeaderSelectionEnter($event)"
               />
             } @else {
-              <span class="neu-table2__visually-hidden">Selection</span>
+              <span class="neu-table2__visually-hidden">{{ labels().selection }}</span>
             }
           </th>
         }
         @for (column of columns(); track column.id) {
           <th
             scope="col"
-            draggable="true"
+            [draggable]="columnOptions().reorderable === true"
             [attr.aria-sort]="ariaSort(column)"
             [attr.data-column-id]="column.id"
             [attr.data-column-pin]="columnPin(column)"
@@ -198,8 +214,8 @@
             [style.min-inline-size]="column.minWidth"
             [style.max-inline-size]="column.maxWidth"
             [style.text-align]="column.align"
-            (dragstart)="onColumnDragStart(column.id)"
-            (dragover)="$event.preventDefault()"
+            (dragstart)="columnOptions().reorderable && onColumnDragStart(column.id)"
+            (dragover)="columnOptions().reorderable && $event.preventDefault()"
             (drop)="onColumnDrop(column.id, $event)"
             (dragend)="cancelColumnDrag()"
           >
@@ -252,86 +268,109 @@
                     aria-haspopup="dialog"
                     [attr.aria-expanded]="openFilterColumnId() === column.id"
                     [attr.aria-pressed]="appliedFilter(column) !== null"
-                    [attr.aria-label]="'Filter ' + column.header"
+                    [attr.aria-label]="text('filterColumn', { column: column.header })"
                     (click)="openFilterMenu(column, $event)"
                   >
-                    Filter
+                    {{ text('filter') }}
                   </button>
                 }
-                <button
-                  type="button"
-                  [attr.data-layout-focus]="'move:' + column.id + ':-1'"
-                  [attr.aria-label]="'Move ' + column.header + ' left'"
-                  (click)="moveColumn(column.id, -1, $event)"
-                >
-                  ←
-                </button>
-                <button
-                  type="button"
-                  [attr.data-layout-focus]="'move:' + column.id + ':1'"
-                  [attr.aria-label]="'Move ' + column.header + ' right'"
-                  (click)="moveColumn(column.id, 1, $event)"
-                >
-                  →
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-label]="'Change pin for ' + column.header"
-                  (click)="cycleColumnPin(column)"
-                >
-                  Pin
-                </button>
-                <button
-                  type="button"
-                  [attr.aria-label]="'Hide ' + column.header"
-                  (click)="hideColumn(column.id)"
-                >
-                  Hide
-                </button>
+                @if (columnOptions().reorderable) {
+                  <button
+                    type="button"
+                    [attr.data-layout-focus]="'move:' + column.id + ':-1'"
+                    [attr.aria-label]="text('moveLeft', { column: column.header })"
+                    (click)="moveColumn(column.id, -1, $event)"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    [attr.data-layout-focus]="'move:' + column.id + ':1'"
+                    [attr.aria-label]="text('moveRight', { column: column.header })"
+                    (click)="moveColumn(column.id, 1, $event)"
+                  >
+                    →
+                  </button>
+                }
+                @if (columnOptions().pinnable) {
+                  <button
+                    type="button"
+                    [attr.aria-label]="text('pinColumn', { column: column.header })"
+                    (click)="cycleColumnPin(column)"
+                  >
+                    {{ text('pin') }}
+                  </button>
+                }
+                @if (columnOptions().hideable) {
+                  <button
+                    type="button"
+                    [attr.aria-label]="text('hideColumn', { column: column.header })"
+                    (click)="hideColumn(column.id)"
+                  >
+                    {{ text('hide') }}
+                  </button>
+                }
               </span>
-              <button
-                type="button"
-                class="neu-table2__resize-handle"
-                [attr.aria-label]="'Resize ' + column.header"
-                (pointerdown)="onResizeStart(column, $event)"
-                (pointermove)="onResizeMove($event)"
-                (pointerup)="commitResize()"
-                (pointercancel)="cancelResize()"
-                (keydown.arrowleft)="resizeWithKeyboard(column, -1, $event)"
-                (keydown.arrowright)="resizeWithKeyboard(column, 1, $event)"
-                (keydown.escape)="cancelResize()"
-              ><span aria-hidden="true">↔</span></button>
+              @if (columnOptions().resizable) {
+                <button
+                  type="button"
+                  class="neu-table2__resize-handle"
+                  [attr.aria-label]="text('resizeColumn', { column: column.header })"
+                  (pointerdown)="onResizeStart(column, $event)"
+                  (pointermove)="onResizeMove($event)"
+                  (pointerup)="commitResize()"
+                  (pointercancel)="cancelResize()"
+                  (keydown.arrowleft)="resizeWithKeyboard(column, -1, $event)"
+                  (keydown.arrowright)="resizeWithKeyboard(column, 1, $event)"
+                  (keydown.escape)="cancelResize()"
+                >
+                  <span aria-hidden="true">↔</span>
+                </button>
+              }
             </div>
             @if (openFilterColumnId() === column.id) {
               <form
                 class="neu-table2__filter-menu"
                 role="dialog"
-                [attr.aria-label]="'Filter ' + column.header"
+                [attr.aria-label]="text('filterColumn', { column: column.header })"
                 [attr.data-filter-editor]="column.id"
-                (submit)="applyFilterMenu($event)"
+                (submit)="
+                  filterTemplate(column.id) ? $event.preventDefault() : applyFilterMenu($event)
+                "
                 (keydown.escape)="closeFilterMenu()"
               >
-                <label>
-                  Rule
-                  <select [value]="filterDraftRule()" (change)="setMenuRule($event)">
-                    @for (rule of filterRules(column); track rule) {
-                      <option [value]="rule">{{ rule }}</option>
-                    }
-                  </select>
-                </label>
-                @if (filterNeedsValue(filterDraftRule())) {
+                @if (filterTemplate(column.id); as customFilter) {
+                  <ng-container
+                    [ngTemplateOutlet]="customFilter"
+                    [ngTemplateOutletContext]="filterContext(column)"
+                  />
+                } @else {
                   <label>
-                    Value
-                    <input [value]="filterDraftValue()" (input)="setMenuValue($event)" />
+                    {{ text('rule') }}
+                    <select [value]="filterDraftRule()" (change)="setMenuRule($event)">
+                      @for (rule of filterRules(column); track rule) {
+                        <option [value]="rule">{{ text(rule) }}</option>
+                      }
+                    </select>
                   </label>
+                  @if (filterNeedsValue(filterDraftRule())) {
+                    <label>
+                      {{ text('value') }}
+                      <input [value]="filterDraftValue()" (input)="setMenuValue($event)" />
+                    </label>
+                  }
+                  <div class="neu-table2__filter-actions">
+                    <button type="submit">
+                      {{ text('applyColumnFilter', { column: column.header }) }}
+                    </button>
+                    <button type="button" (click)="clearFilter(column)">
+                      {{ text('clearColumnFilter', { column: column.header }) }}
+                    </button>
+                    <button type="button" (click)="closeFilterMenu()">
+                      {{ text('cancelFilter') }}
+                    </button>
+                  </div>
                 }
-                <div class="neu-table2__filter-actions">
-                  <button type="submit">Apply {{ column.header }} filter</button>
-                  <button type="button" (click)="clearFilter(column)">
-                    Clear {{ column.header }} filter
-                  </button>
-                  <button type="button" (click)="closeFilterMenu()">Cancel filter</button>
-                </div>
               </form>
             }
           </th>
@@ -349,42 +388,53 @@
             <th [attr.data-column-id]="column.id">
               @if (column.filter !== undefined) {
                 <div class="neu-table2__row-filter">
-                  <label>
-                    <span class="neu-table2__visually-hidden">Rule for {{ column.header }}</span>
-                    <select
-                      [attr.aria-label]="'Filter rule for ' + column.header"
-                      [value]="filterRule(column)"
-                      (change)="setRowFilterRule(column, $event)"
-                    >
-                      @for (rule of filterRules(column); track rule) {
-                        <option [value]="rule">{{ rule }}</option>
-                      }
-                    </select>
-                  </label>
-                  @if (filterNeedsValue(filterRule(column))) {
+                  @if (filterTemplate(column.id); as customFilter) {
+                    <ng-container
+                      [ngTemplateOutlet]="customFilter"
+                      [ngTemplateOutletContext]="filterContext(column)"
+                    />
+                  } @else {
                     <label>
-                      <span class="neu-table2__visually-hidden"
-                        >Filter value for {{ column.header }}</span
+                      <span class="neu-table2__visually-hidden">{{
+                        text('filterRule', { column: column.header })
+                      }}</span>
+                      <select
+                        [attr.aria-label]="text('filterRule', { column: column.header })"
+                        [value]="filterRule(column)"
+                        (change)="setRowFilterRule(column, $event)"
                       >
-                      <input
-                        [attr.aria-label]="'Filter value for ' + column.header"
-                        [value]="filterValue(column)"
-                        (input)="setRowFilterValue(column, $event)"
-                        (keydown.enter)="commitRowFilter(column, $event)"
-                      />
+                        @for (rule of filterRules(column); track rule) {
+                          <option [value]="rule">{{ text(rule) }}</option>
+                        }
+                      </select>
                     </label>
-                  }
-                  @if (filterOptions().commit === 'explicit') {
-                    <button type="button" (click)="commitRowFilter(column)">Apply</button>
-                  }
-                  @if (appliedFilter(column) !== null) {
-                    <button
-                      type="button"
-                      [attr.aria-label]="'Clear filter for ' + column.header"
-                      (click)="clearFilter(column)"
-                    >
-                      Clear
-                    </button>
+                    @if (filterNeedsValue(filterRule(column))) {
+                      <label>
+                        <span class="neu-table2__visually-hidden">{{
+                          text('filterValue', { column: column.header })
+                        }}</span>
+                        <input
+                          [attr.aria-label]="text('filterValue', { column: column.header })"
+                          [value]="filterValue(column)"
+                          (input)="setRowFilterValue(column, $event)"
+                          (keydown.enter)="commitRowFilter(column, $event)"
+                        />
+                      </label>
+                    }
+                    @if (filterOptions().commit === 'explicit') {
+                      <button type="button" (click)="commitRowFilter(column)">
+                        {{ text('apply') }}
+                      </button>
+                    }
+                    @if (appliedFilter(column) !== null) {
+                      <button
+                        type="button"
+                        [attr.aria-label]="text('clearColumnFilter', { column: column.header })"
+                        (click)="clearFilter(column)"
+                      >
+                        {{ text('clear') }}
+                      </button>
+                    }
                   }
                 </div>
               }
@@ -400,6 +450,11 @@
           [attr.data-row-key]="renderRow.key"
           [attr.data-row-token]="rowIdentity(renderRow)"
           [attr.data-row-pin]="renderRow.pin"
+          [attr.tabindex]="
+            interactionOptions().navigation === 'rows' ? navigationTabIndex(renderRow) : null
+          "
+          (focus)="rememberFocus(renderRow)"
+          (keydown)="navigate($event)"
           [attr.data-logical-index]="
             virtualizationOptions().enabled && renderRow.pin === null ? renderRow.index : null
           "
@@ -427,7 +482,9 @@
                   type="button"
                   data-neu-selection-stop
                   [attr.aria-label]="
-                    (rowExpanded(renderRow) ? 'Collapse row ' : 'Expand row ') + renderRow.key
+                    text(rowExpanded(renderRow) ? 'collapseRow' : 'expandRow', {
+                      key: renderRow.key,
+                    })
                   "
                   [attr.aria-expanded]="rowExpanded(renderRow)"
                   [attr.aria-controls]="rowExpanded(renderRow) ? detailId(renderRow) : null"
@@ -444,7 +501,7 @@
                 [type]="selectionIndicator()"
                 [checked]="rowSelected(renderRow)"
                 [disabled]="rowDisabled(renderRow)"
-                [attr.aria-label]="'Select row ' + renderRow.key"
+                [attr.aria-label]="text('selectRow', { key: renderRow.key })"
                 (click)="onSelectionControlClick(renderRow, $event)"
                 (keydown.enter)="onSelectionEnter(renderRow, $event)"
               />
@@ -454,13 +511,16 @@
             @if (groupingCellVisible(presentationNode, column)) {
               <td
                 [attr.tabindex]="
-                  virtualizationOptions().enabled
-                    ? -1
-                    : editingOptions().mode !== 'none' && column.edit !== undefined
-                      ? 0
-                      : null
+                  interactionOptions().navigation === 'cells'
+                    ? navigationTabIndex(renderRow, column.id)
+                    : virtualizationOptions().enabled
+                      ? -1
+                      : editingOptions().mode !== 'none' && column.edit !== undefined
+                        ? 0
+                        : null
                 "
                 [attr.data-column-id]="column.id"
+                (focus)="rememberFocus(renderRow, column.id)"
                 [attr.data-column-header]="column.header"
                 [attr.data-column-pin]="columnPin(column)"
                 [style.inset-inline-start]="
@@ -486,6 +546,7 @@
                       } @else {
                         @defer (when isCellEditing(renderRow, column)) {
                           <neu-table-active-editor
+                            [messages]="labels().messages"
                             [editorId]="editorId(renderRow, column)"
                             [label]="column.header"
                             [value]="context.valueSignal()"

@@ -4,6 +4,20 @@ Date: 2026-10-02. Branch: `v2`. Starting authority: `11524ed630246753fe0d05655eb
 
 ## Status and scope
 
+### Table closure follow-up (2026-10-02)
+
+Pedro authorized resolving the remaining Table contract defects before publication. The previous filter/paginator blocker is corrected in Core, not worked around in Showcase:
+
+- `neuTableFilter` now renders in row and menu surfaces. `NeuTableFilterContext` retains column/sort and adds applied value/rule plus typed apply/clear proposals.
+- `neuTablePaginator` now replaces the enabled paginator and uses `NeuTablePaginatorContext`, not row data. It exposes applied zero-based page, size, known/unknown totals, bounds, configured sizes and query proposal actions.
+- New opt-in `columnOptions` controls resizing, reordering, hiding and pinning. Basic tables have no unwanted controls. Consumers accept `layoutChange.next` into `layout`.
+- `labels.messages` translates built-in controls, filter rules, editors, pagination and announcements. Missing keys retain English defaults.
+- Previously disconnected `interactionOptions` now controls native/row/cell navigation within rendered data, optional wrapping and polite state announcements. Nested inputs retain their own keyboard handling; RTL reverses horizontal movement.
+- Resize controls now have an actual 2rem minimum height, removing the conflicting 1.5rem rule.
+- Directed Table suite: 189/189. New tests cover template replacement, controlled acceptance/rejection, empty/remote states, positions, dynamic removal, keyboard and translation fallback. The prior full-suite run passed 2945 tests before the final navigation change; final recertification is recorded in the Showcase closure report and release artifacts, not inferred from this earlier run.
+
+No new CSS token, second Table facade, Icons dependency, release or publication was introduced. The sections below preserve prior remediation evidence; the measured resize dimensions and template-blocker findings from the earlier snapshot are superseded by this follow-up.
+
 Core remediation gates passed on the source tree recorded by the local commit containing this report. This is **not** a declaration that the Showcase golden pages are complete. No release, tag, push or npm publication is authorized or performed. Neural Icons and the V1 Showcase are untouched.
 
 The starting Core tree was clean. Recoverable archives and full command logs are under `/Users/pedromorenotrujillo/Documents/Codex/2026-10-02/neural-ui-golden-implementation/`. The pre-existing Showcase changes were separately archived before implementation.

@@ -190,8 +190,8 @@ th {
 }
 
 .neu-table2__resize-handle {
-  inline-size: 0.5rem;
-  min-block-size: 1.5rem;
+  inline-size: 2rem;
+  min-block-size: 2rem;
   padding: 0;
   cursor: col-resize;
   touch-action: none;
@@ -204,6 +204,12 @@ th {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+tr[tabindex]:focus-visible,
+td[tabindex]:focus-visible {
+  outline: 2px solid var(--neu-focus-color, Highlight);
+  outline-offset: -2px;
 }
 
 button:focus-visible,
@@ -289,7 +295,9 @@ tr[aria-selected='true'] {
   border-inline-end: 1px solid var(--neu-border, currentColor);
 }
 
-.neu-table2__viewport--striped tbody tr:nth-child(even):not(.neu-table2__state-row):not([aria-selected='true']) {
+.neu-table2__viewport--striped
+  tbody
+  tr:nth-child(even):not(.neu-table2__state-row):not([aria-selected='true']) {
   background: var(--neu-table-stripe-background, color-mix(in srgb, currentColor 4%, transparent));
 }
 

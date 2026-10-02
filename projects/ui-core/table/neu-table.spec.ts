@@ -80,6 +80,7 @@ const baseLayout: NeuTableLayoutState = {
   ],
   template: `
     <neu-table
+      [columnOptions]="{ reorderable: true, resizable: true, hideable: true, pinnable: true }"
       [data]="rows()"
       [columns]="columns()"
       [metadata]="metadata()"

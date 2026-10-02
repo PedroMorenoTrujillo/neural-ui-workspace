@@ -12,7 +12,10 @@ import type {
   NeuFilterExpression,
   NeuFilterOperator,
   NeuTableColumn,
+  NeuTableLabels,
+  NeuTableMessage,
 } from '../../../public/neu-table.types';
+import { tableMessage } from '../../semantics/neu-table-labels';
 import {
   appendNeuTableFilterCondition,
   isNeuTableFilterRule,
@@ -28,11 +31,11 @@ import {
       class="neu-table2__filter-builder"
       role="dialog"
       aria-modal="false"
-      aria-label="Advanced filters"
+      [attr.aria-label]="text('advancedFilters')"
       (keydown.escape)="cancel()"
     >
       <label>
-        Field
+        {{ text('field') }}
         <select [value]="field()" (change)="setField($event)">
           @for (column of filterableColumns(); track column.id) {
             <option [value]="column.filter!.field">{{ column.header }}</option>
@@ -40,29 +43,29 @@ import {
         </select>
       </label>
       <label>
-        Rule
+        {{ text('rule') }}
         <select [value]="activeRule()" (change)="setRule($event)">
           @for (candidate of rules(); track candidate) {
-            <option [value]="candidate">{{ candidate }}</option>
+            <option [value]="candidate">{{ text(candidate) }}</option>
           }
         </select>
       </label>
       @if (needsValue()) {
         <label>
-          Value
+          {{ text('value') }}
           <input [value]="value()" (input)="setValue($event)" />
         </label>
       }
       <label>
-        Join
+        {{ text('join') }}
         <select [value]="operator()" (change)="setOperator($event)">
-          <option value="and">AND</option>
-          <option value="or">OR</option>
+          <option value="and">{{ text('and') }}</option>
+          <option value="or">{{ text('or') }}</option>
         </select>
       </label>
       <div class="neu-table2__filter-actions">
-        <button type="button" (click)="apply()">Apply advanced filter</button>
-        <button type="button" (click)="cancel()">Cancel advanced filter</button>
+        <button type="button" (click)="apply()">{{ text('applyAdvancedFilter') }}</button>
+        <button type="button" (click)="cancel()">{{ text('cancelAdvancedFilter') }}</button>
       </div>
     </section>
   `,
@@ -81,7 +84,7 @@ import {
       padding: 1rem;
       border: 1px solid var(--neu-border, currentColor);
       border-radius: 0.5rem;
-          background: var(--neu-surface, Canvas);
+      background: var(--neu-surface, Canvas);
       box-shadow: 0 0.75rem 2rem color-mix(in srgb, currentColor 18%, transparent);
     }
 
@@ -103,13 +106,15 @@ import {
     }
 
     :is(select, input, button):focus-visible {
-          outline: 2px solid var(--neu-focus-color, currentColor);
+      outline: 2px solid var(--neu-focus-color, currentColor);
       outline-offset: 2px;
     }
   `,
 })
 export class NeuTableAdvancedFilterBuilderComponent<T extends object, F extends string> {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  readonly messages = input<NeuTableLabels['messages']>();
+  protected readonly text = (key: NeuTableMessage) => tableMessage(this.messages(), key);
   readonly columns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
   readonly filters: InputSignal<NeuFilterExpression<F> | null> = input.required();
   readonly applyFilters: InputSignal<(filters: NeuFilterExpression<F>) => void> = input.required();

@@ -238,6 +238,14 @@ export interface NeuTableLayoutChange {
   readonly source: 'resize' | 'reorder' | 'visibility' | 'pin';
 }
 
+/** Optional column controls. Apply layoutChange.next to layout to accept proposals. */
+export interface NeuTableColumnOptions {
+  readonly reorderable?: boolean;
+  readonly resizable?: boolean;
+  readonly hideable?: boolean;
+  readonly pinnable?: boolean;
+}
+
 export interface NeuTableRowOptions<T, K extends NeuTableKey> {
   readonly className?: (row: T) => string | readonly string[] | null;
   readonly isDisabled?: (row: T) => boolean;
@@ -261,7 +269,64 @@ export interface NeuTableLabels {
   readonly retry: string;
   readonly selection: string;
   readonly pagination: string;
+  /** Optional translations for built-in controls; {name} placeholders are interpolated. */
+  readonly messages?: Partial<Record<NeuTableMessage, string>>;
 }
+
+export type NeuTableMessage =
+  | 'stateAnnouncement'
+  | 'firstPage'
+  | 'previousPage'
+  | 'nextPage'
+  | 'lastPage'
+  | 'page'
+  | 'of'
+  | 'goToPage'
+  | 'rowsPerPage'
+  | 'searchTable'
+  | 'search'
+  | 'clearSearch'
+  | 'clear'
+  | 'advancedFilters'
+  | 'hiddenColumns'
+  | 'showColumn'
+  | 'expansion'
+  | 'selectAll'
+  | 'filterColumn'
+  | 'filter'
+  | 'moveLeft'
+  | 'moveRight'
+  | 'pinColumn'
+  | 'pin'
+  | 'hideColumn'
+  | 'hide'
+  | 'resizeColumn'
+  | 'rule'
+  | 'value'
+  | 'applyColumnFilter'
+  | 'clearColumnFilter'
+  | 'cancelFilter'
+  | 'filterRule'
+  | 'filterValue'
+  | 'apply'
+  | 'collapseRow'
+  | 'expandRow'
+  | 'selectRow'
+  | 'sortAction'
+  | 'ascending'
+  | 'descending'
+  | 'none'
+  | 'field'
+  | 'join'
+  | 'and'
+  | 'or'
+  | 'applyAdvancedFilter'
+  | 'cancelAdvancedFilter'
+  | 'edit'
+  | 'save'
+  | 'cancel'
+  | 'validating'
+  | NeuFilterConstraint<string>['rule'];
 
 export interface NeuTableInteractionOptions {
   readonly navigation: 'native' | 'rows' | 'cells';
@@ -414,6 +479,35 @@ export interface NeuTableCellContext<T, K extends NeuTableKey> extends NeuTableR
 export interface NeuTableHeaderContext<T, F extends string> {
   readonly column: NeuTableColumn<T, F>;
   readonly sort: readonly NeuSortEntry<F>[];
+}
+
+/** Custom row/menu filter. Actions propose query changes; the application owns the query. */
+export interface NeuTableFilterContext<T, F extends string> extends NeuTableHeaderContext<T, F> {
+  readonly value: unknown;
+  readonly rule: NeuFilterConstraint<F>['rule'];
+  readonly apply: (value: unknown, rule?: NeuFilterConstraint<F>['rule']) => void;
+  readonly clear: () => void;
+}
+
+/** Applied pagination state, including unknown totals in remote mode. */
+export interface NeuTablePaginatorContext {
+  /** Zero-based applied page. */
+  readonly page: number;
+  readonly pageSize: number;
+  readonly humanPage: number;
+  readonly pageCount: number | null;
+  readonly total: number | null;
+  readonly rangeStart: number;
+  readonly rangeEnd: number;
+  readonly canFirst: boolean;
+  readonly canPrevious: boolean;
+  readonly canNext: boolean;
+  readonly canLast: boolean;
+  readonly pageSizeOptions: readonly number[];
+  /** Proposes a zero-based page, bounded when the total is known. */
+  readonly changePage: (page: number) => void;
+  /** Proposes a configured page size and resets to the first page. */
+  readonly changePageSize: (pageSize: number) => void;
 }
 
 export interface NeuTableEditorContext<

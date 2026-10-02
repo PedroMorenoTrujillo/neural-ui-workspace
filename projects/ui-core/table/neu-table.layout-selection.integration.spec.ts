@@ -49,6 +49,7 @@ const emptyLayout: NeuTableLayoutState = {
   imports: [NeuTableComponent, NeuTableCellDirective],
   template: `
     <neu-table
+      [columnOptions]="{ reorderable: true, resizable: true, hideable: true, pinnable: true }"
       [attr.dir]="direction()"
       [data]="rows()"
       [columns]="columns()"

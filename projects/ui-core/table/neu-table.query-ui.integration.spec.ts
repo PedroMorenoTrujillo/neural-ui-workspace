@@ -37,6 +37,7 @@ const rows: readonly Row[] = [
   imports: [NeuTableComponent],
   template: `
     <neu-table
+      [columnOptions]="{ reorderable: true, resizable: true, hideable: true, pinnable: true }"
       [dataMode]="dataMode()"
       [data]="rows"
       [metadata]="metadata()"
@@ -165,13 +166,13 @@ describe('NeuTable 2 controlled query UI integration', () => {
     await fixture.whenStable();
     const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
       .componentInstance as {
-        filterValueText(value: unknown): string;
-        filterRules(column: NeuTableColumn<Row, Field>): readonly string[];
-        appliedFilter(column: NeuTableColumn<Row, Field>): unknown;
-        sortPriority(column: NeuTableColumn<Row, Field>): number | null;
-        sortActionLabel(column: NeuTableColumn<Row, Field>): string;
-        sortColumn(column: NeuTableColumn<Row, Field>, event: MouseEvent): void;
-      };
+      filterValueText(value: unknown): string;
+      filterRules(column: NeuTableColumn<Row, Field>): readonly string[];
+      appliedFilter(column: NeuTableColumn<Row, Field>): unknown;
+      sortPriority(column: NeuTableColumn<Row, Field>): number | null;
+      sortActionLabel(column: NeuTableColumn<Row, Field>): string;
+      sortColumn(column: NeuTableColumn<Row, Field>, event: MouseEvent): void;
+    };
     const plain: NeuTableColumn<Row, Field> = { id: 'plain', header: 'Plain', field: 'name' };
     expect(renderer.filterRules(plain)).toEqual(['equals']);
     expect(renderer.appliedFilter(plain)).toBeNull();
@@ -181,14 +182,21 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(fixture.componentInstance.queryEvents).toEqual([]);
 
     const values: readonly [unknown, string][] = [
-      ['Ada', 'Ada'], [4, '4'], [4n, '4'], [false, 'false'],
+      ['Ada', 'Ada'],
+      [4, '4'],
+      [4n, '4'],
+      [false, 'false'],
       [new Date('2026-01-01T00:00:00Z'), '2026-01-01T00:00:00.000Z'],
       [new Date('invalid'), ''],
       [['Ada', 4, 4n, true, null, {}], 'Ada, 4, 4, true'],
-      [null, ''], [{ name: 'Ada' }, ''],
+      [null, ''],
+      [{ name: 'Ada' }, ''],
     ];
     for (const [value, expected] of values) expect(renderer.filterValueText(value)).toBe(expected);
-    expect(renderer.filterRules(fixture.componentInstance.columns[1]!)).toEqual(['contains', 'equals']);
+    expect(renderer.filterRules(fixture.componentInstance.columns[1]!)).toEqual([
+      'contains',
+      'equals',
+    ]);
   });
 
   it('rejects unsupported row filter rules and applies an explicit valid rule', async () => {
@@ -198,16 +206,17 @@ describe('NeuTable 2 controlled query UI integration', () => {
     await fixture.whenStable();
     const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
       .componentInstance as {
-        filterRule(column: NeuTableColumn<Row, Field>): string;
-        filterValue(column: NeuTableColumn<Row, Field>): string;
-        setRowFilterRule(column: NeuTableColumn<Row, Field>, event: Event): void;
-        setRowFilterValue(column: NeuTableColumn<Row, Field>, event: Event): void;
-        commitRowFilter(column: NeuTableColumn<Row, Field>, event?: Event): void;
-        clearFilter(column: NeuTableColumn<Row, Field>): void;
-      };
+      filterRule(column: NeuTableColumn<Row, Field>): string;
+      filterValue(column: NeuTableColumn<Row, Field>): string;
+      setRowFilterRule(column: NeuTableColumn<Row, Field>, event: Event): void;
+      setRowFilterValue(column: NeuTableColumn<Row, Field>, event: Event): void;
+      commitRowFilter(column: NeuTableColumn<Row, Field>, event?: Event): void;
+      clearFilter(column: NeuTableColumn<Row, Field>): void;
+    };
     const column = fixture.componentInstance.columns[1]!;
     const select = document.createElement('select');
-    select.innerHTML = '<option value="contains">contains</option><option value="equals">equals</option>';
+    select.innerHTML =
+      '<option value="contains">contains</option><option value="equals">equals</option>';
     select.value = 'futureRule';
     renderer.setRowFilterRule(column, { currentTarget: select } as unknown as Event);
     expect(renderer.filterRule(column)).toBe('contains');
@@ -220,8 +229,12 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(renderer.filterValue(column)).toBe('Ada');
     renderer.commitRowFilter(column);
     fixture.detectChanges();
-    expect(fixture.componentInstance.query().filters)
-      .toEqual({ kind: 'condition', field: 'name', rule: 'equals', value: 'Ada' });
+    expect(fixture.componentInstance.query().filters).toEqual({
+      kind: 'condition',
+      field: 'name',
+      rule: 'equals',
+      value: 'Ada',
+    });
     renderer.clearFilter(column);
     fixture.detectChanges();
     expect(fixture.componentInstance.query().filters).toBeNull();
@@ -246,8 +259,12 @@ describe('NeuTable 2 controlled query UI integration', () => {
     (rule.closest('.neu-table2__row-filter')!.querySelector('button') as HTMLButtonElement).click();
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(fixture.componentInstance.query().filters)
-      .toEqual({ kind: 'condition', field: 'name', rule: 'equals', value: 'Ada' });
+    expect(fixture.componentInstance.query().filters).toEqual({
+      kind: 'condition',
+      field: 'name',
+      rule: 'equals',
+      value: 'Ada',
+    });
     native.querySelector<HTMLButtonElement>('[aria-label="Clear filter for Name"]')!.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.query().filters).toBeNull();
@@ -442,8 +459,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
-    const jump = [...native.querySelectorAll<HTMLInputElement>('input[type="number"]')].find((input) =>
-      input.closest('label')?.textContent?.includes('Go to page'),
+    const jump = [...native.querySelectorAll<HTMLInputElement>('input[type="number"]')].find(
+      (input) => input.closest('label')?.textContent?.includes('Go to page'),
     )!;
 
     jump.value = '3';
@@ -461,25 +478,30 @@ describe('NeuTable 2 controlled query UI integration', () => {
     { start: 2, action: 'First page', expected: 0 },
     { start: 1, action: 'Next page', expected: 2 },
     { start: 0, action: 'Last page', expected: 2 },
-  ])('navigates from page $start with the rendered $action action', async ({ start, action, expected }) => {
-    const fixture = TestBed.createComponent(QueryUiHostComponent);
-    const host = fixture.componentInstance;
-    host.accept = true;
-    host.query.set({ ...host.query(), page: start });
-    fixture.detectChanges();
-    await fixture.whenStable();
-    const native = fixture.nativeElement as HTMLElement;
-    const button = native.querySelector<HTMLButtonElement>(`button[aria-label="${action}"]`)!;
-    expect(button.disabled).toBe(false);
+  ])(
+    'navigates from page $start with the rendered $action action',
+    async ({ start, action, expected }) => {
+      const fixture = TestBed.createComponent(QueryUiHostComponent);
+      const host = fixture.componentInstance;
+      host.accept = true;
+      host.query.set({ ...host.query(), page: start });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const native = fixture.nativeElement as HTMLElement;
+      const button = native.querySelector<HTMLButtonElement>(`button[aria-label="${action}"]`)!;
+      expect(button.disabled).toBe(false);
 
-    button.click();
-    await fixture.whenStable();
-    expect(host.query().page).toBe(expected);
-    expect(host.queryEvents).toHaveLength(1);
-    expect(native.querySelector('[aria-current="page"]')?.textContent).toContain(`Page ${expected + 1}`);
-    expect(host.selectionEvents).toBe(0);
-    expect(host.layoutEvents).toBe(0);
-  });
+      button.click();
+      await fixture.whenStable();
+      expect(host.query().page).toBe(expected);
+      expect(host.queryEvents).toHaveLength(1);
+      expect(native.querySelector('[aria-current="page"]')?.textContent).toContain(
+        `Page ${expected + 1}`,
+      );
+      expect(host.selectionEvents).toBe(0);
+      expect(host.layoutEvents).toBe(0);
+    },
+  );
 
   it('loads the private advanced builder only on demand and proposes one AST snapshot', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
@@ -572,14 +594,22 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const host = fixture.componentInstance;
     host.rowOptions = { reorderable: true, pin: (row: Row) => row.pinned ?? null };
     host.selectionOptions = {
-      mode: 'multiple', indicator: 'checkbox', selectOnRowClick: false,
-      modifier: 'toggle', range: true, toggleAllScope: 'page',
+      mode: 'multiple',
+      indicator: 'checkbox',
+      selectOnRowClick: false,
+      modifier: 'toggle',
+      range: true,
+      toggleAllScope: 'page',
     };
     fixture.detectChanges();
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
-    const headerSelect = native.querySelector<HTMLInputElement>('thead input[aria-label="Select all rows"]')!;
-    headerSelect.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    const headerSelect = native.querySelector<HTMLInputElement>(
+      'thead input[aria-label="Select all rows"]',
+    )!;
+    headerSelect.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
     expect(host.selectionEvents).toBe(1);
 
     const header = native.querySelector<HTMLElement>('thead th[data-column-id="name"]')!;
@@ -589,11 +619,17 @@ describe('NeuTable 2 controlled query UI integration', () => {
     header.dispatchEvent(new Event('dragend', { bubbles: true }));
     header.querySelector<HTMLButtonElement>('[aria-label="Move Name right"]')!.click();
     const resize = header.querySelector<HTMLButtonElement>('.neu-table2__resize-handle')!;
-    resize.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
-    resize.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    resize.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    );
+    resize.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
     expect(host.layoutEvents).toBeGreaterThan(0);
 
-    const filterButton = header.querySelector<HTMLButtonElement>('button[aria-label="Filter Name"]')!;
+    const filterButton = header.querySelector<HTMLButtonElement>(
+      'button[aria-label="Filter Name"]',
+    )!;
     filterButton.click();
     fixture.detectChanges();
     const filterForm = native.querySelector<HTMLFormElement>('[data-filter-editor="name"]')!;
@@ -604,10 +640,14 @@ describe('NeuTable 2 controlled query UI integration', () => {
     fixture.detectChanges();
     expect(native.querySelector('[data-filter-editor="name"]')).toBeNull();
 
-    const filterInput = native.querySelector<HTMLInputElement>('input[aria-label="Filter value for Name"]')!;
+    const filterInput = native.querySelector<HTMLInputElement>(
+      'input[aria-label="Filter value for Name"]',
+    )!;
     filterInput.value = 'Ada';
     filterInput.dispatchEvent(new Event('input', { bubbles: true }));
-    filterInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    filterInput.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
     expect(host.queryEvents.at(-1)?.filters).toMatchObject({ field: 'name', value: 'Ada' });
 
     const row = native.querySelector<HTMLElement>('tbody tr[data-row-key]')!;
@@ -623,7 +663,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const form = document.createElement('form');
     const input = document.createElement('input');
     input.type = 'search';
@@ -650,7 +691,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const name = fixture.componentInstance.columns[1]!;
     const plain: NeuTableColumn<Row, Field> = { id: 'plain', header: 'Plain', field: 'name' };
     renderer.commitRowFilter(plain);
@@ -669,15 +711,20 @@ describe('NeuTable 2 controlled query UI integration', () => {
     input.value = 'Ada';
     renderer.setRowFilterValue(name, { currentTarget: input } as unknown as Event);
     renderer.commitRowFilter(name);
-    expect(fixture.componentInstance.queryEvents.at(-1)?.filters).toMatchObject({ field: 'name', value: 'Ada' });
+    expect(fixture.componentInstance.queryEvents.at(-1)?.filters).toMatchObject({
+      field: 'name',
+      value: 'Ada',
+    });
   });
 
   it('formats summary pagination and rejects a nonnumeric page jump', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
-    (fixture.componentInstance.paginationOptions as { report: 'range' | 'summary' }).report = 'summary';
+    (fixture.componentInstance.paginationOptions as { report: 'range' | 'summary' }).report =
+      'summary';
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     expect(renderer.paginationReport()).toMatch(/^Page 1 of /);
     const input = document.createElement('input');
     input.value = 'unavailable';
@@ -692,22 +739,30 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     expect(renderer.groupLabel({ value: null })).toBe('Group');
     expect(renderer.groupLabel({ value: 'North' })).toBe('Group North');
-    expect(renderer.groupAggregateLabel({ aggregates: [
-      { field: 'score', value: null, error: null },
-      { field: 'count', value: 3, error: null },
-      { field: 'failed', value: null, error: 'missing' },
-    ] })).toBe('score: , count: 3, failed: unavailable');
-    expect(renderer.editorContext(renderer.rows()[0], fixture.componentInstance.columns[0])).toBeNull();
+    expect(
+      renderer.groupAggregateLabel({
+        aggregates: [
+          { field: 'score', value: null, error: null },
+          { field: 'count', value: 3, error: null },
+          { field: 'failed', value: null, error: 'missing' },
+        ],
+      }),
+    ).toBe('score: , count: 3, failed: unavailable');
+    expect(
+      renderer.editorContext(renderer.rows()[0], fixture.componentInstance.columns[0]),
+    ).toBeNull();
   });
 
   it('guards row drop and resize transitions with no active gesture', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const row = renderer.rows()[0];
     const preventDefault = vi.fn();
     renderer.onRowDrop(row, { preventDefault } as unknown as DragEvent);
@@ -718,7 +773,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     renderer.commitResize();
     expect(fixture.componentInstance.layoutEvents).toBe(0);
     renderer.resizeWithKeyboard(fixture.componentInstance.columns[0], 1, {
-      currentTarget: document.createElement('div'), preventDefault,
+      currentTarget: document.createElement('div'),
+      preventDefault,
     } as unknown as Event);
     expect(fixture.componentInstance.layoutEvents).toBe(0);
   });
@@ -729,7 +785,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     (fixture.componentInstance.filterOptions as any).debounceMs = 1000;
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const name = fixture.componentInstance.columns[1]!;
     const input = document.createElement('input');
     input.value = 'Ada';
@@ -740,14 +797,18 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(renderer.filterTimers.get(name.id)).not.toBe(previous);
     renderer.commitRowFilter(name);
     expect(renderer.filterTimers.has(name.id)).toBe(false);
-    expect(fixture.componentInstance.queryEvents.at(-1)?.filters).toMatchObject({ field: 'name', value: 'Bravo' });
+    expect(fixture.componentInstance.queryEvents.at(-1)?.filters).toMatchObject({
+      field: 'name',
+      value: 'Bravo',
+    });
   });
 
   it('restores a select filter control and uses an explicit preferred rule', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const column = fixture.componentInstance.columns[1]!;
     const select = document.createElement('select');
     select.add(new Option('Contains', 'contains'));
@@ -755,7 +816,9 @@ describe('NeuTable 2 controlled query UI integration', () => {
     renderer.commitRowFilter(column);
     expect(select.value).toBe(renderer.filterRule(column));
     const preferred: NeuTableColumn<Row, Field> = {
-      id: 'preferred', header: 'Preferred', field: 'name',
+      id: 'preferred',
+      header: 'Preferred',
+      field: 'name',
       filter: { field: 'name', rules: ['equals'], defaultRule: 'equals' },
     };
     expect(renderer.filterRule(preferred)).toBe('equals');
@@ -763,20 +826,23 @@ describe('NeuTable 2 controlled query UI integration', () => {
 
   it('shows page count without a total and derives layout pin offsets', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
-    (fixture.componentInstance.paginationOptions as { report: 'range' | 'summary' }).report = 'summary';
+    (fixture.componentInstance.paginationOptions as { report: 'range' | 'summary' }).report =
+      'summary';
     fixture.componentInstance.dataMode.set('remote');
     fixture.componentInstance.metadata.update((value) => ({ ...value, totalItems: null }));
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     expect(renderer.paginationReport()).toBe('Page 1');
     const name = fixture.componentInstance.columns[1]!;
     expect(renderer.columnPinOffset(name, 'start')).toBe('0px');
     expect(renderer.columnPinOffset(name, 'end')).toBe('0px');
     expect(renderer.selectionIndicator()).toBe('none');
     expect(renderer.editCommitOnBlur()).toBe(false);
-    const last = (fixture.nativeElement as HTMLElement)
-      .querySelector<HTMLButtonElement>('button[aria-label="Last page"]')!;
+    const last = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      'button[aria-label="Last page"]',
+    )!;
     last.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(fixture.componentInstance.queryEvents).toHaveLength(0);
   });
@@ -785,11 +851,16 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const name = fixture.componentInstance.columns[1]!;
     renderer.cycleColumnPin(name);
     expect(fixture.componentInstance.layoutEvents).toBe(1);
-    fixture.componentInstance.layout.update((value) => ({ ...value, pinnedStart: [], pinnedEnd: ['name'] }));
+    fixture.componentInstance.layout.update((value) => ({
+      ...value,
+      pinnedStart: [],
+      pinnedEnd: ['name'],
+    }));
     fixture.detectChanges();
     renderer.cycleColumnPin(name);
     expect(fixture.componentInstance.layoutEvents).toBe(2);
@@ -797,10 +868,14 @@ describe('NeuTable 2 controlled query UI integration', () => {
 
   it('tracks a reorderable row drag and clears it on a same-row drop', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
-    fixture.componentInstance.rowOptions = { reorderable: true, pin: (row: Row) => row.pinned ?? null };
+    fixture.componentInstance.rowOptions = {
+      reorderable: true,
+      pin: (row: Row) => row.pinned ?? null,
+    };
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const row = renderer.rows()[0];
     renderer.onRowDragStart(row);
     expect(renderer.draggedRow()).toBe(row);
@@ -817,7 +892,9 @@ describe('NeuTable 2 controlled query UI integration', () => {
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
     expect(native.querySelectorAll('.neu-table2__pagination')).toHaveLength(2);
-    const current = native.querySelector('.neu-table2__pagination select option[value="7"]') as HTMLOptionElement;
+    const current = native.querySelector(
+      '.neu-table2__pagination select option[value="7"]',
+    ) as HTMLOptionElement;
     expect(current.disabled).toBe(true);
     expect(current.textContent?.trim()).toBe('7');
   });
@@ -827,7 +904,10 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const host = fixture.componentInstance;
     (host.filterOptions as unknown as { globalFields: Field[] }).globalFields = [];
     host.selectionOptions = {
-      mode: 'single', indicator: 'radio', selectOnRowClick: true, allowClear: true,
+      mode: 'single',
+      indicator: 'radio',
+      selectOnRowClick: true,
+      allowClear: true,
     };
     fixture.detectChanges();
     await fixture.whenStable();
@@ -844,13 +924,18 @@ describe('NeuTable 2 controlled query UI integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const host = fixture.componentInstance;
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     renderer.resizePreview.set({ columnId: 'name', width: '190px' });
     expect(renderer.columnWidth(host.columns[1])).toBe('190px');
     expect(renderer.columnPinOffset(host.columns[2], 'start')).toContain('190px');
-    expect(renderer.filterRule({
-      id: 'extra', header: 'Extra', filter: { field: 'name', rules: ['equals'] },
-    })).toBe('equals');
+    expect(
+      renderer.filterRule({
+        id: 'extra',
+        header: 'Extra',
+        filter: { field: 'name', rules: ['equals'] },
+      }),
+    ).toBe('equals');
   });
 
   it('restores applied search text through input cancellation and form commit', async () => {
@@ -858,8 +943,11 @@ describe('NeuTable 2 controlled query UI integration', () => {
     fixture.componentInstance.query.update((value) => ({ ...value, search: 'applied' }));
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
-    const form = (fixture.nativeElement as HTMLElement).querySelector('form.neu-table2__search') as HTMLFormElement;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
+    const form = (fixture.nativeElement as HTMLElement).querySelector(
+      'form.neu-table2__search',
+    ) as HTMLFormElement;
     const input = form.querySelector('input[type="search"]') as HTMLInputElement;
     renderer.beginSearch();
     input.value = 'draft';
@@ -882,19 +970,26 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     const host = fixture.componentInstance;
     (host.columns[1] as any).filter = {
-      field: 'name', rules: ['isNull'], defaultRule: 'isNull',
+      field: 'name',
+      rules: ['isNull'],
+      defaultRule: 'isNull',
     };
     host.expansionOptions = {
-      enabled: true, toggleOnRowClick: false, isExpandable: () => false,
+      enabled: true,
+      toggleOnRowClick: false,
+      isExpandable: () => false,
     };
     fixture.detectChanges();
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
-    expect(native.querySelector('.neu-table2__filter-row .neu-table2__expansion-column')).not.toBeNull();
+    expect(
+      native.querySelector('.neu-table2__filter-row .neu-table2__expansion-column'),
+    ).not.toBeNull();
     expect(native.querySelector('input[aria-label="Filter value for Name"]')).toBeNull();
     expect(native.querySelector('tbody .neu-table2__expansion-column button')).toBeNull();
 
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     renderer.openFilterMenu(host.columns[1], new MouseEvent('click'));
     fixture.detectChanges();
     await fixture.whenStable();
@@ -907,7 +1002,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
+      .componentInstance as any;
     const rule = renderer.filterDraftRule();
     const select = document.createElement('select');
     select.add(new Option('Equals', 'equals'));

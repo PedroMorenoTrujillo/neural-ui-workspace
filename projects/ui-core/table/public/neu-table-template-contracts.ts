@@ -4,9 +4,10 @@ import type {
   NeuTableDetailContext,
   NeuTableEditorContext,
   NeuTableGroupContext,
+  NeuTableFilterContext,
   NeuTableHeaderContext,
   NeuTableKey,
-  NeuTableRowContext,
+  NeuTablePaginatorContext,
   NeuTableStateTemplateContext,
 } from './neu-table.types';
 
@@ -154,19 +155,26 @@ export class NeuTableGroupFooterDirective<T extends object> {
 @Directive({ selector: 'ng-template[neuTableFilter]', standalone: true })
 export class NeuTableFilterDirective<T extends object, F extends string> {
   readonly columnId: InputSignal<string> = input.required({ alias: 'neuTableFilter' });
-  readonly template: TemplateRef<NeuTableHeaderContext<T, F>> =
-    inject<TemplateRef<NeuTableHeaderContext<T, F>>>(TemplateRef);
+  readonly template: TemplateRef<NeuTableFilterContext<T, F>> =
+    inject<TemplateRef<NeuTableFilterContext<T, F>>>(TemplateRef);
 
   static ngTemplateContextGuard<T extends object, F extends string>(
     directive: NeuTableFilterDirective<T, F>,
     context: unknown,
-  ): context is NeuTableHeaderContext<T, F> {
+  ): context is NeuTableFilterContext<T, F> {
     return true;
   }
 }
 
 @Directive({ selector: 'ng-template[neuTablePaginator]', standalone: true })
-export class NeuTablePaginatorDirective<T extends object, K extends NeuTableKey> {
-  readonly template: TemplateRef<NeuTableRowContext<T, K>> =
-    inject<TemplateRef<NeuTableRowContext<T, K>>>(TemplateRef);
+export class NeuTablePaginatorDirective {
+  readonly template: TemplateRef<NeuTablePaginatorContext> =
+    inject<TemplateRef<NeuTablePaginatorContext>>(TemplateRef);
+
+  static ngTemplateContextGuard(
+    directive: NeuTablePaginatorDirective,
+    context: unknown,
+  ): context is NeuTablePaginatorContext {
+    return true;
+  }
 }

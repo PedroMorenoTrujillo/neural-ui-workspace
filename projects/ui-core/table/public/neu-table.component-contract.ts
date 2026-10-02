@@ -80,6 +80,8 @@ import {
   NeuTableErrorDirective,
   NeuTableEditorDirective,
   NeuTableFooterDirective,
+  NeuTableFilterDirective,
+  NeuTablePaginatorDirective,
   NeuTableGroupFooterDirective,
   NeuTableGroupHeaderDirective,
   NeuTableHeaderDirective,
@@ -93,6 +95,7 @@ import type {
   NeuRowTrackBy,
   NeuTableAppearance,
   NeuTableColumn,
+  NeuTableColumnOptions,
   NeuTableDataMode,
   NeuTableDataRequest,
   NeuTableEditCancel,
@@ -248,6 +251,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     mode: 'subheader',
     scope: 'loaded',
   });
+  readonly columnOptions: InputSignal<NeuTableColumnOptions> = input<NeuTableColumnOptions>({});
   readonly rowOptions: InputSignal<NeuTableRowOptions<T, K>> = input<NeuTableRowOptions<T, K>>({
     reorderable: false,
   });
@@ -339,6 +343,19 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
 
   protected readonly captionTemplate = computed(() =>
     firstNeuTableTemplate(this.captionDirectives()),
+  );
+  protected readonly filterDirectives = contentChildren<NeuTableFilterDirective<T, F>>(
+    NeuTableFilterDirective,
+    { descendants: true },
+  );
+  protected readonly paginatorDirectives = contentChildren(NeuTablePaginatorDirective, {
+    descendants: true,
+  });
+  protected readonly filterTemplates = computed(() =>
+    createNeuTableTemplateMap(this.filterDirectives()),
+  );
+  protected readonly paginatorTemplate = computed(() =>
+    firstNeuTableTemplate(this.paginatorDirectives()),
   );
   protected readonly toolbarTemplate = computed(() =>
     firstNeuTableTemplate(this.toolbarDirectives()),
