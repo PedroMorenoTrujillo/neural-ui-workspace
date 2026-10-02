@@ -122,7 +122,7 @@ The preliminary pack from the raw build has 449 files and is **not** the certifi
 
 ## Accessibility follow-up — 2026-10-02
 
-The overlay DateInput field now exposes combobox semantics with a dialog popup; inline presentation remains a native text field. Floating labels use the semantic text token, with the semantic error-text token for invalid states. Table row expansion is exposed on its expander button, not on a native table row. Resize buttons no longer carry an inapplicable orientation attribute, have a visible decorative affordance, and share a minimum 32px target and visible keyboard focus with the column actions. No public API or paginator context was changed.
+The overlay DateInput field now exposes combobox semantics with a dialog popup; inline presentation remains a native text field. Floating labels use the semantic text token, with the semantic error-text token for invalid states. Table row expansion is exposed on its expander button, not on a native table row. Resize buttons no longer carry an inapplicable orientation attribute and have a visible decorative affordance and keyboard focus. The shared action rule sets a 32px minimum; the later resize-specific rule retains a 24px block minimum. The final Showcase measurement is 32 × 26.30px for resize buttons and passes the 24px WCAG 2.2 target check, not a 44px touch-target certification. No public API or paginator context was changed.
 
 Verification on this follow-up source tree:
 
