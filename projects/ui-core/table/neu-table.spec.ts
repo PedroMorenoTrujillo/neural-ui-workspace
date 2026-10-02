@@ -176,6 +176,10 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     const table = native.querySelector('table');
     expect(table?.getAttribute('aria-label')).toBe('Data table');
     expect(table?.getAttribute('role')).toBe('table');
+    const viewport = native.querySelector('.neu-table2__viewport');
+    expect(viewport?.getAttribute('tabindex')).toBe('0');
+    expect(viewport?.getAttribute('role')).toBe('region');
+    expect(viewport?.getAttribute('aria-label')).toBe('Data table');
     const resize = native.querySelector('.neu-table2__resize-handle');
     expect(resize?.tagName).toBe('BUTTON');
     expect(resize?.hasAttribute('aria-orientation')).toBe(false);
@@ -201,7 +205,7 @@ describe('NeuTable 2 private semantic renderer and facade', () => {
     expect(
       native.querySelector('tr[data-row-key="1"] td[data-column-id="detail"]')?.textContent?.trim(),
     ).toBe('');
-    expect(native.querySelectorAll('[tabindex], th[id], td[headers]').length).toBe(0);
+    expect(table?.querySelectorAll('[tabindex], th[id], td[headers]').length).toBe(0);
     expect(native.querySelector('tfoot')?.textContent).toContain('End Name');
     expect(native.querySelector('tfoot')?.textContent).toContain('Summary');
   });

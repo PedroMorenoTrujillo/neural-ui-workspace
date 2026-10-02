@@ -12,14 +12,13 @@ const serverControls = makeStateKey<boolean>('neu-table-query-controls-ssr');
   selector: 'neu-table-query-host',
   imports: [NeuTableQueryControlsComponent],
   template: `
-    @let state = controls();
     @if (hydrate) {
       @defer (on immediate; hydrate on immediate) {
-        <neu-table-query-controls [controls]="state" />
+        <neu-table-query-controls [controls]="controls()" />
       }
     } @else {
       @defer (on immediate) {
-        <neu-table-query-controls [controls]="state" />
+        <neu-table-query-controls [controls]="controls()" />
       }
     }
   `,

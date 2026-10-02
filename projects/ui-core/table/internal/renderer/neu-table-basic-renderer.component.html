@@ -93,6 +93,9 @@
 <div
   #viewport
   class="neu-table2__viewport"
+  tabindex="0"
+  role="region"
+  [attr.aria-label]="labels().ariaLabel"
   [attr.data-density]="appearance().density"
   [attr.data-borders]="appearance().borders"
   [attr.data-responsive]="appearance().responsive"
