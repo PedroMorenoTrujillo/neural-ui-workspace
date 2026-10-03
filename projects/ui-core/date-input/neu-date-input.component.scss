@@ -12,6 +12,7 @@ $drum-item-h: 36px;
 // ---- Host ----
 .neu-date-input-host {
   display: block;
+  min-width: 0;
   font-family: var(--neu-font-sans);
 
   &--sm {
