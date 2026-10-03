@@ -284,6 +284,30 @@ describe('NeuDateInput N2-025 periods and presentation', () => {
     expect(yearFixture.componentInstance.value()).toEqual({ year: 2026 });
   });
 
+  it.each([
+    ['ArrowDown', 9, 12],
+    ['ArrowUp', 9, 6],
+    ['Home', 8, 7],
+    ['End', 8, 9],
+  ] as const)('matches %s navigation to the three-column month layout', async (key, from, target) => {
+    const fixture = create('month');
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('locale', 'es');
+    fixture.componentRef.setInput('value', { year: 2026, month: from } satisfies CivilMonth);
+    fixture.detectChanges();
+    const rows = fixture.nativeElement.querySelectorAll('.neu-date-input__period-row') as NodeListOf<HTMLElement>;
+    expect(rows).toHaveLength(4);
+    expect(Array.from(rows, (row) => row.querySelectorAll('[role="gridcell"]').length)).toEqual([3, 3, 3, 3]);
+    const start = fixture.nativeElement.querySelector(`[data-civil-month="${from}"]`) as HTMLButtonElement;
+    start.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    await Promise.resolve();
+    expect(fixture.componentInstance.focusedMonth()).toBe(target);
+    expect(fixture.componentInstance.value()).toEqual({ year: 2026, month: from });
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector(`[data-civil-month="${target}"]`));
+    fixture.destroy();
+  });
+
   it('pages month and year focus without committing a period value', async () => {
     const monthFixture = create('month');
     monthFixture.componentRef.setInput('presentation', 'inline');
@@ -839,6 +863,9 @@ describe('NeuDateInputComponent', () => {
     await fixture.whenStable();
     const panel = document.querySelector('.neu-date-input__panel') as HTMLElement;
     const drums = panel.querySelectorAll<HTMLElement>('.neu-date-input__drum');
+    expect(panel.querySelectorAll('.neu-date-input__drum-arrow svg')).toHaveLength(4);
+    expect(panel.querySelectorAll('.neu-date-input__drum-item--adjacent')).toHaveLength(4);
+    expect(panel.querySelectorAll('.neu-date-input__drum-item--selected')).toHaveLength(2);
     (drums[0].querySelectorAll('.neu-date-input__drum-arrow')[1] as HTMLButtonElement).click();
     expect(fixture.componentInstance.value()).toBe('13:30');
     (drums[1].querySelectorAll('.neu-date-input__drum-arrow')[0] as HTMLButtonElement).click();
@@ -1096,7 +1123,7 @@ describe('NeuDateInputComponent', () => {
     expect(fixture.componentInstance.viewYear()).toBe(2026);
 
     const june = native.querySelector<HTMLButtonElement>('[data-civil-month="6"]')!;
-    for (const [key, focused] of [['Home', 5], ['End', 8]] as const) {
+    for (const [key, focused] of [['Home', 4], ['End', 6]] as const) {
       june.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
       await fixture.whenStable();
       expect(fixture.componentInstance.focusedMonth()).toBe(focused);

@@ -358,23 +358,31 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
         @if (mode() === 'time' || mode() === 'datetime') {
           <div class="neu-date-input__time" role="group" [attr.aria-label]="texts().chooseTime">
             <div class="neu-date-input__drum">
-              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().prevHour" (click)="changeHour(-1)">▲</button>
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().prevHour" (click)="changeHour(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 15 12 9 18 15" /></svg>
+              </button>
               <div class="neu-date-input__drum-track">
                 @for (slot of hourSlots(); track slot.offset) {
-                  <button type="button" class="neu-date-input__drum-item" [class.neu-date-input__drum-item--selected]="slot.offset === 0" [disabled]="readonly()" (click)="slot.offset && changeHour(slot.offset)">{{ slot.label }}</button>
+                  <button type="button" class="neu-date-input__drum-item" [class.neu-date-input__drum-item--adjacent]="slot.offset !== 0" [class.neu-date-input__drum-item--selected]="slot.offset === 0" [disabled]="readonly()" (click)="slot.offset && changeHour(slot.offset)">{{ slot.label }}</button>
                 }
               </div>
-              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().nextHour" (click)="changeHour(1)">▼</button>
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().nextHour" (click)="changeHour(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9" /></svg>
+              </button>
             </div>
             <span class="neu-date-input__time-colon">:</span>
             <div class="neu-date-input__drum">
-              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().prevMinute" (click)="changeMinute(-1)">▲</button>
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().prevMinute" (click)="changeMinute(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 15 12 9 18 15" /></svg>
+              </button>
               <div class="neu-date-input__drum-track">
                 @for (slot of minuteSlots(); track slot.offset) {
-                  <button type="button" class="neu-date-input__drum-item" [class.neu-date-input__drum-item--selected]="slot.offset === 0" [disabled]="readonly()" (click)="slot.offset && changeMinute(slot.offset)">{{ slot.label }}</button>
+                  <button type="button" class="neu-date-input__drum-item" [class.neu-date-input__drum-item--adjacent]="slot.offset !== 0" [class.neu-date-input__drum-item--selected]="slot.offset === 0" [disabled]="readonly()" (click)="slot.offset && changeMinute(slot.offset)">{{ slot.label }}</button>
                 }
               </div>
-              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().nextMinute" (click)="changeMinute(1)">▼</button>
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().nextMinute" (click)="changeMinute(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9" /></svg>
+              </button>
             </div>
           </div>
         }
@@ -586,7 +594,7 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
     })),
   );
   readonly monthRows = computed(() =>
-    Array.from({ length: 3 }, (_, row) => this.monthOptions().slice(row * 4, row * 4 + 4)),
+    Array.from({ length: 4 }, (_, row) => this.monthOptions().slice(row * 3, row * 3 + 3)),
   );
   readonly yearOptions = computed(() => {
     const span = Math.max(1, Math.trunc(this.yearRange()));
@@ -894,7 +902,7 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
   }
 
   onMonthKeydown(event: KeyboardEvent, month: number): void {
-    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4 };
+    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -3, ArrowDown: 3 };
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.selectMonth(month);
@@ -902,8 +910,8 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
     }
     let target: CivilMonth | null = null;
     if (event.key in moves) target = shiftCivilMonth({ year: this.viewYear(), month }, moves[event.key]);
-    else if (event.key === 'Home') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 1 };
-    else if (event.key === 'End') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 4 };
+    else if (event.key === 'Home') target = { year: this.viewYear(), month: Math.floor((month - 1) / 3) * 3 + 1 };
+    else if (event.key === 'End') target = { year: this.viewYear(), month: Math.floor((month - 1) / 3) * 3 + 3 };
     else if (event.key === 'PageUp' || event.key === 'PageDown')
       target = shiftCivilMonth({ year: this.viewYear(), month }, event.key === 'PageUp' ? -12 : 12);
     if (!target) return;
