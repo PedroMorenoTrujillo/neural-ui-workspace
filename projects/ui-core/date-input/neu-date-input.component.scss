@@ -401,6 +401,10 @@ $drum-item-h: 36px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.neu-date-input__period-grid--month .neu-date-input__period-cell {
+  padding-inline: 2px;
+}
+
 .neu-date-input__period-cell {
   min-width: 0;
   min-height: 40px;
