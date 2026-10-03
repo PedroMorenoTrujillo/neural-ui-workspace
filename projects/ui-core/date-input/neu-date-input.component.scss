@@ -677,18 +677,17 @@ $drum-item-h: 36px;
   &--adjacent {
     font-size: 13px;
     color: var(--neu-text-muted);
-    opacity: 0.45;
     cursor: pointer;
 
-    &:hover {
-      opacity: 0.75;
+    &:hover:not(:disabled) {
+      background: var(--neu-surface-2);
     }
   }
 
   &--selected {
     font-size: 22px;
     font-weight: 700;
-    color: var(--neu-primary);
+    color: var(--neu-text);
     cursor: default;
   }
 }
