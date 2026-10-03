@@ -535,10 +535,79 @@ describe('NeuDateInputComponent', () => {
     typeText(fixture, '2026-01-01');
     fixture.componentInstance.open();
     fixture.componentInstance.toggle();
+    (fixture.nativeElement.querySelector('.neu-date-input__trigger') as HTMLElement).click();
     fixture.componentInstance.selectCivilDate(civilDate('2026-01-01'));
     expect(fixture.componentInstance.value()).toBeNull();
     expect(fixture.componentInstance.isOpen()).toBe(false);
     expect(input(fixture).disabled).toBe(true);
+  });
+
+  it('opens from the field, icon and trigger padding without changing the value in every overlay mode', async () => {
+    for (const mode of ['date', 'time', 'datetime', 'multiple', 'range', 'month', 'year'] as const) {
+      for (const selector of ['.neu-date-input__field', '.neu-date-input__icon svg', '.neu-date-input__trigger']) {
+        const fixture = create(mode);
+        const opened = vi.fn();
+        fixture.componentInstance.opened.subscribe(opened);
+        (fixture.nativeElement.querySelector(selector) as HTMLElement).dispatchEvent(
+          new MouseEvent('click', { bubbles: true }),
+        );
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(fixture.componentInstance.isOpen()).toBe(true);
+        expect(input(fixture).getAttribute('aria-expanded')).toBe('true');
+        expect(fixture.componentInstance.value()).toEqual(emptyDateValue(mode));
+        expect(opened).toHaveBeenCalledOnce();
+        input(fixture).click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(opened).toHaveBeenCalledOnce();
+        expect(fixture.componentInstance.isOpen()).toBe(true);
+        input(fixture).dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(fixture.componentInstance.isOpen()).toBe(false);
+        expect(document.activeElement).toBe(input(fixture));
+        fixture.destroy();
+      }
+    }
+  });
+
+  it('keeps readonly inspection and inline presentation when clicking the field', async () => {
+    const readonly = create();
+    readonly.componentRef.setInput('readonly', true);
+    readonly.componentRef.setInput('value', civilDate('2026-03-29'));
+    readonly.detectChanges();
+    input(readonly).click();
+    readonly.detectChanges();
+    await readonly.whenStable();
+    expect(readonly.componentInstance.isOpen()).toBe(true);
+    expect(readonly.componentInstance.value()).toBe('2026-03-29');
+    readonly.destroy();
+
+    const inline = create();
+    const opened = vi.fn();
+    inline.componentRef.setInput('presentation', 'inline');
+    inline.componentInstance.opened.subscribe(opened);
+    inline.detectChanges();
+    input(inline).click();
+    inline.detectChanges();
+    await inline.whenStable();
+    expect(opened).not.toHaveBeenCalled();
+    expect(inline.nativeElement.querySelector('.neu-date-input__open')).toBeNull();
+    expect(TestBed.inject(OverlayContainer).getContainerElement().children).toHaveLength(0);
+  });
+
+  it('renders decorative calendar or clock SVGs and the same outline chevron as Select', () => {
+    const fixture = create();
+    expect(fixture.nativeElement.querySelector('.neu-date-input__icon rect')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.neu-date-input__icon').textContent.trim()).toBe('');
+    const chevron = fixture.nativeElement.querySelector('.neu-date-input__chevron') as SVGElement;
+    expect(chevron.getAttribute('aria-hidden')).toBe('true');
+    expect(chevron.querySelector('polyline')?.getAttribute('points')).toBe('6 9 12 15 18 9');
+    fixture.componentRef.setInput('mode', 'time');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-date-input__icon circle')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.neu-date-input__icon rect')).toBeNull();
   });
 
   it('allows readonly inspection and navigation but blocks edits, presets and clear', () => {
@@ -888,6 +957,7 @@ describe('NeuDateInputComponent', () => {
     fixture.detectChanges();
     expect(fixture.componentInstance.value()).toBeNull();
     const trigger = fixture.nativeElement.querySelector('.neu-date-input__open') as HTMLButtonElement;
+    expect(fixture.componentInstance.isOpen()).toBe(false);
     trigger.click();
     await fixture.whenStable();
     expect(trigger.getAttribute('aria-expanded')).toBe('true');

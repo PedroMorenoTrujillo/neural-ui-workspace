@@ -111,10 +111,19 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
       [class.neu-date-input--has-value]="hasValue()"
       [class.neu-date-input--float]="floatingLabel()"
     >
-      <div class="neu-date-input__trigger">
-        <span class="neu-date-input__icon" aria-hidden="true">{{
-          mode() === 'time' ? '◷' : '▣'
-        }}</span>
+      <div class="neu-date-input__trigger" (click)="onTriggerClick($event)">
+        <span class="neu-date-input__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            @if (mode() === 'time') {
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 2" />
+            } @else {
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M16 3v4M8 3v4M3 11h18" />
+            }
+          </svg>
+        </span>
         <input
           #textInput
           class="neu-date-input__field"
@@ -162,7 +171,11 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
             [attr.aria-controls]="panelId()"
             (click)="toggle()"
           >
-            ▾
+            <svg class="neu-date-input__chevron" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </button>
         }
       </div>
@@ -683,6 +696,13 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
     if (this.disabled() || this.presentation() !== 'overlay') return;
     if (this.isOpen()) this.close(true);
     else this.open();
+  }
+
+  protected onTriggerClick(event: MouseEvent): void {
+    if (this.disabled() || this.destroyed || this.presentation() !== 'overlay') return;
+    if (event.target instanceof Element && event.target.closest('button')) return;
+    this.focus({ preventScroll: true });
+    this.open();
   }
 
   open(): void {

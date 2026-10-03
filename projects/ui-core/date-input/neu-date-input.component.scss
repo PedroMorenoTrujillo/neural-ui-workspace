@@ -112,7 +112,7 @@ $drum-item-h: 36px;
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
   overflow: hidden;
-  cursor: text;
+  cursor: pointer;
   text-align: start;
   font-family: var(--neu-font-sans);
   font-size: var(--neu-text-base);
@@ -129,6 +129,10 @@ $drum-item-h: 36px;
     opacity: 0.6;
     cursor: not-allowed;
     background: var(--neu-surface-2);
+  }
+
+  .neu-date-input--disabled & {
+    cursor: not-allowed;
   }
 
   .neu-date-input--open & {
@@ -151,6 +155,11 @@ $drum-item-h: 36px;
   background: transparent;
   border: 0;
   outline: 0;
+  cursor: text;
+
+  &[readonly] {
+    cursor: pointer;
+  }
 
   &::placeholder {
     color: var(--neu-text-disabled);
@@ -201,6 +210,18 @@ $drum-item-h: 36px;
   svg {
     width: 18px;
     height: 18px;
+  }
+}
+
+.neu-date-input__chevron {
+  display: block;
+  width: 18px;
+  height: 18px;
+  transition: transform var(--neu-transition);
+
+  .neu-date-input--open & {
+    transform: rotate(180deg);
+    color: var(--neu-primary);
   }
 }
 
