@@ -241,6 +241,14 @@ import { NeuListboxDropEvent, NeuListboxOption } from './neu-listbox.types';
           </div>
         }
       }
+      @if (virtualBottomHeight() > 0) {
+        <div
+          class="neu-listbox__spacer"
+          aria-hidden="true"
+          [style.height.px]="virtualBottomHeight()"
+        ></div>
+      }
+    </div>
       @if (emptyState()) {
         <div class="neu-listbox__empty" role="status">
           @if (currentFilter()) {
@@ -258,14 +266,6 @@ import { NeuListboxDropEvent, NeuListboxOption } from './neu-listbox.types';
           }
         </div>
       }
-      @if (virtualBottomHeight() > 0) {
-        <div
-          class="neu-listbox__spacer"
-          aria-hidden="true"
-          [style.height.px]="virtualBottomHeight()"
-        ></div>
-      }
-    </div>
     @if (footerTpl()) {
       <div class="neu-listbox__footer">
         <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />

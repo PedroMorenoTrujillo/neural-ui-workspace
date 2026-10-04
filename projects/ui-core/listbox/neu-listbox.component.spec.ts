@@ -73,6 +73,21 @@ describe('NeuListboxComponent', () => {
     expect(component.values()).toEqual([]);
   });
 
+  it('announces empty states outside the listbox options container', () => {
+    fixture.componentRef.setInput('options', []);
+    fixture.detectChanges();
+    const listbox = fixture.nativeElement.querySelector('[role="listbox"]') as HTMLElement;
+    const status = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
+    expect(status.textContent).toContain('No options');
+    expect(listbox.contains(status)).toBe(false);
+    fixture.componentRef.setInput('options', options);
+    fixture.componentRef.setInput('filterValue', 'unmatched');
+    fixture.detectChanges();
+    const filteredStatus = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
+    expect(filteredStatus).toBeTruthy();
+    expect(listbox.contains(filteredStatus)).toBe(false);
+  });
+
   it('supports multiple selection and ignores disabled options', () => {
     const component = fixture.componentInstance;
     const emitted = vi.spyOn(component.value, 'set');
