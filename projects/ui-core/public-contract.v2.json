@@ -29095,7 +29095,7 @@
       "kind": "component",
       "status": "SUPPORTED",
       "selector": "neu-radio",
-      "signature": "declare class NeuRadioComponent<V = string> {\n}",
+      "signature": "declare class NeuRadioComponent<V = string> implements OnInit {\n}",
       "members": [
         {
           "id": "./radio#NeuRadioComponent.input:disabled",
@@ -29144,6 +29144,14 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
+          "id": "./radio#NeuRadioComponent.method:ngOnInit",
+          "name": "ngOnInit",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "ngOnInit(): void;"
         },
         {
           "id": "./radio#NeuRadioComponent.method:onClick",
@@ -66650,12 +66658,12 @@
       "type": 199,
       "variable": 42
     },
-    "publicSymbols": 5315,
+    "publicSymbols": 5316,
     "statuses": {
       "SUPPORTED": 3347,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1968,
+      "INTERNAL/UNSUPPORTED": 1969,
       "REVIEW": 0
     },
     "bindings": {

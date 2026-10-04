@@ -13,6 +13,7 @@ import {
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuRadioComponent } from './neu-radio.component';
+import { isNeuRadioInitialized } from './radio-readiness';
 
 /** Internal parent lookup. The concrete V is retained by the group and child classes. */
 export const NEU_RADIO_GROUP = new InjectionToken<object>('NEU_RADIO_GROUP');
@@ -76,14 +77,14 @@ export class NeuRadioGroupComponent<V = string> implements FormValueControl<V | 
   }
 
   tabIndexFor(radio: NeuRadioComponent<V>): number {
-    const enabled = this.radios().filter((candidate) => !candidate.isDisabled());
+    const enabled = this.radios().filter((candidate) => isNeuRadioInitialized(candidate) && !candidate.isDisabled());
     const selected = enabled.find((candidate) => this.isSelected(candidate.value()));
     return (selected ?? enabled[0]) === radio ? 0 : -1;
   }
 
   moveFrom(radio: NeuRadioComponent<V>, key: string): void {
     if (this.disabled()) return;
-    const enabled = this.radios().filter((candidate) => !candidate.isDisabled());
+    const enabled = this.radios().filter((candidate) => isNeuRadioInitialized(candidate) && !candidate.isDisabled());
     if (!enabled.length) return;
     const current = Math.max(0, enabled.indexOf(radio));
     const target =
@@ -106,7 +107,7 @@ export class NeuRadioGroupComponent<V = string> implements FormValueControl<V | 
   }
 
   focus(options?: FocusOptions): void {
-    const enabled = this.radios().filter((radio) => !radio.isDisabled());
+    const enabled = this.radios().filter((radio) => isNeuRadioInitialized(radio) && !radio.isDisabled());
     const selected = enabled.find((radio) => this.isSelected(radio.value()));
     (selected ?? enabled[0])?.focus(options);
   }

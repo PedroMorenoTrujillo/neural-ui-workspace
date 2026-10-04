@@ -1,6 +1,7 @@
 import {
   Component,
   ElementRef,
+  OnInit,
   ViewEncapsulation,
   computed,
   inject,
@@ -9,6 +10,7 @@ import {
 } from '@angular/core';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NEU_RADIO_GROUP, NeuRadioGroupComponent } from './neu-radio-group.component';
+import { markNeuRadioInitialized } from './radio-readiness';
 
 /** Typed option owned by its nearest NeuRadioGroupComponent. */
 @Component({
@@ -48,7 +50,7 @@ import { NEU_RADIO_GROUP, NeuRadioGroupComponent } from './neu-radio-group.compo
     </label>
   `,
 })
-export class NeuRadioComponent<V = string> {
+export class NeuRadioComponent<V = string> implements OnInit {
   readonly value = input.required<V>();
   readonly label = input<string>('');
   readonly disabled = input<boolean>(false);
@@ -59,6 +61,10 @@ export class NeuRadioComponent<V = string> {
 
   readonly isChecked = computed(() => this.group.isSelected(this.value()));
   readonly isDisabled = computed(() => this.disabled() || this.group.disabled());
+
+  ngOnInit(): void {
+    markNeuRadioInitialized(this);
+  }
 
   onClick(event: MouseEvent): void {
     if (this.group.readonly()) event.preventDefault();
