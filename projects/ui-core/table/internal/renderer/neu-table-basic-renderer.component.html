@@ -31,6 +31,8 @@
         [controls]="{
           search: {
             value: searchEditing() ? searchDraft() : query().search,
+            appliedValue: query().search,
+            immediate: filterOptions().commit === 'immediate',
             begin: beginSearch,
             update: updateSearchDraft,
             cancel: cancelSearch,
@@ -125,9 +127,8 @@
         @if (hasSelectionColumn()) {
           <th scope="col" class="neu-table2__selection-column">
             @if (selectionIndicator() === 'checkbox') {
-              <input
-                type="checkbox"
-                [attr.aria-label]="text('selectAll')"
+              <neu-table-checkbox
+                [ariaLabel]="text('selectAll')"
                 [checked]="selectionProjection().headerState === 'checked'"
                 [indeterminate]="selectionProjection().headerState === 'indeterminate'"
                 [disabled]="selectionProjection().selectableCount === 0"
@@ -179,9 +180,17 @@
                       {{ column.header }}
                     }
                   </span>
-                  @if (ariaSort(column); as state) {
-                    <span aria-hidden="true">{{ state === 'ascending' ? '▲' : '▼' }}</span>
-                  }
+                  <svg class="neu-table2__sort-icon" [attr.data-direction]="ariaSort(column) ?? 'none'"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    @if (ariaSort(column) === 'ascending') {
+                      <path d="M12 19V5m-5 5 5-5 5 5" />
+                    } @else if (ariaSort(column) === 'descending') {
+                      <path d="M12 5v14m-5-5 5 5 5-5" />
+                    } @else {
+                      <path d="M8 19V5m-4 4 4-4 4 4m4-4v14m-4-4 4 4 4-4" />
+                    }
+                  </svg>
                   @if (sortOptions().mode === 'multiple' && sortPriority(column); as priority) {
                     <span
                       class="neu-table2__sort-priority"
@@ -215,33 +224,10 @@
                 />
               }
             </div>
-            @if (openFilterColumnId() === column.id) {
-              <form
-                class="neu-table2__filter-menu"
-                role="dialog"
-                [attr.aria-label]="text('filterColumn', { column: column.header })"
-                [attr.data-filter-editor]="column.id"
-                (submit)="
-                  filterTemplate(column.id) ? $event.preventDefault() : applyFilterMenu($event)
-                "
-                (keydown.escape)="closeFilterMenu()"
-              >
-                @if (filterTemplate(column.id); as customFilter) {
-                  <ng-container
-                    [ngTemplateOutlet]="customFilter"
-                    [ngTemplateOutletContext]="filterContext(column)"
-                  />
-                } @else {
-                  <neu-table-query-host
-                    [controls]="{
-                      filter: queryFilterControls(column, true),
-                      messages: labels().messages,
-                    }"
-                  />
-                }
-              </form>
-            }
           </th>
+        }
+        @if (rowEditColumn()) {
+          <th scope="col" class="neu-table2__edit-column"><span class="neu-table2__visually-hidden">{{ text('edit', { column: '' }) }}</span></th>
         }
       </tr>
       @if (hasRowFilters()) {
@@ -273,6 +259,7 @@
               }
             </td>
           }
+          @if (rowEditColumn()) { <td class="neu-table2__edit-column"></td> }
         </tr>
       }
     </thead>
@@ -330,14 +317,17 @@
           }
           @if (hasSelectionColumn()) {
             <td class="neu-table2__selection-column">
-              <input
-                [type]="selectionIndicator()"
-                [checked]="rowSelected(renderRow)"
-                [disabled]="rowDisabled(renderRow)"
-                [attr.aria-label]="text('selectRow', { key: renderRow.key })"
-                (click)="onSelectionControlClick(renderRow, $event)"
-                (keydown.enter)="onSelectionEnter(renderRow, $event)"
-              />
+              @if (selectionIndicator() === 'checkbox') {
+                <neu-table-checkbox [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"
+                  [ariaLabel]="text('selectRow', { key: renderRow.key })"
+                  (click)="onSelectionControlClick(renderRow, $event)"
+                  (keydown.enter)="onSelectionEnter(renderRow, $event)" />
+              } @else {
+                <input type="radio" [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"
+                  [attr.aria-label]="text('selectRow', { key: renderRow.key })"
+                  (click)="onSelectionControlClick(renderRow, $event)"
+                  (keydown.enter)="onSelectionEnter(renderRow, $event)" />
+              }
             </td>
           }
           @for (column of columns(); track column.id) {
@@ -385,7 +375,8 @@
                             [value]="context.valueSignal()"
                             [errors]="context.errors()"
                             [pending]="activeEditSession()?.pending() ?? false"
-                            [commitOnBlur]="editCommitOnBlur()"
+                             [commitOnBlur]="editCommitOnBlur()"
+                             [showActions]="editingOptions().mode !== 'row'"
                             [setValue]="context.setValue"
                             [commit]="context.commit"
                             [cancel]="cancelEdit()"
@@ -404,6 +395,17 @@
                 }
               </td>
             }
+          }
+          @if (rowEditColumn(); as column) {
+            <td class="neu-table2__edit-column" data-neu-selection-stop>
+              <neu-table-query-host [controls]="{ edit: {
+                active: isRowEditing(renderRow), disabled: rowDisabled(renderRow),
+                pending: activeEditSession()?.pending() ?? false,
+                label: text('edit', { column: renderRow.key }),
+                begin: startRowEditAction(renderRow, column), commit: commitEdit(),
+                cancel: cancelRowEditAction,
+              }, messages: labels().messages }" />
+            </td>
           }
         </tr>
         @if (rowExpanded(renderRow)) {
@@ -574,6 +576,7 @@
                 }
               </td>
             }
+            @if (rowEditColumn()) { <td class="neu-table2__edit-column"></td> }
           </tr>
         }
         @if (summaryTemplate(); as template) {

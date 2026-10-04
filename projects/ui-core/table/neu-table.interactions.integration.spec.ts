@@ -197,6 +197,43 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     }).compileComponents();
   });
 
+  it('opens row editing with one explicit action and never restarts an active draft', async () => {
+    const fixture = TestBed.createComponent(InteractionHostComponent);
+    const host = fixture.componentInstance;
+    host.editingOptions.set({ mode: 'row', activation: 'click', commitOnBlur: false });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const row = native.querySelector<HTMLElement>('tr[data-row-key="1"]')!;
+    row.querySelector<HTMLButtonElement>('.neu-table2__edit-actions button')!.click();
+    await fixture.whenStable();
+    expect(host.editChanges).toHaveLength(1);
+    expect(host.editChanges[0]?.next).toEqual({ kind: 'row', key: 1 });
+    expect(native.querySelector('.neu-table2__editor')).toBeNull();
+    host.editState.set({ kind: 'row', key: 1 });
+    await fixture.whenStable();
+    const input = row.querySelector<HTMLInputElement>('.neu-table2__editor input')!;
+    input.value = 'Ada updated';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.click();
+    await fixture.whenStable();
+    expect(host.editChanges).toHaveLength(1);
+    expect(input.value).toBe('Ada updated');
+    expect(row.querySelector('.neu-table2__editor button')).toBeNull();
+    row.querySelector<HTMLButtonElement>('.neu-table2__edit-actions button')!.click();
+    await fixture.whenStable();
+    expect(host.commits).toHaveLength(1);
+    expect(host.commits[0]?.changes.find(change => change.field === 'name')?.value).toBe('Ada updated');
+    expect(host.rows()[0]?.name).toBe('Ada');
+    host.editState.set({ kind: 'none' });
+    await fixture.whenStable();
+    host.editState.set({ kind: 'row', key: 1 });
+    await fixture.whenStable();
+    row.querySelector<HTMLButtonElement>('.neu-table2__edit-actions button:last-child')!.click();
+    await fixture.whenStable();
+    expect(host.cancels).toHaveLength(1);
+  });
+
   it('keeps editing controlled, immutable and exactly-once across reconstruction/data change', async () => {
     const fixture = TestBed.createComponent(InteractionHostComponent);
     const host = fixture.componentInstance;
@@ -319,7 +356,7 @@ describe('NeuTable H editing, expansion and grouping integration', () => {
     expect(inputs).toHaveLength(2);
     inputs[0].value = '';
     inputs[0].dispatchEvent(new InputEvent('input', { bubbles: true }));
-    click(native.querySelector('.neu-table2__editor button'));
+    click(native.querySelector('.neu-table2__edit-actions button'));
     await render(fixture);
     expect(host.commits).toHaveLength(0);
     expect(native.querySelector('.neu-table2__editor [role="alert"]')?.textContent).toContain(

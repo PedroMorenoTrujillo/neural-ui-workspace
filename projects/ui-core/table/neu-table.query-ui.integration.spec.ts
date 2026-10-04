@@ -1,5 +1,6 @@
 import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { NeuSelectComponent } from '@neural-ui/core/select';
 import { By } from '@angular/platform-browser';
 import { NeuTableComponent } from './public/neu-table.component-contract';
 import type {
@@ -20,6 +21,13 @@ interface Row {
   readonly name: string;
   readonly score: number;
   readonly pinned?: 'start' | 'end';
+}
+
+function selectControl(fixture: ComponentFixture<unknown>, label: string): NeuSelectComponent<unknown, unknown> {
+  const match = fixture.debugElement.queryAll(By.directive(NeuSelectComponent))
+    .find(item => (item.componentInstance as NeuSelectComponent<unknown, unknown>).label() === label);
+  expect(match).toBeDefined();
+  return match!.componentInstance;
 }
 type Field = 'id' | 'name' | 'score';
 
@@ -153,6 +161,53 @@ function renderedKeys(native: HTMLElement): string[] {
 }
 
 describe('NeuTable 2 controlled query UI integration', () => {
+  it('applies global search immediately without an extra submit action', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    Object.assign(host.filterOptions, { commit: 'immediate' });
+    host.accept = true;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const search = native.querySelector<HTMLInputElement>('.neu-table2__search input')!;
+    expect(native.querySelector('.neu-table2__search button[type="submit"]')).toBeNull();
+    search.value = 'Ada';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+    expect(host.query().search).toBe('Ada');
+    expect(host.queryEvents).toHaveLength(1);
+    expect(native.textContent).not.toContain('Charlie');
+    native.querySelector<HTMLButtonElement>('button[aria-label="Clear table search"]')!.click();
+    await fixture.whenStable();
+    expect(host.query().search).toBe('');
+    expect(search.value).toBe('');
+    expect(host.queryEvents).toHaveLength(2);
+  });
+
+  it('keeps numbered pagination controlled and shows each sort direction', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const native = fixture.nativeElement as HTMLElement;
+    const page = native.querySelector<HTMLButtonElement>('button.neu-table2__page-number[aria-label="Page 2"]')!;
+    page.click();
+    await fixture.whenStable();
+    expect(host.queryEvents.at(-1)?.page).toBe(1);
+    expect(host.query().page).toBe(0);
+    expect(native.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('1');
+    host.accept = true;
+    page.click();
+    await fixture.whenStable();
+    expect(native.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('2');
+    const sort = native.querySelector<HTMLButtonElement>('button[aria-label^="Sort Name"]')!;
+    expect(sort.querySelector('svg')?.getAttribute('data-direction')).toBe('none');
+    for (const direction of ['ascending', 'descending', 'none']) {
+      sort.click();
+      await fixture.whenStable();
+      expect(sort.querySelector('svg')?.getAttribute('data-direction')).toBe(direction);
+    }
+  });
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [QueryUiHostComponent],
@@ -248,15 +303,14 @@ describe('NeuTable 2 controlled query UI integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
-    const rule = native.querySelector<HTMLSelectElement>('[aria-label="Filter rule for Name"]')!;
-    rule.value = 'equals';
-    rule.dispatchEvent(new Event('change', { bubbles: true }));
+    const rule = selectControl(fixture, 'Filter rule for Name');
+    rule.value.set('equals');
     fixture.detectChanges();
-    const value = native.querySelector<HTMLInputElement>('[aria-label="Filter value for Name"]')!;
+    const value = native.querySelector<HTMLInputElement>('.neu-table2__row-filter neu-input input')!;
     value.value = 'Ada';
     value.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges();
-    (rule.closest('.neu-table2__row-filter')!.querySelector('button') as HTMLButtonElement).click();
+    (native.querySelector('.neu-table2__row-filter button[neu-button]') as HTMLButtonElement).click();
     fixture.detectChanges();
     await fixture.whenStable();
     expect(fixture.componentInstance.query().filters).toEqual({
@@ -354,7 +408,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
-    const search = native.querySelector<HTMLInputElement>('input[aria-label="Search table"]')!;
+    const search = native.querySelector<HTMLInputElement>('.neu-table2__search input')!;
 
     search.focus();
     search.value = 'Grace';
@@ -378,7 +432,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     await fixture.whenStable();
     const host = fixture.componentInstance;
     const native = fixture.nativeElement as HTMLElement;
-    const search = native.querySelector<HTMLInputElement>('input[aria-label="Search table"]')!;
+    const search = native.querySelector<HTMLInputElement>('.neu-table2__search input')!;
     search.focus();
     search.value = 'Ada';
     search.dispatchEvent(new Event('input', { bubbles: true }));
@@ -403,7 +457,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     host.accept = true;
     native.querySelector<HTMLButtonElement>('button[aria-label="Filter Name"]')!.click();
     await fixture.whenStable();
-    const editor = native.querySelector<HTMLElement>('[data-filter-editor="name"]')!;
+    const editor = document.querySelector<HTMLElement>('[data-filter-editor="name"]')!;
     const value = editor.querySelector<HTMLInputElement>('input')!;
     value.value = 'a';
     value.dispatchEvent(new Event('input', { bubbles: true }));
@@ -415,7 +469,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
 
     native.querySelector<HTMLButtonElement>('button[aria-label="Filter Name"]')!.click();
     await fixture.whenStable();
-    native
+    document
       .querySelector<HTMLButtonElement>('[data-filter-editor="name"] button:nth-of-type(2)')!
       .click();
     await fixture.whenStable();
@@ -435,13 +489,8 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(host.query()).toMatchObject({ page: 2, pageSize: 2 });
 
     host.accept = true;
-    const size = native.querySelector<HTMLSelectElement>('label select');
-    const pageSize = [...native.querySelectorAll<HTMLSelectElement>('select')].find((candidate) =>
-      candidate.closest('label')?.textContent?.includes('Rows per page'),
-    )!;
-    expect(size).toBeDefined();
-    pageSize.value = '4';
-    pageSize.dispatchEvent(new Event('change', { bubbles: true }));
+    const pageSize = selectControl(fixture, 'Rows per page');
+    pageSize.value.set(4);
     await fixture.whenStable();
     expect(host.query()).toMatchObject({ page: 1, pageSize: 4 });
     expect(host.queryEvents).toHaveLength(2);
@@ -496,7 +545,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
       expect(host.query().page).toBe(expected);
       expect(host.queryEvents).toHaveLength(1);
       expect(native.querySelector('[aria-current="page"]')?.textContent).toContain(
-        `Page ${expected + 1}`,
+        String(expected + 1),
       );
       expect(host.selectionEvents).toBe(0);
       expect(host.layoutEvents).toBe(0);
@@ -543,14 +592,14 @@ describe('NeuTable 2 controlled query UI integration', () => {
     for (let index = 0; index < 100; index += 1) {
       native.querySelector<HTMLButtonElement>('[aria-label="Filter Name"]')!.click();
       fixture.detectChanges();
-      expect(native.querySelector('[data-filter-editor="name"]')).not.toBeNull();
-      native
+      expect(document.querySelector('[data-filter-editor="name"]')).not.toBeNull();
+      document
         .querySelector<HTMLButtonElement>('[data-filter-editor="name"] button:last-of-type')!
         .click();
       fixture.detectChanges();
     }
 
-    expect(native.querySelector('[data-filter-editor="name"]')).toBeNull();
+    expect(document.querySelector('[data-filter-editor="name"]')).toBeNull();
     expect(host.queryEvents).toHaveLength(0);
   });
 
@@ -575,15 +624,12 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(native.querySelector('th[data-column-id="score"]')?.getAttribute('aria-sort')).toBe(
       'descending',
     );
-    expect(native.querySelector<HTMLInputElement>('input[aria-label="Search table"]')?.value).toBe(
+    expect(native.querySelector<HTMLInputElement>('.neu-table2__search input')?.value).toBe(
       'server',
     );
 
-    const pageSize = [...native.querySelectorAll<HTMLSelectElement>('select')].find((candidate) =>
-      candidate.closest('label')?.textContent?.includes('Rows per page'),
-    )!;
-    pageSize.value = '4';
-    pageSize.dispatchEvent(new Event('change', { bubbles: true }));
+    const pageSize = selectControl(fixture, 'Rows per page');
+    pageSize.value.set(4);
     await fixture.whenStable();
     expect(host.queryEvents.at(-1)).toMatchObject({ page: 2, pageSize: 4 });
     expect(host.requestEvents).toBe(1);
@@ -632,16 +678,13 @@ describe('NeuTable 2 controlled query UI integration', () => {
     )!;
     filterButton.click();
     fixture.detectChanges();
-    const filterForm = native.querySelector<HTMLFormElement>('[data-filter-editor="name"]')!;
-    const rule = filterForm.querySelector('select')!;
-    rule.value = 'equals';
-    rule.dispatchEvent(new Event('change', { bubbles: true }));
+    const filterForm = document.querySelector<HTMLFormElement>('[data-filter-editor="name"]')!;
     filterForm.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     fixture.detectChanges();
-    expect(native.querySelector('[data-filter-editor="name"]')).toBeNull();
+    expect(document.querySelector('[data-filter-editor="name"]')).toBeNull();
 
     const filterInput = native.querySelector<HTMLInputElement>(
-      'input[aria-label="Filter value for Name"]',
+      '.neu-table2__row-filter neu-input input',
     )!;
     filterInput.value = 'Ada';
     filterInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -895,11 +938,13 @@ describe('NeuTable 2 controlled query UI integration', () => {
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
     expect(native.querySelectorAll('.neu-table2__pagination')).toHaveLength(2);
-    const current = native.querySelector(
-      '.neu-table2__pagination select option[value="7"]',
-    ) as HTMLOptionElement;
-    expect(current.disabled).toBe(true);
-    expect(current.textContent?.trim()).toBe('7');
+    const current = selectControl(fixture, 'Rows per page');
+    expect(current.value()).toBe(7);
+    expect(current.options()).toContain(7);
+    const disabled = current.optionDisabled();
+    expect(typeof disabled).toBe('function');
+    if (typeof disabled === 'function') expect(disabled(7)).toBe(true);
+    expect(native.querySelector('.neu-table2__page-size [role="combobox"]')?.textContent).toContain('7');
   });
 
   it('omits global search and renders radio selection controls when configured', async () => {
@@ -996,7 +1041,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     renderer.openFilterMenu(host.columns[1], new MouseEvent('click'));
     fixture.detectChanges();
     await fixture.whenStable();
-    const menu = native.querySelector('.neu-table2__filter-menu') as HTMLElement;
+    const menu = document.querySelector('.neu-table2__filter-menu') as HTMLElement;
     expect(menu).not.toBeNull();
     expect(menu.querySelector('input')).toBeNull();
   });

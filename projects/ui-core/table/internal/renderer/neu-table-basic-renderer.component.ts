@@ -27,6 +27,7 @@ import {
   type TableColumnControls,
 } from '../features/query-controls/neu-table-query-controls.component';
 import { NeuTableQueryHostComponent } from '../features/query-controls/neu-table-query-host.component';
+import { NeuTableCheckboxComponent } from '../features/selection/neu-table-checkbox.component';
 import { neuTableEditValueSignal, type NeuTableEditSession } from '../editing/neu-table-editing';
 import {
   projectNeuTableGrouping,
@@ -123,6 +124,7 @@ import type {
     NeuTableAdvancedFilterBuilderComponent,
     NeuTableActiveEditorComponent,
     NeuTableQueryHostComponent,
+    NeuTableCheckboxComponent,
   ],
   templateUrl: './neu-table-basic-renderer.component.html',
   styleUrl: './neu-table-basic-renderer.component.scss',
@@ -374,7 +376,8 @@ export class NeuTableBasicRendererComponent<
       1,
       this.columns().length +
         (this.hasSelectionColumn() ? 1 : 0) +
-        (this.expansionActive() ? 1 : 0),
+        (this.expansionActive() ? 1 : 0) +
+        (this.rowEditColumn() ? 1 : 0),
     ),
   );
   protected readonly stateContext: Signal<NeuTableStateTemplateContext> = computed(() => ({
@@ -649,8 +652,10 @@ export class NeuTableBasicRendererComponent<
     this.searchDraft.set(this.query().search);
     this.searchEditing.set(true);
   };
-  protected readonly updateSearchDraft = (event: Event) =>
+  protected readonly updateSearchDraft = (event: Event) => {
     this.searchDraft.set((event.currentTarget as HTMLInputElement).value);
+    if (this.filterOptions().commit === 'immediate') this.commitSearch();
+  };
   protected readonly commitSearch = (event?: Event) => {
     event?.preventDefault();
     const search = this.searchDraft();
@@ -765,6 +770,11 @@ export class NeuTableBasicRendererComponent<
     filter: this.hasMenuFilters() && column.filter !== undefined,
     open: this.openFilterColumnId() === column.id,
     filtered: this.appliedFilter(column) !== null,
+    menu: this.openFilterColumnId() === column.id ? {
+      filter: this.queryFilterControls(column, true),
+      template: this.filterTemplate(column.id) ?? null,
+      context: this.filterContext(column),
+    } : undefined,
     action: (action, event) => {
       switch (action) {
         case 'filter':
@@ -1122,6 +1132,18 @@ export class NeuTableBasicRendererComponent<
     const options = this.editingOptions();
     return options.mode === 'none' ? false : options.commitOnBlur;
   };
+  protected readonly rowEditColumn = computed(() =>
+    this.editingOptions().mode === 'row'
+      ? this.columns().find((column) => column.edit !== undefined)
+      : undefined,
+  );
+  protected readonly isRowEditing = (row: NeuTableRenderRow<T, K>) => {
+    const session = this.activeEditSession();
+    return session?.state.kind === 'row' && session.keyToken === neuTableIdentityToken(row.key);
+  };
+  protected readonly startRowEditAction = (row: NeuTableRenderRow<T, K>, column: NeuTableColumn<T, F>) =>
+    (event: Event) => this.startEdit(row, column, 'pointer', event);
+  protected readonly cancelRowEditAction = () => this.cancelEdit()('consumer');
   protected readonly startEdit = (
     renderRow: NeuTableRenderRow<T, K>,
     column: NeuTableColumn<T, F>,
@@ -1129,7 +1151,8 @@ export class NeuTableBasicRendererComponent<
     event: Event,
   ) => {
     const options = this.editingOptions();
-    if (options.mode === 'none' || column.edit === undefined || this.rowDisabled(renderRow)) return;
+    if (options.mode === 'none' || column.edit === undefined || this.rowDisabled(renderRow) ||
+        this.isCellEditing(renderRow, column)) return;
     event.preventDefault();
     event.stopPropagation();
     this.proposeEdit()(
@@ -1139,10 +1162,11 @@ export class NeuTableBasicRendererComponent<
       source,
     );
     afterNextRender(
-      () =>
-        this.host.nativeElement
-          .querySelector<HTMLElement>(`#${this.editorId(renderRow, column)}`)
-          ?.focus(),
+      () => {
+        const target = this.host.nativeElement.querySelector<HTMLElement>(`#${this.editorId(renderRow, column)}`)
+          ?? this.host.nativeElement.querySelector<HTMLElement>('.neu-table2__editor input');
+        target?.focus();
+      },
       { injector: this.injector },
     );
   };
@@ -1152,7 +1176,7 @@ export class NeuTableBasicRendererComponent<
     event: MouseEvent,
   ) => {
     const options = this.editingOptions();
-    if (options.mode !== 'none' && options.activation === 'click') {
+    if (options.mode !== 'none' && options.activation === 'click' && !this.isInteractiveEvent(event)) {
       this.startEdit(renderRow, column, 'pointer', event);
     }
   };
@@ -1162,7 +1186,7 @@ export class NeuTableBasicRendererComponent<
     event: MouseEvent,
   ) => {
     const options = this.editingOptions();
-    if (options.mode !== 'none' && options.activation === 'double-click') {
+    if (options.mode !== 'none' && options.activation === 'double-click' && !this.isInteractiveEvent(event)) {
       this.startEdit(renderRow, column, 'pointer', event);
     }
   };

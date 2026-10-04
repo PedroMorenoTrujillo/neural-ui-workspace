@@ -66,7 +66,9 @@ test('keeps browser integration platform-guarded and free of ambient global owne
   const result = await build({
     entryPoints: ['projects/ui-core/table/public/public-api.ts'],
     bundle: true,
-    external: ['@angular/core', '@angular/common', '@angular/forms', '@angular/forms/*'],
+    // Check Table's ownership. Framework peers and shared Core controls have
+    // their own platform tests; their lexical variables are not Table globals.
+    external: ['@angular/*', '@angular/cdk/*', '@neural-ui/core/*'],
     format: 'esm',
     platform: 'node',
     write: false,

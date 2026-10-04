@@ -9,6 +9,7 @@ export const tableRendererMessages = {
   hiddenColumns: 'Hidden columns',
   showColumn: 'Show {column}',
   expansion: 'Expansion',
+  edit: 'Edit {column}',
   selectAll: 'Select all rows',
   filterColumn: 'Filter {column}',
   collapseRow: 'Collapse row {key}',

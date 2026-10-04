@@ -148,7 +148,7 @@ describe('NeuTable public filter and paginator templates', () => {
       ): NeuTableFilterContext<{ id: number; name: string }, 'name'>;
     };
     const click = async (selector: string) => {
-      element.querySelector<HTMLButtonElement>(selector)!.click();
+      (element.querySelector<HTMLButtonElement>(selector) ?? document.querySelector<HTMLButtonElement>(selector))!.click();
       await fixture.whenStable();
     };
     return { fixture, host, element, renderer, click };
@@ -236,15 +236,15 @@ describe('NeuTable public filter and paginator templates', () => {
     host.menu.set(true);
     await fixture.whenStable();
     await click('[aria-label="Filter Name"]');
-    expect(element.querySelector('[role="dialog"] input[aria-label="Custom name"]')).not.toBeNull();
+    expect(document.querySelector('[role="dialog"] input[aria-label="Custom name"]')).not.toBeNull();
     await click('.apply');
-    expect(element.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
     await click('[aria-label="Filter Name"]');
-    element
+    document
       .querySelector('[role="dialog"]')!
       .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();
-    expect(element.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it('handles unknown remote totals, empty data, positions and dynamic template removal', async () => {
@@ -278,7 +278,7 @@ describe('NeuTable public filter and paginator templates', () => {
     await fixture.whenStable();
     expect(element.querySelector('.custom-state')).toBeNull();
     expect(element.querySelector('[aria-label="Next page"]')).not.toBeNull();
-    expect(element.querySelector('[aria-label="Filter value for Name"]')).not.toBeNull();
+    expect(element.querySelector('.neu-table2__row-filter neu-input input')).not.toBeNull();
   });
 
   it('exports explicit Angular context guards', () => {

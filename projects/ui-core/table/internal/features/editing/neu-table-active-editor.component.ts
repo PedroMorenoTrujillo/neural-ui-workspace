@@ -1,5 +1,7 @@
 import { Component, input, signal, type InputSignal, type OnChanges } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
+import { NeuInputComponent } from '@neural-ui/core/input';
+import { NeuButtonComponent } from '@neural-ui/core/button';
 import type {
   NeuTableEditError,
   NeuTableLabels,
@@ -10,24 +12,25 @@ import { tableMessage } from '../../semantics/neu-table-labels';
 @Component({
   selector: 'neu-table-active-editor',
   standalone: true,
-  imports: [FormField],
+  imports: [FormField, NeuInputComponent, NeuButtonComponent],
   template: `
-    <label class="neu-table2__editor-label" [for]="editorId()">{{ text('edit') }}</label>
-    <input
-      [id]="editorId()"
+    <neu-input
+      [inputId]="editorId()" [label]="label()" [floatingLabel]="true" size="sm"
       [formField]="fields.value"
       [attr.aria-invalid]="errors().length > 0 || null"
       [attr.aria-describedby]="errors().length > 0 ? editorId() + '-errors' : null"
       [attr.aria-busy]="pending() || null"
-      (input)="update($event)"
+      (valueChange)="setValue()($event)"
       (keydown.enter)="submit($event)"
       (keydown.escape)="dismiss($event)"
-      (blur)="blur($event)"
+      (focusout)="blur($event)"
     />
-    <span class="neu-table2__editor-actions" data-neu-selection-stop>
-      <button type="button" [disabled]="pending()" (click)="commit()()">{{ text('save') }}</button>
-      <button type="button" (click)="cancel()('consumer')">{{ text('cancel') }}</button>
-    </span>
+    @if (showActions()) {
+      <span class="neu-table2__editor-actions" data-neu-selection-stop>
+        <button neu-button size="sm" type="button" [disabled]="pending()" (click)="commit()()">{{ text('save') }}</button>
+        <button neu-button size="sm" variant="outline" type="button" (click)="cancel()('consumer')">{{ text('cancel') }}</button>
+      </span>
+    }
     @if (pending()) {
       <span role="status">{{ text('validating') }}</span>
     }
@@ -39,6 +42,7 @@ import { tableMessage } from '../../semantics/neu-table-labels';
       </span>
     }
   `,
+  styles: ':host { display:grid; gap:.5rem; min-inline-size:0; padding-block:.5rem; } .neu-table2__editor-actions { display:flex; gap:.5rem; flex-wrap:wrap; }',
 })
 export class NeuTableActiveEditorComponent implements OnChanges {
   readonly messages = input<NeuTableLabels['messages']>();
@@ -50,6 +54,7 @@ export class NeuTableActiveEditorComponent implements OnChanges {
   readonly errors: InputSignal<readonly NeuTableEditError[]> = input.required();
   readonly pending: InputSignal<boolean> = input.required();
   readonly commitOnBlur: InputSignal<boolean> = input.required();
+  readonly showActions = input(true);
   readonly setValue: InputSignal<(value: unknown) => void> = input.required();
   readonly commit: InputSignal<() => void> = input.required();
   readonly cancel: InputSignal<(reason: 'escape' | 'consumer') => void> = input.required();

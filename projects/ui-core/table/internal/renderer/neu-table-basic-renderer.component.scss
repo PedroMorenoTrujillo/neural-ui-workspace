@@ -32,8 +32,11 @@ th {
 }
 
 .neu-table2__pagination {
-  justify-content: flex-end;
-  padding-block: var(--neu-table-space-sm, 0.5rem);
+  justify-content: center;
+  gap: .375rem;
+  padding: .75rem .5rem;
+  border-block: 1px solid var(--neu-border);
+  background: var(--neu-surface);
 }
 
 .neu-table2__hidden-columns,
@@ -56,7 +59,8 @@ th {
   flex: 1 1 auto;
   align-items: center;
   gap: var(--neu-table-space-xs, 0.25rem);
-  padding: 0;
+  min-block-size: 2rem;
+  padding: .125rem 0;
   border: 0;
   color: inherit;
   background: transparent;
@@ -66,6 +70,10 @@ th {
   cursor: pointer;
 }
 
+.neu-table2__sort-icon { inline-size:1rem; block-size:1rem; flex:0 0 auto; color:var(--neu-text-muted); }
+.neu-table2__sort-icon[data-direction]:not([data-direction="none"]) { color:var(--neu-primary); }
+.neu-table2__edit-column { inline-size:1%; white-space:nowrap; }
+
 .neu-table2__sort-priority {
   display: inline-grid;
   min-inline-size: 1.25rem;
@@ -74,21 +82,6 @@ th {
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 12%, transparent);
   font-size: 0.75em;
-}
-
-.neu-table2__filter-menu {
-  position: absolute;
-  z-index: 7;
-  inset-block-start: calc(100% - 0.25rem);
-  inset-inline-end: 0.5rem;
-  display: grid;
-  inline-size: min(20rem, calc(100vw - 2rem));
-  gap: var(--neu-table-space-sm, 0.5rem);
-  padding: var(--neu-table-space-sm, 0.75rem);
-  border: 1px solid var(--neu-border, currentColor);
-  border-radius: 0.5rem;
-  background: var(--neu-surface, Canvas);
-  box-shadow: 0 0.75rem 2rem color-mix(in srgb, currentColor 18%, transparent);
 }
 
 .neu-table2__filter-row td {
@@ -162,6 +155,8 @@ select:focus-visible {
 
 thead th {
   block-size: var(--neu-table-header-height, 44px);
+  background:var(--neu-surface-2, Canvas);
+  font-weight:600;
 }
 
 th,
