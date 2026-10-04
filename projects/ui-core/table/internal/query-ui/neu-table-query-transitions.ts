@@ -162,15 +162,18 @@ export function isNeuTableFilterRule(value: string): value is NeuTableFilterRule
   return (NEU_TABLE_FILTER_RULES as readonly string[]).includes(value);
 }
 
-export function neuTableFilterValueFromText(rule: NeuTableFilterRule, value: string): unknown {
+export function neuTableFilterValueFromText(rule: NeuTableFilterRule, value: string, sample?: unknown): unknown {
   if (['isNull', 'isNotNull', 'isEmpty', 'isNotEmpty'].includes(rule)) return null;
+  const parse = (text: string): unknown => typeof sample === 'number' && text.trim() !== '' && Number.isFinite(Number(text))
+    ? Number(text) : text;
   if (['between', 'in', 'notIn'].includes(rule)) {
     return value
       .split(',')
       .map((part) => part.trim())
-      .filter((part) => part.length > 0);
+      .filter((part) => part.length > 0)
+      .map(parse);
   }
-  return value;
+  return parse(value);
 }
 
 export function findNeuTableFilterCondition<F extends string>(

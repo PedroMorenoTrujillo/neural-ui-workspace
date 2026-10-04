@@ -161,6 +161,46 @@ function renderedKeys(native: HTMLElement): string[] {
 }
 
 describe('NeuTable 2 controlled query UI integration', () => {
+  it('applies numeric column menus and keeps their type after zero results', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    host.accept = true;
+    host.rowOptions = { reorderable: false, pin: () => null };
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    const apply = async (text: string) => {
+      renderer.openFilterMenu(host.columns[2], new MouseEvent('click'));
+      renderer.filterDraftRule.set('greaterThan');
+      renderer.filterDraftValue.set(text);
+      renderer.applyFilterMenu();
+      await fixture.whenStable();
+    };
+    await apply('100');
+    expect(renderedKeys(fixture.nativeElement)).toEqual([]);
+    expect(host.query().filters).toMatchObject({ value: 100 });
+    await apply('35');
+    expect(host.query().filters).toMatchObject({ value: 35 });
+    expect(renderedKeys(fixture.nativeElement)).toEqual(['4', '5']);
+    renderer.filterDraftRule.set('equals');
+    renderer.filterDraftValue.set('50');
+    renderer.openFilterColumnId.set('score');
+    renderer.applyFilterMenu();
+    await fixture.whenStable();
+    expect(renderedKeys(fixture.nativeElement)).toEqual(['5']);
+    expect(renderer.filterValueSample()('missing' as Field)).toBeUndefined();
+    expect(renderer.filterValueSample()('name')).toBe('Pinned');
+  });
+  it('resolves filter samples through column accessors and skips absent source values', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    const host = fixture.componentInstance;
+    (host as any).rows = [{ id: 1, name: 'First', score: null }, { id: 2, name: 'Second', score: undefined }, { id: 3, name: 'Third', score: 30 }];
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer')).componentInstance as any;
+    expect(renderer.filterValueSample()('score')).toBe(30);
+    expect(renderer.filterValueSample()('missing')).toBeUndefined();
+  });
   it('applies global search immediately without an extra submit action', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     const host = fixture.componentInstance;

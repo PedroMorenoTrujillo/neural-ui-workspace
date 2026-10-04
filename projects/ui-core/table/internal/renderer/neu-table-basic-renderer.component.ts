@@ -143,6 +143,7 @@ export class NeuTableBasicRendererComponent<
   private readonly platformId = inject(PLATFORM_ID);
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   readonly rows: InputSignal<readonly NeuTableRenderRow<T, K>[]> = input.required();
+  readonly filterValueSample = input<(field: F) => unknown>(() => undefined);
   readonly groupingDomainRows: InputSignal<readonly NeuTableRenderRow<T, K>[]> = input.required();
   readonly columns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
   readonly allColumns: InputSignal<readonly NeuTableColumn<T, F>[]> = input.required();
@@ -865,7 +866,7 @@ export class NeuTableBasicRendererComponent<
       kind: 'condition',
       field: column.filter.field,
       rule,
-      value: neuTableFilterValueFromText(rule, value),
+      value: neuTableFilterValueFromText(rule, value, this.filterValueSample()(column.filter.field)),
     });
     const drafts = new Map(this.rowFilterDrafts());
     drafts.delete(column.id);
@@ -941,7 +942,7 @@ export class NeuTableBasicRendererComponent<
       kind: 'condition',
       field: column.filter.field,
       rule,
-      value: neuTableFilterValueFromText(rule, this.filterDraftValue()),
+      value: neuTableFilterValueFromText(rule, this.filterDraftValue(), this.filterValueSample()(column.filter.field)),
     });
     this.proposeQuery()(
       proposeNeuTableFilters({

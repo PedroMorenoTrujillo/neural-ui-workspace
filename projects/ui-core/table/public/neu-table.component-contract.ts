@@ -399,6 +399,16 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
   protected readonly fieldResolver = computed(() =>
     createNeuTableFieldResolver(this.normalizedColumns()),
   );
+  // Resolve against loaded source data, not filtered/paged rows: a zero-result
+  // query must not turn a numeric filter back into a string on the next edit.
+  protected readonly filterValueSample = (field: F): unknown => {
+    const resolver = this.fieldResolver();
+    for (const row of this.data()) {
+      const value = resolver.resolve(row, field);
+      if (value !== null && value !== undefined) return value;
+    }
+    return undefined;
+  };
   protected readonly remoteVirtualProjection = computed(() => {
     const virtualization = this.virtualizationOptions();
     if (!virtualization.enabled) return null;

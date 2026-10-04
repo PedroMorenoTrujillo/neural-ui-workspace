@@ -44,6 +44,16 @@ const query = (overrides: Partial<NeuTableQuery<Field>> = {}): NeuTableQuery<Fie
 });
 
 describe('NeuTable 2 query UI pure transitions', () => {
+  it('converts numeric field text without coercing string fields or invalid input', () => {
+    expect(neuTableFilterValueFromText('greaterThan', '300', 240)).toBe(300);
+    expect(neuTableFilterValueFromText('equals', '0', 240)).toBe(0);
+    expect(neuTableFilterValueFromText('between', '10, 20', 240)).toEqual([10, 20]);
+    expect(neuTableFilterValueFromText('in', '10, 20', 240)).toEqual([10, 20]);
+    expect(neuTableFilterValueFromText('equals', '001', '001')).toBe('001');
+    expect(neuTableFilterValueFromText('equals', '', 240)).toBe('');
+    expect(neuTableFilterValueFromText('equals', 'bad', 240)).toBe('bad');
+    expect(neuTableFilterValueFromText('equals', 'Infinity', 240)).toBe('Infinity');
+  });
   it('compares filter condition semantics with an explicit value comparator', () => {
     const condition = (field: Field, rule: 'equals' | 'notEquals', value: unknown): NeuFilterExpression<Field> =>
       ({ kind: 'condition', field, rule, value });
