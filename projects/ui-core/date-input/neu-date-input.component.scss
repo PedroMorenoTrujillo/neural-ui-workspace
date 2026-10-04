@@ -572,12 +572,14 @@ $drum-item-h: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--neu-space-1);
+  gap: var(--neu-space-2);
   padding: var(--neu-space-3) var(--neu-space-4);
   flex-shrink: 0;
 }
 
 .neu-date-input__time-colon {
+  flex: 0 0 12px;
+  text-align: center;
   font-size: 20px;
   font-weight: 700;
   color: var(--neu-text);
@@ -642,8 +644,8 @@ $drum-item-h: 36px;
     content: '';
     position: absolute;
     top: $drum-item-h; // skip first adjacent item
-    inset-inline-start: -6px;
-    inset-inline-end: -6px;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     height: $drum-item-h;
     background: var(--neu-primary-soft, rgba(0, 122, 255, 0.1));
     border-radius: var(--neu-radius-sm);
