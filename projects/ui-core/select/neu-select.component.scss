@@ -404,7 +404,7 @@ $select-height: 48px;
 
   &:hover:not(.neu-select__option--disabled) {
     background: var(--neu-primary-50);
-    color: var(--neu-primary);
+    color: var(--neu-text);
   }
 
   &--active:not(.neu-select__option--disabled) {
