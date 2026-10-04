@@ -132,7 +132,7 @@
                 [checked]="selectionProjection().headerState === 'checked'"
                 [indeterminate]="selectionProjection().headerState === 'indeterminate'"
                 [disabled]="selectionProjection().selectableCount === 0"
-                (click)="onHeaderToggle($event)"
+                (activate)="onHeaderToggle($event)"
                 (keydown.enter)="onHeaderSelectionEnter($event)"
               />
             } @else {
@@ -320,7 +320,7 @@
               @if (selectionIndicator() === 'checkbox') {
                 <neu-table-checkbox [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"
                   [ariaLabel]="text('selectRow', { key: renderRow.key })"
-                  (click)="onSelectionControlClick(renderRow, $event)"
+                  (activate)="onSelectionControlClick(renderRow, $event)"
                   (keydown.enter)="onSelectionEnter(renderRow, $event)" />
               } @else {
                 <input type="radio" [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"

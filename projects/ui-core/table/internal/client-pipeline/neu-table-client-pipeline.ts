@@ -221,10 +221,11 @@ export function searchNeuTableRows<T, F extends string>(
   fields: readonly F[],
   resolver: NeuTableFieldResolver<T, F>,
 ): readonly T[] {
-  if (search.length === 0 || fields.length === 0) return rows;
+  const normalizedSearch = normalizeNeuTableText(search);
+  if (normalizedSearch.length === 0 || fields.length === 0) return rows;
   return rows.filter((row) =>
     fields.some(
-      (field) => searchableValue(resolver.resolve(row, field))?.includes(search) === true,
+      (field) => searchableValue(resolver.resolve(row, field))?.includes(normalizedSearch) === true,
     ),
   );
 }

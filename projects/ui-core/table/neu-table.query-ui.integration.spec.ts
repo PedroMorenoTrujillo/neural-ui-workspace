@@ -171,12 +171,13 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const native = fixture.nativeElement as HTMLElement;
     const search = native.querySelector<HTMLInputElement>('.neu-table2__search input')!;
     expect(native.querySelector('.neu-table2__search button[type="submit"]')).toBeNull();
-    search.value = 'Ada';
+    search.value = 'ADA';
     search.dispatchEvent(new Event('input', { bubbles: true }));
     await fixture.whenStable();
-    expect(host.query().search).toBe('Ada');
+    expect(host.query().search).toBe('ADA');
     expect(host.queryEvents).toHaveLength(1);
     expect(native.textContent).not.toContain('Charlie');
+    expect(native.querySelector('tbody')?.textContent).toContain('Ada');
     native.querySelector<HTMLButtonElement>('button[aria-label="Clear table search"]')!.click();
     await fixture.whenStable();
     expect(host.query().search).toBe('');

@@ -111,6 +111,7 @@ export interface TableQueryControls {
         @if (state.filter) {
           <button
             neu-button variant="ghost" size="sm" class="neu-table2__filter-trigger"
+            [tone]="state.filtered ? 'brand' : 'neutral'"
             type="button"
             aria-haspopup="dialog"
             [attr.aria-expanded]="state.open"
@@ -316,8 +317,10 @@ export interface TableQueryControls {
       align-items: center;
       gap: var(--neu-table-space-xs, 0.25rem);
       padding-block-start: .5rem;
+      inline-size: min(28rem, 100%);
     }
     .neu-table2__search neu-input { inline-size: min(20rem, 100%); }
+    .neu-table2__filter-trigger[aria-pressed="true"] { background:var(--neu-primary-soft); }
     .neu-table2__page-size { inline-size: 9.5rem; padding-block-start:.5rem; }
     svg { inline-size: 1rem; block-size: 1rem; flex: 0 0 auto; }
     .neu-table2__edit-actions { display: inline-flex; align-items:center; gap:.5rem; }

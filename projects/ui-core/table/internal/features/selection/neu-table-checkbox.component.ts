@@ -1,5 +1,5 @@
 import { isPlatformServer } from '@angular/common';
-import { Component, inject, input, makeStateKey, PLATFORM_ID, TransferState } from '@angular/core';
+import { Component, ElementRef, inject, input, makeStateKey, output, PLATFORM_ID, TransferState } from '@angular/core';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 
 const serverCheckbox = makeStateKey<boolean>('neu-table-checkbox-ssr');
@@ -8,16 +8,17 @@ const serverCheckbox = makeStateKey<boolean>('neu-table-checkbox-ssr');
 @Component({
   selector: 'neu-table-checkbox',
   imports: [NeuCheckboxComponent],
+  host: { '(click)': 'capture($event)' },
   template: `
     @if (hydrate) {
       @defer (on immediate; hydrate on immediate) {
-        <neu-checkbox [checked]="checked()" [indeterminate]="indeterminate()"
-          [disabled]="disabled()" [ariaLabel]="ariaLabel()" />
+        <neu-checkbox #control [checked]="checked()" [indeterminate]="indeterminate()"
+          [disabled]="disabled()" [ariaLabel]="ariaLabel()" (checkedChange)="propose(control)" />
       }
     } @else {
       @defer (on immediate) {
-        <neu-checkbox [checked]="checked()" [indeterminate]="indeterminate()"
-          [disabled]="disabled()" [ariaLabel]="ariaLabel()" />
+        <neu-checkbox #control [checked]="checked()" [indeterminate]="indeterminate()"
+          [disabled]="disabled()" [ariaLabel]="ariaLabel()" (checkedChange)="propose(control)" />
       }
     }
   `,
@@ -28,6 +29,23 @@ export class NeuTableCheckboxComponent {
   readonly indeterminate = input(false);
   readonly disabled = input(false);
   readonly ariaLabel = input.required<string>();
+  readonly activate = output<MouseEvent>();
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private click: MouseEvent | null = null;
+  private restoring = false;
+  protected capture(event: MouseEvent): void {
+    this.click = event;
+    event.stopPropagation();
+  }
+  protected propose(control: NeuCheckboxComponent): void {
+    if (this.restoring) return;
+    if (this.click) this.activate.emit(this.click);
+    this.restoring = true;
+    try { control.checked.set(this.checked()); } finally { this.restoring = false; }
+    // Keep rejected proposals controlled, including same-turn native changes.
+    const native = this.element.querySelector<HTMLInputElement>('input');
+    if (native) native.checked = this.checked();
+  }
   protected readonly hydrate: boolean;
 
   constructor() {
