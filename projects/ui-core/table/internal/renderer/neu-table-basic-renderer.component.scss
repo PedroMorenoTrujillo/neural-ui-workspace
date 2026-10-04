@@ -90,6 +90,7 @@ th {
 }
 
 .neu-table2__row-filter {
+  position: relative;
   align-items: stretch;
 }
 
@@ -104,6 +105,7 @@ th {
 }
 
 .neu-table2__editor {
+  position: relative;
   display: grid;
   gap: 0.375rem;
 }

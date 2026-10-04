@@ -44,7 +44,7 @@ import { tableMessage } from '../../semantics/neu-table-labels';
     }
   `,
   styles: `
-    :host { display:grid; gap:.5rem; min-inline-size:0; padding-block:.5rem; }
+    :host { position:relative; display:grid; gap:.5rem; min-inline-size:0; padding-block:.5rem; }
     .neu-table2__editor-label { position:absolute; inline-size:1px; block-size:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
     .neu-table2__editor-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
     .neu-table2__editor-actions button { block-size:2.25rem; padding-block:0; }
