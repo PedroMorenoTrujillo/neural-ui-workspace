@@ -80,12 +80,14 @@ describe('NeuListboxComponent', () => {
     const status = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
     expect(status.textContent).toContain('No options');
     expect(listbox.contains(status)).toBe(false);
+    expect(listbox.tabIndex).toBe(-1);
     fixture.componentRef.setInput('options', options);
     fixture.componentRef.setInput('filterValue', 'unmatched');
     fixture.detectChanges();
     const filteredStatus = fixture.nativeElement.querySelector('[role="status"]') as HTMLElement;
     expect(filteredStatus).toBeTruthy();
     expect(listbox.contains(filteredStatus)).toBe(false);
+    expect(listbox.tabIndex).toBe(-1);
   });
 
   it('supports multiple selection and ignores disabled options', () => {

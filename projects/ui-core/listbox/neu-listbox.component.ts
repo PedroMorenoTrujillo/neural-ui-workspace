@@ -133,7 +133,7 @@ import { NeuListboxDropEvent, NeuListboxOption } from './neu-listbox.types';
       [cdkDropListDisabled]="!dragdrop() || isDisabled() || readonly() || lazy()"
       [id]="listId()"
       role="listbox"
-      [attr.tabindex]="isDisabled() ? -1 : tabindex()"
+      [attr.tabindex]="isDisabled() || emptyState() ? -1 : tabindex()"
       [attr.aria-labelledby]="label() ? labelId() : ariaLabelledBy()"
       [attr.aria-label]="label() || ariaLabelledBy() ? null : ariaLabel()"
       [attr.aria-describedby]="ariaDescribedBy() || (hint() ? hintId() : null)"
