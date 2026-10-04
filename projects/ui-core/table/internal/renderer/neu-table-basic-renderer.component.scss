@@ -91,7 +91,10 @@ th {
 
 .neu-table2__row-filter {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
+  min-inline-size: 0;
 }
 
 .neu-table2__selection-column {

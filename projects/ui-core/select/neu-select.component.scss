@@ -430,6 +430,11 @@ $select-height: 48px;
   flex-shrink: 0;
 }
 
+.neu-select__option-checkbox {
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
 // ---- Error ----
 .neu-select__error {
   margin-top: var(--neu-space-1);

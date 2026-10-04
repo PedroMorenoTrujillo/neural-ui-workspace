@@ -232,6 +232,32 @@ describe('NeuSelectComponent', () => {
   });
 
   describe('Multiple mode contract', () => {
+    it('renders a Neural checkbox for every option without a second interactive control', async () => {
+      const { f, comp } = await setup({ multiple: true, value: ['mx'] });
+      comp.open();
+      f.detectChanges();
+      const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
+      const boxes = options.map(option => option.querySelector<HTMLInputElement>('neu-checkbox input')!);
+      expect(boxes.map(box => box.checked)).toEqual([false, true, false]);
+      expect(options.every(option => option.querySelector('neu-checkbox[inert][aria-hidden="true"]'))).toBe(true);
+      const values = vi.fn();
+      comp.value.subscribe(values);
+      options[0].click();
+      f.detectChanges();
+      expect(comp.value()).toEqual(['mx', 'es']);
+      expect(values).toHaveBeenCalledTimes(1);
+      expect(boxes[0].checked).toBe(true);
+      options[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      f.detectChanges();
+      expect(comp.value()).toEqual(['es']);
+      expect(boxes[1].checked).toBe(false);
+      f.componentRef.setInput('value', []);
+      f.detectChanges();
+      expect(boxes.every(box => !box.checked)).toBe(true);
+      options[2].click();
+      expect(comp.value()).toEqual([]);
+    });
+
     it('preserves scalar single-mode value and closes after selection', async () => {
       const { f, comp } = await setup({ multiple: false });
       comp.open();
@@ -241,6 +267,9 @@ describe('NeuSelectComponent', () => {
       expect(comp.value()).toBe('es');
       expect(comp.isOpen()).toBe(false);
       expect(comp.selectedLabel()).toBe('España');
+      comp.open();
+      f.detectChanges();
+      expect(document.querySelector('.neu-select__option neu-checkbox')).toBeNull();
     });
 
     it('blocks disabled options and exposes the selected set to the existing selected template', async () => {

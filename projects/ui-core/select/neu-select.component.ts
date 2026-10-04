@@ -13,6 +13,7 @@ import {
   signal,
 } from '@angular/core';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   ConnectedOverlayPositionChange,
@@ -104,7 +105,7 @@ export type { NeuSelectOption } from './neu-select.types';
  */
 @Component({
   selector: 'neu-select',
-  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
+  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule, NeuCheckboxComponent],
   encapsulation: ViewEncapsulation.None,
   host: {
     '(keydown.escape)': 'requestClose($event)',
@@ -386,6 +387,15 @@ export type { NeuSelectOption } from './neu-select.types';
                   (click)="selectRow($event, entry.row, entry.rowIndex)"
                   (keydown)="onOptionKeyDown($event, entry.row, entry.rowIndex)"
                 >
+                  @if (mode() === 'multiple') {
+                    <neu-checkbox
+                      class="neu-select__option-checkbox"
+                      inert
+                      aria-hidden="true"
+                      [readonly]="true"
+                      [checked]="isOptionSelected(entry.row.option)"
+                    />
+                  } @else {
                   <svg
                     class="neu-select__check"
                     [style.visibility]="isOptionSelected(entry.row.option) ? 'visible' : 'hidden'"
@@ -399,6 +409,7 @@ export type { NeuSelectOption } from './neu-select.types';
                   >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
+                  }
                   @if (itemTpl()) {
                     <ng-container
                       [ngTemplateOutlet]="itemTpl()!.templateRef"
