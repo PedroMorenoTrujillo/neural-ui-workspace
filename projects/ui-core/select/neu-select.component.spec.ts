@@ -1666,6 +1666,34 @@ describe('NeuSelectComponent', () => {
     expect(comp.value()).toEqual(['mx', 'es']);
   });
 
+  it('localizes both toggle-all states and reacts to label changes without changing selection', async () => {
+    const { f, comp } = await setup({
+      multiple: true,
+      selectionOptions: { toggleAll: true },
+      selectAllLabel: 'Seleccionar todo',
+      clearAllLabel: 'Limpiar selección',
+    });
+    (f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement).click();
+    await f.whenStable();
+    const toggle = document.querySelector('.neu-select__toggle-all') as HTMLButtonElement;
+    expect(toggle.textContent?.trim()).toBe('Seleccionar todo');
+    toggle.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['es', 'mx']);
+    expect(toggle.textContent?.trim()).toBe('Limpiar selección');
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    f.componentRef.setInput('selectAllLabel', 'Select all');
+    f.componentRef.setInput('clearAllLabel', 'Clear all');
+    await f.whenStable();
+    expect(toggle.textContent?.trim()).toBe('Clear all');
+    expect(comp.value()).toEqual(['es', 'mx']);
+    toggle.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual([]);
+    expect(toggle.textContent?.trim()).toBe('Select all');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('uses the rendered filter keyboard path to navigate results and close without selecting', async () => {
     const { f, comp } = await setup({ searchable: true });
     (f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement).click();

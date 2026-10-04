@@ -314,7 +314,7 @@ export type { NeuSelectOption } from './neu-select.types';
               [disabled]="isDisabledFinal() || readonly()"
               [attr.aria-pressed]="allScopedSelected()"
               (click)="toggleAll($event)"
-            >{{ allScopedSelected() ? 'Clear all' : 'Select all' }}</button>
+            >{{ allScopedSelected() ? clearAllLabel() : selectAllLabel() }}</button>
           }
           @if (loading() && !lazy()) {
             <div class="neu-select__empty" role="status">{{ loadingLabel() }}</div>
@@ -641,6 +641,12 @@ export class NeuSelectComponent<
 
   /** Aria-label del botón de limpiar / Aria-label for the clear button */
   clearAriaLabel = input<string>('Clear selection');
+
+  /** Texto para seleccionar todas las opciones del ámbito / Label to select all scoped options. */
+  selectAllLabel = input<string>('Select all');
+
+  /** Texto para limpiar las opciones seleccionadas del ámbito / Label to clear all scoped selections. */
+  clearAllLabel = input<string>('Clear all');
 
   readonly openChange = output<boolean>();
   readonly filterChange = output<string>();
