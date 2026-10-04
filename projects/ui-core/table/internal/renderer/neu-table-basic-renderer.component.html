@@ -298,20 +298,7 @@
           @if (expansionActive()) {
             <td class="neu-table2__expansion-column">
               @if (rowExpandable(renderRow)) {
-                <button
-                  type="button"
-                  data-neu-selection-stop
-                  [attr.aria-label]="
-                    text(rowExpanded(renderRow) ? 'collapseRow' : 'expandRow', {
-                      key: renderRow.key,
-                    })
-                  "
-                  [attr.aria-expanded]="rowExpanded(renderRow)"
-                  [attr.aria-controls]="rowExpanded(renderRow) ? detailId(renderRow) : null"
-                  (click)="toggleExpansion(renderRow, 'toggle', $event)"
-                >
-                  {{ rowExpanded(renderRow) ? '−' : '+' }}
-                </button>
+                <neu-table-query-host [controls]="{ toggle: queryExpansionToggle(renderRow) }" />
               }
             </td>
           }
@@ -496,23 +483,7 @@
           } @else if (node.kind === 'group-header') {
             <tr class="neu-table2__group-row" [attr.data-group-id]="node.id">
               <th [attr.colspan]="columnCount()" scope="rowgroup">
-                <button
-                  type="button"
-                  data-neu-selection-stop
-                  [attr.aria-label]="groupLabel(node.context)"
-                  [attr.aria-expanded]="node.context.expanded"
-                  (click)="toggleGroup(node.id, $event)"
-                >
-                  {{ node.context.expanded ? '−' : '+' }}
-                  @if (groupHeaderTemplate(); as template) {
-                    <ng-container
-                      [ngTemplateOutlet]="template"
-                      [ngTemplateOutletContext]="node.context"
-                    />
-                  } @else {
-                    {{ groupLabel(node.context) }}
-                  }
-                </button>
+                <neu-table-query-host [controls]="{ toggle: queryGroupToggle(node) }" />
               </th>
             </tr>
           } @else if (node.kind === 'group-footer') {

@@ -14,8 +14,9 @@ import { tableMessage } from '../../semantics/neu-table-labels';
   standalone: true,
   imports: [FormField, NeuInputComponent, NeuButtonComponent],
   template: `
+    <label class="neu-table2__editor-label" [for]="editorId()">{{ label() }}</label>
     <neu-input
-      [inputId]="editorId()" [label]="label()" [floatingLabel]="true" size="sm"
+      [inputId]="editorId()" [floatingLabel]="false" size="sm"
       [formField]="fields.value"
       [attr.aria-invalid]="errors().length > 0 || null"
       [attr.aria-describedby]="errors().length > 0 ? editorId() + '-errors' : null"
@@ -42,7 +43,12 @@ import { tableMessage } from '../../semantics/neu-table-labels';
       </span>
     }
   `,
-  styles: ':host { display:grid; gap:.5rem; min-inline-size:0; padding-block:.5rem; } .neu-table2__editor-actions { display:flex; gap:.5rem; flex-wrap:wrap; }',
+  styles: `
+    :host { display:grid; gap:.5rem; min-inline-size:0; padding-block:.5rem; }
+    .neu-table2__editor-label { position:absolute; inline-size:1px; block-size:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+    .neu-table2__editor-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .neu-table2__editor-actions button { block-size:2.25rem; padding-block:0; }
+  `,
 })
 export class NeuTableActiveEditorComponent implements OnChanges {
   readonly messages = input<NeuTableLabels['messages']>();

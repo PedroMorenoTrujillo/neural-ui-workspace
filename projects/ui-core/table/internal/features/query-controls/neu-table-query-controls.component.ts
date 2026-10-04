@@ -77,6 +77,15 @@ export interface TableQueryControls {
   readonly column?: TableColumnControls;
   readonly search?: TableSearchControls;
   readonly messages?: NeuTableLabels['messages'];
+  readonly toggle?: {
+    readonly expanded: boolean;
+    readonly label: string;
+    readonly controls?: string | null;
+    readonly template?: TemplateRef<unknown> | null;
+    readonly context?: object;
+    readonly content?: string;
+    readonly activate: (event: Event) => void;
+  };
   readonly edit?: {
     readonly active: boolean;
     readonly disabled: boolean;
@@ -95,6 +104,19 @@ export interface TableQueryControls {
   host: { '[class.pagination]': '!!controls().pagination' },
   template: `
     @let config = controls();
+    @if (config.toggle; as state) {
+      <button neu-button variant="ghost" tone="neutral" size="sm" type="button"
+        class="neu-table2__disclosure" data-neu-selection-stop
+        [ariaLabel]="state.label" [attr.aria-expanded]="state.expanded"
+        [attr.aria-controls]="state.controls" (click)="state.activate($event)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+          [class.expanded]="state.expanded"><path d="m9 5 7 7-7 7" /></svg>
+        @if (state.template; as template) {
+          <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="state.context" />
+        } @else if (state.content) { {{ state.content }} }
+      </button>
+    }
     @if (config.search; as state) {
       <form class="neu-table2__search" role="search" (submit)="finishSearch(state, $event, searchInput, 'commit')">
         <neu-input #searchInput type="search" [label]="text('searchTable')" [floatingLabel]="true" size="sm"
@@ -251,7 +273,7 @@ export interface TableQueryControls {
       }
       @if (state.pageSizeOptions.length) {
         <neu-select #pageSizeControl class="neu-table2__page-size" size="sm" mode="single"
-          [label]="text('rowsPerPage')" [floatingLabel]="true" [ariaLabel]="text('rowsPerPage')"
+          [floatingLabel]="false" [ariaLabel]="text('rowsPerPage')"
           [options]="sizes(state)" [optionDisabled]="disabledSize(state)" [value]="state.pageSize"
           (valueChange)="changeSize(state, $event, pageSizeControl)" />
       }
@@ -321,9 +343,12 @@ export interface TableQueryControls {
     }
     .neu-table2__search neu-input { inline-size: min(20rem, 100%); }
     .neu-table2__filter-trigger[aria-pressed="true"] { background:var(--neu-primary-soft); }
-    .neu-table2__page-size { inline-size: 9.5rem; padding-block-start:.5rem; }
+    .neu-table2__page-size { inline-size: 4.75rem; margin-inline-start:.5rem; }
     svg { inline-size: 1rem; block-size: 1rem; flex: 0 0 auto; }
     .neu-table2__edit-actions { display: inline-flex; align-items:center; gap:.5rem; }
+    .neu-table2__edit-actions button, .neu-table2__search button { block-size:2.25rem; padding-block:0; }
+    .neu-table2__disclosure { border:0; min-block-size:2.25rem; padding:.375rem; gap:.75rem; font-weight:600; }
+    .neu-table2__disclosure svg.expanded { transform:rotate(90deg); }
     .neu-table2__page-control, .neu-table2__page-number { min-inline-size:2.25rem; min-block-size:2.25rem; }
     .neu-table2__page-number[aria-current] { background: var(--neu-primary-soft); color: var(--neu-primary); font-weight:600; }
     .neu-table2__pagination-report { color:var(--neu-text-muted); margin-inline-start:.75rem; }

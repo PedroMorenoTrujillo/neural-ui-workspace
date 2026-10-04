@@ -25,7 +25,10 @@ interface Row {
 
 function selectControl(fixture: ComponentFixture<unknown>, label: string): NeuSelectComponent<unknown, unknown> {
   const match = fixture.debugElement.queryAll(By.directive(NeuSelectComponent))
-    .find(item => (item.componentInstance as NeuSelectComponent<unknown, unknown>).label() === label);
+    .find(item => {
+      const control = item.componentInstance as NeuSelectComponent<unknown, unknown>;
+      return control.label() === label || control.ariaLabel() === label;
+    });
   expect(match).toBeDefined();
   return match!.componentInstance;
 }

@@ -1064,6 +1064,20 @@ export class NeuTableBasicRendererComponent<
     event.stopPropagation();
     this.proposeGrouping()(proposeNeuTableGroupToggle(this.grouping(), id));
   };
+  protected readonly queryExpansionToggle = (row: NeuTableRenderRow<T, K>) => ({
+    expanded: this.rowExpanded(row),
+    label: this.text(this.rowExpanded(row) ? 'collapseRow' : 'expandRow', { key: row.key }),
+    controls: this.rowExpanded(row) ? this.detailId(row) : null,
+    activate: (event: Event) => this.toggleExpansion(row, 'toggle', event),
+  });
+  protected readonly queryGroupToggle = (node: NeuTableGroupNode<T>) => ({
+    expanded: node.context.expanded,
+    label: this.groupLabel(node.context),
+    template: this.groupHeaderTemplate(),
+    context: node.context,
+    content: this.groupLabel(node.context),
+    activate: (event: Event) => this.toggleGroup(node.id, event),
+  });
   protected readonly groupLabel = (context: NeuTableGroupContext<T>) =>
     `Group ${context.value == null ? '' : String(context.value)}`.trim();
   protected readonly groupAggregateLabel = (node: NeuTableGroupNode<T>) =>
