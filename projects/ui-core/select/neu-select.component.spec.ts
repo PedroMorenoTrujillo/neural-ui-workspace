@@ -237,23 +237,25 @@ describe('NeuSelectComponent', () => {
       comp.open();
       f.detectChanges();
       const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
-      const boxes = options.map(option => option.querySelector<HTMLInputElement>('neu-checkbox input')!);
-      expect(boxes.map(box => box.checked)).toEqual([false, true, false]);
-      expect(options.every(option => option.querySelector('neu-checkbox[inert][aria-hidden="true"]'))).toBe(true);
+      const boxes = options.map(option => option.querySelector<HTMLElement>('.neu-select__option-checkbox')!);
+      const checked = (box: HTMLElement) => box.classList.contains('neu-select__option-checkbox--checked');
+      expect(boxes.map(checked)).toEqual([false, true, false]);
+      expect(boxes.every(box => box.getAttribute('aria-hidden') === 'true')).toBe(true);
+      expect(options.every(option => !option.querySelector('input,button,[tabindex]'))).toBe(true);
       const values = vi.fn();
       comp.value.subscribe(values);
       options[0].click();
       f.detectChanges();
       expect(comp.value()).toEqual(['mx', 'es']);
       expect(values).toHaveBeenCalledTimes(1);
-      expect(boxes[0].checked).toBe(true);
+      expect(checked(boxes[0])).toBe(true);
       options[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
       f.detectChanges();
       expect(comp.value()).toEqual(['es']);
-      expect(boxes[1].checked).toBe(false);
+      expect(checked(boxes[1])).toBe(false);
       f.componentRef.setInput('value', []);
       f.detectChanges();
-      expect(boxes.every(box => !box.checked)).toBe(true);
+      expect(boxes.every(box => !checked(box))).toBe(true);
       options[2].click();
       expect(comp.value()).toEqual([]);
     });
@@ -269,7 +271,7 @@ describe('NeuSelectComponent', () => {
       expect(comp.selectedLabel()).toBe('España');
       comp.open();
       f.detectChanges();
-      expect(document.querySelector('.neu-select__option neu-checkbox')).toBeNull();
+      expect(document.querySelector('.neu-select__option-checkbox')).toBeNull();
     });
 
     it('blocks disabled options and exposes the selected set to the existing selected template', async () => {

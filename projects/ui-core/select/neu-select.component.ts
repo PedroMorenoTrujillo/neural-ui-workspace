@@ -13,7 +13,6 @@ import {
   signal,
 } from '@angular/core';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
-import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   ConnectedOverlayPositionChange,
@@ -105,7 +104,7 @@ export type { NeuSelectOption } from './neu-select.types';
  */
 @Component({
   selector: 'neu-select',
-  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule, NeuCheckboxComponent],
+  imports: [NgTemplateOutlet, OverlayModule, ScrollingModule],
   encapsulation: ViewEncapsulation.None,
   host: {
     '(keydown.escape)': 'requestClose($event)',
@@ -388,13 +387,18 @@ export type { NeuSelectOption } from './neu-select.types';
                   (keydown)="onOptionKeyDown($event, entry.row, entry.rowIndex)"
                 >
                   @if (mode() === 'multiple') {
-                    <neu-checkbox
+                    <span
                       class="neu-select__option-checkbox"
-                      inert
+                      [class.neu-select__option-checkbox--checked]="isOptionSelected(entry.row.option)"
                       aria-hidden="true"
-                      [readonly]="true"
-                      [checked]="isOptionSelected(entry.row.option)"
-                    />
+                    >
+                      <svg class="neu-select__option-checkbox-check" viewBox="0 0 12 10" fill="none">
+                        <path class="neu-select__option-checkbox-mark"
+                          [class.neu-select__option-checkbox-mark--visible]="isOptionSelected(entry.row.option)"
+                          d="M1 5L4.5 8.5L11 1" stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
                   } @else {
                   <svg
                     class="neu-select__check"

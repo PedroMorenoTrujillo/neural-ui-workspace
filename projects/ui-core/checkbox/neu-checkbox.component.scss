@@ -1,3 +1,5 @@
+@use '../styles/checkbox-indicator' as indicator;
+
 .neu-checkbox-host {
   display: inline-block;
 }
@@ -34,44 +36,15 @@
 }
 
 .neu-checkbox__box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  background: var(--neu-surface);
-  border: 1.5px solid var(--neu-border-hover);
-  border-radius: var(--neu-radius-sm);
-  transition:
-    background-color var(--neu-transition),
-    border-color var(--neu-transition),
-    box-shadow var(--neu-transition);
-
-  &--checked,
-  &--mixed {
-    background: var(--neu-primary);
-    border-color: var(--neu-primary);
-  }
+  @include indicator.box;
 }
 
 .neu-checkbox__check {
-  width: 12px;
-  height: 10px;
-  color: var(--neu-primary-fg);
+  @include indicator.check;
 }
 
 .neu-checkbox__check-mark {
-  opacity: 0;
-  transform: scale(0.6);
-  transition:
-    opacity 150ms ease,
-    transform 150ms ease;
-
-  &--visible {
-    opacity: 1;
-    transform: scale(1);
-  }
+  @include indicator.mark;
 }
 
 .neu-checkbox__label {
@@ -85,13 +58,5 @@
 @media (pointer: coarse) {
   .neu-checkbox {
     min-height: 44px;
-  }
-}
-
-@media (forced-colors: active) {
-  .neu-checkbox__box--checked,
-  .neu-checkbox__box--mixed {
-    border-color: Highlight;
-    background: Highlight;
   }
 }

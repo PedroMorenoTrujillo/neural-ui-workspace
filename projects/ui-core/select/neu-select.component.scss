@@ -6,6 +6,7 @@
 @use '../styles/floating-label' as floating;
 @use '../styles/text-overflow' as text;
 @use '../styles/focus-state' as focus;
+@use '../styles/checkbox-indicator' as indicator;
 
 $select-height: 48px;
 
@@ -431,9 +432,13 @@ $select-height: 48px;
 }
 
 .neu-select__option-checkbox {
+  @include indicator.box;
   flex: 0 0 auto;
   pointer-events: none;
 }
+
+.neu-select__option-checkbox-check { @include indicator.check; }
+.neu-select__option-checkbox-mark { @include indicator.mark; }
 
 // ---- Error ----
 .neu-select__error {
