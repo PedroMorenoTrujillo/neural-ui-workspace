@@ -288,7 +288,7 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
                 }
               </div>
             } @else if (entry.row.kind === 'loading') {
-              <div class="neu-autocomplete__loader" role="status" [id]="rowId(entry.row)">
+              <div class="neu-autocomplete__loader" role="presentation" [id]="rowId(entry.row)">
                 @if (loaderTpl()) {
                   <ng-container
                     [ngTemplateOutlet]="loaderTpl()!.templateRef"
@@ -325,6 +325,14 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
               </div>
             }
           }
+          @if (virtualBottomHeight() > 0) {
+            <div
+              class="neu-autocomplete__spacer"
+              aria-hidden="true"
+              [style.height.px]="virtualBottomHeight()"
+            ></div>
+          }
+        </div>
           @if (!loading() && visibleOptionCount() === 0 && showEmptyMessage()) {
             <div class="neu-autocomplete__empty" role="status">
               @if (emptyTpl()) {
@@ -334,14 +342,6 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
               }
             </div>
           }
-          @if (virtualBottomHeight() > 0) {
-            <div
-              class="neu-autocomplete__spacer"
-              aria-hidden="true"
-              [style.height.px]="virtualBottomHeight()"
-            ></div>
-          }
-        </div>
         @if (footerTpl()) {
           <div class="neu-autocomplete__footer">
             <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />

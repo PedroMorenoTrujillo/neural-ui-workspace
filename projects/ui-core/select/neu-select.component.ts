@@ -324,7 +324,7 @@ export type { NeuSelectOption } from './neu-select.types';
             [class.neu-select__viewport]="virtualScroll()"
             role="listbox"
             [attr.aria-multiselectable]="multiple() ? 'true' : null"
-            tabindex="0"
+            [attr.tabindex]="filteredOptions().length ? 0 : -1"
             [attr.aria-label]="ariaLabel() || label() || placeholder()"
             [attr.aria-labelledby]="ariaLabelledBy()"
             [attr.aria-busy]="loading() ? 'true' : null"
@@ -357,7 +357,7 @@ export type { NeuSelectOption } from './neu-select.types';
                   }
                 </div>
               } @else if (entry.row.kind === 'loading') {
-                <div class="neu-select__loader" role="status" [id]="rowId(entry.row)">
+                <div class="neu-select__loader" role="presentation" [id]="rowId(entry.row)">
                   @if (loaderTpl()) {
                     <ng-container
                       [ngTemplateOutlet]="loaderTpl()!.templateRef"
@@ -425,6 +425,14 @@ export type { NeuSelectOption } from './neu-select.types';
                 </div>
               }
             }
+            @if (virtualBottomHeight() > 0) {
+              <div
+                class="neu-select__spacer"
+                aria-hidden="true"
+                [style.height.px]="virtualBottomHeight()"
+              ></div>
+            }
+          </div>
             @if (!loading() && filteredOptions().length === 0) {
               <div class="neu-select__empty" role="status">
                 @if (currentFilter() && emptyFilterTpl()) {
@@ -436,14 +444,6 @@ export type { NeuSelectOption } from './neu-select.types';
                 }
               </div>
             }
-            @if (virtualBottomHeight() > 0) {
-              <div
-                class="neu-select__spacer"
-                aria-hidden="true"
-                [style.height.px]="virtualBottomHeight()"
-              ></div>
-            }
-          </div>
           @if (footerTpl()) {
             <div class="neu-select__footer">
               <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />

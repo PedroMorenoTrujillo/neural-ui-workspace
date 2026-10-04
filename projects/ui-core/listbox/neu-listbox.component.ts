@@ -142,6 +142,7 @@ import { NeuListboxDropEvent, NeuListboxOption } from './neu-listbox.types';
       [attr.aria-readonly]="readonly() ? 'true' : null"
       [attr.aria-required]="required() ? 'true' : null"
       [attr.aria-invalid]="invalid() ? 'true' : null"
+      [attr.aria-busy]="loading() ? 'true' : null"
       [attr.aria-activedescendant]="activeDescendantId()"
       [style.max-height]="scrollHeight()"
       [style.--neu-listbox-item-size.px]="virtualScrollItemSize()"
