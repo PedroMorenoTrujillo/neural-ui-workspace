@@ -253,9 +253,9 @@ export class NeuDragDropGroupDirective implements OnChanges, OnInit {
     '[class.neu-draggable--active]': 'active()',
     '[class.neu-draggable--disabled]': '_disabled()',
     '[attr.role]': 'role()',
-    '[attr.tabindex]': '_disabled() ? -1 : tabIndex()',
-    '[attr.aria-label]': 'ariaLabel()',
-    '[attr.aria-disabled]': '_disabled() ? "true" : null',
+    '[attr.tabindex]': 'role() === "presentation" || role() === "none" ? null : (_disabled() ? -1 : tabIndex())',
+    '[attr.aria-label]': 'role() === "presentation" || role() === "none" ? null : ariaLabel()',
+    '[attr.aria-disabled]': 'role() === "presentation" || role() === "none" ? null : (_disabled() ? "true" : null)',
     '[attr.aria-pressed]':
       'keyboardEnabled() && role() === "button" ? (keyboardActive() ? "true" : "false") : null',
     '[attr.aria-keyshortcuts]': 'keyboardEnabled() && !_disabled() ? "Enter Space Escape" : null',

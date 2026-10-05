@@ -55,6 +55,16 @@ describe('remaining component accessibility regressions', () => {
       expect(list.querySelector('[role="option"][aria-disabled="true"]')).toBeTruthy();
     }
   });
+  it('does not make presentational pick-list drag wrappers focusable', () => {
+    const f=TestBed.createComponent(NeuPickListComponent);
+    f.componentRef.setInput('source', [{label:'Atlas',value:'atlas'}]);
+    f.componentRef.setInput('dragDrop', true); f.detectChanges();
+    const wrapper=f.nativeElement.querySelector('.neu-pick-list__item');
+    expect(wrapper.getAttribute('tabindex')).toBeNull();
+    expect(wrapper.getAttribute('aria-disabled')).toBeNull();
+    expect(wrapper.querySelector('.neu-pick-list__drag-handle').tagName).toBe('SPAN');
+    expect(wrapper.querySelector('[role="option"]')).toBeTruthy();
+  });
   it('makes the virtual viewport keyboard-scrollable', () => {
     const f = TestBed.createComponent(NeuVirtualListComponent);
     f.componentRef.setInput('itemKey', (item: string) => item); f.detectChanges();

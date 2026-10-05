@@ -201,18 +201,11 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                   }
                 </button>
                 @if (dragDrop()) {
-                  <button
-                    neu-button
+                  <span
                     neuDragHandle
                     class="neu-pick-list__drag-handle"
-                    type="button"
-                    tone="neutral"
-                    variant="ghost"
-                    size="sm"
-                    [iconOnly]="true"
-                    [ariaLabel]="'Drag ' + optionLabelOf(item)"
-                    [disabled]="isOptionDisabled(item)"
-                  ><neu-icon-outlet [icon]="iconDrag" [fallbackPath]="iconFallbackPath(iconDrag)" [fallbackText]="iconFallbackText(iconDrag)" size="1em" aria-hidden="true" /></button>
+                    aria-hidden="true"
+                  ><neu-icon-outlet [icon]="iconDrag" [fallbackPath]="iconFallbackPath(iconDrag)" [fallbackText]="iconFallbackText(iconDrag)" size="1em" aria-hidden="true" /></span>
                 }
               </div>
             } @empty {
