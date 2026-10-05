@@ -34,7 +34,7 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
     <div class="neu-empty-state__inner">
       @if (icon()) {
         <span class="neu-empty-state__icon">
-          <neu-icon-outlet [icon]="icon() === 'inbox' ? iconInbox : icon()!" [fallbackText]="iconFallbackText(icon() === 'inbox' ? iconInbox : icon()!)" [size]="iconSize()" aria-hidden="true" />
+          <neu-icon-outlet [icon]="icon() === 'inbox' ? iconInbox : icon()!" [fallbackPath]="icon() === 'inbox' ? inboxPath : null" [fallbackText]="iconFallbackText(icon() === 'inbox' ? iconInbox : icon()!)" [size]="iconSize()" aria-hidden="true" />
         </span>
       }
 
@@ -45,7 +45,7 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
       }
 
       @if (actionLabel()) {
-        <button neu-button tone="brand" variant="solid" size="md" (click)="action.emit()">
+        <button neu-button type="button" tone="brand" variant="solid" size="md" (click)="action.emit()">
           {{ actionLabel() }}
         </button>
       }
@@ -54,6 +54,8 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
   styleUrl: './neu-empty-state.component.scss',
 })
 export class NeuEmptyStateComponent {
+  /** Core-owned empty inbox geometry; independent of an application icon provider. */
+  protected readonly inboxPath = 'M4 4h16v16H4z M4 13h5l1 3h4l1-3h5';
   protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconInbox = iconInbox;
   /** Canonical Neural icon name; the built-in inbox icon needs no registration. */

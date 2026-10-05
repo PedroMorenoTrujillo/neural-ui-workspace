@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { provideNeuralIcons } from '@neural-icons/angular';
 import { iconWarning } from '@neural-icons/core/icons/warning';
 import { iconCircleCheck } from '@neural-icons/core/icons/circle-check';
@@ -15,6 +16,7 @@ describe('NeuToastContainerComponent', () => {
     await TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
+        { provide: NEURAL_LOCALE, useValue: 'es-ES' },
         provideNeuralIcons(iconCircleCheck, iconCircleX, iconWarning, iconInfo, iconX),
       ],
     }).compileComponents();

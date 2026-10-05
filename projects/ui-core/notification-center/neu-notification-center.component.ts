@@ -14,6 +14,7 @@ import {
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
 import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { neuIconBell as iconBell } from '@neural-ui/core/internal';
 import { neuIconCircleCheck as iconCircleCheck } from '@neural-ui/core/internal';
 import { neuIconCircleX as iconCircleX } from '@neural-ui/core/internal';
@@ -140,7 +141,7 @@ export class NeuNotificationService {
   encapsulation: ViewEncapsulation.None,
   host: {
     class: 'neu-nc',
-    '[attr.aria-label]': '"Centro de notificaciones"',
+    '[attr.aria-label]': 'text("Notification center", "Centro de notificaciones")',
   },
   template: `
     <!-- Bell button -->
@@ -152,7 +153,7 @@ export class NeuNotificationService {
       class="neu-nc__bell"
       [attr.aria-expanded]="_isOpen()"
       [attr.aria-controls]="_panelId"
-      [attr.aria-label]="'Notificaciones. ' + _svc.unreadCount() + ' sin leer'"
+      [attr.aria-label]="text('Notifications. ', 'Notificaciones. ') + _svc.unreadCount() + text(' unread', ' sin leer')"
       (click)="_toggle()"
     >
       <neu-icon-outlet class="neu-nc__bell-icon" [icon]="iconBell" [fallbackPath]="iconFallbackPath(iconBell)" [fallbackText]="iconFallbackText(iconBell)" size="1.2rem" aria-hidden="true" />
@@ -185,20 +186,20 @@ export class NeuNotificationService {
         [id]="_panelId"
         role="dialog"
         aria-modal="false"
-        aria-label="Notificaciones"
+        [attr.aria-label]="text('Notifications', 'Notificaciones')"
         tabindex="-1"
       >
         <div class="neu-nc__panel-header">
-          <span class="neu-nc__panel-title">Notificaciones</span>
+          <span class="neu-nc__panel-title">{{ text('Notifications', 'Notificaciones') }}</span>
           <div class="neu-nc__panel-actions">
             @if (_svc.unreadCount() > 0) {
               <button type="button" class="neu-nc__action-btn" (click)="_svc.markAllRead()">
-                Leer todo
+                {{ text('Read all', 'Leer todo') }}
               </button>
             }
             @if (_svc.notifications().length > 0) {
               <button type="button" class="neu-nc__action-btn" (click)="_svc.clearAll()">
-                Limpiar
+                {{ text('Clear', 'Limpiar') }}
               </button>
             }
           </div>
@@ -206,7 +207,7 @@ export class NeuNotificationService {
 
         <div class="neu-nc__list" role="list">
           @if (!_svc.notifications().length) {
-            <div class="neu-nc__empty" role="status">No hay notificaciones</div>
+            <div class="neu-nc__empty" role="status">{{ text('No notifications', 'No hay notificaciones') }}</div>
           }
           @for (n of _svc.notifications(); track n.id) {
             <div
@@ -230,7 +231,7 @@ export class NeuNotificationService {
               <button
                 type="button"
                 class="neu-nc__item-close"
-                [attr.aria-label]="'Cerrar notificación: ' + (n.title ?? n.message)"
+                [attr.aria-label]="text('Dismiss notification: ', 'Cerrar notificación: ') + (n.title ?? n.message)"
                 (click)="_svc.remove(n.id)"
               >
                 <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1rem" aria-hidden="true" />
@@ -244,6 +245,8 @@ export class NeuNotificationService {
   styleUrl: './neu-notification-center.component.scss',
 })
 export class NeuNotificationCenterComponent {
+  private readonly locale = inject(NEURAL_LOCALE);
+  protected text(en: string, es: string): string { return this.locale.toLowerCase().startsWith('es') ? es : en; }
   protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconBell = iconBell;
@@ -350,11 +353,11 @@ export class NeuNotificationCenterComponent {
   protected _relativeTime(date: Date): string {
     const diff = this.temporal.currentNow().getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Ahora';
-    if (mins < 60) return `Hace ${mins} min`;
+    if (mins < 1) return this.text('Now', 'Ahora');
+    if (mins < 60) return this.text(`${mins} min ago`, `Hace ${mins} min`);
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `Hace ${hours}h`;
-    return `Hace ${Math.floor(hours / 24)}d`;
+    if (hours < 24) return this.text(`${hours}h ago`, `Hace ${hours}h`);
+    return this.text(`${Math.floor(hours / 24)}d ago`, `Hace ${Math.floor(hours / 24)}d`);
   }
 
   protected defaultIcon(tone: NeuNotificationTone): NeuIconKey {

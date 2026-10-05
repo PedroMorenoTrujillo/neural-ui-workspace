@@ -1,5 +1,6 @@
 import { PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { provideNeuralIcons } from '@neural-icons/angular';
 import { iconBell } from '@neural-icons/core/icons/bell';
 import {
@@ -21,6 +22,7 @@ beforeEach(() =>
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
+      { provide: NEURAL_LOCALE, useValue: 'es-ES' },
       NeuNotificationService,
       provideNeuralIcons(iconBell),
     ],

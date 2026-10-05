@@ -6,6 +6,7 @@ import {
   output, signal, viewChildren,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
@@ -68,14 +69,14 @@ export class NeuCommandPaletteItemDirective {
   template: `
     @if (opened()) {
       <div class="neu-cp-backdrop" aria-hidden="true" (click)="close()"></div>
-      <div class="neu-cmd" role="dialog" aria-modal="true" aria-label="Paleta de comandos"
+      <div class="neu-cmd" role="dialog" aria-modal="true" [attr.aria-label]="text('Command palette', 'Paleta de comandos')"
            neuFocusTrap neuModalFocus neuModalFocusInitial=".neu-cmd__input"
            (neuModalFocusEscape)="close()">
         <div class="neu-cmd__search-wrap">
           <span class="neu-cmd__search-icon" aria-hidden="true">⌕</span>
-          <label class="neu-cmd__sr-only" [for]="searchId">Buscar comandos</label>
+          <label class="neu-cmd__sr-only" [for]="searchId">{{ text('Search commands', 'Buscar comandos') }}</label>
           <input [id]="searchId" class="neu-cmd__input" type="search"
-                 placeholder="Buscar comandos…" autocomplete="off"
+                 [placeholder]="text('Search commands…', 'Buscar comandos…')" autocomplete="off"
                  [attr.aria-controls]="resultsId" [value]="query()"
                  (input)="onQueryInput($event)" (keydown)="onSearchKeydown($event)" />
           <kbd class="neu-cmd__esc-hint" aria-hidden="true">ESC</kbd>
@@ -83,7 +84,7 @@ export class NeuCommandPaletteItemDirective {
 
         <div [id]="resultsId" class="neu-cmd__results">
           @if (results().length === 0) {
-            <p class="neu-cmd__empty" role="status">Sin resultados para "{{ query() }}"</p>
+            <p class="neu-cmd__empty" role="status">{{ text('No results for', 'Sin resultados para') }} "{{ query() }}"</p>
           } @else {
             @for (group of groups(); track group.key; let groupIndex = $index) {
               <section class="neu-cmd__group"
@@ -137,9 +138,9 @@ export class NeuCommandPaletteItemDirective {
         </div>
 
         <div class="neu-cmd__footer" aria-hidden="true">
-          <span><kbd>↑↓</kbd> navegar</span>
-          <span><kbd>↵</kbd> ejecutar</span>
-          <span><kbd>ESC</kbd> cerrar</span>
+          <span><kbd>↑↓</kbd> {{ text('navigate', 'navegar') }}</span>
+          <span><kbd>↵</kbd> {{ text('activate', 'ejecutar') }}</span>
+          <span><kbd>ESC</kbd> {{ text('close', 'cerrar') }}</span>
         </div>
         <ng-template #defaultItem let-command>
           @if (command.icon) {
@@ -161,6 +162,8 @@ export class NeuCommandPaletteItemDirective {
   styleUrl: './neu-command-palette.component.scss',
 })
 export class NeuCommandPaletteComponent {
+  private readonly locale = inject(NEURAL_LOCALE);
+  protected text(en: string, es: string): string { return this.locale.toLowerCase().startsWith('es') ? es : en; }
   readonly commands = input<readonly NeuCommand[]>([]);
   readonly commandAction = output<NeuCommandAction>();
 

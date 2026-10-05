@@ -37,7 +37,7 @@ interface RenderedItem<T, K extends NeuVirtualListKey> {
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-virtual-list' },
   template: `
-    <div #viewport class="neu-virtual-list__viewport" role="list"
+    <div #viewport class="neu-virtual-list__viewport" role="list" tabindex="0"
       [style.block-size.px]="viewportBlockSize()">
       <div class="neu-virtual-list__spacer" aria-hidden="true"
         [style.block-size.px]="window().topSpacer"></div>

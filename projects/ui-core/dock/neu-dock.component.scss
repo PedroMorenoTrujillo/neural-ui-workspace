@@ -1,10 +1,14 @@
 .neu-dock {
   display: block;
   inline-size: fit-content;
+  max-inline-size: 100%;
+  min-inline-size: 0;
 }
 
 .neu-dock__container {
   inline-size: max-content;
+  max-inline-size: 100%;
+  box-sizing: border-box;
   padding: 0.5rem;
   border: 1px solid color-mix(in srgb, var(--neu-border, #cbd5e1) 85%, transparent);
   border-radius: 1.1rem;
@@ -18,7 +22,9 @@
   display: flex;
   align-items: flex-end;
   gap: 0.35rem;
-  min-inline-size: min-content;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-inline-size: 0;
   margin: 0;
   padding: 0;
   list-style: none;

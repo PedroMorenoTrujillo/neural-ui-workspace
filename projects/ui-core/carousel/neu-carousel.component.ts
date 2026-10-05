@@ -1,5 +1,6 @@
 import { Component, ContentChild, DestroyRef, Directive, PLATFORM_ID, TemplateRef, afterNextRender, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
 export interface NeuCarouselResponsiveOption { breakpoint: string | number; numVisible: number; numScroll?: number; }
 export interface NeuCarouselItemContext<T> { $implicit: T; index: number; }
@@ -31,7 +32,7 @@ export interface NeuCarouselPageEvent { page: number; first: number; }
         </div>
         <div class="neu-carousel__controls">
           @if (showIndicators() && pageCount() > 1) { <div class="neu-carousel__indicators" role="group" [attr.aria-label]="indicatorLabel()"> @for (pageNumber of pages(); track pageNumber) { <button type="button" [attr.aria-pressed]="pageNumber === page()" [attr.aria-label]="pageLabel(pageNumber)" [class.neu-carousel__indicator--active]="pageNumber === page()" (click)="setPage(pageNumber, true)"><span aria-hidden="true"></span></button> } </div> }
-          @if (autoplayInterval() > 0 && pageCount() > 1) { <button type="button" class="neu-carousel__autoplay" [attr.aria-label]="(paused() ? 'Resume ' : 'Pause ') + ariaLabel()" [attr.aria-pressed]="paused()" (click)="paused.update(value => !value)">{{ paused() ? '▶' : 'Ⅱ' }}</button> }
+          @if (autoplayInterval() > 0 && pageCount() > 1) { <button type="button" class="neu-carousel__autoplay" [attr.aria-label]="autoplayLabel()" [attr.aria-pressed]="paused()" (click)="paused.update(value => !value)">{{ paused() ? '▶' : 'Ⅱ' }}</button> }
         </div>
       } @else { <div class="neu-carousel__empty" role="status">{{ emptyLabel() }}</div> }
       @if (footerTemplate) { <ng-container [ngTemplateOutlet]="footerTemplate.templateRef" /> }
@@ -42,7 +43,19 @@ export class NeuCarouselComponent<T = unknown> {
   private readonly _destroyRef = inject(DestroyRef); private readonly _document = inject(DOCUMENT); private readonly _platformId = inject(PLATFORM_ID); private readonly _isBrowser = isPlatformBrowser(this._platformId); private _timer: ReturnType<typeof setTimeout> | null = null; private _pointerStart: { x: number; y: number } | null = null; private _lastEffectiveScroll = 1; private readonly _viewportWidth = signal<number | null>(null); private readonly _reducedMotion = signal(false); private readonly _browserReady = signal(false); protected readonly paused = signal(false);
   readonly items = input<readonly T[]>([]); readonly pageInput = input<number | null>(null, { alias: 'page' }); readonly initialPage = input(0); readonly numVisible = input(1); readonly numScroll = input(1); readonly responsiveOptions = input<readonly NeuCarouselResponsiveOption[]>([]); readonly circular = input(false); readonly autoplayInterval = input(0); readonly showIndicators = input(true); readonly showNavigators = input(true); readonly orientation = input<'horizontal' | 'vertical'>('horizontal'); readonly verticalViewPortHeight = input('20rem'); readonly ariaLabel = input('Carousel'); readonly indicatorLabel = input('Carousel pages'); readonly previousLabel = input('Previous items'); readonly nextLabel = input('Next items'); readonly emptyLabel = input('No items'); readonly trackBy = input<(index: number, item: T) => unknown>((index) => index);
   readonly pageChange = output<NeuCarouselPageEvent>(); @ContentChild(NeuCarouselItemDirective) readonly itemTemplate?: NeuCarouselItemDirective<T>; @ContentChild(NeuCarouselHeaderDirective) readonly headerTemplate?: NeuCarouselHeaderDirective; @ContentChild(NeuCarouselFooterDirective) readonly footerTemplate?: NeuCarouselFooterDirective; private readonly _page = signal<number | null>(null);
+  private readonly locale = inject(NEURAL_LOCALE);
+  private readonly activeLocale = signal(this._document.documentElement.lang || this.locale);
+  protected readonly autoplayLabel = computed(() => {
+    const es = this.activeLocale().toLowerCase().startsWith('es');
+    return (this.paused() ? (es ? 'Reanudar ' : 'Resume ') : (es ? 'Pausar ' : 'Pause ')) + this.ariaLabel();
+  });
   constructor() {
+    const Observer = this._document.defaultView?.MutationObserver;
+    if (Observer) {
+      const observer = new Observer(() => this.activeLocale.set(this._document.documentElement.lang || this.locale));
+      observer.observe(this._document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      this._destroyRef.onDestroy(() => observer.disconnect());
+    }
     if (this._isBrowser) {
       afterNextRender(() => {
         const view = this._document.defaultView;
@@ -101,8 +114,8 @@ export class NeuCarouselComponent<T = unknown> {
     const towardsPrevious = delta > 0 !== (this.orientation() === 'horizontal' && this.isRtl(event.currentTarget));
     towardsPrevious ? this.previous() : this.next();
   }
-  itemLabel(index: number): string { return `Item ${index + 1} of ${this.items().length}`; }
-  pageLabel(page: number): string { return `Page ${page + 1} of ${this.pageCount()}`; }
+  itemLabel(index: number): string { return this.activeLocale().toLowerCase().startsWith('es') ? `Elemento ${index + 1} de ${this.items().length}` : `Item ${index + 1} of ${this.items().length}`; }
+  pageLabel(page: number): string { return this.activeLocale().toLowerCase().startsWith('es') ? `Página ${page + 1} de ${this.pageCount()}` : `Page ${page + 1} of ${this.pageCount()}`; }
   private isRtl(target: EventTarget | null): boolean {
     return target instanceof HTMLElement && (
       target.closest('[dir]')?.getAttribute('dir') === 'rtl' ||

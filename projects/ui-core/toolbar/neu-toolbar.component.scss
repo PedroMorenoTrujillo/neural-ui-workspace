@@ -2,6 +2,8 @@
   display: flex;
   align-items: center;
   width: 100%;
+  box-sizing: border-box;
+  min-inline-size: 0;
   gap: 8px;
   background: var(--neu-toolbar-bg, var(--neu-surface-1, #ffffff));
   color: var(--neu-toolbar-color, var(--neu-text, #111));
@@ -22,8 +24,8 @@
   }
 
   &--solid.neu-toolbar--brand {
-    background: var(--neu-toolbar-primary-bg, var(--neu-primary-dark, var(--neu-primary)));
-    color: var(--neu-toolbar-primary-color, #fff);
+    background: var(--neu-toolbar-primary-bg, var(--neu-primary-solid, var(--neu-primary)));
+    color: var(--neu-toolbar-primary-color, var(--neu-primary-solid-fg, #fff));
 
     .neu-button--ghost {
       color: rgb(255 255 255 / 0.92);
@@ -42,7 +44,7 @@
 
   &--soft.neu-toolbar--brand {
     background: var(--neu-primary-soft);
-    color: var(--neu-primary-dark, var(--neu-primary));
+    color: var(--neu-text);
   }
 
   &--ghost {
@@ -100,7 +102,14 @@
 
     .neu-toolbar__section {
       min-width: 0;
+      max-inline-size: 100%;
+      flex-wrap: wrap;
+      overflow-wrap: anywhere;
     }
+  }
+
+  &--nowrap {
+    overflow-x: auto;
   }
 }
 

@@ -33,7 +33,7 @@ describe('NeuEmptyStateComponent', () => {
 
   it('should render title', () => {
     expect(fixture.nativeElement.textContent).toContain('No hay datos');
-    expect(fixture.nativeElement.querySelector('neu-icon-outlet')?.textContent?.trim()).toBe('—');
+    expect(fixture.nativeElement.querySelector('neu-icon-outlet svg path')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
   });
 

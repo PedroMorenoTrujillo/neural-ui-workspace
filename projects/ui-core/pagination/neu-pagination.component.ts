@@ -65,7 +65,7 @@ import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select
       </button>
 
       <!-- Páginas -->
-      @for (p of pages(); track p) {
+      @for (p of pages(); track p === -1 ? 'gap-' + $index : p) {
         @if (p === -1) {
           <span class="neu-pagination__ellipsis" aria-hidden="true">…</span>
         } @else {

@@ -2,8 +2,10 @@ import {
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
 } from '@angular/core';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
 export type NeuProgressTone = 'brand' | 'success' | 'warning' | 'danger';
 
@@ -43,8 +45,8 @@ export type NeuProgressTone = 'brand' | 'success' | 'warning' | 'danger';
         [attr.aria-valuenow]="indeterminate() ? null : clampedValue()"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="100"
-        [attr.aria-label]="label() || 'Progreso'"
-        [attr.aria-valuetext]="indeterminate() ? 'Cargando...' : clampedValue() + '%'"
+        [attr.aria-label]="label() || defaultLabel"
+        [attr.aria-valuetext]="indeterminate() ? loadingText : clampedValue() + '%'"
       >
         <div
           class="neu-progress__fill"
@@ -57,6 +59,10 @@ export type NeuProgressTone = 'brand' | 'success' | 'warning' | 'danger';
   styleUrl: './neu-progress-bar.component.scss',
 })
 export class NeuProgressBarComponent {
+  private readonly spanish = (inject(NEURAL_LOCALE, { optional: true }) ?? 'en').toLowerCase().startsWith('es');
+  protected readonly defaultLabel = this.spanish ? 'Progreso' : 'Progress';
+  protected readonly loadingText = this.spanish ? 'Cargando…' : 'Loading…';
+
   /** Valor de 0 a 100 / Value from 0 to 100 */
   value = input<number>(0);
 

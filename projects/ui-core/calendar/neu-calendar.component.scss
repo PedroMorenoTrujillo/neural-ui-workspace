@@ -624,3 +624,42 @@ html[data-theme='dark'] {
     font-size: 11px;
   }
 }
+
+// Compact month navigation keeps all seven days visible in narrow containers.
+// The selected day's complete event content remains available in the agenda.
+@container (max-width: 480px) {
+  .neu-calendar--month {
+    .neu-calendar__weekdays,
+    .neu-calendar__month-grid {
+      min-width: 0;
+      gap: 2px;
+    }
+    .neu-calendar__month-grid { grid-auto-rows: 48px; }
+    .neu-calendar__weekday { padding: 0; font-size: 9px; letter-spacing: 0; }
+    .neu-calendar__day { padding: 1px; border-radius: 6px; gap: 0; }
+    .neu-calendar__day-top { height: 100%; }
+    .neu-calendar__day-select {
+      position: relative;
+      height: 100%;
+      justify-content: center;
+      padding-block-end: 6px;
+    }
+    .neu-calendar__day-number { width: 24px; height: 24px; font-size: 11px; }
+    .neu-calendar__day-count {
+      position: absolute;
+      bottom: 3px;
+      width: 5px;
+      height: 5px;
+      min-height: 0;
+      padding: 0;
+      font-size: 0;
+      background: var(--neu-primary);
+    }
+    .neu-calendar__event-list { display: none; }
+  }
+  .neu-calendar--week {
+    .neu-calendar__weekdays { display: none; }
+    .neu-calendar__week-grid { grid-template-columns: minmax(0, 1fr); }
+    .neu-calendar__week-day { min-height: 100px; }
+  }
+}

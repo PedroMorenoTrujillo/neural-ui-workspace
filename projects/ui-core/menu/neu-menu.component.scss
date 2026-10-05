@@ -3,6 +3,12 @@
   display: block;
 }
 
+.neu-menu-button {
+  display: inline-flex;
+  align-items: center;
+  max-inline-size: 100%;
+}
+
 .neu-menu__list {
   min-width: 12rem;
   border: 1px solid var(--neu-border, #d1d5db);

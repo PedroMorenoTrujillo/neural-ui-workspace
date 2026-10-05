@@ -18,6 +18,7 @@
   ],
   "closedImperativeDeclarations": [
     "NeuAutocompleteComponent",
+    "NeuCommandPaletteComponent",
     "NeuContextMenuDirective",
     "NeuImageViewerDirective",
     "NeuListboxComponent",
@@ -98,6 +99,7 @@
     "NeuUrlStateService": ["clearParams", "getParam", "params", "patchParams", "setParam"]
   },
   "publicImperativeMembers": {
+    "NeuCommandPaletteComponent": ["close", "open"],
     "NeuAutocompleteComponent": [
       "clear",
       "close",
@@ -108,10 +110,12 @@
       "selectOption"
     ],
     "NeuContextMenuDirective": ["close", "openAt"],
+    "NeuFormFieldComponent": ["mergeDescribedBy"],
     "NeuImageViewerDirective": ["close", "open"],
     "NeuListboxComponent": ["resetFilter", "setFilter", "toggleAll"],
     "NeuMenuComponent": ["activate"],
     "NeuPopoverDirective": ["close", "open", "toggle"],
+    "NeuScrollAreaComponent": ["scrollTo"],
     "NeuSelectComponent": [
       "clear",
       "focus",

@@ -69,6 +69,12 @@ describe('NeuMenuComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Edit');
   });
 
+  it('renders a model badge, including zero', () => {
+    fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit', badge: 0 }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('neu-badge').textContent.trim()).toBe('0');
+  });
+
   it('emits item clicks', () => {
     const spy = vi.spyOn(fixture.componentInstance.itemClick, 'emit');
     fixture.nativeElement.querySelector('button').click();
@@ -365,6 +371,13 @@ describe('NeuMenuButtonComponent', () => {
     trigger.click();
     fixture.detectChanges();
     expect(document.getElementById(id!)).not.toBeNull();
+  });
+
+  it('keeps the label visible when only an item template is projected', () => {
+    const custom = TestBed.createComponent(CustomMenuItemHostComponent);
+    custom.detectChanges();
+    const trigger = custom.nativeElement.querySelector('neu-menu-button > button');
+    expect(trigger.textContent.trim()).toBe('Menu');
   });
 
   it('keeps a disabled trigger closed for pointer and keyboard requests', () => {

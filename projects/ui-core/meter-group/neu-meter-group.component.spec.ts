@@ -13,6 +13,15 @@ function mk() {
 }
 
 describe('NeuMeterGroupComponent', () => {
+  it('cycles the default palette consistently after five segments', () => {
+    const fixture = TestBed.createComponent(NeuMeterGroupComponent);
+    fixture.componentRef.setInput('items', Array.from({ length: 7 }, (_, i) => ({ label: `Item ${i}`, value: 10 })));
+    fixture.detectChanges();
+    const segments = [...fixture.nativeElement.querySelectorAll('.neu-meter-group__segment')] as HTMLElement[];
+    const dots = [...fixture.nativeElement.querySelectorAll('.neu-meter-group__legend-dot')] as HTMLElement[];
+    expect(segments.map(element => element.dataset['index'])).toEqual(['0', '1', '2', '3', '4', '0', '1']);
+    expect(dots.map(element => element.dataset['index'])).toEqual(segments.map(element => element.dataset['index']));
+  });
   beforeEach(() => mk().compileComponents());
 
   it('should render', async () => {

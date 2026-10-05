@@ -15,7 +15,7 @@ import {
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
-import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE, NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
 import {
   NeuColorMode,
   NeuSrgbColor,
@@ -126,7 +126,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
         class="neu-cp__panel"
         [id]="panelId"
         role="dialog"
-        aria-label="Color picker"
+        [attr.aria-label]="text('Color picker', 'Selector de color')"
         (focusin)="onBoundaryFocusIn()"
       >
         <div
@@ -134,7 +134,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
           role="slider"
           aria-roledescription="two-dimensional color area"
           [attr.tabindex]="_isDisabled() ? -1 : 0"
-          aria-label="Saturation and brightness"
+          [attr.aria-label]="text('Saturation and brightness', 'Saturación y brillo')"
           aria-valuemin="0"
           aria-valuemax="100"
           [attr.aria-valuenow]="_roundedHsv().saturation"
@@ -171,7 +171,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
             (change)="finishColorChange()"
             (pointercancel)="cancelColorChange()"
             (lostpointercapture)="cancelColorChange()"
-            aria-label="Hue"
+            [attr.aria-label]="text('Hue', 'Tono')"
             [attr.aria-valuetext]="_roundedHsv().hue + ' degrees'"
           />
           <span class="neu-cp__slider-value">{{ _roundedHsv().hue }}°</span>
@@ -193,7 +193,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
                 (change)="finishColorChange()"
                 (pointercancel)="cancelColorChange()"
                 (lostpointercapture)="cancelColorChange()"
-                aria-label="Alpha"
+                [attr.aria-label]="text('Alpha', 'Opacidad')"
                 [attr.aria-valuetext]="_alphaPercent() + ' percent opacity'"
               />
             </span>
@@ -201,7 +201,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
           </label>
         }
 
-        <div class="neu-cp__swatches" role="group" aria-label="Preset colors">
+        <div class="neu-cp__swatches" role="group" [attr.aria-label]="text('Preset colors', 'Colores predefinidos')">
           @for (swatch of _swatches; track swatch) {
             <button
               type="button"
@@ -214,7 +214,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
           }
         </div>
 
-        <div class="neu-cp__mode-tabs" role="group" aria-label="Color format">
+        <div class="neu-cp__mode-tabs" role="group" [attr.aria-label]="text('Color format', 'Formato de color')">
           @for (modeOption of _modes; track modeOption) {
             <button
               type="button"
@@ -233,7 +233,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
           <div
             class="neu-cp__channels"
             role="group"
-            [attr.aria-label]="_activeMode().toUpperCase() + ' channels'"
+            [attr.aria-label]="_activeMode().toUpperCase() + text(' channels', ' canales')"
           >
             @for (channel of _channelViews(); track channel.key) {
               <label class="neu-cp__channel">
@@ -247,7 +247,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
                   [value]="channel.value"
                   [disabled]="_isDisabled()"
                   [readonly]="readonly()"
-                  [attr.aria-label]="channel.label"
+                  [attr.aria-label]="channelLabel(channel.label)"
                   (focus)="beginColorChange()"
                   (input)="_onChannelInput(channel.key, $any($event.target).value)"
                   (change)="finishColorChange()"
@@ -268,7 +268,7 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
             [disabled]="_isDisabled()"
             [readonly]="readonly()"
             [attr.aria-invalid]="_textInvalid() ? 'true' : null"
-            [attr.aria-label]="'CSS color value in ' + _activeMode() + ' format'"
+            [attr.aria-label]="text('CSS colour value in ', 'Valor de color CSS en formato ') + _activeMode()"
             (focus)="beginColorChange()"
             (input)="_onTextChange($any($event.target).value)"
             (keydown)="_onTextKeydown($event)"
@@ -303,6 +303,12 @@ const DEFAULT_COLOR_VALUE = serializeColor(DEFAULT_COLOR, 'hex', false, 210);
   styleUrl: './neu-color-picker.component.scss',
 })
 export class NeuColorPickerComponent implements FormValueControl<string> {
+  private readonly locale = inject(NEURAL_LOCALE);
+  protected text(en: string, es: string): string { return this.locale.toLowerCase().startsWith('es') ? es : en; }
+  protected channelLabel(label: string): string {
+    const labels: Record<string, string> = { Alpha: 'Opacidad', Hue: 'Tono', Saturation: 'Saturación', Lightness: 'Luminosidad', 'Perceptual lightness': 'Luminosidad perceptiva', Chroma: 'Croma', Red: 'Rojo', Green: 'Verde', Blue: 'Azul' };
+    return this.text(label, labels[label] ?? label);
+  }
   readonly value = model<string>(DEFAULT_COLOR_VALUE);
   readonly mode = input<NeuColorMode>('hex');
   readonly showAlpha = input(false);

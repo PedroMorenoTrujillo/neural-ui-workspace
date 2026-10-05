@@ -48,18 +48,18 @@ function meterValue(value: number): number {
           [style.width.%]="item.pct"
           [style.background]="item.color || null"
           [attr.title]="item.label + ': ' + item.value"
-          [attr.data-index]="$index"
+          [attr.data-index]="$index % 5"
         ></div>
       }
     </div>
     @if (showLegend()) {
-      <ul class="neu-meter-group__legend" [attr.aria-label]="ariaLabel() + ' details'">
+      <ul class="neu-meter-group__legend" [attr.aria-label]="ariaLabel()">
         @for (item of _segments(); track $index) {
           <li class="neu-meter-group__legend-item">
             <span
               class="neu-meter-group__legend-dot"
               [style.background]="item.color || null"
-              [attr.data-index]="$index"
+              [attr.data-index]="$index % 5"
             ></span>
             <span class="neu-meter-group__legend-label">{{ item.label }}</span>
             <span class="neu-meter-group__legend-value">{{ item.pct | number: '1.0-1' }}%</span>
@@ -109,7 +109,7 @@ export class NeuMeterGroupComponent {
     return this.items().map((item) => {
       const value = Math.min(remaining, meterValue(item.value));
       remaining -= value;
-      return { ...item, pct: (value / total) * 100 };
+      return { ...item, value, pct: (value / total) * 100 };
     });
   });
 }

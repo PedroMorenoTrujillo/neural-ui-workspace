@@ -216,7 +216,7 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                 }
               </div>
             } @empty {
-              <div class="neu-pick-list__empty" role="status">{{ emptyFilterLabel() }}</div>
+              <div class="neu-pick-list__empty" role="option" aria-disabled="true" aria-selected="false">{{ emptyFilterLabel() }}</div>
             }
           </div>
           <div class="neu-pick-list__toolbar" [attr.aria-label]="reorderToolbarLabel(location)">

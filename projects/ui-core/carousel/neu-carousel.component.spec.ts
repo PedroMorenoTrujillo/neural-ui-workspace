@@ -12,6 +12,21 @@ describe('NeuCarouselComponent', () => {
   beforeEach(() => { originalInnerWidth = window.innerWidth; });
   afterEach(() => Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth }));
 
+  it('localizes item and page names from the document language', () => {
+    const original = document.documentElement.lang;
+    document.documentElement.lang = 'es';
+    try {
+      const fixture = TestBed.createComponent(NeuCarouselComponent<string>);
+      fixture.componentRef.setInput('items', ['Uno', 'Dos']);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.itemLabel(0)).toBe('Elemento 1 de 2');
+      expect(fixture.componentInstance.pageLabel(0)).toBe('Página 1 de 2');
+      expect(fixture.nativeElement.querySelector('.neu-carousel__indicators button').getAttribute('aria-label')).toBe('Página 1 de 2');
+    } finally {
+      document.documentElement.lang = original;
+    }
+  });
+
   it('pages generic items truthfully, including a final partial page', () => {
     const fixture = TestBed.createComponent(NeuCarouselComponent<string>);
     fixture.componentRef.setInput('items', ['a', 'b', 'c', 'd', 'e']); fixture.componentRef.setInput('numVisible', 2); fixture.componentRef.setInput('numScroll', 2); fixture.detectChanges();

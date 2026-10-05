@@ -42,7 +42,7 @@ export interface NeuTimelineGridSlotSelection {
     '[style.--neu-timeline-grid-min-column-width]': 'minColumnWidth()',
   },
   template: `
-    <div class="neu-timeline-grid">
+    <div class="neu-timeline-grid" tabindex="0">
       <div class="neu-timeline-grid__header">
         <div class="neu-timeline-grid__corner" aria-hidden="true"></div>
         <div

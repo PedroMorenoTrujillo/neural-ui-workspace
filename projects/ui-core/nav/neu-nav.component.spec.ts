@@ -1460,7 +1460,7 @@ describe('NeuNavComponent', () => {
       currentTarget: group,
     } as unknown as MouseEvent);
     expect(f.componentInstance.flyoutState()?.left).toBeNull();
-    expect(f.componentInstance.flyoutState()?.right).toBe(window.innerWidth - 50);
+    expect(f.componentInstance.flyoutState()?.right).toBe(window.innerWidth - 240 - 14);
     f.detectChanges();
     const panel = f.nativeElement.querySelector('.neu-nav__flyout') as HTMLElement;
     expect(panel.getAttribute('role')).toBe('navigation');

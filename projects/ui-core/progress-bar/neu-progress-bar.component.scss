@@ -15,18 +15,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .neu-progress__fill {
-    transition: none;
-  }
-
-  .neu-progress__fill--indeterminate {
-    width: 100% !important;
-    animation: none;
-    opacity: 0.6;
-  }
-}
-
 .neu-progress {
   display: flex;
   flex-direction: column;
@@ -116,5 +104,17 @@
   &--indeterminate {
     width: 50% !important;
     animation: neu-progress-indeterminate 1.4s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-progress__fill {
+    transition: none;
+  }
+
+  .neu-progress__fill--indeterminate {
+    width: 100% !important;
+    animation: none;
+    opacity: 0.6;
   }
 }

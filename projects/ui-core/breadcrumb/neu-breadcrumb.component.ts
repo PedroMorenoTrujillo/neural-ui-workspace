@@ -10,7 +10,7 @@ export interface NeuBreadcrumbItem {
   route?: string | string[];
   /** URL externa / External URL */
   url?: string;
-  /** Optional neural-icons name. */
+  /** Optional application icon key resolved through the Core icon resolver. */
   icon?: NeuIconKey;
 }
 

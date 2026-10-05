@@ -3,11 +3,14 @@
 // ViewEncapsulation.None — prefijo BEM .neu-timeline
 // ============================================================
 
+neu-timeline { display: block; min-inline-size: 0; max-inline-size: 100%; }
+
 .neu-timeline {
   list-style: none;
   margin: 0;
   padding: 0;
   font-family: var(--neu-font-sans);
+  min-inline-size: 0;
 }
 
 // ---- Item ----
@@ -76,12 +79,15 @@
 // ---- Contenido / Content ----
 .neu-timeline__content {
   flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   padding-bottom: var(--neu-space-5);
   padding-top: 2px;
 }
 
 .neu-timeline__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--neu-space-3);
@@ -96,7 +102,7 @@
 
 .neu-timeline__time {
   font-size: var(--neu-text-xs);
-  color: var(--neu-text-disabled);
+  color: var(--neu-text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }

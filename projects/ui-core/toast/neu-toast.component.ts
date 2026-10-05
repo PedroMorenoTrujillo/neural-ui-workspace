@@ -3,6 +3,7 @@ import { NeuToastService } from './neu-toast.service';
 import { NeuToastTone } from './neu-toast.types';
 import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
 import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { neuIconCircleCheck as iconCircleCheck } from '@neural-ui/core/internal';
 import { neuIconCircleX as iconCircleX } from '@neural-ui/core/internal';
 import { neuIconInfo as iconInfo } from '@neural-ui/core/internal';
@@ -64,7 +65,7 @@ const TOAST_ICONS: Record<NeuToastTone, NeuIconKey> = {
         <button
           class="neu-toast__close"
           type="button"
-          [attr.aria-label]="'Cerrar'"
+          [attr.aria-label]="closeLabel"
           (click)="toastService.dismiss(toast.id)"
         >
           <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1rem" aria-hidden="true" />
@@ -75,6 +76,7 @@ const TOAST_ICONS: Record<NeuToastTone, NeuIconKey> = {
   styleUrl: './neu-toast.component.scss',
 })
 export class NeuToastContainerComponent {
+  protected readonly closeLabel = inject(NEURAL_LOCALE).toLowerCase().startsWith('es') ? 'Cerrar' : 'Close';
   protected readonly iconFallbackPath = neuStructuralIconPath;
   protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconX = iconX;

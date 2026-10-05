@@ -19,7 +19,9 @@
 /* ── Pane ─────────────────────────────────────────────────────── */
 .neu-splitter__pane {
   overflow: auto;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-inline-size: 0;
+  min-block-size: 0;
 }
 
 /* ── Handle ───────────────────────────────────────────────────── */

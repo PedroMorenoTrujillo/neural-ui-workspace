@@ -284,7 +284,8 @@ describe('NeuUploaderComponent N2-009', () => {
     const dropzone = fixture.nativeElement.querySelector('.neu-uploader__dropzone') as HTMLElement;
     dropzone.click();
     expect(picker).toHaveBeenCalledTimes(1);
-    (dropzone.querySelector('.neu-uploader__actions button') as HTMLButtonElement).click();
+    expect(dropzone.querySelector('button')).toBeNull();
+    (fixture.nativeElement.querySelector('.neu-uploader__actions button') as HTMLButtonElement).click();
     expect(picker).toHaveBeenCalledTimes(2);
     const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
     dropzone.dispatchEvent(space);

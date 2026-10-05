@@ -1,18 +1,25 @@
+:host { display: block; min-inline-size: 0; max-inline-size: 100%; }
 .neu-carousel__root { display: grid; gap: var(--neu-space-3); max-inline-size: 100%; }
 .neu-carousel__content { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--neu-space-2); }
 .neu-carousel__viewport { overflow: hidden; min-inline-size: 0; }
+.neu-carousel__content:has(> .neu-carousel__viewport:only-child) { grid-template-columns: minmax(0, 1fr); }
 .neu-carousel__track { display: grid; gap: var(--neu-space-3); }
 .neu-carousel__item { min-inline-size: 0; }
 .neu-carousel__nav { inline-size: 2.75rem; block-size: 2.75rem; border: 1px solid var(--neu-border); border-radius: 999px; background: var(--neu-surface); color: var(--neu-text); font-size: 1.5rem; cursor: pointer; }
 .neu-carousel__nav:disabled { opacity: .45; }
 .neu-carousel__root:dir(rtl) .neu-carousel__nav { transform: scaleX(-1); }
 .neu-carousel__controls { display: flex; justify-content: center; align-items: center; gap: var(--neu-space-2); min-block-size: 2.75rem; }
-.neu-carousel__indicators { display: flex; justify-content: center; gap: 0; }
+.neu-carousel__indicators { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; min-inline-size: 0; }
 .neu-carousel__indicators button { inline-size: 2rem; block-size: 2.75rem; padding: 0; border: 0; border-radius: 999px; background: transparent; display: grid; place-items: center; cursor: pointer; }
 .neu-carousel__indicators button span { inline-size: .6rem; block-size: .6rem; border-radius: 999px; background: var(--neu-border); transition: transform var(--neu-transition), background var(--neu-transition); }
 .neu-carousel__indicators .neu-carousel__indicator--active span { background: var(--neu-primary); transform: scale(1.25); }
 .neu-carousel__autoplay { inline-size: 2.75rem; block-size: 2.75rem; border: 1px solid var(--neu-border); border-radius: 999px; background: var(--neu-surface); color: var(--neu-text); cursor: pointer; }
 .neu-carousel__nav:focus-visible, .neu-carousel__indicators button:focus-visible, .neu-carousel__autoplay:focus-visible { outline: 2px solid transparent; box-shadow: var(--neu-focus-ring); }
-.neu-carousel--vertical .neu-carousel__content { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; }
-.neu-carousel--vertical .neu-carousel__track { grid-template-columns: 1fr !important; }
+:host(.neu-carousel--vertical) .neu-carousel__content { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; }
+:host(.neu-carousel--vertical) .neu-carousel__track { grid-template-columns: 1fr !important; }
+@media (max-width: 480px) {
+  :host(:not(.neu-carousel--vertical)) .neu-carousel__content { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-items: center; }
+  :host(:not(.neu-carousel--vertical)) .neu-carousel__viewport { grid-column: 1 / -1; grid-row: 1; justify-self: stretch; }
+  :host(:not(.neu-carousel--vertical)) .neu-carousel__nav { grid-row: 2; }
+}
 @media (prefers-reduced-motion: reduce) { .neu-carousel__indicators .neu-carousel__indicator--active span { transform: none; } .neu-carousel__indicators button span { transition: none; } }

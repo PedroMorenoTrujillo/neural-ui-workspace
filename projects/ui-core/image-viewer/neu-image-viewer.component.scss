@@ -22,17 +22,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
   flex-shrink: 0;
 }
 
 .neu-iv__counter {
+  flex-shrink: 0;
+  white-space: nowrap;
   font-size: 0.875rem;
   color: var(--neu-image-viewer-muted);
 }
 
 .neu-iv__toolbar-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 4px;
   min-inline-size: 0;
   overflow-x: auto;

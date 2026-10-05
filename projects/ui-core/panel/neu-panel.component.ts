@@ -39,9 +39,9 @@ export type NeuScrollAreaVariant = 'auto' | 'hover' | 'scroll' | 'always' | 'hid
   host: { class: 'neu-panel' },
   template: `
     <section class="neu-panel__surface">
-      @if (header()) {
+      @if (header() || collapsible()) {
         <header class="neu-panel__header">
-          <h3>{{ header() }}</h3>
+          @if (header()) { <h3>{{ header() }}</h3> }
           @if (collapsible()) {
             <button type="button" (click)="toggle()" [attr.aria-expanded]="!effectiveCollapsed()" [attr.aria-controls]="_bodyId">
               {{ effectiveCollapsed() ? expandLabel() : collapseLabel() }}
@@ -191,6 +191,7 @@ export class NeuFieldsetComponent {
         role="scrollbar"
         tabindex="0"
         aria-orientation="vertical"
+        [attr.aria-label]="ariaLabel() || viewportId"
         [attr.aria-controls]="viewportId"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="maxScrollY()"
@@ -205,6 +206,7 @@ export class NeuFieldsetComponent {
         role="scrollbar"
         tabindex="0"
         aria-orientation="horizontal"
+        [attr.aria-label]="ariaLabel() || viewportId"
         [attr.aria-controls]="viewportId"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="maxScrollX()"

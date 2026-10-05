@@ -3,9 +3,18 @@
 // ViewEncapsulation.None — prefijo BEM .neu-tabs
 // ============================================================
 
+neu-tabs,
+neu-tab-panel {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
 .neu-tabs {
   display: flex;
   flex-direction: column;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 // ---- Barra de pestañas / Tab bar ----
@@ -111,7 +120,13 @@
 
 .neu-tab-panel {
   padding-top: 1.5rem;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   animation: neu-tab-fade 180ms ease;
+}
+
+.neu-tabs--flush > .neu-tabs__panels > neu-tab-panel > .neu-tab-panel {
+  padding-top: 0;
 }
 
 @keyframes neu-tab-fade {

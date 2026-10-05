@@ -62,6 +62,7 @@ describe('NeuTagComponent', () => {
     expect(direct.nativeElement.querySelector('neu-icon-outlet svg')).toBeNull();
     expect(direct.nativeElement.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
     expect(direct.nativeElement.getAttribute('aria-label')).toBe('Deployment status');
+    expect(direct.nativeElement.getAttribute('role')).toBe('img');
     expect(direct.componentInstance.iconTemplate).toBeUndefined();
   });
 
@@ -72,6 +73,7 @@ describe('NeuTagComponent', () => {
     expect(direct.nativeElement.textContent).toContain('Stable');
     expect(direct.nativeElement.querySelector('button')).toBeNull();
     expect(direct.nativeElement.getAttribute('tabindex')).toBeNull();
+    expect(direct.nativeElement.getAttribute('role')).toBeNull();
   });
 
   it('renders a supplied icon template ahead of its value', async () => {

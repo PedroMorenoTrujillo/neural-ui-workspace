@@ -8376,7 +8376,7 @@
           "name": "close",
           "kind": "method",
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
+          "status": "SUPPORTED",
           "signature": "close(): void;"
         },
         {
@@ -8384,7 +8384,7 @@
           "name": "open",
           "kind": "method",
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
+          "status": "SUPPORTED",
           "signature": "open(): void;"
         },
         {
@@ -13197,7 +13197,7 @@
           "name": "mergeDescribedBy",
           "kind": "method",
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
+          "status": "SUPPORTED",
           "signature": "mergeDescribedBy(...ids: Array<string | null | undefined>): string;"
         },
         {
@@ -23810,7 +23810,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenuButtonComponent, \"neu-menu-button\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n    \"openChange\": \"openChange\";\n}, [\n    \"itemTpl\"\n], [\n    \"*\"\n], true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuMenuButtonComponent, \"neu-menu-button\", never, {\n    \"items\": {\n        \"alias\": \"items\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"itemClick\": \"itemClick\";\n    \"openChange\": \"openChange\";\n}, [\n    \"itemTpl\"\n], [\n    \"ng-template[neuMenuItem]\",\n    \"*\"\n], true, never>;"
         },
         {
           "id": "./menu#NeuMenuButtonComponent.property:ɵfac",
@@ -27032,7 +27032,7 @@
           "name": "scrollTo",
           "kind": "method",
           "static": false,
-          "status": "INTERNAL/UNSUPPORTED",
+          "status": "SUPPORTED",
           "signature": "scrollTo(options: ScrollToOptions): void;"
         },
         {
@@ -35463,7 +35463,7 @@
           "kind": "property",
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "readonly stepAriaLabel: (step: NeuStepperStep) => string;"
+          "signature": "readonly stepAriaLabel: (step: NeuStepperStep, index?: number) => string;"
         },
         {
           "id": "./stepper#NeuStepperComponent.property:stepTooltip",
@@ -66660,10 +66660,10 @@
     },
     "publicSymbols": 5316,
     "statuses": {
-      "SUPPORTED": 3347,
+      "SUPPORTED": 3351,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1969,
+      "INTERNAL/UNSUPPORTED": 1965,
       "REVIEW": 0
     },
     "bindings": {

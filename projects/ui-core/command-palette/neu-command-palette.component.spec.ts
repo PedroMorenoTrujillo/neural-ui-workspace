@@ -119,7 +119,7 @@ describe('NeuCommandPaletteComponent — Neural 2', () => {
     const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
     const input = dialog.querySelector('input[type="search"]') as HTMLInputElement;
     expect(dialog.getAttribute('aria-modal')).toBe('true');
-    expect(input.labels?.[0]?.textContent).toContain('Buscar comandos');
+    expect(input.labels?.[0]?.textContent).toContain('Search commands');
     expect(input.getAttribute('aria-controls')).toBe(dialog.querySelector('.neu-cmd__results')?.id);
     expect(dialog.querySelectorAll('button.neu-cmd__action').length).toBe(1);
     expect(dialog.querySelectorAll('a.neu-cmd__action').length).toBe(2);

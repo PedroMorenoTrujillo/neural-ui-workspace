@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuProgressBarComponent } from './neu-progress-bar.component';
 
 @Component({
@@ -162,6 +163,20 @@ describe('NeuProgressBarComponent', () => {
     df.componentRef.setInput('indeterminate', true);
     df.detectChanges();
     expect(bar.hasAttribute('aria-valuenow')).toBe(false);
-    expect(bar.getAttribute('aria-valuetext')).toBe('Cargando...');
+    expect(bar.getAttribute('aria-valuetext')).toBe('Loading…');
+  });
+
+  it('uses the optional Spanish locale for default progress and loading names', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [NeuProgressBarComponent],
+      providers: [{ provide: NEURAL_LOCALE, useValue: 'es-ES' }],
+    });
+    const df = TestBed.createComponent(NeuProgressBarComponent);
+    df.componentRef.setInput('indeterminate', true);
+    df.detectChanges();
+    const bar = df.nativeElement.querySelector('[role="progressbar"]');
+    expect(bar.getAttribute('aria-label')).toBe('Progreso');
+    expect(bar.getAttribute('aria-valuetext')).toBe('Cargando…');
   });
 });

@@ -9,6 +9,7 @@
 
 .neu-panel__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -19,6 +20,8 @@
 .neu-panel__header h3 {
   margin: 0;
   font-size: 1rem;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .neu-panel__header button {
@@ -44,6 +47,8 @@
 .neu-panel__body,
 .neu-fieldset {
   padding: 1rem;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .neu-fieldset legend {

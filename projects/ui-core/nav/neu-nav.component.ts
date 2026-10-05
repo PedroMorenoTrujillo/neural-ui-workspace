@@ -360,6 +360,7 @@ export interface NeuNavItem {
         <div
           class="neu-nav__flyout"
           [style.top.px]="flyout.top"
+          [style.max-height]="'calc(100dvh - ' + flyout.top + 'px - 8px)'"
           [style.left.px]="flyout.left"
           [style.right.px]="flyout.right"
           role="navigation"
@@ -582,18 +583,22 @@ export class NeuNavComponent {
       clearTimeout(this._flyoutTimer);
       this._flyoutTimer = null;
     }
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const target = event.currentTarget;
     this.flyoutTrigger = target instanceof HTMLElement ? target.querySelector('button') : null;
+    const triggerRect = this.flyoutTrigger?.getBoundingClientRect();
+    const rect = triggerRect?.width ? triggerRect : (target as HTMLElement).getBoundingClientRect();
+    const panelWidth = Math.min(240, Math.max(0, window.innerWidth - 16));
+    const maxInset = Math.max(8, window.innerWidth - panelWidth - 14);
+    const clampInset = (value: number) => Math.max(8, Math.min(value, maxInset));
     const rtl =
       target instanceof HTMLElement &&
       (target.closest('[dir]')?.getAttribute('dir') === 'rtl' ||
         getComputedStyle(target).direction === 'rtl');
     this.flyoutState.set({
       item,
-      top: rect.top,
-      left: rtl ? null : rect.right,
-      right: rtl ? window.innerWidth - rect.left : null,
+      top: Math.max(8, Math.min(rect.top, window.innerHeight - 56)),
+      left: rtl ? null : clampInset(rect.right),
+      right: rtl ? clampInset(window.innerWidth - rect.left) : null,
     });
   }
 

@@ -26,6 +26,35 @@ class TestHostComponent {
 }
 
 describe('NeuChipComponent', () => {
+  it('click proposes selection without mutating the controlled input', () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.detectChanges();
+    const changes: boolean[] = [];
+    df.componentInstance.selectedChange.subscribe(value => changes.push(value));
+    df.nativeElement.click();
+    expect(changes).toEqual([true]);
+    expect(df.componentInstance.selected()).toBe(false);
+  });
+
+  it('Space prevents page scrolling and emits exactly one selection proposal', () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.detectChanges();
+    const changes: boolean[] = [];
+    df.componentInstance.selectedChange.subscribe(value => changes.push(value));
+    const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    df.nativeElement.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(changes).toEqual([true]);
+  });
+
+  it('removable chips do not intercept the native remove button keyboard action', () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.componentRef.setInput('removable', true);
+    df.detectChanges();
+    const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    df.nativeElement.querySelector('button').dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
 

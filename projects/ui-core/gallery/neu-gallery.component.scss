@@ -1,3 +1,4 @@
+:host { display: block; min-inline-size: 0; max-inline-size: 100%; }
 .neu-gallery__surface {
   display: grid;
   gap: var(--neu-space-3);
@@ -78,6 +79,8 @@
 }
 .neu-gallery__caption {
   margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 .neu-gallery__thumbnails {
   display: flex;
@@ -113,8 +116,8 @@
   block-size: 100%;
   object-fit: cover;
 }
-.neu-gallery button:focus-visible,
-.neu-gallery a:focus-visible {
+:host button:focus-visible,
+:host a:focus-visible {
   outline: 2px solid transparent;
   box-shadow: var(--neu-focus-ring);
 }

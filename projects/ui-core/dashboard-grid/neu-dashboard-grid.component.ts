@@ -11,6 +11,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   CdkDrag,
   CdkDragDrop,
@@ -78,7 +79,7 @@ export interface NeuDashboardTileConfig {
             type="button"
             class="neu-dg__tile-handle"
             cdkDragHandle
-            [attr.aria-label]="'Move ' + (tile.title || tile.id) + '; use arrow keys to reorder'"
+            [attr.aria-label]="moveLabel(tile.title || tile.id)"
             (keydown)="_onHandleKey($event, tile.id)"
           >
             @if (tile.title) {
@@ -101,6 +102,10 @@ export interface NeuDashboardTileConfig {
   styleUrl: './neu-dashboard-grid.component.scss',
 })
 export class NeuDashboardGridComponent {
+  private readonly locale = inject(NEURAL_LOCALE);
+  protected moveLabel(title: string): string {
+    return this.locale.toLowerCase().startsWith('es') ? `Mover ${title}; usa las flechas para reordenar` : `Move ${title}; use arrow keys to reorder`;
+  }
   private readonly _host = inject(ElementRef) as ElementRef<HTMLElement>;
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _destroyRef = inject(DestroyRef);

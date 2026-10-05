@@ -1,10 +1,14 @@
 import {
   Component,
+  DestroyRef,
   ViewEncapsulation,
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
 import { NeuResponsiveState } from '@neural-ui/core/internal';
 
@@ -27,8 +31,10 @@ export interface NeuStepperStep {
  *
  * Uso:
  *   <neu-stepper [steps]="steps" [activeStep]="step" (stepChange)="step = $event">
- *     <ng-template neuStepContent>Contenido paso 1</ng-template>
- *     <ng-template neuStepContent>Contenido paso 2</ng-template>
+ *     @switch (step) {
+ *       @case (0) { <p>Datos de contacto</p> }
+ *       @case (1) { <p>Dirección de entrega</p> }
+ *     }
  *   </neu-stepper>
  */
 @Component({
@@ -58,8 +64,7 @@ export interface NeuStepperStep {
               [disabled]="step.disabled"
               [attr.aria-current]="i === activeStep() ? 'step' : null"
               [attr.aria-label]="
-                stepAriaLabel(step) + ', step ' + (i + 1) + ' of ' + steps().length +
-                (isCompleted(i) ? ', completed' : '')
+                stepAriaLabel(step, i)
               "
               [neuTooltip]="stepTooltip(step)"
               [neuTooltipDisabled]="!isCompact()"
@@ -105,6 +110,17 @@ export interface NeuStepperStep {
 })
 export class NeuStepperComponent {
   private readonly responsive = inject(NeuResponsiveState);
+  private readonly document = inject(DOCUMENT);
+  private readonly locale = inject(NEURAL_LOCALE);
+  private readonly activeLocale = signal(this.document.documentElement.lang || this.locale);
+  private readonly destroyRef = inject(DestroyRef);
+  constructor() {
+    const Observer = this.document.defaultView?.MutationObserver;
+    if (!Observer) return;
+    const observer = new Observer(() => this.activeLocale.set(this.document.documentElement.lang || this.locale));
+    observer.observe(this.document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    this.destroyRef.onDestroy(() => observer.disconnect());
+  }
 
   /** Pasos del wizard / Wizard steps */
   steps = input<NeuStepperStep[]>([]);
@@ -126,7 +142,12 @@ export class NeuStepperComponent {
   readonly stepTooltip = (step: NeuStepperStep) =>
     step.description ? `${step.label} - ${step.description}` : step.label;
 
-  readonly stepAriaLabel = (step: NeuStepperStep) => this.stepTooltip(step);
+  readonly stepAriaLabel = (step: NeuStepperStep, index?: number) => {
+    if (index === undefined) return this.stepTooltip(step);
+    const es = this.activeLocale().toLowerCase().startsWith('es');
+    return this.stepTooltip(step) + (es ? `, paso ${index + 1} de ${this.steps().length}` : `, step ${index + 1} of ${this.steps().length}`)
+      + (this.isCompleted(index) ? (es ? ', completado' : ', completed') : '');
+  };
 
   goTo(i: number): void {
     const step = this.steps()[i];
@@ -135,7 +156,7 @@ export class NeuStepperComponent {
     this.stepChange.emit(i);
   }
 
-  /** Marca el paso actual como completado y avanza al siguiente / Marks the current step as completed and advances to the next */
+  /** Proposes the adjacent enabled step; completion stays application-owned. */
   next(): void {
     const current = this.activeStep();
     this.goTo(current + 1);

@@ -5,12 +5,15 @@
 
 .neu-badge {
   display: inline-flex;
+  box-sizing: border-box;
+  max-inline-size: 100%;
   align-items: center;
   gap: 5px;
   font-family: var(--neu-font-sans);
   font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
 
   // ---- Tamaños / Sizes ----
   &--sm {

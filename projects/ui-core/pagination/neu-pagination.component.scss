@@ -6,8 +6,8 @@
 .neu-pagination {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   max-width: 100%;
-  overflow-x: auto;
   padding: 3px;
   gap: 4px;
   font-family: var(--neu-font-sans);
@@ -34,6 +34,7 @@
 
 .neu-pagination__btn {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   min-width: 36px;

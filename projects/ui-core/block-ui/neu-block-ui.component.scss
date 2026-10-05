@@ -44,6 +44,10 @@
 /* ── Content ─────────────────────────────────────────────────── */
 .neu-block-ui__content {
   display: flex;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding: var(--neu-space-4, 1rem);
+  text-align: center;
   flex-direction: column;
   align-items: center;
   gap: 10px;
@@ -68,6 +72,8 @@
 
 /* ── Message ─────────────────────────────────────────────────── */
 .neu-block-ui__message {
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
   font-size: 0.875rem;
   color: var(--neu-text, #111827);
   font-weight: 500;
@@ -95,4 +101,8 @@ html[data-theme='dark'] {
 .neu-block-ui__host--blocked {
   overflow: hidden;
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-block-ui__spinner { animation: none; }
 }

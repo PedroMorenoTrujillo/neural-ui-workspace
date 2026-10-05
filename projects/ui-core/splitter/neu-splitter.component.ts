@@ -2,6 +2,8 @@ import {
   Component, DestroyRef, ElementRef, ViewEncapsulation, afterRenderEffect,
   computed, inject, input, output, signal, viewChildren,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
 export type NeuSplitterDirection = 'horizontal' | 'vertical';
 
@@ -47,7 +49,7 @@ interface DragSession {
           [attr.aria-valuemin]="_ariaMin($index)"
           [attr.aria-valuemax]="_ariaMax($index)"
           [attr.aria-orientation]="orientation() === 'horizontal' ? 'vertical' : 'horizontal'"
-          [attr.aria-label]="'Separador ' + ($index + 1)"
+          [attr.aria-label]="_separatorLabel($index)"
           (pointerdown)="_onPointerDown($event, $index)"
           (pointermove)="_onPointerMove($event)"
           (pointerup)="_onPointerEnd($event)"
@@ -69,6 +71,13 @@ export class NeuSplitterComponent {
   readonly resize = output<readonly number[]>();
 
   private readonly _el = inject(ElementRef<HTMLElement>);
+  private readonly _document = inject(DOCUMENT);
+  private readonly _locale = inject(NEURAL_LOCALE);
+  private readonly _activeLocale = signal(this._document.documentElement.lang || this._locale);
+  protected _separatorLabel(index: number): string {
+    const es = this._activeLocale().toLowerCase().startsWith('es');
+    return (es ? 'Separador ' : 'Separator ') + (index + 1);
+  }
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _paneSlots = viewChildren<ElementRef<HTMLElement>>('paneSlot');
   private readonly _appliedSizes = computed(() => {
@@ -85,6 +94,12 @@ export class NeuSplitterComponent {
 
   constructor() {
     this._destroyRef.onDestroy(() => this._endDrag());
+    const Observer = this._document.defaultView?.MutationObserver;
+    if (Observer) {
+      const observer = new Observer(() => this._activeLocale.set(this._document.documentElement.lang || this._locale));
+      observer.observe(this._document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      this._destroyRef.onDestroy(() => observer.disconnect());
+    }
     afterRenderEffect(() => {
       this._sizes();
       this._paneSlots();

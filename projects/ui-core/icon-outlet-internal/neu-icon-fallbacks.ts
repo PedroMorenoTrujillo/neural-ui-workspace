@@ -12,6 +12,7 @@ export function neuStructuralIconPath(key: string): string | null {
     case 'move-down': return 'M12 5v14m-6-6 6 6 6-6';
     case 'confirm': return 'M4 12l5 5L20 6';
     case 'add': return 'M12 4v16M4 12h16';
+    case 'notifications': return 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4';
     case 'neutral-trend': return 'M5 12h14';
     default: return null;
   }

@@ -30,7 +30,8 @@ export type NeuChipSize = 'sm' | 'md';
     '[attr.aria-pressed]': '_hostAriaPressed()',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.tabindex]': '_hostTabindex()',
-    '(keydown.space)': 'onToggle()',
+    '(click)': 'onToggle()',
+    '(keydown.space)': 'removable() ? null : $event.preventDefault(); onToggle()',
     '(keydown.enter)': 'onToggle()',
   },
   template: `

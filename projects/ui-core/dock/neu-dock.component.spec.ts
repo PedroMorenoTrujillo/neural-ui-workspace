@@ -58,6 +58,18 @@ describe('NeuDockComponent', () => {
     expect(emit).toHaveBeenCalledOnce();
   });
 
+  it('names every action independently of hidden visual labels and tooltips', () => {
+    const fixture = TestBed.createComponent(NeuDockComponent);
+    fixture.componentRef.setInput('items', [
+      { key: 'command', label: 'Run' },
+      { key: 'router', label: 'Docs', routerLink: '/docs' },
+      { key: 'external', label: 'Website', url: 'https://example.test' },
+    ]);
+    fixture.detectChanges();
+    const actions = Array.from(fixture.nativeElement.querySelectorAll('[role="menuitem"]')) as HTMLElement[];
+    expect(actions.map(action => action.getAttribute('aria-label'))).toEqual(['Run', 'Docs', 'Website']);
+  });
+
   it('uses roving focus and skips disabled items', () => {
     const fixture = TestBed.createComponent(NeuDockComponent);
     fixture.componentRef.setInput('items', [

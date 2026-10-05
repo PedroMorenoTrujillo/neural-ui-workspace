@@ -31,6 +31,7 @@ export class NeuTagIconDirective {
   encapsulation: ViewEncapsulation.None,
   host: {
     '[class]': 'hostClasses()',
+    '[attr.role]': 'ariaLabel() ? "img" : null',
     '[attr.aria-label]': 'ariaLabel() || null',
   },
   template: `

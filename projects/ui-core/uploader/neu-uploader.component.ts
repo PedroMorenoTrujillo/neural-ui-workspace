@@ -78,7 +78,7 @@ export type {
           role="button"
           [attr.tabindex]="isInteractionBlocked() ? -1 : 0"
           [attr.aria-disabled]="isInteractionBlocked() ? 'true' : null"
-          [attr.aria-readonly]="readonly() ? 'true' : null"
+          [attr.aria-label]="dropzoneLabel()"
           [attr.aria-describedby]="describedBy()"
           (click)="openFilePicker()"
           (keydown.enter)="onDropzoneKey($event)"
@@ -107,6 +107,7 @@ export type {
             <p class="neu-uploader__description">{{ descriptionText() }}</p>
           </div>
 
+        </div>
           <div class="neu-uploader__actions">
             <button
               neu-button
@@ -131,7 +132,6 @@ export type {
               </button>
             }
           </div>
-        </div>
       } @else {
         <button
           neu-button

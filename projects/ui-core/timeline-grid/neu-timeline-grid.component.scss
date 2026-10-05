@@ -1,4 +1,6 @@
 neu-timeline-grid {
+  display: block;
+  max-inline-size: 100%;
   min-width: 0;
 }
 
@@ -16,7 +18,7 @@ neu-timeline-grid {
     }
 
     .neu-timeline-grid__item {
-      margin: 8px 0;
+      margin: 24px 0;
       padding: 8px 10px;
     }
   }
@@ -28,7 +30,7 @@ neu-timeline-grid {
     }
 
     .neu-timeline-grid__item {
-      margin: 16px 0;
+      margin: 24px 0;
       padding: 14px 16px;
     }
   }
@@ -168,7 +170,8 @@ neu-timeline-grid {
   justify-content: center;
   gap: 4px;
   min-width: 0;
-  margin: 10px 0;
+  /* Leave an accessible 24px slot target above and below occupied columns. */
+  margin: 24px 0;
   padding: 10px 12px;
   border: 1px solid transparent;
   border-radius: var(--neu-radius-lg);
@@ -179,6 +182,7 @@ neu-timeline-grid {
 }
 
 .neu-timeline-grid__item-title {
+  overflow-wrap: anywhere;
   font-size: var(--neu-text-sm);
   font-weight: 700;
 }

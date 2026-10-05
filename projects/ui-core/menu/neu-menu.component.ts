@@ -17,6 +17,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, OverlayModule } from '@angular/cdk/overlay';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { NeuBadgeComponent } from '@neural-ui/core/badge';
 import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
 import { NeuIdGenerator, NeuRovingMenuController } from '@neural-ui/core/internal';
 import { NeuMenuItemDirective, type NeuMenuItem } from '@neural-ui/core/menu-shared';
@@ -28,7 +29,7 @@ import {
 
 @Component({
   selector: 'neu-menu',
-  imports: [NeuButtonComponent, InternalNeuIconOutletComponent, NgTemplateOutlet],
+  imports: [NeuButtonComponent, NeuBadgeComponent, InternalNeuIconOutletComponent, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-menu' },
   template: `
@@ -70,6 +71,9 @@ import {
                 />
               }
               <span class="neu-menu__label">{{ item.label }}</span>
+              @if (item.badge != null) {
+                <neu-badge size="sm">{{ item.badge }}</neu-badge>
+              }
               @if (item.shortcut) {
                 <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd>
               }
@@ -240,6 +244,7 @@ export class NeuMenuComponent {
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-menu-button' },
   template: `
+    <ng-content select="ng-template[neuMenuItem]" />
     <button
       neu-button
       cdkOverlayOrigin
@@ -372,7 +377,7 @@ export class NeuMenuButtonComponent {
 
 @Component({
   selector: 'neu-menubar',
-  imports: [NeuButtonComponent, NeuMenuButtonComponent, NeuMenuItemDirective, NgTemplateOutlet],
+  imports: [NeuButtonComponent, NeuBadgeComponent, InternalNeuIconOutletComponent, NeuMenuButtonComponent, NeuMenuItemDirective, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
   host: { class: 'neu-menubar' },
   template: `
@@ -411,7 +416,10 @@ export class NeuMenuButtonComponent {
                 />
               </ng-template>
             } @else {
-              {{ item.label }}
+              @if (item.icon) { <neu-icon-outlet [icon]="item.icon" size="1rem" aria-hidden="true" /> }
+              <span>{{ item.label }}</span>
+              @if (item.badge != null) { <neu-badge size="sm">{{ item.badge }}</neu-badge> }
+              @if (item.shortcut) { <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd> }
             }
           </neu-menu-button>
         } @else if (item.visible !== false) {
@@ -432,7 +440,10 @@ export class NeuMenuButtonComponent {
                 [ngTemplateOutletContext]="{ $implicit: item }"
               />
             } @else {
-              {{ item.label }}
+              @if (item.icon) { <neu-icon-outlet [icon]="item.icon" size="1rem" aria-hidden="true" /> }
+              <span>{{ item.label }}</span>
+              @if (item.badge != null) { <neu-badge size="sm">{{ item.badge }}</neu-badge> }
+              @if (item.shortcut) { <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd> }
             }
           </button>
         }

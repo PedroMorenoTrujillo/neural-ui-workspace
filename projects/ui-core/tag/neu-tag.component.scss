@@ -3,6 +3,7 @@
   align-items: center;
   gap: var(--neu-space-1, 0.25rem);
   box-sizing: border-box;
+  max-inline-size: 100%;
   min-height: 1.5rem;
   padding-block: 0.1875rem;
   padding-inline: 0.5rem;
@@ -14,7 +15,8 @@
   font-size: var(--neu-text-xs);
   font-weight: 600;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 
   &--rounded { border-radius: var(--neu-radius-full); }
   &--success { background: var(--neu-success-bg); color: var(--neu-success-text); }
@@ -23,13 +25,14 @@
   &--danger { background: var(--neu-error-bg); color: var(--neu-error-text); }
   &--neutral { color: var(--neu-text-muted); border-color: var(--neu-border); }
   &--solid { background: var(--neu-text); color: var(--neu-surface); }
-  &--solid.neu-tag--success { background: var(--neu-success); color: var(--neu-surface); }
-  &--solid.neu-tag--info { background: var(--neu-info); color: var(--neu-surface); }
-  &--solid.neu-tag--warning { background: var(--neu-warning); color: var(--neu-text); }
-  &--solid.neu-tag--danger { background: var(--neu-error); color: var(--neu-surface); }
+  &--solid.neu-tag--success { background: var(--neu-success-text); color: var(--neu-surface); }
+  &--solid.neu-tag--info { background: var(--neu-info-text); color: var(--neu-surface); }
+  &--solid.neu-tag--warning { background: var(--neu-warning-text); color: var(--neu-surface); }
+  &--solid.neu-tag--danger { background: var(--neu-error-text); color: var(--neu-surface); }
 }
 
 .neu-tag__icon { flex: 0 0 auto; }
+.neu-tag__label { min-inline-size: 0; }
 
 @media (forced-colors: active) {
   .neu-tag { border-color: CanvasText; color: CanvasText; background: Canvas; }
