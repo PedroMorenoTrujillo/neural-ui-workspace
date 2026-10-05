@@ -235,14 +235,17 @@ interface SelectionPath<T> {
                 <span class="neu-cascade-select__option-arrow" aria-hidden="true">→</span>
               }
             </button>
-          } @empty {
+          }
+        </div>
+        @if (!currentNodes().length) {
+          <div class="neu-cascade-select__empty" role="status">
             @if (emptyTpl()) {
               <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
             } @else {
-              <div class="neu-cascade-select__empty">{{ emptyLabel() }}</div>
+              {{ emptyLabel() }}
             }
-          }
-        </div>
+          </div>
+        }
 
         @if (footerTpl()) {
           <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />

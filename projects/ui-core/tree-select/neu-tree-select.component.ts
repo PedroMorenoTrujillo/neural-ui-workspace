@@ -123,7 +123,7 @@ export class NeuTreeSelectEmptyDirective {
         [id]="triggerId"
         [disabled]="isDisabled()"
         aria-haspopup="tree"
-        [attr.aria-controls]="panelId"
+        [attr.aria-controls]="panelId + '-tree'"
         [attr.aria-expanded]="open()"
         [attr.aria-readonly]="readonly() ? 'true' : null"
         (click)="toggle()"
@@ -179,9 +179,6 @@ export class NeuTreeSelectEmptyDirective {
       <div
         class="neu-tree-select__panel"
         [id]="panelId"
-        role="tree"
-        [attr.aria-label]="label() || placeholder()"
-        [attr.aria-multiselectable]="isMultiple() ? 'true' : null"
         (focusout)="onCompositeFocusOut($event)"
       >
         @if (headerTpl()) {
@@ -246,6 +243,13 @@ export class NeuTreeSelectEmptyDirective {
             }
           </button>
         </ng-template>
+        <div
+          class="neu-tree-select__tree"
+          [id]="panelId + '-tree'"
+          role="tree"
+          [attr.aria-label]="label() || placeholder()"
+          [attr.aria-multiselectable]="isMultiple() ? 'true' : null"
+        >
         @if (effectiveVirtualization().enabled && visibleNodes().length) {
           <div
             class="neu-tree-select__viewport"
@@ -277,6 +281,7 @@ export class NeuTreeSelectEmptyDirective {
             />
           }
         }
+        </div>
         @if (!visibleNodes().length) {
           <div class="neu-tree-select__empty" role="status">
             @if (emptyTpl()) {

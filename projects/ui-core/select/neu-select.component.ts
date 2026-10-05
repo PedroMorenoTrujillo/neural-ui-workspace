@@ -324,7 +324,7 @@ export type { NeuSelectOption } from './neu-select.types';
             [class.neu-select__viewport]="virtualScroll()"
             role="listbox"
             [attr.aria-multiselectable]="multiple() ? 'true' : null"
-            [attr.tabindex]="filteredOptions().length ? 0 : -1"
+            [attr.tabindex]="filteredOptions().length || (loading() && virtualScroll()) ? 0 : -1"
             [attr.aria-label]="ariaLabel() || label() || placeholder()"
             [attr.aria-labelledby]="ariaLabelledBy()"
             [attr.aria-busy]="loading() ? 'true' : null"

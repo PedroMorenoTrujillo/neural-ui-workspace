@@ -161,6 +161,12 @@
   background: color-mix(in srgb, var(--neu-primary, #2563eb) 8%, transparent);
 }
 
+.neu-tree-select__tree {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
 .neu-tree-select__viewport {
   position: relative;
   min-height: 2.5rem;
