@@ -5,6 +5,7 @@
 .neu-mega-menu__nav {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
   inline-size: 100%;
@@ -17,6 +18,8 @@
 .neu-mega-menu__start,
 .neu-mega-menu__end {
   flex: 0 0 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 .neu-mega-menu__end {
   margin-inline-start: auto;
@@ -33,12 +36,17 @@
 }
 .neu-mega-menu__root-list {
   display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.2rem;
   min-inline-size: 0;
+  max-inline-size: 100%;
 }
 .neu-mega-menu__root-item {
   position: relative;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 .neu-mega-menu__root-action,
 .neu-mega-menu__item-action,
@@ -57,7 +65,9 @@
 }
 .neu-mega-menu__root-action {
   padding: 0.65rem 0.8rem;
-  white-space: nowrap;
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .neu-mega-menu__root-action:hover,
 .neu-mega-menu__root-action:focus-visible,
