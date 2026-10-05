@@ -16,6 +16,37 @@ import { NeuRatingComponent } from '../rating/neu-rating.component';
 class TagsHost {}
 
 describe('Form control accessible semantics', () => {
+  it('announces InputTags changes in the optional application locale', async () => {
+    TestBed.configureTestingModule({ imports: [NeuInputTagsComponent], providers: [{ provide: NEURAL_LOCALE, useValue: 'es-ES' }] });
+    const fixture = TestBed.createComponent(NeuInputTagsComponent);
+    await fixture.whenStable();
+    fixture.componentInstance.selectOption(new Event('click'), 'Angular');
+    expect(fixture.componentInstance.liveMessage()).toBe('Angular añadido');
+    fixture.componentInstance.removeItem(new Event('click'), 0);
+    expect(fixture.componentInstance.liveMessage()).toBe('Angular eliminado');
+  });
+
+  it('cancels a queued InputTags query on Escape and never opens suggestions in readonly mode', async () => {
+    TestBed.configureTestingModule({ imports: [NeuInputTagsComponent] });
+    const fixture = TestBed.createComponent(NeuInputTagsComponent);
+    fixture.componentRef.setInput('typeahead', true);
+    fixture.componentRef.setInput('delay', 10);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'Angular';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 25));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.panelVisible()).toBe(false);
+    fixture.componentRef.setInput('readonly', true);
+    fixture.componentRef.setInput('completeOnFocus', true);
+    fixture.detectChanges();
+    input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.panelVisible()).toBe(false);
+  });
+
   it('keeps InputTags help, footer and empty status outside the options list', async () => {
     TestBed.configureTestingModule({ imports: [TagsHost] });
     const fixture = TestBed.createComponent(TagsHost);

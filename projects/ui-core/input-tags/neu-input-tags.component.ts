@@ -9,6 +9,7 @@ import {
   afterNextRender,
   computed,
   contentChild,
+  effect,
   inject,
   input,
   model,
@@ -19,6 +20,7 @@ import {
 import { COMPOSITION_BUFFER_MODE } from '@angular/forms';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   NeuOptionActivatedEvent,
   NeuOptionCompareWith,
@@ -272,6 +274,8 @@ export class NeuInputTagsComponent<T = string, V = T>
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-input-tags-');
+  private readonly applicationLocale = inject(NEURAL_LOCALE);
+  private readonly spanish = this.applicationLocale.toLowerCase().startsWith('es');
   private readonly compositionMode =
     inject(COMPOSITION_BUFFER_MODE, { optional: true }) ??
     !/android (\d+)/.test(
@@ -402,7 +406,7 @@ export class NeuInputTagsComponent<T = string, V = T>
       ? this.groupedOptions().flatMap((entry) => entry.options)
       : this.filterOptions(this.options()),
   );
-  readonly panelVisible = computed(() => this.typeahead() && this.panelOpen());
+  readonly panelVisible = computed(() => this.typeahead() && this.panelOpen() && !this.isDisabled() && !this.readonly());
   readonly activeOptionId = computed(() =>
     this.activeIndex() >= 0 && this.panelVisible() && this.availableOptions()[this.activeIndex()]
       ? this.optionId(this.activeIndex())
@@ -410,6 +414,9 @@ export class NeuInputTagsComponent<T = string, V = T>
   );
 
   constructor() {
+    effect(() => {
+      if (this.isDisabled() || this.readonly()) this.closePanel();
+    });
     this.destroyRef.onDestroy(() => {
       this.cancelComposition();
       this.clearSearchTimer();
@@ -566,7 +573,7 @@ export class NeuInputTagsComponent<T = string, V = T>
     });
     this.draft.set('');
     this.closePanel();
-    this.liveMessage.set(`${this.optionLabelOf(option)} added`);
+    this.liveMessage.set(`${this.optionLabelOf(option)} ${this.spanish ? 'añadido' : 'added'}`);
     this.focusInput();
   }
 
@@ -577,7 +584,7 @@ export class NeuInputTagsComponent<T = string, V = T>
     if (removed === undefined) return;
     this.commit(current.filter((_, itemIndex) => itemIndex !== index));
     this.itemRemoved.emit({ originalEvent, value: removed, index });
-    this.liveMessage.set(`${this.itemLabel(removed)} removed`);
+    this.liveMessage.set(`${this.itemLabel(removed)} ${this.spanish ? 'eliminado' : 'removed'}`);
     this.focusInput();
   }
 
@@ -597,7 +604,7 @@ export class NeuInputTagsComponent<T = string, V = T>
     next.splice(to, 0, moved as V);
     this.commit(next);
     this.itemReordered.emit({ originalEvent, value: moved as V, from, to });
-    this.liveMessage.set(`${this.itemLabel(moved as V)} moved to position ${to + 1}`);
+    this.liveMessage.set(`${this.itemLabel(moved as V)} ${this.spanish ? 'movido a la posición' : 'moved to position'} ${to + 1}`);
   }
 
   clear(originalEvent: Event = new Event('clear')): void {
@@ -607,7 +614,7 @@ export class NeuInputTagsComponent<T = string, V = T>
     this.draft.set('');
     this.closePanel();
     this.cleared.emit({ originalEvent, previousValue });
-    this.liveMessage.set('All tags removed');
+    this.liveMessage.set(this.spanish ? 'Todas las etiquetas eliminadas' : 'All tags removed');
   }
 
   reset(): void {
@@ -819,7 +826,7 @@ export class NeuInputTagsComponent<T = string, V = T>
   }
 
   private requestSuggestions(originalEvent: Event, reason: NeuOptionDataRequest['reason']): void {
-    if (!this.typeahead() || this.isDisabled()) return;
+    if (!this.typeahead() || this.isDisabled() || this.readonly()) return;
     this.openPanel();
     const requestId = ++this.requestId;
     this.suggestionsRequest.emit({
@@ -839,6 +846,8 @@ export class NeuInputTagsComponent<T = string, V = T>
   }
 
   private closePanel(): void {
+    // Closing must also cancel a queued query, even before the panel opens.
+    this.clearSearchTimer();
     if (!this.panelOpen()) return;
     this.panelOpen.set(false);
     this.activeIndex.set(-1);
@@ -846,6 +855,12 @@ export class NeuInputTagsComponent<T = string, V = T>
   }
 
   private announceResult(accepted: number, rejected: number): void {
+    if (this.spanish) {
+      if (accepted && rejected) this.liveMessage.set(`${accepted} etiquetas añadidas, ${rejected} rechazadas`);
+      else if (accepted) this.liveMessage.set(`${accepted} etiquetas añadidas`);
+      else if (rejected) this.liveMessage.set(`${rejected} etiquetas rechazadas`);
+      return;
+    }
     if (accepted && rejected) this.liveMessage.set(`${accepted} tags added, ${rejected} rejected`);
     else if (accepted) this.liveMessage.set(`${accepted} tags added`);
     else if (rejected) this.liveMessage.set(`${rejected} tags rejected`);
