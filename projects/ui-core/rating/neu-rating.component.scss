@@ -32,7 +32,7 @@
   border: none;
   border-radius: var(--neu-radius-sm);
   cursor: pointer;
-  color: var(--neu-surface-3);
+  color: var(--neu-text-muted);
   padding: 2px;
   transition:
     transform 0.15s ease,
@@ -40,7 +40,7 @@
   outline: none;
 
   &--filled {
-    color: #f59e0b;
+    color: var(--neu-warning-text);
   }
 
   .neu-rating:not(.neu-rating--readonly) &:hover:not(:disabled) {

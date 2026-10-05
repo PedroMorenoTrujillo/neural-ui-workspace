@@ -425,7 +425,7 @@ export interface TableQueryControls {
       padding:1rem; border:1px solid var(--neu-border); border-radius:var(--neu-radius-sm, .25rem);
       background:var(--neu-surface); color:var(--neu-text);
       box-shadow:0 .25rem 1rem color-mix(in srgb, currentColor 12%, transparent);
-      font:400 1rem/1.5 var(--neu-font-family, inherit);
+      font:400 1rem/1.5 var(--neu-font-sans, inherit);
     }
     .neu-table2__visually-hidden {
       position: absolute;
