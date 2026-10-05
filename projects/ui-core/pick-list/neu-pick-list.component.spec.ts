@@ -57,6 +57,21 @@ describe('NeuPickListComponent', () => {
     expect(buttons[3].disabled).toBe(true);
   });
 
+  it('keeps selection and transfer enabled when only dragging is disabled', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    const option = host.querySelector<HTMLButtonElement>('button[role="option"]')!;
+    expect(option.closest('[aria-disabled="true"]')).toBeNull();
+    option.click();
+    fixture.detectChanges();
+    expect(option.getAttribute('aria-selected')).toBe('true');
+    const changed = vi.spyOn(fixture.componentInstance.itemsChange, 'emit');
+    host.querySelector<HTMLButtonElement>('.neu-pick-list__actions button')!.click();
+    expect(changed).toHaveBeenCalledWith({
+      source: [beta],
+      target: [{ value: 'd', label: 'Disabled', disabled: true }, alpha],
+    });
+  });
+
   it('toggles source selection and retains it until the transfer proposal is applied', () => {
     const component = fixture.componentInstance;
     const source = vi.spyOn(component.sourceChange, 'emit');
@@ -528,6 +543,24 @@ describe('NeuPickListComponent', () => {
 });
 
 describe('NeuOrderListComponent', () => {
+  it('keeps selection and reordering enabled with dragging disabled', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuOrderListComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuOrderListComponent);
+    const items = [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta' }];
+    fixture.componentRef.setInput('items', items);
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const option = host.querySelector<HTMLButtonElement>('.neu-order-list__option')!;
+    expect(option.closest('[aria-disabled="true"]')).toBeNull();
+    option.click();
+    fixture.detectChanges();
+    expect(option.getAttribute('aria-pressed')).toBe('true');
+    const changed = vi.spyOn(fixture.componentInstance.orderChange, 'emit');
+    const actions = host.querySelectorAll<HTMLButtonElement>('.neu-order-list__toolbar button');
+    actions[actions.length - 1].click();
+    expect(changed).toHaveBeenCalledWith([items[1], items[0]]);
+  });
+
   it('passes each item and index to the projected order template', async () => {
     await TestBed.configureTestingModule({
       imports: [OrderListTemplateHostComponent],

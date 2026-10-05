@@ -255,7 +255,8 @@ export class NeuDragDropGroupDirective implements OnChanges, OnInit {
     '[attr.role]': 'role()',
     '[attr.tabindex]': 'role() === "presentation" || role() === "none" ? null : (_disabled() ? -1 : tabIndex())',
     '[attr.aria-label]': 'role() === "presentation" || role() === "none" ? null : ariaLabel()',
-    '[attr.aria-disabled]': 'role() === "presentation" || role() === "none" ? null : (_disabled() ? "true" : null)',
+    // Disabling drag must not disable selection or editing inside a composite container.
+    '[attr.aria-disabled]': 'role() === "presentation" || role() === "none" || role() === "group" || role() === "listbox" ? null : (_disabled() ? "true" : null)',
     '[attr.aria-pressed]':
       'keyboardEnabled() && role() === "button" ? (keyboardActive() ? "true" : "false") : null',
     '[attr.aria-keyshortcuts]': 'keyboardEnabled() && !_disabled() ? "Enter Space Escape" : null',
@@ -492,7 +493,8 @@ export class NeuDragHandleDirective implements OnChanges, OnInit {
     '[attr.role]': 'role()',
     '[attr.tabindex]': '_disabled() ? -1 : tabIndex()',
     '[attr.aria-label]': 'ariaLabel()',
-    '[attr.aria-disabled]': '_disabled() ? "true" : null',
+    // A disabled drop target can still contain enabled options and ordinary controls.
+    '[attr.aria-disabled]': 'role() === "group" || role() === "listbox" ? null : (_disabled() ? "true" : null)',
     '[attr.aria-keyshortcuts]': '_disabled() ? null : "Enter Space Escape"',
     '[attr.data-neu-drop-state]':
       'pointerHover() ? "hover" : (keyboardAccepting() ? "active" : "idle")',
