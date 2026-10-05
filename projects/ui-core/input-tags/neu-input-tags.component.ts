@@ -169,7 +169,7 @@ export class NeuInputTagsFooterDirective {
         [attr.title]="title() || null"
         [attr.name]="name() || null"
         [attr.tabindex]="tabindex()"
-        [attr.aria-label]="ariaLabel() || null"
+        [attr.aria-label]="ariaLabel() || (label() || ariaLabelledBy() ? null : placeholder())"
         [attr.aria-labelledby]="ariaLabelledBy() || null"
         [attr.aria-describedby]="effectiveDescribedBy()"
         [attr.aria-required]="ariaRequired() || required() ? 'true' : null"
@@ -189,13 +189,14 @@ export class NeuInputTagsFooterDirective {
     @if (panelVisible()) {
       <div
         class="neu-input-tags__panel"
-        [id]="panelId"
-        role="listbox"
         [style.max-height]="scrollHeight()"
       >
         @if (headerTpl()) {
           <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
         }
+        <div class="neu-input-tags__options" [id]="panelId" role="listbox"
+          [attr.aria-label]="label() || ariaLabel() || placeholder()"
+          [attr.aria-busy]="loading() ? 'true' : null">
         @if (groups().length) {
           @for (entry of groupedOptions(); track entry.group.label) {
             <div class="neu-input-tags__group" role="presentation">
@@ -223,6 +224,7 @@ export class NeuInputTagsFooterDirective {
             />
           }
         }
+        </div>
         @if (!loading() && availableOptions().length === 0) {
           <div class="neu-input-tags__empty" role="status">{{ emptyMessage() }}</div>
         }
@@ -323,7 +325,7 @@ export class NeuInputTagsComponent<T = string, V = T>
   readonly title = input('');
   readonly minlength = input<number | null>(null);
   readonly maxlength = input<number | null>(null);
-  readonly ariaLabel = input('Tags');
+  readonly ariaLabel = input('');
   readonly ariaLabelledBy = input('');
   readonly ariaDescribedBy = input('');
   readonly ariaRequired = input(false);

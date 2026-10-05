@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
 /** Accessible discrete rating backed by a nullable number ModelSignal. */
 @Component({
@@ -46,7 +47,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
           [disabled]="disabled()"
           [tabIndex]="tabIndexFor(i)"
           [attr.data-neu-rating-value]="i"
-          [attr.aria-label]="i + ' star' + (i === 1 ? '' : 's')"
+          [attr.aria-label]="starLabel(i)"
           [attr.aria-checked]="i === selectedValue()"
           role="radio"
           (mouseenter)="onHover(i)"
@@ -118,10 +119,22 @@ export class NeuRatingComponent implements FormValueControl<number | null> {
   );
   readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
   readonly ratingLabel = computed(() =>
-    this.selectedValue() === null
+    this.applicationLocale.toLowerCase().startsWith('es')
+      ? this.selectedValue() === null
+        ? `Sin valoración. ${this.resolvedStars()} estrellas disponibles`
+        : `Valoración: ${this.selectedValue()} de ${this.resolvedStars()} estrellas`
+      : this.selectedValue() === null
       ? `No rating. ${this.resolvedStars()} stars available`
       : `Rating: ${this.selectedValue()} of ${this.resolvedStars()} stars`,
   );
+
+  private readonly applicationLocale = inject(NEURAL_LOCALE);
+  protected starLabel(value: number): string {
+    const count = new Intl.NumberFormat(this.applicationLocale).format(value);
+    return this.applicationLocale.toLowerCase().startsWith('es')
+      ? `${count} ${value === 1 ? 'estrella' : 'estrellas'}`
+      : `${count} ${value === 1 ? 'star' : 'stars'}`;
+  }
 
   onHover(value: number): void {
     if (!this.disabled() && !this.readonly()) this.hovered.set(this.clamp(value));

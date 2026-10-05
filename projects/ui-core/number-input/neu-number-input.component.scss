@@ -48,6 +48,8 @@
 
     .neu-number-input__field {
       flex: 1 1 auto;
+      // Keep both stacked targets at least 24px tall, including borders.
+      min-block-size: 50px;
       width: auto;
       min-width: 0;
       flex-basis: var(--neu-number-input-stacked-min-width, 120px);
@@ -161,7 +163,7 @@
 }
 
 .neu-number-input__control--focused .neu-number-input__floating-label {
-  color: var(--neu-primary);
+  color: var(--neu-text);
 }
 
 /* ── Stack (botones apilados ▲▼ a la derecha) ────────────────── */
@@ -181,6 +183,7 @@
     align-items: center;
     justify-content: center;
     flex: 1;
+    min-block-size: 24px;
     width: var(--neu-number-input-btn-size, 26px);
     border: none;
     border-radius: 0;

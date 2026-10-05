@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   isSliderRange,
   sliderClamp,
@@ -296,8 +297,11 @@ export class NeuSliderComponent<V extends NeuSliderValue = number> implements Fo
   }
 
   rangeThumbLabel(thumb: SliderThumb): string {
-    return `${this.label() || this.ariaLabel() || 'Slider'} ${thumb === 0 ? 'minimum' : 'maximum'}`;
+    const es = this.applicationLocale.toLowerCase().startsWith('es');
+    return `${this.label() || this.ariaLabel() || (es ? 'Deslizador' : 'Slider')} ${thumb === 0 ? (es ? 'mínimo' : 'minimum') : (es ? 'máximo' : 'maximum')}`;
   }
+
+  private readonly applicationLocale = inject(NEURAL_LOCALE);
 
   rangeThumbText(thumb: SliderThumb): string {
     return `${this.visualRange()[thumb]}${this.unit()}`;

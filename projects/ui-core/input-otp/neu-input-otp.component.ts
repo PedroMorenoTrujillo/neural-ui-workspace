@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
 /** One-time-code string field split into a single, focus-managed group of cells. */
 @Component({
@@ -24,8 +25,6 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
     '(focusout)': 'onGroupFocusOut($event)',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-invalid]': 'hasError() ? "true" : null',
-    '[attr.aria-required]': 'required() ? "true" : null',
-    '[attr.aria-readonly]': 'readonly() ? "true" : null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
     '[attr.aria-busy]': 'pending() ? "true" : null',
   },
@@ -171,8 +170,12 @@ export class NeuInputOTPComponent implements FormValueControl<string> {
   reset(): void {}
 
   cellLabel(index: number): string {
-    return `Digit ${index + 1} of ${this.length()}`;
+    return this.applicationLocale.toLowerCase().startsWith('es')
+      ? `${this.type() === 'numeric' ? 'Dígito' : 'Carácter'} ${index + 1} de ${this.length()}`
+      : `${this.type() === 'numeric' ? 'Digit' : 'Character'} ${index + 1} of ${this.length()}`;
   }
+
+  private readonly applicationLocale = inject(NEURAL_LOCALE);
 
   private commitUserValue(next: string): void {
     const normalized = this.normalize(next);

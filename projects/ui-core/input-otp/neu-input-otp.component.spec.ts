@@ -41,8 +41,8 @@ describe('NeuInputOTPComponent Signal Forms contract', () => {
     });
     expect(fixture.nativeElement.getAttribute('role')).toBe('group');
     expect(fixture.nativeElement.getAttribute('aria-label')).toBe('Verification code');
-    expect(fixture.nativeElement.getAttribute('aria-required')).toBe('true');
-    expect(fixture.nativeElement.getAttribute('aria-readonly')).toBe('true');
+    expect(fixture.nativeElement.hasAttribute('aria-required')).toBe(false);
+    expect(fixture.nativeElement.hasAttribute('aria-readonly')).toBe(false);
     expect(fixture.nativeElement.getAttribute('aria-busy')).toBe('true');
     expect(cells).toHaveLength(4);
     expect(cells[0].name).toBe('otp');

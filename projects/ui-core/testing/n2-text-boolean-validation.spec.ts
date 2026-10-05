@@ -107,7 +107,8 @@ describe('N2-003 + N2-004 validation propagation', () => {
     expect(password.pattern).toBe('[A-Z]');
     expect(mask.required).toBe(true);
     expect(mask.pattern).toBe('^\\d{3}-\\d{3}$');
-    expect(otp.getAttribute('aria-required')).toBe('true');
+    expect(otp.hasAttribute('aria-required')).toBe(false);
+    expect([...otp.querySelectorAll('input')].every(input => input.required)).toBe(true);
     expect(otp.getAttribute('aria-invalid')).toBe('true');
     fields.textarea().value.set('AB');
     expect(kinds(fields.textarea())).toContain('minLength');
