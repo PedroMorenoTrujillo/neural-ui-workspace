@@ -186,11 +186,7 @@ html[data-theme='dark'] {
   padding: 10px;
   border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
   border-radius: 18px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neu-surface) 96%, var(--neu-surface-2) 4%),
-    color-mix(in srgb, var(--neu-surface) 88%, black 12%)
-  );
+  background: var(--neu-surface);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   align-content: start;
@@ -211,11 +207,7 @@ html[data-theme='dark'] {
 }
 
 .neu-calendar__day--outside {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neu-surface-2) 90%, black 10%),
-    color-mix(in srgb, var(--neu-surface-2) 82%, black 18%)
-  );
+  background: var(--neu-surface-2);
   box-shadow: none;
   opacity: 0.72;
 }
@@ -352,11 +344,8 @@ html[data-theme='dark'] {
   border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
   border-inline-start: 2px solid var(--neu-primary);
   border-radius: 14px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neu-surface-2) 46%, var(--neu-surface) 54%),
-    color-mix(in srgb, var(--neu-surface) 74%, black 26%)
-  );
+  background: var(--neu-surface);
+  color: var(--neu-text);
   text-align: start;
   cursor: pointer;
   box-shadow:
@@ -466,11 +455,7 @@ html[data-theme='dark'] {
   min-width: 0;
   border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
   border-radius: 18px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neu-surface) 94%, var(--neu-surface-2) 6%),
-    color-mix(in srgb, var(--neu-surface) 86%, black 14%)
-  );
+  background: var(--neu-surface);
   box-shadow:
     0 12px 24px -24px color-mix(in srgb, black 28%, transparent 72%),
     inset 0 1px 0 color-mix(in srgb, white 8%, transparent 92%);
@@ -530,11 +515,7 @@ html[data-theme='dark'] {
   min-height: 220px;
   border: 1px solid color-mix(in srgb, var(--neu-border) 94%, transparent 6%);
   border-radius: 18px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neu-surface) 94%, var(--neu-surface-2) 6%),
-    color-mix(in srgb, var(--neu-surface) 84%, black 16%)
-  );
+  background: var(--neu-surface);
   display: grid;
   grid-template-rows: auto 1fr;
   text-align: start;
