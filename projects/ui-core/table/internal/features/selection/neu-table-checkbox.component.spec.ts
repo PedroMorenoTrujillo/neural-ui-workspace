@@ -3,6 +3,11 @@ import { TestBed } from '@angular/core/testing';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import { NeuTableCheckboxComponent } from './neu-table-checkbox.component';
 
+const controls = (ariaLabel: string) => ({
+  checked: false, indeterminate: false, disabled: false, ariaLabel,
+  activate() {}, enter() {},
+});
+
 describe('Table controlled Neural checkbox adapter', () => {
   beforeEach(() => TestBed.configureTestingModule({
     imports: [NeuTableCheckboxComponent],
@@ -11,7 +16,7 @@ describe('Table controlled Neural checkbox adapter', () => {
 
   it('restores a model write without a pointer gesture or an attached native field', () => {
     const fixture = TestBed.createComponent(NeuTableCheckboxComponent);
-    fixture.componentRef.setInput('ariaLabel', 'Select row');
+    fixture.componentRef.setInput('controls', controls('Select row'));
     const control = TestBed.createComponent(NeuCheckboxComponent).componentInstance;
     const adapter = fixture.componentInstance as unknown as {
       propose(control: NeuCheckboxComponent): void;
@@ -26,7 +31,7 @@ describe('Table controlled Neural checkbox adapter', () => {
 
   it('emits one gesture and restores rejected writes without reentrant proposals', () => {
     const fixture = TestBed.createComponent(NeuTableCheckboxComponent);
-    fixture.componentRef.setInput('ariaLabel', 'Select row');
+    fixture.componentRef.setInput('controls', controls('Select row'));
     const control = TestBed.createComponent(NeuCheckboxComponent).componentInstance;
     const adapter = fixture.componentInstance as unknown as {
       capture(event: MouseEvent): void;
@@ -46,7 +51,7 @@ describe('Table controlled Neural checkbox adapter', () => {
   it('records the SSR hydration state without browser globals', () => {
     TestBed.overrideProvider(PLATFORM_ID, { useValue: 'server' });
     const fixture = TestBed.createComponent(NeuTableCheckboxComponent);
-    fixture.componentRef.setInput('ariaLabel', 'Select all');
+    fixture.componentRef.setInput('controls', controls('Select all'));
     expect(TestBed.inject(TransferState).get(makeStateKey<boolean>('neu-table-checkbox-ssr'), false)).toBe(true);
   });
 });

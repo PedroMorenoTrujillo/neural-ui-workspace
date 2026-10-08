@@ -280,6 +280,43 @@ describe('NeuTable N2-011I export integration', () => {
     expect(host.stateEvents).toBe(0);
   });
 
+  it('captures export state before lazy loading even if controlled inputs change', async () => {
+    const fixture = TestBed.createComponent(ExportHostComponent);
+    const host = fixture.componentInstance;
+    await render(fixture);
+
+    const pending = table(fixture).export(request('json', 'filtered'));
+    host.rows.set([{ id: 99, name: 'Changed', score: 99, team: 'New' }]);
+    host.query.set({ ...baseQuery, search: 'Changed' });
+    host.layout.set({ ...host.layout(), hidden: ['name', 'score', 'team'] });
+    await render(fixture);
+
+    const outcome = await pending;
+    expect(outcome.kind).toBe('generated');
+    if (outcome.kind === 'generated') {
+      expect(JSON.parse(new TextDecoder().decode(outcome.result.bytes))).toEqual([
+        { score: 40, name: '=Formula' },
+        { score: 30, name: 'Linus' },
+        { score: 20, name: 'Ada' },
+        { score: 10, name: 'Grace' },
+      ]);
+    }
+    expect(host.exportRequests).toHaveLength(0);
+    expect(host.featureErrors).toHaveLength(0);
+  });
+
+  it('suppresses remote delegation if destroyed while export code loads', async () => {
+    const fixture = TestBed.createComponent(ExportHostComponent);
+    const host = fixture.componentInstance;
+    host.dataMode.set('remote');
+    await render(fixture);
+    const pending = table(fixture).export(request('json', 'all'));
+    fixture.destroy();
+    expect(await pending).toEqual({ kind: 'delegated' });
+    expect(host.exportRequests).toHaveLength(0);
+    expect(host.featureErrors).toHaveLength(0);
+  });
+
   it('reports retryable chunk failure and suppresses late lifecycle events after destroy', async () => {
     const fixture = TestBed.createComponent(ExportHostComponent);
     const host = fixture.componentInstance;
@@ -306,11 +343,15 @@ describe('NeuTable N2-011I export integration', () => {
     });
 
     let rejectPending!: (cause: unknown) => void;
+    let serializerStarted!: () => void;
+    const started = new Promise<void>((resolve) => { serializerStarted = resolve; });
     instance.exportSerializerLoader = () =>
       new Promise((_, reject) => {
         rejectPending = reject;
+        serializerStarted();
       });
     const pending = table(fixture).export(request('json', 'loaded'));
+    await started;
     fixture.destroy();
     rejectPending(new Error('late failure'));
     await expect(pending).rejects.toThrow('late failure');

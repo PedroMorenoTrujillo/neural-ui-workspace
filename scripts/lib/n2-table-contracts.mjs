@@ -149,6 +149,7 @@ export function validateTargetContracts() {
     const methods = component.members.filter(
       (member) =>
         ts.isMethodDeclaration(member) &&
+        ts.isIdentifier(member.name) &&
         !member.modifiers?.some((modifier) =>
           [ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword].includes(modifier.kind),
         ),

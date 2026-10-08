@@ -72,6 +72,16 @@ describe('NeuTextareaComponent Signal Forms contract', () => {
     expect(textarea.getAttribute('aria-describedby')).toBe(error.id);
   });
 
+  it('merges external FormField descriptions without losing local hint or error IDs', () => {
+    const { fixture, textarea } = create({ inputId: 'notes', ariaLabel: 'Notes', ariaLabelledBy: 'field-label', ariaDescribedBy: 'field-hint field-hint', hint: 'Local hint' });
+    expect(textarea.getAttribute('aria-label')).toBe('Notes');
+    expect(textarea.getAttribute('aria-labelledby')).toBe('field-label');
+    expect(textarea.getAttribute('aria-describedby')).toBe('field-hint notes-hint');
+    fixture.componentRef.setInput('errorMessage', 'Required');
+    fixture.detectChanges();
+    expect(textarea.getAttribute('aria-describedby')).toBe('field-hint notes-error');
+  });
+
   it('writes the model exactly once for a user input and never echoes a parent write', () => {
     const { fixture, component, textarea } = create();
     const changes = vi.fn();

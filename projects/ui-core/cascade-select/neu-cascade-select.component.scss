@@ -63,6 +63,16 @@
   color: var(--neu-text-muted, #6b7280);
 }
 
+.neu-cascade-select__chevron {
+  inline-size: 1rem;
+  block-size: 1rem;
+  transition: transform var(--neu-transition, 120ms);
+
+  .neu-cascade-select__trigger--open & {
+    transform: rotate(180deg);
+  }
+}
+
 .neu-cascade-select__clear {
   position: absolute;
   inset-inline-end: 2.25rem;

@@ -88,6 +88,67 @@ beforeEach(() =>
 );
 
 describe('NeuAutocompleteComponent', () => {
+  it('keeps an unconfirmed query when consumer suggestions change, then clears it on blur', async () => {
+    const f = setup();
+    f.componentRef.setInput('floatingLabel', true);
+    f.componentRef.setInput('label', 'Destination');
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new FocusEvent('focus'));
+    input.value = 'B';
+    input.dispatchEvent(new Event('input'));
+    f.componentRef.setInput('options', [...OPTIONS]);
+    await f.whenStable();
+    expect(f.componentInstance.displayText()).toBe('B');
+    expect(input.value).toBe('B');
+    expect(f.nativeElement.classList.contains('neu-autocomplete--has-value')).toBe(true);
+    input.dispatchEvent(new FocusEvent('blur'));
+    await f.whenStable();
+    expect(input.value).toBe('');
+    expect(f.componentInstance.value()).toBeNull();
+    expect(f.nativeElement.classList.contains('neu-autocomplete--has-value')).toBe(false);
+  });
+
+  it('clears an invalid native edit even when input and blur happen before rendering', async () => {
+    const f = setup();
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'B';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new FocusEvent('blur'));
+    await f.whenStable();
+    expect(input.value).toBe('');
+    expect(f.componentInstance.displayText()).toBe('');
+  });
+
+  it('preserves free text and floats the label after blur', async () => {
+    const f = setup();
+    f.componentRef.setInput('mode', 'free-text');
+    f.componentRef.setInput('floatingLabel', true);
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'B';
+    input.dispatchEvent(new Event('input'));
+    f.componentRef.setInput('options', [...OPTIONS]);
+    input.dispatchEvent(new FocusEvent('blur'));
+    await f.whenStable();
+    expect(input.value).toBe('B');
+    expect(f.componentInstance.value()).toBe('B');
+    expect(f.nativeElement.classList.contains('neu-autocomplete--has-value')).toBe(true);
+  });
+
+  it('uses the shared outline chevron and rotates it when expanded', async () => {
+    const f = setup();
+    f.componentRef.setInput('dropdown', true);
+    await f.whenStable();
+    const icon = f.nativeElement.querySelector('.neu-autocomplete__chevron');
+    expect(icon.getAttribute('fill')).toBe('none');
+    expect(icon.querySelector('polyline').getAttribute('points')).toBe('6 9 12 15 18 9');
+    f.componentInstance.open();
+    await f.whenStable();
+    expect(f.nativeElement.classList.contains('neu-autocomplete--open')).toBe(true);
+  });
+
   it('should create', async () => {
     const f = setup();
     await f.whenStable();

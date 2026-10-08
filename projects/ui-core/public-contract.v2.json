@@ -7512,6 +7512,16 @@
           "signature": "readonly required: _angular_core.InputSignal<boolean>;"
         },
         {
+          "id": "./checkbox#NeuCheckboxComponent.input:tabIndex",
+          "name": "tabIndex",
+          "kind": "input",
+          "publicName": "tabIndex",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly tabIndex: _angular_core.InputSignal<number>;"
+        },
+        {
           "id": "./checkbox#NeuCheckboxComponent.input:touched",
           "name": "touched",
           "kind": "input",
@@ -7588,7 +7598,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCheckboxComponent, \"neu-checkbox\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"checked\": {\n        \"alias\": \"checked\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indeterminate\": {\n        \"alias\": \"indeterminate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"checked\": \"checkedChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuCheckboxComponent, \"neu-checkbox\", never, {\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"checked\": {\n        \"alias\": \"checked\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"indeterminate\": {\n        \"alias\": \"indeterminate\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"tabIndex\": {\n        \"alias\": \"tabIndex\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"checked\": \"checkedChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
           "id": "./checkbox#NeuCheckboxComponent.property:ɵfac",
@@ -25266,6 +25276,16 @@
           "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
         },
         {
+          "id": "./number-input#NeuNumberInputComponent.input:ariaLabelledBy",
+          "name": "ariaLabelledBy",
+          "kind": "input",
+          "publicName": "ariaLabelledBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
+        },
+        {
           "id": "./number-input#NeuNumberInputComponent.input:decrementLabel",
           "name": "decrementLabel",
           "kind": "input",
@@ -25664,7 +25684,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuNumberInputComponent, \"neu-number-input\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"formatOptions\": {\n        \"alias\": \"formatOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"decrementLabel\": {\n        \"alias\": \"decrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"incrementLabel\": {\n        \"alias\": \"incrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n    \"inputDetail\": \"inputDetail\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuNumberInputComponent, \"neu-number-input\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"min\": {\n        \"alias\": \"min\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"max\": {\n        \"alias\": \"max\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"step\": {\n        \"alias\": \"step\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"formatOptions\": {\n        \"alias\": \"formatOptions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"decrementLabel\": {\n        \"alias\": \"decrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"incrementLabel\": {\n        \"alias\": \"incrementLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"floatingLabel\": {\n        \"alias\": \"floatingLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n    \"inputDetail\": \"inputDetail\";\n}, never, never, true, never>;"
         },
         {
           "id": "./number-input#NeuNumberInputComponent.property:ɵfac",
@@ -36616,6 +36636,14 @@
           "signature": "readonly selectionChange: OutputEmitterRef<NeuTableSelectionChange<T, K, F>>;"
         },
         {
+          "id": "./table#NeuTableComponent.property:#private",
+          "name": "#private",
+          "kind": "property",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "#private;"
+        },
+        {
           "id": "./table#NeuTableComponent.property:ɵcmp",
           "name": "ɵcmp",
           "kind": "property",
@@ -40573,6 +40601,36 @@
       "signature": "declare class NeuTextareaComponent implements FormValueControl<string> {\n}",
       "members": [
         {
+          "id": "./textarea#NeuTextareaComponent.input:ariaDescribedBy",
+          "name": "ariaDescribedBy",
+          "kind": "input",
+          "publicName": "ariaDescribedBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./textarea#NeuTextareaComponent.input:ariaLabel",
+          "name": "ariaLabel",
+          "kind": "input",
+          "publicName": "ariaLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+        },
+        {
+          "id": "./textarea#NeuTextareaComponent.input:ariaLabelledBy",
+          "name": "ariaLabelledBy",
+          "kind": "input",
+          "publicName": "ariaLabelledBy",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
+        },
+        {
           "id": "./textarea#NeuTextareaComponent.input:autoResize",
           "name": "autoResize",
           "kind": "input",
@@ -40881,7 +40939,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTextareaComponent, \"neu-textarea\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rows\": {\n        \"alias\": \"rows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autoResize\": {\n        \"alias\": \"autoResize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minLength\": {\n        \"alias\": \"minLength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxLength\": {\n        \"alias\": \"maxLength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pattern\": {\n        \"alias\": \"pattern\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
+          "signature": "static ɵcmp: _angular_core.ɵɵComponentDeclaration<NeuTextareaComponent, \"neu-textarea\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabel\": {\n        \"alias\": \"ariaLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaLabelledBy\": {\n        \"alias\": \"ariaLabelledBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"ariaDescribedBy\": {\n        \"alias\": \"ariaDescribedBy\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"rows\": {\n        \"alias\": \"rows\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"autoResize\": {\n        \"alias\": \"autoResize\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pending\": {\n        \"alias\": \"pending\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"touched\": {\n        \"alias\": \"touched\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"dirty\": {\n        \"alias\": \"dirty\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"minLength\": {\n        \"alias\": \"minLength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maxLength\": {\n        \"alias\": \"maxLength\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"pattern\": {\n        \"alias\": \"pattern\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"inputId\": {\n        \"alias\": \"inputId\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
         },
         {
           "id": "./textarea#NeuTextareaComponent.property:ɵfac",
@@ -51380,6 +51438,18 @@
       "signature": "readonly required: _angular_core.InputSignal<boolean>;"
     },
     {
+      "id": "./checkbox#NeuCheckboxComponent.input:tabIndex",
+      "entrypoint": "./checkbox",
+      "declaration": "NeuCheckboxComponent",
+      "selector": "neu-checkbox",
+      "propertyName": "tabIndex",
+      "publicName": "tabIndex",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly tabIndex: _angular_core.InputSignal<number>;"
+    },
+    {
       "id": "./checkbox#NeuCheckboxComponent.input:touched",
       "entrypoint": "./checkbox",
       "declaration": "NeuCheckboxComponent",
@@ -58242,6 +58312,18 @@
       "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
     },
     {
+      "id": "./number-input#NeuNumberInputComponent.input:ariaLabelledBy",
+      "entrypoint": "./number-input",
+      "declaration": "NeuNumberInputComponent",
+      "selector": "neu-number-input",
+      "propertyName": "ariaLabelledBy",
+      "publicName": "ariaLabelledBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
+    },
+    {
       "id": "./number-input#NeuNumberInputComponent.input:decrementLabel",
       "entrypoint": "./number-input",
       "declaration": "NeuNumberInputComponent",
@@ -63830,6 +63912,42 @@
       "signature": "readonly commandSubmit: _angular_core.OutputEmitterRef<NeuTerminalCommand>;"
     },
     {
+      "id": "./textarea#NeuTextareaComponent.input:ariaDescribedBy",
+      "entrypoint": "./textarea",
+      "declaration": "NeuTextareaComponent",
+      "selector": "neu-textarea",
+      "propertyName": "ariaDescribedBy",
+      "publicName": "ariaDescribedBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaDescribedBy: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.input:ariaLabel",
+      "entrypoint": "./textarea",
+      "declaration": "NeuTextareaComponent",
+      "selector": "neu-textarea",
+      "propertyName": "ariaLabel",
+      "publicName": "ariaLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabel: _angular_core.InputSignal<string>;"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.input:ariaLabelledBy",
+      "entrypoint": "./textarea",
+      "declaration": "NeuTextareaComponent",
+      "selector": "neu-textarea",
+      "propertyName": "ariaLabelledBy",
+      "publicName": "ariaLabelledBy",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly ariaLabelledBy: _angular_core.InputSignal<string>;"
+    },
+    {
       "id": "./textarea#NeuTextareaComponent.input:autoResize",
       "entrypoint": "./textarea",
       "declaration": "NeuTextareaComponent",
@@ -66658,19 +66776,19 @@
       "type": 199,
       "variable": 42
     },
-    "publicSymbols": 5316,
+    "publicSymbols": 5322,
     "statuses": {
-      "SUPPORTED": 3351,
+      "SUPPORTED": 3356,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1965,
+      "INTERNAL/UNSUPPORTED": 1966,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1224,
+      "input": 1229,
       "output": 228,
       "model": 24,
-      "total": 1476
+      "total": 1481
     },
     "designTokens": 251
   }

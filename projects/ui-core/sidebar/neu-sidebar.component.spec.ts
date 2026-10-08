@@ -665,10 +665,12 @@ describe('NeuSidebarComponent', () => {
     const preventBackward = vi.spyOn(backward, 'preventDefault');
 
     closeButton.dispatchEvent(forward);
+    expect(document.activeElement).toBe(action);
     action.focus();
     action.dispatchEvent(backward);
 
-    expect(preventForward).not.toHaveBeenCalled();
-    expect(preventBackward).not.toHaveBeenCalled();
+    expect(preventForward).toHaveBeenCalledTimes(1);
+    expect(preventBackward).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(closeButton);
   });
 });

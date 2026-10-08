@@ -508,7 +508,7 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
     () => this.readonly() || ['multiple', 'range', 'month', 'year'].includes(this.mode()),
   );
   readonly valueSignature = computed(() => JSON.stringify(this.value()));
-  readonly hasValue = computed(() => !this.isEmptyValue());
+  readonly hasValue = computed(() => !this.isEmptyValue() || this.displayText().length > 0);
   readonly displayText = computed(() => {
     const draft = this.draft();
     return draft && draft.base === this.valueSignature() ? draft.raw : this.formatValue();
@@ -695,7 +695,7 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
       this.finishEditing();
     } else if (event.key === 'Escape') {
       event.preventDefault();
-      this.draft.set(null);
+      this.finishEditing();
       this.close(true);
     }
   }
@@ -1019,6 +1019,7 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
   private finishEditing(): void {
     this.draft.set(null);
     this.draftState.set('valid');
+    this.textInput().nativeElement.value = this.displayText();
   }
 
   private commit(

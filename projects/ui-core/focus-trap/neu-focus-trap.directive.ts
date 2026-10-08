@@ -43,7 +43,10 @@ export class NeuFocusTrapDirective {
   private removeDocumentKeydownListener: (() => void) | null = null;
 
   constructor() {
-    this.destroyRef.onDestroy(() => this.removeDocumentKeydownListener?.());
+    this.destroyRef.onDestroy(() => {
+      this.removeDocumentKeydownListener?.();
+      this.lastFocusedInside = null;
+    });
   }
 
   /** Moves focus to the first currently eligible descendant. */
@@ -86,14 +89,15 @@ export class NeuFocusTrapDirective {
 
     const activeElement = this.document.activeElement;
     const activeIndex = tabbable.indexOf(activeElement as HTMLElement);
-    const atStart = activeIndex <= 0;
-    const atEnd = activeIndex === -1 || activeIndex === tabbable.length - 1;
+    // Native sequential focus can omit programmatically focusable controls
+    // (for example buttons in WebKit on macOS), so DOM endpoints alone do not
+    // contain Tab. Own the complete step using the same live eligible order.
+    const nextIndex = event.shiftKey
+      ? activeIndex <= 0 ? tabbable.length - 1 : activeIndex - 1
+      : activeIndex < 0 || activeIndex === tabbable.length - 1 ? 0 : activeIndex + 1;
 
-    if (event.shiftKey ? atStart : atEnd) {
-      event.preventDefault();
-      const target = event.shiftKey ? tabbable.at(-1) : tabbable[0];
-      target?.focus({ preventScroll: true });
-    }
+    event.preventDefault();
+    tabbable[nextIndex]?.focus({ preventScroll: true });
   }
 
   private ensureRemovedFocusRecovery(): void {

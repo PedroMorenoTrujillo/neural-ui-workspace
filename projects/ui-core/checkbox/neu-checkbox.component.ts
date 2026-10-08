@@ -34,6 +34,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
         type="checkbox"
         class="neu-checkbox__input"
         [id]="_id"
+        [tabIndex]="tabIndex()"
         [attr.name]="name() || null"
         [attr.aria-label]="ariaLabel() || null"
         [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
@@ -99,6 +100,8 @@ export class NeuCheckboxComponent implements FormCheckboxControl {
   readonly checked = model<boolean>(false);
   readonly indeterminate = input<boolean>(false);
   readonly ariaLabel = input<string>('');
+  /** Composite widgets can keep the indicator outside their roving tab order. */
+  readonly tabIndex = input<number>(0);
   readonly touch = output<void>();
 
   protected readonly _id = inject(NeuIdGenerator).getId('neu-checkbox-');

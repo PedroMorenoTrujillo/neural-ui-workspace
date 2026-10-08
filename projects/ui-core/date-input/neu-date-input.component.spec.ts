@@ -520,6 +520,31 @@ describe('NeuDateInputComponent', () => {
     expect(fixture.componentInstance.draftState()).toBe('invalid');
   });
 
+  it('keeps the floating label raised above an unconfirmed draft after blur', async () => {
+    const fixture = create();
+    fixture.componentRef.setInput('floatingLabel', true);
+    fixture.componentRef.setInput('label', 'Delivery date');
+    fixture.detectChanges();
+    typeText(fixture, '2026-03');
+    input(fixture).dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.value()).toBeNull();
+    expect(input(fixture).value).toBe('2026-03');
+    expect(fixture.nativeElement.querySelector('.neu-date-input').classList.contains('neu-date-input--has-value')).toBe(true);
+  });
+
+  it('discards a native draft on Escape before rendering even with the picker closed', () => {
+    const fixture = create();
+    const field = input(fixture);
+    field.value = '2026-02-30';
+    field.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(field.value).toBe('');
+    expect(fixture.componentInstance.draftState()).toBe('valid');
+    expect(fixture.componentInstance.hasValue()).toBe(false);
+  });
+
   it('clears each mode to its canonical empty value and emits once', () => {
     const cases: [NeuDateMode, unknown][] = [
       ['date', civilDate('2026-01-01')],

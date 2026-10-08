@@ -82,6 +82,12 @@
   }
 }
 
+.neu-number-input__chevron {
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex: none;
+}
+
 /* ── Label visible / Visible label ─ */
 .neu-number-input__label {
   font-size: var(--neu-text-sm, 0.875rem);

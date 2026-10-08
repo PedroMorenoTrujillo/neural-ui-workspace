@@ -65,11 +65,6 @@ import {
   type NeuTableEditSession,
 } from '../internal/editing/neu-table-editing';
 import {
-  createNeuTableExportMatrix,
-  projectNeuTableExport,
-} from '../internal/export/neu-table-export-projection';
-import { loadNeuTableExportSerializer } from '../internal/export/neu-table-export-loader';
-import {
   createNeuTableTemplateMap,
   firstNeuTableTemplate,
 } from '../internal/templates/neu-table-template-registry';
@@ -143,30 +138,33 @@ import type {
   },
 })
 export class NeuTableComponent<T extends object, K extends NeuTableKey, F extends string> {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly browserActive = signal(false);
-  private readonly retryToken = signal(0);
-  private readonly remoteCoordinatorVersion = signal(0);
-  private readonly viewportGeometry = signal<NeuTableViewportGeometry>({
+  readonly #destroyRef = inject(DestroyRef);
+  readonly #platformId = inject(PLATFORM_ID);
+  readonly #browserActive = signal(false);
+  readonly #retryToken = signal(0);
+  readonly #remoteCoordinatorVersion = signal(0);
+  readonly #viewportGeometry = signal<NeuTableViewportGeometry>({
     measured: false,
     scrollTop: 0,
     viewportSize: 0,
   });
   private readonly renderer = viewChild(NeuTableBasicRendererComponent);
-  private readonly diagnostics = new Set<string>();
-  private destroyed = false;
-  private exportSerializerLoader = loadNeuTableExportSerializer;
-  private editGeneration = 0;
-  private lastAppliedEditToken = 'none';
-  private closedAppliedEditToken: string | null = null;
-  private lastAppliedQuery: NeuTableQuery<F> | null = null;
-  private lastAppliedGroupingToken = 'initial';
-  private lastPublishedViewport: {
+  readonly #diagnostics = new Set<string>();
+  #destroyed = false;
+  private exportSerializerLoader = (format: NeuTableExportRequest<F>['format']) =>
+    import('../internal/export/neu-table-export-projection').then(
+      (module) => module.loadNeuTableExportSerializer(format),
+    );
+  #editGeneration = 0;
+  #lastAppliedEditToken = 'none';
+  #closedAppliedEditToken: string | null = null;
+  #lastAppliedQuery: NeuTableQuery<F> | null = null;
+  #lastAppliedGroupingToken = 'initial';
+  #lastPublishedViewport: {
     readonly visible: NeuTableRange;
     readonly render: NeuTableRange;
   } | null = null;
-  private remoteCoordinator = createNeuTableRemoteCoordinatorState<F>();
+  #remoteCoordinator = createNeuTableRemoteCoordinatorState<F>();
   readonly dataMode: InputSignal<NeuTableDataMode> = input<NeuTableDataMode>('client');
   readonly data: InputSignal<readonly T[]> = input<readonly T[]>([]);
   readonly metadata: InputSignal<NeuTableMetadata> = input<NeuTableMetadata>({
@@ -413,15 +411,15 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     const virtualization = this.virtualizationOptions();
     if (!virtualization.enabled) return null;
     return projectNeuTableVirtualWindow({
-      geometry: this.viewportGeometry(),
+      geometry: this.#viewportGeometry(),
       total: this.metadata().totalItems,
       virtualization,
     });
   });
   protected readonly remoteCorrelation = computed(() => {
-    this.remoteCoordinatorVersion();
+    this.#remoteCoordinatorVersion();
     return classifyNeuTableRemoteCorrelation(
-      this.remoteCoordinator,
+      this.#remoteCoordinator,
       this.metadata(),
       this.dataMode() === 'remote' ? (this.remoteVirtualProjection()?.request ?? null) : null,
     );
@@ -452,7 +450,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       totalItems: null,
       loading: false,
       error: null,
-      queryRevision: this.remoteCoordinator.queryRevision,
+      queryRevision: this.#remoteCoordinator.queryRevision,
       appliedRequestId: null,
     };
   });
@@ -510,7 +508,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     const virtualization = this.virtualizationOptions();
     if (!virtualization.enabled) return null;
     if (this.paginationOptions().enabled) {
-      this.diagnoseOnce(
+      this.#diagnoseOnce(
         'virtual-pagination',
         'NeuTable 2 virtualization disables pagination runtime while preserving applied query.',
       );
@@ -518,7 +516,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     return this.dataMode() === 'remote'
       ? this.remoteVirtualProjection()
       : projectNeuTableVirtualWindow({
-          geometry: this.viewportGeometry(),
+          geometry: this.#viewportGeometry(),
           total: this.logicalNormalCount(),
           virtualization,
         });
@@ -546,7 +544,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     }
     const declaredLength = Math.max(0, dataRange.end - dataRange.start);
     if (this.data().length !== declaredLength) {
-      this.diagnoseOnce(
+      this.#diagnoseOnce(
         `data-range:${dataRange.start}:${dataRange.end}:${this.data().length}`,
         `NeuTable 2 remote data/dataRange mismatch: ${this.data().length} rows for [${dataRange.start},${dataRange.end}).`,
       );
@@ -625,7 +623,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       current.errors.set(errors);
       if (errors.length > 0) return;
       current.requestPending = true;
-      this.restoreEditFocus(current);
+      this.#restoreEditFocus(current);
       if (commit.changes.length > 0) this.editCommit.emit(commit);
       this.editStateChange.emit({ next: { kind: 'none' }, source: 'commit' });
     };
@@ -650,7 +648,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     }
   };
   protected readonly cancelEdit = (reason: 'escape' | 'consumer') => {
-    this.cancelActiveEdit(reason);
+    this.#cancelActiveEdit(reason);
   };
   protected readonly proposeExpansion = (args: {
     readonly row: T;
@@ -670,7 +668,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     if (!this.virtualizationOptions().enabled && change !== null) this.groupingChange.emit(change);
   };
   protected readonly emitRowEvent = (event: NeuTableRowAction<T, K> | NeuTableRowMove<K>) => {
-    if (this.destroyed) return;
+    if (this.#destroyed) return;
     if ('action' in event) this.rowAction.emit(event);
     else this.rowReorder.emit(event);
   };
@@ -742,7 +740,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     reason: NeuTableRangeChange['reason'],
   ) => {
     if (!this.virtualizationOptions().enabled || !geometry.measured) return;
-    const current = this.viewportGeometry();
+    const current = this.#viewportGeometry();
     if (
       current.measured === geometry.measured &&
       current.scrollTop === geometry.scrollTop &&
@@ -750,35 +748,35 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     ) {
       return;
     }
-    this.viewportGeometry.set(geometry);
+    this.#viewportGeometry.set(geometry);
     const projection = this.virtualProjection();
     if (projection === null) return;
     const published = { visible: projection.visible, render: projection.render };
     if (
-      this.lastPublishedViewport !== null &&
-      areNeuTableRangesEqual(this.lastPublishedViewport.visible, published.visible) &&
-      areNeuTableRangesEqual(this.lastPublishedViewport.render, published.render)
+      this.#lastPublishedViewport !== null &&
+      areNeuTableRangesEqual(this.#lastPublishedViewport.visible, published.visible) &&
+      areNeuTableRangesEqual(this.#lastPublishedViewport.render, published.render)
     ) {
       return;
     }
-    this.lastPublishedViewport = published;
+    this.#lastPublishedViewport = published;
     this.rangeChange.emit({ ...published, reason });
   };
 
   protected ngDoCheck(): void {
     const query = this.query();
     if (
-      this.lastAppliedQuery !== null &&
+      this.#lastAppliedQuery !== null &&
       !areNeuTableQuerySlicesEqual(
-        this.lastAppliedQuery,
+        this.#lastAppliedQuery,
         query,
         this.sortOptions(),
         this.filterOptions().equals,
       )
     ) {
-      this.cancelActiveEdit('consumer');
+      this.#cancelActiveEdit('consumer');
     }
-    this.lastAppliedQuery = query;
+    this.#lastAppliedQuery = query;
 
     const grouping = this.grouping();
     const groupingToken =
@@ -788,30 +786,30 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
             .map(encodeURIComponent)
             .join('|')}`;
     if (
-      this.lastAppliedGroupingToken !== 'initial' &&
-      this.lastAppliedGroupingToken !== groupingToken
+      this.#lastAppliedGroupingToken !== 'initial' &&
+      this.#lastAppliedGroupingToken !== groupingToken
     ) {
-      this.cancelActiveEdit('consumer');
+      this.#cancelActiveEdit('consumer');
     }
-    this.lastAppliedGroupingToken = groupingToken;
+    this.#lastAppliedGroupingToken = groupingToken;
 
     const appliedEdit = this.editState();
     const appliedToken = neuTableEditStateToken(appliedEdit);
-    if (appliedToken !== this.lastAppliedEditToken) {
-      this.lastAppliedEditToken = appliedToken;
-      this.closedAppliedEditToken = null;
-      this.invalidateEditSession();
+    if (appliedToken !== this.#lastAppliedEditToken) {
+      this.#lastAppliedEditToken = appliedToken;
+      this.#closedAppliedEditToken = null;
+      this.#invalidateEditSession();
     }
 
     if (this.virtualizationOptions().enabled) {
       if (this.expansionOptions().enabled || this.expandedKeys().length > 0) {
-        this.diagnoseOnce(
+        this.#diagnoseOnce(
           'virtual-expansion',
           'NeuTable 2 fixed-height virtualization disables row expansion presentation.',
         );
       }
       if (grouping !== null && grouping.by.length > 0) {
-        this.diagnoseOnce(
+        this.#diagnoseOnce(
           'virtual-grouping',
           'NeuTable 2 fixed-height virtualization disables grouping presentation.',
         );
@@ -819,10 +817,10 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     }
 
     if (appliedEdit.kind === 'none') {
-      this.invalidateEditSession();
+      this.#invalidateEditSession();
       return;
     }
-    if (this.closedAppliedEditToken === appliedToken) return;
+    if (this.#closedAppliedEditToken === appliedToken) return;
 
     let session = this.activeEditSession();
     const columnsById = new Map(this.normalizedColumns().map((column) => [column.id, column]));
@@ -832,7 +830,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       if (
         editedColumnIds.some((columnId) => !columnsById.has(columnId) || !visibleIds.has(columnId))
       ) {
-        this.cancelActiveEdit('consumer');
+        this.#cancelActiveEdit('consumer');
         return;
       }
     }
@@ -844,7 +842,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     if (session === null) {
       if (row === undefined) return;
       session = createNeuTableEditSession({
-        generation: ++this.editGeneration,
+        generation: ++this.#editGeneration,
         state: appliedEdit,
         row,
         columns: this.normalizedColumns(),
@@ -855,7 +853,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
 
     if (row === undefined) {
       if (this.dataMode() === 'remote' && this.virtualizationOptions().enabled) return;
-      this.cancelActiveEdit('data-change');
+      this.#cancelActiveEdit('data-change');
       return;
     }
     if (
@@ -866,11 +864,11 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
         this.filterOptions().equals ?? Object.is,
       ) === 'changed'
     ) {
-      this.cancelActiveEdit('data-change');
+      this.#cancelActiveEdit('data-change');
     }
   }
 
-  private invalidateEditSession(): void {
+  #invalidateEditSession(): void {
     const session = this.activeEditSession();
     if (session !== null) {
       session.validationVersion += 1;
@@ -879,11 +877,11 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     this.activeEditSession.set(null);
   }
 
-  private cancelActiveEdit(reason: NeuTableEditCancel<T, K>['reason']): void {
+  #cancelActiveEdit(reason: NeuTableEditCancel<T, K>['reason']): void {
     const session = this.activeEditSession();
     if (session === null) return;
-    this.restoreEditFocus(session);
-    this.closedAppliedEditToken = neuTableEditStateToken(this.editState());
+    this.#restoreEditFocus(session);
+    this.#closedAppliedEditToken = neuTableEditStateToken(this.editState());
     session.validationVersion += 1;
     session.pending.set(false);
     this.editCancel.emit({ key: session.state.key, row: session.row, reason });
@@ -891,7 +889,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     this.activeEditSession.set(null);
   }
 
-  private restoreEditFocus(session: NeuTableEditSession<T, K, F>): void {
+  #restoreEditFocus(session: NeuTableEditSession<T, K, F>): void {
     const columnId =
       session.state.kind === 'cell'
         ? session.state.columnId
@@ -901,52 +899,52 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
 
   constructor() {
     effect(() => {
-      const previous = this.remoteCoordinator;
+      const previous = this.#remoteCoordinator;
       const transition = transitionNeuTableRemoteCoordinator(
         previous,
         {
-          browserActive: this.browserActive(),
+          browserActive: this.#browserActive(),
           dataMode: this.dataMode(),
           metadata: this.metadata(),
           query: this.query(),
           requiredRange:
             this.dataMode() === 'remote' ? (this.remoteVirtualProjection()?.request ?? null) : null,
-          retryToken: this.retryToken(),
+          retryToken: this.#retryToken(),
           virtualizationEnabled: this.virtualizationOptions().enabled,
         },
         (left, right) =>
           areNeuTableQuerySlicesEqual(left, right, this.sortOptions(), this.filterOptions().equals),
       );
-      this.remoteCoordinator = transition.state;
+      this.#remoteCoordinator = transition.state;
       if (
         previous.queryRevision !== transition.state.queryRevision ||
         previous.latestRequestId !== transition.state.latestRequestId ||
         !areNeuTableRangesEqual(previous.latestRequestRange, transition.state.latestRequestRange) ||
         previous.dataMode !== transition.state.dataMode
       ) {
-        this.remoteCoordinatorVersion.update((version) => version + 1);
+        this.#remoteCoordinatorVersion.update((version) => version + 1);
       }
       if (transition.request !== null) this.dataRequest.emit(transition.request);
     });
 
-    if (isPlatformBrowser(this.platformId)) {
-      afterNextRender(() => this.browserActive.set(true));
+    if (isPlatformBrowser(this.#platformId)) {
+      afterNextRender(() => this.#browserActive.set(true));
     }
 
-    this.destroyRef.onDestroy(() => {
-      this.destroyed = true;
-      this.invalidateEditSession();
-      this.remoteCoordinator = destroyNeuTableRemoteCoordinator(this.remoteCoordinator);
+    this.#destroyRef.onDestroy(() => {
+      this.#destroyed = true;
+      this.#invalidateEditSession();
+      this.#remoteCoordinator = destroyNeuTableRemoteCoordinator(this.#remoteCoordinator);
     });
   }
 
-  private readonly diagnoseOnce = (key: string, message: string): void => {
-    if (!isDevMode() || this.diagnostics.has(key)) return;
-    this.diagnostics.add(key);
+  readonly #diagnoseOnce = (key: string, message: string): void => {
+    if (!isDevMode() || this.#diagnostics.has(key)) return;
+    this.#diagnostics.add(key);
     console.warn(message);
   };
 
-  private readonly normalIndexForKey = (key: K): number | null => {
+  readonly #normalIndexForKey = (key: K): number | null => {
     const token = neuTableIdentityToken(key);
     if (this.dataMode() === 'client') {
       const index = this.normalPage().rows.findIndex(
@@ -969,7 +967,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     const pinned = [...this.sourcePartition().start, ...this.sourcePartition().end].some(
       (row) => neuTableIdentityToken(this.rowKey()(row)) === token,
     );
-    const index = pinned ? null : this.normalIndexForKey(target.key);
+    const index = pinned ? null : this.#normalIndexForKey(target.key);
     if (!pinned && index === null) return false;
     const renderer = this.renderer();
     if (renderer === undefined) return false;
@@ -985,7 +983,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
     const virtualization = this.virtualizationOptions();
     if (!virtualization.enabled) return Promise.resolve();
     const index =
-      target.index ?? (target.key === undefined ? null : this.normalIndexForKey(target.key));
+      target.index ?? (target.key === undefined ? null : this.#normalIndexForKey(target.key));
     const total = this.logicalNormalCount();
     if (
       index === null ||
@@ -994,7 +992,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       (total !== null && index >= total)
     ) {
       if (target.key !== undefined && this.dataMode() === 'remote') {
-        this.diagnoseOnce(
+        this.#diagnoseOnce(
           `remote-key:${neuTableIdentityToken(target.key)}`,
           'NeuTable 2 cannot scroll to an unloaded remote key without a key-to-index contract.',
         );
@@ -1008,17 +1006,18 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
 
   retryData(): void {
     if (
-      !isPlatformBrowser(this.platformId) ||
+      !isPlatformBrowser(this.#platformId) ||
       this.dataMode() !== 'remote' ||
-      this.remoteCoordinator.destroyed
+      this.#remoteCoordinator.destroyed
     ) {
       return;
     }
-    this.retryToken.update((token) => token + 1);
+    this.#retryToken.update((token) => token + 1);
   }
 
   async export(request: NeuTableExportRequest<F>): Promise<NeuTableExportOutcome> {
-    const projection = projectNeuTableExport({
+    // Capture the controlled state before loading the optional export implementation.
+    const options = {
       request,
       dataMode: this.dataMode(),
       data: this.presentedData(),
@@ -1037,13 +1036,17 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
       filterOptions: this.filterOptions(),
       paginationOptions: this.paginationOptions(),
       virtualizationOptions: this.virtualizationOptions(),
-    });
-    if (projection.kind === 'delegated') {
-      if (!this.destroyed) this.exportRequest.emit(request);
-      return { kind: 'delegated' };
-    }
+    };
 
     try {
+      const { projectNeuTableExport, createNeuTableExportMatrix } = await import(
+        '../internal/export/neu-table-export-projection'
+      );
+      const projection = projectNeuTableExport(options);
+      if (projection.kind === 'delegated') {
+        if (!this.#destroyed) this.exportRequest.emit(request);
+        return { kind: 'delegated' };
+      }
       const serializer = await this.exportSerializerLoader(request.format);
       const serialized = await serializer(createNeuTableExportMatrix(projection));
       return {
@@ -1055,7 +1058,7 @@ export class NeuTableComponent<T extends object, K extends NeuTableKey, F extend
         },
       };
     } catch (cause) {
-      if (!this.destroyed) {
+      if (!this.#destroyed) {
         this.featureError.emit({ feature: 'export', cause, recoverable: true });
       }
       throw cause;

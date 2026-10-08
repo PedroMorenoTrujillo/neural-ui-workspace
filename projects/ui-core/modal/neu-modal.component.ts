@@ -1,16 +1,20 @@
 import { DOCUMENT } from '@angular/common';
 import {
   Component,
+  AfterRenderRef,
   DestroyRef,
   ElementRef,
+  Injector,
   ViewEncapsulation,
   computed,
   effect,
   afterRenderEffect,
+  afterNextRender,
   inject,
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
@@ -53,6 +57,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
     '[class.neu-dialog--resizable]': 'resizable()',
     '[class.neu-dialog--maximized]': 'effectiveMaximized()',
     '[attr.aria-hidden]': '!open()',
+    '(document:click)': 'captureActivationOrigin($event)',
   },
   template: `
     @if (open()) {
@@ -74,7 +79,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
           [class.neu-dialog__panel--maximized]="effectiveMaximized()"
           role="dialog"
           tabindex="-1"
-          neuFocusTrap
+          [neuFocusTrap]="isTopOverlay()"
           [id]="'neu-dialog-' + _uid"
           [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
           [attr.aria-modal]="true"
@@ -181,8 +186,14 @@ export class NeuDialogComponent {
   private readonly document = inject(DOCUMENT);
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
   private readonly overlayStack = inject(InternalNeuOverlayStack);
+  protected readonly isTopOverlay = computed(() => this.overlayStack.isTop(this));
   private previousActiveElement: HTMLElement | null = null;
+  private activationOrigin: HTMLElement | null = null;
+  private activationOriginCleanup: AfterRenderRef | null = null;
+  private deactivateOverlay: (() => void) | null = null;
+  private lowerOverlayOwner: NeuDialogComponent | null = null;
   private focusEpoch = 0;
   private offsetX = 0;
   private offsetY = 0;
@@ -219,7 +230,14 @@ export class NeuDialogComponent {
     });
     effect((onCleanup) => {
       if (!this.open()) return;
-      onCleanup(this.overlayStack.activate(this));
+      this.lowerOverlayOwner = null;
+      const deactivate = this.overlayStack.activate(this);
+      this.deactivateOverlay = deactivate;
+      onCleanup(() => {
+        if (!untracked(() => this.overlayStack.isTop(this))) this.previousActiveElement = null;
+        deactivate();
+        if (this.deactivateOverlay === deactivate) this.deactivateOverlay = null;
+      });
     });
 
     effect(() => {
@@ -235,22 +253,37 @@ export class NeuDialogComponent {
         return;
       }
 
-      this.previousActiveElement ??= this.document.activeElement as HTMLElement | null;
+      this.previousActiveElement ??= this.activationOrigin ?? this.document.activeElement as HTMLElement | null;
       queueMicrotask(() => {
-        if (epoch === this.focusEpoch && this.open() && !this.destroyRef.destroyed) {
+        if (
+          epoch === this.focusEpoch &&
+          this.open() &&
+          !this.destroyRef.destroyed &&
+          this.overlayStack.isTop(this)
+        ) {
           this.focusInitialElement();
         }
       });
     });
 
     this.destroyRef.onDestroy(() => {
+      const wasTop = this.overlayStack.isTop(this);
+      this.deactivateOverlay?.();
+      this.deactivateOverlay = null;
+      this.activationOriginCleanup?.destroy();
+      this.activationOriginCleanup = null;
+      this.activationOrigin = null;
       this.cancelInteraction();
       this.focusEpoch += 1;
       const target = this.previousActiveElement;
       this.previousActiveElement = null;
-      if (this.restoreFocus() && this.isValidFocusTarget(target)) {
-        target.focus({ preventScroll: true });
+      if (
+        this.restoreFocus() &&
+        wasTop
+      ) {
+        this.restoreFocusTarget(target);
       }
+      this.lowerOverlayOwner = null;
     });
   }
 
@@ -258,6 +291,21 @@ export class NeuDialogComponent {
     if (this.destroyRef.destroyed) return;
     this.closeRequestEpoch += 1;
     this.closeRequested.emit({ reason: 'programmatic-command' });
+  }
+
+  protected captureActivationOrigin(event: Event): void {
+    if (this.open() || this.destroyRef.destroyed || !(event.target instanceof Element)) return;
+    const target = event.target.closest<HTMLElement>(
+      'button, a[href], input:not([type="hidden"]), select, textarea, [tabindex]',
+    );
+    this.activationOriginCleanup?.destroy();
+    this.activationOrigin = this.isValidFocusTarget(target) ? target : null;
+    // Some browsers activate a button without focusing it. Keep the actual
+    // click origin only until that interaction's Angular render has applied.
+    this.activationOriginCleanup = afterNextRender(() => {
+      this.activationOrigin = null;
+      this.activationOriginCleanup = null;
+    }, { injector: this.injector });
   }
 
   requestClose(reason: 'escape' | 'backdrop' | 'action', event: Event): void {
@@ -475,6 +523,8 @@ export class NeuDialogComponent {
 
   private restorePreviousFocus(epoch: number): void {
     const target = this.previousActiveElement;
+    const lowerOwner = this.lowerOverlayOwner;
+    this.lowerOverlayOwner = null;
     if (!this.restoreFocus() || !target?.focus) {
       this.previousActiveElement = null;
       return;
@@ -484,17 +534,47 @@ export class NeuDialogComponent {
       if (
         epoch === this.focusEpoch &&
         !this.open() &&
-        !this.destroyRef.destroyed &&
-        this.isValidFocusTarget(target)
+        !this.destroyRef.destroyed
       ) {
-        target.focus({ preventScroll: true });
+        this.restoreFocusTarget(target, lowerOwner);
         if (this.previousActiveElement === target) this.previousActiveElement = null;
       }
     });
   }
 
   private isValidFocusTarget(target: HTMLElement | null): target is HTMLElement {
-    return !!target?.isConnected && target.ownerDocument === this.document;
+    if (
+      !target?.isConnected ||
+      target.ownerDocument !== this.document ||
+      target.matches(':disabled, [aria-disabled="true"]')
+    ) return false;
+
+    for (let element: HTMLElement | null = target; element; element = element.parentElement) {
+      if (element.hidden || element.hasAttribute('inert') || element.getAttribute('aria-hidden') === 'true') return false;
+      const style = this.document.defaultView?.getComputedStyle(element);
+      if (style?.display === 'none' || style?.visibility === 'hidden' || style?.visibility === 'collapse') return false;
+    }
+    return true;
+  }
+
+  private onNeuOverlayDeactivated(nextOwner: object | undefined): void {
+    this.lowerOverlayOwner = this.restoreFocus() && nextOwner instanceof NeuDialogComponent
+      ? nextOwner : null;
+  }
+
+  private restoreFocusTarget(
+    target: HTMLElement | null,
+    lowerOwner: NeuDialogComponent | null = this.lowerOverlayOwner,
+  ): void {
+    if (lowerOwner) {
+      if (!this.overlayStack.isTop(lowerOwner)) return;
+      const lowerPanel = lowerOwner.panelRef()?.nativeElement;
+      if (!target || !lowerPanel?.contains(target) || !this.isValidFocusTarget(target)) {
+        lowerOwner.focusInitialElement();
+        return;
+      }
+    }
+    if (this.isValidFocusTarget(target)) target.focus({ preventScroll: true });
   }
 }
 

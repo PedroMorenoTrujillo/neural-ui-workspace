@@ -31,6 +31,7 @@ import {
   type TreeEditSession,
 } from '../editing/neu-tree-table-editing';
 import { NeuTreeTableActiveEditorComponent } from '../features/editing/neu-tree-table-active-editor.component';
+import { NeuTreeTableCheckboxComponent } from '../features/selection/neu-tree-table-checkbox.component';
 import type { TreeProjection, TreeProjectionNode } from '../hierarchy/neu-tree-table-hierarchy';
 import {
   areNeuTreeTableRangesEqual,
@@ -111,7 +112,7 @@ function projectionRevision(value: string): number {
 @Component({
   selector: 'neu-tree-table-private-renderer',
   standalone: true,
-  imports: [NgTemplateOutlet, NeuTreeTableActiveEditorComponent],
+  imports: [NgTemplateOutlet, NeuTreeTableActiveEditorComponent, NeuTreeTableCheckboxComponent],
   templateUrl: './neu-tree-table-renderer.component.html',
   styleUrl: './neu-tree-table-renderer.component.scss',
   host: { '[attr.data-neu-tree-table-renderer]': '"basic"' },
@@ -707,6 +708,14 @@ export class NeuTreeTableRendererComponent<
     if (options.mode !== 'none' && options.selectOnRowClick) {
       this.proposeSelection(node, 'row', event);
     }
+  }
+
+  protected onCheckboxToggle(node: TreeProjectionNode<T, K>, event: MouseEvent): void {
+    this.proposeSelection(node, 'checkbox', event);
+  }
+
+  protected onToggleAll(): void {
+    this.selectionIntent.emit({ kind: 'toggle-all', source: 'toggle-all' });
   }
 
   protected onTableDoubleClick(event: MouseEvent): void {

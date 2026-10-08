@@ -68,6 +68,19 @@ beforeEach(() => {
 });
 
 describe('NeuCommandPaletteComponent — Neural 2', () => {
+  it('lets only one mounted palette handle the global shortcut', async () => {
+    const first = setupDefault();
+    const second = setupDefault();
+    await first.whenStable();
+    await second.whenStable();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true, cancelable: true }));
+    first.detectChanges();
+    second.detectChanges();
+    expect(first.nativeElement.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(second.nativeElement.querySelector('[role="dialog"]')).toBeNull();
+    first.destroy();
+    second.destroy();
+  });
   it('ignores non-input query events and disabled highlight requests', () => {
     const fixture = openDefault();
     const palette = fixture.componentInstance.palette() as unknown as {

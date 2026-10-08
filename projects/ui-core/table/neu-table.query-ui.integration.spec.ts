@@ -3,6 +3,7 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { NeuSelectComponent } from '@neural-ui/core/select';
 import { By } from '@angular/platform-browser';
 import { NeuTableComponent } from './public/neu-table.component-contract';
+import type { TableFilterControls } from './internal/features/query-controls/neu-table-query-controls.component';
 import type {
   NeuTableColumn,
   NeuTableDataMode,
@@ -307,8 +308,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
       .componentInstance as {
       filterRule(column: NeuTableColumn<Row, Field>): string;
       filterValue(column: NeuTableColumn<Row, Field>): string;
-      setRowFilterRule(column: NeuTableColumn<Row, Field>, event: Event): void;
-      setRowFilterValue(column: NeuTableColumn<Row, Field>, event: Event): void;
+      queryFilterControls(column: NeuTableColumn<Row, Field>, menu: boolean): TableFilterControls;
       commitRowFilter(column: NeuTableColumn<Row, Field>, event?: Event): void;
       clearFilter(column: NeuTableColumn<Row, Field>): void;
     };
@@ -317,14 +317,14 @@ describe('NeuTable 2 controlled query UI integration', () => {
     select.innerHTML =
       '<option value="contains">contains</option><option value="equals">equals</option>';
     select.value = 'futureRule';
-    renderer.setRowFilterRule(column, { currentTarget: select } as unknown as Event);
+    renderer.queryFilterControls(column, false).setRule({ currentTarget: select } as unknown as Event);
     expect(renderer.filterRule(column)).toBe('contains');
     select.value = 'equals';
-    renderer.setRowFilterRule(column, { currentTarget: select } as unknown as Event);
+    renderer.queryFilterControls(column, false).setRule({ currentTarget: select } as unknown as Event);
     expect(renderer.filterRule(column)).toBe('equals');
     const input = document.createElement('input');
     input.value = 'Ada';
-    renderer.setRowFilterValue(column, { currentTarget: input } as unknown as Event);
+    renderer.queryFilterControls(column, false).setValue({ currentTarget: input } as unknown as Event);
     expect(renderer.filterValue(column)).toBe('Ada');
     renderer.commitRowFilter(column);
     fixture.detectChanges();
@@ -788,7 +788,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(fixture.componentInstance.queryEvents).toHaveLength(0);
     const select = document.createElement('select');
     select.value = 'unsupported';
-    renderer.setRowFilterRule(name, { currentTarget: select } as unknown as Event);
+    renderer.queryFilterControls(name, false).setRule({ currentTarget: select } as unknown as Event);
     expect(renderer.rowFilterDrafts().has(name.id)).toBe(false);
     renderer.filterDraftRule.set('unsupported');
     renderer.openFilterColumnId.set(name.id);
@@ -796,7 +796,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(fixture.componentInstance.queryEvents).toHaveLength(0);
     const input = document.createElement('input');
     input.value = 'Ada';
-    renderer.setRowFilterValue(name, { currentTarget: input } as unknown as Event);
+    renderer.queryFilterControls(name, false).setValue({ currentTarget: input } as unknown as Event);
     renderer.commitRowFilter(name);
     expect(fixture.componentInstance.queryEvents.at(-1)?.filters).toMatchObject({
       field: 'name',
@@ -880,10 +880,10 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const name = fixture.componentInstance.columns[1]!;
     const input = document.createElement('input');
     input.value = 'Ada';
-    renderer.setRowFilterValue(name, { currentTarget: input } as unknown as Event);
+    renderer.queryFilterControls(name, false).setValue({ currentTarget: input } as unknown as Event);
     const previous = renderer.filterTimers.get(name.id);
     input.value = 'Bravo';
-    renderer.setRowFilterValue(name, { currentTarget: input } as unknown as Event);
+    renderer.queryFilterControls(name, false).setValue({ currentTarget: input } as unknown as Event);
     expect(renderer.filterTimers.get(name.id)).not.toBe(previous);
     renderer.commitRowFilter(name);
     expect(renderer.filterTimers.has(name.id)).toBe(false);
@@ -944,7 +944,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const renderer = fixture.debugElement.query(By.css('neu-table-basic-renderer'))
       .componentInstance as any;
     const name = fixture.componentInstance.columns[1]!;
-    renderer.cycleColumnPin(name);
+    renderer.queryColumnControls(name).action('pin', new Event('click'));
     expect(fixture.componentInstance.layoutEvents).toBe(1);
     fixture.componentInstance.layout.update((value) => ({
       ...value,
@@ -952,7 +952,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
       pinnedEnd: ['name'],
     }));
     fixture.detectChanges();
-    renderer.cycleColumnPin(name);
+    renderer.queryColumnControls(name).action('pin', new Event('click'));
     expect(fixture.componentInstance.layoutEvents).toBe(2);
   });
 

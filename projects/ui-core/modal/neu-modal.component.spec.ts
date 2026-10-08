@@ -446,7 +446,7 @@ describe('NeuDialogComponent', () => {
     expect(document.activeElement).toBe(visibleLink);
   });
 
-  it('should let focus continue when tabbing inside the focusable range', async () => {
+  it('should advance focus both directions inside the focusable range', async () => {
     await TestBed.configureTestingModule({
       imports: [FocusableHostComponent, DialogModule],
       providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
@@ -474,11 +474,13 @@ describe('NeuDialogComponent', () => {
 
     visibleButton.focus();
     panel.dispatchEvent(forwardEvent);
+    expect(document.activeElement).toBe(visibleLink);
     visibleLink.focus();
     panel.dispatchEvent(backwardEvent);
 
-    expect(forwardEvent.defaultPrevented).toBe(false);
-    expect(backwardEvent.defaultPrevented).toBe(false);
+    expect(forwardEvent.defaultPrevented).toBe(true);
+    expect(backwardEvent.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(visibleButton);
   });
 
   it('focus initial guard should be safe before the panel exists', async () => {

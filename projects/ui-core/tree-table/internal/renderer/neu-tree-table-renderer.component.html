@@ -58,18 +58,13 @@
             [attr.aria-sort]="ariaSort(column)"
           >
             @if (showToggleAll(column)) {
-              <input
-                type="checkbox"
-                class="neu-tree-table2__selection-indicator"
-                data-selection-toggle-all
-                tabindex="-1"
-                [attr.aria-label]="labels().selection"
-                [attr.aria-checked]="
-                  selectionModel().header.indeterminate ? 'mixed' : selectionModel().header.checked
-                "
+              <neu-tree-table-checkbox
+                [header]="true"
+                [ariaLabel]="labels().selection"
                 [checked]="selectionModel().header.checked"
                 [indeterminate]="selectionModel().header.indeterminate"
                 [disabled]="selectionModel().header.disabled"
+                (activate)="onToggleAll()"
               />
             }
             @if (column.sort) {
@@ -236,6 +231,15 @@
                       </button>
                     }
                     @if (selectionIndicator(node); as indicator) {
+                      @if (indicator === 'checkbox') {
+                        <neu-tree-table-checkbox
+                          [ariaLabel]="labels().selection"
+                          [checked]="selectionState(node).selected"
+                          [indeterminate]="selectionState(node).indeterminate"
+                          [disabled]="selectionState(node).disabled"
+                          (activate)="onCheckboxToggle(node, $event)"
+                        />
+                      } @else {
                       <input
                         class="neu-tree-table2__selection-indicator"
                         data-selection-indicator
@@ -251,6 +255,7 @@
                         [indeterminate]="selectionState(node).indeterminate"
                         [disabled]="selectionState(node).disabled"
                       />
+                      }
                     }
                     <span class="neu-tree-table2__node-content">
                       @if (nodeTemplate(); as template) {

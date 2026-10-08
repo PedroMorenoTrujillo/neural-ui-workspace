@@ -136,7 +136,11 @@ function collectNumberSymbols(formatter: Intl.NumberFormat): NumberSymbols {
           [attr.aria-label]="incrementLabel()"
           (click)="increment()"
         >
-          ▲
+          <svg class="neu-number-input__chevron" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <polyline points="6 15 12 9 18 15" />
+          </svg>
         </button>
       } @else if (layout() === 'horizontal') {
         <button
@@ -169,6 +173,7 @@ function collectNumberSymbols(formatter: Intl.NumberFormat): NumberSymbols {
         [attr.aria-readonly]="readonly() ? 'true' : null"
         [attr.aria-busy]="pending() ? 'true' : null"
         [attr.aria-label]="!label() ? ariaLabel() || null : null"
+        [attr.aria-labelledby]="ariaLabelledBy() || null"
         [attr.aria-describedby]="ariaDescribedBy() || null"
         [disabled]="disabled()"
         [value]="displayValue()"
@@ -186,7 +191,11 @@ function collectNumberSymbols(formatter: Intl.NumberFormat): NumberSymbols {
             [attr.aria-label]="incrementLabel()"
             (click)="increment()"
           >
-            ▲
+            <svg class="neu-number-input__chevron" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <polyline points="6 15 12 9 18 15" />
+            </svg>
           </button>
           <button
             type="button"
@@ -195,7 +204,11 @@ function collectNumberSymbols(formatter: Intl.NumberFormat): NumberSymbols {
             [attr.aria-label]="decrementLabel()"
             (click)="decrement()"
           >
-            ▼
+            <svg class="neu-number-input__chevron" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           </button>
         </span>
       } @else if (layout() === 'vertical') {
@@ -206,7 +219,11 @@ function collectNumberSymbols(formatter: Intl.NumberFormat): NumberSymbols {
           [attr.aria-label]="decrementLabel()"
           (click)="decrement()"
         >
-          ▼
+          <svg class="neu-number-input__chevron" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </button>
       } @else {
         <button
@@ -238,6 +255,7 @@ export class NeuNumberInputComponent implements FormValueControl<number | null> 
   readonly layout = input<NeuNumberInputLayout>('stacked');
   readonly label = input<string>('');
   readonly ariaLabel = input<string>('');
+  readonly ariaLabelledBy = input<string>('');
   readonly ariaDescribedBy = input<string>('');
   readonly decrementLabel = input<string>('Decrease');
   readonly incrementLabel = input<string>('Increase');
@@ -387,6 +405,8 @@ export class NeuNumberInputComponent implements FormValueControl<number | null> 
 
   private finishEditing(): void {
     this.draft.set(null);
+    // A rejected edit can leave [value] unchanged within the same render cycle.
+    this.nativeInput().nativeElement.value = this.displayValue();
   }
 
   private commitStepped(candidate: number): void {

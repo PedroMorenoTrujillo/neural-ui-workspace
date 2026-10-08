@@ -358,6 +358,19 @@
   color: var(--neu-text-muted, #6b7280);
   cursor: pointer;
   padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-autocomplete__chevron {
+  inline-size: 1rem;
+  block-size: 1rem;
+  transition: transform var(--neu-transition, 120ms);
+
+  .neu-autocomplete--open & {
+    transform: rotate(180deg);
+  }
 }
 
 @media (forced-colors: active) {

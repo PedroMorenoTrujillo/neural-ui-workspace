@@ -19,6 +19,8 @@ $cb-muted: var(--neu-code-block-muted, #8f99bd);
 }
 
 .neu-code-block {
+  // Keep the visually hidden copy announcement inside this block's scroll/clip boundary.
+  position: relative;
   min-inline-size: 0;
   border-radius: var(--neu-radius-lg);
   overflow: hidden;

@@ -1,6 +1,7 @@
 import { isPlatformServer } from '@angular/common';
-import { Component, ElementRef, inject, input, makeStateKey, output, PLATFORM_ID, TransferState } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, makeStateKey, output, PLATFORM_ID, TransferState } from '@angular/core';
 import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
+import type { TableSelectionControls } from '../query-controls/neu-table-query-host.component';
 
 const serverCheckbox = makeStateKey<boolean>('neu-table-checkbox-ssr');
 
@@ -25,10 +26,11 @@ const serverCheckbox = makeStateKey<boolean>('neu-table-checkbox-ssr');
   styles: ':host { display: inline-flex; vertical-align: middle; }',
 })
 export class NeuTableCheckboxComponent {
-  readonly checked = input(false);
-  readonly indeterminate = input(false);
-  readonly disabled = input(false);
-  readonly ariaLabel = input.required<string>();
+  readonly controls = input.required<TableSelectionControls>();
+  readonly checked = computed(() => this.controls().checked);
+  readonly indeterminate = computed(() => this.controls().indeterminate);
+  readonly disabled = computed(() => this.controls().disabled);
+  readonly ariaLabel = computed(() => this.controls().ariaLabel);
   readonly activate = output<MouseEvent>();
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private click: MouseEvent | null = null;

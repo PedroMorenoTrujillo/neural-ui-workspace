@@ -33,6 +33,28 @@ describe('NeuNumberInputComponent', () => {
     expect(changes).toHaveBeenCalledExactlyOnceWith(12.5);
   });
 
+  it('removes an invalid native edit on blur before the next render', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('floatingLabel', true);
+    fixture.detectChanges();
+    const input = native(fixture);
+    input.value = '-';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.componentInstance.onFocusOut({ relatedTarget: null } as unknown as FocusEvent);
+    fixture.detectChanges();
+    expect(input.value).toBe('');
+    expect(fixture.componentInstance.hasValue()).toBe(false);
+  });
+
+  it.each(['stacked', 'vertical'])('uses outline chevrons for %s steppers', (layout) => {
+    const fixture = create();
+    fixture.componentRef.setInput('layout', layout);
+    fixture.detectChanges();
+    const icons = fixture.nativeElement.querySelectorAll('.neu-number-input__chevron');
+    expect(icons.length).toBe(2);
+    expect([...icons].map((icon: Element) => icon.getAttribute('fill'))).toEqual(['none', 'none']);
+  });
+
   it('clears to null from an empty input without converting it to zero', () => {
     const fixture = create();
     fixture.componentInstance.value.set(8);

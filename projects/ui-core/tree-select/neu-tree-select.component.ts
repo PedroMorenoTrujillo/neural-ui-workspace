@@ -148,7 +148,7 @@ export class NeuTreeSelectEmptyDirective {
           aria-hidden="true"
         >
           <svg viewBox="0 0 24 24" fill="none">
-            <path d="m7 9 5 5 5-5" />
+            <path d="m6 9 6 6 6-6" />
           </svg>
         </span>
       </button>

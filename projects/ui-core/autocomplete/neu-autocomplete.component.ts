@@ -221,7 +221,11 @@ type OverlayReason = NeuAutocompleteOverlayEvent['reason'];
               [ngTemplateOutletContext]="iconTemplateContext(_isOpen())"
             />
           } @else {
-            ▾
+            <svg class="neu-autocomplete__chevron" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
           }
         </button>
       }
@@ -714,15 +718,22 @@ export class NeuAutocompleteComponent<
   };
 
   constructor() {
+    let valueSynced = false;
+    let previousValue = this.value();
     effect(() => {
       const value = this.value();
       const options = this.allOptions();
+      const valueChanged = !valueSynced || !Object.is(previousValue, value);
+      valueSynced = true;
+      previousValue = value;
       untracked(() => {
         if (this.suppressNextExternalValueSync) {
           this.suppressNextExternalValueSync = false;
           return;
         }
         if (value === null) {
+          // New suggestions must not discard an unconfirmed search query.
+          if (!valueChanged) return;
           this._query.set('');
           this.filterQuery.set('');
           this.matchedOption.set(null);
@@ -746,6 +757,13 @@ export class NeuAutocompleteComponent<
         this.matchedOption.set(null);
         this.customTextValue.set(this.mode() === 'free-text' ? text : null);
       });
+    });
+    effect(() => {
+      const text = this._query();
+      const input = this.inputEl()?.nativeElement;
+      // Angular can skip an unchanged [value] binding after a native edit is rejected
+      // in the same render cycle. Keep the visible text and floating label in sync.
+      if (input && input.value !== text) input.value = text;
     });
     effect(() => {
       const rows = this.visibleRows();

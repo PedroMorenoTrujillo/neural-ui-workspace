@@ -27,6 +27,16 @@ describe('NeuCodeBlockComponent', () => {
     expect(f.nativeElement.querySelector('.neu-code-block')).toBeTruthy();
   });
 
+  it('contains the copy announcement within the block instead of the document', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const block = f.nativeElement.querySelector('.neu-code-block');
+    const status = block.querySelector('[role="status"]');
+    expect(status).toBeTruthy();
+    expect(getComputedStyle(block).position).toBe('relative');
+    expect(getComputedStyle(status).position).toBe('absolute');
+  });
+
   it('should apply compact density only when requested', () => {
     const f = TestBed.createComponent(NeuCodeBlockComponent);
     f.detectChanges();

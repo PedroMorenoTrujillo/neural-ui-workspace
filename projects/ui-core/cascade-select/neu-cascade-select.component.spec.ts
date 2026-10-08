@@ -123,6 +123,14 @@ describe('NeuCascadeSelectComponent', () => {
     expect(fixture.nativeElement.classList.contains('neu-cascade-select')).toBe(true);
   });
 
+  it('uses the same decorative outline chevron as Select', () => {
+    const icon = fixture.nativeElement.querySelector('.neu-cascade-select__chevron');
+    expect(icon.tagName.toLowerCase()).toBe('svg');
+    expect(icon.getAttribute('fill')).toBe('none');
+    expect(icon.getAttribute('aria-hidden')).toBe('true');
+    expect(icon.querySelector('polyline').getAttribute('points')).toBe('6 9 12 15 18 9');
+  });
+
   it('supports the convenient NeuCascadeSelectNode model', () => {
     const component = fixture.componentInstance as unknown as NeuCascadeSelectComponent<
       NeuCascadeSelectNode<number>,

@@ -25,6 +25,7 @@ import {
 import { neuTableIdentityToken } from '../identity/neu-table-row-identity';
 import { readNeuTableColumnValue } from '../semantics/neu-table-basic-projections';
 import type { NeuTableExportMatrix } from './neu-table-export-serializer.types';
+export { loadNeuTableExportSerializer } from './neu-table-export-loader';
 
 export interface NeuTableExportColumnProjection<T extends object> {
   readonly key: string;

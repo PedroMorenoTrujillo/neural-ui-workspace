@@ -306,6 +306,7 @@ $drum-item-h: 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--neu-space-1);
   margin-bottom: var(--neu-space-2);
 }
 
@@ -314,6 +315,115 @@ $drum-item-h: 36px;
   font-weight: 600;
   color: var(--neu-text);
   text-transform: capitalize;
+}
+
+.neu-date-input__cal-title--pickers {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  gap: var(--neu-space-1);
+}
+
+.neu-date-input__picker {
+  appearance: none;
+  min-inline-size: 0;
+  block-size: 36px;
+  padding-inline: var(--neu-space-2) 28px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background-color: var(--neu-surface);
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 38%,
+      var(--neu-text-muted) 38%,
+      var(--neu-text-muted) 62%,
+      transparent 62%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 38%,
+      var(--neu-text-muted) 38%,
+      var(--neu-text-muted) 62%,
+      transparent 62%
+    );
+  background-position:
+    right 16px center,
+    right 10px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  color: var(--neu-text);
+  font: inherit;
+  font-size: var(--neu-text-xs);
+  text-overflow: ellipsis;
+  cursor: pointer;
+
+  &:first-child {
+    flex: 1;
+    padding-inline: var(--neu-space-1) 24px;
+  }
+
+  &:last-child {
+    flex: 0 0 5rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &:hover {
+    background-color: var(--neu-surface-2);
+    border-color: var(--neu-text-muted);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+}
+
+@supports (appearance: base-select) {
+  .neu-date-input__picker,
+  .neu-date-input__picker::picker(select) {
+    appearance: base-select;
+  }
+
+  .neu-date-input__picker {
+    &:open {
+      border-color: var(--neu-primary);
+    }
+
+    &::picker-icon {
+      display: none;
+    }
+
+    &::picker(select) {
+      max-block-size: 16rem;
+      margin-block-start: var(--neu-space-1);
+      padding: var(--neu-space-1);
+      border: 1px solid var(--neu-border);
+      border-radius: var(--neu-radius);
+      background: var(--neu-surface);
+      color: var(--neu-text);
+      box-shadow: var(--neu-shadow);
+      overflow-y: auto;
+    }
+
+    option {
+      min-block-size: 32px;
+      padding: var(--neu-space-2);
+      border-radius: var(--neu-radius-sm);
+      font: inherit;
+
+      &:hover,
+      &:focus-visible {
+        background: var(--neu-surface-2);
+      }
+
+      &:checked {
+        background: var(--neu-primary-soft);
+        color: var(--neu-primary);
+        font-weight: 600;
+      }
+    }
+  }
 }
 
 .neu-date-input__cal-arrow {

@@ -48,6 +48,28 @@ describe('Table optional query controls', () => {
     warn.mockRestore();
   });
 
+  it('loads controlled Neural selection without loading query controls', async () => {
+    TestBed.configureTestingModule({ imports: [NeuTableQueryHostComponent] });
+    const fixture = TestBed.createComponent(NeuTableQueryHostComponent);
+    const activate = vi.fn();
+    const enter = vi.fn();
+    fixture.componentRef.setInput('controls', { selection: {
+      checked: false, indeterminate: true, disabled: false,
+      ariaLabel: 'Select all rows', activate, enter,
+    } });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const input = fixture.nativeElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    expect(input.getAttribute('aria-label')).toBe('Select all rows');
+    expect(input.indeterminate).toBe(true);
+    input.click();
+    expect(activate).toHaveBeenCalledTimes(1);
+    expect(input.checked).toBe(false);
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(enter).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.querySelector('neu-table-query-controls')).toBeNull();
+  });
+
   it('transfers the SSR rendering choice through Angular public state', () => {
     TestBed.configureTestingModule({ providers: [{ provide: PLATFORM_ID, useValue: 'server' }] });
     const server = TestBed.runInInjectionContext(() => new NeuTableQueryHostComponent());

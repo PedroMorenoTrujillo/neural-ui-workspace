@@ -127,14 +127,7 @@
         @if (hasSelectionColumn()) {
           <th scope="col" class="neu-table2__selection-column">
             @if (selectionIndicator() === 'checkbox') {
-              <neu-table-checkbox
-                [ariaLabel]="text('selectAll')"
-                [checked]="selectionProjection().headerState === 'checked'"
-                [indeterminate]="selectionProjection().headerState === 'indeterminate'"
-                [disabled]="selectionProjection().selectableCount === 0"
-                (activate)="onHeaderToggle($event)"
-                (keydown.enter)="onHeaderSelectionEnter($event)"
-              />
+              <neu-table-query-host [controls]="{ selection: selectionControls() }" />
             } @else {
               <span class="neu-table2__visually-hidden">{{ labels().selection }}</span>
             }
@@ -305,10 +298,7 @@
           @if (hasSelectionColumn()) {
             <td class="neu-table2__selection-column">
               @if (selectionIndicator() === 'checkbox') {
-                <neu-table-checkbox [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"
-                  [ariaLabel]="text('selectRow', { key: renderRow.key })"
-                  (activate)="onSelectionControlClick(renderRow, $event)"
-                  (keydown.enter)="onSelectionEnter(renderRow, $event)" />
+                <neu-table-query-host [controls]="{ selection: selectionControls(renderRow) }" />
               } @else {
                 <input type="radio" [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"
                   [attr.aria-label]="text('selectRow', { key: renderRow.key })"
@@ -409,47 +399,25 @@
         }
       </ng-template>
 
-      @if (metadata().loading) {
-        <tr class="neu-table2__state-row" data-state="loading">
+      @let state = metadata().loading ? 'loading' : metadata().error !== null ? 'error' : rows().length === 0 ? 'empty' : null;
+      @if (state) {
+        <tr class="neu-table2__state-row" [attr.data-state]="state">
           <td [attr.colspan]="columnCount()">
-            <div class="neu-table2__state" role="status" aria-live="polite">
-              @if (loadingTemplate(); as template) {
+            <div class="neu-table2__state" [attr.role]="state === 'error' ? 'alert' : 'status'"
+              [attr.aria-live]="state === 'loading' ? 'polite' : null">
+              @let stateTemplate = state === 'loading' ? loadingTemplate() : state === 'error' ? errorTemplate() : emptyTemplate();
+              @if (stateTemplate; as template) {
                 <ng-container
                   [ngTemplateOutlet]="template"
-                  [ngTemplateOutletContext]="stateContext()"
+                  [ngTemplateOutletContext]="state === 'empty' ? null : stateContext()"
                 />
               } @else {
-                {{ labels().loading }}
-              }
-            </div>
-          </td>
-        </tr>
-      } @else if (metadata().error !== null) {
-        <tr class="neu-table2__state-row" data-state="error">
-          <td [attr.colspan]="columnCount()">
-            <div class="neu-table2__state" role="alert">
-              @if (errorTemplate(); as template) {
-                <ng-container
-                  [ngTemplateOutlet]="template"
-                  [ngTemplateOutletContext]="stateContext()"
-                />
-              } @else {
-                <span>{{ labels().error }}</span>
+                {{ labels()[state] }}
+                @if (state === 'error') {
                 <button type="button" [attr.aria-label]="labels().retry" (click)="retry()()">
                   {{ labels().retry }}
                 </button>
-              }
-            </div>
-          </td>
-        </tr>
-      } @else if (rows().length === 0) {
-        <tr class="neu-table2__state-row" data-state="empty">
-          <td [attr.colspan]="columnCount()">
-            <div class="neu-table2__state" role="status">
-              @if (emptyTemplate(); as template) {
-                <ng-container [ngTemplateOutlet]="template" />
-              } @else {
-                {{ labels().empty }}
+                }
               }
             </div>
           </td>

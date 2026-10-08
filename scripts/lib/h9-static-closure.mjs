@@ -50,6 +50,8 @@ export function assertTableInitialBoundary(metafile, initialKeys) {
   const optional = {
     'advanced-filter': /neu-table-advanced-filter-builder\.component-/,
     editor: /neu-table-active-editor\.component-/,
+    selection: /neu-table-checkbox\.component-/,
+    'export-projection': /neu-table-export-projection-/,
     csv: /neu-table-csv-export-/,
     json: /neu-table-json-export-/,
     xlsx: /neu-table-xlsx-export-/,

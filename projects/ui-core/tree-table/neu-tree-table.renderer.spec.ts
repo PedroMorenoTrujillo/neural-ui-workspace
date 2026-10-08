@@ -743,7 +743,7 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
     const alpha = row(native, 'string:a');
-    alpha.querySelector<HTMLInputElement>('input[data-selection-indicator]')?.click();
+    alpha.querySelector<HTMLInputElement>(':is(input[data-selection-indicator], [data-selection-indicator] input)')?.click();
     await fixture.whenStable();
 
     expect(host.selectionChanges()).toHaveLength(1);
@@ -757,7 +757,7 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(alpha.querySelector<HTMLInputElement>('input')?.checked).toBe(false);
 
     host.acceptSelection.set(true);
-    alpha.querySelector<HTMLInputElement>('input[data-selection-indicator]')?.click();
+    alpha.querySelector<HTMLInputElement>(':is(input[data-selection-indicator], [data-selection-indicator] input)')?.click();
     await fixture.whenStable();
     expect(host.selectionChanges()).toHaveLength(2);
     expect(host.selection().keys).toEqual(['a', 'b']);
@@ -791,10 +791,10 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(host.selectionChanges()).toHaveLength(2);
     expect(host.selectionChanges()[1]).toMatchObject({ source: 'row', addedKeys: ['c'] });
     expect(document.activeElement).toBe(gamma);
-    expect(native.querySelectorAll('input[data-selection-indicator]')).toHaveLength(0);
+    expect(native.querySelectorAll(':is(input[data-selection-indicator], [data-selection-indicator] input)')).toHaveLength(0);
   });
 
-  it('renders native checkbox a11y and proposes loaded toggle-all once', async () => {
+  it('uses Neural Checkbox, preserves roving focus and proposes loaded toggle-all once', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     const host = fixture.componentInstance;
     host.selection.set({ kind: 'keys', keys: ['a'] });
@@ -812,16 +812,18 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     await fixture.whenStable();
     const native = fixture.nativeElement as HTMLElement;
     const table = native.querySelector('table');
-    const header = native.querySelector<HTMLInputElement>('input[data-selection-toggle-all]');
+    const header = native.querySelector<HTMLInputElement>('[data-selection-toggle-all] input');
+    expect(native.querySelectorAll('neu-tree-table-checkbox neu-checkbox')).toHaveLength(4);
+    expect(header?.tabIndex).toBe(-1);
     expect(table?.getAttribute('aria-multiselectable')).toBe('true');
     expect(header?.getAttribute('aria-checked')).toBe('mixed');
     expect(
       row(native, 'string:a')
-        .querySelector<HTMLInputElement>('input[data-selection-indicator]')
+        .querySelector<HTMLInputElement>(':is(input[data-selection-indicator], [data-selection-indicator] input)')
         ?.getAttribute('aria-checked'),
     ).toBe('mixed');
     expect(
-      row(native, 'string:c').querySelector<HTMLInputElement>('input[data-selection-indicator]')
+      row(native, 'string:c').querySelector<HTMLInputElement>(':is(input[data-selection-indicator], [data-selection-indicator] input)')
         ?.disabled,
     ).toBe(true);
 
@@ -1107,7 +1109,7 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(
-      row(native, 'string:b').querySelector<HTMLInputElement>('input[data-selection-indicator]')
+      row(native, 'string:b').querySelector<HTMLInputElement>(':is(input[data-selection-indicator], [data-selection-indicator] input)')
         ?.checked,
     ).toBe(true);
   });
@@ -1330,7 +1332,7 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const indicator = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
-      'input[data-selection-indicator][type="radio"]',
+      ':is(input[data-selection-indicator], [data-selection-indicator] input)[type="radio"]',
     )!;
     expect(indicator).not.toBeNull();
     indicator.click();

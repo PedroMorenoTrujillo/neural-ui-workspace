@@ -51,7 +51,6 @@ test('keeps legacy runtimes absent and confines Signal Forms to the active edito
     /\.\.\/\.\.\/neu-table/,
     /@angular\/forms/,
     /@angular\/router/,
-    /@angular\/cdk/,
     /sort\.controller/,
     /filter\.engine/,
     /selection\.controller/,
@@ -61,6 +60,13 @@ test('keeps legacy runtimes absent and confines Signal Forms to the active edito
   ]) {
     assert.doesNotMatch(internal, forbidden);
   }
+  // Overlay/focus utilities belong only to the lazily loaded query UI.
+  assert.doesNotMatch(
+    internalFiles
+      .filter((path) => !path.endsWith('neu-table-query-controls.component.ts'))
+      .map((path) => readFileSync(path, 'utf8')).join('\n'),
+    /@angular\/cdk/,
+  );
   const activeEditor = readFileSync(
     `${root}/internal/features/editing/neu-table-active-editor.component.ts`,
     'utf8',

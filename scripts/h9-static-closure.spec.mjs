@@ -22,6 +22,8 @@ const outputs = {
       { path: 'out/csv.js', kind: 'dynamic-import' },
       { path: 'out/json.js', kind: 'dynamic-import' },
       { path: 'out/xlsx.js', kind: 'dynamic-import' },
+      { path: 'out/selection.js', kind: 'dynamic-import' },
+      { path: 'out/export-projection.js', kind: 'dynamic-import' },
     ],
   },
   'out/bridge.js': { inputs: {}, imports: [{ path: '@angular/core', external: true }] },
@@ -30,13 +32,15 @@ const outputs = {
   'out/csv.js': { inputs: { 'dist/neu-table-csv-export-X.mjs': {} } },
   'out/json.js': { inputs: { 'dist/neu-table-json-export-X.mjs': {} } },
   'out/xlsx.js': { inputs: { 'dist/neu-table-xlsx-export-X.mjs': {} } },
+  'out/selection.js': { inputs: { 'dist/neu-table-checkbox.component-X.mjs': {} } },
+  'out/export-projection.js': { inputs: { 'dist/neu-table-export-projection-X.mjs': {} } },
 };
 
 test('initial closure recursively retains static chunks but excludes dynamic imports', () => {
   const initial = outputClosure({ outputs });
   assert.deepEqual(initial, ['out/bridge.js', 'out/core.js', 'out/stdin.js']);
-  assert.deepEqual(assertTableInitialBoundary({ outputs }, initial).lazyOutputs, 5);
-  assert.equal(outputClosure({ outputs }, { includeDynamic: true }).length, 8);
+  assert.deepEqual(assertTableInitialBoundary({ outputs }, initial).lazyOutputs, 7);
+  assert.equal(outputClosure({ outputs }, { includeDynamic: true }).length, 10);
 });
 
 test('a lazy implementation retained statically is rejected', () => {
@@ -61,13 +65,26 @@ test('missing core or lazy implementation is not a false PASS', () => {
     /core FESM is absent/,
   );
   const missingLazy = structuredClone(outputs);
-  missingLazy['out/core.js'].imports.pop();
+  missingLazy['out/core.js'].imports = missingLazy['out/core.js'].imports.filter(
+    (entry) => entry.path !== 'out/xlsx.js',
+  );
   assert.throws(
     () =>
       assertTableInitialBoundary({ outputs: missingLazy }, outputClosure({ outputs: missingLazy })),
     /xlsx implementation missing/,
   );
 });
+
+for (const [feature, path] of [['selection', 'out/selection.js'], ['export-projection', 'out/export-projection.js']]) {
+  test(`Table ${feature} stays outside the basic consumer`, () => {
+    const contaminated = structuredClone(outputs);
+    contaminated['out/core.js'].imports.find((entry) => entry.path === path).kind = 'import-statement';
+    assert.throws(
+      () => assertTableInitialBoundary({ outputs: contaminated }, outputClosure({ outputs: contaminated })),
+      new RegExp(`${feature} implementation leaked`),
+    );
+  });
+}
 
 test('missing graph outputs and bytes fail closed', () => {
   assert.throws(

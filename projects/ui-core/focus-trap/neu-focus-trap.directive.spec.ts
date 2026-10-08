@@ -129,12 +129,14 @@ describe('NeuFocusTrapDirective', () => {
     expect(document.activeElement).toBe(query('last'));
   });
 
-  it('does not intercept Tab inside the eligible range', async () => {
+  it('advances both directions inside the eligible range without relying on native Tab eligibility', async () => {
     const { query } = await createHost();
     query('first').focus();
 
-    expect(pressTab(query('first')).defaultPrevented).toBe(false);
-    expect(pressTab(query('input'), true).defaultPrevented).toBe(false);
+    expect(pressTab(query('first')).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(query('input'));
+    expect(pressTab(query('input'), true).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(query('first'));
   });
 
   it('discovers dynamic descendants on every keydown without a stale list', async () => {
@@ -168,9 +170,11 @@ describe('NeuFocusTrapDirective', () => {
     }
 
     query('closed-summary').focus();
-    expect(pressTab(query('closed-summary')).defaultPrevented).toBe(false);
+    expect(pressTab(query('closed-summary')).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(query('legend-action'));
     query('legend-action').focus();
-    expect(pressTab(query('legend-action')).defaultPrevented).toBe(false);
+    expect(pressTab(query('legend-action')).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(query('last'));
   });
 
   it('supports anchors, native controls, contenteditable and custom tabindex order', async () => {
@@ -194,7 +198,8 @@ describe('NeuFocusTrapDirective', () => {
     query('input').focus();
 
     expect(document.activeElement).toBe(query('input'));
-    expect(pressTab(query('input')).defaultPrevented).toBe(false);
+    expect(pressTab(query('input')).defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(query('closed-summary'));
   });
 
   it('updates enabled state dynamically and does not restore or move focus when disabled', async () => {

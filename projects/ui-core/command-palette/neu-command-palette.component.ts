@@ -191,6 +191,7 @@ export class NeuCommandPaletteComponent {
   protected readonly searchId = this.idGenerator.getId('neu-command-search-');
   private destroyed = false;
   private readonly shortcutListener = (event: KeyboardEvent): void => {
+    if (event.defaultPrevented) return;
     if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== 'k') return;
     if (!this.opened() && this.isEditable(event.target)) return;
     event.preventDefault();

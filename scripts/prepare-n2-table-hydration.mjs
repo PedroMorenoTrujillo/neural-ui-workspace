@@ -57,9 +57,11 @@ const html=await renderApplication(bootstrap,{document,url:'http://localhost/',a
 for(const marker of ['id="n2-custom-filter"','id="n2-custom-next"','id="n2-custom-state"']) {
   if(!html.includes(marker)) throw new Error('Missing custom template SSR evidence: '+marker);
 }
-for(const value of ['ngh=','<table','SSR Name','0:Linus','data-row-key="1"','data-row-key="2"','data-row-key="3"','data-column-pin="start"','data-column-pin="end"','data-selected="true"','aria-disabled="true"','aria-sort="descending"','aria-label="Search table"','aria-label="Filter Identifier"','type="checkbox"','type="radio"','Show Status','SSR empty','SSR loading','SSR error','id="n2-h-editor"','Hydrated detail Ada','Hydrated group active 2']){
+for(const value of ['ngh=','<table','SSR Name','0:Linus','data-row-key="1"','data-row-key="2"','data-row-key="3"','data-column-pin="start"','data-column-pin="end"','data-selected="true"','aria-disabled="true"','aria-sort="descending"','aria-label="Filter Identifier"','type="checkbox"','type="radio"','Show Status','SSR empty','SSR loading','SSR error','id="n2-h-editor"','Hydrated detail Ada','Hydrated group active 2']){
   if(!html.includes(value)) throw new Error('Missing SSR evidence: '+value);
 }
+const searchLabel=html.match(/<label[^>]*for="([^"]+)"[^>]*>Search table<\\/label>/);
+if(!searchLabel || !html.includes('id="'+searchLabel[1]+'" type="search"')) throw new Error('Missing associated search label in SSR');
 const section=(id:string)=>html.match(new RegExp('<section id="'+id+'">(.*?)</section>','s'))?.[1]??'';
 const rowCount=(id:string)=>(section(id).match(/data-row-key=/g)??[]).length;
 if(rowCount('n2-table-client-virtual')!==50) throw new Error('Client virtual SSR bootstrap must render exactly 50 rows.');

@@ -1,7 +1,9 @@
 import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import {
   APP_ID,
+  AfterRenderRef,
   DestroyRef,
+  EffectRef,
   Injectable,
   Injector,
   PLATFORM_ID,
@@ -97,25 +99,45 @@ export class NeuResponsiveState {
     destroyRef: DestroyRef = inject(DestroyRef),
   ): WritableSignal<boolean> {
     const result = signal(false);
+    if (destroyRef.destroyed) return result;
+
+    let destroyed = false;
+    let pendingRender: AfterRenderRef | undefined;
+    let queryEffect: EffectRef | undefined;
     let release: (() => void) | undefined;
 
-    afterNextRender(
+    destroyRef.onDestroy(() => {
+      if (destroyed) return;
+      destroyed = true;
+      pendingRender?.destroy();
+      pendingRender = undefined;
+      queryEffect?.destroy();
+      queryEffect = undefined;
+      const dispose = release;
+      release = undefined;
+      dispose?.();
+    });
+
+    pendingRender = afterNextRender(
       () => {
-        if (!isPlatformBrowser(this.platformId)) return;
-        const queryEffect = effect(
+        pendingRender = undefined;
+        if (destroyed || !isPlatformBrowser(this.platformId)) return;
+        queryEffect = effect(
           () => {
+            if (destroyed) return;
             const nextQuery = isSignal(query) ? query() : query;
-            release?.();
-            release = this.acquire(nextQuery, result);
+            const dispose = release;
+            release = undefined;
+            dispose?.();
+            if (destroyed) return;
+            const nextRelease = this.acquire(nextQuery, result);
+            if (destroyed) nextRelease();
+            else release = nextRelease;
           },
-          { injector: this.injector },
+          { injector: this.injector, manualCleanup: true },
         );
-        destroyRef.onDestroy(() => {
-          queryEffect.destroy();
-          release?.();
-        });
       },
-      { injector: this.injector },
+      { injector: this.injector, manualCleanup: true },
     );
 
     return result;

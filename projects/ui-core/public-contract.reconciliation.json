@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1476,
-    "bindingDelta": 309,
+    "declarationBindings": 1481,
+    "bindingDelta": 314,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 852,
+    "newlyDiscovered": 857,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 432,
       "model-binding-was-not-supported": 24,
-      "multiline-annotated-or-compound-declaration-was-missed": 390
+      "multiline-annotated-or-compound-declaration-was-missed": 395
     }
   },
   "mappings": [
@@ -3442,6 +3442,10 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./checkbox#NeuCheckboxComponent.input:tabIndex",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./checkbox#NeuCheckboxComponent.input:touched",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -4782,6 +4786,10 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./number-input#NeuNumberInputComponent.input:ariaLabelledBy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
       "id": "./number-input#NeuNumberInputComponent.input:dirty",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
@@ -5888,6 +5896,18 @@
     {
       "id": "./tag#NeuTagComponent.input:variant",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.input:ariaDescribedBy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.input:ariaLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.input:ariaLabelledBy",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./textarea#NeuTextareaComponent.input:dirty",

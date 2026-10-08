@@ -67,7 +67,7 @@ try {
     'descending',
   );
   assert.equal(
-    await page.locator('#n2-table-primary input[aria-label="Search table"]').inputValue(),
+    await page.locator('#n2-table-primary').getByRole('searchbox', { name: 'Search table' }).inputValue(),
     '',
   );
   assert.equal(
@@ -303,7 +303,8 @@ try {
       .then((value) => value?.startsWith('generated:1:')),
     true,
   );
-  assert.equal(javascriptRequests.length, initialJavascriptRequests + 1);
+  // The export projection/loader and requested serializer are both optional.
+  assert.equal(javascriptRequests.length, initialJavascriptRequests + 2);
   assert.equal(await page.locator('#n2-output-events').textContent(), '[]');
   await page.locator('#n2-h-query').click();
   await page.waitForFunction(
@@ -338,18 +339,16 @@ try {
       () => document.querySelector('#n2-output-events')?.textContent === '["queryChange"]',
     );
   });
-  await page.locator('#n2-table-primary input[aria-label="Search table"]').fill('Ada');
-  await page.locator('#n2-table-primary button', { hasText: 'Search' }).click();
+  await page.locator('#n2-table-primary').getByRole('searchbox', { name: 'Search table' }).fill('Ada');
+  await page.locator('#n2-table-primary').getByRole('searchbox', { name: 'Search table' }).press('Enter');
   await page.waitForFunction(
     () =>
       document.querySelector('#n2-output-events')?.textContent === '["queryChange","queryChange"]',
   );
   await page.locator('#n2-table-primary button[aria-label="Filter Name"]').click();
-  await page.locator('#n2-table-primary [data-filter-editor="name"] input').fill('a');
+  await page.getByRole('dialog', { name: 'Filter Name' }).locator('input').fill('a');
   await page
-    .locator('#n2-table-primary [data-filter-editor="name"] button', {
-      hasText: 'Apply Name filter',
-    })
+    .getByRole('dialog', { name: 'Filter Name' }).getByRole('button', { name: 'Apply Name filter' })
     .click();
   await page.waitForFunction(
     () =>
@@ -371,11 +370,11 @@ try {
     'descending',
   );
   assert.equal(
-    await page.locator('#n2-table-primary input[aria-label="Search table"]').inputValue(),
+    await page.locator('#n2-table-primary').getByRole('searchbox', { name: 'Search table' }).inputValue(),
     '',
   );
   await measure('selection', async () => {
-    await page.locator('#n2-table-primary input[aria-label="Select row 3"]').click();
+    await page.locator('#n2-table-primary').getByRole('checkbox', { name: 'Select row 3' }).locator('..').click();
     await page.waitForFunction(() =>
       document.querySelector('#n2-output-events')?.textContent?.includes('selectionChange'),
     );

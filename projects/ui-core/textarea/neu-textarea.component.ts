@@ -46,8 +46,10 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
         [attr.maxlength]="maxLength() ?? null"
         [attr.pattern]="nativePattern()"
         [attr.name]="name() || null"
+        [attr.aria-label]="ariaLabel() || null"
+        [attr.aria-labelledby]="ariaLabelledBy() || null"
         [attr.aria-describedby]="
-          hasVisibleError() ? inputId() + '-error' : hint() ? inputId() + '-hint' : null
+          describedBy()
         "
         [attr.aria-invalid]="hasError() ? 'true' : null"
         [attr.aria-required]="required() ? 'true' : null"
@@ -78,6 +80,9 @@ export class NeuTextareaComponent implements FormValueControl<string> {
   readonly value = model<string>('');
 
   readonly label = input('');
+  readonly ariaLabel = input('');
+  readonly ariaLabelledBy = input('');
+  readonly ariaDescribedBy = input('');
   readonly rows = input<number>(3);
   readonly size = input<'sm' | 'md' | 'lg'>('md');
   readonly autoResize = input<boolean>(false);
@@ -121,6 +126,10 @@ export class NeuTextareaComponent implements FormValueControl<string> {
     () => this.invalid() || this.errors().length > 0 || !!this.errorMessage(),
   );
   protected readonly hasVisibleError = computed(() => this.hasError() && !!this.errorMessage());
+  protected readonly describedBy = computed(() => [...new Set([
+    ...this.ariaDescribedBy().split(/\s+/).filter(Boolean),
+    ...(this.hasVisibleError() ? [this.inputId() + '-error'] : this.hint() ? [this.inputId() + '-hint'] : []),
+  ])].join(' ') || null);
   protected readonly resizeStyle = computed(() =>
     this.autoResize() ? 'none' : this.resizable() ? 'vertical' : 'none',
   );
