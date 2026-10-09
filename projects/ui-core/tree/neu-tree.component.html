@@ -68,6 +68,7 @@
             class="neu-tree__row"
             [class.neu-tree__row--selected]="isSelected(entry.key)"
             [class.neu-tree__row--disabled]="entry.node.disabled"
+            [attr.aria-disabled]="entry.node.disabled ? 'true' : null"
             [style.padding-inline-start.px]="(entry.level - 1) * indentSize() + 6"
             [neuDropZone]="null"
             [neuDropScope]="dragScope"
@@ -95,16 +96,17 @@
               <span class="neu-tree__toggle neu-tree__toggle--placeholder" aria-hidden="true"></span>
             }
             @if (selection().mode === 'checkbox') {
-              <input
-                class="neu-tree__checkbox"
-                type="checkbox"
-                tabindex="-1"
+              <span #checkboxHost class="neu-tree__checkbox" (click)="$event.stopPropagation()">
+              <neu-checkbox
+                #checkbox
+                [tabIndex]="-1"
                 [checked]="checkboxState(entry.key) === 'checked'"
                 [indeterminate]="checkboxState(entry.key) === 'mixed'"
                 [disabled]="entry.node.disabled"
-                [attr.aria-label]="'Select ' + entry.node.label"
-                (click)="onCheckboxClick(entry.key, $event)"
+                [ariaLabel]="'Select ' + entry.node.label"
+                (checkedChange)="onCheckboxChange(entry.key, checkbox, checkboxHost)"
               />
+              </span>
             }
             <span class="neu-tree__content" (click)="onContentClick(entry, $event)">
               @if (nodeTpl()) {

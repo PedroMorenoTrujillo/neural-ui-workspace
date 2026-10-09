@@ -465,6 +465,18 @@ describe('NeuNotificationCenterComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__empty')).toBeTruthy();
+    expect(document.querySelector('.neu-nc__list')?.getAttribute('role')).toBeNull();
+    const svc = mkSvc();
+    svc.push({ message: 'Persistent notification', duration: 0 });
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.neu-nc__list')?.getAttribute('role')).toBe('list');
+    expect(document.querySelector('.neu-nc__list > [role="listitem"]')).toBeTruthy();
+    svc.clearAll();
+    f.detectChanges();
+    await f.whenStable();
+    expect(document.querySelector('.neu-nc__list')?.getAttribute('role')).toBeNull();
+    expect(document.querySelector('.neu-nc__empty')?.getAttribute('role')).toBe('status');
   });
 
   it('push with duration=0 should NOT auto-dismiss', async () => {

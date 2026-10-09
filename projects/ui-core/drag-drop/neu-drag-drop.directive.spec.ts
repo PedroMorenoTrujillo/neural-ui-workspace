@@ -127,10 +127,24 @@ class CompositeDragHostComponent {
   clicks = 0;
 }
 
+@Component({
+  standalone: true,
+  imports: [NeuDraggableDirective, NeuDropZoneDirective],
+  template: `
+    <div [neuDraggable]="1" [neuDragRole]="null" [neuDraggableDisabled]="true">
+      <button type="button">Edit row</button>
+    </div>
+    <div [neuDropZone]="null" [neuDropRole]="null" [neuDropZoneDisabled]="true">
+      <input type="checkbox" aria-label="Select row" />
+    </div>
+  `,
+})
+class PointerOnlyDragDropHostComponent {}
+
 describe('DragDrop public directives', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DragDropHostComponent, FalsyDragDropHostComponent, CompositeDragHostComponent],
+      imports: [DragDropHostComponent, FalsyDragDropHostComponent, CompositeDragHostComponent, PointerOnlyDragDropHostComponent],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
   });
@@ -140,6 +154,18 @@ describe('DragDrop public directives', () => {
     fixture.detectChanges();
     return fixture;
   }
+
+  it('does not announce native controls as disabled when only pointer dragging is disabled', () => {
+    const fixture = TestBed.createComponent(PointerOnlyDragDropHostComponent);
+    fixture.detectChanges();
+
+    for (const container of fixture.nativeElement.querySelectorAll('.neu-draggable, .neu-drop-zone')) {
+      expect(container.getAttribute('role')).toBeNull();
+      expect(container.getAttribute('aria-disabled')).toBeNull();
+    }
+    expect(fixture.nativeElement.querySelector('button').disabled).toBe(false);
+    expect(fixture.nativeElement.querySelector('input').disabled).toBe(false);
+  });
 
   it('wires the public source, handle, group and drop-zone directives to CDK', () => {
     const fixture = setup();

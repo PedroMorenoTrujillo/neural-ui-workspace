@@ -49,27 +49,113 @@ describe('NeuPickListComponent', () => {
     fixture.componentRef.setInput('targetHeader', 'Assigned roles');
     fixture.detectChanges();
     const buttons = fixture.nativeElement.querySelectorAll(
-      'button',
+      '.neu-pick-list__actions button',
     ) as NodeListOf<HTMLButtonElement>;
     expect(fixture.nativeElement.textContent).toContain('Available roles');
     expect(fixture.nativeElement.textContent).toContain('Assigned roles');
-    expect(buttons[2].disabled).toBe(true);
+    expect(buttons[0].disabled).toBe(true);
+    expect(buttons[1].disabled).toBe(true);
+    expect(buttons[2].disabled).toBe(false);
     expect(buttons[3].disabled).toBe(true);
+  });
+
+  it('reorders a row without selecting or transferring it and preserves controlled selection', () => {
+    const gamma = { value: 'c', label: 'Gamma' };
+    const source = [alpha, beta, gamma];
+    fixture.componentRef.setInput('source', source);
+    fixture.componentRef.setInput('sourceSelectionKeys', ['c']);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const changed = vi.spyOn(component.itemsChange, 'emit');
+    const selected = vi.spyOn(component.sourceSelectionChange, 'emit');
+    const actions = fixture.nativeElement.querySelectorAll(
+      '.neu-pick-list__column:first-child .neu-pick-list__item-move',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(actions).toHaveLength(6);
+    expect(actions[0].disabled).toBe(true);
+    expect(actions[5].disabled).toBe(true);
+    expect(actions[1].getAttribute('aria-label')).toBe('Move Alpha down');
+    expect(fixture.nativeElement.querySelector('.neu-pick-list__toolbar')).toBeNull();
+    actions[1].click();
+    expect(changed).toHaveBeenCalledWith({ source: [beta, alpha, gamma], target: component.target() });
+    expect(selected).not.toHaveBeenCalled();
+    expect(component.source()).toBe(source);
+    expect(component.sourceSelectionKeys()).toEqual(['c']);
+    fixture.componentRef.setInput('source', changed.mock.calls[0][0].source);
+    fixture.detectChanges();
+    expect(component.isSourceSelected(gamma)).toBe(true);
+  });
+
+  it('moves filtered rows on either side while preserving hidden slots and local selection', () => {
+    const hidden = { value: 'h', label: 'Hidden' };
+    const one = { value: 'one', label: 'Visible one' };
+    const two = { value: 'two', label: 'Visible two' };
+    fixture.componentRef.setInput('source', [alpha, hidden, beta]);
+    fixture.componentRef.setInput('target', [one, { value: 'th', label: 'Hidden' }, two]);
+    fixture.componentRef.setInput('targetFilterValue', 'Visible');
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.toggleTarget('two');
+    fixture.detectChanges();
+    const changed = vi.spyOn(component.itemsChange, 'emit');
+    const selected = vi.spyOn(component.targetSelectionChange, 'emit');
+    const actions = fixture.nativeElement.querySelectorAll(
+      '.neu-pick-list__column:last-child .neu-pick-list__item-move',
+    ) as NodeListOf<HTMLButtonElement>;
+    actions[2].click();
+    expect(changed).toHaveBeenCalledWith({
+      source: [alpha, hidden, beta], target: [two, { value: 'th', label: 'Hidden' }, one],
+    });
+    expect(selected).not.toHaveBeenCalled();
+    expect(component.targetSelection().has('two')).toBe(true);
+    expect(component.target()[0]).toBe(one);
+  });
+
+  it('disables row actions at disabled barriers and when identities are ambiguous', () => {
+    fixture.componentRef.setInput('source', [alpha, { value: 'locked', label: 'Locked', disabled: true }, beta]);
+    fixture.detectChanges();
+    const actions = fixture.nativeElement.querySelectorAll(
+      '.neu-pick-list__column:first-child .neu-pick-list__item-move',
+    ) as NodeListOf<HTMLButtonElement>;
+    expect([...actions].every((button) => button.disabled)).toBe(true);
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    fixture.componentRef.setInput('source', [alpha, { ...alpha }]);
+    fixture.detectChanges();
+    expect([...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      '.neu-pick-list__item-move',
+    )].every((button) => button.disabled)).toBe(true);
+    warning.mockRestore();
   });
 
   it('keeps selection and transfer enabled when only dragging is disabled', () => {
     const host = fixture.nativeElement as HTMLElement;
-    const option = host.querySelector<HTMLButtonElement>('button[role="option"]')!;
+    const option = host.querySelector<HTMLButtonElement>('.neu-pick-list__option')!;
     expect(option.closest('[aria-disabled="true"]')).toBeNull();
     option.click();
     fixture.detectChanges();
-    expect(option.getAttribute('aria-selected')).toBe('true');
+    expect(option.getAttribute('aria-pressed')).toBe('true');
     const changed = vi.spyOn(fixture.componentInstance.itemsChange, 'emit');
     host.querySelector<HTMLButtonElement>('.neu-pick-list__actions button')!.click();
     expect(changed).toHaveBeenCalledWith({
       source: [beta],
       target: [{ value: 'd', label: 'Disabled', disabled: true }, alpha],
     });
+  });
+
+  it('exposes list items with separate selection toggles and reorder actions', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    const lists = [...host.querySelectorAll<HTMLElement>('[role="list"]')];
+    expect(lists).toHaveLength(2);
+    expect(host.querySelector('[role="listbox"]')).toBeNull();
+    expect(lists.every(list => !!list.getAttribute('aria-label'))).toBe(true);
+    const row = lists[0].querySelector<HTMLElement>('[role="listitem"]')!;
+    const toggle = row.querySelector<HTMLButtonElement>('.neu-pick-list__option')!;
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    expect(row.querySelectorAll('.neu-pick-list__item-move')).toHaveLength(2);
+    expect(toggle.querySelector('button')).toBeNull();
+    toggle.click();
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('toggles source selection and retains it until the transfer proposal is applied', () => {
@@ -99,7 +185,7 @@ describe('NeuPickListComponent', () => {
     document.body.append(host);
     try {
       const component = fixture.componentInstance;
-      const sourceOption = host.querySelector('.neu-pick-list__column button[role="option"]') as HTMLButtonElement;
+      const sourceOption = host.querySelector('.neu-pick-list__column .neu-pick-list__option') as HTMLButtonElement;
       sourceOption.focus();
       expect(document.activeElement).toBe(sourceOption);
       sourceOption.click();
@@ -111,7 +197,7 @@ describe('NeuPickListComponent', () => {
       fixture.componentRef.setInput('target', next!.target);
       fixture.detectChanges();
       await fixture.whenStable();
-      const destination = [...host.querySelectorAll<HTMLButtonElement>('.neu-pick-list__column button[role="option"]')]
+      const destination = [...host.querySelectorAll<HTMLButtonElement>('.neu-pick-list__column .neu-pick-list__option')]
         .find((button) => button.textContent?.includes('Alpha'));
       expect(destination).toBeDefined();
       expect(document.activeElement).toBe(destination);
@@ -428,7 +514,7 @@ describe('NeuPickListComponent', () => {
     filters[1].dispatchEvent(new Event('input'));
 
     for (const button of fixture.nativeElement.querySelectorAll(
-      '.neu-pick-list__toolbar button',
+      '.neu-pick-list__item-move',
     ) as NodeListOf<HTMLButtonElement>)
       button.click();
 

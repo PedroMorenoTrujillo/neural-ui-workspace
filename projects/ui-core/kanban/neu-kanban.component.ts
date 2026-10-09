@@ -18,6 +18,7 @@ import {
   type CdkDragDrop,
 } from '@angular/cdk/drag-drop';
 import { DOCUMENT } from '@angular/common';
+import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
@@ -45,7 +46,7 @@ interface NeuKanbanKeyboardMove {
 
 @Component({
   selector: 'neu-kanban',
-  imports: [CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [NeuButtonComponent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[style.--neu-kanban-column-width]': 'columnWidth()',
@@ -175,6 +176,7 @@ interface NeuKanbanKeyboardMove {
                   (keydown)="onMoveMenuKeydown(card.id, $event)"
                 >
                   <button
+                    neu-button variant="ghost" tone="neutral" size="sm"
                     type="button"
                     class="neu-kanban__move-trigger"
                     [disabled]="card.disabled === true"
@@ -184,7 +186,7 @@ interface NeuKanbanKeyboardMove {
                     [attr.data-neu-kanban-move-trigger-card-id]="card.id"
                     (click)="toggleMoveMenu(card.id, $event)"
                   >
-                    <span aria-hidden="true">↔</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4-4 4 4 4M4 8h12m0 4 4 4-4 4M20 16H8" /></svg>
                     <span>{{ resolvedMoveButtonLabel() }}</span>
                   </button>
                   @if (isMoveMenuOpen(card.id)) {
@@ -195,6 +197,7 @@ interface NeuKanbanKeyboardMove {
                       [attr.aria-label]="moveGroupLabel(card.title)"
                     >
                       <button
+                        neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'left')"
                         [attr.aria-label]="moveDirectionLabel(card.title, 'left')"
@@ -203,6 +206,7 @@ interface NeuKanbanKeyboardMove {
                         ←
                       </button>
                       <button
+                        neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'up')"
                         [attr.aria-label]="moveDirectionLabel(card.title, 'up')"
@@ -211,6 +215,7 @@ interface NeuKanbanKeyboardMove {
                         ↑
                       </button>
                       <button
+                        neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'down')"
                         [attr.aria-label]="moveDirectionLabel(card.title, 'down')"
@@ -219,6 +224,7 @@ interface NeuKanbanKeyboardMove {
                         ↓
                       </button>
                       <button
+                        neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'right')"
                         [attr.aria-label]="moveDirectionLabel(card.title, 'right')"

@@ -205,7 +205,7 @@ export class NeuNotificationService {
           </div>
         </div>
 
-        <div class="neu-nc__list" role="list">
+        <div class="neu-nc__list" [attr.role]="_svc.notifications().length ? 'list' : null">
           @if (!_svc.notifications().length) {
             <div class="neu-nc__empty" role="status">{{ text('No notifications', 'No hay notificaciones') }}</div>
           }

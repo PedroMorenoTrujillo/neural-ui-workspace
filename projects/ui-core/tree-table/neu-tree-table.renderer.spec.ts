@@ -1339,6 +1339,13 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     expect(fixture.componentInstance.selectionChanges()).toHaveLength(1);
     expect(fixture.componentInstance.selectionChanges()[0]?.source).toBe('radio');
     expect(fixture.componentInstance.selection()).toEqual({ kind: 'keys', keys: [] });
+    const label = indicator.closest<HTMLLabelElement>('.neu-radio')!;
+    expect(label.querySelector('.neu-radio__circle')).not.toBeNull();
+    expect(indicator.tabIndex).toBe(-1);
+    label.click();
+    expect(fixture.componentInstance.selectionChanges()).toHaveLength(2);
+    expect(fixture.componentInstance.selectionChanges()[1]?.source).toBe('radio');
+    expect(indicator.checked).toBe(false);
   });
 
   it('treats absent filter metadata and an immediate search commit as no-ops', () => {

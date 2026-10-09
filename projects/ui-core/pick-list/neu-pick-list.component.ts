@@ -159,32 +159,33 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
           }
           <div
             class="neu-pick-list__list"
-            role="listbox"
-            aria-multiselectable="true"
+            role="list"
+            [attr.aria-label]="columnHeader(location)"
             [neuDropZone]="location"
             neuDropScope="neu-pick-list"
             [neuDropZoneDisabled]="!dragDrop()"
             [neuDropAriaLabel]="'Drop into ' + columnHeader(location)"
-            neuDropRole="listbox"
+            neuDropRole="list"
             (drop)="onDrop($event, location)"
           >
-            @for (item of columnItems(location); track identityTrackKey(item, $index)) {
+            @for (item of columnItems(location); track identityTrackKey(item, $index); let index = $index) {
               <div
                 class="neu-pick-list__item"
+                [class.neu-pick-list__item--draggable]="dragDrop()"
                 [neuDraggable]="dragData(item, location)"
                 neuDragScope="neu-pick-list"
                 [neuDraggableDisabled]="isOptionDisabled(item)"
                 [neuDragPointer]="dragDrop()"
                 [neuDragKeyboard]="false"
                 [neuDragTabIndex]="-1"
-                neuDragRole="presentation"
+                neuDragRole="listitem"
               >
                 <button
                   type="button"
-                  role="option"
+                  class="neu-pick-list__option"
                   [class.is-selected]="isLocationSelected(item, location)"
                   [disabled]="isOptionDisabled(item)"
-                  [attr.aria-selected]="isLocationSelected(item, location)"
+                  [attr.aria-pressed]="isLocationSelected(item, location)"
                   (click)="toggleLocationFromTemplate(location, optionValueOf(item))"
                 >
                   @if (itemTpl()) {
@@ -207,29 +208,25 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
                     aria-hidden="true"
                   ><neu-icon-outlet [icon]="iconDrag" [fallbackPath]="iconFallbackPath(iconDrag)" [fallbackText]="iconFallbackText(iconDrag)" size="1em" aria-hidden="true" /></span>
                 }
+                @for (direction of directions; track direction) {
+                  <button
+                    neu-button
+                    class="neu-pick-list__item-move"
+                    type="button"
+                    tone="neutral"
+                    variant="ghost"
+                    size="sm"
+                    [iconOnly]="true"
+                    [ariaLabel]="itemMoveLabel(item, direction)"
+                    [disabled]="!canMoveItem(location, index, direction)"
+                    (click)="$event.stopPropagation(); moveItem(location, index, direction)"
+                  >
+                    <neu-icon-outlet [icon]="moveIcon(direction === -1 ? 'up' : 'down')" [fallbackPath]="iconFallbackPath(moveIcon(direction === -1 ? 'up' : 'down'))" [fallbackText]="iconFallbackText(moveIcon(direction === -1 ? 'up' : 'down'))" size="1em" aria-hidden="true" />
+                  </button>
+                }
               </div>
             } @empty {
-              <div class="neu-pick-list__empty" role="option" aria-disabled="true" aria-selected="false">{{ emptyFilterLabel() }}</div>
-            }
-          </div>
-          <div class="neu-pick-list__toolbar" [attr.aria-label]="reorderToolbarLabel(location)">
-            @for (move of listMoves; track move) {
-              <button
-                neu-button
-                type="button"
-                tone="neutral"
-                variant="ghost"
-                size="sm"
-                [iconOnly]="true"
-                [ariaLabel]="reorderActionLabel(location, move)"
-                [disabled]="!hasLocationSelection(location)"
-                (click)="reorderSelection(location, move)"
-              >
-                <neu-icon-outlet [icon]="moveIcon(move)" [fallbackPath]="iconFallbackPath(moveIcon(move))" [fallbackText]="iconFallbackText(moveIcon(move))" size="1em" aria-hidden="true" />
-                @if (move === 'top' || move === 'bottom') {
-                  <neu-icon-outlet [icon]="moveIcon(move)" [fallbackPath]="iconFallbackPath(moveIcon(move))" [fallbackText]="iconFallbackText(moveIcon(move))" size="1em" aria-hidden="true" />
-                }
-              </button>
+              <div class="neu-pick-list__empty" role="listitem">{{ emptyFilterLabel() }}</div>
             }
           </div>
         </section>
@@ -265,6 +262,7 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   protected readonly iconFallbackText = neuSemanticIconText;
   protected readonly iconDrag = iconDrag;
   protected readonly listLocations = NEU_LIST_LOCATIONS;
+  protected readonly directions = [-1, 1] as const;
   protected readonly listMoves = NEU_LIST_MOVES;
   protected readonly pickActions = NEU_PICK_ACTIONS;
   readonly itemTpl = contentChild(NeuPickListItemDirective<T>);
@@ -467,6 +465,36 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
     }
   }
 
+  protected itemMoveLabel(item: T, direction: -1 | 1): string {
+    return `Move ${this.optionLabelOf(item)} ${direction === -1 ? 'up' : 'down'}`;
+  }
+
+  protected canMoveItem(location: NeuListLocation, index: number, direction: -1 | 1): boolean {
+    if (this.duplicate()) return false;
+    const visible = this.columnItems(location);
+    const destination = index + direction;
+    return index >= 0 && index < visible.length && destination >= 0 && destination < visible.length &&
+      !this.isOptionDisabled(visible[index]!) && !this.isOptionDisabled(visible[destination]!);
+  }
+
+  protected moveItem(location: NeuListLocation, index: number, direction: -1 | 1): void {
+    if (!this.canMoveItem(location, index, direction)) return;
+    const visible = this.columnItems(location);
+    const items = location === 'source' ? this.source() : this.target();
+    const next = reorderVisible(
+      items,
+      visible,
+      this.optionValueOf(visible[index]!),
+      index + direction,
+      (item) => this.optionValueOf(item),
+      (item) => this.isOptionDisabled(item),
+    );
+    if (next) this.commit(
+      location === 'source' ? next : [...this.source()],
+      location === 'target' ? next : [...this.target()],
+    );
+  }
+
   reorderSelection(location: NeuListLocation, move: NeuListMove): void {
     if (!this.validIdentity()) return;
     const items = location === 'source' ? this.source() : this.target();
@@ -663,10 +691,10 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
       const index = visible.findIndex((item) =>
         neuOptionValuesEqual(this.optionValueOf(item), movedKey),
       );
-      const options = column.querySelectorAll<HTMLButtonElement>('button[role="option"]');
+      const options = column.querySelectorAll<HTMLButtonElement>('.neu-pick-list__option');
       const preferred = index < 0 ? null : options[index];
       const fallback = column.querySelector<HTMLElement>(
-        'button[role="option"]:not([disabled]), input:not([disabled]), button:not([disabled])',
+        '.neu-pick-list__option:not([disabled]), input:not([disabled]), button:not([disabled])',
       );
       (preferred && !preferred.disabled ? preferred : fallback)?.focus({ preventScroll: true });
     }, { injector: this.injector });

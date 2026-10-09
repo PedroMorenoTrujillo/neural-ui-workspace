@@ -91,6 +91,23 @@ describe('NeuInputOTPComponent Signal Forms contract', () => {
     expect(alphanumeric.component.value()).toBe('A');
   });
 
+  it('appends at the first empty position without leaving a ghost digit in a skipped cell', () => {
+    const { fixture, component, cells } = create({ value: '12' });
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    cells[4].focus();
+    input(cells[4], '3');
+    fixture.detectChanges();
+    expect(component.value()).toBe('123');
+    expect(cells.map((cell) => cell.value)).toEqual(['1', '2', '3', '', '', '']);
+    expect(changed).toHaveBeenCalledExactlyOnceWith('123');
+    expect(document.activeElement).toBe(cells[3]);
+    cells[1].focus();
+    input(cells[1], '9');
+    fixture.detectChanges();
+    expect(cells.map((cell) => cell.value)).toEqual(['1', '9', '3', '', '', '']);
+  });
+
   it('distributes complete and partial paste from the active cell exactly once', () => {
     const complete = create({ length: 4 });
     const completeChange = vi.fn();

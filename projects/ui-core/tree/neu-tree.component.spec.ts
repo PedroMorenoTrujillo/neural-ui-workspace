@@ -485,6 +485,31 @@ describe('NeuTreeComponent controlled C6', () => {
     expect(rows(fixture)[1]?.querySelector('input[type="checkbox"]')).not.toBeNull();
   });
 
+  it('uses Neural checkbox visuals while keeping selection controlled and one tree tab stop', () => {
+    const fixture = create({ selection: { mode: 'checkbox', keys: [] } });
+    const row = rows(fixture)[0]!;
+    const control = row.querySelector('neu-checkbox')!;
+    const native = control.querySelector<HTMLInputElement>('input')!;
+    const events: unknown[] = [];
+    fixture.componentInstance.selectionChange.subscribe((value) => events.push(value));
+    expect(control.querySelector('.neu-checkbox__box')).not.toBeNull();
+    expect(native.tabIndex).toBe(-1);
+    expect(native.getAttribute('aria-readonly')).toBeNull();
+    expect(row.querySelector('.neu-tree__row')!.getAttribute('aria-disabled')).toBeNull();
+    control.querySelector<HTMLElement>('.neu-checkbox__box')!.click();
+    fixture.detectChanges();
+    expect(events).toHaveLength(1);
+    expect(native.checked).toBe(false);
+    expect(row.getAttribute('aria-checked')).toBe('false');
+    fixture.componentRef.setInput('selection', { mode: 'checkbox', keys: ['root', 'child', 'grandchild'] });
+    fixture.detectChanges();
+    expect(native.checked).toBe(true);
+    expect(row.getAttribute('aria-checked')).toBe('true');
+    const disabled = rows(fixture)[1]!.querySelector<HTMLInputElement>('input')!;
+    disabled.click();
+    expect(events).toHaveLength(1);
+  });
+
   it('searches loaded descendants and transiently reveals ancestor paths', () => {
     const fixture = create();
     fixture.componentRef.setInput('searchable', true);

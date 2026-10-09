@@ -227,7 +227,9 @@
                         [attr.aria-label]="node.expanded ? labels().collapse : labels().expand"
                         [attr.aria-expanded]="node.expanded"
                       >
-                        <span aria-hidden="true">{{ node.expanded ? '−' : '+' }}</span>
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path [attr.d]="node.expanded ? 'm6 9 6 6 6-6' : 'm9 6 6 6-6 6'" />
+                        </svg>
                       </button>
                     }
                     @if (selectionIndicator(node); as indicator) {
@@ -240,8 +242,12 @@
                           (activate)="onCheckboxToggle(node, $event)"
                         />
                       } @else {
+                      <label class="neu-tree-table2__selection-indicator neu-radio"
+                        [class.neu-radio--checked]="selectionState(node).selected"
+                        [class.neu-radio--disabled]="selectionState(node).disabled"
+                        (click)="$event.stopPropagation()">
                       <input
-                        class="neu-tree-table2__selection-indicator"
+                        class="neu-radio__input"
                         data-selection-indicator
                         tabindex="-1"
                         [type]="indicator"
@@ -254,7 +260,12 @@
                         [checked]="selectionState(node).selected"
                         [indeterminate]="selectionState(node).indeterminate"
                         [disabled]="selectionState(node).disabled"
+                        (click)="onTableClick($event)"
                       />
+                      <span class="neu-radio__circle" [class.neu-radio__circle--checked]="selectionState(node).selected" aria-hidden="true">
+                        <span class="neu-radio__dot"></span>
+                      </span>
+                      </label>
                       }
                     }
                     <span class="neu-tree-table2__node-content">

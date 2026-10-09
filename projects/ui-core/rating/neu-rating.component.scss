@@ -22,6 +22,11 @@
   }
 }
 
+.neu-rating__item {
+  display: inline-flex;
+  flex: none;
+}
+
 .neu-rating__star {
   display: inline-flex;
   align-items: center;

@@ -22,6 +22,7 @@ import {
   NeuDraggableDirective,
   NeuDropZoneDirective,
 } from '@neural-ui/core/drag-drop';
+import { NeuCheckboxComponent } from '@neural-ui/core/checkbox';
 import {
   buildTreeModel,
   deriveTreeCheckboxStates,
@@ -68,7 +69,7 @@ interface TreeDropTarget<K extends NeuTreeKey> {
 @Component({
   selector: 'neu-tree',
   standalone: true,
-  imports: [NgTemplateOutlet, NeuDragDropGroupDirective, NeuDraggableDirective, NeuDropZoneDirective],
+  imports: [NgTemplateOutlet, NeuCheckboxComponent, NeuDragDropGroupDirective, NeuDraggableDirective, NeuDropZoneDirective],
   encapsulation: ViewEncapsulation.None,
   templateUrl: './neu-tree.component.html',
   styleUrl: './neu-tree.component.scss',
@@ -145,6 +146,7 @@ export class NeuTreeComponent<T, K extends NeuTreeKey = string> {
   private typeahead = '';
   private typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
   private focusFrame: number | null = null;
+  private restoringCheckbox = false;
 
   constructor() {
     effect(() => {
@@ -250,13 +252,22 @@ export class NeuTreeComponent<T, K extends NeuTreeKey = string> {
     this.emitChildrenRequest(key, 'retry', this.model().revision);
   }
 
-  protected onCheckboxClick(key: K, event: MouseEvent): void {
-    event.stopPropagation();
-    const target = event.target as HTMLInputElement;
-    const state = this.checkboxState(key);
-    target.checked = state === 'checked';
-    target.indeterminate = state === 'mixed';
+  protected onCheckboxChange(key: K, control: NeuCheckboxComponent, host: HTMLElement): void {
+    if (this.restoringCheckbox) return;
     this.proposeSelection(key, 'pointer');
+    const state = this.checkboxState(key);
+    this.restoringCheckbox = true;
+    try {
+      control.checked.set(state === 'checked');
+    } finally {
+      this.restoringCheckbox = false;
+    }
+    // Restore rejected proposals even when the parent's binding is unchanged.
+    const native = host.querySelector<HTMLInputElement>('input');
+    if (native) {
+      native.checked = state === 'checked';
+      native.indeterminate = state === 'mixed';
+    }
   }
 
   protected onContentClick(entry: VisibleTreeEntry<T, K>, event: MouseEvent): void {

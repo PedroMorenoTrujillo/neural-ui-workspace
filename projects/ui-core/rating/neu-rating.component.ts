@@ -36,37 +36,41 @@ import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
       [attr.aria-describedby]="ariaDescribedBy() || null"
       (focusout)="onFocusOut($event)"
     >
-      @for (i of ratingOptions(); track i) {
-        <button
-          class="neu-rating__star"
-          [class.neu-rating__star--half]="resolvedStep() === 0.5"
-          [class.neu-rating__star--first-half]="resolvedStep() === 0.5 && isHalf(i)"
-          [class.neu-rating__star--second-half]="resolvedStep() === 0.5 && !isHalf(i)"
-          [class.neu-rating__star--filled]="i <= (hovered() ?? selectedValue() ?? 0)"
-          type="button"
-          [disabled]="disabled()"
-          [tabIndex]="tabIndexFor(i)"
-          [attr.data-neu-rating-value]="i"
-          [attr.aria-label]="starLabel(i)"
-          [attr.aria-checked]="i === selectedValue()"
-          role="radio"
-          (mouseenter)="onHover(i)"
-          (mouseleave)="onLeave()"
-          (focus)="focusedValue.set(i)"
-          (click)="activate(i, true)"
-          (keydown)="onKeyDown(i, $event)"
-        >
-          <svg class="neu-rating__icon" viewBox="0 0 24 24" aria-hidden="true">
-            <polygon
-              points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
-              [attr.fill]="getFill(i)"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
+      @for (star of starsArray(); track star) {
+        <span class="neu-rating__item">
+          @for (i of resolvedStep() === 0.5 ? [star - 0.5, star] : [star]; track i) {
+            <button
+              class="neu-rating__star"
+              [class.neu-rating__star--half]="resolvedStep() === 0.5"
+              [class.neu-rating__star--first-half]="resolvedStep() === 0.5 && isHalf(i)"
+              [class.neu-rating__star--second-half]="resolvedStep() === 0.5 && !isHalf(i)"
+              [class.neu-rating__star--filled]="i <= (hovered() ?? selectedValue() ?? 0)"
+              type="button"
+              [disabled]="disabled()"
+              [tabIndex]="tabIndexFor(i)"
+              [attr.data-neu-rating-value]="i"
+              [attr.aria-label]="starLabel(i)"
+              [attr.aria-checked]="i === selectedValue()"
+              role="radio"
+              (mouseenter)="onHover(i)"
+              (mouseleave)="onLeave()"
+              (focus)="focusedValue.set(i)"
+              (click)="activate(i, true)"
+              (keydown)="onKeyDown(i, $event)"
+            >
+              <svg class="neu-rating__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon
+                  points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                  [attr.fill]="getFill(i)"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          }
+        </span>
       }
     </div>
   `,

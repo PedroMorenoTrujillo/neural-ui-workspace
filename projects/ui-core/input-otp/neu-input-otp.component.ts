@@ -102,7 +102,9 @@ export class NeuInputOTPComponent implements FormValueControl<string> {
     const current = this.normalize(this.value());
     const target = Math.min(index, current.length);
     const next = this.normalize(`${current.slice(0, target)}${char}${current.slice(target + 1)}`);
-    input.value = next[target] ?? '';
+    // A skipped empty cell appends at the first gap. Restore the cell that
+    // actually received native input, even if its bound value stays empty.
+    input.value = next[index] ?? '';
     this.commitUserValue(next);
     if (char && target < this.length() - 1) this.focusCell(target + 1);
   }

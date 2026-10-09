@@ -40,6 +40,7 @@
 
 .neu-textarea__field {
   width: 100%;
+  max-inline-size: 100%;
   min-height: 80px;
   padding: 1.25rem var(--neu-space-4) var(--neu-space-3);
   font-family: var(--neu-font-sans);
@@ -49,7 +50,7 @@
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
   outline: none;
-  resize: var(--_neu-textarea-resize, vertical);
+  resize: var(--_neu-textarea-resize, both);
   transition:
     border-color var(--neu-transition),
     box-shadow var(--neu-transition);
@@ -80,7 +81,7 @@
 }
 
 // Auto-resize: quita el resize handle
-.neu-textarea__field[style*='height'] {
+.neu-textarea__field--auto-resize {
   resize: none;
   overflow: hidden;
 }

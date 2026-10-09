@@ -12,6 +12,7 @@
 .neu-compare__handle::before { position: absolute; top: 50%; inset-inline-start: 50%; width: .875rem; height: .875rem; transform: translate(-50%, -50%); content: '↔'; text-align: center; line-height: .8; }
 .neu-compare--vertical .neu-compare__handle { inset-inline-start: 50%; top: var(--neu-compare-percent); cursor: ns-resize; }
 .neu-compare--vertical .neu-compare__handle::before { content: '↕'; }
+.neu-compare__handle:has(> :not(.neu-compare__input))::before { content: none; }
 .neu-compare__indicator { position: absolute; z-index: 1; inset: 0; pointer-events: none; }
 .neu-compare__indicator::before { position: absolute; inset-block: 0; inset-inline-start: var(--neu-compare-percent); width: 2px; background: var(--neu-primary-fg, #fff); content: ''; }
 .neu-compare--vertical .neu-compare__indicator::before { inset-block-start: var(--neu-compare-percent); inset-inline: 0; width: auto; height: 2px; }

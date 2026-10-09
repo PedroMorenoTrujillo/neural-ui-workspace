@@ -187,9 +187,10 @@
 
 .neu-tree__checkbox {
   flex: 0 0 auto;
-  inline-size: 1rem;
-  block-size: 1rem;
-  margin: 0.35rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  block-size: 1.75rem;
+  margin-block-start: 0.25rem;
 }
 
 .neu-tree__content {

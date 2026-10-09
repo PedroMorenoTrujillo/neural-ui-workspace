@@ -36,6 +36,7 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
       <textarea
         #nativeTextarea
         class="neu-textarea__field"
+        [class.neu-textarea__field--auto-resize]="autoResize()"
         [id]="inputId()"
         [rows]="rows()"
         [placeholder]="' '"
@@ -131,7 +132,7 @@ export class NeuTextareaComponent implements FormValueControl<string> {
     ...(this.hasVisibleError() ? [this.inputId() + '-error'] : this.hint() ? [this.inputId() + '-hint'] : []),
   ])].join(' ') || null);
   protected readonly resizeStyle = computed(() =>
-    this.autoResize() ? 'none' : this.resizable() ? 'vertical' : 'none',
+    this.autoResize() ? 'none' : this.resizable() ? 'both' : 'none',
   );
   protected readonly nativePattern = computed(() => {
     const patterns = this.pattern();

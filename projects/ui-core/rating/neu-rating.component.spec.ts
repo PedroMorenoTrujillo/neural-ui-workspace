@@ -173,6 +173,18 @@ describe('NeuRatingComponent', () => {
     expect(buttons()[4].classList.contains('neu-rating__star--half')).toBe(true);
   });
 
+  it('keeps each pair of half-step radios in one visual star when wrapping', () => {
+    const { root } = mount({ step: 0.5 });
+    const items = Array.from(root.querySelectorAll('.neu-rating__item'));
+    expect(items).toHaveLength(5);
+    expect(items.map((item) =>
+      Array.from(item.querySelectorAll('button')).map((button) =>
+        Number(button.getAttribute('data-neu-rating-value')),
+      ),
+    )).toEqual([[0.5, 1], [1.5, 2], [2.5, 3], [3.5, 4], [4.5, 5]]);
+    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+  });
+
   it('selects and clears a half rating exactly once per user activation', () => {
     const { component, buttons } = mount({ step: 0.5 });
     const changes = vi.fn();

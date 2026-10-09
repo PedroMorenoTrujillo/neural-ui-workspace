@@ -297,7 +297,7 @@ export interface TableQueryControls {
           <button neu-button size="sm" variant="outline" type="button" [ariaLabel]="text('clearColumnFilter', state.column)" (click)="state.clear()">
             {{ text('clear') }}
           </button>
-          <button neu-button size="sm" variant="ghost" type="button" (click)="state.cancel()">{{ text('cancelFilter') }}</button>
+          <button neu-button size="sm" variant="ghost" type="button" [ariaLabel]="text('cancelFilter')" (click)="state.cancel()">{{ text('cancel') }}</button>
         </div>
       } @else {
         @if (state.explicit) {
@@ -416,8 +416,16 @@ export interface TableQueryControls {
     }
     .neu-table2__filter-actions {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      align-items: center;
       gap: var(--neu-table-space-xs, 0.25rem);
+    }
+    .neu-table2__filter-actions button {
+      block-size: 2.25rem;
+      min-block-size: 2.25rem;
+      padding-block: 0;
+      padding-inline: .625rem;
+      white-space: nowrap;
     }
     .neu-table2__filter-menu {
       display:grid; gap:.75rem; inline-size:min(18rem, calc(100vw - 1rem));

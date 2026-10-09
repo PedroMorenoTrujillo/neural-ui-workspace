@@ -179,9 +179,15 @@ describe('NeuTextareaComponent Signal Forms contract', () => {
     expect(touched).toHaveBeenCalledTimes(1);
   });
 
-  it('supports vertical, fixed and automatic resize without changing the value', async () => {
-    const vertical = create();
-    expect(vertical.textarea.style.resize).toBe('vertical');
+  it('supports diagonal, fixed and automatic resize without changing the value', async () => {
+    const manual = create();
+    expect(manual.textarea.style.resize).toBe('both');
+    expect(manual.textarea.classList).not.toContain('neu-textarea__field--auto-resize');
+    manual.textarea.style.width = '180px';
+    manual.textarea.style.height = '120px';
+    manual.fixture.detectChanges();
+    expect(manual.textarea.style.resize).toBe('both');
+    expect(manual.component.value()).toBe('');
     const fixed = create({ resizable: false });
     expect(fixed.textarea.style.resize).toBe('none');
     const automatic = create({ autoResize: true });
@@ -191,6 +197,7 @@ describe('NeuTextareaComponent Signal Forms contract', () => {
     await Promise.resolve();
     expect(automatic.textarea.style.height).toBe('84px');
     expect(automatic.textarea.style.resize).toBe('none');
+    expect(automatic.textarea.classList).toContain('neu-textarea__field--auto-resize');
   });
 
   it('normalizes an unexpected transient non-string only for display and supports hidden', () => {

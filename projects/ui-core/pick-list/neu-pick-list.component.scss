@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 0.75rem;
-  align-items: center;
+  align-items: stretch;
 }
 
 .neu-pick-list__column,
@@ -18,15 +18,36 @@
 }
 
 .neu-pick-list__list {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  block-size: 16rem;
+  min-block-size: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
   gap: 0.375rem;
+}
+
+.neu-pick-list__column {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
 }
 
 .neu-pick-list__item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  flex-shrink: 0;
   gap: 0.375rem;
   align-items: center;
+}
+
+.neu-pick-list__item--draggable {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.neu-pick-list__item > .neu-pick-list__option {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .neu-pick-list__filter,
@@ -101,6 +122,7 @@
 
 .neu-pick-list__actions {
   display: grid;
+  align-self: center;
   gap: 0.5rem;
 }
 
