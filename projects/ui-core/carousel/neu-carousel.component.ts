@@ -14,11 +14,17 @@ export interface NeuCarouselPageEvent { page: number; first: number; }
   selector: 'neu-carousel', imports: [NgTemplateOutlet],
   host: { class: 'neu-carousel', '[class.neu-carousel--vertical]': 'orientation() === "vertical"' },
   template: `
-    <section class="neu-carousel__root" role="region" [attr.aria-label]="ariaLabel()" (keydown)="onKeydown($event)" (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)">
+    <section class="neu-carousel__root" role="region" [attr.aria-label]="ariaLabel()" (keydown)="onKeydown($event)" (pointerdown)="onPointerDown($event)" (pointerup)="onPointerUp($event)" (pointercancel)="onPointerCancel()" (dragstart)="onDragStart($event)">
       @if (headerTemplate) { <ng-container [ngTemplateOutlet]="headerTemplate.templateRef" /> }
       @if (items().length) {
         <div class="neu-carousel__content">
-          @if (showNavigators()) { <button type="button" class="neu-carousel__nav" [disabled]="!canPrevious()" [attr.aria-label]="previousLabel()" (click)="previous()">{{ orientation() === 'vertical' ? '↑' : '‹' }}</button> }
+          @if (showNavigators()) {
+            <button type="button" class="neu-carousel__nav" [disabled]="!canPrevious()" [attr.aria-label]="previousLabel()" (click)="previous()">
+              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path [attr.d]="orientation() === 'vertical' ? 'm6 15 6-6 6 6' : 'm15 18-6-6 6-6'" />
+              </svg>
+            </button>
+          }
           <div class="neu-carousel__viewport" [style.block-size]="orientation() === 'vertical' ? verticalViewPortHeight() : null" aria-live="off">
             <div class="neu-carousel__track" [style.grid-template-columns]="orientation() === 'horizontal' ? 'repeat(' + effectiveVisible() + ', minmax(0, 1fr))' : null">
               @for (item of visibleItems(); track trackBy()($index + first(), item); let index = $index) {
@@ -28,7 +34,13 @@ export interface NeuCarouselPageEvent { page: number; first: number; }
               }
             </div>
           </div>
-          @if (showNavigators()) { <button type="button" class="neu-carousel__nav" [disabled]="!canNext()" [attr.aria-label]="nextLabel()" (click)="next()">{{ orientation() === 'vertical' ? '↓' : '›' }}</button> }
+          @if (showNavigators()) {
+            <button type="button" class="neu-carousel__nav" [disabled]="!canNext()" [attr.aria-label]="nextLabel()" (click)="next()">
+              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path [attr.d]="orientation() === 'vertical' ? 'm6 9 6 6 6-6' : 'm9 18 6-6-6-6'" />
+              </svg>
+            </button>
+          }
         </div>
         <div class="neu-carousel__controls">
           @if (showIndicators() && pageCount() > 1) { <div class="neu-carousel__indicators" role="group" [attr.aria-label]="indicatorLabel()"> @for (pageNumber of pages(); track pageNumber) { <button type="button" [attr.aria-pressed]="pageNumber === page()" [attr.aria-label]="pageLabel(pageNumber)" [class.neu-carousel__indicator--active]="pageNumber === page()" (click)="setPage(pageNumber, true)"><span aria-hidden="true"></span></button> } </div> }
@@ -106,6 +118,11 @@ export class NeuCarouselComponent<T = unknown> {
     if (event.key === 'End') { event.preventDefault(); this.setPage(this.pageCount() - 1, true); }
   }
   onPointerDown(event: PointerEvent): void { this._pointerStart = { x: event.clientX, y: event.clientY }; }
+  onPointerCancel(): void { this._pointerStart = null; }
+  onDragStart(event: DragEvent): void {
+    // Native image drag cancels pointerup, preventing the carousel swipe from completing.
+    if (event.target instanceof HTMLImageElement) event.preventDefault();
+  }
   onPointerUp(event: PointerEvent): void {
     if (!this._pointerStart) return;
     const delta = this.orientation() === 'vertical' ? event.clientY - this._pointerStart.y : event.clientX - this._pointerStart.x;

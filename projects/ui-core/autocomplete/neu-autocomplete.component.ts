@@ -25,6 +25,7 @@ import {
 } from '@angular/core';
 import { COMPOSITION_BUFFER_MODE } from '@angular/forms';
 import type { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   NeuOptionAccessor,
@@ -375,6 +376,7 @@ export class NeuAutocompleteComponent<
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly locale = inject(NEURAL_LOCALE);
   private readonly overlay = inject(Overlay);
   /* v8 ignore start -- Angular signal-query factories; DOM/query behavior is covered. */
   private readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputEl');
@@ -663,7 +665,10 @@ export class NeuAutocompleteComponent<
     if (metadata.empty) return this.emptyLabel();
     if (metadata.loading && !total) return this.loadingLabel();
     if (this.searchMessage()) return this.searchMessage()!.replaceAll('{0}', String(total));
-    return total === 1 ? '1 resultado disponible' : `${total} resultados disponibles`;
+    if (/^es(?:-|$)/i.test(this.locale)) {
+      return total === 1 ? '1 resultado disponible' : `${total} resultados disponibles`;
+    }
+    return total === 1 ? '1 result available' : `${total} results available`;
   });
   readonly effectiveVirtualScrollItemSize = computed(() => {
     const explicit = this.virtualScrollItemSize();

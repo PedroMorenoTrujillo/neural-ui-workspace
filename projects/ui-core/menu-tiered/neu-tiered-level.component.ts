@@ -79,7 +79,11 @@ export interface NeuTieredOwner {
               @if (item.shortcut) { <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd> }
             }
             @if (item.children?.length) {
-              <span class="neu-tiered-menu__chevron" aria-hidden="true">›</span>
+              <svg class="neu-tiered-menu__chevron" aria-hidden="true"
+                width="1em" height="1em" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
             }
           </button>
           @if (item.children?.length) {

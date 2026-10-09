@@ -83,6 +83,7 @@ import type { NeuDensity } from '@neural-ui/core';
       <!-- Bloque de código -->
       <pre
         class="neu-code-block__pre"
+        dir="ltr"
         tabindex="0"
       ><code class="neu-code-block__code">{{ code() }}</code></pre>
     </div>

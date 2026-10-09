@@ -116,6 +116,16 @@ class PanelProjectionHostComponent { readonly disabled = signal(false); readonly
 class EnhancedScrollAreaHostComponent {}
 
 describe('NeuFieldsetComponent and NeuScrollAreaComponent', () => {
+  it('uses a decorative stroke chevron on the native legend toggle', () => {
+    const fixture = TestBed.createComponent(PanelProjectionHostComponent);
+    fixture.componentInstance.collapsible.set(true);
+    fixture.detectChanges();
+    const indicator = fixture.nativeElement.querySelector('svg.neu-fieldset__indicator');
+    expect(indicator?.getAttribute('aria-hidden')).toBe('true');
+    expect(indicator?.getAttribute('fill')).toBe('none');
+    expect(indicator?.querySelector('polyline')?.getAttribute('points')).toBe('6 9 12 15 18 9');
+  });
+
   it('renders optional legend and projects fieldset and scroll content', async () => {
     await TestBed.configureTestingModule({
       imports: [PanelProjectionHostComponent],

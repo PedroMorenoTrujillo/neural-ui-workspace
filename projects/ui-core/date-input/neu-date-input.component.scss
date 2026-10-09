@@ -5,6 +5,10 @@
 
 @use '../styles/floating-label' as floating;
 
+neu-date-input[hidden] {
+  display: none !important;
+}
+
 $trigger-height: 48px;
 $panel-z: 200;
 $drum-item-h: 36px;

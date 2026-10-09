@@ -116,6 +116,29 @@ describe('NeuCheckboxComponent', () => {
     expect(touched).toHaveBeenCalledOnce();
   });
 
+  it('restores a controlled mixed state after native activation, including readonly', () => {
+    const df = TestBed.createComponent(NeuCheckboxComponent);
+    df.componentRef.setInput('indeterminate', true);
+    df.componentRef.setInput('readonly', true);
+    df.detectChanges();
+    const emitted = vi.fn();
+    df.componentInstance.checked.subscribe(emitted);
+    const input: HTMLInputElement = df.nativeElement.querySelector('input');
+    input.click();
+    expect(input.checked).toBe(false);
+    expect(input.indeterminate).toBe(true);
+    expect(input.getAttribute('aria-checked')).toBe('mixed');
+    expect(emitted).not.toHaveBeenCalled();
+    df.componentRef.setInput('readonly', false);
+    df.detectChanges();
+    input.click();
+    expect(input.indeterminate).toBe(true);
+    expect(emitted).toHaveBeenCalledExactlyOnceWith(true);
+    df.componentRef.setInput('indeterminate', false);
+    df.detectChanges();
+    expect(input.indeterminate).toBe(false);
+  });
+
   it('disabled input should disable the native input element', async () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.componentRef.setInput('disabled', true);

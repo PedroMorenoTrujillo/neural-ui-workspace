@@ -32,6 +32,17 @@ describe('NeuUploaderComponent N2-009', () => {
     expect(Array.isArray(fixture.componentInstance.value())).toBe(true);
   });
 
+  it('gives the icon-only Neural picker button its accessible choose label', async () => {
+    const fixture = await setup({ dropzone: false, showPickerText: false, chooseLabel: 'Choose attachment' });
+    const trigger = fixture.nativeElement.querySelector('.neu-uploader__picker-trigger') as HTMLButtonElement;
+    expect(trigger.getAttribute('aria-label')).toBe('Choose attachment');
+    fixture.componentRef.setInput('chooseLabel', 'Elegir adjunto');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-label')).toBe('Elegir adjunto');
+    fixture.destroy();
+  });
+
   it('adds accepted files using one immutable snapshot and emits contextual detail', async () => {
     const fixture = await setup();
     const component = fixture.componentInstance;

@@ -99,6 +99,24 @@ describe('NeuTooltipDirective', () => {
     expect(div.getAttribute('tabindex')).toBe('0');
   });
 
+  it('preserves consumer tab order on native and custom triggers', () => {
+    @Component({
+      imports: [NeuTooltipDirective],
+      template: `
+        <button neuTooltip="Native" [attr.tabindex]="order()">Native trigger</button>
+        <div neuTooltip="Custom" [attr.tabindex]="order()">Custom trigger</div>
+      `,
+    })
+    class TabOrderHost { readonly order = signal(-1); }
+    const f = TestBed.createComponent(TabOrderHost);
+    f.detectChanges();
+    const triggers = Array.from(f.nativeElement.querySelectorAll('button, div')) as HTMLElement[];
+    expect(triggers.map(trigger => trigger.tabIndex)).toEqual([-1, -1]);
+    f.componentInstance.order.set(0);
+    f.detectChanges();
+    expect(triggers.map(trigger => trigger.tabIndex)).toEqual([0, 0]);
+  });
+
   it('should show tooltip on focus event', () => {
     // El tooltip debe mostrarse también con focus (accesibilidad)
     // Tooltip must also show on focus event (accessibility)

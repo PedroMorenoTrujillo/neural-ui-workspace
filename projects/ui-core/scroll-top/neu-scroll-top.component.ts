@@ -89,6 +89,15 @@ export class NeuScrollTopComponent {
   scrollToTop(): void {
     const target = this.scrollTarget();
     if (!target) return;
+    if (this.element.nativeElement.contains(this.document.activeElement)) {
+      const focusTarget = target === this.document.defaultView
+        ? this.document.querySelector<HTMLElement>('main, [role="main"]') ?? this.document.body
+        : target as HTMLElement;
+      const hadTabIndex = focusTarget.hasAttribute('tabindex');
+      if (!hadTabIndex) focusTarget.setAttribute('tabindex', '-1');
+      focusTarget.focus({ preventScroll: true });
+      if (!hadTabIndex) focusTarget.removeAttribute('tabindex');
+    }
     const behavior = this.reducedMotion() ? 'auto' : this.behavior();
     target.scrollTo({ top: 0, behavior });
   }

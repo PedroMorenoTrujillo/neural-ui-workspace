@@ -140,7 +140,7 @@ export type {
           size="sm"
           class="neu-uploader__picker-trigger"
           [disabled]="isInteractionBlocked()"
-          [attr.aria-label]="pickerButtonAriaLabel()"
+          [ariaLabel]="pickerButtonAriaLabel() ?? ''"
           [attr.aria-describedby]="describedBy()"
           (click)="openFilePicker()"
         >

@@ -79,7 +79,11 @@ import {
               }
             }
             @if (item.children?.length) {
-              <span class="neu-menu__chevron" aria-hidden="true">›</span>
+              <svg class="neu-menu__chevron" aria-hidden="true"
+                width="1em" height="1em" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
             }
           </button>
           @if (item.children?.length && isExpanded(item)) {
@@ -142,6 +146,24 @@ export class NeuMenuComponent {
     const direction = this.host.ownerDocument.defaultView?.getComputedStyle(this.host).direction;
     const openKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
     const closeKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+    if (event.key === 'Escape') {
+      if (item.children?.length && this.isExpanded(item)) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggleExpanded(item);
+        return;
+      }
+      const parent = this.host.closest('.neu-menu__child')
+        ?.previousElementSibling as HTMLButtonElement | null;
+      if (parent?.getAttribute('aria-expanded') === 'true' && !parent.disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        // Reuse the parent branch's guarded, consumer-owned expansion proposal.
+        parent.click();
+        parent.focus();
+        return;
+      }
+    }
     if (event.key === openKey && item.children?.length) {
       event.preventDefault();
       if (!this.isExpanded(item)) {
@@ -409,17 +431,19 @@ export class NeuMenuButtonComponent {
                 [ngTemplateOutlet]="itemTemplate.templateRef"
                 [ngTemplateOutletContext]="{ $implicit: item }"
               />
+            } @else {
+              @if (item.icon) { <neu-icon-outlet [icon]="item.icon" size="1rem" aria-hidden="true" /> }
+              <span>{{ item.label }}</span>
+              @if (item.badge != null) { <neu-badge size="sm">{{ item.badge }}</neu-badge> }
+              @if (item.shortcut) { <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd> }
+            }
+            @if (itemTpl(); as itemTemplate) {
               <ng-template neuMenuItem let-childItem>
                 <ng-container
                   [ngTemplateOutlet]="itemTemplate.templateRef"
                   [ngTemplateOutletContext]="{ $implicit: childItem }"
                 />
               </ng-template>
-            } @else {
-              @if (item.icon) { <neu-icon-outlet [icon]="item.icon" size="1rem" aria-hidden="true" /> }
-              <span>{{ item.label }}</span>
-              @if (item.badge != null) { <neu-badge size="sm">{{ item.badge }}</neu-badge> }
-              @if (item.shortcut) { <kbd class="neu-menu__shortcut">{{ item.shortcut }}</kbd> }
             }
           </neu-menu-button>
         } @else if (item.visible !== false) {

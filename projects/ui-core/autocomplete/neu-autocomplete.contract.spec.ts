@@ -777,7 +777,7 @@ describe('NeuAutocomplete contract closure', () => {
     fixture.componentRef.setInput('groups', []);
     fixture.componentRef.setInput('options', [CITIES[0]]);
     fixture.detectChanges();
-    expect(component.resultsAnnouncement()).toBe('1 resultado disponible');
+    expect(component.resultsAnnouncement()).toBe('1 result available');
 
     fixture.componentRef.setInput('virtualScrollItemSize', Number.NaN);
     fixture.componentRef.setInput('size', 'sm');

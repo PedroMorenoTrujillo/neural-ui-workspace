@@ -78,10 +78,16 @@ class RawCountrySelectHostComponent {
     >
       <ng-template neuSelectHeader>Country header</ng-template>
       <ng-template neuSelectFooter>Country footer</ng-template>
-      <ng-template neuSelectGroup let-group><span class="projected-group">{{ $any(group).title }}</span></ng-template>
-      <ng-template neuSelectLoader let-first="first"><span class="projected-loader">Loading from {{ first }}</span></ng-template>
+      <ng-template neuSelectGroup let-group
+        ><span class="projected-group">{{ $any(group).title }}</span></ng-template
+      >
+      <ng-template neuSelectLoader let-first="first"
+        ><span class="projected-loader">Loading from {{ first }}</span></ng-template
+      >
       <ng-template neuSelectEmpty><span class="projected-empty">No countries</span></ng-template>
-      <ng-template neuSelectEmptyFilter><span class="projected-empty-filter">No match</span></ng-template>
+      <ng-template neuSelectEmptyFilter
+        ><span class="projected-empty-filter">No match</span></ng-template
+      >
     </neu-select>
   `,
   imports: [
@@ -104,10 +110,16 @@ class ProjectedSelectHostComponent {
 @Component({
   template: `
     <neu-select [options]="options" [value]="value()" [searchable]="true" [clearable]="true">
-      <ng-template neuSelectClearIcon><span class="exact-clear-icon">Remove country</span></ng-template>
-      <ng-template neuSelectFilterIcon><span class="exact-filter-icon">Find country</span></ng-template>
+      <ng-template neuSelectClearIcon
+        ><span class="exact-clear-icon">Remove country</span></ng-template
+      >
+      <ng-template neuSelectFilterIcon
+        ><span class="exact-filter-icon">Find country</span></ng-template
+      >
       @if (customFilter()) {
-        <ng-template neuSelectFilter><span class="exact-filter">Custom country filter</span></ng-template>
+        <ng-template neuSelectFilter
+          ><span class="exact-filter">Custom country filter</span></ng-template
+        >
       }
     </neu-select>
   `,
@@ -192,6 +204,43 @@ async function setup(extraInputs: Record<string, unknown> = {}) {
 }
 
 describe('NeuSelectComponent', () => {
+  it.each([false, true])(
+    'reconciles keyboard rows when an open selector changes options (multiple=%s)',
+    async (multiple) => {
+      const { f, comp } = await setup({ multiple });
+      const values = vi.fn();
+      comp.value.subscribe(values);
+      comp.open();
+      f.detectChanges();
+      await f.whenStable();
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+      f.componentRef.setInput('options', [{ label: 'Gamma', value: 'g' }]);
+      f.detectChanges();
+      await f.whenStable();
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+      expect(comp.value()).toEqual(multiple ? ['g'] : 'g');
+      expect(values).toHaveBeenCalledTimes(1);
+      expect(values).toHaveBeenCalledWith(multiple ? ['g'] : 'g');
+    },
+  );
+
+  it('uses replacement rows for typeahead without reattaching the open overlay', async () => {
+    const { f, comp } = await setup();
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    f.componentRef.setInput('options', [
+      { label: 'Gamma', value: 'g' },
+      { label: 'Delta', value: 'd' },
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'd', cancelable: true }));
+    comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    expect(comp.value()).toBe('d');
+  });
+
   it('projects bounded multiple labels and selected chips from applied values', async () => {
     const { f } = await setup({ multiple: true, value: ['es', 'mx'] });
     const select = f.componentInstance;
@@ -237,11 +286,16 @@ describe('NeuSelectComponent', () => {
       comp.open();
       f.detectChanges();
       const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
-      const boxes = options.map(option => option.querySelector<HTMLElement>('.neu-select__option-checkbox')!);
-      const checked = (box: HTMLElement) => box.classList.contains('neu-select__option-checkbox--checked');
+      const boxes = options.map(
+        (option) => option.querySelector<HTMLElement>('.neu-select__option-checkbox')!,
+      );
+      const checked = (box: HTMLElement) =>
+        box.classList.contains('neu-select__option-checkbox--checked');
       expect(boxes.map(checked)).toEqual([false, true, false]);
-      expect(boxes.every(box => box.getAttribute('aria-hidden') === 'true')).toBe(true);
-      expect(options.every(option => !option.querySelector('input,button,[tabindex]'))).toBe(true);
+      expect(boxes.every((box) => box.getAttribute('aria-hidden') === 'true')).toBe(true);
+      expect(options.every((option) => !option.querySelector('input,button,[tabindex]'))).toBe(
+        true,
+      );
       const values = vi.fn();
       comp.value.subscribe(values);
       options[0].click();
@@ -255,7 +309,7 @@ describe('NeuSelectComponent', () => {
       expect(checked(boxes[1])).toBe(false);
       f.componentRef.setInput('value', []);
       f.detectChanges();
-      expect(boxes.every(box => !checked(box))).toBe(true);
+      expect(boxes.every((box) => !checked(box))).toBe(true);
       options[2].click();
       expect(comp.value()).toEqual([]);
     });
@@ -765,7 +819,12 @@ describe('NeuSelectComponent', () => {
   it('should project the selected model into neuSelectSelected template context', async () => {
     @Component({
       template: `
-        <neu-select [options]="countries" optionLabel="name" [optionValue]="valueOf" [formControl]="ctrl">
+        <neu-select
+          [options]="countries"
+          optionLabel="name"
+          [optionValue]="valueOf"
+          [formControl]="ctrl"
+        >
           <ng-template neuSelectSelected let-country>
             <span class="select-selected-context">
               {{ $any(country)?.id }}:{{ $any(country)?.name }}
@@ -1513,7 +1572,9 @@ describe('NeuSelectComponent', () => {
     const fixture = TestBed.createComponent(ProjectedSelectHostComponent);
     fixture.detectChanges();
     await fixture.whenStable();
-    (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.neu-select__trigger')!.click();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLElement>('.neu-select__trigger')!
+      .click();
     await fixture.whenStable();
 
     expect(document.querySelector('.neu-select__header')?.textContent).toContain('Country header');
@@ -1703,10 +1764,16 @@ describe('NeuSelectComponent', () => {
     search.dispatchEvent(new Event('input', { bubbles: true }));
     await f.whenStable();
     expect(document.querySelectorAll('.neu-select__option')).toHaveLength(1);
-    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    search.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
     f.detectChanges();
-    expect(document.querySelector('.neu-select__option')?.getAttribute('aria-selected')).toBe('false');
-    search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    expect(document.querySelector('.neu-select__option')?.getAttribute('aria-selected')).toBe(
+      'false',
+    );
+    search.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
     await f.whenStable();
     expect(comp.value()).toBeNull();
     expect(comp.isOpen()).toBe(false);
@@ -1856,7 +1923,12 @@ describe('NeuSelectComponent', () => {
       { title: 'Locked', locked: true, children: [{ value: 'cl', label: 'Chile' }] },
     ];
     const f = TestBed.createComponent(
-      NeuSelectComponent as unknown as new () => NeuSelectComponent<NeuSelectOption, string, 'single', Group>,
+      NeuSelectComponent as unknown as new () => NeuSelectComponent<
+        NeuSelectOption,
+        string,
+        'single',
+        Group
+      >,
     );
     f.componentRef.setInput('groups', groups);
     f.componentRef.setInput('groupConfig', {
@@ -1994,7 +2066,17 @@ describe('NeuSelectComponent', () => {
       });
       comp.selectRow(new MouseEvent('click'), comp.visibleRows()[0], 0);
       comp.selectRow(new MouseEvent('click'), comp.visibleRows()[1], 1);
-      comp.selectRow(new MouseEvent('click'), { kind: 'option', option: { value: 'fr', label: 'France' }, index: 3, logicalIndex: 3, disabled: false }, 3);
+      comp.selectRow(
+        new MouseEvent('click'),
+        {
+          kind: 'option',
+          option: { value: 'fr', label: 'France' },
+          index: 3,
+          logicalIndex: 3,
+          disabled: false,
+        },
+        3,
+      );
       f.detectChanges();
 
       expect(comp.value()).toEqual(['es', 'mx']);
@@ -2054,7 +2136,10 @@ describe('NeuSelectComponent', () => {
       comp.value.set(0);
       expect(comp.isOptionSelected(-0)).toBe(false);
 
-      f.componentRef.setInput('compareWith', (left: { id: number }, right: { id: number }) => left.id === right.id);
+      f.componentRef.setInput(
+        'compareWith',
+        (left: { id: number }, right: { id: number }) => left.id === right.id,
+      );
       f.componentRef.setInput('optionValue', (value: { id: number }) => value);
       f.componentRef.setInput('options', [{ id: 1 }]);
       comp.value.set({ id: 1 });
@@ -2128,7 +2213,19 @@ describe('NeuSelectComponent', () => {
       comp.removeSelectedOption(OPTIONS[0], new MouseEvent('click'));
       f.componentRef.setInput('readonly', false);
 
-      for (const key of ['ArrowDown', 'ArrowUp', 'Home', 'End', 'PageDown', 'PageUp', 'Enter', ' ', 'Escape', 'Tab', 'e']) {
+      for (const key of [
+        'ArrowDown',
+        'ArrowUp',
+        'Home',
+        'End',
+        'PageDown',
+        'PageUp',
+        'Enter',
+        ' ',
+        'Escape',
+        'Tab',
+        'e',
+      ]) {
         comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key, cancelable: true }));
       }
       comp.onFilterKeyDown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
@@ -2218,7 +2315,10 @@ describe('NeuSelectComponent', () => {
 
     it('keeps keyboard handling idempotent and ignores disabled keyboard input', async () => {
       const { f, comp } = await setup();
-      const handled = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }) as KeyboardEvent & { __neuSelectHandled?: boolean };
+      const handled = new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        cancelable: true,
+      }) as KeyboardEvent & { __neuSelectHandled?: boolean };
       handled.__neuSelectHandled = true;
       comp.onTriggerKeyDown(handled);
       expect(handled.defaultPrevented).toBe(false);
@@ -2264,7 +2364,11 @@ describe('NeuSelectComponent', () => {
     });
 
     it('derives both virtual spacer heights with and without lazy offsets', async () => {
-      const { f, comp } = await setup({ virtualScroll: true, virtualScrollVisibleItems: 1, virtualScrollBuffer: 0 });
+      const { f, comp } = await setup({
+        virtualScroll: true,
+        virtualScrollVisibleItems: 1,
+        virtualScrollBuffer: 0,
+      });
       comp.open();
       f.detectChanges();
       await f.whenStable();
@@ -2295,7 +2399,11 @@ describe('NeuSelectComponent', () => {
     });
 
     it('prioritizes an explicit description over hint and error IDs', async () => {
-      const { f, comp } = await setup({ ariaDescribedBy: 'external-help', hint: 'Hint', invalid: true });
+      const { f, comp } = await setup({
+        ariaDescribedBy: 'external-help',
+        hint: 'Hint',
+        invalid: true,
+      });
       expect(comp.describedBy()).toBe('external-help');
       f.componentRef.setInput('ariaDescribedBy', null);
       f.detectChanges();
@@ -2340,7 +2448,12 @@ describe('NeuSelectComponent', () => {
     });
 
     it('emits a reset request for an empty lazy filter and accounts for its data offset', async () => {
-      const { f, comp } = await setup({ lazy: true, dataFirst: 10, totalItems: 100, virtualScroll: true });
+      const { f, comp } = await setup({
+        lazy: true,
+        dataFirst: 10,
+        totalItems: 100,
+        virtualScroll: true,
+      });
       const requests = vi.fn();
       comp.dataRequest.subscribe(requests);
       const row = comp.visibleRows().find((entry: any) => entry.kind === 'option');
@@ -2352,7 +2465,9 @@ describe('NeuSelectComponent', () => {
     });
 
     it('leaves focus unchanged when all options are disabled', async () => {
-      const { comp } = await setup({ options: [{ value: 'x', label: 'Unavailable', disabled: true }] });
+      const { comp } = await setup({
+        options: [{ value: 'x', label: 'Unavailable', disabled: true }],
+      });
       comp.focusFirstOption();
       expect(comp.activeIndex()).toBe(-1);
     });
@@ -2384,7 +2499,9 @@ describe('NeuSelectComponent', () => {
       const state = { scrollY: 0 };
       const view = {
         scrollX: 0,
-        get scrollY() { return state.scrollY; },
+        get scrollY() {
+          return state.scrollY;
+        },
         requestAnimationFrame(callback: FrameRequestCallback) {
           frames += 1;
           if (frames === 2) state.scrollY = 1;

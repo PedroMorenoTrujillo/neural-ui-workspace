@@ -143,6 +143,10 @@ describe('NeuTreeTable 2 fixed-height virtualization integration', () => {
   it('bounds 10k loaded nodes, emits local ranges and keeps native treegrid semantics', async () => {
     const fixture = TestBed.createComponent(VirtualHostComponent);
     fixture.detectChanges();
+    // No frame or layout measurement may be required to avoid mounting 10k rows.
+    expect(fixture.nativeElement.querySelectorAll('tr[data-node-key]').length).toBeLessThanOrEqual(
+      22,
+    );
     await nextFrame();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -235,11 +239,14 @@ describe('NeuTreeTable 2 fixed-height virtualization integration', () => {
     expect(fixture.componentInstance.requests()).toBe(0);
   }, 15_000);
 
-  it('keeps the server-compatible full projection until viewport geometry is measured', () => {
+  it('keeps a server-compatible bounded projection until viewport geometry is measured', () => {
     vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(0);
     const fixture = TestBed.createComponent(VirtualHostComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('tr[data-node-key]')).toHaveLength(total);
+    expect(fixture.nativeElement.querySelectorAll('tr[data-node-key]')).toHaveLength(22);
+    expect(fixture.nativeElement.querySelector('table')?.getAttribute('aria-rowcount')).toBe(
+      '10000',
+    );
     expect(fixture.componentInstance.ranges()).toEqual([]);
   }, 15_000);
 

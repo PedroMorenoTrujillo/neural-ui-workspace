@@ -1,5 +1,9 @@
 @use '../styles/text-overflow' as text;
 
+neu-listbox[hidden] {
+  display: none !important;
+}
+
 .neu-listbox {
   display: inline-grid;
   gap: 0.375rem;

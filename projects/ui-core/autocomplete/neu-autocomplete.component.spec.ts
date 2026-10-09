@@ -3,6 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { COMPOSITION_BUFFER_MODE, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   NeuAutocompleteComponent,
   NeuAutocompleteClearIconDirective,
@@ -630,7 +631,22 @@ describe('NeuAutocompleteComponent', () => {
     await f.whenStable();
 
     const liveRegion = f.nativeElement.querySelector('.neu-autocomplete__sr-status');
-    expect(liveRegion.textContent.trim()).toBe('2 resultados disponibles');
+    expect(liveRegion.textContent.trim()).toBe('2 results available');
+  });
+
+  it('uses the application locale for Spanish result announcements', async () => {
+    TestBed.overrideProvider(NEURAL_LOCALE, { useValue: 'es-ES' });
+    const f = setup();
+    f.componentInstance['onQueryChange']('a');
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.neu-autocomplete__sr-status').textContent.trim())
+      .toBe('2 resultados disponibles');
+    f.componentRef.setInput('searchMessage', '{0} coincidencias');
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.neu-autocomplete__sr-status').textContent.trim())
+      .toBe('2 coincidencias');
   });
 
   it('ArrowDown should avoid landing on a disabled option', () => {

@@ -9,7 +9,7 @@ import {
 } from './internal/virtualization/neu-tree-table-virtualization';
 
 describe('NeuTreeTable 2 fixed-height virtual math', () => {
-  it('keeps the complete loaded visible projection for disabled and unmeasured bootstrap', () => {
+  it('bounds the unmeasured bootstrap while keeping disabled projections complete', () => {
     expect(
       projectNeuTreeTableVirtualWindow({
         geometry: { measured: false, scrollTop: 9_999, viewportSize: 600 },
@@ -19,10 +19,10 @@ describe('NeuTreeTable 2 fixed-height virtual math', () => {
     ).toEqual({
       itemSize: 20,
       measured: false,
-      visible: { start: 0, end: 10_000 },
-      render: { start: 0, end: 10_000 },
+      visible: { start: 0, end: 20 },
+      render: { start: 0, end: 22 },
       before: 0,
-      after: 0,
+      after: 199_560,
     });
     expect(
       projectNeuTreeTableVirtualWindow({
@@ -32,6 +32,20 @@ describe('NeuTreeTable 2 fixed-height virtual math', () => {
       }).render,
     ).toEqual({ start: 0, end: 50 });
   });
+
+  it.each([0, 1, 10_000, 100_000])(
+    'keeps SSR and client bootstrap bounded for %i rows',
+    (total) => {
+      const projected = projectNeuTreeTableVirtualWindow({
+        geometry: { measured: false, scrollTop: 0, viewportSize: 0 },
+        total,
+        virtualization: { enabled: true, itemSize: 32, overscan: 4 },
+      });
+      expect(projected.measured).toBe(false);
+      expect(projected.render).toEqual({ start: 0, end: Math.min(total, 16) });
+      expect(projected.before + projected.render.end * 32 + projected.after).toBe(total * 32);
+    },
+  );
 
   it.each([
     {

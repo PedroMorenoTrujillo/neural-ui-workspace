@@ -69,6 +69,54 @@ describe('NeuMenuComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Edit');
   });
 
+  it('Escape closes only the deepest inline branch and restores its parent focus', async () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [
+        { key: 'nested', label: 'Nested', children: [{ key: 'leaf', label: 'Leaf' }] },
+      ] },
+    ]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    const leaf = buttons.find(button => button.textContent?.trim() === 'Leaf')!;
+    const nested = buttons.find(button => button.textContent?.trim() === 'Nested')!;
+    leaf.focus();
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    leaf.dispatchEvent(event);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(nested);
+    expect(nested.getAttribute('aria-expanded')).toBe('false');
+    expect(buttons[0].getAttribute('aria-expanded')).toBe('true');
+    expect(fixture.nativeElement.textContent).not.toContain('Leaf');
+  });
+
+  it('Escape proposes a controlled branch close without mutating owner state', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'leaf', label: 'Leaf' }] },
+    ]);
+    fixture.componentRef.setInput('expandedKeys', ['parent']);
+    fixture.detectChanges();
+    const proposal = vi.spyOn(fixture.componentInstance.expandedKeysChange, 'emit');
+    const buttons = fixture.nativeElement.querySelectorAll('button');
+    buttons[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(proposal).toHaveBeenCalledWith([]);
+    expect(buttons[0].getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('renders a decorative stroke chevron for nested items', () => {
+    fixture.componentRef.setInput('items', [
+      { key: 'parent', label: 'Parent', children: [{ key: 'child', label: 'Child' }] },
+    ]);
+    fixture.detectChanges();
+    const chevron = fixture.nativeElement.querySelector('svg.neu-menu__chevron');
+    expect(chevron?.getAttribute('aria-hidden')).toBe('true');
+    expect(chevron?.getAttribute('fill')).toBe('none');
+    expect(chevron?.querySelector('polyline')?.getAttribute('points')).toBe('9 6 15 12 9 18');
+  });
+
   it('renders a model badge, including zero', () => {
     fixture.componentRef.setInput('items', [{ key: 'edit', label: 'Edit', badge: 0 }]);
     fixture.detectChanges();

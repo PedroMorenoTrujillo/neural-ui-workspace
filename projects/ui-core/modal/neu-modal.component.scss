@@ -35,7 +35,7 @@
   max-height: var(--neu-dialog-max-height, 90vh);
   margin: var(--neu-dialog-margin, auto);
   overflow: hidden;
-  animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 
   &--sm {
     width: min(calc(100vw - 2rem), var(--neu-dialog-width-sm, 400px));
@@ -127,7 +127,7 @@ neu-dialog {
   max-width: 100%;
   overflow: hidden;
   pointer-events: auto;
-  animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: neu-dialog-in 200ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 
   &--sm {
     width: min(100%, var(--neu-dialog-width-sm, 400px));

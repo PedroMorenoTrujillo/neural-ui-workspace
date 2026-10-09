@@ -1,6 +1,10 @@
 /* ── Host: flex-column para acomodar label + control ──────────── */
 @use '../styles/floating-label' as floating;
 
+neu-number-input[hidden] {
+  display: none !important;
+}
+
 .neu-number-input {
   display: inline-flex;
   min-inline-size: 0;

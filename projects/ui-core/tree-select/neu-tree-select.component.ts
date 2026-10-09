@@ -3,9 +3,11 @@ import {
   DestroyRef,
   Directive,
   ElementRef,
+  Injector,
   TemplateRef,
   ViewEncapsulation,
   computed,
+  afterNextRender,
   contentChild,
   inject,
   input,
@@ -892,6 +894,8 @@ export class NeuTreeSelectComponent<
     return this.visibleNodes().findIndex((item) => !item.disabled);
   }
 
+  private readonly focusInjector = inject(Injector);
+
   private focusActiveNode(): void {
     const overlay = this.connectedOverlay()?.overlayRef.overlayElement;
     if (!overlay) return;
@@ -901,15 +905,16 @@ export class NeuTreeSelectComponent<
         this.effectiveVirtualization().viewportHeight / this.effectiveVirtualization().itemSize,
       );
       if (index < this.virtualStart() || index >= this.virtualStart() + count) {
-        this.virtualStart.set(Math.max(0, index));
+        this.virtualStart.set(Math.max(0, Math.min(index, this.visibleNodes().length - count)));
         const viewport = overlay.querySelector<HTMLElement>('.neu-tree-select__viewport');
         if (viewport) viewport.scrollTop = this.virtualStart() * this.effectiveVirtualization().itemSize;
       }
-      queueMicrotask(() =>
+      afterNextRender(() => {
+        if (this.eventDestroyRef.destroyed || !this.open()) return;
         overlay
           .querySelector<HTMLElement>(`[data-neu-tree-select-index="${this.navigation.index}"]`)
-          ?.focus({ preventScroll: true }),
-      );
+          ?.focus({ preventScroll: true });
+      }, { injector: this.focusInjector });
       return;
     }
     overlay

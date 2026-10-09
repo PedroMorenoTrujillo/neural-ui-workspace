@@ -1,3 +1,7 @@
+.neu-input-tags[hidden] {
+  display: none !important;
+}
+
 .neu-input-tags { position: relative; display: block; max-width: 100%; }
 .neu-input-tags--fluid { width: 100%; }
 .neu-input-tags__control { display: flex; min-height: var(--neu-control-height, 3rem); flex-wrap: wrap; align-items: center; gap: var(--neu-control-gap, var(--neu-space-1, .25rem)); padding: .25rem var(--neu-control-padding-inline, .75rem); border: 1.5px solid var(--neu-border, #d1d5db); border-radius: var(--neu-radius, .5rem); background: var(--neu-surface, #fff); cursor: text; transition: border-color var(--neu-transition, 200ms ease), box-shadow var(--neu-transition, 200ms ease); }

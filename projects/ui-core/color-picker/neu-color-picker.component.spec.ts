@@ -36,6 +36,16 @@ describe('NeuColorPickerComponent N2-009', () => {
   );
   afterEach(() => vi.unstubAllGlobals());
 
+  it('preserves the preset colour paint when resetting native button styling', async () => {
+    await openPanel();
+    const swatches = document.querySelectorAll<HTMLButtonElement>('.neu-cp__sw');
+    expect(swatches.length).toBeGreaterThan(0);
+    for (const swatch of swatches) {
+      expect(swatch.style.getPropertyValue('--neu-cp-color')).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(getComputedStyle(swatch).backgroundImage).toContain('linear-gradient');
+    }
+  });
+
   it('exposes a string ModelSignal and keeps parent writes silent', () => {
     const fixture = setup();
     const changes = vi.fn();

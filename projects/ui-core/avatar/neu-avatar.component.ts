@@ -75,12 +75,12 @@ export class NeuAvatarComponent {
   protected readonly failedSrc = signal('');
 
   protected readonly initials = computed(() => {
-    const n = this.name().trim();
+    const n = this.name().trim().normalize('NFC');
     if (!n) return '?';
     const parts = n.split(/\s+/);
     return parts.length === 1
-      ? parts[0].slice(0, 2).toUpperCase()
-      : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      ? Array.from(parts[0]).slice(0, 2).join('').toUpperCase()
+      : (Array.from(parts[0])[0] + Array.from(parts[parts.length - 1])[0]).toUpperCase();
   });
 
   protected readonly hostClasses = computed(() => [

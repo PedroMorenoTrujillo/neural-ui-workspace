@@ -1,6 +1,10 @@
 @use '../styles/floating-label' as floating;
 @use '../styles/focus-state' as focus;
 
+neu-textarea[hidden] {
+  display: none !important;
+}
+
 .neu-textarea-host {
   display: block;
   width: 100%;

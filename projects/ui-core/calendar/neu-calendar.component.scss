@@ -608,6 +608,19 @@ html[data-theme='dark'] {
 
 // Compact month navigation keeps all seven days visible in narrow containers.
 // The selected day's complete event content remains available in the agenda.
+@container (min-width: 481px) and (max-width: 800px) {
+  .neu-calendar--month {
+    .neu-calendar__weekdays,
+    .neu-calendar__month-grid {
+      min-width: 0;
+      gap: 4px;
+    }
+    .neu-calendar__month-grid { grid-auto-rows: 72px; }
+    .neu-calendar__day { padding: 6px; }
+    .neu-calendar__event-list { display: none; }
+  }
+}
+
 @container (max-width: 480px) {
   .neu-calendar--month {
     .neu-calendar__weekdays,

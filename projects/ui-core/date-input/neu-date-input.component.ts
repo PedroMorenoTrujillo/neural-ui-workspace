@@ -227,7 +227,11 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
                 [disabled]="disabled()"
                 (click)="navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)"
               >
-                ‹
+                <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 6 9 12 15 18" />
+                </svg>
               </button>
               @if (mode() === 'month' || mode() === 'year') {
                 <span class="neu-date-input__cal-title" aria-live="polite">
@@ -242,7 +246,7 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
                     (change)="onMonthSelect($event)"
                   >
                     @for (month of monthOptions(); track month.value) {
-                      <option [value]="month.value">{{ month.label }}</option>
+                      <option [value]="month.value" [selected]="month.value === viewMonth()">{{ month.label }}</option>
                     }
                   </select>
                   <select
@@ -252,7 +256,7 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
                     (change)="onYearSelect($event)"
                   >
                     @for (year of yearOptions(); track year) {
-                      <option [value]="year">{{ year }}</option>
+                      <option [value]="year" [selected]="year === viewYear()">{{ year }}</option>
                     }
                   </select>
                 </span>
@@ -266,7 +270,11 @@ type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
                 [disabled]="disabled()"
                 (click)="navigateMonth(mode() === 'year' ? 12 : mode() === 'month' ? 12 : 1)"
               >
-                ›
+                <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
               </button>
             </div>
             @if (mode() === 'month') {
@@ -494,7 +502,7 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
   readonly errorId = computed(() => `${this.controlId()}-error`);
   readonly hintId = computed(() => `${this.controlId()}-hint`);
   readonly resolvedLocale = computed(() => this.locale()?.trim() || this.defaultLocale || 'en-US');
-  readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0 || this.draftState() === 'invalid');
   readonly resolvedDescribedBy = computed(() =>
     [
       this.ariaDescribedBy(),
@@ -694,9 +702,14 @@ export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueContro
     } else if (event.key === 'Enter') {
       this.finishEditing();
     } else if (event.key === 'Escape') {
-      event.preventDefault();
+      // Leave an unhandled Escape to the enclosing editor/dialog once our
+      // picker is closed and there is no unfinished text to discard.
+      const hasDraft = this.draftState() !== 'valid' ||
+        (this.draft() !== null && this.draft()!.raw !== this.editableValue());
+      const wasOpen = this.isOpen();
+      if (wasOpen || hasDraft) event.preventDefault();
       this.finishEditing();
-      this.close(true);
+      if (wasOpen) this.close(true);
     }
   }
 

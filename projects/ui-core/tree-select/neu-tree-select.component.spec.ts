@@ -219,6 +219,30 @@ describe('NeuTreeSelectComponent N2-019', () => {
     });
   });
 
+  it('renders the virtual keyboard destination before focusing it and clamps the final viewport', async () => {
+    const { fixture, component } = createTreeSelect({
+      nodes: Array.from({ length: 200 }, (_, index) => ({ value: `node-${index}`, label: `Node ${index}` })),
+      searchable: false,
+      virtualizationOptions: { enabled: true, itemSize: 40, viewportHeight: 240, buffer: 2 },
+    });
+    component.toggle();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const first = document.querySelector<HTMLElement>('[data-neu-tree-select-index="0"]')!;
+    first.focus();
+    first.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.virtualStart()).toBe(194);
+    expect(document.activeElement?.getAttribute('data-neu-tree-select-index')).toBe('199');
+    (document.activeElement as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.virtualStart()).toBe(0);
+    expect(document.activeElement?.getAttribute('data-neu-tree-select-index')).toBe('0');
+  });
+
   it('keeps keyboard navigation and overlay lifecycle exactly once', async () => {
     const { fixture, component } = createTreeSelect({ searchable: false });
     const opened = vi.fn();

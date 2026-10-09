@@ -73,6 +73,19 @@ describe('NeuAvatarComponent', () => {
     expect(df.nativeElement.textContent).toContain('JD');
   });
 
+  it.each([
+    ['𐐀 Ada', '𐐀A'],
+    ['𐐀lex', '𐐀L'],
+    ['E\u0301lodie Nu\u0301n\u0303ez', 'ÉN'],
+    ['E\u0301lodie', 'ÉL'],
+  ])('preserves Unicode characters when deriving initials for %s', (name, expected) => {
+    const df = TestBed.createComponent(NeuAvatarComponent);
+    df.componentRef.setInput('name', name);
+    df.detectChanges();
+    expect(df.nativeElement.querySelector('.neu-avatar__initials').textContent).toBe(expected);
+    expect(df.nativeElement.querySelector('.neu-avatar').getAttribute('aria-label')).toBe(name);
+  });
+
   it('should show single initial for single word name', async () => {
     const df = TestBed.createComponent(NeuAvatarComponent);
     df.componentRef.setInput('name', 'John');

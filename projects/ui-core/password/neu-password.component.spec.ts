@@ -106,11 +106,19 @@ describe('NeuPasswordComponent Signal Forms contract', () => {
   });
 
   it('computes strength and supports a non-toggleable field', () => {
-    const strong = create({ value: 'LongPass1!', showStrength: true });
+    const strong = create({ value: 'LongPass1!', showStrength: true, label: 'Contraseña' });
     expect(strong.component.strength()).toBe(4);
     expect(
       strong.fixture.nativeElement.querySelector('.neu-password__strength').dataset.score,
     ).toBe('4');
+    const meter = strong.fixture.nativeElement.querySelector('[role="meter"]') as HTMLElement;
+    expect(meter.getAttribute('aria-label')).toBe('Contraseña');
+    expect(meter.getAttribute('aria-valuemin')).toBe('0');
+    expect(meter.getAttribute('aria-valuemax')).toBe('4');
+    expect(meter.getAttribute('aria-valuenow')).toBe('4');
+    strong.fixture.componentRef.setInput('value', 'short');
+    strong.fixture.detectChanges();
+    expect(meter.getAttribute('aria-valuenow')).toBe('0');
     const plain = create({ toggleable: false });
     expect(plain.fixture.nativeElement.querySelector('button')).toBeNull();
   });

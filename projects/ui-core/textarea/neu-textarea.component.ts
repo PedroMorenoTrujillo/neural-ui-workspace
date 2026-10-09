@@ -215,7 +215,8 @@ export class NeuTextareaComponent implements FormValueControl<string> {
 
   private resizeToContent(element = this.nativeTextarea().nativeElement): void {
     element.style.height = 'auto';
-    element.style.height = `${element.scrollHeight}px`;
+    const borderHeight = element.offsetHeight - element.clientHeight;
+    element.style.height = `${element.scrollHeight + borderHeight}px`;
   }
 
   private cancelComposition(): void {

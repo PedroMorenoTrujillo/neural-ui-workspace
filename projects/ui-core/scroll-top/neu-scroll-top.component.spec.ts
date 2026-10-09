@@ -55,6 +55,24 @@ describe('NeuScrollTopComponent', () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
   });
 
+  it.each([null, '3'])('returns keyboard focus to the parent and preserves its tabindex (%s)', async (tabindex) => {
+    const local = TestBed.createComponent(HostComponent);
+    local.componentInstance.target = 'parent';
+    local.detectChanges();
+    await local.whenStable();
+    const parent = local.nativeElement.querySelector('div') as HTMLElement;
+    if (tabindex !== null) parent.setAttribute('tabindex', tabindex);
+    Object.defineProperty(parent, 'scrollTo', { configurable: true, value: vi.fn() });
+    Object.defineProperty(parent, 'scrollTop', { configurable: true, value: 101 });
+    parent.dispatchEvent(new Event('scroll'));
+    local.detectChanges();
+    const button = local.nativeElement.querySelector('button') as HTMLButtonElement;
+    button.focus();
+    button.click();
+    expect(document.activeElement).toBe(parent);
+    expect(parent.getAttribute('tabindex')).toBe(tabindex);
+  });
+
   it('honors reduced-motion preferences when scrolling', async () => {
     const initialMatchMediaDescriptor = Object.getOwnPropertyDescriptor(window, 'matchMedia');
     const local = TestBed.createComponent(HostComponent);

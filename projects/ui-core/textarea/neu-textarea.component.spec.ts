@@ -192,10 +192,12 @@ describe('NeuTextareaComponent Signal Forms contract', () => {
     expect(fixed.textarea.style.resize).toBe('none');
     const automatic = create({ autoResize: true });
     Object.defineProperty(automatic.textarea, 'scrollHeight', { configurable: true, value: 84 });
+    Object.defineProperty(automatic.textarea, 'offsetHeight', { configurable: true, value: 86 });
+    Object.defineProperty(automatic.textarea, 'clientHeight', { configurable: true, value: 84 });
     automatic.textarea.value = 'two\nlines';
     automatic.textarea.dispatchEvent(new InputEvent('input'));
     await Promise.resolve();
-    expect(automatic.textarea.style.height).toBe('84px');
+    expect(automatic.textarea.style.height).toBe('86px');
     expect(automatic.textarea.style.resize).toBe('none');
     expect(automatic.textarea.classList).toContain('neu-textarea__field--auto-resize');
   });

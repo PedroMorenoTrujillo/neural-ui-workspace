@@ -120,6 +120,32 @@ describe('NeuTabsComponent N2-021', () => {
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
   );
 
+  it('hides orphaned panels after live model removal without mutating the controlled id', () => {
+    const { fixture, host, component } = controlledFixture();
+    host.activeId.set('code');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]').textContent).toContain('Code content');
+
+    host.tabs.set(TABS.filter((tab) => tab.id !== 'code'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(component.activeTabId()).toBe('code');
+    expect(host.proposals).toEqual([]);
+
+    host.tabs.set(TABS);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]').textContent).toContain('Code content');
+  });
+
+  it('does not expose a panel for a disabled controlled tab', () => {
+    const { fixture, host } = controlledFixture();
+    host.activeId.set('api');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-selected="true"]')).toBeNull();
+    expect(host.proposals).toEqual([]);
+  });
+
   it('renders native tab semantics, badge, disabled state and the applied panel', () => {
     const { fixture } = controlledFixture();
     const tablist = fixture.nativeElement.querySelector('[role="tablist"]');

@@ -252,13 +252,9 @@
                         tabindex="-1"
                         [type]="indicator"
                         [attr.aria-label]="labels().selection"
-                        [attr.aria-checked]="
-                          selectionState(node).indeterminate
-                            ? 'mixed'
-                            : selectionState(node).selected
-                        "
+                        [attr.aria-checked]="selectionState(node).selected"
                         [checked]="selectionState(node).selected"
-                        [indeterminate]="selectionState(node).indeterminate"
+                        [indeterminate]="false"
                         [disabled]="selectionState(node).disabled"
                         (click)="onTableClick($event)"
                       />

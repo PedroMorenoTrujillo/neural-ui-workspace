@@ -326,6 +326,42 @@ describe('NeuNavComponent', () => {
     expect(f.nativeElement.querySelector('button.neu-nav__toggle-tab')).toBeTruthy();
   });
 
+  it('keeps root destinations and groups named when their labels are visually hidden', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [...SIMPLE_ITEMS, ...HREF_ITEMS, ...GROUP_ITEMS]);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    await f.whenStable();
+    const items = Array.from(f.nativeElement.querySelectorAll('.neu-nav__items > a, .neu-nav__items > .neu-nav__group > button')) as HTMLElement[];
+    expect(items.map(item => item.getAttribute('aria-label'))).toEqual([
+      'Inicio', 'Componentes', 'Documentación', 'GitHub', 'Grupo',
+    ]);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    expect(items.every(item => item.getAttribute('aria-label') === null)).toBe(true);
+  });
+
+  it('removes disabled and destinationless internal items from the tab sequence', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      ...DISABLED_ITEMS,
+      { id: 'no-route', label: 'No destination', icon: '' },
+      ...GROUP_ITEMS,
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    (f.nativeElement.querySelector('button.neu-nav__item--parent') as HTMLButtonElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    const disabled = Array.from(f.nativeElement.querySelectorAll('a.neu-nav__item--disabled')) as HTMLAnchorElement[];
+    expect(disabled).toHaveLength(2);
+    expect(disabled.map(item => ({ tabIndex: item.tabIndex, disabled: item.getAttribute('aria-disabled'), href: item.getAttribute('href') }))).toEqual([
+      { tabIndex: -1, disabled: 'true', href: null },
+      { tabIndex: -1, disabled: 'true', href: null },
+    ]);
+    expect((f.nativeElement.querySelectorAll('.neu-nav__items > a')[1] as HTMLAnchorElement).tabIndex).toBe(-1);
+  });
+
   it('should NOT show toggle-tab button when collapsible=false', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', SIMPLE_ITEMS);

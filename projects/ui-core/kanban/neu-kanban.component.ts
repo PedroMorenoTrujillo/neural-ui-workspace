@@ -182,7 +182,7 @@ interface NeuKanbanKeyboardMove {
                     [disabled]="card.disabled === true"
                     [attr.aria-expanded]="isMoveMenuOpen(card.id)"
                     [attr.aria-controls]="moveActionsId(card.id)"
-                    [attr.aria-label]="resolvedMoveButtonLabel() + ': ' + card.title"
+                    [ariaLabel]="resolvedMoveButtonLabel() + ': ' + card.title"
                     [attr.data-neu-kanban-move-trigger-card-id]="card.id"
                     (click)="toggleMoveMenu(card.id, $event)"
                   >
@@ -200,7 +200,7 @@ interface NeuKanbanKeyboardMove {
                         neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'left')"
-                        [attr.aria-label]="moveDirectionLabel(card.title, 'left')"
+                        [ariaLabel]="moveDirectionLabel(card.title, 'left')"
                         (click)="moveByAction(card.id, 'left')"
                       >
                         ←
@@ -209,7 +209,7 @@ interface NeuKanbanKeyboardMove {
                         neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'up')"
-                        [attr.aria-label]="moveDirectionLabel(card.title, 'up')"
+                        [ariaLabel]="moveDirectionLabel(card.title, 'up')"
                         (click)="moveByAction(card.id, 'up')"
                       >
                         ↑
@@ -218,7 +218,7 @@ interface NeuKanbanKeyboardMove {
                         neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'down')"
-                        [attr.aria-label]="moveDirectionLabel(card.title, 'down')"
+                        [ariaLabel]="moveDirectionLabel(card.title, 'down')"
                         (click)="moveByAction(card.id, 'down')"
                       >
                         ↓
@@ -227,7 +227,7 @@ interface NeuKanbanKeyboardMove {
                         neu-button variant="ghost" tone="neutral" size="sm"
                         type="button"
                         [disabled]="!canMove(card.id, 'right')"
-                        [attr.aria-label]="moveDirectionLabel(card.title, 'right')"
+                        [ariaLabel]="moveDirectionLabel(card.title, 'right')"
                         (click)="moveByAction(card.id, 'right')"
                       >
                         →

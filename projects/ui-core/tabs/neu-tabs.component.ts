@@ -154,7 +154,11 @@ export class NeuTabsComponent<
 
   isTabActive(id: NeuTabKey): boolean {
     const active = this.activeTabId();
-    return active !== null && Object.is(active, id);
+    return (
+      active !== null &&
+      Object.is(active, id) &&
+      this.tabs().some((tab) => Object.is(tab.id, id) && !tab.disabled)
+    );
   }
 
   tabButtonId(id: NeuTabKey): string {

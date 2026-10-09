@@ -102,6 +102,23 @@ describe('NeuDateInput N2-025 periods and presentation', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }));
   afterEach(() => TestBed.inject(OverlayContainer).getContainerElement().replaceChildren());
 
+  it('initializes month and year selectors to the visible calendar period', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('presentation', 'inline');
+    fixture.componentRef.setInput('showMonthYearPicker', true);
+    fixture.componentRef.setInput('value', civilDate('2026-10-15'));
+    fixture.detectChanges();
+    const selectors = fixture.nativeElement.querySelectorAll('.neu-date-input__picker') as NodeListOf<HTMLSelectElement>;
+    expect(selectors[0].value).toBe('9');
+    expect(selectors[1].value).toBe('2026');
+    fixture.componentInstance.navigateMonth(3);
+    fixture.detectChanges();
+    expect(selectors[0].value).toBe('0');
+    expect(selectors[1].value).toBe('2027');
+    expect(fixture.componentInstance.value()).toBe('2026-10-15');
+    fixture.destroy();
+  });
+
   it('distinguishes complete, partial and impossible typed input by mode', () => {
     for (const [mode, partial, invalid, valid] of [
       ['date', '2026-02-', '2026-02-30', '2024-02-29'],
@@ -1281,8 +1298,38 @@ describe('NeuDateInputComponent', () => {
     date.onInputKeydown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
     const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
     date.onInputKeydown(escape);
-    expect(escape.defaultPrevented).toBe(true);
+    expect(escape.defaultPrevented).toBe(false);
     expect(date.draftState()).toBe('valid');
+  });
+
+  it('consumes Escape for an unfinished draft, then leaves the next Escape to its parent', () => {
+    const fixture = create();
+    const date = fixture.componentInstance;
+    typeText(fixture, '2026-02-');
+    const first = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    date.onInputKeydown(first);
+    expect(first.defaultPrevented).toBe(true);
+    expect(input(fixture).value).toBe('');
+    const second = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    date.onInputKeydown(second);
+    expect(second.defaultPrevented).toBe(false);
+  });
+
+  it('marks an impossible typed date invalid without changing the accepted value', () => {
+    const fixture = create();
+    const date = fixture.componentInstance;
+    date.value.set(civilDate('2026-10-15'));
+    fixture.detectChanges();
+    typeText(fixture, '2026-02-30');
+    fixture.detectChanges();
+    expect(date.value()).toBe('2026-10-15');
+    expect(date.draftState()).toBe('invalid');
+    expect(input(fixture).getAttribute('aria-invalid')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.neu-date-input--error')).not.toBeNull();
+    date.onInputKeydown(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }));
+    fixture.detectChanges();
+    expect(date.value()).toBe('2026-10-15');
+    expect(input(fixture).getAttribute('aria-invalid')).toBeNull();
   });
 
   it('ignores month and year selector events while disabled', () => {

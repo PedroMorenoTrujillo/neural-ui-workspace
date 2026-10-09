@@ -1,5 +1,9 @@
 @use '../styles/checkbox-indicator' as indicator;
 
+neu-checkbox[hidden] {
+  display: none !important;
+}
+
 .neu-checkbox-host {
   display: inline-block;
 }

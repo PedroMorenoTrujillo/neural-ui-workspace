@@ -230,6 +230,26 @@ describe('NeuTreeTable 2 private renderer and facade', () => {
     }).compileComponents();
   });
 
+  it('never exposes mixed state on a single-selection radio, including selected branches', async () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    const host = fixture.componentInstance;
+    host.expanded.set(['a']);
+    host.selectionOptions.set({ mode: 'single', indicator: 'radio', selectOnRowClick: true, allowClear: false });
+    host.selection.set({ kind: 'keys', keys: ['a'] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    let radios = [...fixture.nativeElement.querySelectorAll('input[type="radio"]')] as HTMLInputElement[];
+    expect(radios[0].getAttribute('aria-checked')).toBe('true');
+    expect(radios.every(radio => !radio.indeterminate && radio.getAttribute('aria-checked') !== 'mixed')).toBe(true);
+    host.selection.set({ kind: 'keys', keys: ['b'] });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    radios = [...fixture.nativeElement.querySelectorAll('input[type="radio"]')] as HTMLInputElement[];
+    expect(radios[0].getAttribute('aria-checked')).toBe('false');
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    expect(radios.every(radio => !radio.indeterminate && radio.getAttribute('aria-checked') !== 'mixed')).toBe(true);
+  });
+
   it('tests explicit search and filter drafts against controlled parent query changes', async () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.filterOptions.set({ ...fixture.componentInstance.filterOptions(),

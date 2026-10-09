@@ -48,22 +48,25 @@ describe('remaining component accessibility regressions', () => {
     expect(zone.querySelector('button')).toBeNull();
     expect(f.nativeElement.querySelector('.neu-uploader__actions button')).toBeTruthy();
   });
-  it('keeps empty pick-list options valid inside the listbox', () => {
+  it('keeps empty pick-list content non-interactive inside each list', () => {
     const f = TestBed.createComponent(NeuPickListComponent); f.detectChanges();
-    for (const list of f.nativeElement.querySelectorAll('[role="listbox"]')) {
-      expect(list.querySelector('[role="status"]')).toBeNull();
-      expect(list.querySelector('[role="option"][aria-disabled="true"]')).toBeTruthy();
+    const lists = f.nativeElement.querySelectorAll('[role="list"]');
+    expect(lists.length).toBe(2);
+    for (const list of lists) {
+      expect(list.querySelector('button')).toBeNull();
+      expect(list.textContent.trim()).not.toBe('');
     }
   });
-  it('does not make presentational pick-list drag wrappers focusable', () => {
+  it('does not add pick-list drag wrappers to the tab order', () => {
     const f=TestBed.createComponent(NeuPickListComponent);
     f.componentRef.setInput('source', [{label:'Atlas',value:'atlas'}]);
     f.componentRef.setInput('dragDrop', true); f.detectChanges();
     const wrapper=f.nativeElement.querySelector('.neu-pick-list__item');
-    expect(wrapper.getAttribute('tabindex')).toBeNull();
+    expect(wrapper.getAttribute('role')).toBe('listitem');
+    expect(wrapper.getAttribute('tabindex')).toBe('-1');
     expect(wrapper.getAttribute('aria-disabled')).toBeNull();
     expect(wrapper.querySelector('.neu-pick-list__drag-handle').tagName).toBe('SPAN');
-    expect(wrapper.querySelector('[role="option"]')).toBeTruthy();
+    expect(wrapper.querySelector('button.neu-pick-list__option').getAttribute('aria-pressed')).toBe('false');
   });
   it('makes the virtual viewport keyboard-scrollable', () => {
     const f = TestBed.createComponent(NeuVirtualListComponent);

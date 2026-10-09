@@ -1,5 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { NeuDateInputComponent, civilDate } from '@neural-ui/core/date-input';
 import { vi } from 'vitest';
 import { NeuInlineEditorComponent } from './neu-inline-editor.component';
 import { detectStableChanges, dispatchKeyboard } from '../testing/cva-contract';
@@ -17,6 +19,16 @@ describe('NeuInlineEditorComponent N2-009', () => {
       providers: [provideZonelessChangeDetection()],
     }).compileComponents(),
   );
+
+  it('names the Neural edit trigger independently of its displayed value', async () => {
+    const fixture = await setup({ value: 'Atlas', editLabel: 'Edit customer' });
+    const trigger = fixture.nativeElement.querySelector('.neu-inline-editor__display') as HTMLButtonElement;
+    expect(trigger.getAttribute('aria-label')).toBe('Edit customer');
+    fixture.componentRef.setInput('editLabel', 'Editar cliente');
+    await detectStableChanges(fixture);
+    expect(trigger.getAttribute('aria-label')).toBe('Editar cliente');
+    fixture.destroy();
+  });
 
   it('keeps the canonical text value unchanged until commit and emits exactly once', async () => {
     const fixture = await setup({ value: 'Draft' });
@@ -78,6 +90,91 @@ describe('NeuInlineEditorComponent N2-009', () => {
     expect(component.draftValid()).toBe(false);
   });
 
+  it('renders a Neural Select and only commits its selected draft when saved', async () => {
+    const fixture = await setup({ type: 'select', value: 'Atlas', options: ['Atlas', 'Birch'] });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    expect(fixture.nativeElement.querySelector('neu-select [role="combobox"]')).toBeTruthy();
+    component.onSelectionDraft('Birch');
+    expect(component.value()).toBe('Atlas');
+    component.commit();
+    expect(component.value()).toBe('Birch');
+    fixture.destroy();
+  });
+
+  it('keeps multiline Enter in the Neural Textarea and saves with Ctrl+Enter', async () => {
+    const fixture = await setup({ type: 'textarea', value: 'Initial' });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    const textarea = fixture.nativeElement.querySelector('neu-textarea textarea') as HTMLTextAreaElement;
+    expect(textarea).toBeTruthy();
+    textarea.value = 'First\nSecond';
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    dispatchKeyboard(textarea, 'Enter');
+    expect(component.editing()).toBe(true);
+    expect(component.value()).toBe('Initial');
+    textarea.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
+    expect(component.value()).toBe('First\nSecond');
+    expect(component.editing()).toBe(false);
+    fixture.destroy();
+  });
+
+  it('renders a Neural DateInput with a civil draft and keeps cancel non-mutating', async () => {
+    const fixture = await setup({ type: 'date', value: '2026-10-15' });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    const date = fixture.debugElement.query(By.directive(NeuDateInputComponent)).componentInstance as NeuDateInputComponent;
+    expect(date.value()).toBe('2026-10-15');
+    date.selectCivilDate(civilDate('2026-10-16'));
+    expect(component.value()).toBe('2026-10-15');
+    component.cancel();
+    expect(component.value()).toBe('2026-10-15');
+    component.beginEdit();
+    component.onDraftInput('2026-10-16');
+    component.commit();
+    expect(component.value()).toBe('2026-10-16');
+    fixture.destroy();
+  });
+
+  it('does not save on blur when focus enters the owned selector overlay', async () => {
+    const fixture = await setup({ type: 'select', value: 'Atlas', options: ['Atlas', 'Birch'], saveOnBlur: true });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    const trigger = fixture.nativeElement.querySelector('[aria-controls]') as HTMLElement;
+    const overlay = document.createElement('div');
+    overlay.id = trigger.getAttribute('aria-controls')!;
+    const option = document.createElement('button');
+    overlay.append(option);
+    document.body.append(overlay);
+    component.onEditFocusout(new FocusEvent('focusout', { relatedTarget: option }));
+    await Promise.resolve();
+    expect(component.editing()).toBe(true);
+    overlay.remove();
+    fixture.destroy();
+  });
+
+  it('restores editor focus when a picker changes the draft without committing it', async () => {
+    const fixture = await setup({ type: 'select', value: 'Atlas', options: ['Atlas', 'Birch'], saveOnBlur: true });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    const option = document.createElement('button');
+    document.body.append(option);
+    option.focus();
+    component.onSelectionDraft('Birch');
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('[role="combobox"]'));
+    await detectStableChanges(fixture);
+    expect(component.editing()).toBe(true);
+    expect(component.value()).toBe('Atlas');
+    expect(component.draft()).toBe('Birch');
+    option.remove();
+    fixture.destroy();
+  });
+
   it('lets a parent write win while an edit is active without echoing it', async () => {
     const fixture = await setup({ value: 'Initial' });
     const component = fixture.componentInstance;
@@ -134,6 +231,35 @@ describe('NeuInlineEditorComponent N2-009', () => {
     expect(component.value()).toBe('Published');
   });
 
+  it.each(['cancel', 'commit'] as const)('returns focus to the edit trigger after %s from its editor', async (action) => {
+    const fixture = await setup({ value: 'Atlas' });
+    fixture.componentInstance.beginEdit();
+    await detectStableChanges(fixture);
+    (fixture.nativeElement.querySelector('input') as HTMLInputElement).focus();
+    fixture.componentInstance[action]();
+    await detectStableChanges(fixture);
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.neu-inline-editor__display'));
+    fixture.destroy();
+  });
+
+  it('does not steal focus from an external control when saving on blur', async () => {
+    const fixture = await setup({ value: 'Atlas', saveOnBlur: true });
+    fixture.componentInstance.beginEdit();
+    await detectStableChanges(fixture);
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    try {
+      outside.focus();
+      fixture.componentInstance.onEditFocusout(new FocusEvent('focusout', { relatedTarget: outside }));
+      await detectStableChanges(fixture);
+      expect(fixture.componentInstance.editing()).toBe(false);
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      outside.remove();
+      fixture.destroy();
+    }
+  });
+
   it('shows a decimal input mode while editing a numeric value', async () => {
     const fixture = await setup({ type: 'number', value: 3 });
     (fixture.nativeElement.querySelector('.neu-inline-editor__display') as HTMLButtonElement).click();
@@ -151,10 +277,21 @@ describe('NeuInlineEditorComponent N2-009', () => {
     const inside = fixture.nativeElement.querySelector('.neu-inline-editor__actions button');
     component.onEditFocusout({ relatedTarget: inside } as FocusEvent);
     expect(component.editing()).toBe(true);
+    (fixture.nativeElement.querySelector('input') as HTMLInputElement).blur();
     component.onEditFocusout({ relatedTarget: null } as FocusEvent);
     await fixture.whenStable();
     expect(component.value()).toBe('Blurred');
     expect(component.editing()).toBe(false);
+  });
+
+  it.each(['text', 'select', 'textarea', 'date'] as const)('keeps %s edit mode open while focus moves from the display into the editor', async (type) => {
+    const fixture = await setup({ value: type === 'date' ? '2026-10-15' : 'Atlas', type, options: ['Atlas', 'Birch'], saveOnBlur: true });
+    (fixture.nativeElement.querySelector('.neu-inline-editor__display') as HTMLButtonElement).focus();
+    (fixture.nativeElement.querySelector('.neu-inline-editor__display') as HTMLButtonElement).click();
+    await detectStableChanges(fixture);
+    expect(fixture.componentInstance.editing()).toBe(true);
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.neu-inline-editor__edit input, .neu-inline-editor__edit textarea, .neu-inline-editor__edit [role="combobox"]'));
+    fixture.destroy();
   });
 
   it('emits touch once for the edit boundary', async () => {

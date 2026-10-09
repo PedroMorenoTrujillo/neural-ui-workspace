@@ -1,6 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
+import { Component } from '@angular/core';
 import { NeuCodeBlockComponent } from './neu-code-block.component';
+
+@Component({
+  imports: [NeuCodeBlockComponent],
+  template: '<neu-code-block />',
+})
+class CodeBlockHostComponent {}
 
 describe('NeuCodeBlockComponent', () => {
   let navigatorDescriptor: PropertyDescriptor | undefined;
@@ -8,7 +15,7 @@ describe('NeuCodeBlockComponent', () => {
   beforeEach(async () => {
     navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
     await TestBed.configureTestingModule({
-      imports: [NeuCodeBlockComponent],
+      imports: [NeuCodeBlockComponent, CodeBlockHostComponent],
     }).compileComponents();
 
     const doc = TestBed.inject(DOCUMENT);
@@ -25,6 +32,15 @@ describe('NeuCodeBlockComponent', () => {
     const f = TestBed.createComponent(NeuCodeBlockComponent);
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-code-block')).toBeTruthy();
+  });
+
+  it('allows the host to shrink inside flex and grid layouts', () => {
+    const f = TestBed.createComponent(CodeBlockHostComponent);
+    f.detectChanges();
+    const style = getComputedStyle(f.nativeElement.querySelector('neu-code-block'));
+    expect(style.display).toBe('block');
+    expect(style.minInlineSize).toBe('0px');
+    expect(style.maxInlineSize).toBe('100%');
   });
 
   it('contains the copy announcement within the block instead of the document', () => {
@@ -96,6 +112,18 @@ describe('NeuCodeBlockComponent', () => {
     f.detectChanges();
     const code = f.nativeElement.querySelector('.neu-code-block__code');
     expect(code.textContent).toContain('const x = 42;');
+  });
+
+  it('isolates source code from an RTL interface without changing the copy text', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    const source = '<neu-avatar name="Ana Martín" />';
+    f.nativeElement.setAttribute('dir', 'rtl');
+    f.componentRef.setInput('code', source);
+    f.detectChanges();
+    const pre = f.nativeElement.querySelector('pre') as HTMLPreElement;
+    expect(pre.getAttribute('dir')).toBe('ltr');
+    expect(getComputedStyle(pre).textAlign).toBe('left');
+    expect(pre.textContent).toBe(source);
   });
 
   it('should render a copy button', () => {

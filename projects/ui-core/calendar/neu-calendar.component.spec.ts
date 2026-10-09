@@ -69,6 +69,19 @@ describe('NeuCalendarComponent', () => {
     return fixture;
   }
 
+  it('uses decorative stroke chevrons without changing navigation names', () => {
+    const fixture = setup();
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-calendar__nav-btn') as NodeListOf<HTMLButtonElement>,
+    );
+    expect(buttons.map((button) => button.getAttribute('aria-label')))
+      .toEqual(['Previous', 'Next']);
+    expect(buttons.map((button) => button.querySelector('svg path')?.getAttribute('d')))
+      .toEqual(['m15 18-6-6 6-6', 'm9 18 6-6-6-6']);
+    expect(buttons.every((button) => button.querySelector('svg')?.getAttribute('aria-hidden') === 'true'))
+      .toBe(true);
+  });
+
   it('should render the month view by default with 42 cells', async () => {
     const fixture = setup();
     await fixture.whenStable();

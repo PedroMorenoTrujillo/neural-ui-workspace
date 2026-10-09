@@ -1,5 +1,9 @@
 @use '../styles/breakpoints' as *;
 
+neu-uploader[hidden] {
+  display: none !important;
+}
+
 $uploader-height: 176px;
 $uploader-height-sm: 144px;
 $uploader-height-lg: 208px;

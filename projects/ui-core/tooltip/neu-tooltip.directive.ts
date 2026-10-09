@@ -5,6 +5,7 @@ import {
   HostListener,
   Injector,
   OnDestroy,
+  OnInit,
   inject,
   input,
   signal,
@@ -31,11 +32,9 @@ export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
   selector: '[neuTooltip]',
   host: {
     '[attr.aria-describedby]': '_isVisible() ? _tooltipId : null',
-    // Sólo añadimos tabindex en elementos que no son nativamente focusables
-    '[attr.tabindex]': '_needsTabindex() ? "0" : null',
   },
 })
-export class NeuTooltipDirective implements OnDestroy {
+export class NeuTooltipDirective implements OnDestroy, OnInit {
   readonly neuTooltip = input.required<string>();
   readonly neuTooltipPosition = input<NeuTooltipPosition>('top');
   readonly neuTooltipDisabled = input<boolean>(false);
@@ -55,6 +54,13 @@ export class NeuTooltipDirective implements OnDestroy {
   private _tooltipRef: ComponentRef<NeuTooltipOverlayComponent> | null = null;
   private _hideTimeout: ReturnType<typeof setTimeout> | null = null;
   protected readonly _isVisible = signal(false);
+
+  ngOnInit(): void {
+    const host = this._elementRef.nativeElement;
+    if (this._needsTabindex() && !host.hasAttribute('tabindex')) {
+      host.setAttribute('tabindex', '0');
+    }
+  }
 
   @HostListener('mouseenter')
   @HostListener('focus')

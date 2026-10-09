@@ -186,7 +186,43 @@ describe('NeuSpeedDialComponent', () => {
     );
   });
 
-  it('lets native Enter/Space click toggle once and uses arrows for boundary focus', () => {
+  it('focuses an action only after a controlled owner opens and the view renders', async () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector('.neu-speed-dial__trigger') as HTMLButtonElement;
+    trigger.focus();
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(trigger);
+    fixture.componentRef.setInput('open', true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.neu-speed-dial__action'));
+  });
+
+  it('does not steal focus after an asynchronous owner echo when the trigger has blurred', async () => {
+    const fixture = setup();
+    fixture.componentRef.setInput('open', false);
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector('.neu-speed-dial__trigger') as HTMLButtonElement;
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    try {
+      trigger.focus();
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      outside.focus();
+      fixture.componentRef.setInput('open', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      outside.remove();
+    }
+  });
+
+  it('lets native Enter/Space click toggle once and uses arrows for boundary focus', async () => {
     const fixture = TestBed.createComponent(NeuSpeedDialComponent);
     fixture.componentRef.setInput('items', [
       { key: 'one', label: 'One', command: () => undefined },
@@ -205,8 +241,10 @@ describe('NeuSpeedDialComponent', () => {
     expect(fixture.componentInstance.isOpen()).toBe(true);
     fixture.componentInstance.close();
 
+    trigger.focus();
     trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
     fixture.detectChanges();
+    await fixture.whenStable();
     const actions = fixture.nativeElement.querySelectorAll(
       '.neu-speed-dial__action',
     ) as NodeListOf<HTMLElement>;

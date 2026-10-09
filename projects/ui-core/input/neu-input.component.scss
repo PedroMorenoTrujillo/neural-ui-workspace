@@ -7,6 +7,10 @@
 @use '../styles/text-overflow' as text;
 @use '../styles/focus-state' as focus;
 
+neu-input[hidden] {
+  display: none !important;
+}
+
 $input-height: 48px; // md — default
 $input-height-sm: 36px; // sm
 $input-height-lg: 56px; // lg

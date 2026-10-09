@@ -111,6 +111,8 @@ export class NeuCheckboxComponent implements FormCheckboxControl {
 
   onChange(event: Event): void {
     const target = event.target as HTMLInputElement;
+    // Native activation clears this property even when the controlled input stays mixed.
+    target.indeterminate = this.indeterminate();
     if (this.disabled() || this.readonly()) {
       target.checked = this.checked();
       return;

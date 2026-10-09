@@ -7,6 +7,7 @@ import {
   TemplateRef,
   ViewEncapsulation,
   booleanAttribute,
+  afterRenderEffect,
   computed,
   contentChild,
   effect,
@@ -247,6 +248,7 @@ export class NeuSpeedDialTriggerDirective {
         [attr.aria-controls]="listId()"
         (click)="onTriggerClick($event)"
         (keydown)="onTriggerKeydown($event)"
+        (blur)="pendingKeyboardFocus.set(null)"
       >
         @if (triggerTemplate(); as template) {
           <ng-container
@@ -290,6 +292,7 @@ export class NeuSpeedDialComponent {
   private readonly controller = new NeuRovingMenuController({ orientation: 'both' });
   private readonly generatedId = inject(NeuIdGenerator).getId('neu-speed-dial-');
   private readonly _isOpen = signal(false);
+  protected readonly pendingKeyboardFocus = signal<number | null>(null);
   private previousOwnedOpen: boolean | null = null;
   private pendingOwnedTransition:
     | {
@@ -335,6 +338,20 @@ export class NeuSpeedDialComponent {
   protected readonly rotateTrigger = computed(() => this.animation().rotateTrigger !== false);
 
   constructor() {
+    afterRenderEffect(() => {
+      const index = this.pendingKeyboardFocus();
+      if (index === null || !this.isOpen()) return;
+      untracked(() => {
+        this.pendingKeyboardFocus.set(null);
+        const trigger = this.trigger().nativeElement;
+        if (trigger.ownerDocument.activeElement !== trigger || this.disabled()) return;
+        const target = this.actionElement(index);
+        if (target) {
+          target.tabIndex = 0;
+          target.focus();
+        }
+      });
+    });
     effect(() => {
       const items = this.resolvedItems();
       untracked(() => {
@@ -419,6 +436,7 @@ export class NeuSpeedDialComponent {
   }
 
   protected onTriggerClick(event: MouseEvent): void {
+    this.pendingKeyboardFocus.set(null);
     event.stopPropagation();
     this.triggerClick.emit(event);
     if (this.disabled()) return;
@@ -468,6 +486,8 @@ export class NeuSpeedDialComponent {
   protected onTriggerKeydown(event: KeyboardEvent): void {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
+      if (this.disabled()) return;
+      const wasOpen = this.isOpen();
       if (!this.isOpen()) this.openWithReason(event, 'trigger');
       const candidates = this.resolvedItems()
         .map((item, index) => ({ item, index }))
@@ -475,6 +495,10 @@ export class NeuSpeedDialComponent {
       const boundary = event.key === 'ArrowDown' ? candidates[0] : candidates.at(-1);
       if (!boundary) return;
       this.setFocused(boundary.index);
+      if (!wasOpen) {
+        this.pendingKeyboardFocus.set(boundary.index);
+        return;
+      }
       const target = this.actionElement(boundary.index);
       if (target) {
         target.tabIndex = 0;
@@ -534,6 +558,7 @@ export class NeuSpeedDialComponent {
     reason: NeuSpeedDialVisibilityReason,
     restoreFocus = false,
   ): void {
+    this.pendingKeyboardFocus.set(null);
     if (!this.isOpen()) return;
     if (this.proposeOwnedState(false, originalEvent, reason, restoreFocus)) return;
     this.commitClose(originalEvent, reason, restoreFocus);

@@ -58,12 +58,10 @@ export function projectNeuTreeTableVirtualWindow(options: {
   readonly virtualization: NeuTreeTableVirtualizationOptions;
 }): TreeVirtualWindow {
   const total = Math.max(0, Math.floor(finite(options.total, 0)));
-  if (!options.virtualization.enabled || !options.geometry.measured) {
+  if (!options.virtualization.enabled) {
     const range = { start: 0, end: total };
     return {
-      itemSize: options.virtualization.enabled
-        ? normalizeNeuTreeTableItemSize(options.virtualization.itemSize)
-        : 1,
+      itemSize: 1,
       measured: false,
       visible: range,
       render: range,
@@ -74,8 +72,15 @@ export function projectNeuTreeTableVirtualWindow(options: {
 
   const itemSize = normalizeNeuTreeTableItemSize(options.virtualization.itemSize);
   const overscan = normalizeNeuTreeTableOverscan(options.virtualization.overscan);
-  const scrollTop = Math.max(0, finite(options.geometry.scrollTop, 0));
-  const viewportSize = Math.max(0, finite(options.geometry.viewportSize, 0));
+  // Bound the first render before layout is available. The same deterministic
+  // bootstrap is used by SSR and the client so hydration does not depend on DOM
+  // measurements. ResizeObserver replaces this estimate with the actual size.
+  const scrollTop = options.geometry.measured
+    ? Math.max(0, finite(options.geometry.scrollTop, 0))
+    : 0;
+  const viewportSize = options.geometry.measured
+    ? Math.max(0, finite(options.geometry.viewportSize, 0))
+    : 384;
   const visibleStart = Math.min(total, Math.floor(scrollTop / itemSize));
   const visibleEnd = Math.min(
     total,
@@ -86,7 +91,7 @@ export function projectNeuTreeTableVirtualWindow(options: {
 
   return {
     itemSize,
-    measured: true,
+    measured: options.geometry.measured,
     visible: { start: visibleStart, end: visibleEnd },
     render: { start: renderStart, end: Math.max(renderStart, renderEnd) },
     before: renderStart * itemSize,

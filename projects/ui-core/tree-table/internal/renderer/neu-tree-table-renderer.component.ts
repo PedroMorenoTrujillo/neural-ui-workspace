@@ -698,7 +698,7 @@ export class NeuTreeTableRendererComponent<
       this.proposeSelection(node, indicator.type === 'radio' ? 'radio' : 'checkbox', event);
       const state = this.selectionState(node);
       indicator.checked = state.selected;
-      indicator.indeterminate = state.indeterminate;
+      indicator.indeterminate = indicator.type === 'checkbox' && state.indeterminate;
       return;
     }
     if (this.isInteractiveTarget(target)) return;

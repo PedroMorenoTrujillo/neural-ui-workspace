@@ -75,6 +75,23 @@ describe('NeuKanbanComponent controlled board', () => {
     expect(board.resolvedMoveButtonLabel()).toBe('Shift');
   });
 
+  it('keeps the Neural button accessible names after rendering movement actions', async () => {
+    const { fixture } = setup();
+    await fixture.whenStable();
+    const host = fixture.nativeElement as HTMLElement;
+    expect(trigger(host, 'a').getAttribute('aria-label')).toBe('Move: Alpha');
+    trigger(host, 'a').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const actions = [...host.querySelectorAll<HTMLButtonElement>('.neu-kanban__move-actions button')];
+    expect(actions).toHaveLength(4);
+    for (const button of actions) {
+      expect(button.getAttribute('aria-label')).toContain('Alpha');
+      expect(button.getAttribute('aria-label')).toMatch(/left|right|up|down/i);
+    }
+    fixture.destroy();
+  });
+
   function card(host: HTMLElement, id: string): HTMLElement {
     const found = Array.from(host.querySelectorAll<HTMLElement>('[data-neu-kanban-card-id]'))
       .find((node) => node.dataset['neuKanbanCardId'] === id);

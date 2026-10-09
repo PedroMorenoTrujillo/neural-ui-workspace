@@ -36,6 +36,10 @@ describe('NeuTieredMenu B2', () => {
 
   it('uses an inline root, deterministic controls and no initially mounted submenu', () => {
     const file = root('file');
+    const chevron = file.querySelector('svg.neu-tiered-menu__chevron');
+    expect(chevron?.getAttribute('aria-hidden')).toBe('true');
+    expect(chevron?.getAttribute('fill')).toBe('none');
+    expect(chevron?.querySelector('polyline')?.getAttribute('points')).toBe('9 6 15 12 9 18');
     expect(file.getAttribute('aria-haspopup')).toBe('menu');
     expect(file.getAttribute('aria-expanded')).toBe('false');
     expect(file.getAttribute('aria-controls')).toBe(`${file.id}-submenu`);

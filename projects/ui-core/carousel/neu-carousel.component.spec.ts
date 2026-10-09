@@ -5,12 +5,34 @@ import { NeuCarouselComponent, NeuCarouselFooterDirective, NeuCarouselHeaderDire
 @Component({ standalone: true, imports: [NeuCarouselComponent, NeuCarouselHeaderDirective, NeuCarouselItemDirective, NeuCarouselFooterDirective], template: `<neu-carousel [items]="items"><ng-template neuCarouselHeader><strong class="custom-header">Header</strong></ng-template><ng-template neuCarouselItem let-item let-index="index"><span class="custom-item">{{ index }} {{ item }}</span></ng-template><ng-template neuCarouselFooter><strong class="custom-footer">Footer</strong></ng-template></neu-carousel>` })
 class CarouselTemplateHost { readonly items = [1, 2]; }
 
+@Component({
+  imports: [NeuCarouselComponent, NeuCarouselItemDirective],
+  template: `<neu-carousel [items]="items"><ng-template neuCarouselItem><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="Collection" /><span draggable="true">Custom drag</span></ng-template></neu-carousel>`,
+})
+class CarouselImageHost { readonly items = [1, 2]; }
+
 describe('NeuCarouselComponent', () => {
   let originalInnerWidth: number;
 
   beforeEach(async () => TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }).compileComponents());
   beforeEach(() => { originalInnerWidth = window.innerWidth; });
   afterEach(() => Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth }));
+
+  it('renders decorative stroke chevrons for horizontal and vertical navigation', () => {
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2]);
+    fixture.detectChanges();
+    const paths = () => Array.from(
+      fixture.nativeElement.querySelectorAll('.neu-carousel__nav svg path') as NodeListOf<SVGPathElement>,
+      (path) => path.getAttribute('d'),
+    );
+    expect(paths()).toEqual(['m15 18-6-6 6-6', 'm9 18 6-6-6-6']);
+    expect(fixture.nativeElement.querySelector('.neu-carousel__nav svg').getAttribute('aria-hidden'))
+      .toBe('true');
+    fixture.componentRef.setInput('orientation', 'vertical');
+    fixture.detectChanges();
+    expect(paths()).toEqual(['m6 15 6-6 6 6', 'm6 9 6 6 6-6']);
+  });
 
   it('localizes item and page names from the document language', () => {
     const original = document.documentElement.lang;
@@ -67,6 +89,28 @@ describe('NeuCarouselComponent', () => {
     component.onPointerDown(new PointerEvent('pointerdown', { clientX: 20 }));
     component.onPointerUp(new PointerEvent('pointerup', { clientX: 100 }));
     expect(component.page()).toBe(0);
+  });
+
+  it('prevents native image drag without blocking consumer-owned drag surfaces', () => {
+    const fixture = TestBed.createComponent(CarouselImageHost);
+    fixture.detectChanges();
+    const imageDrag = new Event('dragstart', { bubbles: true, cancelable: true });
+    fixture.nativeElement.querySelector('img').dispatchEvent(imageDrag);
+    expect(imageDrag.defaultPrevented).toBe(true);
+    const customDrag = new Event('dragstart', { bubbles: true, cancelable: true });
+    fixture.nativeElement.querySelector('[draggable="true"]').dispatchEvent(customDrag);
+    expect(customDrag.defaultPrevented).toBe(false);
+  });
+
+  it('discards a cancelled pointer gesture instead of reusing its start position', () => {
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    fixture.componentRef.setInput('items', [1, 2]);
+    fixture.detectChanges();
+    const surface = fixture.nativeElement.querySelector('.neu-carousel__root');
+    surface.dispatchEvent(new PointerEvent('pointerdown', { clientX: 100 }));
+    surface.dispatchEvent(new PointerEvent('pointercancel'));
+    surface.dispatchEvent(new PointerEvent('pointerup', { clientX: 10 }));
+    expect(fixture.componentInstance.page()).toBe(0);
   });
 
   it('covers carousel labels, edge states, orientation, and dynamic page reconciliation', () => {

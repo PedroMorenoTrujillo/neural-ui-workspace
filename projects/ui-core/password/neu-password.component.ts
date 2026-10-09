@@ -104,7 +104,15 @@ import { NeuIdGenerator } from '@neural-ui/core/internal';
       }
     </div>
     @if (showStrength()) {
-      <div class="neu-password__strength" [attr.data-score]="strength()">
+      <div
+        class="neu-password__strength"
+        role="meter"
+        [attr.aria-label]="label() || 'Password strength'"
+        aria-valuemin="0"
+        aria-valuemax="4"
+        [attr.aria-valuenow]="strength()"
+        [attr.data-score]="strength()"
+      >
         <span></span><span></span><span></span><span></span>
       </div>
     }
