@@ -1,0 +1,27 @@
+# N2-D1 — Physical removals
+
+Status: **D1 COMPLETE — READY FOR INDEPENDENT MEDIUM LANE**. A3 and A5 are complete, and this checkpoint remains uncommitted. The next B7–B9 lane requires GPT-6 SOL HIGH and has not started.
+
+## Removal and consumer accounting
+
+Physically removed the two portfolio entries already classified `REMOVE`: `organization-chart` and `scheduler-gantt`, including their runtime, secondary entrypoints, styles, and legacy-only specs. No replacement, alias, redirect, compatibility wrapper, or symlink was added. The deleted source remains recoverable from Git until the user approves a commit. TimelineGrid was inspected and remains untouched; it does not import SchedulerGantt. There was no active product consumer of either removed entrypoint outside its own files. The mixed H5B4 typing fixture was narrowed to retain its still-valid SpeedDial positive/negative checks rather than deleting the entire fixture.
+
+The removed legacy specs represented **20 OrganizationChart tests + 17 SchedulerGantt tests**. They exercised removed legacy API and do not represent uncovered P1 behavior in the retained portfolio. The before-D1 full-suite count of **179 files / 2,430 tests** is derived from the after count plus these two files and 37 cases, not a separately rerun baseline. The after-D1 full suite passed at **177 files / 2,393 tests**. No test was migrated or added as a substitute for the intentionally removed components.
+
+Removed four OrganizationChart-only design tokens and their generator/policy references. The generated token inventory changed from **286 to 282 tokens**, with precisely `--neu-organization-chart-connector`, `--neu-organization-chart-connector-width`, `--neu-organization-chart-gap-x`, and `--neu-organization-chart-gap-y` removed and no token names added. Removed obsolete active README references. Historical N2 reports and historical contract-reconciliation evidence were retained.
+
+## Public/package delta and gates
+
+The official `snapshot:contracts` generator and token generator were run; snapshots were not hand-edited. The current contract has **99 entrypoints, 96 components, 117 directives, 1,229 inputs, 231 outputs, 24 models, and 254 design tokens**, versus **101 / 98 / 121 / 1,253 / 237 / 26 / 258** before regeneration. The exported-declaration inventory is **792**, binding inventory **1,484**, and symbol inventory **5,208**. The regeneration also captured pre-existing DateInput source changes that were not made in D1 (three new DateInput-related declarations and corresponding changed declarations). This is an honest snapshot update, not a D1 runtime change; no certified DateInput implementation was altered.
+
+The new `scripts/audit-n2-d1-removals.mjs` static gate passes: neither removed entrypoint is present in active runtime, fixtures, or public package contracts, and TimelineGrid remains present. The final package has **99 entrypoints**, a reduction of two. A clean, disposable package build checked **103 package exports** (the entrypoint count and total package-export count use different inventory definitions); both removed secondary exports were absent. That isolated package passed the package verifier (**439 files**), publint, and Are the Types Wrong. The direct production library build, contract audit, contract tests (**5/5**), final-entrypoint import smoke (**99**), SSR import smoke (**99**), token audit, visual-nomenclature audit, and retained H5B4 template-typing fixture all pass. The full unit suite passed as above.
+
+The workspace's ignored `dist/neural-ui/core` contained unrelated stale numbered package directories from prior activity, making an ordinary `npm pack` of that directory hang. No broad cleanup was performed. Only the exact stale generated OrganizationChart/SchedulerGantt outputs were removed; the verification script builds a fresh isolated package and deletes its own temporary directory. The ordinary entrypoint audit still reports **16 pre-existing missing Showcase demos**. The primitives audit still reports **three pre-existing inline SVG usages** in MegaMenu, Modal, and TreeSelect. Neither is a D1 regression or authorized cleanup.
+
+## Portfolio, boundaries, and hygiene
+
+The source-derived portfolio and roadmap were regenerated through their generator and its drift gate passes: **96 public components = 42 completed + 54 pending + 0 planned removals**, with **19 implementation batches** remaining. D1's two removal rows are retained only as historical accounting. A1 remains dependent on the separate neural-icons lane; no icon runtime/source, icon repository, or icon-related component was modified in D1. No Table, TreeTable, TimelineGrid, Showcase implementation, or new feature work occurred.
+
+The D1 diff consists of the two removed component directories, the narrow active fixture/README/token/audit updates, officially regenerated contracts/token artifacts, the two new package/removal checks, this report, and the source-derived portfolio documents. The unrelated pre-existing untracked `projects/ui-core/tree-table/public_api 2.ts` was not touched. `git diff --check` passes; no D1 temporary consumer/build directory remains. No symlink was added. No commit, push, tag, release, or npm publish was performed.
+
+Recommendation: **D1 COMPLETE — READY FOR INDEPENDENT MEDIUM LANE**. Because the requested B7–B9 lane explicitly requires a mid-thread switch to GPT-6 SOL HIGH, stop here: **READY FOR B7 — USE GPT-6 SOL HIGH**. B7, B8, and B9 are not started.

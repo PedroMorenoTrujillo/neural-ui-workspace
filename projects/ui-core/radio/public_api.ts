@@ -1,2 +1,2 @@
-export * from './neu-radio-group.component';
-export * from './neu-radio.component';
+export { NeuRadioGroupComponent } from './neu-radio-group.component';
+export { NeuRadioComponent } from './neu-radio.component';

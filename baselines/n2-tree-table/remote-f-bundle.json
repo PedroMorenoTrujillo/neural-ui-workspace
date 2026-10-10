@@ -1,0 +1,102 @@
+{
+  "checkpoint": "N2-015F",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 90344,
+        "gzip": 18136,
+        "brotli": 15316
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 90307
+        }
+      ]
+    },
+    "remote-roots": {
+      "size": {
+        "raw": 90344,
+        "gzip": 18136,
+        "brotli": 15316
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 90307
+        }
+      ]
+    },
+    "remote-children": {
+      "size": {
+        "raw": 90344,
+        "gzip": 18136,
+        "brotli": 15316
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 90307
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 90845,
+        "gzip": 18305,
+        "brotli": 15429
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 90727
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 90845,
+        "gzip": 18305,
+        "brotli": 15429
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 90727
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 90344,
+        "gzip": 18136,
+        "brotli": 15316
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 90307
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "@angular/common",
+    "@angular/core"
+  ],
+  "optionalChunks": [],
+  "forbiddenGraphTokens": []
+}

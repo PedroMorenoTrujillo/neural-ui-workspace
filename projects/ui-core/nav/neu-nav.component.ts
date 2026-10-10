@@ -1,21 +1,19 @@
 import {
-  ChangeDetectionStrategy,
   Component,
-  computed,
   DestroyRef,
   ViewEncapsulation,
-  afterNextRender,
+  computed,
   inject,
   input,
-  linkedSignal,
   output,
   signal,
 } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
-import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { RouterLink } from '@angular/router';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconChevronRight as iconChevronRight } from '@neural-ui/core/internal';
+import { neuIconChevronLeft as iconChevronLeft } from '@neural-ui/core/internal';
+import { neuIconExternalLink as iconExternalLink } from '@neural-ui/core/internal';
 import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
 
 // ---- Tipos públicos / Public types ----
@@ -34,7 +32,7 @@ import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
 export interface NeuNavItem {
   id: string;
   label: string;
-  icon: string;
+  icon: NeuIconKey;
   /** Ruta Angular interna (RouterLink). Excluye `href`. / Internal Angular route (RouterLink). Excludes `href`. */
   route?: string;
   /** URL externa. Se abre en nueva pestaña. Excluye `route`. / External URL. Opens in a new tab. Excludes `route`. */
@@ -42,15 +40,16 @@ export interface NeuNavItem {
   /** Ítems hijo (nivel 2). Cada hijo puede tener sus propios `children` (nivel 3). / Child items (level 2). Each child can have its own `children` (level 3). */
   children?: NeuNavItem[];
   badge?: string;
-  badgeVariant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
+  badgeTone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info';
   disabled?: boolean;
+  /** Applied current-page state, owned by the consumer. */
+  active?: boolean;
 }
 
 @Component({
   selector: 'neu-nav',
-  imports: [RouterLink, RouterLinkActive, NeuIconComponent, NeuTooltipDirective],
+  imports: [RouterLink, InternalNeuIconOutletComponent, NeuTooltipDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-nav-wrapper" [class.neu-nav-wrapper--collapsed]="isCollapsed()">
       <nav
@@ -71,16 +70,17 @@ export interface NeuNavItem {
         </div>
 
         <!-- Items (nivel 1) -->
-        <div class="neu-nav__items" role="list">
+        <div class="neu-nav__items">
           @for (item of items(); track item.id) {
             @if (item.children?.length) {
               <!-- NIVEL 1 — Grupo acordeón -->
               <div
                 class="neu-nav__group"
                 [class.neu-nav__group--open]="isGroupOpen(item.id)"
-                role="listitem"
                 (mouseenter)="onGroupMouseEnter(item, $event)"
                 (mouseleave)="onGroupMouseLeave()"
+                (focusin)="onGroupFocusIn(item, $event)"
+                (focusout)="onGroupMouseLeave()"
               >
                 <button
                   class="neu-nav__item neu-nav__item--parent"
@@ -88,14 +88,14 @@ export interface NeuNavItem {
                   [class.neu-nav__item--active]="isGroupActive(item)"
                   [class.neu-nav__item--disabled]="item.disabled"
                   [attr.aria-expanded]="isGroupOpen(item.id)"
-                  [attr.aria-haspopup]="true"
+                  [attr.aria-label]="isCollapsed() ? item.label : null"
                   [attr.disabled]="item.disabled ? '' : null"
                   [neuTooltip]="isCollapsed() ? item.label : ''"
-                  [neuTooltipPosition]="tooltipPosition()"
+                  neuTooltipPosition="right"
                   (click)="!isCollapsed() && toggleGroup(item.id)"
                 >
-                  <neu-icon
-                    [name]="item.icon"
+                  <neu-icon-outlet
+                    [icon]="item.icon" [fallbackPath]="iconFallbackPath(item.icon)" [fallbackText]="iconFallbackText(item.icon)"
                     size="18px"
                     class="neu-nav__item-icon"
                     aria-hidden="true"
@@ -104,30 +104,28 @@ export interface NeuNavItem {
                   @if (item.badge) {
                     <span
                       class="neu-nav__item-badge neu-nav__item-badge--{{
-                        item.badgeVariant ?? 'default'
+                        item.badgeTone ?? 'neutral'
                       }}"
                       >{{ item.badge }}</span
                     >
                   }
-                  <neu-icon
-                    [name]="groupChevronIcon()"
+                  <neu-icon-outlet
+                    [icon]="iconChevronRight" [fallbackPath]="iconFallbackPath(iconChevronRight)" [fallbackText]="iconFallbackText(iconChevronRight)"
                     size="14px"
                     class="neu-nav__group-chevron"
-                    [class.neu-nav__group-chevron--rtl]="isRtl()"
                     aria-hidden="true"
                   />
                 </button>
 
                 <!-- Submenú nivel 2 -->
                 @if (!isCollapsed() && isGroupOpen(item.id)) {
-                  <div class="neu-nav__submenu" role="list">
+                  <div class="neu-nav__submenu">
                     @for (child of item.children; track child.id) {
                       @if (child.children?.length) {
                         <!-- NIVEL 2 — Subgrupo acordeón -->
                         <div
                           class="neu-nav__group neu-nav__group--nested"
                           [class.neu-nav__group--open]="isGroupOpen(child.id)"
-                          role="listitem"
                         >
                           <button
                             class="neu-nav__item neu-nav__item--child neu-nav__item--parent"
@@ -135,12 +133,11 @@ export interface NeuNavItem {
                             [class.neu-nav__item--active]="isGroupActive(child)"
                             [class.neu-nav__item--disabled]="child.disabled"
                             [attr.aria-expanded]="isGroupOpen(child.id)"
-                            [attr.aria-haspopup]="true"
                             [attr.disabled]="child.disabled ? '' : null"
                             (click)="toggleGroup(child.id)"
                           >
-                            <neu-icon
-                              [name]="child.icon"
+                            <neu-icon-outlet
+                              [icon]="child.icon" [fallbackPath]="iconFallbackPath(child.icon)" [fallbackText]="iconFallbackText(child.icon)"
                               size="15px"
                               class="neu-nav__item-icon"
                               aria-hidden="true"
@@ -149,44 +146,44 @@ export interface NeuNavItem {
                             @if (child.badge) {
                               <span
                                 class="neu-nav__item-badge neu-nav__item-badge--{{
-                                  child.badgeVariant ?? 'default'
+                                  child.badgeTone ?? 'neutral'
                                 }}"
                                 >{{ child.badge }}</span
                               >
                             }
-                            <neu-icon
-                              [name]="groupChevronIcon()"
+                            <neu-icon-outlet
+                              [icon]="iconChevronRight" [fallbackPath]="iconFallbackPath(iconChevronRight)" [fallbackText]="iconFallbackText(iconChevronRight)"
                               size="13px"
                               class="neu-nav__group-chevron"
-                              [class.neu-nav__group-chevron--rtl]="isRtl()"
                               aria-hidden="true"
                             />
                           </button>
 
                           <!-- Submenú nivel 3 -->
                           @if (isGroupOpen(child.id)) {
-                            <div class="neu-nav__submenu neu-nav__submenu--nested" role="list">
+                            <div class="neu-nav__submenu neu-nav__submenu--nested">
                               @for (grand of child.children; track grand.id) {
                                 @if (grand.href) {
                                   <!-- NIVEL 3 — Enlace externo -->
                                   <a
                                     class="neu-nav__item neu-nav__item--grandchild"
+                                    [class.neu-nav__item--active]="grand.active"
                                     [class.neu-nav__item--disabled]="grand.disabled"
+                                    [attr.aria-current]="grand.active ? 'page' : null"
                                     [href]="grand.disabled ? null : grand.href"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     [attr.aria-disabled]="grand.disabled ? 'true' : null"
-                                    role="listitem"
                                   >
-                                    <neu-icon
-                                      [name]="grand.icon"
+                                    <neu-icon-outlet
+                                      [icon]="grand.icon" [fallbackPath]="iconFallbackPath(grand.icon)" [fallbackText]="iconFallbackText(grand.icon)"
                                       size="14px"
                                       class="neu-nav__item-icon"
                                       aria-hidden="true"
                                     />
                                     <span class="neu-nav__item-label">{{ grand.label }}</span>
-                                    <neu-icon
-                                      name="lucideExternalLink"
+                                    <neu-icon-outlet
+                                      [icon]="iconExternalLink" [fallbackPath]="iconFallbackPath(iconExternalLink)" [fallbackText]="iconFallbackText(iconExternalLink)"
                                       size="11px"
                                       class="neu-nav__external-icon"
                                       aria-hidden="true"
@@ -198,15 +195,13 @@ export interface NeuNavItem {
                                     class="neu-nav__item neu-nav__item--grandchild"
                                     [class.neu-nav__item--disabled]="grand.disabled"
                                     [routerLink]="grand.disabled ? null : (grand.route ?? null)"
-                                    routerLinkActive="neu-nav__item--active"
-                                    [routerLinkActiveOptions]="{ exact: true }"
-                                    [attr.aria-current]="
-                                      isCurrentRoute(grand.route ?? '') ? 'page' : null
-                                    "
-                                    role="listitem"
+                                    [attr.aria-disabled]="grand.disabled ? 'true' : null"
+                                    [attr.tabindex]="grand.disabled || !grand.route ? -1 : null"
+                                    [class.neu-nav__item--active]="grand.active"
+                                    [attr.aria-current]="grand.active ? 'page' : null"
                                   >
-                                    <neu-icon
-                                      [name]="grand.icon"
+                                    <neu-icon-outlet
+                                      [icon]="grand.icon" [fallbackPath]="iconFallbackPath(grand.icon)" [fallbackText]="iconFallbackText(grand.icon)"
                                       size="14px"
                                       class="neu-nav__item-icon"
                                       aria-hidden="true"
@@ -215,7 +210,7 @@ export interface NeuNavItem {
                                     @if (grand.badge) {
                                       <span
                                         class="neu-nav__item-badge neu-nav__item-badge--{{
-                                          grand.badgeVariant ?? 'default'
+                                          grand.badgeTone ?? 'neutral'
                                         }}"
                                         >{{ grand.badge }}</span
                                       >
@@ -230,15 +225,16 @@ export interface NeuNavItem {
                         <!-- NIVEL 2 — Enlace externo -->
                         <a
                           class="neu-nav__item neu-nav__item--child"
+                          [class.neu-nav__item--active]="child.active"
                           [class.neu-nav__item--disabled]="child.disabled"
+                          [attr.aria-current]="child.active ? 'page' : null"
                           [href]="child.disabled ? null : child.href"
                           target="_blank"
                           rel="noopener noreferrer"
                           [attr.aria-disabled]="child.disabled ? 'true' : null"
-                          role="listitem"
                         >
-                          <neu-icon
-                            [name]="child.icon"
+                          <neu-icon-outlet
+                            [icon]="child.icon" [fallbackPath]="iconFallbackPath(child.icon)" [fallbackText]="iconFallbackText(child.icon)"
                             size="15px"
                             class="neu-nav__item-icon"
                             aria-hidden="true"
@@ -247,13 +243,13 @@ export interface NeuNavItem {
                           @if (child.badge) {
                             <span
                               class="neu-nav__item-badge neu-nav__item-badge--{{
-                                child.badgeVariant ?? 'default'
+                                child.badgeTone ?? 'neutral'
                               }}"
                               >{{ child.badge }}</span
                             >
                           }
-                          <neu-icon
-                            name="lucideExternalLink"
+                          <neu-icon-outlet
+                            [icon]="iconExternalLink" [fallbackPath]="iconFallbackPath(iconExternalLink)" [fallbackText]="iconFallbackText(iconExternalLink)"
                             size="12px"
                             class="neu-nav__external-icon"
                             aria-hidden="true"
@@ -265,13 +261,13 @@ export interface NeuNavItem {
                           class="neu-nav__item neu-nav__item--child"
                           [class.neu-nav__item--disabled]="child.disabled"
                           [routerLink]="child.disabled ? null : (child.route ?? null)"
-                          routerLinkActive="neu-nav__item--active"
-                          [routerLinkActiveOptions]="{ exact: true }"
-                          [attr.aria-current]="isCurrentRoute(child.route ?? '') ? 'page' : null"
-                          role="listitem"
+                          [attr.aria-disabled]="child.disabled ? 'true' : null"
+                          [attr.tabindex]="child.disabled || !child.route ? -1 : null"
+                          [class.neu-nav__item--active]="child.active"
+                          [attr.aria-current]="child.active ? 'page' : null"
                         >
-                          <neu-icon
-                            [name]="child.icon"
+                          <neu-icon-outlet
+                            [icon]="child.icon" [fallbackPath]="iconFallbackPath(child.icon)" [fallbackText]="iconFallbackText(child.icon)"
                             size="15px"
                             class="neu-nav__item-icon"
                             aria-hidden="true"
@@ -280,7 +276,7 @@ export interface NeuNavItem {
                           @if (child.badge) {
                             <span
                               class="neu-nav__item-badge neu-nav__item-badge--{{
-                                child.badgeVariant ?? 'default'
+                                child.badgeTone ?? 'neutral'
                               }}"
                               >{{ child.badge }}</span
                             >
@@ -295,17 +291,19 @@ export interface NeuNavItem {
               <!-- NIVEL 1 — Enlace externo -->
               <a
                 class="neu-nav__item"
+                [class.neu-nav__item--active]="item.active"
                 [class.neu-nav__item--disabled]="item.disabled"
+                [attr.aria-current]="item.active ? 'page' : null"
                 [href]="item.disabled ? null : item.href"
+                [attr.aria-label]="isCollapsed() ? item.label : null"
                 target="_blank"
                 rel="noopener noreferrer"
                 [attr.aria-disabled]="item.disabled ? 'true' : null"
                 [neuTooltip]="isCollapsed() ? item.label : ''"
-                [neuTooltipPosition]="tooltipPosition()"
-                role="listitem"
+                neuTooltipPosition="right"
               >
-                <neu-icon
-                  [name]="item.icon"
+                <neu-icon-outlet
+                  [icon]="item.icon" [fallbackPath]="iconFallbackPath(item.icon)" [fallbackText]="iconFallbackText(item.icon)"
                   size="18px"
                   class="neu-nav__item-icon"
                   aria-hidden="true"
@@ -314,13 +312,13 @@ export interface NeuNavItem {
                 @if (item.badge) {
                   <span
                     class="neu-nav__item-badge neu-nav__item-badge--{{
-                      item.badgeVariant ?? 'default'
+                      item.badgeTone ?? 'neutral'
                     }}"
                     >{{ item.badge }}</span
                   >
                 }
-                <neu-icon
-                  name="lucideExternalLink"
+                <neu-icon-outlet
+                  [icon]="iconExternalLink" [fallbackPath]="iconFallbackPath(iconExternalLink)" [fallbackText]="iconFallbackText(iconExternalLink)"
                   size="13px"
                   class="neu-nav__external-icon"
                   aria-hidden="true"
@@ -332,15 +330,16 @@ export interface NeuNavItem {
                 class="neu-nav__item"
                 [class.neu-nav__item--disabled]="item.disabled"
                 [routerLink]="item.disabled ? null : (item.route ?? null)"
-                routerLinkActive="neu-nav__item--active"
-                [routerLinkActiveOptions]="{ exact: item.route === '/' }"
-                [attr.aria-current]="isCurrentRoute(item.route ?? '') ? 'page' : null"
+                [attr.aria-label]="isCollapsed() ? item.label : null"
+                [attr.aria-disabled]="item.disabled ? 'true' : null"
+                [attr.tabindex]="item.disabled || !item.route ? -1 : null"
+                [class.neu-nav__item--active]="item.active"
+                [attr.aria-current]="item.active ? 'page' : null"
                 [neuTooltip]="isCollapsed() ? item.label : ''"
-                [neuTooltipPosition]="tooltipPosition()"
-                role="listitem"
+                neuTooltipPosition="right"
               >
-                <neu-icon
-                  [name]="item.icon"
+                <neu-icon-outlet
+                  [icon]="item.icon" [fallbackPath]="iconFallbackPath(item.icon)" [fallbackText]="iconFallbackText(item.icon)"
                   size="18px"
                   class="neu-nav__item-icon"
                   aria-hidden="true"
@@ -349,7 +348,7 @@ export interface NeuNavItem {
                 @if (item.badge) {
                   <span
                     class="neu-nav__item-badge neu-nav__item-badge--{{
-                      item.badgeVariant ?? 'default'
+                      item.badgeTone ?? 'neutral'
                     }}"
                     >{{ item.badge }}</span
                   >
@@ -370,11 +369,16 @@ export interface NeuNavItem {
         <div
           class="neu-nav__flyout"
           [style.top.px]="flyout.top"
-          [style.left.px]="flyoutPosition()?.left"
-          [style.right.px]="flyoutPosition()?.right"
-          role="menu"
+          [style.max-height]="'calc(100dvh - ' + flyout.top + 'px - 8px)'"
+          [style.left.px]="flyout.left"
+          [style.right.px]="flyout.right"
+          role="navigation"
+          [attr.aria-label]="ariaLabel() + ' shortcuts'"
           (mouseenter)="onFlyoutMouseEnter()"
           (mouseleave)="onFlyoutMouseLeave()"
+          (focusin)="onFlyoutMouseEnter()"
+          (focusout)="onFlyoutMouseLeave()"
+          (keydown.escape)="closeFlyout()"
         >
           <div class="neu-nav__flyout-title">{{ flyout.item.label }}</div>
           @for (child of flyout.item.children ?? []; track child.id) {
@@ -385,16 +389,20 @@ export interface NeuNavItem {
                   @if (grand.href) {
                     <a
                       class="neu-nav__flyout-item"
-                      role="menuitem"
-                      [href]="grand.href"
+                      [class.neu-nav__flyout-item--active]="grand.active"
+                      [class.neu-nav__flyout-item--disabled]="grand.disabled"
+                      [attr.aria-current]="grand.active ? 'page' : null"
+                      [attr.aria-disabled]="grand.disabled ? 'true' : null"
+                      [attr.tabindex]="grand.disabled ? -1 : null"
+                      [attr.href]="grand.disabled ? null : grand.href"
                       target="_blank"
                       rel="noopener noreferrer"
-                      (click)="flyoutState.set(null)"
+                      (click)="!grand.disabled && flyoutState.set(null)"
                     >
-                      <neu-icon [name]="grand.icon" size="13px" aria-hidden="true" />
+                      <neu-icon-outlet [icon]="grand.icon" [fallbackPath]="iconFallbackPath(grand.icon)" [fallbackText]="iconFallbackText(grand.icon)" size="13px" aria-hidden="true" />
                       <span>{{ grand.label }}</span>
-                      <neu-icon
-                        name="lucideExternalLink"
+                      <neu-icon-outlet
+                        [icon]="iconExternalLink" [fallbackPath]="iconFallbackPath(iconExternalLink)" [fallbackText]="iconFallbackText(iconExternalLink)"
                         size="10px"
                         class="neu-nav__external-icon"
                       />
@@ -402,12 +410,15 @@ export interface NeuNavItem {
                   } @else {
                     <a
                       class="neu-nav__flyout-item"
-                      role="menuitem"
-                      [routerLink]="grand.route"
-                      routerLinkActive="neu-nav__flyout-item--active"
-                      (click)="flyoutState.set(null)"
+                      [routerLink]="grand.disabled ? null : (grand.route ?? null)"
+                      [class.neu-nav__flyout-item--active]="grand.active"
+                      [class.neu-nav__flyout-item--disabled]="grand.disabled"
+                      [attr.aria-current]="grand.active ? 'page' : null"
+                      [attr.aria-disabled]="grand.disabled ? 'true' : null"
+                      [attr.tabindex]="grand.disabled ? -1 : null"
+                      (click)="!grand.disabled && flyoutState.set(null)"
                     >
-                      <neu-icon [name]="grand.icon" size="13px" aria-hidden="true" />
+                      <neu-icon-outlet [icon]="grand.icon" [fallbackPath]="iconFallbackPath(grand.icon)" [fallbackText]="iconFallbackText(grand.icon)" size="13px" aria-hidden="true" />
                       <span>{{ grand.label }}</span>
                     </a>
                   }
@@ -416,25 +427,32 @@ export interface NeuNavItem {
             } @else if (child.href) {
               <a
                 class="neu-nav__flyout-item"
-                role="menuitem"
-                [href]="child.href"
+                [class.neu-nav__flyout-item--active]="child.active"
+                [class.neu-nav__flyout-item--disabled]="child.disabled"
+                [attr.aria-current]="child.active ? 'page' : null"
+                [attr.aria-disabled]="child.disabled ? 'true' : null"
+                [attr.tabindex]="child.disabled ? -1 : null"
+                [attr.href]="child.disabled ? null : child.href"
                 target="_blank"
                 rel="noopener noreferrer"
-                (click)="flyoutState.set(null)"
+                (click)="!child.disabled && flyoutState.set(null)"
               >
-                <neu-icon [name]="child.icon" size="13px" aria-hidden="true" />
+                <neu-icon-outlet [icon]="child.icon" [fallbackPath]="iconFallbackPath(child.icon)" [fallbackText]="iconFallbackText(child.icon)" size="13px" aria-hidden="true" />
                 <span>{{ child.label }}</span>
-                <neu-icon name="lucideExternalLink" size="10px" class="neu-nav__external-icon" />
+                <neu-icon-outlet [icon]="iconExternalLink" [fallbackPath]="iconFallbackPath(iconExternalLink)" [fallbackText]="iconFallbackText(iconExternalLink)" size="10px" class="neu-nav__external-icon" />
               </a>
             } @else {
               <a
                 class="neu-nav__flyout-item"
-                role="menuitem"
-                [routerLink]="child.route"
-                routerLinkActive="neu-nav__flyout-item--active"
-                (click)="flyoutState.set(null)"
+                [routerLink]="child.disabled ? null : (child.route ?? null)"
+                [class.neu-nav__flyout-item--active]="child.active"
+                [class.neu-nav__flyout-item--disabled]="child.disabled"
+                [attr.aria-current]="child.active ? 'page' : null"
+                [attr.aria-disabled]="child.disabled ? 'true' : null"
+                [attr.tabindex]="child.disabled ? -1 : null"
+                (click)="!child.disabled && flyoutState.set(null)"
               >
-                <neu-icon [name]="child.icon" size="13px" aria-hidden="true" />
+                <neu-icon-outlet [icon]="child.icon" [fallbackPath]="iconFallbackPath(child.icon)" [fallbackText]="iconFallbackText(child.icon)" size="13px" aria-hidden="true" />
                 <span>{{ child.label }}</span>
               </a>
             }
@@ -451,7 +469,11 @@ export interface NeuNavItem {
           [attr.aria-expanded]="!isCollapsed()"
           (click)="toggleCollapse()"
         >
-          <neu-icon [name]="toggleChevronIcon()" size="12px" aria-hidden="true" />
+          <neu-icon-outlet
+            [icon]="isCollapsed() ? iconChevronRight : iconChevronLeft" [fallbackPath]="iconFallbackPath(isCollapsed() ? iconChevronRight : iconChevronLeft)" [fallbackText]="iconFallbackText(isCollapsed() ? iconChevronRight : iconChevronLeft)"
+            size="12px"
+            aria-hidden="true"
+          />
         </button>
       }
     </div>
@@ -459,84 +481,53 @@ export interface NeuNavItem {
   styleUrl: './neu-nav.component.scss',
 })
 export class NeuNavComponent {
-  private readonly router = inject(Router);
-
-  // ---- Señal reactiva de ruta activa / Reactive active route signal ----
-  private readonly currentUrl = toSignal(
-    this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)),
-    { initialValue: null },
-  );
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconChevronLeft = iconChevronLeft;
+  protected readonly iconChevronRight = iconChevronRight;
+  protected readonly iconExternalLink = iconExternalLink;
 
   // ---- Inputs ----
 
   /** Lista de ítems de navegación / Navigation item list */
   items = input<NeuNavItem[]>([]);
 
-  /** Estado inicial colapsado / Initial collapsed state */
-  collapsed = input<boolean>(false);
+  /** Applied collapse state; omit for local uncontrolled disclosure. */
+  collapsed = input<boolean | undefined>(undefined);
 
   /** Muestra el botón de colapsar/expandir / Shows the collapse/expand button */
   collapsible = input<boolean>(true);
 
   /** Etiqueta accesible del <nav> / Accessible label for the <nav> */
-  ariaLabel = input<string>('Navegación principal');
+  ariaLabel = input<string>('Main navigation');
 
   /** Aria-label del botón cuando el nav está colapsado / Aria-label for the button when the nav is collapsed */
-  expandLabel = input<string>('Expandir menú');
+  expandLabel = input<string>('Expand navigation');
 
   /** Aria-label del botón cuando el nav está expandido / Aria-label for the button when the nav is expanded */
-  collapseLabel = input<string>('Colapsar menú');
+  collapseLabel = input<string>('Collapse navigation');
 
   /** Emite cuando cambia el estado colapsado / Emits when the collapsed state changes */
   collapsedChange = output<boolean>();
 
   // ---- Estado interno / Internal state ----
 
-  // Sigue el input `collapsed` del padre (permite el configurador)
-  // pero puede ser sobreescrito localmente con toggleCollapse()
-  readonly isCollapsed = linkedSignal(() => this.collapsed());
+  private readonly localCollapsed = signal(false);
+  readonly isCollapsed = computed(() => this.collapsed() ?? this.localCollapsed());
   private readonly openGroups = signal<Set<string>>(new Set());
 
   // ---- Flyout para modo colapsado / Flyout for collapsed mode ----
-  private readonly _directionality = inject(Directionality);
-  readonly isRtl = computed(() => this._directionality.valueSignal() === 'rtl');
-  readonly groupChevronIcon = computed(() =>
-    this.isRtl() ? 'lucideChevronLeft' : 'lucideChevronRight',
-  );
-  readonly toggleChevronIcon = computed(() => {
-    const pointsTowardInlineEnd = this.isCollapsed();
-    if (this.isRtl()) {
-      return pointsTowardInlineEnd ? 'lucideChevronLeft' : 'lucideChevronRight';
-    }
-    return pointsTowardInlineEnd ? 'lucideChevronRight' : 'lucideChevronLeft';
-  });
-  readonly tooltipPosition = computed<'left' | 'right'>(() =>
-    this._directionality.valueSignal() === 'rtl' ? 'left' : 'right',
-  );
   readonly flyoutState = signal<{
     item: NeuNavItem;
     top: number;
-    left: number;
-    anchorLeft?: number;
-    viewportWidth?: number;
+    left: number | null;
+    right?: number | null;
   } | null>(null);
-  readonly flyoutPosition = computed(() => {
-    const flyout = this.flyoutState();
-    if (!flyout) return null;
-    if (
-      this._directionality.valueSignal() === 'rtl' &&
-      flyout.anchorLeft !== undefined &&
-      flyout.viewportWidth !== undefined
-    ) {
-      return { left: null, right: flyout.viewportWidth - flyout.anchorLeft };
-    }
-    return { left: flyout.left, right: null };
-  });
   private _flyoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private flyoutTrigger: HTMLElement | null = null;
+  private restoringFlyoutFocus = false;
 
   constructor() {
-    // Abrimos el grupo activo DESPUÉS de que el padre haya pasado los inputs
-    afterNextRender(() => this._openActiveGroup());
     // Limpiamos el timer del flyout al destruir el componente
     inject(DestroyRef).onDestroy(() => {
       if (this._flyoutTimer) clearTimeout(this._flyoutTimer);
@@ -546,11 +537,9 @@ export class NeuNavComponent {
   // ---- Helpers de estado / State helpers ----
 
   toggleCollapse(): void {
-    this.isCollapsed.update((v) => {
-      const next = !v;
-      this.collapsedChange.emit(next);
-      return next;
-    });
+    const next = !this.isCollapsed();
+    if (this.collapsed() === undefined) this.localCollapsed.set(next);
+    this.collapsedChange.emit(next);
   }
 
   toggleGroup(id: string): void {
@@ -566,37 +555,59 @@ export class NeuNavComponent {
     return this.openGroups().has(id);
   }
 
+  /** Query the consumer-applied active item; the Router never owns active state. */
   isCurrentRoute(route: string): boolean {
     if (!route) return false;
-    // Consume la señal para que OnPush re-evalúe tras navegación
-    this.currentUrl();
-    return this.router.url === route || this.router.url.startsWith(route + '?');
+    const matches = (item: NeuNavItem): boolean =>
+      (item.route === route && !!item.active) || !!item.children?.some(matches);
+    return this.items().some(matches);
   }
 
   isGroupActive(item: NeuNavItem): boolean {
-    if (!item.children?.length) return false;
-    return item.children.some(
-      (c) =>
-        this.isCurrentRoute(c.route ?? '') ||
-        (c.children?.some((g) => this.isCurrentRoute(g.route ?? '')) ?? false),
+    return (
+      !!item.active ||
+      !!item.children?.some(
+        (child) => child.active || child.children?.some((grandchild) => grandchild.active),
+      )
     );
   }
 
   // ---- Flyout handlers ----
 
   onGroupMouseEnter(item: NeuNavItem, event: MouseEvent): void {
+    this.openFlyout(item, event);
+  }
+
+  protected onGroupFocusIn(item: NeuNavItem, event: FocusEvent): void {
+    if (this.restoringFlyoutFocus) {
+      this.restoringFlyoutFocus = false;
+      return;
+    }
+    this.openFlyout(item, event);
+  }
+
+  private openFlyout(item: NeuNavItem, event: Event): void {
     if (!this.isCollapsed() || !item.children?.length) return;
     if (this._flyoutTimer) {
       clearTimeout(this._flyoutTimer);
       this._flyoutTimer = null;
     }
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const target = event.currentTarget;
+    this.flyoutTrigger = target instanceof HTMLElement ? target.querySelector('button') : null;
+    const triggerRect = this.flyoutTrigger?.getBoundingClientRect();
+    const rect = triggerRect?.width ? triggerRect : (target as HTMLElement).getBoundingClientRect();
+    const panelWidth = Math.min(240, Math.max(0, window.innerWidth - 16));
+    const maxInset = Math.max(8, window.innerWidth - panelWidth - 14);
+    const clampInset = (value: number) => Math.max(8, Math.min(value, maxInset));
+    const rtl =
+      target instanceof HTMLElement &&
+      (target.closest('[dir]')?.getAttribute('dir') === 'rtl' ||
+        getComputedStyle(target).direction === 'rtl');
     this.flyoutState.set({
       item,
-      top: rect.top,
-      left: rect.right,
-      anchorLeft: rect.left,
-      viewportWidth: window.innerWidth,
+      top: Math.max(8, Math.min(rect.top, window.innerHeight - 56)),
+      left: rtl ? null : clampInset(rect.right),
+      right: rtl ? clampInset(window.innerWidth - rect.left) : null,
     });
   }
 
@@ -616,26 +627,13 @@ export class NeuNavComponent {
     this._flyoutTimer = setTimeout(() => this.flyoutState.set(null), 150);
   }
 
-  private _openActiveGroup(): void {
-    const toOpen = new Set<string>();
-    for (const item of this.items()) {
-      if (!item.children) continue;
-      for (const child of item.children) {
-        if (child.route && this.router.url.startsWith(child.route)) {
-          toOpen.add(item.id);
-        }
-        if (child.children) {
-          for (const grand of child.children) {
-            if (grand.route && this.router.url.startsWith(grand.route)) {
-              toOpen.add(item.id);
-              toOpen.add(child.id);
-            }
-          }
-        }
-      }
-    }
-    if (toOpen.size > 0) {
-      this.openGroups.set(toOpen);
+  protected closeFlyout(): void {
+    if (this._flyoutTimer) clearTimeout(this._flyoutTimer);
+    this._flyoutTimer = null;
+    this.flyoutState.set(null);
+    if (this.flyoutTrigger && document.activeElement !== this.flyoutTrigger) {
+      this.restoringFlyoutFocus = true;
+      this.flyoutTrigger.focus();
     }
   }
 }

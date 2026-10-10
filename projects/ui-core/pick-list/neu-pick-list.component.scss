@@ -1,8 +1,8 @@
-.neu-pick-list {
+.neu-pick-list__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 0.75rem;
-  align-items: center;
+  align-items: stretch;
 }
 
 .neu-pick-list__column,
@@ -17,6 +17,75 @@
   padding: 0.75rem;
 }
 
+.neu-pick-list__list {
+  display: flex;
+  flex-direction: column;
+  block-size: 16rem;
+  min-block-size: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  gap: 0.375rem;
+}
+
+.neu-pick-list__column {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.neu-pick-list__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  flex-shrink: 0;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.neu-pick-list__item--draggable {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.neu-pick-list__item > .neu-pick-list__option {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.neu-pick-list__filter,
+.neu-order-list__filter {
+  inline-size: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: var(--neu-radius-md, 0.5rem);
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  font: inherit;
+  padding-inline: 0.625rem;
+
+  &::placeholder {
+    color: var(--neu-text-muted, #64748b);
+  }
+
+  &:focus-visible {
+    border-color: var(--neu-primary, #3b82f6);
+    outline: 2px solid var(--neu-primary, #3b82f6);
+    outline-offset: 2px;
+  }
+}
+
+.neu-pick-list__toolbar,
+.neu-order-list__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.neu-order-list__toolbar {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--neu-border, #d1d5db);
+}
+
 .neu-pick-list__column h3 {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
@@ -25,12 +94,35 @@
 
 .neu-pick-list__column button,
 .neu-pick-list__actions button,
-.neu-order-list__item button {
+.neu-order-list__item button,
+.neu-order-list__toolbar button {
+  min-height: 2.5rem;
   border: 1px solid var(--neu-border, #d1d5db);
   border-radius: 0.5rem;
   background: var(--neu-surface, #fff);
   color: var(--neu-text, #111827);
   padding: 0.5rem 0.625rem;
+  cursor: pointer;
+  transition:
+    background var(--neu-transition),
+    border-color var(--neu-transition),
+    color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--neu-border-hover, var(--neu-primary));
+    background: var(--neu-surface-2, #f3f4f6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary, #2563eb);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
 }
 
 .neu-pick-list__column button {
@@ -39,10 +131,12 @@
 
 .neu-pick-list__column button.is-selected {
   background: color-mix(in srgb, var(--neu-primary, #2563eb) 14%, transparent);
+  border-color: color-mix(in srgb, var(--neu-primary, #2563eb) 55%, var(--neu-border));
 }
 
 .neu-pick-list__actions {
   display: grid;
+  align-self: center;
   gap: 0.5rem;
 }
 
@@ -53,8 +147,33 @@
   align-items: center;
 }
 
+.neu-order-list__item--draggable {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.neu-pick-list__drag-handle,
+.neu-order-list__drag-handle {
+  touch-action: none;
+}
+
+.neu-order-list__option {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+@media (pointer: coarse) {
+  .neu-pick-list__column button,
+  .neu-pick-list__actions button,
+  .neu-order-list__item button,
+  .neu-order-list__toolbar button {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
 @media (max-width: 640px) {
-  .neu-pick-list {
+  .neu-pick-list__layout {
     grid-template-columns: minmax(0, 1fr);
   }
 

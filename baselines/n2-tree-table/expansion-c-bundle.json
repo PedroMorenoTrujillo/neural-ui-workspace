@@ -1,0 +1,88 @@
+{
+  "checkpoint": "N2-015C",
+  "legacyReference": {
+    "raw": 120496,
+    "gzip": 18411
+  },
+  "method": "Angular-compiled minified ESM; Angular external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 57294,
+        "gzip": 10203,
+        "brotli": 8596
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 57258
+        }
+      ]
+    },
+    "expansion-interaction": {
+      "size": {
+        "raw": 57294,
+        "gzip": 10203,
+        "brotli": 8596
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 57258
+        }
+      ]
+    },
+    "keyboard-focus": {
+      "size": {
+        "raw": 57294,
+        "gzip": 10203,
+        "brotli": 8596
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 57258
+        }
+      ]
+    },
+    "templates": {
+      "size": {
+        "raw": 57795,
+        "gzip": 10381,
+        "brotli": 8722
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 57677
+        }
+      ]
+    },
+    "nested": {
+      "size": {
+        "raw": 57294,
+        "gzip": 10203,
+        "brotli": 8596
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tree-table-next.mjs",
+          "bytesInOutput": 57258
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": [
+    "@angular/common",
+    "@angular/core"
+  ],
+  "forbiddenGraphTokens": []
+}

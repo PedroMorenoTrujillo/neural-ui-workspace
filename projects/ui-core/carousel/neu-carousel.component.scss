@@ -1,17 +1,25 @@
-.neu-carousel-host { display: block; inline-size: 100%; }
-.neu-carousel { position: relative; padding-inline: 3rem; }
-.neu-carousel__viewport { overflow: hidden; border-radius: var(--neu-radius-lg); }
-.neu-carousel__track { display: grid; grid-template-columns: repeat(var(--neu-carousel-visible, 1), minmax(0, 1fr)); gap: var(--neu-space-4); }
-.neu-carousel__slide { min-inline-size: 0; border-radius: var(--neu-radius-lg); }
-.neu-carousel__nav { position: absolute; inset-block-start: 50%; display: inline-grid; place-items: center; inline-size: 2.5rem; block-size: 2.5rem; translate: 0 -50%; border: 1px solid var(--neu-border); border-radius: 50%; background: var(--neu-surface); color: var(--neu-text); box-shadow: var(--neu-shadow-sm); cursor: pointer; z-index: 1; }
-.neu-carousel__nav--previous { inset-inline-start: 0; }
-.neu-carousel__nav--next { inset-inline-end: 0; }
-.neu-carousel__nav:hover:not(:disabled) { border-color: var(--neu-primary); color: var(--neu-primary); }
-.neu-carousel__nav:focus-visible, .neu-carousel__indicator:focus-visible { outline: 2px solid var(--neu-primary); outline-offset: 2px; }
-.neu-carousel__nav:disabled { opacity: .35; cursor: not-allowed; }
-.neu-carousel__indicators { display: flex; justify-content: center; gap: .5rem; margin-block-start: var(--neu-space-4); }
-.neu-carousel__indicator { inline-size: 1.5rem; block-size: 1.5rem; padding: 0; border: .4375rem solid transparent; border-radius: 50%; background: var(--neu-border-hover) padding-box; cursor: pointer; transition: inline-size var(--neu-transition), background var(--neu-transition); }
-.neu-carousel__indicator.is-active { inline-size: 1.75rem; border-radius: var(--neu-radius-full); background: var(--neu-primary); }
-.neu-carousel__empty { grid-column: 1 / -1; padding: var(--neu-space-8); border: 1px dashed var(--neu-border); border-radius: var(--neu-radius-lg); color: var(--neu-text-muted); text-align: center; }
-@media (max-width: 640px) { .neu-carousel { padding-inline: 2.5rem; } }
-@media (prefers-reduced-motion: reduce) { .neu-carousel__indicator { transition: none; } }
+:host { display: block; min-inline-size: 0; max-inline-size: 100%; }
+.neu-carousel__root { display: grid; gap: var(--neu-space-3); max-inline-size: 100%; }
+.neu-carousel__content { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--neu-space-2); }
+.neu-carousel__viewport { overflow: hidden; min-inline-size: 0; }
+.neu-carousel__content:has(> .neu-carousel__viewport:only-child) { grid-template-columns: minmax(0, 1fr); }
+.neu-carousel__track { display: grid; gap: var(--neu-space-3); }
+.neu-carousel__item { min-inline-size: 0; }
+.neu-carousel__nav { inline-size: 2.75rem; block-size: 2.75rem; border: 1px solid var(--neu-border); border-radius: 999px; background: var(--neu-surface); color: var(--neu-text); font-size: 1.5rem; cursor: pointer; }
+.neu-carousel__nav:disabled { opacity: .45; }
+.neu-carousel__root:dir(rtl) .neu-carousel__nav { transform: scaleX(-1); }
+.neu-carousel__controls { display: flex; justify-content: center; align-items: center; gap: var(--neu-space-2); min-block-size: 2.75rem; }
+.neu-carousel__indicators { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; min-inline-size: 0; }
+.neu-carousel__indicators button { inline-size: 2rem; block-size: 2.75rem; padding: 0; border: 0; border-radius: 999px; background: transparent; display: grid; place-items: center; cursor: pointer; }
+.neu-carousel__indicators button span { inline-size: .6rem; block-size: .6rem; border-radius: 999px; background: var(--neu-border); transition: transform var(--neu-transition), background var(--neu-transition); }
+.neu-carousel__indicators .neu-carousel__indicator--active span { background: var(--neu-primary); transform: scale(1.25); }
+.neu-carousel__autoplay { inline-size: 2.75rem; block-size: 2.75rem; border: 1px solid var(--neu-border); border-radius: 999px; background: var(--neu-surface); color: var(--neu-text); cursor: pointer; }
+.neu-carousel__nav:focus-visible, .neu-carousel__indicators button:focus-visible, .neu-carousel__autoplay:focus-visible { outline: 2px solid transparent; box-shadow: var(--neu-focus-ring); }
+:host(.neu-carousel--vertical) .neu-carousel__content { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; }
+:host(.neu-carousel--vertical) .neu-carousel__track { grid-template-columns: 1fr !important; }
+@media (max-width: 480px) {
+  :host(:not(.neu-carousel--vertical)) .neu-carousel__content { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-items: center; }
+  :host(:not(.neu-carousel--vertical)) .neu-carousel__viewport { grid-column: 1 / -1; grid-row: 1; justify-self: stretch; }
+  :host(:not(.neu-carousel--vertical)) .neu-carousel__nav { grid-row: 2; }
+}
+@media (prefers-reduced-motion: reduce) { .neu-carousel__indicators .neu-carousel__indicator--active span { transform: none; } .neu-carousel__indicators button span { transition: none; } }

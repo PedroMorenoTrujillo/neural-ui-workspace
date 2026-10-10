@@ -1,0 +1,200 @@
+{
+  "checkpoint": "N2-011K",
+  "measured": {
+    "initial": {
+      "raw": 174266,
+      "gzip": 34620,
+      "brotli": 25546
+    },
+    "initialFiles": [
+      "out/chunk-shared.js",
+      "out/stdin.js"
+    ],
+    "formats": {
+      "csv": {
+        "size": {
+          "raw": 584,
+          "gzip": 382,
+          "brotli": 338
+        },
+        "files": [
+          "out/neural-ui-core-table-neu-table-csv-export-private.js"
+        ],
+        "attribution": [
+          {
+            "path": ".n2-table-export-<temp>/dist/neural-ui/core/fesm2022/neural-ui-core-table-neu-table-csv-export-CuNooDyP.mjs",
+            "bytesInOutput": 549
+          }
+        ]
+      },
+      "json": {
+        "size": {
+          "raw": 887,
+          "gzip": 469,
+          "brotli": 410
+        },
+        "files": [
+          "out/neural-ui-core-table-neu-table-json-export-private.js"
+        ],
+        "attribution": [
+          {
+            "path": ".n2-table-export-<temp>/dist/neural-ui/core/fesm2022/neural-ui-core-table-neu-table-json-export-DxhLBe72.mjs",
+            "bytesInOutput": 851
+          }
+        ]
+      },
+      "xlsx": {
+        "size": {
+          "raw": 3964,
+          "gzip": 1430,
+          "brotli": 1278
+        },
+        "files": [
+          "out/neural-ui-core-table-neu-table-xlsx-export-private.js"
+        ],
+        "attribution": [
+          {
+            "path": ".n2-table-export-<temp>/dist/neural-ui/core/fesm2022/neural-ui-core-table-neu-table-xlsx-export-B4bugFc_.mjs",
+            "bytesInOutput": 3928
+          }
+        ]
+      }
+    },
+    "attribution": []
+  },
+  "sourceComponent": {
+    "initial": {
+      "raw": 73914,
+      "gzip": 20831,
+      "brotli": 18593
+    },
+    "initialFiles": [
+      "out/chunk-shared.js",
+      "out/stdin.js"
+    ],
+    "formats": {
+      "csv": {
+        "size": {
+          "raw": 613,
+          "gzip": 402,
+          "brotli": 352
+        },
+        "files": [
+          "out/neu-table-csv-export-private.js"
+        ],
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/internal/features/export/neu-table-csv-export.ts",
+            "bytesInOutput": 549
+          }
+        ]
+      },
+      "json": {
+        "size": {
+          "raw": 916,
+          "gzip": 487,
+          "brotli": 424
+        },
+        "files": [
+          "out/neu-table-json-export-private.js"
+        ],
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/internal/features/export/neu-table-json-export.ts",
+            "bytesInOutput": 851
+          }
+        ]
+      },
+      "xlsx": {
+        "size": {
+          "raw": 3993,
+          "gzip": 1455,
+          "brotli": 1294
+        },
+        "files": [
+          "out/neu-table-xlsx-export-private.js"
+        ],
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/internal/features/export/neu-table-xlsx-export.ts",
+            "bytesInOutput": 3928
+          }
+        ]
+      }
+    },
+    "attribution": [
+      {
+        "path": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+        "bytesInOutput": 20382
+      },
+      {
+        "path": "projects/ui-core/table/public/neu-table.component-contract.ts",
+        "bytesInOutput": 16871
+      },
+      {
+        "path": "projects/ui-core/table/internal/selection/neu-table-selection.ts",
+        "bytesInOutput": 6051
+      },
+      {
+        "path": "projects/ui-core/table/internal/client-pipeline/neu-table-client-pipeline.ts",
+        "bytesInOutput": 4609
+      },
+      {
+        "path": "projects/ui-core/table/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+        "bytesInOutput": 3928
+      },
+      {
+        "path": "projects/ui-core/table/internal/query-ui/neu-table-query-transitions.ts",
+        "bytesInOutput": 3710
+      },
+      {
+        "path": "projects/ui-core/table/internal/remote/neu-table-remote-coordinator.ts",
+        "bytesInOutput": 3143
+      },
+      {
+        "path": "projects/ui-core/table/internal/grouping/neu-table-grouping.ts",
+        "bytesInOutput": 2356
+      },
+      {
+        "path": "projects/ui-core/table/internal/layout/neu-table-layout.ts",
+        "bytesInOutput": 2351
+      },
+      {
+        "path": "projects/ui-core/table/public/neu-table-template-contracts.ts",
+        "bytesInOutput": 2228
+      },
+      {
+        "path": "projects/ui-core/table/internal/export/neu-table-export-projection.ts",
+        "bytesInOutput": 2048
+      },
+      {
+        "path": "projects/ui-core/table/internal/features/editing/neu-table-active-editor.component.ts",
+        "bytesInOutput": 1875
+      },
+      {
+        "path": "projects/ui-core/table/internal/virtualization/neu-table-virtualization.ts",
+        "bytesInOutput": 1654
+      },
+      {
+        "path": "projects/ui-core/table/internal/editing/neu-table-editing.ts",
+        "bytesInOutput": 1373
+      },
+      {
+        "path": "projects/ui-core/table/internal/identity/neu-table-row-identity.ts",
+        "bytesInOutput": 396
+      },
+      {
+        "path": "projects/ui-core/table/internal/export/neu-table-export-loader.ts",
+        "bytesInOutput": 304
+      },
+      {
+        "path": "projects/ui-core/table/internal/semantics/neu-table-basic-projections.ts",
+        "bytesInOutput": 286
+      },
+      {
+        "path": "projects/ui-core/table/internal/templates/neu-table-template-registry.ts",
+        "bytesInOutput": 103
+      }
+    ]
+  }
+}

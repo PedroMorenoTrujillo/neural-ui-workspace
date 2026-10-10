@@ -3,13 +3,14 @@
 // ViewEncapsulation.None — usa prefijo BEM .neu-button
 // ============================================================
 @use '../styles/breakpoints' as *;
+@use '../styles/button-interaction' as *;
 
 // ---- Base ----
 .neu-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--neu-space-2);
+  gap: var(--neu-control-gap, var(--neu-space-2));
   border: 1px solid transparent;
   border-radius: var(--neu-radius);
   font-family: var(--neu-font-sans);
@@ -18,18 +19,8 @@
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  user-select: none;
-  transition:
-    background-color var(--neu-transition),
-    border-color var(--neu-transition),
-    color var(--neu-transition),
-    box-shadow var(--neu-transition),
-    opacity var(--neu-transition);
+  @include neu-button-interaction;
   outline: none;
-
-  &:focus-visible {
-    box-shadow: var(--neu-focus-ring-strong);
-  }
 
   // ---- Tamaños / Sizes ----
   &--sm {
@@ -57,67 +48,102 @@
     width: 100%;
   }
 
-  // ---- Variantes / Variants ----
-  &--primary {
-    background: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
-    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
-    border-color: var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary)));
+  // ---- Tonos + tratamientos / Tones + treatments ----
+  // Tone tokens are resolved once; treatments share the same state selectors.
+  &--brand {
+    --_nb-fill: var(--neu-button-background, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
+    --_nb-fg: var(--neu-button-foreground, var(--neu-primary-solid-fg, var(--neu-primary-fg)));
+    --_nb-border: var(--neu-button-border, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
+    --_nb-hover: var(--neu-button-background-hover, var(--neu-primary-solid-hover, var(--neu-primary-dark)));
+    --_nb-hover-border: var(--_nb-hover);
+    --_nb-text: var(--neu-primary-dark, var(--neu-primary));
+    --_nb-surface: var(--neu-primary-50);
+
+    [data-theme='dark'] & {
+      --_nb-text: var(--neu-primary-light, var(--neu-primary));
+    }
+  }
+
+  &--neutral {
+    --_nb-fill: var(--neu-text);
+    --_nb-fg: var(--neu-surface);
+    --_nb-border: var(--neu-text);
+    --_nb-hover: color-mix(in srgb, var(--neu-text) 84%, black 16%);
+    --_nb-hover-border: var(--_nb-hover);
+    --_nb-text: var(--neu-text);
+    --_nb-surface: var(--neu-surface-2);
+  }
+
+  &--danger {
+    --_nb-fill: var(--neu-error);
+    --_nb-fg: var(--neu-primary-fg);
+    --_nb-border: var(--neu-error);
+    --_nb-hover: color-mix(in srgb, var(--neu-error) 82%, #000000 18%);
+    --_nb-hover-border: var(--_nb-hover);
+    --_nb-text: var(--neu-error-text, var(--neu-error));
+    --_nb-surface: var(--neu-error-bg);
+  }
+
+  // Semantic tones retain their existing public overrides and contrast tokens.
+  @each $tone, $fill, $foreground in (
+    (success, var(--neu-success), #fff),
+    (info, color-mix(in srgb, var(--neu-info) 82%, black), #fff),
+    (warning, var(--neu-warning), #111827)
+  ) {
+    &--#{$tone} {
+      --_nb-fill: var(--neu-button-solid-bg, #{$fill});
+      --_nb-fg: var(--neu-button-solid-fg, #{$foreground});
+      --_nb-border: var(--neu-button-solid-border, #{$fill});
+      --_nb-hover: var(--neu-button-solid-hover-bg, color-mix(in srgb, #{$fill} 88%, black));
+      --_nb-hover-border: var(--_nb-border);
+      --_nb-text: var(--neu-#{$tone}-text);
+      --_nb-surface: var(--neu-#{$tone}-bg);
+    }
+  }
+
+  &--solid {
+    background: var(--_nb-fill);
+    color: var(--_nb-fg);
+    border-color: var(--_nb-border);
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
-      border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark));
+      background: var(--_nb-hover);
+      border-color: var(--_nb-hover-border);
+    }
+  }
+
+  &--solid.neu-button--brand {
+    &:hover:not(:disabled):not(.neu-button--disabled) {
       box-shadow: var(--neu-shadow-glow);
     }
 
     &:active:not(:disabled) {
-      background: var(--neu-primary-solid-hover, var(--neu-primary-dark));
-      transform: translateY(1px);
+      background: var(--_nb-hover);
     }
   }
 
-  &--secondary {
-    background: #475569;
-    color: #ffffff;
-    border-color: #475569;
+  &--outline,
+  &--ghost {
+    background: transparent;
+    color: var(--_nb-text);
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: #334155;
-      border-color: #334155;
+      background: var(--_nb-surface);
     }
   }
 
   &--outline {
-    background: transparent;
-    color: var(--neu-primary-dark, var(--neu-primary));
-    border-color: var(--neu-primary);
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-primary-50);
-      border-color: var(--neu-primary-dark, var(--neu-primary));
-    }
+    border-color: currentColor;
   }
 
   &--ghost {
-    background: transparent;
-    color: var(--neu-text);
     border-color: transparent;
 
     &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-surface-2);
       color: var(--neu-text);
     }
   }
 
-  &--danger {
-    background: var(--neu-error);
-    color: var(--neu-primary-fg);
-    border-color: var(--neu-error);
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: #dc2626;
-      border-color: #dc2626;
-    }
-  }
 
   // ---- Estado deshabilitado / Disabled state ----
   &--disabled,
@@ -157,8 +183,7 @@
       padding: 0;
     }
 
-    .neu-icon,
-    neu-icon {
+    neural-icon {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -167,44 +192,11 @@
       line-height: 1;
     }
 
-    .neu-icon ng-icon,
-    neu-icon ng-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: var(--ng-icon__size, 1em);
-      height: var(--ng-icon__size, 1em);
-      line-height: 1;
-    }
-
-    .neu-icon svg,
-    neu-icon svg {
+    neural-icon svg {
       display: block;
       width: 100%;
       height: 100%;
     }
-  }
-}
-
-html[data-theme='dark'] {
-  .neu-button--outline {
-    color: #d8ebff;
-    border-color: #65b7ff;
-  }
-
-  .neu-button--outline:hover:not(:disabled):not(.neu-button--disabled) {
-    background: rgba(101, 183, 255, 0.18);
-    color: #ffffff;
-    border-color: #9ecbff;
-  }
-
-  .neu-button--ghost {
-    color: #f2f7fb;
-  }
-
-  .neu-button--ghost:hover:not(:disabled):not(.neu-button--disabled) {
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
   }
 }
 

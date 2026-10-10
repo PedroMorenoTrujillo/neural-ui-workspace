@@ -32,7 +32,6 @@
   // ---- Flat — sin sombras / no shadows ----
   &--flat {
     box-shadow: none;
-    border-color: var(--neu-border);
 
     &:hover {
       box-shadow: none;

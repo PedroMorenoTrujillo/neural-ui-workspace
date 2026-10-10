@@ -1,79 +1,52 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
+  afterRenderEffect,
   computed,
   effect,
   inject,
   input,
+  isDevMode,
   output,
-  ElementRef,
   HostListener,
+  signal,
+  viewChild,
 } from '@angular/core';
+import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
 import { DOCUMENT } from '@angular/common';
-import { NeuUrlStateService } from '@neural-ui/core/url-state';
-import { NeuIconComponent } from '@neural-ui/core/icon';
-
-let overlayScrollLockCount = 0;
-let previousHtmlOverflow = '';
-let previousBodyOverflow = '';
-
-function lockDocumentScroll(document: Document): void {
-  if (overlayScrollLockCount === 0) {
-    previousHtmlOverflow = document.documentElement.style.overflow;
-    previousBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-  }
-
-  overlayScrollLockCount += 1;
-}
-
-function unlockDocumentScroll(document: Document): void {
-  if (overlayScrollLockCount === 0) {
-    return;
-  }
-
-  overlayScrollLockCount -= 1;
-
-  if (overlayScrollLockCount === 0) {
-    document.documentElement.style.overflow = previousHtmlOverflow;
-    document.body.style.overflow = previousBodyOverflow;
-  }
-}
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
+import { NeuCloseRequest } from '@neural-ui/core/foundation';
+import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Sidebar Component
  *
- * El estado abierto/cerrado se gestiona automáticamente desde la URL / The open/closed state is automatically managed from the URL
- * via NeuUrlStateService (?menu=open por defecto). / via NeuUrlStateService (?menu=open by default).
+ * El estado overlay es aplicado y controlado por el consumer. / Overlay state is consumer-controlled.
  *
  * Modos:
  *   - overlay (default): panel flotante sobre el contenido con backdrop / floating panel above content with backdrop
  *   - persistent: sidebar fijo integrado en el layout (desktop) / fixed sidebar integrated in the layout (desktop)
  *
  * Uso:
- *   <neu-sidebar urlParam="menu" [persistent]="isDesktop()">
+ *   <neu-sidebar [open]="menuOpen()" [persistent]="isDesktop()" (closeRequested)="closeMenu($event)">
  *     <span neu-sidebar-header>Mi App</span>
  *     <nav>...</nav>
  *     <div neu-sidebar-footer>...</div>
  *   </neu-sidebar>
- *
- * Abrir desde cualquier parte: / Open from anywhere:
- *   inject(NeuUrlStateService).setParam('menu', 'open', false);
  */
 @Component({
   selector: 'neu-sidebar',
-  imports: [NeuIconComponent],
+  imports: [NeuFocusTrapDirective, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Overlay de fondo — solo visible en modo overlay -->
     @if (!persistent()) {
       <div
         class="neu-sidebar__overlay"
         [class.neu-sidebar__overlay--visible]="isOpen()"
-        (click)="close()"
+        (click)="requestClose('outside', $event)"
         aria-hidden="true"
       ></div>
     }
@@ -81,13 +54,15 @@ function unlockDocumentScroll(document: Document): void {
     <!-- Panel lateral -->
     <aside
       class="neu-sidebar"
+      tabindex="-1"
+      [neuFocusTrap]="isOpen() && !persistent()"
       [class.neu-sidebar--open]="isOpen()"
       [class.neu-sidebar--persistent]="persistent()"
-      [class.neu-sidebar--collapsed]="collapsed()"
+      [class.neu-sidebar--collapsed]="effectiveCollapsed()"
       [class.neu-sidebar--right]="side() === 'right'"
       [attr.role]="persistent() ? 'navigation' : 'dialog'"
       [attr.aria-modal]="persistent() ? null : 'true'"
-      [attr.aria-label]="resolvedAriaLabel()"
+      [attr.aria-label]="ariaLabel()"
       [attr.aria-hidden]="!isOpen() && !persistent()"
       [attr.inert]="!isOpen() && !persistent() ? '' : null"
     >
@@ -100,11 +75,11 @@ function unlockDocumentScroll(document: Document): void {
           @if (!persistent()) {
             <button
               class="neu-sidebar__close"
-              (click)="close()"
-              [attr.aria-label]="resolvedCloseLabel()"
+              (click)="requestClose('action', $event)"
+              [attr.aria-label]="closeLabel()"
               type="button"
             >
-              <neu-icon name="lucideX" size="18px" aria-hidden="true" />
+              <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" size="18px" aria-hidden="true" />
             </button>
           }
         </div>
@@ -124,17 +99,22 @@ function unlockDocumentScroll(document: Document): void {
   styleUrl: './neu-sidebar.component.scss',
 })
 export class NeuSidebarComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconX = iconX;
   private readonly document = inject(DOCUMENT);
-  private readonly elementRef = inject(ElementRef);
-  private readonly urlState = inject(NeuUrlStateService);
-  private readonly openParam = computed(() => this.urlState.getParam(this.urlParam()));
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
+  private readonly overlayStack = inject(InternalNeuOverlayStack);
   private previousActiveElement: HTMLElement | null = null;
+  private pendingFocusTimer: ReturnType<typeof setTimeout> | null = null;
+  private lifecycleInitialized = false;
+  private eventOverlayActive = false;
 
   /** Posición del sidebar: izquierda o derecha de la pantalla / Sidebar position: left or right of the screen */
   side = input<'left' | 'right'>('left');
 
-  /** QueryParam que controla el estado. Default: 'menu' (?menu=open) / QueryParam that controls the state. Default: 'menu' (?menu=open) */
-  urlParam = input<string>('menu');
+  /** Applied overlay state. Ignored for persistent presentation without being rewritten. */
+  readonly open = input(false);
 
   /**
    * Modo persistente: el sidebar está siempre visible como parte del layout.
@@ -149,29 +129,10 @@ export class NeuSidebarComponent {
   hideHeader = input<boolean>(false);
 
   /** Etiqueta accesible para el <aside> / Accessible label for the <aside> */
-  ariaLabel = input<string>('');
+  ariaLabel = input<string>('Navigation menu');
 
   /** Etiqueta accesible para el botón cerrar / Accessible label for the close button */
-  closeLabel = input<string>('');
-
-  /** Uses explicit labels first and otherwise follows the document language. */
-  protected resolvedAriaLabel(): string {
-    const explicitLabel = this.ariaLabel().trim();
-    if (explicitLabel) return explicitLabel;
-    return this._usesSpanishDefaults() ? 'Menú de navegación' : 'Navigation menu';
-  }
-
-  protected resolvedCloseLabel(): string {
-    const explicitLabel = this.closeLabel().trim();
-    if (explicitLabel) return explicitLabel;
-    return this._usesSpanishDefaults()
-      ? 'Cerrar menú de navegación'
-      : 'Close navigation menu';
-  }
-
-  private _usesSpanishDefaults(): boolean {
-    return this.document.documentElement.lang.toLowerCase().startsWith('es');
-  }
+  closeLabel = input<string>('Close navigation menu');
   /** Cierra el overlay al pulsar Escape / Closes the overlay when pressing Escape */
   closeOnEscape = input<boolean>(true);
   /** Devuelve el foco al elemento activo antes de abrir / Restores focus after close */
@@ -181,147 +142,160 @@ export class NeuSidebarComponent {
    * Modo colapsado: el sidebar muestra solo iconos (icon-only en desktop).
    * Útil para sidebars persistentes en modo compact / Collapsed mode: sidebar shows only icons.
    */
-  collapsed = input<boolean>(false);
+  /** Applied controlled collapse state. Undefined selects uncontrolled mode. */
+  readonly collapsed = input<boolean | undefined>(undefined);
+  /** One-time collapse seed for uncontrolled instances. */
+  readonly initialCollapsed = input(false);
 
-  /** Emite cuando el usuario cierra el sidebar (overlay click o botón) / Emits when the user closes the sidebar (overlay click or button) */
-  closeRequested = output<void>();
+  /** Consumer-owned close intent. Applied `open` remains unchanged. */
+  readonly closeRequested = output<NeuCloseRequest>();
+  /** Completed post-init overlay lifecycle. */
+  readonly opened = output<void>();
+  readonly closed = output<void>();
 
   /** Emite cuando el estado collapsed cambia / Emits when collapsed state changes */
-  collapsedChange = output<boolean>();
-
-  /** Signal reactivo: true si el sidebar debe mostrarse / Reactive signal: true if the sidebar should be shown */
-  readonly isOpen = computed(() => {
-    if (this.persistent()) return true;
-    return this.openParam()() === 'open';
+  readonly collapsedChange = output<boolean>();
+  private collapseControlMode: 'controlled' | 'uncontrolled' | null = null;
+  private collapseModeWarningEmitted = false;
+  private uncontrolledCollapsed = false;
+  private readonly uncontrolledCollapsedRevision = signal(0);
+  readonly effectiveCollapsed = computed(() => {
+    this.uncontrolledCollapsedRevision();
+    return this.ensureCollapseControlMode() === 'controlled'
+      ? (this.collapsed() ?? false)
+      : this.uncontrolledCollapsed;
   });
+
+  readonly overlayActive = computed(() => !this.persistent() && this.open());
+  /** Persistent mode is always presented; overlay mode follows the applied input. */
+  readonly isOpen = computed(() => this.persistent() || this.open());
 
   constructor() {
     effect((onCleanup) => {
-      const shouldLockScroll = !this.persistent() && this.isOpen();
-
-      if (!shouldLockScroll) {
-        return;
-      }
-
-      lockDocumentScroll(this.document);
-
-      onCleanup(() => {
-        unlockDocumentScroll(this.document);
-      });
+      if (!this.overlayActive()) return;
+      onCleanup(this.overlayStack.activate(this, 0));
     });
 
     // Focus management: save previous element and move focus to sidebar when opening in drawer mode
     effect(() => {
-      const isOpenNow = this.isOpen();
+      const isOpenNow = this.overlayActive();
       const isPersistent = this.persistent();
+      const shouldRestoreFocus = this.restoreFocus();
+
+      this.cancelPendingFocus();
 
       if (isPersistent) {
+        this.previousActiveElement = null;
         return;
       }
 
       if (isOpenNow) {
-        // Save the current active element
-        this.previousActiveElement = this.document.activeElement as HTMLElement;
+        // Preserve the original trigger when a close is immediately superseded by a reopen.
+        this.previousActiveElement ??= this.document.activeElement as HTMLElement;
 
         // Move focus to first focusable element inside the sidebar
         this.focusFirstElement();
-      } else if (
-        this.restoreFocus() &&
-        this.previousActiveElement &&
-        this.previousActiveElement.focus
-      ) {
+      } else if (shouldRestoreFocus && this.previousActiveElement) {
         // Restore focus to the element that had it before opening
-        setTimeout(() => {
-          this.previousActiveElement?.focus();
+        const target = this.previousActiveElement;
+        this.scheduleFocus(() => {
           this.previousActiveElement = null;
-        }, 0);
+          if (this.isValidFocusTarget(target)) target.focus();
+        });
+      } else {
+        this.previousActiveElement = null;
       }
     });
-  }
 
-  /** Abre el sidebar — añade ?{urlParam}=open a la URL / Opens the sidebar — adds ?{urlParam}=open to the URL */
-  open(replaceUrl = false): void {
-    this.urlState.setParam(this.urlParam(), 'open', replaceUrl);
-  }
+    afterRenderEffect(() => {
+      const active = this.overlayActive();
+      if (!this.lifecycleInitialized) {
+        this.lifecycleInitialized = true;
+        this.eventOverlayActive = active;
+        return;
+      }
+      if (active === this.eventOverlayActive) return;
+      this.eventOverlayActive = active;
+      if (active) this.opened.emit();
+      else this.closed.emit();
+    });
 
-  /** Cierra el sidebar — elimina el parámetro de la URL / Closes the sidebar — removes the URL parameter */
-  close(): void {
-    this.urlState.setParam(this.urlParam(), null, true);
-    this.closeRequested.emit();
+    this.destroyRef.onDestroy(() => {
+      this.cancelPendingFocus();
+      this.previousActiveElement = null;
+    });
   }
 
   /** Alterna el estado collapsed / Toggles collapsed state */
   toggleCollapsed(): void {
-    const newState = !this.collapsed();
-    this.collapsedChange.emit(newState);
+    const proposal = !this.effectiveCollapsed();
+    if (this.ensureCollapseControlMode() === 'uncontrolled') {
+      this.uncontrolledCollapsed = proposal;
+      this.uncontrolledCollapsedRevision.update((revision) => revision + 1);
+    }
+    this.collapsedChange.emit(proposal);
   }
 
-  /** Obtiene los elementos focusables dentro del sidebar / Gets focusable elements inside sidebar */
-  private getFocusableElements(): HTMLElement[] {
-    const focusableSelectors = [
-      'button',
-      'a[href]',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
-      '[tabindex]:not([tabindex="-1"])',
-    ].join(',');
-
-    const aside = this.elementRef.nativeElement.querySelector('aside.neu-sidebar');
-    if (!aside) {
-      return [];
+  private ensureCollapseControlMode(): 'controlled' | 'uncontrolled' {
+    const requested = this.collapsed() === undefined ? 'uncontrolled' : 'controlled';
+    if (this.collapseControlMode === null) {
+      this.collapseControlMode = requested;
+      if (requested === 'uncontrolled') this.uncontrolledCollapsed = this.initialCollapsed();
+    } else if (this.collapseControlMode !== requested && !this.collapseModeWarningEmitted) {
+      this.collapseModeWarningEmitted = true;
+      if (isDevMode())
+        console.warn('NeuSidebar cannot switch between controlled and uncontrolled collapse.');
     }
-
-    return Array.from(aside.querySelectorAll(focusableSelectors)) as HTMLElement[];
+    return this.collapseControlMode;
   }
 
   /** Mueve el foco al primer elemento focusable / Moves focus to first focusable element */
   private focusFirstElement(): void {
-    setTimeout(() => {
-      const focusable = this.getFocusableElements();
-      if (focusable.length > 0) {
-        focusable[0].focus();
-      }
+    this.scheduleFocus(() => {
+      this.focusTrapRef()?.focusFirst();
+    });
+  }
+
+  private scheduleFocus(callback: () => void): void {
+    this.cancelPendingFocus();
+    this.pendingFocusTimer = setTimeout(() => {
+      this.pendingFocusTimer = null;
+      if (!this.destroyRef.destroyed) callback();
     }, 0);
   }
 
+  private cancelPendingFocus(): void {
+    if (this.pendingFocusTimer === null) return;
+    clearTimeout(this.pendingFocusTimer);
+    this.pendingFocusTimer = null;
+  }
+
+  private isValidFocusTarget(target: HTMLElement): boolean {
+    return (
+      target.isConnected &&
+      target.ownerDocument === this.document &&
+      this.document.documentElement.contains(target)
+    );
+  }
+
+  protected requestClose(reason: 'escape' | 'outside' | 'action', originalEvent: Event): void {
+    if (this.destroyRef.destroyed || !this.overlayActive() || !this.overlayStack.isTop(this))
+      return;
+    this.closeRequested.emit({ reason, originalEvent });
+  }
+
   /** Focus trap: cicla entre elementos focusables con Tab/Shift+Tab / Focus trap cycling */
-  @HostListener('keydown', ['$event'])
+  @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (!this.isOpen() || this.persistent()) {
       return;
     }
 
-    if (event.key === 'Escape' && this.closeOnEscape()) {
+    if (event.key === 'Escape' && this.closeOnEscape() && this.overlayStack.isTop(this)) {
       event.preventDefault();
-      this.close();
+      event.stopPropagation();
+      this.requestClose('escape', event);
       return;
-    }
-
-    if (event.key !== 'Tab') {
-      return;
-    }
-
-    const focusable = this.getFocusableElements();
-    if (focusable.length === 0) {
-      return;
-    }
-
-    const activeElement = this.document.activeElement as HTMLElement;
-    const currentIndex = focusable.indexOf(activeElement);
-
-    if (event.shiftKey) {
-      // Shift+Tab — go to previous
-      if (currentIndex <= 0) {
-        event.preventDefault();
-        focusable[focusable.length - 1].focus();
-      }
-    } else {
-      // Tab — go to next
-      if (currentIndex >= focusable.length - 1) {
-        event.preventDefault();
-        focusable[0].focus();
-      }
     }
   }
 }

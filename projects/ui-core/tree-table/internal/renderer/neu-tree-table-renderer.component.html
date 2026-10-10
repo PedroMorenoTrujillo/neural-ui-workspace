@@ -1,0 +1,338 @@
+@if (toolbarTemplate(); as template) {
+  <div class="neu-tree-table2__toolbar">
+    <ng-container [ngTemplateOutlet]="template" />
+  </div>
+}
+
+@if (showSearch()) {
+  <div class="neu-tree-table2__query-bar">
+    <input
+      type="search"
+      class="neu-tree-table2__search"
+      aria-label="Search"
+      [value]="searchValue()"
+      (input)="onSearchInput($event)"
+      (change)="onSearchCommit($event)"
+    />
+  </div>
+}
+
+<div
+  #viewport
+  class="neu-tree-table2__viewport"
+  [attr.data-density]="appearance().density"
+  [attr.data-borders]="appearance().borders"
+  [attr.data-responsive]="appearance().responsive"
+  [class.neu-tree-table2__viewport--striped]="appearance().striped"
+  [class.neu-tree-table2__viewport--sticky-header]="appearance().stickyHeader"
+  [class.neu-tree-table2__viewport--virtual]="virtualizationOptions().enabled"
+>
+  <table
+    class="neu-tree-table2__table"
+    role="treegrid"
+    (click)="onTableClick($event)"
+    (dblclick)="onTableDoubleClick($event)"
+    (contextmenu)="onTableContextMenu($event)"
+    [attr.aria-label]="labels().ariaLabel"
+    [attr.aria-multiselectable]="ariaMultiselectable()"
+    [attr.aria-rowcount]="virtualizationOptions().enabled ? logicalRowCount() : null"
+    [attr.tabindex]="containerTabIndex()"
+  >
+    @if (captionTemplate(); as template) {
+      <caption>
+        <ng-container [ngTemplateOutlet]="template" />
+      </caption>
+    }
+
+    <thead>
+      <tr role="row">
+        @for (column of columns(); track column.id; let columnIndex = $index) {
+          <th
+            role="columnheader"
+            scope="col"
+            [attr.data-column-id]="column.id"
+            [style.inline-size]="columnWidth(column)"
+            [style.min-inline-size]="column.minWidth"
+            [style.max-inline-size]="column.maxWidth"
+            [style.text-align]="column.align"
+            [attr.aria-sort]="ariaSort(column)"
+          >
+            @if (showToggleAll(column)) {
+              <neu-tree-table-checkbox
+                [header]="true"
+                [ariaLabel]="labels().selection"
+                [checked]="selectionModel().header.checked"
+                [indeterminate]="selectionModel().header.indeterminate"
+                [disabled]="selectionModel().header.disabled"
+                (activate)="onToggleAll()"
+              />
+            }
+            @if (column.sort) {
+              <button
+                type="button"
+                class="neu-tree-table2__sort"
+                [attr.data-sort-priority]="sortPriority(column)"
+                [attr.data-sort-column]="column.id"
+              >
+                @if (headerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column, columnIndex)"
+                  />
+                } @else {
+                  {{ column.header }}
+                }
+              </button>
+            } @else if (headerTemplate(column.id); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="headerContext(column, columnIndex)"
+              />
+            } @else {
+              {{ column.header }}
+            }
+          </th>
+        }
+      </tr>
+      @if (showFilterRow()) {
+        <tr role="row" class="neu-tree-table2__filter-row">
+          @for (column of columns(); track column.id) {
+            <th role="columnheader" scope="col" [attr.data-filter-column-id]="column.id">
+              @if (column.filter) {
+                <input
+                  type="text"
+                  class="neu-tree-table2__filter"
+                  [attr.aria-label]="'Filter ' + column.header"
+                  [value]="filterValue(column)"
+                  (input)="onFilterInput(column, $event)"
+                  (change)="onFilterCommit(column, $event)"
+                />
+              }
+            </th>
+          }
+        </tr>
+      }
+    </thead>
+
+    <tbody (focusin)="onBodyFocus($event)" (keydown)="onBodyKeydown($event)">
+      @if (logicalRowCount() === 0 && rootStatus() === 'loading') {
+        <tr role="row" class="neu-tree-table2__state-row" data-state="loading">
+          <td role="gridcell" [attr.colspan]="columnCount()">
+            @if (loadingTemplate(); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="stateContext"
+              />
+            } @else {
+              {{ labels().loading }}
+            }
+          </td>
+        </tr>
+      } @else if (logicalRowCount() === 0 && rootStatus() === 'error') {
+        <tr role="row" class="neu-tree-table2__state-row" data-state="error">
+          <td role="gridcell" [attr.colspan]="columnCount()">
+            @if (errorTemplate(); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="stateContext"
+              />
+            } @else {
+              {{ labels().error }}
+            }
+          </td>
+        </tr>
+      } @else if (logicalRowCount() === 0) {
+        <tr role="row" class="neu-tree-table2__state-row" data-state="empty">
+          <td role="gridcell" [attr.colspan]="columnCount()">
+            @if (emptyTemplate(); as template) {
+              <ng-container [ngTemplateOutlet]="template" />
+            } @else {
+              {{ labels().empty }}
+            }
+          </td>
+        </tr>
+      } @else {
+        @if (virtualizationOptions().enabled && spacerBefore() > 0) {
+          <tr
+            role="presentation"
+            class="neu-tree-table2__virtual-spacer"
+            data-virtual-spacer="before"
+            aria-hidden="true"
+          >
+            <td
+              role="presentation"
+              [attr.colspan]="columnCount()"
+              [style.block-size.px]="spacerBefore()"
+            ></td>
+          </tr>
+        }
+        @for (node of rows(); track node.token) {
+          <tr
+            role="row"
+            [class]="rowClass(node)"
+            [attr.data-node-key]="node.token"
+            [attr.data-logical-index]="node.logicalVisibleIndex"
+            [attr.aria-rowindex]="
+              virtualizationOptions().enabled ? node.logicalVisibleIndex + 1 : null
+            "
+            [attr.tabindex]="node.token === rovingToken() ? 0 : -1"
+            [style.block-size.px]="virtualRowSize()"
+            [attr.aria-level]="node.depth + 1"
+            [attr.aria-expanded]="node.expandable ? node.expanded : null"
+            [attr.aria-selected]="
+              selectionOptions().mode === 'none' ? null : selectionState(node).selected
+            "
+            [attr.aria-posinset]="node.siblingIndex + 1"
+            [attr.aria-setsize]="node.siblingCount"
+          >
+            @for (column of columns(); track column.id; let columnIndex = $index) {
+              <td
+                role="gridcell"
+                [attr.data-column-id]="column.id"
+                [attr.data-column-header]="column.header"
+                [style.inline-size]="columnWidth(column)"
+                [style.min-inline-size]="column.minWidth"
+                [style.max-inline-size]="column.maxWidth"
+                [style.text-align]="column.align"
+              >
+                @if (isEditing(node, column)) {
+                  @if (editorTemplate(column.id); as template) {
+                    <ng-container
+                      [ngTemplateOutlet]="template"
+                      [ngTemplateOutletContext]="editorContext(node, column, columnIndex)"
+                    />
+                  } @else {
+                    @defer (when isEditing(node, column)) {
+                      <neu-tree-table-private-editor
+                        [editorId]="editorId(node, column)"
+                        [label]="column.header"
+                        [value]="editDraftValue(column.id)"
+                        [error]="editError()"
+                        [setValue]="editorContext(node, column, columnIndex).update"
+                        [commit]="editorContext(node, column, columnIndex).commit"
+                        [cancel]="editorContext(node, column, columnIndex).cancel"
+                      />
+                    }
+                  }
+                } @else if (isTreeColumn(column)) {
+                  <div
+                    class="neu-tree-table2__tree-cell"
+                    [style.padding-inline-start.px]="node.depth * hierarchyOptions().indentSize"
+                  >
+                    @if (node.expandable) {
+                      <button
+                        type="button"
+                        class="neu-tree-table2__expander"
+                        tabindex="-1"
+                        [attr.aria-label]="node.expanded ? labels().collapse : labels().expand"
+                        [attr.aria-expanded]="node.expanded"
+                      >
+                        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path [attr.d]="node.expanded ? 'm6 9 6 6 6-6' : 'm9 6 6 6-6 6'" />
+                        </svg>
+                      </button>
+                    }
+                    @if (selectionIndicator(node); as indicator) {
+                      @if (indicator === 'checkbox') {
+                        <neu-tree-table-checkbox
+                          [ariaLabel]="labels().selection"
+                          [checked]="selectionState(node).selected"
+                          [indeterminate]="selectionState(node).indeterminate"
+                          [disabled]="selectionState(node).disabled"
+                          (activate)="onCheckboxToggle(node, $event)"
+                        />
+                      } @else {
+                      <label class="neu-tree-table2__selection-indicator neu-radio"
+                        [class.neu-radio--checked]="selectionState(node).selected"
+                        [class.neu-radio--disabled]="selectionState(node).disabled"
+                        (click)="$event.stopPropagation()">
+                      <input
+                        class="neu-radio__input"
+                        data-selection-indicator
+                        tabindex="-1"
+                        [type]="indicator"
+                        [attr.aria-label]="labels().selection"
+                        [attr.aria-checked]="selectionState(node).selected"
+                        [checked]="selectionState(node).selected"
+                        [indeterminate]="false"
+                        [disabled]="selectionState(node).disabled"
+                        (click)="onTableClick($event)"
+                      />
+                      <span class="neu-radio__circle" [class.neu-radio__circle--checked]="selectionState(node).selected" aria-hidden="true">
+                        <span class="neu-radio__dot"></span>
+                      </span>
+                      </label>
+                      }
+                    }
+                    <span class="neu-tree-table2__node-content">
+                      @if (nodeTemplate(); as template) {
+                        <ng-container
+                          [ngTemplateOutlet]="template"
+                          [ngTemplateOutletContext]="nodeContext(node)"
+                        />
+                      } @else if (cellTemplate(column.id); as template) {
+                        <ng-container
+                          [ngTemplateOutlet]="template"
+                          [ngTemplateOutletContext]="cellContext(node, column, columnIndex)"
+                        />
+                      } @else {
+                        {{ present(node.value, column) }}
+                      }
+                    </span>
+                  </div>
+                } @else if (cellTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="cellContext(node, column, columnIndex)"
+                  />
+                } @else {
+                  {{ present(node.value, column) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+        @if (virtualizationOptions().enabled && spacerAfter() > 0) {
+          <tr
+            role="presentation"
+            class="neu-tree-table2__virtual-spacer"
+            data-virtual-spacer="after"
+            aria-hidden="true"
+          >
+            <td
+              role="presentation"
+              [attr.colspan]="columnCount()"
+              [style.block-size.px]="spacerAfter()"
+            ></td>
+          </tr>
+        }
+      }
+    </tbody>
+
+    @if (hasFooter()) {
+      <tfoot>
+        @if (footerTemplates().size > 0) {
+          <tr role="row">
+            @for (column of columns(); track column.id; let columnIndex = $index) {
+              <td role="gridcell" [attr.data-column-id]="column.id">
+                @if (footerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column, columnIndex)"
+                  />
+                }
+              </td>
+            }
+          </tr>
+        }
+        @if (summaryTemplate(); as template) {
+          <tr role="row">
+            <td role="gridcell" [attr.colspan]="columnCount()">
+              <ng-container [ngTemplateOutlet]="template" />
+            </td>
+          </tr>
+        }
+      </tfoot>
+    }
+  </table>
+</div>

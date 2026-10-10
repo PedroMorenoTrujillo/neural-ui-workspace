@@ -1,7 +1,13 @@
 import { Overlay } from '@angular/cdk/overlay';
-import { Directionality } from '@angular/cdk/bidi';
 import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconRotateCcw } from '@neural-icons/core/icons/rotate-ccw';
+import { iconX } from '@neural-icons/core/icons/x';
+import { iconZoomIn } from '@neural-icons/core/icons/zoom-in';
+import { iconZoomOut } from '@neural-icons/core/icons/zoom-out';
 import {
   NEU_IV_DATA,
   NeuImageViewerDirective,
@@ -11,13 +17,14 @@ import {
 const ITEMS = [
   { src: 'img1.jpg', alt: 'Imagen 1', caption: 'Caption 1' },
   { src: 'img2.jpg', alt: 'Imagen 2' },
-  { src: 'img3.jpg' },
+  { src: 'img3.jpg', alt: '' },
 ];
 
 function mkData(partial: Partial<{ items: typeof ITEMS; initialIndex: number }> = {}) {
   return {
     items: partial.items ?? ITEMS,
     initialIndex: partial.initialIndex ?? 0,
+    ariaLabel: 'Image viewer',
     close: vi.fn(),
   };
 }
@@ -31,7 +38,11 @@ function setupOverlay(data = mkData()) {
 
 beforeEach(() =>
   TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection(), Overlay],
+    providers: [
+      provideZonelessChangeDetection(),
+      Overlay,
+      provideNeuralIcons(iconChevronLeft, iconChevronRight, iconRotateCcw, iconX, iconZoomIn, iconZoomOut),
+    ],
   }).compileComponents(),
 );
 
@@ -118,18 +129,6 @@ describe('NeuImageViewerOverlayComponent', () => {
     expect(f.componentInstance._index()).toBe(1);
   });
 
-  it('reverses image arrow navigation and glyphs in RTL', () => {
-    const { f } = setupOverlay(mkData({ initialIndex: 1 }));
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-
-    f.componentInstance._onKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-    f.detectChanges();
-
-    expect(f.componentInstance._index()).toBe(2);
-    expect(f.nativeElement.querySelector('.neu-iv__arrow--prev')?.textContent.trim()).toBe('›');
-    expect(f.nativeElement.querySelector('.neu-iv__arrow--next')?.textContent.trim()).toBe('‹');
-  });
-
   it('_onKey + should zoom in', () => {
     const { f } = setupOverlay();
     f.componentInstance._onKey(new KeyboardEvent('keydown', { key: '+' }));
@@ -163,35 +162,35 @@ describe('NeuImageViewerOverlayComponent', () => {
     expect(f.componentInstance._scale()).toBeLessThan(1);
   });
 
-  it('_onMouseDown triggers pan on move', () => {
+  it('pans with captured Pointer Events only while zoomed above one', () => {
     const { f } = setupOverlay();
     const comp = f.componentInstance;
+    comp._zoom(0.25);
     const mockDown = {
       button: 0,
+      pointerId: 1,
       clientX: 100,
       clientY: 100,
-      preventDefault: vi.fn(),
-    } as unknown as MouseEvent;
-    comp._onMouseDown(mockDown);
-    const moveEvent = new MouseEvent('mousemove', { clientX: 120, clientY: 115 });
-    window.dispatchEvent(moveEvent);
+      currentTarget: f.nativeElement.querySelector('.neu-iv__stage'),
+    } as unknown as PointerEvent;
+    comp._onPointerDown(mockDown);
+    comp._onPointerMove({ pointerId: 1, clientX: 120, clientY: 115 } as PointerEvent);
     expect(comp._panX()).toBe(20);
     expect(comp._panY()).toBe(15);
-    const upEvent = new MouseEvent('mouseup');
-    window.dispatchEvent(upEvent);
+    comp._onPointerUp({ pointerId: 1, clientX: 120, clientY: 115 } as PointerEvent);
   });
 
-  it('_onMouseDown ignores non-left-button clicks', () => {
+  it('ignores non-primary pointer buttons', () => {
     const { f } = setupOverlay();
     const comp = f.componentInstance;
-    comp._onMouseDown({
+    comp._zoom(0.25);
+    comp._onPointerDown({
       button: 2,
+      pointerId: 1,
       clientX: 100,
       clientY: 100,
-      preventDefault: vi.fn(),
-    } as unknown as MouseEvent);
-    const moveEvent = new MouseEvent('mousemove', { clientX: 200, clientY: 200 });
-    window.dispatchEvent(moveEvent);
+    } as unknown as PointerEvent);
+    comp._onPointerMove({ pointerId: 1, clientX: 200, clientY: 200 } as PointerEvent);
     expect(comp._panX()).toBe(0);
   });
 
@@ -286,7 +285,7 @@ describe('NeuImageViewerDirective', () => {
     f.detectChanges();
     const dir = f.debugElement.children[0].injector.get(NeuImageViewerDirective);
     const items = (dir as any)._normalizeItems();
-    expect(items).toEqual([{ src: 'x.jpg' }]);
+    expect(items).toEqual([{ src: 'x.jpg', alt: '' }]);
   });
 
   it('_normalizeItems with object input should wrap in array', () => {
@@ -344,6 +343,26 @@ describe('NeuImageViewerDirective', () => {
   });
 
   // ── Toolbar button DOM click tests ────────────────────────────────────────
+
+  it('renders uniformly sized icon-only toolbar and navigation controls', async () => {
+    const { f } = setupOverlay();
+    await f.whenStable();
+
+    const controls = Array.from(
+      (f.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        '.neu-iv__btn, .neu-iv__arrow',
+      ),
+    );
+    expect(controls).toHaveLength(6);
+    expect(controls.every((control) => control.querySelector('neu-icon-outlet'))).toBe(true);
+    expect(controls.every((control) => !!control.getAttribute('aria-label'))).toBe(true);
+    expect(
+      controls.every(
+        (control) =>
+          (control.querySelector('neu-icon-outlet') as HTMLElement | null)?.style.width === '1.5rem',
+      ),
+    ).toBe(true);
+  });
 
   it('clicking zoom-in button zooms in via template handler', async () => {
     // Clic en botón de zoom in debe hacer zoom vía handler del template
@@ -462,6 +481,25 @@ describe('NeuImageViewerDirective', () => {
     dir.close();
   });
 
+  it('opens from Enter, focuses the modal toolbar, and restores the trigger on close', async () => {
+    const f = TestBed.createComponent(HostForDirective);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuImageViewerDirective) as any;
+    const img = f.nativeElement.querySelector('img') as HTMLImageElement;
+    expect(img.getAttribute('role')).toBe('button');
+    expect(img.tabIndex).toBe(0);
+    img.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    await f.whenStable();
+    expect(document.activeElement).toBe(
+      document.body.querySelector('.neu-iv__btn:not([disabled])'),
+    );
+    dir.close();
+    expect(document.activeElement).toBe(img);
+  });
+
   it('unknown keyboard keys should leave overlay state unchanged', () => {
     const { f } = setupOverlay(mkData({ initialIndex: 1 }));
     const before = {
@@ -486,7 +524,9 @@ describe('NeuImageViewerDirective', () => {
     dir.open();
     vi.runAllTimers();
 
-    const closeButton = document.body.querySelector('[aria-label="Cerrar"]') as HTMLButtonElement;
+    const closeButton = document.body.querySelector(
+      '[aria-label="Close image viewer"]',
+    ) as HTMLButtonElement;
     closeButton.click();
 
     expect(closeSpy).toHaveBeenCalled();
@@ -511,20 +551,69 @@ describe('NeuImageViewerDirective', () => {
     expect(f.componentInstance._scale()).toBeGreaterThan(1);
 
     stage.dispatchEvent(
-      new MouseEvent('mousedown', { button: 0, clientX: 10, clientY: 10, bubbles: true }),
+      new PointerEvent('pointerdown', { pointerId: 1, button: 0, clientX: 10, clientY: 10, bubbles: true }),
     );
-    (f.componentInstance as any)._dragging = false;
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 100, clientY: 100 }));
-    expect(f.componentInstance._panX()).toBe(0);
-    expect(f.componentInstance._panY()).toBe(0);
-    (f.componentInstance as any)._dragging = true;
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 25, clientY: 30 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
+    stage.dispatchEvent(
+      new PointerEvent('pointermove', { pointerId: 1, clientX: 25, clientY: 30, bubbles: true }),
+    );
+    stage.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true }));
 
     expect(f.componentInstance._panX()).toBe(15);
     expect(f.componentInstance._panY()).toBe(20);
 
     f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(data.close).toHaveBeenCalled();
+  });
+
+  it('does not create an overlay for empty or blank viewer input', () => {
+    const f = TestBed.createComponent(HostForDirective);
+    f.detectChanges();
+    const dir = f.debugElement.children[0].injector.get(NeuImageViewerDirective) as any;
+    const createSpy = vi.spyOn(TestBed.inject(Overlay), 'create');
+    dir.neuImageViewer = () => '';
+    dir.open();
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(dir._overlayRef).toBeNull();
+  });
+
+  it('keeps no-op transforms and wheel edges stable', () => {
+    const { f } = setupOverlay();
+    const viewer = f.componentInstance;
+    const unchangedWheel = { deltaY: 0, preventDefault: vi.fn() } as unknown as WheelEvent;
+    viewer._onWheel(unchangedWheel);
+    expect(unchangedWheel.preventDefault).not.toHaveBeenCalled();
+    viewer._zoom(0);
+    viewer._rotate(360);
+    expect(viewer._scale()).toBe(1);
+    expect(viewer._rotation()).toBe(0);
+    viewer._zoom(10);
+    const atMaximum = { deltaY: -1, preventDefault: vi.fn() } as unknown as WheelEvent;
+    viewer._onWheel(atMaximum);
+    expect(atMaximum.preventDefault).not.toHaveBeenCalled();
+    viewer._index.set(100);
+    expect(viewer._current()).toEqual({ src: '', alt: '' });
+    expect(viewer._downloadName()).toBe('image');
+  });
+
+  it('ignores mismatched and cancelled gestures and respects a prevented Escape', () => {
+    const { f, data } = setupOverlay();
+    const viewer = f.componentInstance;
+    viewer._onPointerMove({ pointerId: 1 } as PointerEvent);
+    viewer._onPointerUp({ pointerId: 1 } as PointerEvent);
+    const pointer = { button: 0, pointerId: 2, clientX: 100, clientY: 20 } as PointerEvent;
+    viewer._onPointerDown(pointer);
+    viewer._onPointerDown(pointer);
+    viewer._zoom(0.5);
+    viewer._onPointerMove({ pointerId: 3, clientX: 20, clientY: 20 } as PointerEvent);
+    expect(viewer._panX()).toBe(0);
+    viewer._onPointerUp({ pointerId: 3, clientX: 20 } as PointerEvent);
+    viewer._onPointerDown(pointer);
+    viewer._onPointerCancel();
+    viewer._onPointerMove({ pointerId: 2, clientX: 20, clientY: 20 } as PointerEvent);
+    expect(viewer._panX()).toBe(0);
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
+    escape.preventDefault();
+    viewer._onKey(escape);
+    expect(data.close).not.toHaveBeenCalled();
   });
 });

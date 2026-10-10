@@ -1,4 +1,9 @@
 @use '../styles/floating-label' as floating;
+@use '../styles/focus-state' as focus;
+
+neu-textarea[hidden] {
+  display: none !important;
+}
 
 .neu-textarea-host {
   display: block;
@@ -39,6 +44,7 @@
 
 .neu-textarea__field {
   width: 100%;
+  max-inline-size: 100%;
   min-height: 80px;
   padding: 1.25rem var(--neu-space-4) var(--neu-space-3);
   font-family: var(--neu-font-sans);
@@ -48,7 +54,7 @@
   border: 1.5px solid var(--neu-border);
   border-radius: var(--neu-radius);
   outline: none;
-  resize: var(--_neu-textarea-resize, vertical);
+  resize: var(--_neu-textarea-resize, both);
   transition:
     border-color var(--neu-transition),
     box-shadow var(--neu-transition);
@@ -68,6 +74,10 @@
     box-shadow: var(--neu-focus-ring);
   }
 
+  .neu-textarea__wrapper--error.neu-textarea__wrapper--focused & {
+    @include focus.invalid-focus;
+  }
+
   .neu-textarea__wrapper--disabled & {
     background: var(--neu-surface-2);
     cursor: not-allowed;
@@ -75,7 +85,7 @@
 }
 
 // Auto-resize: quita el resize handle
-.neu-textarea__field[style*='height'] {
+.neu-textarea__field--auto-resize {
   resize: none;
   overflow: hidden;
 }
@@ -107,12 +117,12 @@
     background: var(--neu-surface);
     padding: 0 4px;
     inset-inline-start: calc(var(--neu-space-4) - 4px);
-    color: var(--neu-primary);
+    color: var(--neu-text);
   }
 
   .neu-textarea__wrapper--focused.neu-textarea__wrapper--error &,
   .neu-textarea__wrapper--error & {
-    color: var(--neu-error);
+    color: var(--neu-error-text, var(--neu-error));
   }
 
   .neu-textarea__wrapper--disabled & {

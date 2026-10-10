@@ -1,13 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Injectable,
-  ViewEncapsulation,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { Component, Injectable, ViewEncapsulation, inject } from '@angular/core';
 import { Dialog, DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export interface NeuConfirmDialogData {
   /** Título del diálogo / Dialog title */
@@ -31,19 +24,19 @@ export interface NeuConfirmDialogData {
   selector: 'neu-confirm-dialog',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-confirm-dialog',
     role: 'alertdialog',
     'aria-modal': 'true',
-    '[attr.aria-labelledby]': '"neu-confirm-title"',
-    '[attr.aria-describedby]': '"neu-confirm-msg"',
+    '[attr.aria-labelledby]': 'data.title ? titleId : null',
+    '[attr.aria-label]': 'data.title ? null : data.message',
+    '[attr.aria-describedby]': 'messageId',
   },
   template: `
     @if (data.title) {
-      <h2 class="neu-confirm-dialog__title" id="neu-confirm-title">{{ data.title }}</h2>
+      <h2 class="neu-confirm-dialog__title" [id]="titleId">{{ data.title }}</h2>
     }
-    <p class="neu-confirm-dialog__message" id="neu-confirm-msg">{{ data.message }}</p>
+    <p class="neu-confirm-dialog__message" [id]="messageId">{{ data.message }}</p>
     <div class="neu-confirm-dialog__actions">
       <button
         type="button"
@@ -51,7 +44,7 @@ export interface NeuConfirmDialogData {
         [class.neu-confirm-dialog__btn--danger]="data.rejectVariant === 'danger'"
         (click)="reject()"
       >
-        {{ data.rejectLabel ?? 'Cancelar' }}
+        {{ data.rejectLabel ?? 'Cancel' }}
       </button>
       <button
         type="button"
@@ -60,7 +53,7 @@ export interface NeuConfirmDialogData {
         [class.neu-confirm-dialog__btn--danger]="data.acceptVariant === 'danger'"
         (click)="accept()"
       >
-        {{ data.acceptLabel ?? 'Aceptar' }}
+        {{ data.acceptLabel ?? 'Confirm' }}
       </button>
     </div>
   `,
@@ -69,12 +62,19 @@ export interface NeuConfirmDialogData {
 export class NeuConfirmDialogComponent {
   readonly data: NeuConfirmDialogData = inject(DIALOG_DATA);
   private readonly _dialogRef = inject(DialogRef<boolean>);
+  private settled = false;
+  protected readonly titleId = inject(NeuIdGenerator).getId('neu-confirm-title-');
+  protected readonly messageId = inject(NeuIdGenerator).getId('neu-confirm-message-');
 
   accept(): void {
+    if (this.settled) return;
+    this.settled = true;
     this._dialogRef.close(true);
   }
 
   reject(): void {
+    if (this.settled) return;
+    this.settled = true;
     this._dialogRef.close(false);
   }
 }
@@ -86,7 +86,7 @@ export class NeuConfirmDialogComponent {
  *
  * Uso:
  *   inject(NeuConfirmDialogService)
- *     .confirm({ message: '¿Eliminar este registro?', acceptVariant: 'danger' })
+ *     .confirm({ message: 'Delete this record?', acceptVariant: 'danger' })
  *     .then(ok => ok && doDelete());
  */
 @Injectable({ providedIn: 'root' })
@@ -102,7 +102,7 @@ export class NeuConfirmDialogService {
       data,
       panelClass: 'neu-confirm-dialog-panel',
       backdropClass: 'neu-confirm-dialog-backdrop',
-      disableClose: true,
+      disableClose: false,
     });
     return new Promise<boolean>((resolve) => {
       ref.closed.subscribe((result) => resolve(result ?? false));

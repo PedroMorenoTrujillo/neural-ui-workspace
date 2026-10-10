@@ -20,6 +20,63 @@ describe('NeuUrlStateService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('clears an optimistic patch after its navigation settles', async () => {
+    let finish!: (value: boolean) => void;
+    vi.spyOn(router, 'navigate').mockReturnValue(new Promise<boolean>((resolve) => { finish = resolve; }));
+
+    service.patchParams({ view: 'details' }, false);
+    expect(service.params()['view']).toBe('details');
+    finish(true);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(service.params()['view']).toBeUndefined();
+    expect(router.navigate).toHaveBeenCalledWith([], expect.objectContaining({ replaceUrl: false }));
+  });
+
+  it('keeps a queued optimistic parameter visible while navigation is unresolved', async () => {
+    let finish!: (value: boolean) => void;
+    vi.spyOn(router, 'navigate').mockReturnValue(new Promise<boolean>((resolve) => { finish = resolve; }));
+    service.setParam('view', 'details');
+    await Promise.resolve();
+    expect(service.params()['view']).toBe('details');
+    finish(false);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(service.params()['view']).toBeUndefined();
+  });
+
+  it('does not let an older navigation clear a newer optimistic value', async () => {
+    const finishes: Array<(value: boolean) => void> = [];
+    vi.spyOn(router, 'navigate').mockImplementation(() => new Promise<boolean>((resolve) => { finishes.push(resolve); }));
+
+    service.patchParams({ view: 'first' });
+    service.patchParams({ view: 'second' });
+    finishes[0](true);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(service.params()['view']).toBe('second');
+    finishes[1](true);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(service.params()['view']).toBeUndefined();
+  });
+
+  it('preserves a queued write when a previous navigation finishes in the same turn', async () => {
+    const finishes: Array<(value: boolean) => void> = [];
+    vi.spyOn(router, 'navigate').mockImplementation(() => new Promise<boolean>((resolve) => { finishes.push(resolve); }));
+
+    service.patchParams({ view: 'first' });
+    finishes[0](true);
+    service.setParam('view', 'queued', false);
+    await Promise.resolve();
+    expect(service.params()['view']).toBe('queued');
+    expect(router.navigate).toHaveBeenLastCalledWith([], expect.objectContaining({ queryParams: { view: 'queued' }, replaceUrl: false }));
+    finishes[1](true);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(service.params()['view']).toBeUndefined();
+  });
+
   it('should return null for non-existent param', () => {
     const val = service.getParam('nonexistent')();
     expect(val).toBeNull();

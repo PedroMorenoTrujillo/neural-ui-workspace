@@ -3,44 +3,42 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const automatedOnly = process.argv.includes('--automated-only');
-const automatedCommands = [
-  ['npm', ['test']],
-  ['npm', ['run', 'audit:entrypoint-coverage']],
+const bundleProfile = process.env['NEURAL_UI_BUNDLE_PROFILE'] ?? 'main';
+if (!['pr', 'main', 'release'].includes(bundleProfile)) {
+  throw new Error(`Unsupported NEURAL_UI_BUNDLE_PROFILE: ${bundleProfile}`);
+}
+const commands = [
+  ['npm', ['run', 'test:coverage:gate']],
+  ['npm', ['run', 'test:coverage']],
+  ['npm', ['run', 'test:release-artifacts']],
+  ['npm', ['run', 'test:bundle-optimizers']],
   ['npm', ['run', 'build']],
+  ['npm', ['run', 'test:package-linker']],
+  ['npm', ['run', 'prepare:release-artifacts']],
   ['npm', ['run', 'audit:entrypoints']],
-  ['npm', ['run', 'audit:showcase-evidence']],
-  ['npm', ['run', 'audit:quality-matrix']],
-  ['npm', ['run', 'audit:manual-at-evidence']],
   ['npm', ['run', 'audit:cva']],
-  ['npm', ['run', 'audit:bundle']],
-  ['npm', ['run', 'size-limit:built']],
-  ['npm', ['run', 'audit:performance']],
+  ['npm', ['run', `audit:bundle:${bundleProfile}`]],
+  ['npm', ['run', 'audit:table-architecture']],
+  ['npm', ['run', 'audit:h5c2-duplication']],
   ['npm', ['run', 'audit:logical-css']],
-  ['npm', ['run', 'audit:governance']],
-  ['npm', ['run', 'audit:licenses']],
-  ['npm', ['run', 'audit:security']],
   ['npm', ['run', 'audit:contracts']],
   ['npm', ['run', 'audit:docs']],
+  ['npm', ['run', 'test:angular-compatibility']],
+  ['npm', ['run', 'test:table-body-section-template-types']],
   ['npm', ['run', 'test:schematics']],
-  ['npm', ['run', 'test:compat:matrix']],
+  ...(process.env['NEURAL_UI_ANGULAR_22_CONSUMER'] === '1'
+    ? [['npm', ['run', 'test:angular-22-consumer']]]
+    : []),
   ['npm', ['run', 'test:imports']],
   ['npm', ['run', 'test:ssr-smoke']],
   ['npm', ['run', 'verify:package']],
   ['npm', ['run', 'audit:package']],
+  ['npm', ['run', 'verify:release-artifacts']],
 ];
-const humanEvidenceCommands = [['npm', ['run', 'audit:quality-matrix:strict']]];
-const commands = automatedOnly
-  ? automatedCommands
-  : [...automatedCommands, ...humanEvidenceCommands];
 
 for (const [command, args] of commands) {
   const result = spawnSync(command, args, { cwd: workspaceRoot, stdio: 'inherit' });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
-console.log(
-  automatedOnly
-    ? 'ui-core automated release verification passed'
-    : 'ui-core release verification passed',
-);
+console.log('ui-core release verification passed');

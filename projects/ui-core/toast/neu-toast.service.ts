@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { DestroyRef, Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.types';
 
 /**
@@ -14,6 +16,8 @@ import { NeuToastItem, NeuToastOptions, NeuToastPosition } from './neu-toast.typ
  */
 @Injectable({ providedIn: 'root' })
 export class NeuToastService {
+  private readonly ids = inject(NeuIdGenerator);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   /** Lista reactiva de toasts activos / Reactive list of active toasts */
   readonly toasts = signal<NeuToastItem[]>([]);
 
@@ -22,25 +26,29 @@ export class NeuToastService {
 
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
 
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.clear());
+  }
+
   setPosition(position: NeuToastPosition): void {
     this.position.set(position);
   }
 
   show(options: NeuToastOptions): string {
-    const id = `neu-toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = this.ids.getId('neu-toast-');
     const duration = options.duration ?? 4000;
 
     const item: NeuToastItem = {
       id,
       message: options.message,
       title: options.title ?? '',
-      type: options.type ?? 'info',
+      tone: options.tone ?? 'info',
       duration,
     };
 
     this.toasts.update((list) => [...list, item]);
 
-    if (duration > 0) {
+    if (this.isBrowser && duration > 0) {
       const timer = setTimeout(() => this.dismiss(id), duration);
       this.timers.set(id, timer);
     }
@@ -49,19 +57,19 @@ export class NeuToastService {
   }
 
   success(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'success' });
+    return this.show({ ...opts, message, tone: 'success' });
   }
 
   error(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'error' });
+    return this.show({ ...opts, message, tone: 'danger' });
   }
 
   info(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'info' });
+    return this.show({ ...opts, message, tone: 'info' });
   }
 
   warning(message: string, opts?: Partial<NeuToastOptions>): string {
-    return this.show({ ...opts, message, type: 'warning' });
+    return this.show({ ...opts, message, tone: 'warning' });
   }
 
   dismiss(id: string): void {

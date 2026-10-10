@@ -1,0 +1,391 @@
+{
+  "checkpoint": "N2-022",
+  "capturedAt": "2026-09-21T20:02:37.580Z",
+  "method": "Angular-compiled minified consumer ESM; Angular/RxJS external; gzip 9; Brotli 11",
+  "legacyConsumers": {
+    "dialog": {
+      "size": {
+        "raw": 61972,
+        "gzip": 12177,
+        "brotli": 10638
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-modal.mjs",
+          "bytesInOutput": 34514
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12969
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6641
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4205
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 393
+        }
+      ]
+    },
+    "bottom-sheet": {
+      "size": {
+        "raw": 46529,
+        "gzip": 9025,
+        "brotli": 7859
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 14583
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12945
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-bottom-sheet.mjs",
+          "bytesInOutput": 9108
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6638
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        }
+      ]
+    },
+    "sidebar": {
+      "size": {
+        "raw": 44519,
+        "gzip": 9395,
+        "brotli": 8181
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 18558
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12963
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6632
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3115
+        }
+      ]
+    },
+    "calendar": {
+      "size": {
+        "raw": 59082,
+        "gzip": 8209,
+        "brotli": 7028
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-calendar.mjs",
+          "bytesInOutput": 54553
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4177
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 317
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 162093,
+        "gzip": 25150,
+        "brotli": 20914
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-calendar.mjs",
+          "bytesInOutput": 54590
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-modal.mjs",
+          "bytesInOutput": 34520
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 18580
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 14588
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12985
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-bottom-sheet.mjs",
+          "bytesInOutput": 9114
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6654
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4215
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3121
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 393
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "consumers": {
+    "dialog": {
+      "size": {
+        "raw": 63657,
+        "gzip": 12487,
+        "brotli": 10953
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-modal.mjs",
+          "bytesInOutput": 34874
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12969
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6647
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5524
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 393
+        }
+      ]
+    },
+    "bottom-sheet": {
+      "size": {
+        "raw": 52932,
+        "gzip": 10647,
+        "brotli": 9312
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 14583
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12963
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-bottom-sheet.mjs",
+          "bytesInOutput": 9632
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6647
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5528
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 324
+        }
+      ]
+    },
+    "sidebar": {
+      "size": {
+        "raw": 47536,
+        "gzip": 10081,
+        "brotli": 8812
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 18829
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12966
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6638
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5528
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 324
+        }
+      ]
+    },
+    "calendar": {
+      "size": {
+        "raw": 60292,
+        "gzip": 8450,
+        "brotli": 7241
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-calendar.mjs",
+          "bytesInOutput": 54443
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5497
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 317
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 161321,
+        "gzip": 24605,
+        "brotli": 20371
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-calendar.mjs",
+          "bytesInOutput": 54477
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-modal.mjs",
+          "bytesInOutput": 34880
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 18844
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-button.mjs",
+          "bytesInOutput": 14583
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12985
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-bottom-sheet.mjs",
+          "bytesInOutput": 9638
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6654
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 5534
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 393
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "dialog": {
+      "rawDeltaPercent": 2.7189698573549346,
+      "gzipDeltaPercent": 2.5457830335879117,
+      "brotliDeltaPercent": 2.961082910321489
+    },
+    "bottom-sheet": {
+      "rawDeltaPercent": 13.761310150658728,
+      "gzipDeltaPercent": 17.97229916897507,
+      "brotliDeltaPercent": 18.488357297366075
+    },
+    "sidebar": {
+      "rawDeltaPercent": 6.776881780812687,
+      "gzipDeltaPercent": 7.3017562533262375,
+      "brotliDeltaPercent": 7.712993521574379
+    },
+    "calendar": {
+      "rawDeltaPercent": 2.0480010832402424,
+      "gzipDeltaPercent": 2.935802168351809,
+      "brotliDeltaPercent": 3.0307342060330105
+    },
+    "combined": {
+      "rawDeltaPercent": -0.4762697957345474,
+      "gzipDeltaPercent": -2.1669980119284293,
+      "brotliDeltaPercent": -2.596346944630391
+    }
+  },
+  "forbiddenSidebarGraphTokens": []
+}

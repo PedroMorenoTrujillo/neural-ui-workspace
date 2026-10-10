@@ -1,8 +1,8 @@
 {
   "name": "@neural-ui/core",
-  "version": "1.14.3",
+  "version": "2.0.0",
   "description": "Modern Angular UI component library built with signals, standalone components, and OnPush change detection.",
-  "author": "PedroMorenoTrujillo",
+  "author": "Pedro Moreno Trujillo",
   "keywords": [
     "angular",
     "ui",
@@ -13,19 +13,19 @@
     "zoneless"
   ],
   "license": "MIT",
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
   "peerDependencies": {
-    "@angular-devkit/schematics": ">=19.0.0 <23.0.0",
-    "@angular/cdk": ">=19.0.0 <23.0.0",
-    "@angular/common": ">=19.0.0 <23.0.0",
-    "@angular/core": ">=19.0.0 <23.0.0",
-    "@angular/forms": ">=19.0.0 <23.0.0",
-    "@angular/router": ">=19.0.0 <23.0.0",
-    "@schematics/angular": ">=19.0.0 <23.0.0",
-    "@ng-icons/core": ">=31.4.0 <34.0.0",
-    "@ng-icons/lucide": ">=31.4.0 <34.0.0"
+    "@angular-devkit/schematics": ">=22.0.0 <23.0.0",
+    "@angular/cdk": ">=22.0.0 <23.0.0",
+    "@angular/common": ">=22.0.0 <23.0.0",
+    "@angular/core": ">=22.0.0 <23.0.0",
+    "@angular/forms": ">=22.0.0 <23.0.0",
+    "@angular/router": ">=22.0.0 <23.0.0",
+    "@schematics/angular": ">=22.0.0 <23.0.0"
   },
   "dependencies": {
-    "chart.js": "^4.5.1",
     "tslib": "^2.3.0"
   },
   "sideEffects": [
@@ -38,11 +38,12 @@
     "url": "git+https://github.com/PedroMorenoTrujillo/neural-ui-workspace.git",
     "directory": "projects/ui-core"
   },
-  "homepage": "https://neural-ui-showcase.vercel.app",
+  "homepage": "https://ui.neuralui.org/v2/",
   "bugs": {
     "url": "https://github.com/PedroMorenoTrujillo/neural-ui-workspace/issues"
   },
   "exports": {
+    "./token-manifest.json": "./token-manifest.json",
     "./styles": {
       "sass": "./styles.scss",
       "style": "./styles.scss",

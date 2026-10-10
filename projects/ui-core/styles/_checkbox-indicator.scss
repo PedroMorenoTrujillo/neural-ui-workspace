@@ -1,0 +1,50 @@
+// Shared visual indicator for Checkbox and multiple-selection listbox options.
+// The owning control provides interaction and accessibility semantics.
+@mixin box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  background: var(--neu-surface);
+  border: 1.5px solid var(--neu-border-hover);
+  border-radius: var(--neu-radius-sm);
+  transition:
+    background-color var(--neu-transition),
+    border-color var(--neu-transition),
+    box-shadow var(--neu-transition);
+
+  &--checked,
+  &--mixed {
+    background: var(--neu-primary);
+    border-color: var(--neu-primary);
+  }
+
+  @media (forced-colors: active) {
+    &--checked,
+    &--mixed {
+      border-color: Highlight;
+      background: Highlight;
+    }
+  }
+}
+
+@mixin check {
+  width: 12px;
+  height: 10px;
+  color: var(--neu-primary-fg);
+}
+
+@mixin mark {
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+
+  &--visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,233 +1,116 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuFilterBarComponent, NeuFilterChip } from './neu-filter-bar.component';
+import { NeuFilterBarComponent, type NeuFilterChip } from './neu-filter-bar.component';
 
-const CHIPS: NeuFilterChip[] = [
+const CHIPS: readonly NeuFilterChip[] = [
   { key: 'all', label: 'Todos', active: false },
   { key: 'active', label: 'Activos', active: false },
   { key: 'inactive', label: 'Inactivos', active: false },
 ];
 
-function mk() {
-  return TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+function create(filters: readonly NeuFilterChip[] = CHIPS) {
+  const fixture = TestBed.createComponent(NeuFilterBarComponent);
+  fixture.componentRef.setInput('filters', filters);
+  fixture.detectChanges();
+  return fixture;
 }
 
 describe('NeuFilterBarComponent', () => {
-  beforeEach(() => mk().compileComponents());
-
-  it('localizes its default accessible labels from the document language', async () => {
-    const originalLanguage = document.documentElement.lang;
-    try {
-      document.documentElement.lang = 'en';
-      const english = TestBed.createComponent(NeuFilterBarComponent);
-      expect(english.componentInstance.clearLabel()).toBe('Clear all');
-      expect(english.componentInstance.ariaLabel()).toBe('Filters');
-      english.destroy();
-
-      TestBed.resetTestingModule();
-      await mk().compileComponents();
-      document.documentElement.lang = 'es';
-      const spanish = TestBed.createComponent(NeuFilterBarComponent);
-      expect(spanish.componentInstance.clearLabel()).toBe('Limpiar todo');
-      expect(spanish.componentInstance.ariaLabel()).toBe('Filtros');
-      spanish.destroy();
-    } finally {
-      document.documentElement.lang = originalLanguage;
-    }
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }).compileComponents();
   });
 
-  it('should render filter chips', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.detectChanges();
-    await f.whenStable();
-    const chips = f.nativeElement.querySelectorAll('.neu-filter-bar__chip');
-    expect(chips.length).toBe(3);
+  it('renders applied chips and accessible group semantics', () => {
+    const fixture = create();
+    expect(fixture.nativeElement.getAttribute('role')).toBe('group');
+    expect(fixture.nativeElement.getAttribute('aria-label')).toBe('Filters');
+    const chips = fixture.nativeElement.querySelectorAll('.neu-filter-bar__chip');
+    expect(chips).toHaveLength(3);
     expect(chips[0].textContent.trim()).toBe('Todos');
+    expect(chips[0].getAttribute('aria-pressed')).toBe('false');
   });
 
-  it('toggle should activate a chip', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-
-    comp.toggle(CHIPS[0]);
-    f.detectChanges();
-    await f.whenStable();
-    const chip = f.nativeElement.querySelector('.neu-filter-bar__chip');
-    expect(chip.classList).toContain('neu-filter-bar__chip--active');
-  });
-
-  it('toggle should emit filterChange with active chips', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.detectChanges();
-    await f.whenStable();
+  it('emits one immutable proposal without applying it when the parent rejects', () => {
+    const fixture = create(Object.freeze(CHIPS.map((chip) => Object.freeze({ ...chip }))));
     const emitted: NeuFilterChip[][] = [];
-    f.componentInstance.filterChange.subscribe((chips: NeuFilterChip[]) => emitted.push(chips));
-
-    (f.componentInstance as any).toggle(CHIPS[1]);
-    expect(emitted.length).toBe(1);
-    expect(emitted[0][0].key).toBe('active');
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    (fixture.nativeElement.querySelectorAll('.neu-filter-bar__chip')[1] as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(emitted.map((chips) => chips.map((chip) => chip.key))).toEqual([['active']]);
+    expect(emitted[0][0]).not.toBe(CHIPS[1]);
+    expect(fixture.nativeElement.querySelectorAll('.neu-filter-bar__chip')[1].getAttribute('aria-pressed')).toBe('false');
+    expect(fixture.nativeElement.querySelector('.neu-filter-bar__clear')).toBeNull();
   });
 
-  it('multi=true allows multiple chips active', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.componentRef.setInput('multi', true);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-
-    comp.toggle(CHIPS[0]);
-    comp.toggle(CHIPS[1]);
-    expect(comp._chips().filter((c: NeuFilterChip) => c.active).length).toBe(2);
+  it('reflects accepted parent writes and reconstructed arrays without emitting echoes', () => {
+    const fixture = create();
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    fixture.componentRef.setInput('filters', CHIPS.map((chip) => ({ ...chip, active: chip.key === 'active' })));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.neu-filter-bar__chip')[1].getAttribute('aria-pressed')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.neu-filter-bar__clear')).toBeTruthy();
+    expect(emitted).toEqual([]);
   });
 
-  it('multi=false deactivates other chips on toggle', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.componentRef.setInput('multi', false);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-
-    comp.toggle(CHIPS[0]);
-    comp.toggle(CHIPS[1]);
-    expect(comp._chips().filter((c: NeuFilterChip) => c.active).length).toBe(1);
-    expect(comp._chips().find((c: NeuFilterChip) => c.active)?.key).toBe('active');
+  it('multiple mode proposes the next active set in applied order', () => {
+    const fixture = create([{ ...CHIPS[0], active: true }, CHIPS[1], CHIPS[2]]);
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    fixture.componentInstance.toggle(CHIPS[1]);
+    expect(emitted.at(-1)?.map((chip) => chip.key)).toEqual(['all', 'active']);
+    fixture.componentInstance.toggle(CHIPS[0]);
+    expect(emitted.at(-1)?.map((chip) => chip.key)).toEqual([]);
   });
 
-  it('should show clear button when a chip is active and clearable=true', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.componentRef.setInput('clearable', true);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-
-    comp.toggle(CHIPS[0]);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-filter-bar__clear')).toBeTruthy();
+  it('single mode proposes only one active chip and can clear the selected chip', () => {
+    const fixture = create([{ ...CHIPS[0], active: true }, CHIPS[1]]);
+    fixture.componentRef.setInput('multi', false);
+    fixture.detectChanges();
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    fixture.componentInstance.toggle(CHIPS[1]);
+    expect(emitted.at(-1)?.map((chip) => chip.key)).toEqual(['active']);
+    fixture.componentInstance.toggle(CHIPS[0]);
+    expect(emitted.at(-1)).toEqual([]);
   });
 
-  it('should hide clear button when no chips are active', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.componentRef.setInput('clearable', true);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-filter-bar__clear')).toBeNull();
+  it('clear emits exactly once from applied active state and leaves it unchanged', () => {
+    const fixture = create([{ ...CHIPS[0], active: true }]);
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    (fixture.nativeElement.querySelector('.neu-filter-bar__clear') as HTMLButtonElement).click();
+    fixture.componentInstance.clearAll();
+    expect(emitted).toEqual([[], []]);
+    expect(fixture.componentInstance.filters()[0].active).toBe(true);
   });
 
-  it('clearAll should deactivate all chips and emit empty array', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    comp.toggle(CHIPS[0]);
-    comp.toggle(CHIPS[1]);
-
-    const emitted: unknown[][] = [];
-    f.componentInstance.filterChange.subscribe((e: unknown[]) => emitted.push(e));
-    comp.clearAll();
-
-    expect(comp._hasActive()).toBe(false);
-    expect(emitted[emitted.length - 1]).toEqual([]);
+  it('does not emit reset when nothing is active or render clear when disabled', () => {
+    const fixture = create();
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    fixture.componentInstance.clearAll();
+    expect(emitted).toEqual([]);
+    fixture.componentRef.setInput('filters', [{ ...CHIPS[0], active: true }]);
+    fixture.componentRef.setInput('clearable', false);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-filter-bar__clear')).toBeNull();
   });
 
-  it('setActive should activate chips by keys', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', CHIPS);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-
-    comp.setActive(['active', 'inactive']);
-    expect(comp._chips().filter((c: NeuFilterChip) => c.active).length).toBe(2);
+  it('setActive proposes existing keys without mutating the applied list', () => {
+    const fixture = create();
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    fixture.componentInstance.setActive(['inactive', 'unknown', 'active']);
+    expect(emitted.at(-1)?.map((chip) => chip.key)).toEqual(['active', 'inactive']);
+    expect(fixture.componentInstance.filters()).toBe(CHIPS);
   });
 
-  it('should apply neu-filter-bar class', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-filter-bar');
-  });
-
-  it('toggle activates and deactivates a filter chip', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', [{ key: 'a', label: 'Alpha', active: false }]);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    comp.toggle(comp._chips()[0]);
-    expect(comp._chips()[0].active).toBe(true);
-    comp.toggle(comp._chips()[0]);
-    expect(comp._chips()[0].active).toBe(false);
-  });
-
-  it('clearAll deactivates all chips', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', [
-      { key: 'a', label: 'A', active: true },
-      { key: 'b', label: 'B', active: true },
-    ]);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    comp.clearAll();
-    const allInactive = comp._chips().every((c: any) => !c.active);
-    expect(allInactive).toBe(true);
-  });
-
-  it('filterChange emits when toggle is called', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('filters', [{ key: 'x', label: 'X', active: false }]);
-    f.detectChanges();
-    await f.whenStable();
-    const events: any[] = [];
-    f.componentInstance.filterChange.subscribe((e: any) => events.push(e));
-    const comp = f.componentInstance as any;
-    comp.toggle(comp._chips()[0]);
-    expect(events.length).toBe(1);
-  });
-
-  it('clearable=false should not render clear button', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    f.componentRef.setInput('clearable', false);
-    f.componentRef.setInput('filters', [{ key: 'z', label: 'Z', active: true }]);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-filter-bar__clear')).toBeNull();
-  });
-
-  it('clicking chips and clear button uses the rendered template handlers', async () => {
-    const f = TestBed.createComponent(NeuFilterBarComponent);
-    const events: NeuFilterChip[][] = [];
-    f.componentRef.setInput('filters', CHIPS);
-    f.componentInstance.filterChange.subscribe((chips) => events.push(chips));
-    f.detectChanges();
-    await f.whenStable();
-
-    const chips = f.nativeElement.querySelectorAll(
-      '.neu-filter-bar__chip',
-    ) as NodeListOf<HTMLButtonElement>;
-    chips[1].click();
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(events.at(-1)?.map((chip) => chip.key)).toEqual(['active']);
-    expect(f.nativeElement.querySelector('.neu-filter-bar__clear')).toBeTruthy();
-
-    (f.nativeElement.querySelector('.neu-filter-bar__clear') as HTMLButtonElement).click();
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(events.at(-1)).toEqual([]);
-    expect(f.componentInstance._hasActive()).toBe(false);
+  it('ignores an unknown gesture key', () => {
+    const fixture = create();
+    const emitted: NeuFilterChip[][] = [];
+    fixture.componentInstance.filterChange.subscribe((chips) => emitted.push(chips));
+    fixture.componentInstance.toggle({ key: 'unknown', label: 'Unknown' });
+    expect(emitted).toEqual([]);
   });
 });

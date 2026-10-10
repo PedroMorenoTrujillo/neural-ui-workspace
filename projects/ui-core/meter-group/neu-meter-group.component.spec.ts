@@ -13,6 +13,15 @@ function mk() {
 }
 
 describe('NeuMeterGroupComponent', () => {
+  it('cycles the default palette consistently after five segments', () => {
+    const fixture = TestBed.createComponent(NeuMeterGroupComponent);
+    fixture.componentRef.setInput('items', Array.from({ length: 7 }, (_, i) => ({ label: `Item ${i}`, value: 10 })));
+    fixture.detectChanges();
+    const segments = [...fixture.nativeElement.querySelectorAll('.neu-meter-group__segment')] as HTMLElement[];
+    const dots = [...fixture.nativeElement.querySelectorAll('.neu-meter-group__legend-dot')] as HTMLElement[];
+    expect(segments.map(element => element.dataset['index'])).toEqual(['0', '1', '2', '3', '4', '0', '1']);
+    expect(dots.map(element => element.dataset['index'])).toEqual(segments.map(element => element.dataset['index']));
+  });
   beforeEach(() => mk().compileComponents());
 
   it('should render', async () => {
@@ -37,7 +46,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('items', ITEMS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._usedSum()).toBe(100);
+    expect(comp['_usedSum']()).toBe(100);
   });
 
   it('_effectiveTotal should use provided total when >0', async () => {
@@ -46,7 +55,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 200);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._effectiveTotal()).toBe(200);
+    expect(comp['_effectiveTotal']()).toBe(200);
   });
 
   it('_effectiveTotal should fallback to usedSum when total=0', async () => {
@@ -55,7 +64,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 0);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._effectiveTotal()).toBe(100);
+    expect(comp['_effectiveTotal']()).toBe(100);
   });
 
   it('_segments should compute correct percentages summing to 100', async () => {
@@ -63,7 +72,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('items', ITEMS);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    const sum = comp._segments().reduce((s: number, seg: any) => s + seg.pct, 0);
+    const sum = comp['_segments']().reduce((s: number, seg: any) => s + seg.pct, 0);
     expect(Math.round(sum)).toBe(100);
   });
 
@@ -73,7 +82,7 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 100);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._segments()[0].pct).toBe(100);
+    expect(comp['_segments']()[0].pct).toBe(100);
   });
 
   it('should render legend when showLegend=true', async () => {
@@ -110,6 +119,49 @@ describe('NeuMeterGroupComponent', () => {
     f.componentRef.setInput('total', 0);
     f.detectChanges();
     const comp = f.componentInstance as any;
-    expect(comp._effectiveTotal()).toBe(1);
+    expect(comp['_effectiveTotal']()).toBe(1);
+  });
+
+  it('clamps negative and overflowing values and keeps duplicate labels renderable', async () => {
+    const f = TestBed.createComponent(NeuMeterGroupComponent);
+    f.componentRef.setInput('items', [
+      { label: 'Repeated', value: -10 },
+      { label: 'Repeated', value: 150 },
+    ]);
+    f.componentRef.setInput('total', 100);
+    f.detectChanges();
+    await f.whenStable();
+    const meter = f.nativeElement.querySelector('[role="meter"]');
+    expect(meter.getAttribute('aria-valuenow')).toBe('100');
+    expect(f.nativeElement.querySelectorAll('.neu-meter-group__segment')).toHaveLength(2);
+    expect(f.nativeElement.querySelector('.neu-meter-group__legend').getAttribute('aria-hidden')).toBeNull();
+  });
+
+  it('bounds aggregate and segment widths for overflowing and non-finite values', () => {
+    const f = TestBed.createComponent(NeuMeterGroupComponent);
+    const items = Object.freeze([
+      Object.freeze({ label: 'A', value: 80 }),
+      Object.freeze({ label: 'B', value: 80 }),
+      Object.freeze({ label: 'C', value: Number.NaN }),
+    ]);
+    f.componentRef.setInput('items', items);
+    f.componentRef.setInput('total', 100);
+    f.detectChanges();
+    const meter = f.nativeElement.querySelector('[role="meter"]');
+    expect(meter.getAttribute('aria-valuenow')).toBe('100');
+    const widths = [...f.nativeElement.querySelectorAll('.neu-meter-group__segment')]
+      .map((segment: Element) => Number.parseFloat((segment as HTMLElement).style.width));
+    expect(widths).toEqual([80, 20, 0]);
+    expect(items[0].value).toBe(80);
+  });
+
+  it('preserves meaningful legend labels without treating segments as separate live controls', () => {
+    const f = TestBed.createComponent(NeuMeterGroupComponent);
+    f.componentRef.setInput('items', ITEMS);
+    f.componentRef.setInput('ariaLabel', 'Capacity');
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('[role="meter"]')?.getAttribute('aria-label')).toBe('Capacity');
+    expect(f.nativeElement.querySelectorAll('.neu-meter-group__legend-item')).toHaveLength(3);
+    expect(f.nativeElement.querySelectorAll('.neu-meter-group__segment[role]')).toHaveLength(0);
   });
 });

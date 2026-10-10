@@ -1,3 +1,7 @@
+neu-radio-group[hidden] {
+  display: none !important;
+}
+
 // ---- Radio Group ----
 
 .neu-radio-group {
@@ -20,7 +24,6 @@
 .neu-radio {
   display: inline-flex;
   align-items: center;
-  min-width: 24px;
   min-height: 24px;
   gap: var(--neu-space-3);
   cursor: pointer;
@@ -65,7 +68,6 @@
 
   &--checked {
     border-color: var(--neu-primary);
-    box-shadow: var(--neu-focus-ring);
   }
 }
 
@@ -87,5 +89,21 @@
   font-size: var(--neu-text-sm);
   color: var(--neu-text);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.4;
+}
+
+@media (pointer: coarse) {
+  .neu-radio {
+    min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-radio__circle--checked {
+    border-color: Highlight;
+  }
+
+  .neu-radio__dot {
+    background: Highlight;
+  }
 }

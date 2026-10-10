@@ -1,359 +1,237 @@
-import { Component } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { Directionality } from '@angular/cdk/bidi';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { vi } from 'vitest';
 import { NeuRatingComponent } from './neu-rating.component';
 
-@Component({
-  imports: [NeuRatingComponent, ReactiveFormsModule],
-  template: `<neu-rating [formControl]="control" />`,
-})
-class RatingFormHostComponent {
-  readonly control = new FormControl(2, { nonNullable: true });
-}
-
-function mk(inputs: Record<string, unknown> = {}) {
-  const f = TestBed.createComponent(NeuRatingComponent);
-  for (const [k, v] of Object.entries(inputs)) {
-    f.componentRef.setInput(k, v);
-  }
-  f.detectChanges();
-  return { f, comp: f.componentInstance as any };
-}
-
 describe('NeuRatingComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({}).compileComponents();
-  });
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
 
-  // ── Rendering ─────────────────────────────────────────────────────────────
+  function mount(inputs: Record<string, unknown> = {}) {
+    const fixture = TestBed.createComponent(NeuRatingComponent);
+    for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+    fixture.detectChanges();
+    return {
+      fixture,
+      component: fixture.componentInstance,
+      root: fixture.nativeElement.querySelector('.neu-rating') as HTMLElement,
+      buttons: () =>
+        Array.from(
+          (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+            '.neu-rating__star',
+          ),
+        ),
+    };
+  }
 
-  it('should render 5 stars by default', () => {
-    const { f } = mk();
-    const stars = f.nativeElement.querySelectorAll('button');
-    expect(stars.length).toBe(5);
-  });
-
-  it('should render custom number of stars', () => {
-    const { f } = mk({ stars: 3 });
-    const stars = f.nativeElement.querySelectorAll('button');
-    expect(stars.length).toBe(3);
-  });
-
-  it('should generate unique SVG gradient ids across component instances', () => {
-    @Component({
-      imports: [NeuRatingComponent],
-      template: `<neu-rating [value]="2.5" /><neu-rating [value]="2.5" />`,
-    })
-    class MultipleRatingsHost {}
-
-    const multiple = TestBed.createComponent(MultipleRatingsHost);
-    multiple.detectChanges();
-    const gradients = [...multiple.nativeElement.querySelectorAll('linearGradient')] as Element[];
-    const ids = gradients.map((gradient) => gradient.id);
-    const halfPolygons = [
-      ...multiple.nativeElement.querySelectorAll('.neu-rating__star--half polygon'),
-    ] as Element[];
-
-    expect(new Set(ids).size).toBe(ids.length);
-    halfPolygons.forEach((polygon) => {
-      const referencedId = polygon.getAttribute('fill')?.match(/^url\(#(.+)\)$/)?.[1];
-      expect(referencedId).toBeTruthy();
-      expect(ids).toContain(referencedId!);
-    });
-  });
-
-  it('starsArray should contain 1..stars', () => {
-    const { comp } = mk({ stars: 4 });
-    expect(comp.starsArray()).toEqual([1, 2, 3, 4]);
-  });
-
-  it('should apply readonly class when readonly=true', () => {
-    const { f } = mk({ readonly: true });
-    expect(f.nativeElement.querySelector('.neu-rating--readonly')).toBeTruthy();
-  });
-
-  it('should expose radiogroup semantics only when interactive', () => {
-    const { f } = mk({ value: 2, stars: 5 });
-    const root = f.nativeElement.querySelector('.neu-rating');
+  it('renders an empty nullable five-star radiogroup by default', () => {
+    const { component, root, buttons } = mount();
+    expect(component.value()).toBeNull();
+    expect(buttons()).toHaveLength(5);
     expect(root.getAttribute('role')).toBe('radiogroup');
-    expect(root.getAttribute('aria-label')).toContain('2 de 5');
+    expect(root.getAttribute('aria-label')).toContain('No rating');
+    expect(buttons().every((button) => button.getAttribute('aria-checked') === 'false')).toBe(true);
+    expect(buttons()[0].tabIndex).toBe(0);
   });
 
-  it('should remove radiogroup role when readonly=true', () => {
-    const { f } = mk({ readonly: true, value: 4, stars: 5 });
-    const root = f.nativeElement.querySelector('.neu-rating');
-    expect(root.hasAttribute('role')).toBe(false);
+  it('selects an integer and clears to null when the selected star is activated again', () => {
+    const { component, buttons } = mount();
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    buttons()[2].click();
+    buttons()[2].click();
+    expect(component.value()).toBeNull();
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([3, null]);
   });
 
-  it('buttons should be disabled when readonly=true', () => {
-    const { f } = mk({ readonly: true });
-    const buttons: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
-    buttons.forEach((btn) => expect(btn.disabled).toBe(true));
+  it('does not emit when select receives the same value and clamps out-of-range selections', () => {
+    const { component } = mount({ value: 3 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    component.select(3);
+    component.select(99);
+    component.select(-10);
+    expect(component.value()).toBe(1);
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([5, 1]);
   });
 
-  it('integrates with reactive forms and propagates value, touched and disabled state', () => {
-    const f = TestBed.createComponent(RatingFormHostComponent);
-    f.detectChanges();
-    const rating = f.debugElement.query(By.directive(NeuRatingComponent))
-      .componentInstance as NeuRatingComponent;
-
-    expect(rating.currentValue()).toBe(2);
-    rating.select(4);
-    expect(f.componentInstance.control.value).toBe(4);
-    expect(f.componentInstance.control.touched).toBe(true);
-
-    f.componentInstance.control.setValue(3);
-    f.detectChanges();
-    expect(rating.currentValue()).toBe(3);
-
-    f.componentInstance.control.disable();
-    f.detectChanges();
-    expect(rating.cvaDisabled()).toBe(true);
-    expect((f.nativeElement.querySelector('button') as HTMLButtonElement).disabled).toBe(true);
+  it('accepts external number/null writes without echo and reset preserves the form value', () => {
+    const { fixture, component, buttons } = mount({ value: 2 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    fixture.componentRef.setInput('value', null);
+    fixture.detectChanges();
+    component.reset();
+    expect(component.value()).toBeNull();
+    expect(buttons().every((button) => button.getAttribute('aria-checked') === 'false')).toBe(true);
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  // ── Filled stars ──────────────────────────────────────────────────────────
-
-  it('should mark filled stars based on value', () => {
-    const { f } = mk({ value: 3 });
-    const filled = f.nativeElement.querySelectorAll('.neu-rating__star--filled');
-    expect(filled.length).toBe(3);
+  it('supports arrows, Home and End without clearing at a keyboard boundary', () => {
+    const { component, buttons } = mount({ value: 2 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    buttons()[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    buttons()[2].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
+    );
+    buttons()[4].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    buttons()[4].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+    );
+    expect(component.value()).toBe(1);
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([3, 5, 1]);
   });
 
-  it('should mark half star for non-integer value', () => {
-    const { f } = mk({ value: 2.5 });
-    const halfStars = f.nativeElement.querySelectorAll('.neu-rating__star--half');
-    expect(halfStars.length).toBe(1);
+  it('uses Enter/Space as explicit select and same-value clear gestures', () => {
+    const { component, buttons } = mount({ value: 4 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    buttons()[3].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    buttons()[3].dispatchEvent(
+      new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }),
+    );
+    expect(component.value()).toBe(4);
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([null, 4]);
   });
 
-  it('should set aria-checked on the exact selected star', () => {
-    const { f } = mk({ value: 3, stars: 5 });
-    const buttons: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
-    expect(buttons[2].getAttribute('aria-checked')).toBe('true');
-    expect(buttons[1].getAttribute('aria-checked')).toBe('false');
-    expect(buttons[3].getAttribute('aria-checked')).toBe('false');
+  it('keeps readonly radios focusable while blocking hover, click and keyboard mutation', () => {
+    const { component, root, buttons } = mount({ value: 3, readonly: true });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    component.focus();
+    buttons()[1].dispatchEvent(new Event('mouseenter'));
+    buttons()[1].click();
+    buttons()[2].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons()[2]);
+    expect(root.getAttribute('aria-readonly')).toBe('true');
+    expect(buttons()[2].disabled).toBe(false);
+    expect(component.value()).toBe(3);
+    expect(component.getFill(2)).toBe('currentColor');
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  // ── select / valueChange ──────────────────────────────────────────────────
-
-  it('clicking a star should emit valueChange', () => {
-    const { f, comp } = mk({ value: 0 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    const buttons: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
-    buttons[2].click();
-    expect(emitted).toEqual([3]);
+  it('fully disables every radio and removes the group from the roving tab stop', () => {
+    const { component, root, buttons } = mount({ value: 3, disabled: true });
+    component.select(4);
+    expect(root.getAttribute('aria-disabled')).toBe('true');
+    expect(buttons().every((button) => button.disabled && button.tabIndex === -1)).toBe(true);
+    expect(component.value()).toBe(3);
   });
 
-  it('should NOT emit when readonly', () => {
-    const { f, comp } = mk({ readonly: true, value: 1 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    const buttons: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
-    if (buttons.length) buttons[0].click();
-    expect(emitted.length).toBe(0);
+  it('emits touch only when focus leaves the composite radiogroup', () => {
+    const { component, root, buttons } = mount({ value: 2 });
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    buttons()[1].focus();
+    root.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: buttons()[2] }));
+    expect(touched).not.toHaveBeenCalled();
+    root.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    expect(touched).toHaveBeenCalledTimes(1);
   });
 
-  it('select(0) should clamp to 1', () => {
-    const { comp } = mk({ value: 3, stars: 5 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    comp.select(0);
-    expect(emitted).toEqual([1]);
+  it('projects official validation and accessibility state', () => {
+    const { fixture, root } = mount({
+      label: 'Product score',
+      ariaDescribedBy: 'rating-help',
+      required: true,
+      invalid: true,
+      pending: true,
+    });
+    expect(root.getAttribute('aria-label')).toBe('Product score');
+    expect(root.getAttribute('aria-describedby')).toBe('rating-help');
+    expect(root.getAttribute('aria-required')).toBe('true');
+    expect(root.getAttribute('aria-invalid')).toBe('true');
+    expect(root.getAttribute('aria-busy')).toBe('true');
+    expect(fixture.nativeElement.querySelector('.neu-rating--invalid')).toBeTruthy();
   });
 
-  it('select(10) with stars=5 should clamp to 5', () => {
-    const { comp } = mk({ value: 3, stars: 5 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    comp.select(10);
-    expect(emitted).toEqual([5]);
+  it('renders only whole-star P1 state for a defensive fractional parent value', () => {
+    const { fixture, component } = mount({ value: 2.5 });
+    expect(component.value()).toBe(2.5);
+    expect(component.selectedValue()).toBe(3);
+    expect(fixture.nativeElement.querySelector('.neu-rating__star--half')).toBeNull();
+    expect(fixture.nativeElement.querySelector('linearGradient')).toBeNull();
   });
 
-  it('select should not emit when readonly', () => {
-    const { comp } = mk({ readonly: true, value: 2 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    comp.select(4);
-    expect(emitted.length).toBe(0);
+  it('offers discrete half-step radios and preserves a fractional applied value', () => {
+    const { component, root, buttons } = mount({ value: 2.5, step: 0.5 });
+    expect(buttons()).toHaveLength(10);
+    expect(component.value()).toBe(2.5);
+    expect(component.selectedValue()).toBe(2.5);
+    expect(root.querySelectorAll('[aria-checked="true"]')).toHaveLength(1);
+    expect(buttons()[4].getAttribute('aria-label')).toBe('2.5 stars');
+    expect(buttons()[4].classList.contains('neu-rating__star--half')).toBe(true);
   });
 
-  // ── onHover / onLeave ─────────────────────────────────────────────────────
-
-  it('onHover sets hovered signal', () => {
-    const { comp } = mk({ value: 0 });
-    comp.onHover(3);
-    expect(comp.hovered()).toBe(3);
+  it('keeps each pair of half-step radios in one visual star when wrapping', () => {
+    const { root } = mount({ step: 0.5 });
+    const items = Array.from(root.querySelectorAll('.neu-rating__item'));
+    expect(items).toHaveLength(5);
+    expect(items.map((item) =>
+      Array.from(item.querySelectorAll('button')).map((button) =>
+        Number(button.getAttribute('data-neu-rating-value')),
+      ),
+    )).toEqual([[0.5, 1], [1.5, 2], [2.5, 3], [3.5, 4], [4.5, 5]]);
+    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
   });
 
-  it('onLeave resets hovered to null', () => {
-    const { comp } = mk({ value: 0 });
-    comp.onHover(3);
-    comp.onLeave();
-    expect(comp.hovered()).toBeNull();
+  it('selects and clears a half rating exactly once per user activation', () => {
+    const { component, buttons } = mount({ step: 0.5 });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    buttons()[2].click();
+    buttons()[2].click();
+    expect(changes.mock.calls.map(([value]) => value)).toEqual([1.5, null]);
   });
 
-  it('onHover does nothing when readonly', () => {
-    const { comp } = mk({ readonly: true, value: 0 });
-    comp.onHover(3);
-    expect(comp.hovered()).toBeNull();
+  it('moves by half steps with RTL-aware arrows and bounds', () => {
+    const { component, root, buttons } = mount({ value: 2.5, step: 0.5 });
+    root.style.direction = 'rtl';
+    buttons()[4].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(3);
+    buttons()[5].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(0.5);
   });
 
-  // ── getFill ───────────────────────────────────────────────────────────────
-
-  it('getFill returns currentColor for filled star', () => {
-    const { comp } = mk({ value: 3 });
-    expect(comp.getFill(1)).toBe('currentColor');
-    expect(comp.getFill(3)).toBe('currentColor');
+  it('bounds invalid runtime step configuration to the certified integer mode', () => {
+    const { component, buttons } = mount({ step: 0 });
+    expect(component.resolvedStep()).toBe(1);
+    expect(buttons()).toHaveLength(5);
   });
 
-  it('getFill returns url(#half-N) for half star', () => {
-    const { comp } = mk({ value: 2.5 });
-    expect(comp.getFill(3)).toBe(`url(#${comp.gradientId(3)})`);
+  it('falls back from a nonfinite star count and previews only editable hover values', () => {
+    const { fixture, component, buttons } = mount({ stars: Number.NaN });
+    expect(buttons()).toHaveLength(5);
+    component.onHover(3);
+    expect(component.getFill(3)).toBe('currentColor');
+    component.onLeave();
+    expect(component.getFill(3)).toBe('transparent');
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    component.onHover(4);
+    expect(component.getFill(4)).toBe('transparent');
   });
 
-  it('getFill returns transparent for unfilled star', () => {
-    const { comp } = mk({ value: 2 });
-    expect(comp.getFill(3)).toBe('transparent');
-    expect(comp.getFill(5)).toBe('transparent');
-  });
-
-  it('getFill uses hovered value when hovered is set', () => {
-    const { comp } = mk({ value: 1 });
-    comp.onHover(4);
-    expect(comp.getFill(4)).toBe('currentColor');
-    expect(comp.getFill(5)).toBe('transparent');
-  });
-
-  it('mouseenter and mouseleave on a star should update the rendered hover state', () => {
-    const { f } = mk({ value: 1, stars: 5 });
-    const buttons: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('button');
-    buttons[3].dispatchEvent(new Event('mouseenter', { bubbles: true }));
-    f.detectChanges();
-    expect(f.nativeElement.querySelectorAll('.neu-rating__star--filled').length).toBe(4);
-    buttons[3].dispatchEvent(new Event('mouseleave', { bubbles: true }));
-    f.detectChanges();
-    expect(f.nativeElement.querySelectorAll('.neu-rating__star--filled').length).toBe(1);
-  });
-
-  // ── isInteger ─────────────────────────────────────────────────────────────
-
-  it('isInteger returns true for integer', () => {
-    const { comp } = mk();
-    expect(comp.isInteger(3)).toBe(true);
-    expect(comp.isInteger(0)).toBe(true);
-  });
-
-  it('isInteger returns false for non-integer', () => {
-    const { comp } = mk();
-    expect(comp.isInteger(3.5)).toBe(false);
-    expect(comp.isInteger(2.1)).toBe(false);
-  });
-
-  // ── Keyboard ──────────────────────────────────────────────────────────────
-
-  it('uses a single roving tab stop on the selected star', () => {
-    const { f } = mk({ value: 3, stars: 5 });
-    const buttons = [...f.nativeElement.querySelectorAll('button')] as HTMLButtonElement[];
-
-    expect(buttons.map((button) => button.tabIndex)).toEqual([-1, -1, 0, -1, -1]);
-  });
-
-  it('uses the first star as the tab stop when no value is selected', () => {
-    const { f } = mk({ value: 0, stars: 5 });
-    const buttons = [...f.nativeElement.querySelectorAll('button')] as HTMLButtonElement[];
-
-    expect(buttons.map((button) => button.tabIndex)).toEqual([0, -1, -1, -1, -1]);
-  });
-
-  it('onHover should update _hoverValue and onLeave should reset it', () => {
-    const { comp } = mk({ value: 2, stars: 5 });
-    comp.onHover(4);
-    // The internal signal is 'hovered', not '_hoverValue'
-    expect((comp as any).hovered()).toBe(4);
-    comp.onLeave();
-    expect((comp as any).hovered()).toBeNull();
-  });
-
-  it('select with out-of-range value should clamp', () => {
-    const { comp } = mk({ value: 5, stars: 5 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    // Even out-of-range should emit
-    comp.select(6);
-    expect(emitted.length).toBe(1);
-  });
-
-  it('moves selection and focus with horizontal arrows', () => {
-    const { f, comp } = mk({ value: 3, stars: 5 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((v: number) => emitted.push(v));
-    const buttons = [...f.nativeElement.querySelectorAll('button')] as HTMLButtonElement[];
-    const stars = f.debugElement.queryAll(By.css('.neu-rating__star'));
-
-    buttons[2].focus();
-    stars[2].triggerEventHandler('keydown.arrowright', {
-      currentTarget: buttons[2],
-      preventDefault: vi.fn(),
-    } as unknown as KeyboardEvent);
-
-    expect(emitted).toEqual([4]);
-    expect(document.activeElement).toBe(buttons[3]);
-    expect(comp.activeStar()).toBe(4);
-  });
-
-  it('wraps arrows and supports Home, End, ArrowUp and ArrowDown', () => {
-    const { f, comp } = mk({ value: 1, stars: 5 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((value: number) => emitted.push(value));
-    const buttons = [...f.nativeElement.querySelectorAll('button')] as HTMLButtonElement[];
-    const stars = f.debugElement.queryAll(By.css('.neu-rating__star'));
-    const eventFor = (button: HTMLButtonElement) =>
-      ({ currentTarget: button, preventDefault: vi.fn() }) as unknown as KeyboardEvent;
-
-    stars[0].triggerEventHandler('keydown.arrowleft', eventFor(buttons[0]));
-    stars[4].triggerEventHandler('keydown.home', eventFor(buttons[4]));
-    stars[0].triggerEventHandler('keydown.end', eventFor(buttons[0]));
-    stars[4].triggerEventHandler('keydown.arrowup', eventFor(buttons[4]));
-    stars[3].triggerEventHandler('keydown.arrowdown', eventFor(buttons[3]));
-
-    expect(emitted).toEqual([5, 1, 5, 4, 5]);
-  });
-
-  it('reverses horizontal keyboard movement and half fill in RTL', () => {
-    const { f, comp } = mk({ value: 3.5, stars: 5 });
-    const emitted: number[] = [];
-    comp.valueChange.subscribe((value: number) => emitted.push(value));
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-    const buttons = [...f.nativeElement.querySelectorAll('button')] as HTMLButtonElement[];
-    const stars = f.debugElement.queryAll(By.css('.neu-rating__star'));
-
-    stars[3].triggerEventHandler('keydown.arrowleft', {
-      currentTarget: buttons[3],
-      preventDefault: vi.fn(),
-    } as unknown as KeyboardEvent);
-    f.detectChanges();
-
-    expect(emitted).toEqual([5]);
-    expect(document.activeElement).toBe(buttons[4]);
-    const gradient = f.nativeElement.querySelector(`#${comp.gradientId(4)}`);
-    expect(gradient.getAttribute('x1')).toBe('1');
-    expect(gradient.getAttribute('x2')).toBe('0');
-  });
-
-  it('getFill should return half gradient when hovered value is fractional', () => {
-    const { comp } = mk({ value: 1, stars: 5 });
-    comp.hovered.set(2.5);
-
-    expect(comp.getFill(3)).toBe(`url(#${comp.gradientId(3)})`);
-  });
-
-  it('getFill should prefer hovered value over selected value for transparent stars', () => {
-    const { comp } = mk({ value: 4, stars: 5 });
-    comp.hovered.set(2);
-
-    expect(comp.getFill(3)).toBe('transparent');
+  it('supports upward and backward keyboard movement while leaving other keys alone', () => {
+    const { component, buttons } = mount({ value: 3 });
+    const ignored = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    component.onKeyDown(3, ignored);
+    expect(ignored.defaultPrevented).toBe(false);
+    buttons()[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(2);
+    buttons()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }));
+    expect(component.value()).toBe(1);
+    component.focus();
+    expect(document.activeElement).toBe(buttons()[0]);
   });
 });

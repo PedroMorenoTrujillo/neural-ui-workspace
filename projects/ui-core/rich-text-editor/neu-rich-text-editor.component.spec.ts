@@ -1,519 +1,354 @@
-import { Component } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { provideIcons } from '@ng-icons/core';
-import {
-  lucideBold,
-  lucideEraser,
-  lucideImage,
-  lucideItalic,
-  lucideLink,
-  lucideList,
-  lucideListOrdered,
-  lucideUnderline,
-} from '@ng-icons/lucide';
+import { vi } from 'vitest';
 import { NeuRichTextEditorComponent } from './neu-rich-text-editor.component';
-import {
-  escapeRichTextAttribute,
-  escapeRichTextHtml,
-  normalizeRichTextHtml,
-  plainTextToRichTextHtml,
-  sanitizeRichTextHtml,
-} from './neu-rich-text-editor.utils';
+import { sanitizeRichTextHtml } from './neu-rich-text-editor.utils';
 
-function createComponent(inputs: Record<string, unknown> = {}) {
+async function setup(inputs: Record<string, unknown> = {}) {
   const fixture = TestBed.createComponent(NeuRichTextEditorComponent);
-  for (const [key, value] of Object.entries(inputs)) {
-    fixture.componentRef.setInput(key, value);
-  }
+  for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
   fixture.detectChanges();
-  return { fixture, component: fixture.componentInstance as any };
+  await fixture.whenStable();
+  fixture.detectChanges();
+  return fixture;
 }
 
-describe('NeuRichTextEditorComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      providers: [
-        provideIcons({
-          lucideBold,
-          lucideEraser,
-          lucideImage,
-          lucideItalic,
-          lucideLink,
-          lucideList,
-          lucideListOrdered,
-          lucideUnderline,
-        }),
-      ],
-    }).compileComponents();
-  });
+function clipboard(data: Record<string, string>, files: File[] = []): ClipboardEvent {
+  return {
+    preventDefault: vi.fn(),
+    clipboardData: {
+      files,
+      getData: (type: string) => data[type] ?? '',
+    },
+  } as unknown as ClipboardEvent;
+}
 
-  it('should render toolbar and editable surface', () => {
-    const { fixture } = createComponent({ label: 'Contenido' });
-    expect(fixture.nativeElement.querySelector('.neu-rich-text-editor__toolbar')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.neu-rich-text-editor__surface')).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain('Contenido');
-  });
-
-  it('writeValue should normalize plain text to html', () => {
-    const { component } = createComponent();
-    component.writeValue('Hola\nMundo');
-    expect(component.value()).toBe('<p>Hola<br>Mundo</p>');
-    component.writeValue(null);
-    expect(component.value()).toBe('');
-  });
-
-  it('should emit sanitized value when content changes', () => {
-    const { fixture, component } = createComponent();
-    const onChange = vi.fn();
-    const valueChange = vi.spyOn(component.valueChange, 'emit');
-    component.registerOnChange(onChange);
-
-    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    );
-    surface.innerHTML = '<p>Hola</p><script>alert(1)</script>';
-    surface.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(component.value()).toBe('<p>Hola</p>');
-    expect(onChange).toHaveBeenCalledWith('<p>Hola</p>');
-    expect(valueChange).toHaveBeenCalledWith('<p>Hola</p>');
-  });
-
-  it('should render variable buttons and insert selected variable', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const { fixture } = createComponent({ variables: ['{{nombre}}'] });
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__variable',
-    );
-    button.click();
-    expect(execCommand).toHaveBeenCalledWith('insertHTML', false, '{{nombre}}');
-  });
-
-  it('should apply configurable accessible toolbar labels', () => {
-    const { fixture } = createComponent({
-      labels: {
-        toolbar: 'Editor enriquecido',
-        bold: 'Aplicar negrita',
-      },
+describe('NeuRichTextEditorComponent N2-009', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: vi.fn((_command: string, _showUi?: boolean, value?: string) => {
+        if (value) {
+          const editor = document.querySelector('.neu-rich-text-editor__surface');
+          if (editor) editor.innerHTML += value;
+        }
+        return true;
+      }),
     });
-
-    const toolbar: HTMLElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__toolbar',
-    );
-    const boldButton: HTMLButtonElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__toolbar button',
-    );
-
-    expect(toolbar.getAttribute('aria-label')).toBe('Editor enriquecido');
-    expect(boldButton.getAttribute('aria-label')).toBe('Aplicar negrita');
-    expect(boldButton.getAttribute('title')).toBe('Aplicar negrita');
   });
 
-  it('should provide an accessible name for the editable surface', () => {
-    const { fixture } = createComponent({ label: 'Contenido' });
-    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    );
-
-    expect(surface.getAttribute('aria-labelledby')).toBe(`${surface.id}-label`);
-    expect(surface.getAttribute('aria-label')).toBeNull();
-  });
-
-  it('should fall back to the toolbar label as editable surface name', () => {
-    const { fixture } = createComponent({ labels: { toolbar: 'Editor enriquecido' } });
-    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    );
-
-    expect(surface.getAttribute('aria-label')).toBe('Editor enriquecido');
-    expect(surface.getAttribute('aria-labelledby')).toBeNull();
-  });
-
-  it('should disable contenteditable when disabled through CVA', () => {
-    const { fixture, component } = createComponent();
-    component.setDisabledState(true);
+  it('renders sanitized parent HTML without echoing the write', async () => {
+    const fixture = await setup();
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    fixture.componentRef.setInput('value', '<p onclick="bad()">Safe</p><script>bad()</script>');
     fixture.detectChanges();
-    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    );
-    expect(surface.getAttribute('contenteditable')).toBe('false');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface');
+    expect(editor.innerHTML).toBe('<p>Safe</p>');
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  it('should integrate with reactive forms', async () => {
-    await TestBed.configureTestingModule({ imports: [ReactiveFormsModule] }).compileComponents();
+  it('preserves safe attribute semantics across sanitization', () => {
+    const input = '<a href="https://example.test/?a=1&amp;b=2"\n   title="A &amp; B">link</a>';
+    const once = sanitizeRichTextHtml(input);
+    const twice = sanitizeRichTextHtml(once);
+    const host = document.createElement('div');
+    host.innerHTML = once;
+    const anchor = host.querySelector('a')!;
 
-    @Component({
-      template: `<neu-rich-text-editor [formControl]="control" />`,
-      imports: [NeuRichTextEditorComponent, ReactiveFormsModule],
-    })
-    class HostComponent {
-      control = new FormControl('');
-    }
-
-    const fixture = TestBed.createComponent(HostComponent);
-    fixture.detectChanges();
-    const surface: HTMLDivElement = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    );
-    surface.innerHTML = '<p>Contenido</p>';
-    surface.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(fixture.componentInstance.control.value).toBe('<p>Contenido</p>');
+    expect(anchor.href).toBe('https://example.test/?a=1&b=2');
+    expect(new URL(anchor.href).searchParams.get('a')).toBe('1');
+    expect(new URL(anchor.href).searchParams.get('b')).toBe('2');
+    expect(anchor.title).toBe('A & B');
+    expect(twice).toBe(once);
   });
 
-  it('formats only when editable and tracks focus and blur', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const { fixture, component } = createComponent();
-    const surface = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    ) as HTMLDivElement;
-    let touched = 0;
-    component.registerOnTouched(() => touched++);
-    surface.dispatchEvent(new Event('focus'));
-    expect(component.focused()).toBe(true);
+  it('renders an applied entity-bearing link without an initial value echo', async () => {
+    const fixture = await setup();
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    const applied = '<a href="https://example.test/?a=1&amp;b=2" title="A &amp; B">link</a>';
+
+    fixture.componentRef.setInput('value', applied);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    const anchor = editor.querySelector('a')!;
+    expect(anchor.href).toBe('https://example.test/?a=1&b=2');
+    expect(anchor.title).toBe('A & B');
+    expect(fixture.componentInstance.value()).toBe(applied);
+    expect(changes).not.toHaveBeenCalled();
+
+    editor.append(document.createTextNode('!'));
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(new URL(editor.querySelector('a')!.href).searchParams.get('b')).toBe('2');
+    expect(editor.querySelector('a')!.title).toBe('A & B');
+    expect(changes).toHaveBeenCalledTimes(1);
+    expect(sanitizeRichTextHtml(fixture.componentInstance.value())).toBe(fixture.componentInstance.value());
+  });
+
+  it('inserts a query-bearing link without escaping its URL twice', async () => {
+    const fixture = await setup();
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.test/?a=1&b=2')
+      .mockReturnValueOnce('A & B');
+
+    fixture.componentInstance.addLink();
+
+    const anchor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface a') as HTMLAnchorElement;
+    expect(anchor.href).toBe('https://example.test/?a=1&b=2');
+    expect(new URL(anchor.href).searchParams.get('b')).toBe('2');
+    expect(anchor.textContent).toBe('A & B');
+    expect(fixture.componentInstance.value()).not.toContain('&amp;amp;');
+    prompt.mockRestore();
+  });
+
+  it('leaves content unchanged when a link prompt is cancelled and uses safe image alt fallback', async () => {
+    const fixture = await setup({ value: '<p>Initial</p>' });
+    const component = fixture.componentInstance;
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce('https://example.test/image.png')
+      .mockReturnValueOnce(null);
+
+    component.addLink();
+    expect(component.value()).toBe('<p>Initial</p>');
+    expect(changes).not.toHaveBeenCalled();
+    component.addImageUrl();
+    const image = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface img') as HTMLImageElement;
+    expect(image.src).toBe('https://example.test/image.png');
+    expect(image.alt.length).toBeGreaterThan(0);
+    expect(component.value()).not.toContain('javascript:');
+    prompt.mockRestore();
+  });
+
+  it('publishes one sanitized value for one native input', async () => {
+    const fixture = await setup({ value: '<p>Initial</p>' });
+    const component = fixture.componentInstance;
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    editor.innerHTML = '<p onmouseover="bad()">Edited</p>';
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(component.value()).toBe('<p>Edited</p>');
+    expect(changes).toHaveBeenCalledExactlyOnceWith('<p>Edited</p>');
+  });
+
+  it('sanitizes rich paste and escapes plain text paste', async () => {
+    const fixture = await setup();
+    const component = fixture.componentInstance;
+    component.handlePaste(
+      clipboard({ 'text/html': '<a href="javascript:bad()">Bad</a><strong>Good</strong>' }),
+    );
+    expect(component.value()).toContain('<strong>Good</strong>');
+    expect(component.value()).not.toContain('javascript:');
+
+    component.handlePaste(clipboard({ 'text/plain': '<unsafe>\n\nSecond' }));
+    expect(component.value()).toContain('&lt;unsafe&gt;');
+    expect(component.value()).toContain('<p>Second</p>');
+  });
+
+  it('uses labels.toolbar and exposes no toolbarAriaLabel bridge', async () => {
+    const fixture = await setup({ labels: { toolbar: 'Formatting tools' } });
+    expect(
+      fixture.nativeElement.querySelector('[role="toolbar"]').getAttribute('aria-label'),
+    ).toBe('Formatting tools');
+    expect('toolbarAriaLabel' in fixture.componentInstance).toBe(false);
+  });
+
+  it('supports formatting, links, images and variables through sanitized HTML', async () => {
+    const fixture = await setup({ variables: ['{{name}}'] });
+    const component = fixture.componentInstance;
+    const prompt = vi
+      .spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.com')
+      .mockReturnValueOnce('Example')
+      .mockReturnValueOnce('https://example.com/image.png')
+      .mockReturnValueOnce('Image');
     component.format('bold');
-    expect(execCommand).toHaveBeenCalledWith('bold');
-    surface.dispatchEvent(new Event('blur'));
-    expect(component.focused()).toBe(false);
-    expect(touched).toBe(1);
-
-    fixture.componentRef.setInput('readonly', true);
-    fixture.detectChanges();
-    component.format('italic');
-    expect(execCommand).toHaveBeenCalledTimes(1);
-  });
-
-  it('inserts escaped links and images from prompts', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const prompt = vi.spyOn(window, 'prompt');
-    prompt.mockReturnValueOnce('https://example.com?a=1').mockReturnValueOnce('A <link>');
-    const { component } = createComponent();
-    component.addLink();
-    expect(execCommand).toHaveBeenCalledWith(
-      'insertHTML',
-      false,
-      '<a href="https://example.com?a=1" target="_blank" rel="noopener noreferrer">A &lt;link&gt;</a>',
-    );
-
-    prompt.mockReturnValueOnce('https://example.com/image.png').mockReturnValueOnce('Diagram');
-    component.addImageUrl();
-    expect(execCommand).toHaveBeenLastCalledWith(
-      'insertHTML',
-      false,
-      '<img src="https://example.com/image.png" alt="Diagram">',
-    );
-    prompt.mockReturnValueOnce(null);
-    component.addLink();
-    expect(execCommand).toHaveBeenCalledTimes(2);
-  });
-
-  it('covers cancelled prompts and URL fallback labels without mutating disabled editors', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const prompt = vi.spyOn(window, 'prompt');
-    const { fixture, component } = createComponent();
-
-    prompt.mockReturnValueOnce('https://example.com/fallback').mockReturnValueOnce('');
-    component.addLink();
-    expect(execCommand).toHaveBeenCalledWith(
-      'insertHTML',
-      false,
-      '<a href="https://example.com/fallback" target="_blank" rel="noopener noreferrer">https://example.com/fallback</a>',
-    );
-
-    prompt.mockReturnValueOnce(null);
-    component.addImageUrl();
-    expect(execCommand).toHaveBeenCalledTimes(1);
-
-    fixture.componentRef.setInput('disabled', true);
-    fixture.detectChanges();
     component.addLink();
     component.addImageUrl();
-    expect(execCommand).toHaveBeenCalledTimes(1);
+    component.insertVariable('{{name}}');
+    expect(document.execCommand).toHaveBeenCalledWith('bold');
+    expect(component.value()).toContain('noopener noreferrer');
+    expect(component.value()).toContain('<img');
+    expect(component.value()).toContain('{{name}}');
+    prompt.mockRestore();
   });
 
-  it('renders error, hint and preview states with the correct aria relationship', () => {
-    const { fixture, component } = createComponent({
-      hint: 'Helpful',
-      showPreview: true,
-      previewLabel: 'Result',
-    });
-    component.writeValue('<p>Preview</p>');
-    fixture.detectChanges();
-    const surface = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    ) as HTMLDivElement;
-    expect(surface.getAttribute('aria-describedby')).toBe(`${surface.id}-hint`);
-    expect(fixture.nativeElement.querySelector('summary')?.textContent).toContain('Result');
-    fixture.componentRef.setInput('errorMessage', 'Required');
-    fixture.detectChanges();
-    expect(surface.getAttribute('aria-invalid')).toBe('true');
-    expect(surface.getAttribute('aria-describedby')).toBe(`${surface.id}-error`);
-    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
-      'Required',
-    );
-  });
-
-  it('sanitizes pasted HTML and converts pasted plain text', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const { component } = createComponent();
-    const preventHtml = vi.fn();
-    component.handlePaste({
-      preventDefault: preventHtml,
-      clipboardData: {
-        files: [],
-        getData: (type: string) => (type === 'text/html' ? '<p onclick="x">Safe</p>' : ''),
-      },
-    } as unknown as ClipboardEvent);
-    expect(preventHtml).toHaveBeenCalled();
-    expect(execCommand).toHaveBeenLastCalledWith('insertHTML', false, '<p>Safe</p>');
-
-    const preventText = vi.fn();
-    component.handlePaste({
-      preventDefault: preventText,
-      clipboardData: {
-        files: [],
-        getData: (type: string) => (type === 'text/plain' ? 'One\n\nTwo' : ''),
-      },
-    } as unknown as ClipboardEvent);
-    expect(execCommand).toHaveBeenLastCalledWith('insertHTML', false, '<p>One</p><p>Two</p>');
-  });
-
-  it('rejects oversized pasted images and ignores paste when disabled', () => {
-    const { fixture, component } = createComponent({ maxPastedImageBytes: 1 });
-    const rejected = vi.spyOn(component.imageRejected, 'emit');
-    const file = new File(['too large'], 'image.png', { type: 'image/png' });
-    component.handlePaste({
-      preventDefault: vi.fn(),
-      clipboardData: { files: [file], getData: () => '' },
-    } as unknown as ClipboardEvent);
-    expect(rejected).toHaveBeenCalledWith({ file, maxBytes: 1, reason: 'size' });
-    fixture.componentRef.setInput('disabled', true);
-    fixture.detectChanges();
-    component.handlePaste({
-      preventDefault: vi.fn(),
-      clipboardData: { files: [], getData: () => 'text' },
-    } as unknown as ClipboardEvent);
-  });
-
-  it('wires every toolbar command and the surface paste listener', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const { fixture } = createComponent();
+  it('routes native toolbar, variable and editor events through the rendered controls', async () => {
+    const fixture = await setup({ label: 'Notes', hint: 'Write a note', variables: ['{{account}}'] });
+    const component = fixture.componentInstance;
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.test')
+      .mockReturnValueOnce('Example')
+      .mockReturnValueOnce('https://example.test/image.png')
+      .mockReturnValueOnce('Photo');
     const buttons = fixture.nativeElement.querySelectorAll(
       '.neu-rich-text-editor__toolbar button',
     ) as NodeListOf<HTMLButtonElement>;
-    buttons[0].click();
-    buttons[1].click();
-    buttons[2].click();
-    buttons[3].click();
-    buttons[4].click();
-    expect(execCommand).toHaveBeenNthCalledWith(1, 'bold');
-    expect(execCommand).toHaveBeenNthCalledWith(2, 'italic');
-    expect(execCommand).toHaveBeenNthCalledWith(3, 'underline');
-    expect(execCommand).toHaveBeenNthCalledWith(4, 'insertUnorderedList');
-    expect(execCommand).toHaveBeenNthCalledWith(5, 'insertOrderedList');
+    expect(buttons).toHaveLength(8);
+    for (const button of buttons) button.click();
+    (fixture.nativeElement.querySelector('.neu-rich-text-editor__variable') as HTMLButtonElement).click();
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLElement;
+    editor.dispatchEvent(new FocusEvent('focus'));
+    editor.dispatchEvent(new FocusEvent('blur'));
+    editor.dispatchEvent(new Event('paste', { bubbles: true, cancelable: true }));
 
-    const prompt = vi.spyOn(window, 'prompt');
-    prompt.mockReturnValueOnce(null).mockReturnValueOnce(null);
-    buttons[5].click();
-    buttons[6].click();
-    buttons[7].click();
-    expect(execCommand).toHaveBeenLastCalledWith('removeFormat');
+    expect(document.execCommand).toHaveBeenCalledWith('bold');
+    expect(document.execCommand).toHaveBeenCalledWith('italic');
+    expect(document.execCommand).toHaveBeenCalledWith('underline');
+    expect(document.execCommand).toHaveBeenCalledWith('insertUnorderedList');
+    expect(document.execCommand).toHaveBeenCalledWith('insertOrderedList');
+    expect(document.execCommand).toHaveBeenCalledWith('removeFormat');
+    expect(component.value()).toContain('https://example.test');
+    expect(component.value()).toContain('{{account}}');
+    expect(editor.getAttribute('aria-describedby')).toBe(`${component.editorId()}-hint`);
+    prompt.mockRestore();
+  });
 
-    const surface = fixture.nativeElement.querySelector(
-      '.neu-rich-text-editor__surface',
-    ) as HTMLDivElement;
-    const paste = new Event('paste', { bubbles: true }) as ClipboardEvent;
-    Object.defineProperty(paste, 'clipboardData', {
-      value: { files: [], getData: (type: string) => (type === 'text/plain' ? 'Pasted' : '') },
+  it('rejects oversized pasted images with domain detail', async () => {
+    const fixture = await setup({ maxPastedImageBytes: 1 });
+    const rejected = vi.fn();
+    fixture.componentInstance.imageRejected.subscribe(rejected);
+    const file = new File(['too large'], 'large.png', { type: 'image/png' });
+    const event = clipboard({}, [file]);
+    fixture.componentInstance.handlePaste(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(rejected).toHaveBeenCalledExactlyOnceWith({
+      file,
+      maxBytes: 1,
+      reason: 'size',
     });
-    surface.dispatchEvent(paste);
-    expect(execCommand).toHaveBeenLastCalledWith('insertHTML', false, '<p>Pasted</p>');
   });
 
-  it('supports legacy toolbar labels and URL insertion with escaped content', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const { component } = createComponent({ toolbarAriaLabel: 'Legacy toolbar' });
-    expect(component.mergedLabels().toolbar).toBe('Legacy toolbar');
-    const prompt = vi.spyOn(window, 'prompt');
-    prompt.mockReturnValueOnce('https://example.com?a=1&b=2').mockReturnValueOnce('<Read>');
-    component.addLink();
-    prompt.mockReturnValueOnce('https://example.com/image.png').mockReturnValueOnce('');
-    component.addImageUrl();
-    expect(execCommand).toHaveBeenNthCalledWith(
-      1,
-      'insertHTML',
-      false,
-      '<a href="https://example.com?a=1&amp;amp;b=2" target="_blank" rel="noopener noreferrer">&lt;Read&gt;</a>',
-    );
-    expect(execCommand).toHaveBeenLastCalledWith(
-      'insertHTML',
-      false,
-      '<img src="https://example.com/image.png" alt="Image">',
-    );
+  it('inserts an allowed pasted image only after its file data resolves', async () => {
+    const fixture = await setup();
+    const component = fixture.componentInstance;
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    const image = new File(['image'], 'small.png', { type: 'image/png' });
+    const event = clipboard({}, [image]);
+
+    component.handlePaste(event);
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+    await vi.waitFor(() => expect(component.value()).toContain('<img'));
+    expect(component.value()).toContain('data:image/png;base64,');
+    expect(changes).toHaveBeenCalledTimes(1);
   });
 
-  it('inserts a valid pasted image through FileReader and honours disabled controls', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const originalFileReader = window.FileReader;
-    class ImmediateFileReader {
-      result: string | ArrayBuffer | null = 'data:image/png;base64,QUJD';
-      onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
-      readAsDataURL(): void {
-        this.onload?.({} as ProgressEvent<FileReader>);
-      }
-    }
-    Object.defineProperty(window, 'FileReader', { configurable: true, value: ImmediateFileReader });
-    try {
-      const { fixture, component } = createComponent();
-      const image = new File(['ok'], 'image.png', { type: 'image/png' });
-      component.handlePaste({
-        preventDefault: vi.fn(),
-        clipboardData: { files: [image], getData: () => '' },
-      } as unknown as ClipboardEvent);
-      expect(execCommand).toHaveBeenCalledWith(
-        'insertHTML',
-        false,
-        '<img src="data:image/png;base64,QUJD" alt="Pasted image">',
-      );
-      fixture.componentRef.setInput('disabled', true);
-      fixture.detectChanges();
-      component.format('bold');
-      component.insertVariable('{{name}}');
-      expect(execCommand).toHaveBeenCalledTimes(1);
-    } finally {
-      Object.defineProperty(window, 'FileReader', {
-        configurable: true,
-        value: originalFileReader,
-      });
-    }
+  it('treats toolbar and editor as one touch and commit boundary', async () => {
+    const fixture = await setup({ value: '<p>Initial</p>' });
+    const component = fixture.componentInstance;
+    const touch = vi.fn();
+    const committed = vi.fn();
+    component.touch.subscribe(touch);
+    component.valueCommitted.subscribe(committed);
+    component.onBoundaryFocusIn();
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface') as HTMLDivElement;
+    editor.innerHTML = '<p>Changed</p>';
+    component.handleInput();
+    const toolbarButton = fixture.nativeElement.querySelector('[role="toolbar"] button');
+    component.onBoundaryFocusOut({
+      relatedTarget: toolbarButton,
+      currentTarget: fixture.nativeElement,
+    } as unknown as FocusEvent);
+    expect(touch).not.toHaveBeenCalled();
+    component.onBoundaryFocusOut({
+      relatedTarget: null,
+      currentTarget: fixture.nativeElement,
+    } as unknown as FocusEvent);
+    await fixture.whenStable();
+    expect(touch).toHaveBeenCalledTimes(1);
+    expect(committed).toHaveBeenCalledExactlyOnceWith('<p>Changed</p>');
   });
 
-  it('handles pasted image readers without a string result', () => {
-    const execCommand = vi.fn(() => true);
-    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-    const originalFileReader = window.FileReader;
-    class ArrayBufferFileReader {
-      result: string | ArrayBuffer | null = new ArrayBuffer(1);
-      onload: ((event: ProgressEvent<FileReader>) => void) | null = null;
-      readAsDataURL(): void {
-        this.onload?.({} as ProgressEvent<FileReader>);
-      }
-    }
-    Object.defineProperty(window, 'FileReader', {
-      configurable: true,
-      value: ArrayBufferFileReader,
-    });
-    try {
-      const { component } = createComponent();
-      const image = new File(['ok'], 'image.png', { type: 'image/png' });
-      component.handlePaste({
-        preventDefault: vi.fn(),
-        clipboardData: { files: [image], getData: () => '' },
-      } as unknown as ClipboardEvent);
-      expect(execCommand).toHaveBeenCalledWith('insertHTML', false, '<img alt="Pasted image">');
-    } finally {
-      Object.defineProperty(window, 'FileReader', {
-        configurable: true,
-        value: originalFileReader,
-      });
-    }
-  });
-});
-
-describe('rich text html utils', () => {
-  it('sanitizeRichTextHtml should remove scripts and unsafe attributes', () => {
-    expect(sanitizeRichTextHtml('<p onclick="bad()">Hola</p><script>alert(1)</script>')).toBe(
-      '<p>Hola</p>',
-    );
+  it('allows selection and copy in readonly while blocking mutations', async () => {
+    const fixture = await setup({ value: '<p>Read me</p>', readonly: true });
+    const component = fixture.componentInstance;
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface');
+    expect(editor.getAttribute('contenteditable')).toBe('false');
+    expect(editor.getAttribute('tabindex')).toBe('0');
+    component.insertVariable('blocked');
+    expect(component.value()).toBe('<p>Read me</p>');
+    expect((fixture.nativeElement.querySelector('[role="toolbar"] button') as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('sanitizeRichTextHtml should keep safe links and force target rel', () => {
-    expect(sanitizeRichTextHtml('<a href="https://example.com">Web</a>')).toBe(
-      '<a href="https://example.com" target="_blank" rel="noopener noreferrer">Web</a>',
-    );
+  it('removes disabled controls from the tab order', async () => {
+    const fixture = await setup({ disabled: true });
+    const editor = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface');
+    expect(editor.getAttribute('tabindex')).toBe('-1');
+    expect(editor.getAttribute('contenteditable')).toBe('false');
   });
 
-  it('sanitizeRichTextHtml should keep template links for transactional email', () => {
-    expect(sanitizeRichTextHtml('<a href="{{link_dossier}}">Descargar</a>')).toBe(
-      '<a href="{{link_dossier}}" target="_blank" rel="noopener noreferrer">Descargar</a>',
-    );
+  it('clears through an external reset without emitting or retaining unsafe DOM', async () => {
+    const fixture = await setup({ value: '<p>Text</p>' });
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    fixture.componentRef.setInput('value', '');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-rich-text-editor__surface').innerHTML).toBe('');
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  it('sanitizeRichTextHtml should remove unsafe link and image sources', () => {
-    expect(
-      sanitizeRichTextHtml(
-        '<a href="javascript:alert(1)" target="_self">Bad</a><img src="data:image/svg+xml;base64,PHN2Zz4=" alt="bad">',
-      ),
-    ).toBe('<a>Bad</a><img alt="bad">');
+  it('aborts pending readers on destroy', async () => {
+    const fixture = await setup();
+    const abort = vi.fn();
+    const reader = { readyState: 1, abort, onload: vi.fn(), onerror: vi.fn(), onabort: vi.fn() };
+    fixture.componentInstance['activeReaders'].add(reader as unknown as FileReader);
+    fixture.destroy();
+    expect(abort).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance['activeReaders'].size).toBe(0);
   });
 
-  it('normalizeRichTextHtml should convert plain text to paragraphs', () => {
-    expect(normalizeRichTextHtml('Uno\n\nDos')).toBe('<p>Uno</p><p>Dos</p>');
+  it('uses the URL as link text when no separate label is entered', async () => {
+    const fixture = await setup();
+    const prompt = vi.spyOn(window, 'prompt')
+      .mockReturnValueOnce('https://example.test/reference')
+      .mockReturnValueOnce('');
+    fixture.componentInstance.addLink();
+    const link = fixture.nativeElement.querySelector('.neu-rich-text-editor__surface a') as HTMLAnchorElement;
+    expect(link.textContent).toBe('https://example.test/reference');
+    prompt.mockRestore();
   });
 
-  it('normalizes empty text, escapes plain content and preserves allowed structure', () => {
-    expect(normalizeRichTextHtml('   ')).toBe('');
-    expect(plainTextToRichTextHtml('<one>\n"two"')).toBe('<p>&lt;one&gt;<br>&quot;two&quot;</p>');
-    expect(sanitizeRichTextHtml('<!-- comment --><div title="hello">Text<br></br></div>')).toBe(
-      '<div title="hello">Text<br></div>',
-    );
+  it('leaves content intact when image URL entry is cancelled or edits are readonly', async () => {
+    const fixture = await setup({ value: '<p>Original</p>' });
+    const prompt = vi.spyOn(window, 'prompt').mockReturnValue(null);
+    fixture.componentInstance.addImageUrl();
+    expect(fixture.componentInstance.value()).toBe('<p>Original</p>');
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    fixture.componentInstance.format('bold');
+    fixture.componentInstance.addLink();
+    fixture.componentInstance.addImageUrl();
+    expect(fixture.componentInstance.value()).toBe('<p>Original</p>');
+    prompt.mockRestore();
   });
 
-  it('sanitizes image sources, dimensions and table attributes', () => {
-    expect(
-      sanitizeRichTextHtml(
-        '<img src="https://example.com/photo.png" alt="photo" width="120" height="x"><td colspan="2" rowspan="3">Cell</td>',
-      ),
-    ).toBe(
-      '<img src="https://example.com/photo.png" alt="photo" width="120"><td colspan="2" rowspan="3">Cell</td>',
-    );
-    expect(
-      sanitizeRichTextHtml(
-        '<img src="data:image/png;base64,aGVsbG8=" alt="inline"><img src="ftp://bad">',
-      ),
-    ).toBe('<img src="data:image/png;base64,aGVsbG8=" alt="inline"><img>');
-  });
-
-  it('filters blocked and unknown markup, unsafe protocols and dangerous attributes', () => {
-    expect(
-      sanitizeRichTextHtml(
-        '<iframe src="https://bad">x</iframe><custom title="x">gone</custom><a href="tel:+34123" style="x" onload="x">Phone</a>',
-      ),
-    ).toBe('gone<a href="tel:+34123" target="_blank" rel="noopener noreferrer">Phone</a>');
-    expect(sanitizeRichTextHtml('<a href="mailto:test@example.com">Mail</a>')).toContain(
-      'mailto:test@example.com',
-    );
-  });
-
-  it('sanitizes quoted, bare and disallowed attributes consistently', () => {
-    expect(
-      sanitizeRichTextHtml(
-        `<a href='tel:+34123' title=Call target="_self" rel="external" onclick="bad()">Phone</a>`,
-      ),
-    ).toBe('<a href="tel:+34123" target="_blank" rel="noopener noreferrer" title="Call">Phone</a>');
-    expect(
-      sanitizeRichTextHtml('<p data-test="x" style="color:red" onmouseover="bad()">Copy</p>'),
-    ).toBe('<p>Copy</p>');
-  });
-
-  it('keeps table cell span attributes and drops unsupported cell metadata', () => {
-    expect(
-      sanitizeRichTextHtml('<td colspan=2 data-id="1">A</td><th rowspan="3" scope="col">B</th>'),
-    ).toBe('<td colspan="2">A</td><th rowspan="3">B</th>');
-  });
-
-  it('escapes text and attribute-specific backticks', () => {
-    expect(escapeRichTextHtml(`&<>"'`)).toBe('&amp;&lt;&gt;&quot;&#039;');
-    expect(escapeRichTextAttribute('`value`')).toBe('&#096;value&#096;');
+  it('reports one touch without a commit when focus leaves unchanged content', async () => {
+    const fixture = await setup({ value: '<p>Original</p>' });
+    const component = fixture.componentInstance;
+    const touch = vi.fn();
+    const committed = vi.fn();
+    component.touch.subscribe(touch);
+    component.valueCommitted.subscribe(committed);
+    component.onBoundaryFocusIn();
+    component.onBoundaryFocusIn();
+    component.onBoundaryFocusOut({ relatedTarget: null, currentTarget: fixture.nativeElement } as unknown as FocusEvent);
+    await fixture.whenStable();
+    component.onBoundaryFocusOut({ relatedTarget: null, currentTarget: fixture.nativeElement } as unknown as FocusEvent);
+    await fixture.whenStable();
+    expect(touch).toHaveBeenCalledTimes(1);
+    expect(committed).not.toHaveBeenCalled();
   });
 });

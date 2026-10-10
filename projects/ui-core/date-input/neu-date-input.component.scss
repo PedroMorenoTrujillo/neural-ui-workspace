@@ -5,6 +5,10 @@
 
 @use '../styles/floating-label' as floating;
 
+neu-date-input[hidden] {
+  display: none !important;
+}
+
 $trigger-height: 48px;
 $panel-z: 200;
 $drum-item-h: 36px;
@@ -12,6 +16,7 @@ $drum-item-h: 36px;
 // ---- Host ----
 .neu-date-input-host {
   display: block;
+  min-width: 0;
   font-family: var(--neu-font-sans);
 
   &--sm {
@@ -71,7 +76,7 @@ $drum-item-h: 36px;
       transform: translateY(-50%);
       font-size: 12px;
       font-weight: 600;
-      color: var(--neu-primary);
+      color: var(--neu-text);
       background: var(--neu-surface);
       padding: 0 4px;
       inset-inline-start: calc(var(--neu-space-3) - 4px);
@@ -84,11 +89,11 @@ $drum-item-h: 36px;
   }
 
   &.neu-date-input--error .neu-date-input__float-label {
-    color: var(--neu-error);
+    color: var(--neu-error-text, var(--neu-error));
 
     &.neu-date-input--open .neu-date-input__float-label,
     &.neu-date-input--has-value .neu-date-input__float-label {
-      color: var(--neu-error);
+      color: var(--neu-error-text, var(--neu-error));
     }
   }
 }
@@ -106,7 +111,7 @@ $drum-item-h: 36px;
   gap: var(--neu-space-2);
   width: 100%;
   min-width: 0;
-  min-height: $trigger-height;
+  min-height: var(--neu-control-height, #{$trigger-height});
   padding: 0 var(--neu-space-3);
   background: var(--neu-surface);
   border: 1.5px solid var(--neu-border);
@@ -131,6 +136,10 @@ $drum-item-h: 36px;
     background: var(--neu-surface-2);
   }
 
+  .neu-date-input--disabled & {
+    cursor: not-allowed;
+  }
+
   .neu-date-input--open & {
     border-color: var(--neu-primary);
     box-shadow: var(--neu-focus-ring);
@@ -138,6 +147,62 @@ $drum-item-h: 36px;
 
   .neu-date-input--error & {
     border-color: var(--neu-error);
+  }
+}
+
+.neu-date-input__field {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  cursor: text;
+
+  &[readonly] {
+    cursor: pointer;
+  }
+
+  &::placeholder {
+    color: var(--neu-text-disabled);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.neu-date-input__clear,
+.neu-date-input__open {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  color: var(--neu-text-muted);
+  font: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: var(--neu-radius-sm, 4px);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: var(--neu-text);
+    background: var(--neu-surface-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
   }
 }
 
@@ -150,6 +215,18 @@ $drum-item-h: 36px;
   svg {
     width: 18px;
     height: 18px;
+  }
+}
+
+.neu-date-input__chevron {
+  display: block;
+  width: 18px;
+  height: 18px;
+  transition: transform var(--neu-transition);
+
+  .neu-date-input--open & {
+    transform: rotate(180deg);
+    color: var(--neu-primary);
   }
 }
 
@@ -183,6 +260,15 @@ $drum-item-h: 36px;
   &--time-only {
     flex-direction: row;
   }
+
+  &--inline {
+    position: static;
+    z-index: auto;
+    box-shadow: none;
+    animation: none;
+    width: fit-content;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 600px) {
@@ -191,6 +277,11 @@ $drum-item-h: 36px;
     inset-inline-end: 0;
     width: min(280px, calc(100vw - 2rem));
     max-width: calc(100vw - 2rem);
+  }
+
+  .neu-date-input__panel--inline {
+    inset-inline-start: auto;
+    inset-inline-end: auto;
   }
 }
 
@@ -209,6 +300,9 @@ $drum-item-h: 36px;
 .neu-date-input__calendar {
   padding: var(--neu-space-3);
   width: 280px;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   flex-shrink: 0;
 }
 
@@ -216,6 +310,7 @@ $drum-item-h: 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--neu-space-1);
   margin-bottom: var(--neu-space-2);
 }
 
@@ -224,6 +319,115 @@ $drum-item-h: 36px;
   font-weight: 600;
   color: var(--neu-text);
   text-transform: capitalize;
+}
+
+.neu-date-input__cal-title--pickers {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  gap: var(--neu-space-1);
+}
+
+.neu-date-input__picker {
+  appearance: none;
+  min-inline-size: 0;
+  block-size: 36px;
+  padding-inline: var(--neu-space-2) 28px;
+  border: 1px solid var(--neu-border);
+  border-radius: var(--neu-radius-sm);
+  background-color: var(--neu-surface);
+  background-image:
+    linear-gradient(
+      45deg,
+      transparent 38%,
+      var(--neu-text-muted) 38%,
+      var(--neu-text-muted) 62%,
+      transparent 62%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 38%,
+      var(--neu-text-muted) 38%,
+      var(--neu-text-muted) 62%,
+      transparent 62%
+    );
+  background-position:
+    right 16px center,
+    right 10px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  color: var(--neu-text);
+  font: inherit;
+  font-size: var(--neu-text-xs);
+  text-overflow: ellipsis;
+  cursor: pointer;
+
+  &:first-child {
+    flex: 1;
+    padding-inline: var(--neu-space-1) 24px;
+  }
+
+  &:last-child {
+    flex: 0 0 5rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &:hover {
+    background-color: var(--neu-surface-2);
+    border-color: var(--neu-text-muted);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: 2px;
+  }
+}
+
+@supports (appearance: base-select) {
+  .neu-date-input__picker,
+  .neu-date-input__picker::picker(select) {
+    appearance: base-select;
+  }
+
+  .neu-date-input__picker {
+    &:open {
+      border-color: var(--neu-primary);
+    }
+
+    &::picker-icon {
+      display: none;
+    }
+
+    &::picker(select) {
+      max-block-size: 16rem;
+      margin-block-start: var(--neu-space-1);
+      padding: var(--neu-space-1);
+      border: 1px solid var(--neu-border);
+      border-radius: var(--neu-radius);
+      background: var(--neu-surface);
+      color: var(--neu-text);
+      box-shadow: var(--neu-shadow);
+      overflow-y: auto;
+    }
+
+    option {
+      min-block-size: 32px;
+      padding: var(--neu-space-2);
+      border-radius: var(--neu-radius-sm);
+      font: inherit;
+
+      &:hover,
+      &:focus-visible {
+        background: var(--neu-surface-2);
+      }
+
+      &:checked {
+        background: var(--neu-primary-soft);
+        color: var(--neu-primary);
+        font-weight: 600;
+      }
+    }
+  }
 }
 
 .neu-date-input__cal-arrow {
@@ -259,6 +463,10 @@ $drum-item-h: 36px;
   text-align: center;
   margin-bottom: 4px;
 
+  &--numbered {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
   span {
     font-size: 11px;
     font-weight: 600;
@@ -270,8 +478,79 @@ $drum-item-h: 36px;
 
 .neu-date-input__cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: 1fr;
   gap: 2px;
+}
+
+.neu-date-input__cal-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.neu-date-input__cal-grid--numbered .neu-date-input__cal-week {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.neu-date-input__week-number {
+  display: grid;
+  place-items: center;
+  font-size: var(--neu-text-xs);
+  color: var(--neu-text-muted);
+  user-select: none;
+}
+
+.neu-date-input__period-grid {
+  display: grid;
+  gap: var(--neu-space-1);
+}
+
+.neu-date-input__period-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--neu-space-1);
+}
+
+.neu-date-input__period-grid--month .neu-date-input__period-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.neu-date-input__period-grid--month .neu-date-input__period-cell {
+  padding-inline: 2px;
+}
+
+.neu-date-input__period-cell {
+  min-width: 0;
+  min-height: 40px;
+  padding: var(--neu-space-1);
+  border: 0;
+  border-radius: var(--neu-radius-sm);
+  background: transparent;
+  color: var(--neu-text);
+  font: inherit;
+  font-size: var(--neu-text-sm);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--neu-surface-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
+  &[aria-selected='true'] {
+    background: var(--neu-primary-solid, var(--neu-primary));
+    color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
 .neu-date-input__cal-day {
@@ -341,16 +620,20 @@ $drum-item-h: 36px;
 .neu-date-input__cal-title--pickers {
   display: inline-flex;
   gap: var(--neu-space-2);
+  align-items: center;
 }
 
 .neu-date-input__picker {
-  min-width: 88px;
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius-sm);
-  background: var(--neu-surface);
-  color: var(--neu-text);
-  padding: var(--neu-space-1) var(--neu-space-2);
-  font: inherit;
+  display: block;
+  min-width: 0;
+}
+
+.neu-date-input__picker--month {
+  width: 7.5rem;
+}
+
+.neu-date-input__picker--year {
+  width: 5.5rem;
 }
 
 .neu-date-input__cal-footer {
@@ -403,12 +686,14 @@ $drum-item-h: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--neu-space-1);
+  gap: var(--neu-space-2);
   padding: var(--neu-space-3) var(--neu-space-4);
   flex-shrink: 0;
 }
 
 .neu-date-input__time-colon {
+  flex: 0 0 12px;
+  text-align: center;
   font-size: 20px;
   font-weight: 700;
   color: var(--neu-text);
@@ -430,7 +715,7 @@ $drum-item-h: 36px;
   align-items: center;
   justify-content: center;
   width: 36px;
-  height: 24px;
+  height: 32px;
   padding: 0;
   background: none;
   border: none;
@@ -444,6 +729,16 @@ $drum-item-h: 36px;
   &:hover {
     background: var(--neu-surface-2);
     color: var(--neu-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   svg {
@@ -463,8 +758,8 @@ $drum-item-h: 36px;
     content: '';
     position: absolute;
     top: $drum-item-h; // skip first adjacent item
-    inset-inline-start: -6px;
-    inset-inline-end: -6px;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     height: $drum-item-h;
     background: var(--neu-primary-soft, rgba(0, 122, 255, 0.1));
     border-radius: var(--neu-radius-sm);
@@ -479,27 +774,40 @@ $drum-item-h: 36px;
   justify-content: center;
   width: 52px;
   height: $drum-item-h;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--neu-text);
+  font: inherit;
   font-family: var(--neu-font-sans);
   font-weight: 500;
   user-select: none;
   border-radius: var(--neu-radius-sm);
   transition: opacity var(--neu-transition);
 
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
   &--adjacent {
     font-size: 13px;
     color: var(--neu-text-muted);
-    opacity: 0.45;
     cursor: pointer;
 
-    &:hover {
-      opacity: 0.75;
+    &:hover:not(:disabled) {
+      background: var(--neu-surface-2);
     }
   }
 
   &--selected {
     font-size: 22px;
     font-weight: 700;
-    color: var(--neu-primary);
+    color: var(--neu-text);
     cursor: default;
   }
 }

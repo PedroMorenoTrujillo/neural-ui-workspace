@@ -1,0 +1,59 @@
+{
+  "checkpoint": "N2-011B",
+  "basic": [
+    {
+      "path": "projects/ui-core/table/next/public/neu-table.component-contract.ts",
+      "bytesInOutput": 2931
+    },
+    {
+      "path": "projects/ui-core/table/next/public/neu-table-template-contracts.ts",
+      "bytesInOutput": 2186
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.ts",
+      "bytesInOutput": 1502
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/semantics/neu-table-basic-projections.ts",
+      "bytesInOutput": 495
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+      "bytesInOutput": 395
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/templates/neu-table-template-registry.ts",
+      "bytesInOutput": 102
+    }
+  ],
+  "templates": [
+    {
+      "path": "projects/ui-core/table/next/public/neu-table.component-contract.ts",
+      "bytesInOutput": 2931
+    },
+    {
+      "path": "projects/ui-core/table/next/public/neu-table-template-contracts.ts",
+      "bytesInOutput": 2186
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.ts",
+      "bytesInOutput": 1504
+    },
+    {
+      "path": "projects/ui-core/table/next/public/public-api.ts",
+      "bytesInOutput": 506
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/semantics/neu-table-basic-projections.ts",
+      "bytesInOutput": 495
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+      "bytesInOutput": 397
+    },
+    {
+      "path": "projects/ui-core/table/next/internal/templates/neu-table-template-registry.ts",
+      "bytesInOutput": 102
+    }
+  ]
+}

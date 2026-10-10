@@ -3,9 +3,18 @@
 // ViewEncapsulation.None — prefijo BEM .neu-tabs
 // ============================================================
 
+neu-tabs,
+neu-tab-panel {
+  display: block;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
 .neu-tabs {
   display: flex;
   flex-direction: column;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 // ---- Barra de pestañas / Tab bar ----
@@ -62,6 +71,17 @@
   &--active {
     color: var(--neu-primary-dark, var(--neu-primary));
     font-weight: 600;
+
+    &::after {
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1.5px;
+      height: 2.5px;
+      border-radius: var(--neu-radius-full) var(--neu-radius-full) 0 0;
+      background: var(--neu-primary);
+      content: '';
+      pointer-events: none;
+    }
   }
 
   &--disabled {
@@ -86,17 +106,11 @@
   line-height: 1;
 }
 
-// ---- Indicador deslizante / Sliding indicator (animated underline) ----
-.neu-tabs__indicator {
-  position: absolute;
-  inset-block-end: -1.5px;
-  block-size: 2.5px;
-  background: var(--neu-primary);
-  border-radius: var(--neu-radius-full) var(--neu-radius-full) 0 0;
-  transition:
-    inset-inline-start var(--neu-transition-slow),
-    width var(--neu-transition-slow);
-  pointer-events: none;
+:where([data-theme='dark'], .dark) {
+  .neu-tabs__tab--active,
+  .neu-tabs__tab-badge {
+    color: var(--neu-primary-light, var(--neu-primary));
+  }
 }
 
 // ---- Paneles / Panels ----
@@ -106,16 +120,26 @@
 
 .neu-tab-panel {
   padding-top: 1.5rem;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
   animation: neu-tab-fade 180ms ease;
+}
+
+.neu-tabs--flush > .neu-tabs__panels > neu-tab-panel > .neu-tab-panel {
+  padding-top: 0;
 }
 
 @keyframes neu-tab-fade {
   from {
-    opacity: 0;
     transform: translateY(4px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-tab-panel {
+    animation: none;
   }
 }

@@ -1,113 +1,70 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { NeuRadioGroupComponent } from './neu-radio-group.component';
 import { NeuRadioComponent } from './neu-radio.component';
 
 @Component({
-  template: `
-    <neu-radio-group [formControl]="ctrl" [direction]="direction">
-      <neu-radio value="a" label="Opción A" />
-      <neu-radio value="b" label="Opción B" />
-      <neu-radio value="c" label="Opción C" [disabled]="disableC" />
-    </neu-radio-group>
-  `,
-  imports: [NeuRadioGroupComponent, NeuRadioComponent, ReactiveFormsModule],
+  imports: [NeuRadioGroupComponent, NeuRadioComponent],
+  template: `<neu-radio-group
+    [value]="selected()"
+    (valueChange)="selected.set($event)"
+    [readonly]="readonly()"
+  >
+    <neu-radio value="a" label="A" /><neu-radio value="b" [disabled]="secondDisabled()" />
+  </neu-radio-group>`,
 })
-class TestHostComponent {
-  ctrl = new FormControl<string | null>(null);
-  direction: any = 'column';
-  disableC = false;
+class Host {
+  readonly selected = signal<string | null>(null);
+  readonly readonly = signal(false);
+  readonly secondDisabled = signal(false);
 }
 
-describe('NeuRadioComponent + NeuRadioGroupComponent', () => {
-  let fixture: ComponentFixture<TestHostComponent>;
-  let host: TestHostComponent;
+describe('NeuRadioComponent', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TestHostComponent] }).compileComponents();
-    fixture = TestBed.createComponent(TestHostComponent);
-    host = fixture.componentInstance;
+  it('renders its optional label only when supplied', () => {
+    const fixture = TestBed.createComponent(Host);
     fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.neu-radio__label')).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).toContain('A');
   });
 
-  it('should render all radio labels', () => {
-    const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Opción A');
-    expect(text).toContain('Opción B');
-    expect(text).toContain('Opción C');
-  });
-
-  it('should have no option selected by default', () => {
-    const inputs: NodeListOf<HTMLInputElement> =
-      fixture.nativeElement.querySelectorAll('input[type="radio"]');
-    inputs.forEach((i) => expect(i.checked).toBe(false));
-  });
-
-  it('should mark the correct radio as checked when formControl is set', () => {
-    host.ctrl.setValue('b');
+  it('reflects checked state and delegates one selection to the group', () => {
+    const fixture = TestBed.createComponent(Host);
     fixture.detectChanges();
-    const inputs: NodeListOf<HTMLInputElement> =
-      fixture.nativeElement.querySelectorAll('input[type="radio"]');
-    expect(inputs[0].checked).toBe(false);
-    expect(inputs[1].checked).toBe(true);
-    expect(inputs[2].checked).toBe(false);
-  });
-
-  it('should update formControl when a radio is clicked', () => {
-    const inputs: NodeListOf<HTMLInputElement> =
-      fixture.nativeElement.querySelectorAll('input[type="radio"]');
-    inputs[0].click();
+    const options = fixture.nativeElement.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+    options[0].click();
     fixture.detectChanges();
-    expect(host.ctrl.value).toBe('a');
+    expect(fixture.componentInstance.selected()).toBe('a');
+    expect(options[0].checked).toBe(true);
+    expect(options[0].getAttribute('aria-checked')).toBe('true');
   });
 
-  it('should disable a specific radio with disabled input', () => {
-    const df = TestBed.createComponent(TestHostComponent);
-    df.componentInstance.disableC = true;
-    df.detectChanges();
-    const inputs: NodeListOf<HTMLInputElement> =
-      df.nativeElement.querySelectorAll('input[type="radio"]');
-    expect(inputs[2].disabled).toBe(true);
-  });
-
-  it('should disable all radios when formControl is disabled', () => {
-    host.ctrl.disable();
+  it('prevents readonly click and restores canonical checked state on change', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.selected.set('a');
+    fixture.componentInstance.readonly.set(true);
     fixture.detectChanges();
-    const inputs: NodeListOf<HTMLInputElement> =
-      fixture.nativeElement.querySelectorAll('input[type="radio"]');
-    inputs.forEach((i) => expect(i.disabled).toBe(true));
+    const options = fixture.nativeElement.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    expect(options[1].dispatchEvent(click)).toBe(false);
+    options[1].checked = true;
+    options[1].dispatchEvent(new Event('change', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selected()).toBe('a');
+    expect(options[1].checked).toBe(false);
   });
 
-  it('NeuRadioComponent onBlur should not throw', () => {
-    @Component({
-      template: `<neu-radio-group name="x"><neu-radio value="a" label="A" /></neu-radio-group>`,
-      imports: [NeuRadioGroupComponent, NeuRadioComponent],
-    })
-    class BlurHost {}
-    const f = TestBed.createComponent(BlurHost);
-    f.detectChanges();
-    const radioInput: HTMLInputElement = f.nativeElement.querySelector('input[type="radio"]');
-    expect(() => radioInput.dispatchEvent(new Event('blur'))).not.toThrow();
-  });
-
-  it('selecting a radio programmatically updates isChecked', async () => {
-    const f = TestBed.createComponent(NeuRadioGroupComponent);
-    f.detectChanges();
-    await f.whenStable();
-    f.componentInstance.writeValue('b');
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.componentInstance._value()).toBe('b');
-  });
-
-  it('NeuRadioGroupComponent registerOnChange callback is called on change', async () => {
-    const f = TestBed.createComponent(NeuRadioGroupComponent);
-    f.detectChanges();
-    await f.whenStable();
-    let changed: unknown;
-    f.componentInstance.registerOnChange((v: unknown) => (changed = v));
-    f.componentInstance.select('c');
-    expect(changed).toBe('c');
+  it('marks disabled options and ignores unrelated keyboard keys', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.secondDisabled.set(true);
+    fixture.detectChanges();
+    const options = fixture.nativeElement.querySelectorAll('input') as NodeListOf<HTMLInputElement>;
+    expect(options[1].disabled).toBe(true);
+    const key = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    expect(options[0].dispatchEvent(key)).toBe(true);
+    expect(fixture.componentInstance.selected()).toBeNull();
   });
 });

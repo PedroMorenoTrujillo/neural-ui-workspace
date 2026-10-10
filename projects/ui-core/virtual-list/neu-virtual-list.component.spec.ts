@@ -1,338 +1,209 @@
-import {
-  Component,
-  Directive,
-  Input,
-  TemplateRef,
-  ViewContainerRef,
-  provideZonelessChangeDetection,
-} from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import { NeuVirtualListComponent, NeuVirtualListRowComponent } from './neu-virtual-list.component';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { NeuVirtualItemDirective, NeuVirtualListComponent } from './neu-virtual-list.component';
+import type { NeuVirtualListRange } from './neu-virtual-list.types';
 
 @Component({
-  template: `
-    <neu-virtual-list [items]="items">
-      <ng-template let-item let-index="index">
-        <span class="projected-row">{{ index }}-{{ item }}</span>
-      </ng-template>
-    </neu-virtual-list>
-  `,
-  imports: [NeuVirtualListComponent],
+  imports: [NeuVirtualListComponent, NeuVirtualItemDirective],
+  template: `<neu-virtual-list [items]="items()" [itemKey]="key" [visibleRows]="2"
+    [itemSize]="20">
+    <ng-template [neuVirtualItem]="items()" [neuVirtualItemKey]="key"
+      let-item let-index="index" let-key="key">
+      <span class="custom">{{ index }}:{{ key }}:{{ item.label }}</span>
+    </ng-template>
+  </neu-virtual-list>`,
 })
-class NeuVirtualListHostComponent {
-  readonly items = ['Alpha', 'Beta'];
+class Host {
+  items = signal<readonly { key: string; label: string }[]>([
+    { key: 'a', label: 'Alpha' }, { key: 'b', label: 'Beta' }, { key: 'c', label: 'Gamma' },
+  ]);
+  readonly key = (item: { key: string }) => item.key;
 }
 
-@Component({
-  selector: 'cdk-virtual-scroll-viewport',
-  template: '<ng-content />',
-  standalone: true,
-})
-class FakeVirtualScrollViewportComponent {
-  @Input() itemSize = 0;
-
-  checkViewportSize(): void {}
+function mount(items: readonly number[] = []): ComponentFixture<NeuVirtualListComponent<number, number>> {
+  const fixture = TestBed.createComponent(NeuVirtualListComponent<number, number>);
+  fixture.componentRef.setInput('items', items);
+  fixture.componentRef.setInput('itemKey', (item: number) => item);
+  fixture.detectChanges();
+  return fixture;
 }
 
-@Directive({
-  selector: '[cdkVirtualFor][cdkVirtualForOf]',
-  standalone: true,
-})
-class FakeCdkVirtualForDirective<T> {
-  @Input() cdkVirtualForTrackBy?: (index: number, item: T) => unknown;
+const viewportOf = (element: HTMLElement) =>
+  element.querySelector('.neu-virtual-list__viewport') as HTMLElement;
+const rendered = (element: HTMLElement) =>
+  [...element.querySelectorAll<HTMLElement>('[role="listitem"]')];
 
-  constructor(
-    private readonly templateRef: TemplateRef<{ $implicit: T; index: number }>,
-    private readonly viewContainerRef: ViewContainerRef,
-  ) {}
+beforeEach(() => TestBed.configureTestingModule({
+  providers: [provideZonelessChangeDetection()],
+}).compileComponents());
 
-  @Input()
-  set cdkVirtualForOf(items: readonly T[]) {
-    this.viewContainerRef.clear();
-    items.forEach((item, index) => {
-      this.viewContainerRef.createEmbeddedView(this.templateRef, { $implicit: item, index });
-    });
-  }
-}
-
-function setup(items: unknown[] = []) {
-  const f = TestBed.createComponent(NeuVirtualListComponent);
-  f.componentRef.setInput('items', items);
-  f.detectChanges();
-  return f;
-}
-
-beforeEach(() =>
-  TestBed.configureTestingModule({
-    imports: [ScrollingModule],
-    providers: [provideZonelessChangeDetection()],
-  }).compileComponents(),
-);
-
-describe('NeuVirtualListComponent', () => {
-  it('should create', async () => {
-    const f = setup();
-    await f.whenStable();
-    expect(f.componentInstance).toBeTruthy();
+describe('NeuVirtualListComponent fixed-height window', () => {
+  it('renders a semantic list with bounded initial rows', () => {
+    const fixture = mount(Array.from({ length: 100 }, (_, i) => i));
+    const rows = rendered(fixture.nativeElement);
+    expect(fixture.nativeElement.classList).toContain('neu-virtual-list');
+    expect(viewportOf(fixture.nativeElement).getAttribute('role')).toBe('list');
+    expect(rows).toHaveLength(12);
+    expect(rows[0].getAttribute('aria-posinset')).toBe('1');
+    expect(rows[0].getAttribute('aria-setsize')).toBe('100');
+    expect(fixture.nativeElement.querySelectorAll('.neu-virtual-list__spacer')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('[aria-hidden="true"]')).toHaveLength(2);
   });
 
-  it('should apply neu-virtual-list class', async () => {
-    const f = setup();
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-virtual-list');
+  it('renders typed template context and consumer content', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.custom')?.textContent?.trim()).toBe('0:a:Alpha');
+    expect(fixture.nativeElement.querySelectorAll('.custom')).toHaveLength(3);
   });
 
-  it('_containerHeight should use itemSize * visibleRows', () => {
-    const f = setup();
-    f.componentRef.setInput('itemSize', 40);
-    f.componentRef.setInput('visibleRows', 5);
-    expect(f.componentInstance._containerHeight()).toBe('200px');
+  it('renders an empty status and no phantom domain node', () => {
+    const fixture = mount();
+    expect(rendered(fixture.nativeElement)).toHaveLength(0);
+    expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent).toContain('No results');
   });
 
-  it('should show empty state when items is empty', async () => {
-    const f = setup([]);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-virtual-list__empty')).toBeTruthy();
+  it('uses readonly applied replacements without mutating source arrays', () => {
+    const source = Object.freeze([1, 2, 3]);
+    const fixture = mount(source);
+    expect(rendered(fixture.nativeElement)[0].textContent?.trim()).toBe('1');
+    fixture.componentRef.setInput('items', Object.freeze([9, 8]));
+    fixture.detectChanges();
+    expect(rendered(fixture.nativeElement).map((row) => row.textContent?.trim())).toEqual(['9', '8']);
+    expect(source).toEqual([1, 2, 3]);
   });
 
-  it('should not show empty state when items exist', async () => {
-    const f = setup([1, 2, 3]);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-virtual-list__empty')).toBeNull();
+  it('keeps semantic DOM identity for reconstructed objects with the same K', () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    const first = fixture.nativeElement.querySelector('[role="listitem"]');
+    fixture.componentInstance.items.set([
+      { key: 'a', label: 'New Alpha' }, { key: 'b', label: 'Beta' },
+    ]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="listitem"]')).toBe(first);
+    expect(first.textContent).toContain('New Alpha');
   });
 
-  it('_isEmpty should reflect whether the items array has values', () => {
-    const f = setup([]);
-    expect(f.componentInstance._isEmpty()).toBe(true);
-
-    f.componentRef.setInput('items', ['Alpha']);
-    f.detectChanges();
-
-    expect(f.componentInstance._isEmpty()).toBe(false);
-  });
-
-  it('emptyLabel input should change the empty state text', async () => {
-    const f = setup([]);
-    f.componentRef.setInput('emptyLabel', 'Lista vacía');
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-virtual-list__empty')?.textContent).toContain(
-      'Lista vacía',
-    );
-  });
-
-  it('should apply container height as inline style', async () => {
-    const f = setup([]);
-    f.componentRef.setInput('itemSize', 50);
-    f.componentRef.setInput('visibleRows', 8);
-    f.detectChanges();
-    await f.whenStable();
-    const height = f.nativeElement.style.height;
-    expect(height).toBe('400px');
-  });
-
-  it('should make the viewport focusable for keyboard users', async () => {
-    const f = setup([]);
-    await f.whenStable();
-    const viewport = f.nativeElement.querySelector('.neu-virtual-list__viewport');
-    expect(viewport?.getAttribute('tabindex')).toBe('0');
-  });
-
-  it('should apply the computed height to the viewport element', async () => {
-    const f = setup([1, 2, 3]);
-    f.componentRef.setInput('itemSize', 32);
-    f.componentRef.setInput('visibleRows', 4);
-    f.detectChanges();
-    await f.whenStable();
-    const viewport = f.nativeElement.querySelector('.neu-virtual-list__viewport');
-    expect(viewport.style.height).toBe('128px');
-  });
-
-  it('_trackBy defaults to index', () => {
-    const f = setup();
-    const result = f.componentInstance._trackBy(3, 'x');
-    expect(result).toBe(3);
-  });
-
-  it('_itemContext should expose the item as implicit and keep the provided index', () => {
-    const f = setup();
-
-    expect((f.componentInstance as any)._itemContext('Alpha', 7)).toEqual({
-      $implicit: 'Alpha',
-      index: 7,
-    });
-  });
-
-  it('_defaultItemLabel should stringify primitive item values', () => {
-    const f = setup();
-
-    expect((f.componentInstance as any)._defaultItemLabel(123)).toBe('123');
-    expect((f.componentInstance as any)._defaultItemLabel('Alpha')).toBe('Alpha');
-  });
-
-  it('_itemTemplateOrDefault should return the fallback template when no projected template exists', () => {
-    const f = setup(['Alpha']);
-    const fallback = {} as any;
-
-    expect((f.componentInstance as any)._itemTemplateOrDefault(fallback)).toBe(fallback);
-  });
-
-  it('ngAfterViewInit should not throw', () => {
-    const f = setup([1, 2, 3]);
-    expect(() => f.componentInstance.ngAfterViewInit()).not.toThrow();
-  });
-
-  it('ngAfterViewInit should call checkViewportSize when the viewport is available', () => {
-    const f = setup([1, 2, 3]);
-    const checkViewportSize = vi.fn();
-    (f.componentInstance as any)._viewport = { checkViewportSize };
-
-    f.componentInstance.ngAfterViewInit();
-
-    expect(checkViewportSize).toHaveBeenCalledTimes(1);
-  });
-
-  it('itemClick output emits when listening to events', () => {
-    const f = setup([1, 2, 3]);
-    const clicks: any[] = [];
-    f.componentInstance.itemClick.subscribe((v: any) => clicks.push(v));
-    // Manually emit since the component doesn't bind click in its template
-    // We test that the output is accessible and emit-able
-    (f.componentInstance as any).itemClick.emit({ item: 1, index: 0 });
-    expect(clicks.length).toBe(1);
-    expect(clicks[0].item).toBe(1);
-  });
-
-  it('trackBy input is used in _trackBy', () => {
-    const f = setup([10, 20, 30]);
-    f.componentRef.setInput('trackBy', (i: number, item: number) => item);
-    expect(f.componentInstance._trackBy(0, 99)).toBe(99);
-  });
-
-  it('items with custom heights should compute containerHeight correctly', () => {
-    const f = setup([]);
-    f.componentRef.setInput('itemSize', 60);
-    f.componentRef.setInput('visibleRows', 3);
-    expect(f.componentInstance._containerHeight()).toBe('180px');
-  });
-
-  it('renders items in the default slot when no itemTemplate is provided', async () => {
-    // Sin template personalizado itemTemplate es null — se usará el @else cuando CDK renderice
-    // Without custom template itemTemplate is null — the @else branch will be used when CDK renders
-    const f = setup(['Alpha', 'Beta', 'Gamma']);
-    await f.whenStable();
-    // CDK virtual scroll requires real DOM layout — in JSDOM the viewport renders 0 rows.
-    // Verify the component has no custom template (itemTemplate is null), confirming @else path.
-    expect((f.componentInstance as any).itemTemplate).toBeFalsy();
-    // No empty state shown since items are provided
-    expect(f.nativeElement.querySelector('.neu-virtual-list__empty')).toBeNull();
-  });
-
-  it('should detect projected item templates from content projection', async () => {
-    const f = TestBed.createComponent(NeuVirtualListHostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const virtualList = f.debugElement.children[0].componentInstance as NeuVirtualListComponent;
-    expect(virtualList.itemTemplate).toBeTruthy();
-  });
-
-  it('_itemTemplateOrDefault should prefer the projected template when available', async () => {
-    const f = TestBed.createComponent(NeuVirtualListHostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const virtualList = f.debugElement.children[0].componentInstance as any;
-    const fallback = {} as any;
-
-    expect(virtualList._itemTemplateOrDefault(fallback)).toBe(virtualList.itemTemplate);
-  });
-
-  it('should render the default item template when CDK viewport rendering is simulated', async () => {
-    TestBed.resetTestingModule();
-    await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-    })
-      .overrideComponent(NeuVirtualListComponent, {
-        remove: { imports: [ScrollingModule] },
-        add: { imports: [FakeVirtualScrollViewportComponent, FakeCdkVirtualForDirective] },
-      })
-      .compileComponents();
-
-    const f = TestBed.createComponent(NeuVirtualListComponent);
-    f.componentRef.setInput('items', ['Alpha', 'Beta']);
-    f.detectChanges();
-    await f.whenStable();
-
-    const rows = Array.from(
-      f.nativeElement.querySelectorAll('.neu-virtual-list__item-default'),
-    ) as HTMLElement[];
-
-    expect(rows.length).toBeGreaterThan(0);
-    expect(rows[0].textContent).toContain('Alpha');
-  });
-
-  it('should apply itemSize to the simulated default rows', async () => {
-    TestBed.resetTestingModule();
-    await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-    })
-      .overrideComponent(NeuVirtualListComponent, {
-        remove: { imports: [ScrollingModule] },
-        add: { imports: [FakeVirtualScrollViewportComponent, FakeCdkVirtualForDirective] },
-      })
-      .compileComponents();
-
-    const f = TestBed.createComponent(NeuVirtualListComponent);
-    f.componentRef.setInput('items', ['Alpha']);
-    f.componentRef.setInput('itemSize', 64);
-    f.detectChanges();
-    await f.whenStable();
-
-    const row = f.nativeElement.querySelector('.neu-virtual-list__item-default') as HTMLElement;
-    const rowComponent = f.debugElement.query(
-      (de) => de.componentInstance instanceof NeuVirtualListRowComponent,
-    ).componentInstance as NeuVirtualListRowComponent;
-    expect(row.style.height).toBe('64px');
-    expect(row.textContent).toContain('Alpha');
-    expect(rowComponent.context()).toEqual({ $implicit: 'Alpha', index: 0 });
-  });
-
-  it('should render projected rows when the virtual viewport is simulated', async () => {
-    TestBed.resetTestingModule();
-
-    @Component({
-      template: `
-        <neu-virtual-list [items]="items">
-          <ng-template let-item let-index="index">
-            <span class="projected-row">{{ index }}-{{ item }}</span>
-          </ng-template>
-        </neu-virtual-list>
-      `,
-      imports: [NeuVirtualListComponent],
-    })
-    class SimulatedProjectedHostComponent {
-      readonly items = ['Alpha', 'Beta'];
+  it('updates for reorder, insertion, removal and populated/empty transitions', () => {
+    const fixture = mount([1, 2, 3]);
+    for (const [items, expected] of [
+      [[3, 2, 1], '3'], [[0, 3, 2, 1], '0'], [[2, 1], '2'], [[], undefined], [[7], '7'],
+    ] as const) {
+      fixture.componentRef.setInput('items', items);
+      fixture.detectChanges();
+      expect(rendered(fixture.nativeElement)[0]?.textContent?.trim()).toBe(expected);
     }
+  });
 
-    await TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-    })
-      .overrideComponent(NeuVirtualListComponent, {
-        remove: { imports: [ScrollingModule] },
-        add: { imports: [FakeVirtualScrollViewportComponent, FakeCdkVirtualForDirective] },
-      })
-      .compileComponents();
+  it('exposes logical positions in RTL without direction-specific layout state', () => {
+    const fixture = mount([1, 2, 3]);
+    fixture.nativeElement.setAttribute('dir', 'rtl');
+    fixture.detectChanges();
+    expect(rendered(fixture.nativeElement)[1].getAttribute('aria-posinset')).toBe('2');
+  });
 
-    const f = TestBed.createComponent(SimulatedProjectedHostComponent);
-    f.detectChanges();
-    await f.whenStable();
+  it('keeps 10k applied items to a small mounted DOM window', () => {
+    const fixture = mount(Array.from({ length: 10_000 }, (_, i) => i));
+    expect(rendered(fixture.nativeElement).length).toBeLessThanOrEqual(14);
+    expect(fixture.nativeElement.textContent).not.toContain('9999');
+  });
 
-    const rows = Array.from(f.nativeElement.querySelectorAll('.projected-row')) as HTMLElement[];
+  it('reports the initial browser range once, not once per equivalent parent write', async () => {
+    const fixture = mount([1, 2, 3]);
+    const ranges: NeuVirtualListRange[] = [];
+    fixture.componentInstance.rangeChange.subscribe((value) => ranges.push(value));
+    await fixture.whenStable();
+    fixture.componentRef.setInput('items', [1, 2, 3]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(ranges.length).toBeLessThanOrEqual(1);
+  });
 
-    expect(rows.length).toBe(2);
-    expect(rows[0].textContent).toContain('0-Alpha');
-    expect(rows[1].textContent).toContain('1-Beta');
+  it('scrollTo handles index and key targets, and rejects invalid targets', async () => {
+    const fixture = mount(Array.from({ length: 100 }, (_, i) => i));
+    await fixture.whenStable();
+    expect(fixture.componentInstance.scrollTo({ index: 30, align: 'start' })).toBe(true);
+    fixture.detectChanges();
+    expect(rendered(fixture.nativeElement)[0].getAttribute('aria-posinset')).toBe('29');
+    expect(fixture.componentInstance.scrollTo({ key: 99, align: 'end' })).toBe(true);
+    expect(fixture.componentInstance.scrollTo({ key: 101 })).toBe(false);
+    expect(fixture.componentInstance.scrollTo({ index: -1 })).toBe(false);
+    expect(fixture.componentInstance.scrollTo({ index: 1.5 })).toBe(false);
+  });
+
+  it('diagnoses duplicate keys while keeping track identities bounded', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const fixture = mount([1, 1, 2]);
+    await fixture.whenStable();
+    expect(rendered(fixture.nativeElement)).toHaveLength(3);
+    expect(warn.mock.calls.some(([message]) => String(message).includes('duplicate itemKey'))).toBe(true);
+    warn.mockRestore();
+  });
+
+  it('releases viewport resources over 100 create/destroy cycles', async () => {
+    for (let i = 0; i < 100; i++) {
+      const fixture = mount([i, i + 1]);
+      await fixture.whenStable();
+      fixture.destroy();
+    }
+  });
+
+  it('coalesces scroll and resize notifications and disconnects the observer on destroy', async () => {
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    let resize: (() => void) | undefined;
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resize = callback; }
+      observe = observe;
+      disconnect = disconnect;
+    });
+    const cancel = vi.fn();
+    try {
+      const fixture = mount(Array.from({ length: 100 }, (_, i) => i));
+      await fixture.whenStable();
+      vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => frames.push(callback));
+      vi.stubGlobal('cancelAnimationFrame', cancel);
+      const viewport = viewportOf(fixture.nativeElement);
+      expect(observe).toHaveBeenCalledWith(viewport);
+      viewport.scrollTop = 400;
+      viewport.dispatchEvent(new Event('scroll'));
+      resize?.();
+      expect(frames).toHaveLength(1);
+      frames.shift()?.(0);
+      fixture.detectChanges();
+      expect(rendered(fixture.nativeElement)[0].getAttribute('aria-posinset')).toBe('7');
+      viewport.dispatchEvent(new Event('scroll'));
+      fixture.destroy();
+      expect(disconnect).toHaveBeenCalledTimes(1);
+      expect(cancel).toHaveBeenCalledWith(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('aligns valid key targets to center and nearest without overscrolling the list', async () => {
+    const fixture = mount(Array.from({ length: 20 }, (_, i) => i));
+    fixture.componentRef.setInput('itemSize', 0);
+    fixture.componentRef.setInput('visibleRows', Number.NaN);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.scrollTo({ key: 10, align: 'center' })).toBe(true);
+    expect(viewportOf(fixture.nativeElement).scrollTop).toBeGreaterThan(0);
+    expect(fixture.componentInstance.scrollTo({ key: 0 })).toBe(true);
+    expect(viewportOf(fixture.nativeElement).scrollTop).toBe(0);
+  });
+
+  it('reveals later items with nearest alignment and rejects scrolling after destroy', async () => {
+    const fixture = mount(Array.from({ length: 30 }, (_, i) => i));
+    await fixture.whenStable();
+    const viewport = viewportOf(fixture.nativeElement);
+    expect(fixture.componentInstance.scrollTo({ index: 25 })).toBe(true);
+    expect(viewport.scrollTop).toBeGreaterThan(0);
+    expect(fixture.componentInstance.scrollTo({ index: 20, align: 'end' })).toBe(true);
+    fixture.destroy();
+    expect(fixture.componentInstance.scrollTo({ index: 1 })).toBe(false);
   });
 });

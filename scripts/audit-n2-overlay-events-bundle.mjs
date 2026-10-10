@@ -1,0 +1,208 @@
+import { execFileSync, spawnSync } from 'node:child_process';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { brotliCompressSync, constants, gzipSync } from 'node:zlib';
+import { build } from 'esbuild';
+
+import { assertPackageOnlyBundle, verifyUnusedPackageExport } from './lib/rel-01-package-bundle-evidence.mjs';
+
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+await verifyUnusedPackageExport(join(root, 'dist/neural-ui/core'), '@neural-ui/core', 'provideNeuralUI');
+const artifactPath = join(root, 'baselines/n2-overlay-events/n2-022-bundle.json');
+const update = process.argv.includes('--update');
+const external = ['@angular/*', 'rxjs', 'rxjs/*'];
+const git = existsSync('/opt/homebrew/bin/git') ? '/opt/homebrew/bin/git' : 'git';
+
+const compressed = (bytes) => ({
+  raw: bytes.byteLength,
+  gzip: gzipSync(bytes, { level: 9 }).byteLength,
+  brotli: brotliCompressSync(bytes, {
+    params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
+  }).byteLength,
+});
+
+function packagePlugin(packageRoot) {
+  const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
+  return {
+    name: 'n2-overlay-events-package',
+    setup(api) {
+      api.onResolve({ filter: /^@neural-ui\/core(?:\/.*)?$/ }, ({ path }) => {
+        const suffix = path.slice('@neural-ui/core'.length);
+        const entry = manifest.exports[suffix ? `.${suffix}` : '.'];
+        const target = typeof entry === 'string' ? entry : (entry?.default ?? entry?.import);
+        if (!target) throw new Error(`Missing package export for ${path}`);
+        return { path: resolve(packageRoot, target), sideEffects: false };
+      });
+    },
+  };
+}
+
+async function packageConsumer(packageRoot, source) {
+  const result = await build({
+    bundle: true,
+    external,
+    format: 'esm',
+    metafile: true,
+    minify: true,
+    platform: 'browser',
+    plugins: [packagePlugin(packageRoot)],
+    stdin: { contents: source, loader: 'js', resolveDir: root },
+    tsconfigRaw: { compilerOptions: {} },
+    treeShaking: true,
+    write: false,
+  });
+  assertPackageOnlyBundle(result.metafile, packageRoot, source);
+  const output = result.outputFiles.find((file) => file.path.endsWith('<stdout>'));
+  const bytes = output?.contents ?? Buffer.alloc(0);
+  const attribution = Object.entries(result.metafile.outputs)
+    .flatMap(([, value]) => Object.entries(value.inputs ?? {}))
+    .map(([path, value]) => ({
+      path: path.replace(/^.*?dist\/neural-ui\/core\//, 'dist/neural-ui/core/'),
+      bytesInOutput: value.bytesInOutput,
+    }))
+    .filter((entry) => entry.bytesInOutput > 0)
+    .sort((left, right) => right.bytesInOutput - left.bytesInOutput)
+    .slice(0, 16);
+  return { size: compressed(bytes), attribution };
+}
+
+function restoreHeadPath(workspace, path) {
+  const target = join(workspace, path);
+  rmSync(target, { recursive: true, force: true });
+  const files = execFileSync(git, ['ls-tree', '-r', '--name-only', 'HEAD', path], {
+    cwd: root,
+    encoding: 'utf8',
+  })
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean);
+  for (const file of files) {
+    const destination = join(target, relative(path, file));
+    mkdirSync(dirname(destination), { recursive: true });
+    writeFileSync(destination, execFileSync(git, ['show', `HEAD:${file}`], { cwd: root }));
+  }
+}
+
+function buildWorkspace(legacy) {
+  const workspace = mkdtempSync(join(root, '.n2-overlay-events-bundle-'));
+  try {
+    for (const path of ['projects', 'angular.json', 'tsconfig.json', 'package.json', 'LICENSE']) {
+      cpSync(join(root, path), join(workspace, path), { recursive: true, dereference: true });
+    }
+    if (legacy) {
+      for (const path of [
+        'projects/ui-core/modal',
+        'projects/ui-core/bottom-sheet',
+        'projects/ui-core/sidebar',
+        'projects/ui-core/calendar',
+        'projects/ui-core/foundation',
+        'projects/ui-core/internal',
+      ])
+        restoreHeadPath(workspace, path);
+    }
+    const ng = join(root, 'node_modules/.bin/ng');
+    const built = spawnSync(ng, ['build', 'ui-core', '--configuration', 'production'], {
+      cwd: workspace,
+      encoding: 'utf8',
+      env: { ...process.env, NO_COLOR: '1' },
+    });
+    if (built.status !== 0) throw new Error(`${built.stdout}\n${built.stderr}`);
+    return { workspace, packageRoot: join(workspace, 'dist/neural-ui/core') };
+  } catch (error) {
+    rmSync(workspace, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+const sources = {
+  dialog: "import{NeuDialogComponent}from'@neural-ui/core/modal';export{NeuDialogComponent};",
+  'bottom-sheet':
+    "import{NeuBottomSheetComponent}from'@neural-ui/core/bottom-sheet';export{NeuBottomSheetComponent};",
+  sidebar: "import{NeuSidebarComponent}from'@neural-ui/core/sidebar';export{NeuSidebarComponent};",
+  calendar:
+    "import{NeuCalendarComponent}from'@neural-ui/core/calendar';export{NeuCalendarComponent};",
+  combined:
+    "import{NeuDialogComponent}from'@neural-ui/core/modal';import{NeuBottomSheetComponent}from'@neural-ui/core/bottom-sheet';import{NeuSidebarComponent}from'@neural-ui/core/sidebar';import{NeuCalendarComponent}from'@neural-ui/core/calendar';export{NeuDialogComponent,NeuBottomSheetComponent,NeuSidebarComponent,NeuCalendarComponent};",
+  'root-unused': "import{provideNeuralUI}from'@neural-ui/core';",
+};
+const candidate = buildWorkspace(false);
+const legacy = buildWorkspace(true);
+
+try {
+  const consumers = {};
+  const legacyConsumers = {};
+  for (const [name, source] of Object.entries(sources)) {
+    consumers[name] = await packageConsumer(candidate.packageRoot, source);
+    legacyConsumers[name] = await packageConsumer(legacy.packageRoot, source);
+  }
+  if (consumers['root-unused'].size.raw !== 0) throw new Error('Root-unused is not zero bytes.');
+  const sidebarGraph = JSON.stringify(consumers.sidebar);
+  const forbidden = [
+    '/url-state/',
+    '@angular/router',
+    '@angular/common/http',
+    '@angular/forms',
+    '/table/neu-table',
+    '/tree-table/neu-tree-table',
+    '/table-core/',
+    'primeng',
+  ].filter((token) => sidebarGraph.includes(token));
+  if (forbidden.length) throw new Error(`Forbidden Sidebar graph tokens: ${forbidden.join(', ')}`);
+  const comparison = Object.fromEntries(
+    ['dialog', 'bottom-sheet', 'sidebar', 'calendar', 'combined'].map((name) => [
+      name,
+      {
+        rawDeltaPercent:
+          ((consumers[name].size.raw - legacyConsumers[name].size.raw) /
+            legacyConsumers[name].size.raw) *
+          100,
+        gzipDeltaPercent:
+          ((consumers[name].size.gzip - legacyConsumers[name].size.gzip) /
+            legacyConsumers[name].size.gzip) *
+          100,
+        brotliDeltaPercent:
+          ((consumers[name].size.brotli - legacyConsumers[name].size.brotli) /
+            legacyConsumers[name].size.brotli) *
+          100,
+      },
+    ]),
+  );
+  const artifact = {
+    checkpoint: 'N2-022',
+    capturedAt: new Date().toISOString(),
+    method: 'Angular-compiled minified consumer ESM; Angular/RxJS external; gzip 9; Brotli 11',
+    legacyConsumers,
+    consumers,
+    comparison,
+    forbiddenSidebarGraphTokens: forbidden,
+  };
+  if (update) {
+    mkdirSync(dirname(artifactPath), { recursive: true });
+    writeFileSync(artifactPath, `${JSON.stringify(artifact, null, 2)}\n`);
+    console.log(`Updated ${artifactPath}`);
+  } else {
+    if (!existsSync(artifactPath)) throw new Error('N2-022 bundle artifact is missing.');
+    const stored = JSON.parse(readFileSync(artifactPath, 'utf8'));
+    if (stored.checkpoint !== artifact.checkpoint) throw new Error('Unexpected checkpoint.');
+    console.log(
+      `N2-022 bundle passed: ${JSON.stringify(
+        Object.fromEntries(Object.entries(consumers).map(([name, value]) => [name, value.size])),
+      )}`,
+    );
+    console.log(
+      `Calendar current vs HEAD: ${JSON.stringify({ before: legacyConsumers.calendar.size, after: consumers.calendar.size, delta: comparison.calendar })}`,
+    );
+  }
+} finally {
+  rmSync(candidate.workspace, { recursive: true, force: true });
+  rmSync(legacy.workspace, { recursive: true, force: true });
+}

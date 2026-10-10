@@ -1,0 +1,40 @@
+{
+  "checkpoint": "N2-015B",
+  "capturedAt": "2026-09-20T18:01:07.080Z",
+  "metrics": {
+    "normalize1k": {
+      "p50Ms": 0.413,
+      "p95Ms": 0.818
+    },
+    "flatten1k": {
+      "p50Ms": 0.648,
+      "p95Ms": 0.857
+    },
+    "normalize10k": {
+      "p50Ms": 5.45,
+      "p95Ms": 5.939
+    },
+    "flatten10k": {
+      "p50Ms": 6.965,
+      "p95Ms": 7.435
+    },
+    "deep1000": {
+      "p50Ms": 2.277,
+      "p95Ms": 3.136
+    },
+    "expand100": {
+      "p50Ms": 0.08,
+      "p95Ms": 0.086
+    },
+    "identicalRead1k": {
+      "p50Ms": 0.002,
+      "p95Ms": 0.112
+    },
+    "render1k": {
+      "p50Ms": 2.67,
+      "p95Ms": 4.775,
+      "domNodes": 5008
+    },
+    "destroy50Ms": 78.954
+  }
+}

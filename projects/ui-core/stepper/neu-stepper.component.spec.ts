@@ -55,7 +55,7 @@ describe('NeuStepperComponent', () => {
     const steps: NeuStepperStep[] = [{ label: 'Paso 1', description: 'Rellena tus datos' }];
     const { f } = mk({ steps });
     const button: HTMLButtonElement = f.nativeElement.querySelector('.neu-stepper__step-btn');
-    expect(button.getAttribute('aria-label')).toBe('Paso 1 - Rellena tus datos');
+    expect(button.getAttribute('aria-label')).toBe('Paso 1 - Rellena tus datos, step 1 of 1');
   });
 
   it('should mark steps completed (i < activeStep)', () => {
@@ -129,12 +129,16 @@ describe('NeuStepperComponent', () => {
 
   // ── next() ────────────────────────────────────────────────────────────────
 
-  it('next() marks current step completed and emits next index', () => {
-    const { comp } = mk({ activeStep: 0 });
+  it('next() proposes the next index and completion follows the controlled activeStep', () => {
+    const { f, comp } = mk({ activeStep: 0 });
     const emitted: number[] = [];
     comp.stepChange.subscribe((v: number) => emitted.push(v));
     comp.next();
     expect(emitted).toEqual([1]);
+    expect(comp.isCompleted(0)).toBe(false);
+
+    f.componentRef.setInput('activeStep', 1);
+    f.detectChanges();
     expect(comp.isCompleted(0)).toBe(true);
   });
 
@@ -154,6 +158,27 @@ describe('NeuStepperComponent', () => {
     comp.stepChange.subscribe((v: number) => emitted.push(v));
     comp.prev();
     expect(emitted).toEqual([1]);
+  });
+
+  it('clears transient completion when the controlled step moves backwards', () => {
+    const { f, comp } = mk({ activeStep: 1 });
+    const emitted: number[] = [];
+    comp.stepChange.subscribe((v: number) => emitted.push(v));
+
+    comp.next();
+    f.componentRef.setInput('activeStep', emitted.at(-1));
+    f.detectChanges();
+    expect(f.nativeElement.querySelectorAll('.neu-stepper__step--completed')).toHaveLength(2);
+
+    comp.prev();
+    f.componentRef.setInput('activeStep', emitted.at(-1));
+    f.detectChanges();
+
+    const renderedSteps = f.nativeElement.querySelectorAll('.neu-stepper__step');
+    expect(renderedSteps[0].classList).toContain('neu-stepper__step--completed');
+    expect(renderedSteps[1].classList).toContain('neu-stepper__step--active');
+    expect(renderedSteps[1].classList).not.toContain('neu-stepper__step--completed');
+    expect(renderedSteps[2].classList).not.toContain('neu-stepper__step--completed');
   });
 
   it('prev() on first step does not emit', () => {
@@ -227,27 +252,30 @@ describe('NeuStepperComponent', () => {
   });
 
   it('should react to matchMedia changes and unregister the listener on destroy', () => {
-    const originalMatchMedia = window.matchMedia;
+    const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
     const addEventListener = vi.fn();
     const removeEventListener = vi.fn();
     let changeHandler: ((event: MediaQueryListEvent) => void) | undefined;
 
-    window.matchMedia = vi.fn().mockImplementation(() => ({
-      matches: true,
-      media: '(max-width: 767px)',
-      onchange: null,
-      addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        addEventListener();
-        changeHandler = listener;
-      },
-      removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
-        removeEventListener();
-        expect(listener).toBe(changeHandler);
-      },
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    }));
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn().mockImplementation(() => ({
+        matches: true,
+        media: '(max-width: 767px)',
+        onchange: null,
+        addEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+          addEventListener();
+          changeHandler = listener;
+        },
+        removeEventListener: (_type: string, listener: (event: MediaQueryListEvent) => void) => {
+          removeEventListener();
+          expect(listener).toBe(changeHandler);
+        },
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
 
     try {
       const f = TestBed.createComponent(NeuStepperComponent);
@@ -263,7 +291,8 @@ describe('NeuStepperComponent', () => {
       f.destroy();
       expect(removeEventListener).toHaveBeenCalledTimes(1);
     } finally {
-      window.matchMedia = originalMatchMedia;
+      if (originalMatchMedia) Object.defineProperty(window, 'matchMedia', originalMatchMedia);
+      else Reflect.deleteProperty(window, 'matchMedia');
     }
   });
 
@@ -274,5 +303,26 @@ describe('NeuStepperComponent', () => {
     comp.next();
     // stepChange not emitted when already on last step (index 2 = last of 3 steps)
     expect(emitted.length).toBe(0);
+  });
+
+  it('next and prev propose from applied state without writing it', () => {
+    const { comp } = mk({ activeStep: 1 });
+    const emitted: number[] = [];
+    comp.stepChange.subscribe((value: number) => emitted.push(value));
+    comp.next();
+    expect(emitted).toEqual([2]);
+    expect(comp.activeStep()).toBe(1);
+    comp.prev();
+    expect(emitted).toEqual([2, 0]);
+  });
+
+  it('imperative navigation rejects disabled and out-of-range targets', () => {
+    const { comp } = mk({ steps: [{ label: 'One' }, { label: 'Two', disabled: true }] });
+    const emitted: number[] = [];
+    comp.stepChange.subscribe((value: number) => emitted.push(value));
+    comp.next();
+    comp.goTo(-1);
+    comp.goTo(5);
+    expect(emitted).toEqual([]);
   });
 });

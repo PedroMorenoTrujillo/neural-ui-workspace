@@ -1,45 +1,45 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  OnInit,
   ViewEncapsulation,
   computed,
   inject,
   input,
+  viewChild,
 } from '@angular/core';
-import { NEU_RADIO_GROUP } from './neu-radio-group.component';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEU_RADIO_GROUP, NeuRadioGroupComponent } from './neu-radio-group.component';
+import { markNeuRadioInitialized } from './radio-readiness';
 
-let _neuRadioIdSeq = 0;
-
-/**
- * NeuralUI Radio Component
- *
- * Opción individual dentro de un neu-radio-group.
- *
- * Uso:
- *   <neu-radio value="opcion-a" label="Opción A" />
- */
+/** Typed option owned by its nearest NeuRadioGroupComponent. */
 @Component({
   selector: 'neu-radio',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-radio-host' },
   template: `
     <label
       class="neu-radio"
       [class.neu-radio--checked]="isChecked()"
       [class.neu-radio--disabled]="isDisabled()"
-      [for]="_id"
+      [for]="inputId()"
     >
       <input
+        #nativeInput
         type="radio"
         class="neu-radio__input"
-        [id]="_id"
-        [name]="_groupName"
+        [id]="inputId()"
+        [name]="group.groupName()"
         [value]="value()"
         [checked]="isChecked()"
         [disabled]="isDisabled()"
-        (change)="onSelect()"
-        (blur)="onBlur()"
+        [tabIndex]="group.tabIndexFor(this)"
+        [attr.aria-checked]="isChecked()"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
+        [attr.aria-readonly]="group.readonly() ? 'true' : null"
+        (click)="onClick($event)"
+        (change)="onSelect($event)"
+        (keydown)="onKeyDown($event)"
       />
       <span class="neu-radio__circle" [class.neu-radio__circle--checked]="isChecked()">
         <span class="neu-radio__dot"></span>
@@ -50,23 +50,43 @@ let _neuRadioIdSeq = 0;
     </label>
   `,
 })
-export class NeuRadioComponent {
-  readonly value = input.required<unknown>();
+export class NeuRadioComponent<V = string> implements OnInit {
+  readonly value = input.required<V>();
   readonly label = input<string>('');
   readonly disabled = input<boolean>(false);
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-radio-'));
 
-  readonly group = inject(NEU_RADIO_GROUP);
+  protected readonly group = inject(NEU_RADIO_GROUP) as NeuRadioGroupComponent<V>;
+  private readonly nativeInput = viewChild.required<ElementRef<HTMLInputElement>>('nativeInput');
 
-  readonly _id = `neu-radio-${_neuRadioIdSeq++}`;
-  /** Toma el nombre del grupo padre — así todos los radios del grupo comparten el mismo `name` nativo / Takes the parent group name — so all radios in the group share the same native `name` */
-  readonly _groupName = this.group._name;
+  readonly isChecked = computed(() => this.group.isSelected(this.value()));
+  readonly isDisabled = computed(() => this.disabled() || this.group.disabled());
 
-  readonly isChecked = computed(() => this.group._value() === this.value());
-  readonly isDisabled = computed(() => this.disabled() || this.group._isDisabled());
+  ngOnInit(): void {
+    markNeuRadioInitialized(this);
+  }
 
-  onSelect(): void {
+  onClick(event: MouseEvent): void {
+    if (this.group.readonly()) event.preventDefault();
+  }
+
+  onSelect(event: Event): void {
+    if (this.group.readonly() || this.isDisabled()) {
+      (event.target as HTMLInputElement).checked = this.isChecked();
+      return;
+    }
     this.group.select(this.value());
   }
 
-  onBlur(): void {}
+  onKeyDown(event: KeyboardEvent): void {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+    event.preventDefault();
+    this.group.moveFrom(this, event.key);
+  }
+
+  focus(options?: FocusOptions): void {
+    this.nativeInput().nativeElement.focus(options);
+  }
 }

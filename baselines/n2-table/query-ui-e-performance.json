@@ -1,0 +1,57 @@
+{
+  "checkpoint": "N2-011E",
+  "capturedAt": "2026-09-20T10:27:53.339Z",
+  "metrics": {
+    "sortProposal": {
+      "samples": 25,
+      "p50Ms": 0.0016,
+      "p95Ms": 0.0082
+    },
+    "multiSortProposal": {
+      "samples": 25,
+      "p50Ms": 0.0018,
+      "p95Ms": 0.0024
+    },
+    "searchProposal": {
+      "samples": 25,
+      "p50Ms": 0.0011,
+      "p95Ms": 0.0022
+    },
+    "simpleFilterTransform": {
+      "samples": 25,
+      "p50Ms": 0.0003,
+      "p95Ms": 0.0037
+    },
+    "nestedFilterTransform": {
+      "samples": 25,
+      "p50Ms": 0.022,
+      "p95Ms": 0.0428
+    },
+    "pageProposal": {
+      "samples": 25,
+      "p50Ms": 0.0011,
+      "p95Ms": 0.0033
+    },
+    "pageSizeProposal": {
+      "samples": 25,
+      "p50Ms": 0.0015,
+      "p95Ms": 0.0035
+    },
+    "sameQuerySuppression": {
+      "samples": 25,
+      "p50Ms": 0.0012,
+      "p95Ms": 0.0082
+    },
+    "renderPipeline100": {
+      "samples": 25,
+      "p50Ms": 0.135,
+      "p95Ms": 0.2592
+    },
+    "queryReplacement100": {
+      "samples": 25,
+      "p50Ms": 0.0712,
+      "p95Ms": 0.0953
+    },
+    "pipelineEvaluations": 2
+  }
+}

@@ -1,0 +1,387 @@
+{
+  "checkpoint": "N2-011H",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 168789,
+        "gzip": 29127,
+        "brotli": 24472
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "editing": {
+      "size": {
+        "raw": 174393,
+        "gzip": 30224,
+        "brotli": 25254
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "expansion": {
+      "size": {
+        "raw": 168789,
+        "gzip": 29127,
+        "brotli": 24472
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "grouping": {
+      "size": {
+        "raw": 168789,
+        "gzip": 29127,
+        "brotli": 24472
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "virtualExpansion": {
+      "size": {
+        "raw": 168789,
+        "gzip": 29127,
+        "brotli": 24472
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "virtualGrouping": {
+      "size": {
+        "raw": 168789,
+        "gzip": 29127,
+        "brotli": 24472
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "combined": {
+      "size": {
+        "raw": 181912,
+        "gzip": 31897,
+        "brotli": 26135
+      },
+      "entrySize": {
+        "raw": 73,
+        "gzip": 87,
+        "brotli": 77
+      },
+      "chunks": [
+        {
+          "kind": "advanced-filter",
+          "size": {
+            "raw": 7519,
+            "gzip": 1939,
+            "brotli": 1654
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 168716,
+            "gzip": 29088,
+            "brotli": 24418
+          }
+        },
+        {
+          "kind": "editing",
+          "size": {
+            "raw": 5604,
+            "gzip": 1414,
+            "brotli": 1215
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "entrySize": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "chunks": [],
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "virtualizationGBasic": {
+      "raw": 136808,
+      "gzip": 23788,
+      "brotli": 20177
+    },
+    "interactionsHBasic": {
+      "raw": 168789,
+      "gzip": 29127,
+      "brotli": 24472
+    },
+    "basicGzipDelta": 5339,
+    "virtualizationGCombined": {
+      "raw": 137191,
+      "gzip": 23935,
+      "brotli": 20308
+    },
+    "interactionsHCombined": {
+      "raw": 181912,
+      "gzip": 31897,
+      "brotli": 26135
+    },
+    "combinedGzipDelta": 7962
+  },
+  "isolated": {
+    "editingEngine": {
+      "size": {
+        "raw": 1727,
+        "gzip": 803,
+        "brotli": 716
+      },
+      "entrySize": {
+        "raw": 1727,
+        "gzip": 803,
+        "brotli": 716
+      },
+      "chunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/editing/neu-table-editing.ts",
+          "bytesInOutput": 1356
+        },
+        {
+          "path": "projects/ui-core/table/next/internal/semantics/neu-table-basic-projections.ts",
+          "bytesInOutput": 107
+        },
+        {
+          "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+          "bytesInOutput": 47
+        }
+      ]
+    },
+    "groupingEngine": {
+      "size": {
+        "raw": 2519,
+        "gzip": 1090,
+        "brotli": 977
+      },
+      "entrySize": {
+        "raw": 2519,
+        "gzip": 1090,
+        "brotli": 977
+      },
+      "chunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/grouping/neu-table-grouping.ts",
+          "bytesInOutput": 2342
+        },
+        {
+          "path": "projects/ui-core/table/next/internal/semantics/neu-table-basic-projections.ts",
+          "bytesInOutput": 107
+        }
+      ]
+    }
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "controlled transition guards",
+      "expansion/group presentation",
+      "small edit session controller"
+    ],
+    "privateChunks": [
+      "Signal Forms active editor",
+      "advanced filter builder"
+    ],
+    "notWorthSplitting": [
+      "expansion membership and loaded grouping projection"
+    ]
+  }
+}

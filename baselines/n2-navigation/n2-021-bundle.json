@@ -1,0 +1,277 @@
+{
+  "checkpoint": "N2-021",
+  "capturedAt": "2026-09-21T15:20:47.117Z",
+  "method": "Angular-compiled minified consumer ESM; Angular/RxJS external; gzip 9; Brotli 11",
+  "legacyConsumers": {
+    "tabs": {
+      "size": {
+        "raw": 19420,
+        "gzip": 4553,
+        "brotli": 4009
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tabs.mjs",
+          "bytesInOutput": 16288
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3101
+        }
+      ]
+    },
+    "panel": {
+      "size": {
+        "raw": 44521,
+        "gzip": 5756,
+        "brotli": 4801
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-panel.mjs",
+          "bytesInOutput": 39994
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4177
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 318
+        }
+      ]
+    },
+    "sidebar": {
+      "size": {
+        "raw": 43190,
+        "gzip": 9104,
+        "brotli": 7938
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 17229
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12963
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6632
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3115
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 104176,
+        "gzip": 17234,
+        "brotli": 14391
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-panel.mjs",
+          "bytesInOutput": 40024
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 17248
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tabs.mjs",
+          "bytesInOutput": 16313
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12985
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6656
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4212
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3118
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 324
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "consumers": {
+    "tabs": {
+      "size": {
+        "raw": 21376,
+        "gzip": 5312,
+        "brotli": 4652
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tabs.mjs",
+          "bytesInOutput": 16850
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4177
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 318
+        }
+      ]
+    },
+    "panel": {
+      "size": {
+        "raw": 45937,
+        "gzip": 6010,
+        "brotli": 5049
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-panel.mjs",
+          "bytesInOutput": 41410
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4177
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 318
+        }
+      ]
+    },
+    "sidebar": {
+      "size": {
+        "raw": 44519,
+        "gzip": 9395,
+        "brotli": 8181
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 18558
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12963
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6632
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3115
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 107484,
+        "gzip": 18105,
+        "brotli": 14899
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-panel.mjs",
+          "bytesInOutput": 41443
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-sidebar.mjs",
+          "bytesInOutput": 18578
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-tabs.mjs",
+          "bytesInOutput": 16871
+        },
+        {
+          "path": "node_modules/@ng-icons/core/fesm2022/ng-icons-core.mjs",
+          "bytesInOutput": 12985
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-focus-trap.mjs",
+          "bytesInOutput": 6656
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-internal.mjs",
+          "bytesInOutput": 4210
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-icon.mjs",
+          "bytesInOutput": 3217
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-url-state.mjs",
+          "bytesInOutput": 3121
+        },
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-foundation.mjs",
+          "bytesInOutput": 324
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "tabs": {
+      "rawDeltaPercent": 10.072090628218332,
+      "gzipDeltaPercent": 16.67032725675379,
+      "brotliDeltaPercent": 16.038912446994264
+    },
+    "panel": {
+      "rawDeltaPercent": 3.1805215516273218,
+      "gzipDeltaPercent": 4.412786657400973,
+      "brotliDeltaPercent": 5.1655905019787545
+    },
+    "sidebar": {
+      "rawDeltaPercent": 3.0771011808288957,
+      "gzipDeltaPercent": 3.196397188049209,
+      "brotliDeltaPercent": 3.061224489795918
+    },
+    "combined": {
+      "rawDeltaPercent": 3.175395484564583,
+      "gzipDeltaPercent": 5.053963096205176,
+      "brotliDeltaPercent": 3.529984017788896
+    }
+  },
+  "forbiddenGraphTokens": [],
+  "note": "Sidebar overlay URL ownership is unchanged and belongs to the later overlay contract; collapsed state has no persistence owner."
+}

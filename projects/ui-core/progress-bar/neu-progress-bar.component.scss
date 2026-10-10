@@ -40,7 +40,10 @@
     }
   }
 
-  &--primary {
+  &--neutral .neu-progress__fill { background: var(--neu-text-muted); }
+  &--info .neu-progress__fill { background: var(--neu-info); }
+
+  &--brand {
     .neu-progress__fill {
       background: var(--neu-primary);
     }
@@ -104,5 +107,17 @@
   &--indeterminate {
     width: 50% !important;
     animation: neu-progress-indeterminate 1.4s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-progress__fill {
+    transition: none;
+  }
+
+  .neu-progress__fill--indeterminate {
+    width: 100% !important;
+    animation: none;
+    opacity: 0.6;
   }
 }

@@ -1,144 +1,143 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
+  Injector,
   ViewEncapsulation,
+  afterNextRender,
   computed,
-  effect,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
-  viewChild,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import {
-  ControlValueAccessor,
-  FormControl,
-  NG_VALUE_ACCESSOR,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
-import { NeuIconComponent } from '@neural-ui/core/icon';
-import { NeuInputComponent } from '@neural-ui/core/input';
-import { NeuDateInputComponent } from '@neural-ui/core/date-input';
-import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
-import { NeuSelectComponent, NeuSelectOption } from '@neural-ui/core/select';
+import { NeuSelectComponent } from '@neural-ui/core/select';
 import { NeuTextareaComponent } from '@neural-ui/core/textarea';
+import { NeuDateInputComponent, isCivilDate } from '@neural-ui/core/date-input';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconEdit as iconEdit } from '@neural-ui/core/internal';
+import { neuIconCheck as iconCheck } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
 
-export type NeuInlineEditorType = 'text' | 'number' | 'select' | 'textarea' | 'date';
+export type NeuInlineMode = 'text' | 'number';
+export type NeuInlineEditorType = NeuInlineMode | 'select' | 'textarea' | 'date';
+export type NeuInlineValue<M extends NeuInlineMode> = M extends 'number'
+  ? number | null
+  : string;
 export type NeuInlineEditorSize = 'sm' | 'md' | 'lg';
 
-export interface NeuInlineEditorCommitEvent<T = string | number | null> {
-  previousValue: T;
-  value: T;
+export interface NeuInlineEditorCommitEvent<M extends NeuInlineMode = NeuInlineMode> {
+  readonly previousValue: NeuInlineValue<M>;
+  readonly value: NeuInlineValue<M>;
+}
+
+interface NeuInlineEditorValueCommitEvent<V> {
+  readonly previousValue: V;
+  readonly value: V;
 }
 
 @Component({
   selector: 'neu-inline-editor',
-  imports: [
-    ReactiveFormsModule,
-    NeuButtonComponent,
-    NeuIconComponent,
-    NeuInputComponent,
-    NeuDateInputComponent,
-    NeuNumberInputComponent,
-    NeuSelectComponent,
-    NeuTextareaComponent,
-  ],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent, NeuSelectComponent, NeuTextareaComponent, NeuDateInputComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuInlineEditorComponent),
-      multi: true,
-    },
-  ],
   host: {
     '[class]': 'hostClasses()',
-    '[attr.aria-disabled]': 'isDisabled()',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '(focusout)': 'onEditFocusout($event)',
   },
   template: `
     @if (editing()) {
-      <div
-        class="neu-inline-editor__edit"
-        (keydown)="onEditKeydown($event)"
-        (focusout)="onEditFocusout($event)"
-      >
+      <div class="neu-inline-editor__edit">
         @switch (type()) {
-          @case ('select') {
-            <neu-select
-              class="neu-inline-editor__control"
-              [options]="options()"
-              [formControl]="stringControl"
-              [size]="size()"
-              [floatingLabel]="false"
-              [placeholder]="placeholder()"
-            />
-          }
-          @case ('number') {
-            <neu-number-input
-              class="neu-inline-editor__control"
-              [formControl]="numberControl"
-              [size]="size()"
-              [min]="min()"
-              [max]="max()"
-              [step]="step()"
-            />
-          }
-          @case ('textarea') {
-            <neu-textarea
-              class="neu-inline-editor__control"
-              [formControl]="stringControl"
-              [size]="size()"
-              [label]="placeholder()"
-              [rows]="rows()"
-            />
-          }
-          @case ('date') {
-            <neu-date-input
-              class="neu-inline-editor__control"
-              [formControl]="stringControl"
-              [size]="size()"
-              [placeholder]="placeholder()"
-            />
-          }
-          @default {
-            <neu-input
-              class="neu-inline-editor__control"
-              [formControl]="stringControl"
-              [size]="size()"
-              [floatingLabel]="false"
-              [placeholder]="placeholder()"
-            />
-          }
+        @case ('select') {
+          <neu-select
+            class="neu-inline-editor__field"
+            [options]="options()"
+            [value]="draft()"
+            (valueChange)="onSelectionDraft($event)"
+            [ariaLabel]="editLabel()"
+            [placeholder]="placeholder()"
+            [ariaDescribedBy]="ariaDescribedBy()"
+            [size]="size()"
+            [disabled]="disabled()"
+            [readonly]="readonly()"
+            [fluid]="true"
+            (closed)="onEditorOverlayClosed()"
+            (keydown)="onEditKeydown($event)"
+          />
+        }
+        @case ('textarea') {
+          <neu-textarea
+            class="neu-inline-editor__field"
+            [value]="draft()"
+            (valueChange)="onDraftInput($event)"
+            [ariaLabel]="editLabel()"
+            [ariaDescribedBy]="ariaDescribedBy()"
+            [size]="size()"
+            [disabled]="disabled()"
+            [readonly]="readonly()"
+            [rows]="3"
+            (keydown)="onEditKeydown($event)"
+          />
+        }
+        @case ('date') {
+          <neu-date-input
+            class="neu-inline-editor__field"
+            mode="date"
+            [value]="dateDraft()"
+            (valueChange)="onSelectionDraft($event)"
+            [ariaLabel]="editLabel()"
+            [placeholder]="placeholder()"
+            [ariaDescribedBy]="ariaDescribedBy()"
+            [size]="size()"
+            [disabled]="disabled()"
+            [readonly]="readonly()"
+            (closed)="onEditorOverlayClosed()"
+            (keydown)="onEditKeydown($event)"
+          />
+        }
+        @default {
+        <input
+          class="neu-inline-editor__control"
+          type="text"
+          [inputMode]="type() === 'number' ? 'decimal' : 'text'"
+          [value]="draft()"
+          [placeholder]="placeholder()"
+          [attr.aria-label]="editLabel()"
+          [attr.aria-invalid]="draftValid() ? null : 'true'"
+          [attr.aria-describedby]="ariaDescribedBy() || null"
+          [disabled]="disabled()"
+          [readOnly]="readonly()"
+          (input)="onDraftInput($any($event.target).value)"
+          (keydown)="onEditKeydown($event)"
+        />
+        }
         }
 
         <div class="neu-inline-editor__actions">
           <button
             neu-button
             type="button"
-            variant="primary"
+            tone="brand" variant="solid"
             [size]="size()"
-            icon="lucideCheck"
             [iconOnly]="true"
             [ariaLabel]="saveLabel()"
-            [disabled]="isDisabled()"
+            [disabled]="disabled() || readonly() || !draftValid()"
             (click)="commit()"
-          ></button>
+          ><neu-icon-outlet [icon]="iconCheck" [fallbackPath]="iconFallbackPath(iconCheck)" [fallbackText]="iconFallbackText(iconCheck)" size="1em" /></button>
           <button
             neu-button
             type="button"
-            variant="ghost"
+            tone="neutral" variant="ghost"
             [size]="size()"
-            icon="lucideX"
             [iconOnly]="true"
             [ariaLabel]="cancelLabel()"
+            [disabled]="disabled()"
             (click)="cancel()"
-          ></button>
+          ><neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1em" /></button>
         </div>
       </div>
     } @else {
@@ -146,171 +145,227 @@ export interface NeuInlineEditorCommitEvent<T = string | number | null> {
         neu-button
         class="neu-inline-editor__display"
         type="button"
-        variant="ghost"
+        tone="neutral" variant="ghost"
         [size]="size()"
-        [disabled]="isDisabled() || readonly()"
-        [attr.aria-label]="editLabel()"
+        [disabled]="disabled()"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        [ariaLabel]="editLabel()"
         (click)="beginEdit()"
       >
         <span class="neu-inline-editor__value" [class.neu-inline-editor__value--empty]="isEmpty()">
           {{ displayValue() }}
         </span>
         @if (!readonly()) {
-          <neu-icon name="lucidePencil" size="14px" aria-hidden="true" />
+          <neu-icon-outlet [icon]="iconEdit" [fallbackPath]="iconFallbackPath(iconEdit)" [fallbackText]="iconFallbackText(iconEdit)" size="14px" aria-hidden="true" />
         }
       </button>
     }
   `,
   styleUrl: './neu-inline-editor.component.scss',
 })
-export class NeuInlineEditorComponent implements ControlValueAccessor {
-  private readonly _host = inject(ElementRef<HTMLElement>);
-  private readonly _document = inject(DOCUMENT);
+export class NeuInlineEditorControl<V = string | number | null> implements FormValueControl<V> {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconCheck = iconCheck;
+  protected readonly iconEdit = iconEdit;
+  protected readonly iconX = iconX;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
-  readonly value = input<string | number | null>(null);
+  readonly value = model<V>('' as V);
   readonly type = input<NeuInlineEditorType>('text');
+  readonly options = input<readonly unknown[]>([]);
   readonly size = input<NeuInlineEditorSize>('sm');
-  readonly options = input<NeuSelectOption[]>([]);
   readonly placeholder = input('');
-  readonly emptyLabel = input(this._localizedDefault('Empty', 'Vacío'));
-  readonly editLabel = input(this._localizedDefault('Edit value', 'Editar valor'));
-  readonly saveLabel = input(this._localizedDefault('Save value', 'Guardar valor'));
-  readonly cancelLabel = input(this._localizedDefault('Cancel edit', 'Cancelar edición'));
+  readonly emptyLabel = input('Empty');
+  readonly editLabel = input('Edit value');
+  readonly saveLabel = input('Save value');
+  readonly cancelLabel = input('Cancel edit');
   readonly disabled = input(false);
   readonly readonly = input(false);
+  readonly hidden = input(false);
+  readonly invalid = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly required = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly ariaDescribedBy = input('');
   readonly startInEdit = input(false);
   readonly saveOnBlur = input(false);
-  readonly min = input(-Infinity);
-  readonly max = input(Infinity);
-  readonly step = input(1);
-  readonly rows = input(3);
 
-  readonly valueChange = output<string | number | null>();
-  readonly editStart = output<string | number | null>();
-  readonly editCancel = output<string | number | null>();
-  readonly editCommit = output<NeuInlineEditorCommitEvent>();
+  readonly editStart = output<V>();
+  readonly editCancel = output<V>();
+  readonly valueCommitted = output<NeuInlineEditorValueCommitEvent<V>>();
+  readonly touch = output<void>();
 
-  readonly stringControl = new FormControl<string | null>(null);
-  readonly numberControl = new FormControl<number>(0, { nonNullable: true });
   readonly editing = signal(false);
-  private readonly _value = signal<string | number | null>(null);
-  private readonly _snapshot = signal<string | number | null>(null);
-  private readonly _cvaDisabled = signal(false);
-  private _onChange: (value: string | number | null) => void = () => {};
-  private _onTouched: () => void = () => {};
+  readonly draft = signal('');
+  protected readonly dateDraft = computed(() => {
+    const draft = this.draft();
+    return isCivilDate(draft) ? draft : null;
+  });
+  private readonly snapshot = signal<{ readonly value: V } | null>(null);
+  private touchSent = false;
 
-  readonly isDisabled = computed(() => this.disabled() || this._cvaDisabled());
-  readonly isEmpty = computed(() => {
-    const value = this._value();
-    return value === null || value === undefined || value === '';
+  readonly draftValid = computed(() => {
+    if (this.type() !== 'number') return true;
+    const text = this.draft().trim();
+    return text === '' || Number.isFinite(Number(text));
   });
-  readonly displayValue = computed(() => {
-    if (this.isEmpty()) return this.emptyLabel();
-    const current = this._value();
-    if (this.type() === 'select') {
-      return this.options().find((option) => option.value === current)?.label ?? String(current);
-    }
-    return String(current);
-  });
+  readonly isEmpty = computed(() => this.value() === null || this.value() === '');
+  readonly displayValue = computed(() =>
+    this.isEmpty() ? this.emptyLabel() : String(this.value()),
+  );
 
   constructor() {
-    effect(() => {
-      this._setValue(this.value(), false);
+    afterNextRender(() => {
+      if (this.startInEdit()) this.beginEdit();
     });
-
-    effect(() => {
-      this.isDisabled();
-      this._syncDisabledState();
-    });
-
-    effect(() => {
-      if (this.startInEdit() && !this.editing()) {
-        this.beginEdit();
-      }
-    });
-
-    this.stringControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
-      if (this.type() !== 'number') {
-        this._value.set(value);
-      }
-    });
-    this.numberControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
-      if (this.type() === 'number') {
-        this._value.set(Number.isFinite(value) ? value : null);
-      }
-    });
-  }
-
-  private _localizedDefault(english: string, spanish: string): string {
-    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
-  }
-
-  writeValue(value: string | number | null): void {
-    this._setValue(value, false);
-  }
-
-  registerOnChange(fn: (value: string | number | null) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this._cvaDisabled.set(isDisabled);
-    this._syncDisabledState();
   }
 
   beginEdit(): void {
-    if (this.isDisabled() || this.readonly()) return;
-    this._snapshot.set(this._value());
-    this._syncControls(this._value());
+    if (this.disabled() || this.readonly() || this.editing()) return;
+    const current = this.value();
+    this.snapshot.set({ value: current });
+    this.draft.set(current === null ? '' : String(current));
+    this.touchSent = false;
     this.editing.set(true);
-    this.editStart.emit(this._value());
-    queueMicrotask(() => this._focusFirstControl());
+    this.editStart.emit(current);
+    afterNextRender(() => {
+      if (!this.destroyRef.destroyed && this.editing()) this.editorFocusTarget()?.focus();
+    }, { injector: this.injector });
+  }
+
+  onDraftInput(value: string): void {
+    if (this.disabled() || this.readonly()) return;
+    this.draft.set(value);
+  }
+
+  onSelectionDraft(value: unknown): void {
+    this.onDraftInput(value == null ? '' : String(value));
+    // The picker may detach its focused option without restoring pointer focus.
+    // Choosing a draft is still an internal interaction, not an implicit save.
+    this.editorFocusTarget()?.focus();
   }
 
   commit(): void {
-    if (this.isDisabled()) return;
-    const previousValue = this._snapshot();
-    const value = this.type() === 'number' ? this.numberControl.value : this.stringControl.value;
-    const normalized = this._normalizeValue(value);
-    this._setValue(normalized, true);
-    this.editing.set(false);
-    this._onTouched();
-    this.editCommit.emit({ previousValue, value: normalized });
+    if (this.disabled() || this.readonly() || !this.editing() || !this.draftValid()) return;
+    const snapshot = this.snapshot();
+    if (!snapshot) return;
+    const previousValue = snapshot.value;
+
+    // An owner write made while editing always wins over the local draft.
+    if (!Object.is(this.value(), previousValue)) {
+      this.finishEdit();
+      this.editCancel.emit(this.value());
+      this.markTouched();
+      return;
+    }
+
+    const next = this.parseDraft();
+    this.value.set(next);
+    this.finishEdit();
+    this.valueCommitted.emit({ previousValue, value: next });
+    this.markTouched();
   }
 
   cancel(): void {
-    const previousValue = this._snapshot();
-    this._setValue(previousValue, false);
-    this.editing.set(false);
-    this._onTouched();
-    this.editCancel.emit(previousValue);
+    if (!this.editing()) return;
+    this.finishEdit();
+    this.draft.set('');
+    this.editCancel.emit(this.value());
+    this.markTouched();
   }
 
   onEditKeydown(event: KeyboardEvent): void {
+    if (event.defaultPrevented) return;
     if (event.key === 'Escape') {
       event.preventDefault();
       this.cancel();
-      return;
-    }
-    if (event.key === 'Enter' && this.type() !== 'textarea') {
+    } else if (event.key === 'Enter' && (this.type() !== 'textarea' || event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       this.commit();
     }
   }
 
   onEditFocusout(event: FocusEvent): void {
-    if (!this.saveOnBlur() || !this.editing()) return;
+    if (!this.editing()) return;
+    // Replacing the display button is entry into edit mode, not a boundary exit.
+    if ((event.target as Element | null)?.closest('.neu-inline-editor__display')) return;
     const nextTarget = event.relatedTarget as Node | null;
-    if (nextTarget && this._host.nativeElement.contains(nextTarget)) return;
+    if (this.ownsEditorFocus(nextTarget)) return;
     queueMicrotask(() => {
-      if (this.editing()) {
-        this.commit();
-      }
+      if (!this.editing()) return;
+      if (this.ownsEditorFocus(this.host.nativeElement.ownerDocument.activeElement)) return;
+      if (this.saveOnBlur()) this.commit();
+      else this.markTouched();
     });
+  }
+
+  onEditorOverlayClosed(): void {
+    queueMicrotask(() => {
+      if (this.destroyRef.destroyed) return;
+      // Select restores focus on the next frame, after emitting closed.
+      // Register after that restoration so an internal visit is not a blur save.
+      this.host.nativeElement.ownerDocument.defaultView?.requestAnimationFrame(() => {
+        if (this.destroyRef.destroyed || !this.editing()) return;
+        if (!this.ownsEditorFocus(this.host.nativeElement.ownerDocument.activeElement)) {
+          if (this.saveOnBlur()) this.commit();
+          else this.markTouched();
+        }
+      });
+    });
+  }
+
+  focus(options?: FocusOptions): void {
+    if (this.disabled()) return;
+    const target =
+      this.editorFocusTarget() ??
+      ((this.host.nativeElement as HTMLElement).querySelector(
+        '.neu-inline-editor__display',
+      ) as HTMLButtonElement | null);
+    target?.focus(options);
+  }
+
+  private editorFocusTarget(): HTMLElement | null {
+    return this.host.nativeElement.querySelector<HTMLElement>(
+      '.neu-inline-editor__edit input, .neu-inline-editor__edit textarea, .neu-inline-editor__edit [role="combobox"]',
+    );
+  }
+
+  private finishEdit(): void {
+    const document = this.host.nativeElement.ownerDocument;
+    const restoreFocus = this.ownsEditorFocus(document.activeElement);
+    this.editing.set(false);
+    if (!restoreFocus) return;
+    afterNextRender(() => {
+      if (this.destroyRef.destroyed || this.editing() || this.disabled()) return;
+      // Do not override a deliberate move to another control while rendering.
+      if (document.activeElement !== document.body &&
+          !this.ownsEditorFocus(document.activeElement)) return;
+      this.host.nativeElement.querySelector<HTMLButtonElement>(
+        '.neu-inline-editor__display',
+      )?.focus();
+    }, { injector: this.injector });
+  }
+
+  private ownsEditorFocus(target: Node | null): boolean {
+    if (!target) return false;
+    const host = this.host.nativeElement;
+    if (host.contains(target)) return true;
+    return [...host.querySelectorAll('[aria-controls]')].some(control => {
+      const id = control.getAttribute('aria-controls');
+      return !!id && !!host.ownerDocument.getElementById(id)?.contains(target);
+    });
+  }
+
+  reset(): void {
+    this.editing.set(false);
+    this.draft.set('');
+    this.snapshot.set(null);
+    this.touchSent = false;
   }
 
   hostClasses(): Record<string, boolean> {
@@ -318,48 +373,31 @@ export class NeuInlineEditorComponent implements ControlValueAccessor {
       'neu-inline-editor': true,
       [`neu-inline-editor--${this.size()}`]: true,
       'neu-inline-editor--editing': this.editing(),
-      'neu-inline-editor--disabled': this.isDisabled(),
+      'neu-inline-editor--disabled': this.disabled(),
       'neu-inline-editor--readonly': this.readonly(),
+      'neu-inline-editor--invalid': this.invalid() || this.errors().length > 0,
+      'neu-inline-editor--hidden': this.hidden(),
     };
   }
 
-  private _setValue(value: string | number | null | undefined, emit: boolean): void {
-    const normalized = this._normalizeValue(value);
-    this._value.set(normalized);
-    this._syncControls(normalized);
-    if (emit) {
-      this.valueChange.emit(normalized);
-      this._onChange(normalized);
-    }
-  }
-
-  private _normalizeValue(value: string | number | null | undefined): string | number | null {
-    if (value === undefined) return null;
+  private parseDraft(): V {
     if (this.type() === 'number') {
-      const next = typeof value === 'number' ? value : Number(value);
-      return Number.isFinite(next) ? next : null;
+      const text = this.draft().trim();
+      return (text === '' ? null : Number(text)) as V;
     }
-    return value === null ? null : String(value);
+    return this.draft() as V;
   }
 
-  private _syncControls(value: string | number | null): void {
-    this.stringControl.setValue(value === null ? null : String(value), { emitEvent: false });
-    this.numberControl.setValue(typeof value === 'number' ? value : Number(value ?? 0), {
-      emitEvent: false,
-    });
-    this._syncDisabledState();
-  }
-
-  private _syncDisabledState(): void {
-    const method = this.isDisabled() ? 'disable' : 'enable';
-    this.stringControl[method]({ emitEvent: false });
-    this.numberControl[method]({ emitEvent: false });
-  }
-
-  private _focusFirstControl(): void {
-    const control = (this._host.nativeElement as HTMLElement).querySelector(
-      '.neu-input__field, .neu-number-input__field, .neu-select__trigger, .neu-textarea__field',
-    ) as HTMLElement | null;
-    control?.focus();
+  private markTouched(): void {
+    if (this.touchSent) return;
+    this.touchSent = true;
+    this.touch.emit();
   }
 }
+
+/** Public mode-specialized instance type. */
+export type NeuInlineEditorComponent<M extends NeuInlineMode = 'text'> =
+  NeuInlineEditorControl<NeuInlineValue<M>>;
+
+/** Runtime Angular component constructor with direct field-value inference. */
+export const NeuInlineEditorComponent = NeuInlineEditorControl;

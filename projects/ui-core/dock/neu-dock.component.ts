@@ -1,84 +1,275 @@
-import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, inject, input, output, signal } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
+import { NgTemplateOutlet } from '@angular/common';
+import {
+  Component,
+  Directive,
+  ElementRef,
+  TemplateRef,
+  ViewEncapsulation,
+  booleanAttribute,
+  computed,
+  contentChild,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+  viewChildren,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NeuBadgeComponent } from '@neural-ui/core/badge';
+import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
+import {
+  NeuMenuActionLike,
+  NeuResolvedMenuAction,
+  NeuRovingMenuController,
+  NeuTextDirection,
+  activateNeuMenuAction,
+  resolveNeuMenuAction,
+} from '@neural-ui/core/internal';
+import { NeuTooltipDirective } from '@neural-ui/core/tooltip';
+import { NeuResponsiveState } from '@neural-ui/core/internal';
 
-export interface NeuDockItem<T = unknown> {
+export type NeuDockPosition = 'top' | 'right' | 'bottom' | 'left';
+
+export interface NeuDockItem extends NeuMenuActionLike<NeuDockItem> {
   key: string;
   label: string;
-  icon?: string;
-  image?: string;
-  badge?: string;
-  disabled?: boolean;
-  data?: T;
+  data?: unknown;
+}
+
+export interface NeuDockItemTemplateContext {
+  $implicit: NeuDockItem;
+  index: number;
+  active: boolean;
+}
+
+@Directive({ selector: 'ng-template[neuDockItem]' })
+export class NeuDockItemDirective {
+  constructor(readonly templateRef: TemplateRef<NeuDockItemTemplateContext>) {}
 }
 
 @Component({
   selector: 'neu-dock',
-  imports: [],
+  imports: [
+    NgTemplateOutlet,
+    RouterLink,
+    NeuBadgeComponent,
+    InternalNeuIconOutletComponent,
+    NeuTooltipDirective,
+  ],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-dock-host' },
+  host: {
+    class: 'neu-dock',
+    '[class.neu-dock--top]': 'position() === "top"',
+    '[class.neu-dock--right]': 'position() === "right"',
+    '[class.neu-dock--bottom]': 'position() === "bottom"',
+    '[class.neu-dock--left]': 'position() === "left"',
+    '[class.neu-dock--mobile]': 'mobile()',
+    '[class.neu-dock--magnify]': 'magnification() && !coarsePointer()',
+    '[attr.dir]': 'direction()',
+  },
   template: `
-    <nav class="neu-dock neu-dock--{{ position() }}" [attr.aria-label]="ariaLabel()" (keydown)="onKeydown($event)">
-      <ul class="neu-dock__list" role="menubar" [attr.aria-orientation]="isVertical() ? 'vertical' : 'horizontal'">
-        @for (item of items(); track item.key; let index = $index) {
-          <li role="none">
-            <button
-              class="neu-dock__item"
-              type="button"
-              role="menuitem"
-              [disabled]="item.disabled"
-              [class.is-active]="effectiveActiveKey() === item.key"
-              [attr.aria-label]="item.label"
-              [attr.aria-current]="effectiveActiveKey() === item.key ? 'page' : null"
-              [attr.tabindex]="index === focusIndex() ? 0 : -1"
-              [attr.data-index]="index"
-              (focus)="focusIndex.set(index)"
-              (click)="select(item)"
-            >
-              @if (item.image) { <img [src]="item.image" alt="" /> }
-              @else { <span class="neu-dock__icon" aria-hidden="true">{{ item.icon || '•' }}</span> }
-              @if (item.badge) { <span class="neu-dock__badge">{{ item.badge }}</span> }
-              <span class="neu-dock__tooltip" role="tooltip">{{ item.label }}</span>
-            </button>
+    <nav
+      class="neu-dock__container"
+      [attr.aria-label]="ariaLabel()"
+      [attr.aria-labelledby]="ariaLabelledBy()"
+    >
+      <ul
+        class="neu-dock__list"
+        role="menubar"
+        [attr.aria-orientation]="orientation()"
+        (mouseleave)="hoveredIndex.set(-1)"
+      >
+        @for (action of resolvedItems(); track action.key; let index = $index) {
+          <li
+            class="neu-dock__item"
+            role="none"
+            [class.neu-dock__item--hovered]="hoveredIndex() === index"
+            [class.neu-dock__item--neighbor]="
+              hoveredIndex() >= 0 && Math.abs(hoveredIndex() - index) === 1
+            "
+            (mouseenter)="hoveredIndex.set(index)"
+          >
+            @if (action.kind === 'router') {
+              <a
+                #dockAction
+                class="neu-dock__action"
+                [routerLink]="action.routerLink ?? null"
+                role="menuitem"
+                [class.neu-dock__action--active]="action.active"
+                [class.neu-dock__action--disabled]="action.disabled"
+                [attr.aria-current]="action.active ? 'page' : null"
+                [attr.aria-disabled]="action.disabled"
+                [attr.tabindex]="tabIndex(index)"
+                [neuTooltip]="action.tooltip ?? action.label"
+                [neuTooltipDisabled]="coarsePointer()"
+                [attr.aria-label]="action.label"
+                (click)="activate($event, action)"
+                (keydown)="onKeydown($event, index)"
+                (focus)="onActionFocus($event, index)"
+                (blur)="itemBlur.emit($event)"
+              >
+                <ng-container
+                  [ngTemplateOutlet]="itemTemplateRef()"
+                  [ngTemplateOutletContext]="templateContext(action, index)"
+                />
+              </a>
+            } @else if (action.kind === 'external') {
+              <a
+                #dockAction
+                class="neu-dock__action"
+                [href]="action.url"
+                [target]="action.target"
+                [rel]="action.rel"
+                role="menuitem"
+                [class.neu-dock__action--active]="action.active"
+                [class.neu-dock__action--disabled]="action.disabled"
+                [attr.aria-current]="action.active ? 'page' : null"
+                [attr.aria-disabled]="action.disabled"
+                [attr.tabindex]="tabIndex(index)"
+                [neuTooltip]="action.tooltip ?? action.label"
+                [neuTooltipDisabled]="coarsePointer()"
+                [attr.aria-label]="action.label"
+                (click)="activate($event, action)"
+                (keydown)="onKeydown($event, index)"
+                (focus)="onActionFocus($event, index)"
+                (blur)="itemBlur.emit($event)"
+              >
+                <ng-container
+                  [ngTemplateOutlet]="itemTemplateRef()"
+                  [ngTemplateOutletContext]="templateContext(action, index)"
+                />
+              </a>
+            } @else {
+              <button
+                #dockAction
+                type="button"
+                class="neu-dock__action"
+                role="menuitem"
+                [disabled]="action.disabled"
+                [class.neu-dock__action--active]="action.active"
+                [attr.aria-current]="action.active ? 'page' : null"
+                [attr.tabindex]="tabIndex(index)"
+                [neuTooltip]="action.tooltip ?? action.label"
+                [neuTooltipDisabled]="coarsePointer()"
+                [attr.aria-label]="action.label"
+                (click)="activate($event, action)"
+                (keydown)="onKeydown($event, index)"
+                (focus)="onActionFocus($event, index)"
+                (blur)="itemBlur.emit($event)"
+              >
+                <ng-container
+                  [ngTemplateOutlet]="itemTemplateRef()"
+                  [ngTemplateOutletContext]="templateContext(action, index)"
+                />
+              </button>
+            }
           </li>
         }
       </ul>
     </nav>
+
+    <ng-template #defaultItem let-item let-index="index" let-active="active">
+      @if (item.icon) {
+        <neu-icon-outlet class="neu-dock__icon" [icon]="item.icon" size="1.5rem" aria-hidden="true" />
+      } @else {
+        <span class="neu-dock__fallback" aria-hidden="true">{{ item.label.slice(0, 1) }}</span>
+      }
+      <span class="neu-dock__label">{{ item.label }}</span>
+      @if (item.badge != null) {
+        <neu-badge class="neu-dock__badge" size="sm">{{ item.badge }}</neu-badge>
+      }
+    </ng-template>
   `,
   styleUrl: './neu-dock.component.scss',
 })
-export class NeuDockComponent<T = unknown> {
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly directionality = inject(Directionality);
-  readonly items = input<NeuDockItem<T>[]>([]);
-  readonly position = input<'top' | 'bottom' | 'start' | 'end'>('bottom');
-  readonly ariaLabel = input('Application dock');
-  readonly activeKey = input<string | null>(null);
-  readonly itemClick = output<NeuDockItem<T>>();
-  readonly activeKeyChange = output<string>();
-  readonly internalActiveKey = signal<string | null>(null);
-  readonly focusIndex = signal(0);
-  readonly effectiveActiveKey = () => this.activeKey() ?? this.internalActiveKey();
-  readonly isVertical = () => this.position() === 'start' || this.position() === 'end';
+export class NeuDockComponent {
+  protected readonly Math = Math;
+  private readonly responsive = inject(NeuResponsiveState);
+  /* v8 ignore start -- Angular signal-query factories; rendered action/template behavior is covered. */
+  private readonly actions = viewChildren<ElementRef<HTMLElement>>('dockAction');
+  private readonly itemTemplate = contentChild(NeuDockItemDirective);
+  private readonly defaultTemplate =
+    viewChild.required<TemplateRef<NeuDockItemTemplateContext>>('defaultItem');
+  /* v8 ignore stop */
+  private readonly controller = new NeuRovingMenuController({ orientation: 'horizontal' });
 
-  select(item: NeuDockItem<T>): void {
-    if (item.disabled) return;
-    this.internalActiveKey.set(item.key); this.activeKeyChange.emit(item.key); this.itemClick.emit(item);
+  readonly items = input<NeuDockItem[]>([]);
+  readonly position = input<NeuDockPosition>('bottom');
+  readonly breakpoint = input('960px');
+  readonly ariaLabel = input('Application dock');
+  readonly ariaLabelledBy = input<string | null>(null);
+  readonly magnification = input(true, { transform: booleanAttribute });
+  readonly direction = input<NeuTextDirection>('ltr');
+
+  readonly itemClick = output<NeuDockItem>();
+  readonly itemFocus = output<FocusEvent>();
+  readonly itemBlur = output<FocusEvent>();
+
+  readonly mobile = this.responsive.observe(computed(() => `(max-width: ${this.breakpoint()})`));
+  readonly coarsePointer = this.responsive.observe('(pointer: coarse)');
+  readonly hoveredIndex = signal(-1);
+  readonly activeIndex = signal(-1);
+  readonly orientation = computed(() =>
+    this.position() === 'left' || this.position() === 'right' ? 'vertical' : 'horizontal',
+  );
+  readonly resolvedItems = computed(() =>
+    this.items()
+      .map((item, index) => resolveNeuMenuAction(item, index))
+      .filter((item) => item.visible && !item.separator),
+  );
+
+  constructor() {
+    effect(() => {
+      const resolved = this.resolvedItems();
+      this.controller.configure({ orientation: this.orientation(), direction: this.direction() });
+      this.activeIndex.set(
+        this.controller.setItems(
+          resolved.map((item) => ({
+            key: item.key,
+            label: item.label,
+            disabled: item.disabled,
+            hidden: !item.visible,
+            separator: item.separator,
+          })),
+        ),
+      );
+    });
   }
-  onKeydown(event: KeyboardEvent): void {
-    const horizontal = !this.isVertical();
-    const previousKey = horizontal
-      ? (this.directionality.valueSignal() === 'rtl' ? 'ArrowRight' : 'ArrowLeft')
-      : 'ArrowUp';
-    const nextKey = horizontal
-      ? (this.directionality.valueSignal() === 'rtl' ? 'ArrowLeft' : 'ArrowRight')
-      : 'ArrowDown';
-    if (![previousKey, nextKey, 'Home', 'End'].includes(event.key)) return;
-    const buttons = this.buttons(); if (!buttons.length) return;
-    event.preventDefault();
-    let index = this.focusIndex();
-    index = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : (index + (event.key === nextKey ? 1 : -1) + buttons.length) % buttons.length;
-    this.focusIndex.set(index); buttons[index]?.focus();
+
+  itemTemplateRef(): TemplateRef<NeuDockItemTemplateContext> {
+    return this.itemTemplate()?.templateRef ?? this.defaultTemplate();
   }
-  private buttons(): HTMLButtonElement[] { return Array.from(this.host.nativeElement.querySelectorAll<HTMLButtonElement>('.neu-dock__item:not(:disabled)')); }
+
+  templateContext(
+    action: NeuResolvedMenuAction<NeuDockItem>,
+    index: number,
+  ): NeuDockItemTemplateContext {
+    return { $implicit: action.original, index, active: action.active };
+  }
+
+  tabIndex(index: number): number {
+    return this.controller.tabIndexFor(index);
+  }
+
+  activate(event: Event, action: NeuResolvedMenuAction<NeuDockItem>): void {
+    if (activateNeuMenuAction(action, event)) this.itemClick.emit(action.original);
+  }
+
+  onActionFocus(event: FocusEvent, index: number): void {
+    this.controller.setActiveIndex(index);
+    this.activeIndex.set(this.controller.index);
+    this.itemFocus.emit(event);
+  }
+
+  onKeydown(event: KeyboardEvent, index: number): void {
+    this.controller.setActiveIndex(index);
+    const result = this.controller.handleKey(event);
+    if (!result.handled) return;
+    this.activeIndex.set(result.activeIndex);
+    const target = this.actions()[result.activeIndex]?.nativeElement;
+    if (result.activate) target?.click();
+    else target?.focus();
+  }
 }

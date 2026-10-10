@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "authority": "H9-B4",
+  "methodology": {
+    "consumer": "Minified ESM with Angular, CDK and RxJS external; esbuild tree shaking and package sideEffects semantics. Optional icon providers are bundled only when imported by the consumer.",
+    "raw": "Canonical strict bytes. Warning is baseline + max(128 B, 1%); failure is baseline + max(256 B, 2.5%).",
+    "compressed": "Node zlib per-output compression. Warning is baseline + max(64 B, 2%); failure is baseline + max(128 B, 5%).",
+    "atomicTemplates": "Angular standalone component templates retain one component implementation; input bindings do not create distinct basic and advanced closures.",
+    "scenarioOverrides": "A scenario may declare explicit warning/failure ceilings when a reviewed feature closure intentionally exceeds the generic percentage budget; the frozen baseline and measured delta remain recorded."
+  },
+  "provenance": {
+    "h9B3LibraryCommit": "38b75030290b63041cc3a574066759b5bbb83dde",
+    "h9B3LibraryTree": "78be43648df2aa58956eeb6f0ca2d3a3bc363aba",
+    "calibration": "Neural UI 1.15.0 release candidate after the reviewed component, accessibility, composition, and documentation expansion",
+    "measurementEnvironmentCorrection": {
+      "date": "2026-10-10",
+      "reason": "The historical compression metadata is not reproducible with the official Node 22.22.3 darwin-arm64 distribution (verified SHA-256 0da7ff74ef8611328c8212f17943368713a2ad953fb7d89a8c8a0eae87c23207), which reports zlib 1.3.1-e00f703 and Brotli 1.1.0. Measurement is now explicitly pinned to the tested Angular 22.2.2 / Node 24.15.0 toolchain.",
+      "budgetTreatment": "All scenario baselines, overrides, aggregate and package warning/failure ceilings are preserved byte-for-byte. This corrects measurement metadata only; historical compressed measurements are not represented as recalibrated under the new compressor.",
+      "historicalToolchain": {
+        "node": "22.22.3",
+        "npmExecutable": "10.9.8",
+        "packageManagerDeclaration": "npm@10.9.7",
+        "angularCli": "21.2.16",
+        "angular": "21.2.17",
+        "esbuild": "0.27.3",
+        "gzip": "Node zlib 1.2.12, level 9, per output",
+        "brotli": "Node Brotli 1.2.0, quality 11, per output"
+      }
+    },
+    "n2IconRebaseline": {
+      "coreBaseCommit": "63de8dc0f1c030722acaae7bdca08f5750151f53",
+      "scope": ["button", "pick-list-order-list"],
+      "reason": "Provider-agnostic Core icon outlet; measured package-only consumer closures after isolating the outlet secondary entrypoint. The historical Button budget excluded its mandatory Neural Icons peer, whereas the N2 Button closure includes its own renderer and no icon provider. Historical baselines are retained per scenario.",
+      "measurement": "Two identical full H9 calibrations on Node 22.22.3, Angular 22.1.6, Angular CLI 22.1.8, esbuild 0.27.3, zlib 1.2.12, Brotli 1.2.0, darwin arm64; strict observed bytes with no padding."
+    }
+  },
+  "toolchain": {
+    "node": "24.15.0",
+    "npmExecutable": "11.12.1",
+    "packageManagerDeclaration": "npm@10.9.7",
+    "angularCli": "22.2.2",
+    "angular": "22.2.2",
+    "esbuild": "0.28.2",
+    "gzip": "Node zlib 1.3.1-e00f703, level 9, per output",
+    "brotli": "Node Brotli 1.2.0, quality 11, per output"
+  },
+  "scenarios": {
+    "root-unused": { "baseline": { "raw": 0, "gzip": 20, "brotli": 1 } },
+    "provider": { "baseline": { "raw": 2178, "gzip": 948, "brotli": 854 } },
+    "button": { "baseline": { "raw": 21806, "gzip": 3788, "brotli": 3221 }, "historicalBaseline": { "raw": 18064, "gzip": 3148, "brotli": 2672 } },
+    "select": { "baseline": { "raw": 125947, "gzip": 22311, "brotli": 19379 } },
+    "table-basic": { "baseline": { "raw": 174439, "gzip": 34670, "brotli": 25692 } },
+    "table-advanced-lazy": { "baseline": { "raw": 954019, "gzip": 165462, "brotli": 103647 } },
+    "tree-basic": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-checkbox": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-lazy": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-virtual": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "tree-dnd-full": { "baseline": { "raw": 112111, "gzip": 20132, "brotli": 16971 } },
+    "kanban": { "baseline": { "raw": 43578, "gzip": 7879, "brotli": 6860 } },
+    "tree-table": { "baseline": { "raw": 1040899, "gzip": 180473, "brotli": 113265 } },
+    "dialog-basic": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-draggable": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-resizable": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-maximizable": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "dialog-all-advanced": { "baseline": { "raw": 49238, "gzip": 9572, "brotli": 8347 } },
+    "color-picker-basic": { "baseline": { "raw": 59866, "gzip": 11735, "brotli": 10288 } },
+    "color-picker-advanced": { "baseline": { "raw": 59866, "gzip": 11735, "brotli": 10288 } },
+    "pick-list-order-list": { "baseline": { "raw": 109514, "gzip": 17059, "brotli": 14166 }, "historicalBaseline": { "raw": 106805, "gzip": 16529, "brotli": 13916 } },
+    "menu": { "baseline": { "raw": 70946, "gzip": 10266, "brotli": 8913 } },
+    "pagination": { "baseline": { "raw": 140883, "gzip": 24933, "brotli": 21379 } }
+  },
+  "aggregate": {
+    "baseline": { "chunks": 107, "raw": 3672316, "gzip": 634881, "brotli": 514169 },
+    "raw": { "warning": 3705084, "failure": 3737852 },
+    "gzip": { "warning": 647169, "failure": 659457 },
+    "brotli": { "warning": 526457, "failure": 538745 }
+  },
+  "package": {
+    "baseline": { "packed": 741374, "unpacked": 4749112, "files": 336 },
+    "packed": { "warning": 748788, "failure": 763616 },
+    "unpacked": { "warning": 4796604, "failure": 4891586 }
+  }
+}

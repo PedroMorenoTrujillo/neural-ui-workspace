@@ -1,22 +1,24 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   input,
   output,
 } from '@angular/core';
-import { NeuIconComponent } from '@neural-ui/core/icon';
+import { InternalNeuIconOutletComponent, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconInbox as iconInbox } from '@neural-ui/core/internal';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import type { NeuDensity } from '@neural-ui/core';
 
 export type NeuEmptyStateSize = 'sm' | 'md' | 'lg';
 export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'success';
 
 /**
- * NeuEmptyState — Estado vacío con icono Lucide, título, descripción y acción.
+ * NeuEmptyState — Estado vacío con icono Neural, título, descripción y acción.
  *
  * Uso:
  *   <neu-empty-state
- *     icon="lucideInbox"
+ *     icon="inbox"
  *     title="Sin resultados"
  *     description="Prueba con otros filtros."
  *     actionLabel="Limpiar filtros"
@@ -25,15 +27,14 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
  */
 @Component({
   selector: 'neu-empty-state',
-  imports: [NeuIconComponent, NeuButtonComponent],
+  imports: [InternalNeuIconOutletComponent, NeuButtonComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-empty-state__inner">
       @if (icon()) {
         <span class="neu-empty-state__icon">
-          <neu-icon [name]="icon()" [size]="iconSize()" />
+          <neu-icon-outlet [icon]="icon() === 'inbox' ? iconInbox : icon()!" [fallbackPath]="icon() === 'inbox' ? inboxPath : null" [fallbackText]="iconFallbackText(icon() === 'inbox' ? iconInbox : icon()!)" [size]="iconSize()" aria-hidden="true" />
         </span>
       }
 
@@ -44,7 +45,7 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
       }
 
       @if (actionLabel()) {
-        <button neu-button variant="primary" size="md" (click)="action.emit()">
+        <button neu-button type="button" tone="brand" variant="solid" size="md" (click)="action.emit()">
           {{ actionLabel() }}
         </button>
       }
@@ -53,12 +54,16 @@ export type NeuEmptyStateTone = 'neutral' | 'info' | 'warning' | 'danger' | 'suc
   styleUrl: './neu-empty-state.component.scss',
 })
 export class NeuEmptyStateComponent {
-  /** Nombre del icono Lucide registrado con provideIcons(). / Lucide icon name registered with provideIcons(). */
-  icon = input<string>('lucideInbox');
+  /** Core-owned empty inbox geometry; independent of an application icon provider. */
+  protected readonly inboxPath = 'M4 4h16v16H4z M4 13h5l1 3h4l1-3h5';
+  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconInbox = iconInbox;
+  /** Canonical Neural icon name; the built-in inbox icon needs no registration. */
+  icon = input<NeuIconKey | null>('inbox');
   /** Tamaño del icono. Por defecto 3rem. / Icon size. Default 3rem. */
   iconSize = input<string>('3rem');
   /** Título principal del estado vacío. / Main title of the empty state. */
-  title = input<string>('No hay nada aquí');
+  title = input<string>('Nothing to see here');
   /** Descripción secundaria opcional. / Optional secondary description. */
   description = input<string>('');
   /** Texto del botón de acción. Si está vacío, no se muestra el botón. / Action button text. If empty, the button is not shown. */
@@ -67,8 +72,8 @@ export class NeuEmptyStateComponent {
   size = input<NeuEmptyStateSize>('md');
   /** Tono semántico del icono y fondo / Semantic tone for icon and background */
   tone = input<NeuEmptyStateTone>('neutral');
-  /** Reduce espaciado para tablas, listas y overlays compactos / Reduces spacing for tables, lists and compact overlays */
-  compact = input<boolean>(false);
+  /** Compactación espacial para tablas, listas y overlays / Spatial compactness */
+  density = input<NeuDensity>('normal');
 
   /** Emite cuando el usuario hace clic en el botón de acción. / Emits when the user clicks the action button. */
   action = output<void>();
@@ -78,7 +83,7 @@ export class NeuEmptyStateComponent {
       'neu-empty-state': true,
       [`neu-empty-state--${this.size()}`]: true,
       [`neu-empty-state--${this.tone()}`]: true,
-      'neu-empty-state--compact': this.compact(),
+      [`neu-empty-state--density-${this.density()}`]: true,
     };
   }
 }

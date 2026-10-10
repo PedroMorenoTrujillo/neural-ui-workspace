@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, TemplateRef, viewChild } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { OverlayModule } from '@angular/cdk/overlay';
 import {
   NeuContextMenuDirective,
+  NeuContextMenuItemDirective,
   NeuContextMenuOverlayComponent,
   NeuContextMenuItem,
 } from './neu-context-menu.component';
@@ -12,7 +13,7 @@ import {
 const ITEMS: NeuContextMenuItem[] = [
   { key: 'copy', label: 'Copiar', icon: '📋' },
   { key: 'paste', label: 'Pegar', icon: '📋' },
-  { key: 'delete', label: 'Eliminar', icon: '🗑️', variant: 'danger' },
+  { key: 'delete', label: 'Eliminar', icon: '🗑️', tone: 'danger' },
 ];
 
 @Component({
@@ -24,6 +25,23 @@ class TestHostComponent {
   readonly items = ITEMS;
 }
 
+@Component({
+  template: `<ng-template #item let-item
+    ><strong class="custom-context-item">{{ item.key }}</strong></ng-template
+  >`,
+})
+class ContextMenuTemplateHostComponent {
+  readonly item = viewChild.required<TemplateRef<{ $implicit: NeuContextMenuItem }>>('item');
+}
+
+@Component({
+  template: `<ng-template neuContextMenuItem let-item>{{ item.label }}</ng-template>`,
+  imports: [NeuContextMenuItemDirective],
+})
+class ContextMenuItemDirectiveHostComponent {
+  readonly item = viewChild.required(NeuContextMenuItemDirective);
+}
+
 function mk() {
   return TestBed.configureTestingModule({
     imports: [OverlayModule],
@@ -33,6 +51,13 @@ function mk() {
 
 describe('NeuContextMenuDirective', () => {
   beforeEach(() => mk().compileComponents());
+
+  it('exposes the consumer item template through its template directive', () => {
+    const f = TestBed.createComponent(ContextMenuItemDirectiveHostComponent);
+    f.detectChanges();
+
+    expect(f.componentInstance.item().templateRef).toBeInstanceOf(TemplateRef);
+  });
 
   it('should create without throwing', async () => {
     const f = TestBed.createComponent(TestHostComponent);
@@ -52,6 +77,34 @@ describe('NeuContextMenuDirective', () => {
     const el = f.nativeElement.querySelector('div');
     el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 200 }));
     expect(opened.length).toBe(1);
+  });
+
+  it('opens from Shift+F10 and restores the keyboard origin on Escape', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const origin = f.nativeElement.querySelector('div') as HTMLElement;
+    expect(origin.tabIndex).toBe(0);
+    expect(origin.getAttribute('aria-haspopup')).toBe('menu');
+    origin.focus();
+    origin.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'F10',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+    f.detectChanges();
+    await f.whenStable();
+    const item = document.body.querySelector('[role="menuitem"]') as HTMLButtonElement;
+    expect(item).toBeTruthy();
+    item.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    expect(document.body.querySelector('.neu-context-menu')).toBeNull();
+    expect(document.activeElement).toBe(origin);
   });
 
   it('should emit menuItemClick when an item is selected', async () => {
@@ -85,8 +138,22 @@ describe('NeuContextMenuDirective', () => {
 
     const el = f.nativeElement.querySelector('div');
     el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }));
+    dir.openAt(0, 0);
     // Since contextmenu event calls onContextMenu which checks disabled
     expect(opened.length).toBe(0);
+  });
+
+  it('uses the host element as the programmatic fallback origin', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    const host = f.nativeElement.querySelector('div') as HTMLElement;
+
+    dir.openAt(12, 24);
+
+    expect(dir._origin).toBe(host);
+    dir.close();
   });
 
   it('ngOnDestroy should call _close and emit menuClosed when overlay is open', async () => {
@@ -147,6 +214,21 @@ describe('NeuContextMenuDirective', () => {
     expect(dir._overlayRef).not.toBe(firstOverlayRef);
   });
 
+  it('finalizes a close when the retained overlay is already detached', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    const closed = vi.spyOn(dir.menuClosed, 'emit');
+
+    dir.openAt(20, 20);
+    vi.spyOn(dir._overlayRef, 'hasAttached').mockReturnValue(false);
+    dir.close();
+
+    expect(closed).toHaveBeenCalledOnce();
+    expect(dir._overlayRef).toBeNull();
+  });
+
   it('Escape from the attached overlay component should close the directive overlay', async () => {
     const f = TestBed.createComponent(TestHostComponent);
     f.detectChanges();
@@ -162,6 +244,47 @@ describe('NeuContextMenuDirective', () => {
     dir._compRef.instance._onEscape();
 
     expect(closed).toHaveLength(1);
+    expect(dir._overlayRef).toBeNull();
+  });
+
+  it('constrains a pointer-opened menu to the visible viewport', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(800);
+    vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(600);
+
+    dir.openAt(9999, 9999);
+    const pane = dir._overlayRef.overlayElement as HTMLElement;
+    vi.spyOn(pane, 'getBoundingClientRect').mockReturnValue({
+      width: 200,
+      height: 100,
+      top: 0,
+      right: 200,
+      bottom: 100,
+      left: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    await Promise.resolve();
+
+    const strategy = dir._overlayRef.getConfig().positionStrategy as any;
+    expect(strategy._xOffset).toBe('592px');
+    expect(strategy._topOffset).toBe('492px');
+    dir.close();
+  });
+
+  it('ignores unrelated host keys and stale overlay finalization', async () => {
+    const f = TestBed.createComponent(TestHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const dir = f.debugElement.children[0].injector.get(NeuContextMenuDirective) as any;
+    const key = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    dir.onHostKeydown(key);
+    expect(key.defaultPrevented).toBe(false);
+    dir._finalizeClose({} as any);
     expect(dir._overlayRef).toBeNull();
   });
 });
@@ -211,7 +334,7 @@ describe('NeuContextMenuOverlayComponent', () => {
     expect(selected.length).toBe(0);
   });
 
-  it('should render danger class for danger variant items', async () => {
+  it('should render danger class for danger tone items', async () => {
     const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
     f.componentInstance._items.set([ITEMS[2]]);
     f.detectChanges();
@@ -228,6 +351,70 @@ describe('NeuContextMenuOverlayComponent', () => {
     const icon = f.nativeElement.querySelector('.neu-context-menu__icon');
     expect(icon).toBeTruthy();
     expect(icon.textContent).toContain('📋');
+  });
+
+  it('renders separators after the first item and keeps plain items icon-free', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set([
+      { key: 'plain', label: 'Plain' },
+      { key: 'separated', label: 'Separated', separator: true },
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelectorAll('.neu-context-menu__separator')).toHaveLength(1);
+    expect(f.nativeElement.querySelector('.neu-context-menu__icon')).toBeNull();
+  });
+
+  it('renders a consumer TemplateRef instead of the fallback icon markup', async () => {
+    const templateHost = TestBed.createComponent(ContextMenuTemplateHostComponent);
+    templateHost.detectChanges();
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance.itemTemplate = templateHost.componentInstance.item();
+    f.componentInstance._items.set([ITEMS[0]]);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(f.nativeElement.querySelector('.custom-context-item')?.textContent).toBe('copy');
+    expect(f.nativeElement.querySelector('.neu-context-menu__icon')).toBeNull();
+    expect(
+      (f.nativeElement.querySelector('.neu-context-menu__item') as HTMLElement).textContent?.trim(),
+    ).toBe('copy');
+  });
+
+  it('activates the focused enabled item from the real keyboard listener', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set(ITEMS);
+    const selected: NeuContextMenuItem[] = [];
+    f.componentInstance._selectFn = (item) => selected.push(item);
+    f.detectChanges();
+    await f.whenStable();
+    const first = f.nativeElement.querySelector('.neu-context-menu__item') as HTMLButtonElement;
+    first.focus();
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+
+    expect(selected.map((item) => item.key)).toEqual(['copy']);
+  });
+
+  it('ignores non-menu and unhandled keyboard events without selecting an item', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set(ITEMS);
+    const selected: NeuContextMenuItem[] = [];
+    f.componentInstance._selectFn = (item) => selected.push(item);
+    f.detectChanges();
+    await f.whenStable();
+
+    (f.nativeElement as HTMLElement).dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'a', bubbles: true, cancelable: true }),
+    );
+    const first = f.nativeElement.querySelector('.neu-context-menu__item') as HTMLButtonElement;
+    first.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }),
+    );
+
+    expect(selected).toEqual([]);
   });
 
   it('should render separator HR for non-first items with separator=true', async () => {
@@ -310,5 +497,39 @@ describe('NeuContextMenuOverlayComponent', () => {
 
     f.nativeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(escaped).toBe(true);
+  });
+
+  it('uses one roving tab stop and skips disabled items with arrows and typeahead', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set([
+      ITEMS[0],
+      { key: 'disabled', label: 'Disabled', disabled: true },
+      ITEMS[2],
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    const buttons = Array.from(
+      f.nativeElement.querySelectorAll('[role="menuitem"]'),
+    ) as HTMLButtonElement[];
+    expect(buttons.map((button) => button.tabIndex)).toEqual([0, -1, -1]);
+    buttons[0].focus();
+    buttons[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[2]);
+    buttons[2].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'c', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement).toBe(buttons[0]);
+  });
+
+  it('focuses the menu surface when every item is disabled', async () => {
+    const f = TestBed.createComponent(NeuContextMenuOverlayComponent);
+    f.componentInstance._items.set([{ key: 'disabled', label: 'Disabled', disabled: true }]);
+    f.componentInstance._requestInitialFocus();
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(document.activeElement).toBe(f.nativeElement);
   });
 });

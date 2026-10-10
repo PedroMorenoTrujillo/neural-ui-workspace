@@ -1,28 +1,39 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
-  HostListener,
   Injectable,
-  OnDestroy,
+  PLATFORM_ID,
   ViewEncapsulation,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { neuIconBell as iconBell } from '@neural-ui/core/internal';
+import { neuIconCircleCheck as iconCircleCheck } from '@neural-ui/core/internal';
+import { neuIconCircleX as iconCircleX } from '@neural-ui/core/internal';
+import { neuIconInfo as iconInfo } from '@neural-ui/core/internal';
+import { neuIconWarning as iconWarning } from '@neural-ui/core/internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
+import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
-export type NeuNotificationType = 'info' | 'success' | 'warning' | 'error';
+export type NeuNotificationTone = 'neutral' | 'success' | 'info' | 'warning' | 'danger';
 
 export interface NeuNotification {
   id: string;
-  type: NeuNotificationType;
+  tone: NeuNotificationTone;
   title?: string;
   message: string;
   /** Auto-dismiss duration in ms (0 = persistent) */
   duration?: number;
-  /** Icon text / emoji */
-  icon?: string;
+  /** Optional consumer-registered neural icon name. */
+  icon?: NeuIconKey;
   timestamp: Date;
   read: boolean;
 }
@@ -32,14 +43,13 @@ export interface NeuNotificationOptions extends Omit<
   'id' | 'timestamp' | 'read'
 > {}
 
-const DEFAULT_ICONS: Record<NeuNotificationType, string> = {
-  info: 'ℹ️',
-  success: '✅',
-  warning: '⚠️',
-  error: '❌',
+const DEFAULT_ICONS: Record<NeuNotificationTone, NeuIconKey> = {
+  neutral: iconInfo,
+  info: iconInfo,
+  success: iconCircleCheck,
+  warning: iconWarning,
+  danger: iconCircleX,
 };
-
-let _idSeq = 0;
 
 /**
  * NeuralUI NotificationService
@@ -47,32 +57,42 @@ let _idSeq = 0;
  * Servicio inyectable que gestiona la cola de notificaciones.
  *
  * Uso:
- *   inject(NeuNotificationService).push({ type: 'success', message: '¡Guardado!' });
+ *   inject(NeuNotificationService).push({ tone: 'success', message: '¡Guardado!' });
  */
 @Injectable({ providedIn: 'root' })
 export class NeuNotificationService {
+  private readonly ids = inject(NeuIdGenerator);
+  private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  /** Lista reactiva de notificaciones, con la más reciente primero / Reactive notification list, newest first */
   readonly notifications = signal<NeuNotification[]>([]);
 
+  /** Número de notificaciones sin leer / Number of unread notifications */
   readonly unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
 
   private readonly timers = new Map<string, ReturnType<typeof setTimeout>>();
 
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.clearAll());
+  }
+
   /** Agrega una notificación / Adds a notification */
   push(opts: Partial<NeuNotificationOptions> & Pick<NeuNotificationOptions, 'message'>): string {
-    const id = `neu-notif-${++_idSeq}`;
+    const id = this.ids.getId('neu-notif-');
     const n: NeuNotification = {
       id,
-      type: opts.type ?? 'info',
+      tone: opts.tone ?? 'info',
       title: opts.title,
       message: opts.message,
-      icon: opts.icon ?? DEFAULT_ICONS[opts.type ?? 'info'],
+      icon: opts.icon,
       duration: opts.duration ?? 5000,
-      timestamp: new Date(),
+      timestamp: this.temporal.currentNow(),
       read: false,
     };
     this.notifications.update((list) => [n, ...list]);
 
-    if (n.duration && n.duration > 0) {
+    if (this.browser && n.duration && n.duration > 0) {
       const timer = setTimeout(() => this.remove(id), n.duration);
       this.timers.set(id, timer);
     }
@@ -107,8 +127,6 @@ export class NeuNotificationService {
   }
 }
 
-let _panelSeq = 0;
-
 /**
  * NeuralUI NotificationCenter Component
  *
@@ -120,27 +138,26 @@ let _panelSeq = 0;
  */
 @Component({
   selector: 'neu-notification-center',
-  imports: [OverlayModule],
+  imports: [OverlayModule, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-nc',
-    '[attr.aria-label]': '"Centro de notificaciones"',
+    '[attr.aria-label]': 'text("Notification center", "Centro de notificaciones")',
   },
   template: `
     <!-- Bell button -->
     <button
+      #bell
       cdkOverlayOrigin
       #notificationOrigin="cdkOverlayOrigin"
       type="button"
       class="neu-nc__bell"
       [attr.aria-expanded]="_isOpen()"
-      aria-haspopup="dialog"
       [attr.aria-controls]="_panelId"
-      [attr.aria-label]="'Notificaciones. ' + _svc.unreadCount() + ' sin leer'"
+      [attr.aria-label]="text('Notifications. ', 'Notificaciones. ') + _svc.unreadCount() + text(' unread', ' sin leer')"
       (click)="_toggle()"
     >
-      <span class="neu-nc__bell-icon" aria-hidden="true">🔔</span>
+      <neu-icon-outlet class="neu-nc__bell-icon" [icon]="iconBell" [fallbackPath]="iconFallbackPath(iconBell)" [fallbackText]="iconFallbackText(iconBell)" size="1.2rem" aria-hidden="true" />
       @if (_svc.unreadCount() > 0) {
         <span class="neu-nc__badge" aria-hidden="true">{{
           _svc.unreadCount() > 99 ? '99+' : _svc.unreadCount()
@@ -159,44 +176,50 @@ let _panelSeq = 0;
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
       [cdkConnectedOverlayPush]="true"
       [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-      (backdropClick)="_close(true)"
-      (detach)="_close()"
+      (attach)="_onOverlayAttach()"
+      (backdropClick)="_close()"
+      (detach)="_onOverlayDetach()"
+      (overlayKeydown)="_onOverlayKeydown($event)"
     >
       <div
+        #panel
         class="neu-nc__panel"
         [id]="_panelId"
         role="dialog"
         aria-modal="false"
-        aria-label="Notificaciones"
+        [attr.aria-label]="text('Notifications', 'Notificaciones')"
+        tabindex="-1"
       >
         <div class="neu-nc__panel-header">
-          <span class="neu-nc__panel-title">Notificaciones</span>
+          <span class="neu-nc__panel-title">{{ text('Notifications', 'Notificaciones') }}</span>
           <div class="neu-nc__panel-actions">
             @if (_svc.unreadCount() > 0) {
               <button type="button" class="neu-nc__action-btn" (click)="_svc.markAllRead()">
-                Leer todo
+                {{ text('Read all', 'Leer todo') }}
               </button>
             }
             @if (_svc.notifications().length > 0) {
               <button type="button" class="neu-nc__action-btn" (click)="_svc.clearAll()">
-                Limpiar
+                {{ text('Clear', 'Limpiar') }}
               </button>
             }
           </div>
         </div>
 
-        <div class="neu-nc__list" role="list">
+        <div class="neu-nc__list" [attr.role]="_svc.notifications().length ? 'list' : null">
           @if (!_svc.notifications().length) {
-            <div class="neu-nc__empty" role="status">No hay notificaciones</div>
+            <div class="neu-nc__empty" role="status">{{ text('No notifications', 'No hay notificaciones') }}</div>
           }
           @for (n of _svc.notifications(); track n.id) {
             <div
               class="neu-nc__item"
               role="listitem"
               [class.neu-nc__item--unread]="!n.read"
-              [class]="'neu-nc__item--' + n.type"
+              [class]="'neu-nc__item--' + n.tone"
             >
-              <span class="neu-nc__item-icon" aria-hidden="true">{{ n.icon }}</span>
+              <span class="neu-nc__item-icon" aria-hidden="true">
+                <neu-icon-outlet [icon]="n.icon ?? defaultIcon(n.tone)" [fallbackPath]="iconFallbackPath(n.icon ?? defaultIcon(n.tone))" [fallbackText]="iconFallbackText(n.icon ?? defaultIcon(n.tone))" size="1rem" />
+              </span>
               <div class="neu-nc__item-body">
                 @if (n.title) {
                   <p class="neu-nc__item-title">{{ n.title }}</p>
@@ -209,10 +232,10 @@ let _panelSeq = 0;
               <button
                 type="button"
                 class="neu-nc__item-close"
-                [attr.aria-label]="'Cerrar notificación'"
+                [attr.aria-label]="text('Dismiss notification: ', 'Cerrar notificación: ') + (n.title ?? n.message)"
                 (click)="_svc.remove(n.id)"
               >
-                ×
+                <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1rem" aria-hidden="true" />
               </button>
             </div>
           }
@@ -223,12 +246,22 @@ let _panelSeq = 0;
   styleUrl: './neu-notification-center.component.scss',
 })
 export class NeuNotificationCenterComponent {
-  readonly _svc = inject(NeuNotificationService);
+  private readonly locale = inject(NEURAL_LOCALE);
+  protected text(en: string, es: string): string { return this.locale.toLowerCase().startsWith('es') ? es : en; }
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconBell = iconBell;
+  protected readonly iconX = iconX;
+  protected readonly _svc = inject(NeuNotificationService);
   private readonly overlay = inject(Overlay);
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  readonly _isOpen = signal(false);
-  readonly _panelId = `neu-nc-panel-${++_panelSeq}`;
-  readonly _viewportMargin = 16;
+  private readonly temporal = inject(NeuInitialTemporalState);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly bellRef = viewChild<ElementRef<HTMLButtonElement>>('bell');
+  private readonly panelRef = viewChild<ElementRef<HTMLElement>>('panel');
+  private pendingMarkReadTimer: ReturnType<typeof setTimeout> | null = null;
+  protected readonly _isOpen = signal(false);
+  protected readonly _panelId = inject(NeuIdGenerator).getId('neu-nc-panel-');
+  protected readonly _viewportMargin = 16;
   readonly overlayPositions: ConnectedPosition[] = [
     {
       originX: 'end',
@@ -254,39 +287,81 @@ export class NeuNotificationCenterComponent {
   ];
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
-  _toggle(): void {
-    const opening = !this._isOpen();
-    this._isOpen.set(opening);
-    if (opening) {
-      // Mark all as read when panel opens
-      setTimeout(() => this._svc.markAllRead(), 500);
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.cancelPendingMarkRead();
+      this._isOpen.set(false);
+    });
+  }
+
+  protected _toggle(): void {
+    if (this._isOpen()) {
+      this._close();
+    } else {
+      this._isOpen.set(true);
+      this.scheduleMarkAllRead();
     }
   }
 
-  _close(restoreFocus = false): void {
+  protected _close(restoreFocus = true): void {
     if (!this._isOpen()) return;
     this._isOpen.set(false);
-    if (restoreFocus) {
-      queueMicrotask(() =>
-        this.host.nativeElement.querySelector<HTMLElement>('.neu-nc__bell')?.focus(),
-      );
-    }
+    this.cancelPendingMarkRead();
+    if (!restoreFocus) return;
+    queueMicrotask(() => {
+      const bell = this.bellRef()?.nativeElement;
+      if (!this.destroyRef.destroyed && bell?.isConnected) {
+        bell.focus({ preventScroll: true });
+      }
+    });
   }
 
-  @HostListener('document:keydown.escape', ['$event'])
-  _onEscape(event: Event): void {
-    if (!this._isOpen()) return;
+  protected _onOverlayAttach(): void {
+    queueMicrotask(() => {
+      const panel = this.panelRef()?.nativeElement;
+      if (this._isOpen() && !this.destroyRef.destroyed && panel?.isConnected) {
+        const firstAction = panel.querySelector<HTMLElement>('button:not([disabled])');
+        (firstAction ?? panel).focus({ preventScroll: true });
+      }
+    });
+  }
+
+  protected _onOverlayDetach(): void {
+    if (this._isOpen()) this._close();
+  }
+
+  protected _onOverlayKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this._isOpen()) return;
     event.preventDefault();
-    this._close(true);
+    event.stopPropagation();
+    this._close();
   }
 
-  _relativeTime(date: Date): string {
-    const diff = Date.now() - date.getTime();
+  private scheduleMarkAllRead(): void {
+    this.cancelPendingMarkRead();
+    this.pendingMarkReadTimer = setTimeout(() => {
+      this.pendingMarkReadTimer = null;
+      if (!this.destroyRef.destroyed) this._svc.markAllRead();
+    }, 500);
+  }
+
+  private cancelPendingMarkRead(): void {
+    if (this.pendingMarkReadTimer === null) return;
+    clearTimeout(this.pendingMarkReadTimer);
+    this.pendingMarkReadTimer = null;
+  }
+
+  protected _relativeTime(date: Date): string {
+    const diff = this.temporal.currentNow().getTime() - date.getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Ahora';
-    if (mins < 60) return `Hace ${mins} min`;
+    if (mins < 1) return this.text('Now', 'Ahora');
+    if (mins < 60) return this.text(`${mins} min ago`, `Hace ${mins} min`);
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `Hace ${hours}h`;
-    return `Hace ${Math.floor(hours / 24)}d`;
+    if (hours < 24) return this.text(`${hours}h ago`, `Hace ${hours}h`);
+    return this.text(`${Math.floor(hours / 24)}d ago`, `Hace ${Math.floor(hours / 24)}d`);
+  }
+
+  protected defaultIcon(tone: NeuNotificationTone): NeuIconKey {
+    return DEFAULT_ICONS[tone];
   }
 }

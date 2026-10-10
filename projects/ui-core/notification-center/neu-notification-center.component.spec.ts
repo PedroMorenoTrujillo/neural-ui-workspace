@@ -1,5 +1,8 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconBell } from '@neural-icons/core/icons/bell';
 import {
   NeuNotificationCenterComponent,
   NeuNotificationService,
@@ -17,7 +20,12 @@ function setup() {
 
 beforeEach(() =>
   TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection(), NeuNotificationService],
+    providers: [
+      provideZonelessChangeDetection(),
+      { provide: NEURAL_LOCALE, useValue: 'es-ES' },
+      NeuNotificationService,
+      provideNeuralIcons(iconBell),
+    ],
   }).compileComponents(),
 );
 
@@ -36,7 +44,7 @@ describe('NeuNotificationService', () => {
   it('push should default type to info', () => {
     const svc = mkSvc();
     svc.push({ message: 'Test' });
-    expect(svc.notifications()[0].type).toBe('info');
+    expect(svc.notifications()[0].tone).toBe('info');
   });
 
   it('push should default duration to 5000ms', () => {
@@ -45,16 +53,16 @@ describe('NeuNotificationService', () => {
     expect(svc.notifications()[0].duration).toBe(5000);
   });
 
-  it('push with named type should set icon', () => {
+  it('push with named tone leaves the default icon to the renderer', () => {
     const svc = mkSvc();
-    svc.push({ type: 'success', message: 'OK' });
-    expect(svc.notifications()[0].icon).toBe('✅');
+    svc.push({ tone: 'success', message: 'OK' });
+    expect(svc.notifications()[0].icon).toBeUndefined();
   });
 
   it('push should preserve a custom icon', () => {
     const svc = mkSvc();
-    svc.push({ type: 'info', message: 'Custom', icon: '⭐', duration: 0 });
-    expect(svc.notifications()[0].icon).toBe('⭐');
+    svc.push({ tone: 'info', message: 'Custom', icon: 'bell', duration: 0 });
+    expect(svc.notifications()[0].icon).toBe('bell');
   });
 
   it('push with positive duration should auto-dismiss after timeout', () => {
@@ -68,6 +76,16 @@ describe('NeuNotificationService', () => {
     expect(svc.notifications().length).toBe(0);
 
     vi.useRealTimers();
+  });
+
+  it('does not schedule auto-dismiss timers during server rendering', () => {
+    vi.useFakeTimers();
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: 'server' });
+    const svc = mkSvc();
+    const baselineTimers = vi.getTimerCount();
+    svc.push({ message: 'SSR', duration: 1000 });
+    expect(vi.getTimerCount()).toBe(baselineTimers);
+    expect(svc.notifications()).toHaveLength(1);
   });
 
   it('remove should delete the notification', () => {
@@ -152,10 +170,10 @@ describe('NeuNotificationCenterComponent', () => {
 
   it('_toggle should open panel', async () => {
     const f = setup();
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
     expect(document.querySelector('.neu-nc__panel')).toBeTruthy();
   });
 
@@ -164,64 +182,179 @@ describe('NeuNotificationCenterComponent', () => {
     (f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement).click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
     (document.querySelector('.cdk-overlay-backdrop') as HTMLElement).click();
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('_toggle again should close panel', async () => {
     const f = setup();
-    f.componentInstance._toggle();
-    f.componentInstance._toggle();
-    expect(f.componentInstance._isOpen()).toBe(false);
+    f.componentInstance['_toggle']();
+    f.componentInstance['_toggle']();
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('_toggle should mark notifications as read after opening delay', () => {
     vi.useFakeTimers();
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
 
     svc.push({ message: 'Unread', duration: 0 });
     expect(svc.notifications()[0].read).toBe(false);
 
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     vi.advanceTimersByTime(500);
 
     expect(svc.notifications()[0].read).toBe(true);
-    vi.useRealTimers();
+    expect(markAllRead).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('cancels the delayed mutation when destroyed before 500ms', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    f.destroy();
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.unreadCount()).toBe(1);
+    expect(markAllRead).not.toHaveBeenCalled();
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('cancels the current open-session mutation when closed before 500ms', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(1000);
+
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+    expect(svc.unreadCount()).toBe(1);
+    expect(markAllRead).not.toHaveBeenCalled();
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('replaces superseded open-session work across open-close-open', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(250);
+    f.componentInstance['_toggle']();
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(250);
+
+    expect(svc.unreadCount()).toBe(1);
+    expect(markAllRead).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(250);
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.unreadCount()).toBe(0);
+    expect(markAllRead).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('is safe to destroy after the delayed mutation already completed', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+    svc.push({ message: 'Unread', duration: 0 });
+
+    f.componentInstance['_toggle']();
+    vi.advanceTimersByTime(500);
+    f.destroy();
+    vi.advanceTimersByTime(1000);
+
+    expect(svc.unreadCount()).toBe(0);
+    expect(markAllRead).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+  });
+
+  it('survives 100 destroy-before-delay cycles without a service mutation', async () => {
+    vi.useFakeTimers();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+
+    for (let cycle = 0; cycle < 100; cycle += 1) {
+      svc.push({ message: `Unread ${cycle}`, duration: 0 });
+      const f = setup();
+      f.componentInstance['_toggle']();
+      f.detectChanges();
+      f.destroy();
+      vi.advanceTimersByTime(501);
+      expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
+      await Promise.resolve();
+    }
+
+    expect(svc.unreadCount()).toBe(100);
+    expect(markAllRead).not.toHaveBeenCalled();
+  });
+
+  it('runs exactly one delayed mutation for each of 100 surviving opens', () => {
+    vi.useFakeTimers();
+    const f = setup();
+    const svc = TestBed.inject(NeuNotificationService);
+    const markAllRead = vi.spyOn(svc, 'markAllRead');
+
+    for (let cycle = 0; cycle < 100; cycle += 1) {
+      svc.push({ message: `Unread ${cycle}`, duration: 0 });
+      f.componentInstance['_toggle']();
+      vi.advanceTimersByTime(500);
+      expect(svc.unreadCount()).toBe(0);
+      f.componentInstance['_toggle']();
+    }
+
+    vi.advanceTimersByTime(1000);
+    expect(markAllRead).toHaveBeenCalledTimes(100);
+    expect(f.componentInstance['pendingMarkReadTimer']).toBeNull();
   });
 
   it('_relativeTime should return "Ahora" for recent dates', () => {
     const f = setup();
-    const result = f.componentInstance._relativeTime(new Date());
+    const result = f.componentInstance['_relativeTime'](new Date());
     expect(result).toBe('Ahora');
   });
 
   it('_relativeTime should return minutes for > 1 min ago', () => {
     const f = setup();
     const past = new Date(Date.now() - 5 * 60000);
-    expect(f.componentInstance._relativeTime(past)).toContain('5 min');
+    expect(f.componentInstance['_relativeTime'](past)).toContain('5 min');
   });
 
   it('_relativeTime should return hours for > 60 min ago', () => {
     const f = setup();
     const past = new Date(Date.now() - 2 * 60 * 60000);
-    expect(f.componentInstance._relativeTime(past)).toContain('2h');
+    expect(f.componentInstance['_relativeTime'](past)).toContain('2h');
   });
 
   it('_relativeTime should return days for > 24h ago', () => {
     const f = setup();
     const past = new Date(Date.now() - 3 * 24 * 60 * 60000);
-    expect(f.componentInstance._relativeTime(past)).toContain('3d');
+    expect(f.componentInstance['_relativeTime'](past)).toContain('3d');
   });
 
   it('should render notification items when panel is open with notifications', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'success', title: 'Título', message: 'Cuerpo', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'success', title: 'Título', message: 'Cuerpo', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__item')).toBeTruthy();
@@ -231,8 +364,8 @@ describe('NeuNotificationCenterComponent', () => {
   it('should render item title when present', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', title: 'Mi título', message: 'msg', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'info', title: 'Mi título', message: 'msg', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.body.textContent).toContain('Mi título');
@@ -241,8 +374,8 @@ describe('NeuNotificationCenterComponent', () => {
   it('should not render title element when notification has no title', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', message: 'Solo mensaje', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'info', message: 'Solo mensaje', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__item-title')).toBeNull();
@@ -251,8 +384,8 @@ describe('NeuNotificationCenterComponent', () => {
   it('should mark notification as unread with class', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'warning', message: 'Alerta', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'warning', message: 'Alerta', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__item--unread')).toBeTruthy();
@@ -261,8 +394,8 @@ describe('NeuNotificationCenterComponent', () => {
   it('close button should remove the notification', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'error', message: 'Error!', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'danger', message: 'Error!', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
@@ -275,19 +408,19 @@ describe('NeuNotificationCenterComponent', () => {
   it('close button should expose an accessible aria-label', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'error', message: 'Error!', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'danger', message: 'Error!', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const closeBtn = document.querySelector('.neu-nc__item-close') as HTMLButtonElement;
-    expect(closeBtn.getAttribute('aria-label')).toBe('Cerrar notificación');
+    expect(closeBtn.getAttribute('aria-label')).toContain('Cerrar notificación:');
   });
 
   it('markAllRead button should appear and work when there are unread', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', message: 'A', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'info', message: 'A', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const readAllBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find((b: any) =>
@@ -303,8 +436,8 @@ describe('NeuNotificationCenterComponent', () => {
   it('clearAll button should appear and remove all notifications', async () => {
     const f = setup();
     const svc = TestBed.inject(NeuNotificationService);
-    svc.push({ type: 'info', message: 'A', duration: 0 });
-    f.componentInstance._toggle();
+    svc.push({ tone: 'info', message: 'A', duration: 0 });
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     const clearBtn = Array.from(document.querySelectorAll('.neu-nc__action-btn')).find((b: any) =>
@@ -328,45 +461,72 @@ describe('NeuNotificationCenterComponent', () => {
 
   it('should show empty state in panel when no notifications', async () => {
     const f = setup();
-    f.componentInstance._toggle();
+    f.componentInstance['_toggle']();
     f.detectChanges();
     await f.whenStable();
     expect(document.querySelector('.neu-nc__empty')).toBeTruthy();
-  });
-
-  it('closes with Escape and restores focus to the bell', async () => {
-    const f = setup();
-    const bell = f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement;
-    bell.click();
+    expect(document.querySelector('.neu-nc__list')?.getAttribute('role')).toBeNull();
+    const svc = mkSvc();
+    svc.push({ message: 'Persistent notification', duration: 0 });
     f.detectChanges();
     await f.whenStable();
-    const escape = new KeyboardEvent('keydown', {
-      key: 'Escape',
-      bubbles: true,
-      cancelable: true,
-    });
-
-    document.dispatchEvent(escape);
+    expect(document.querySelector('.neu-nc__list')?.getAttribute('role')).toBe('list');
+    expect(document.querySelector('.neu-nc__list > [role="listitem"]')).toBeTruthy();
+    svc.clearAll();
     f.detectChanges();
     await f.whenStable();
-
-    expect(escape.defaultPrevented).toBe(true);
-    expect(f.componentInstance._isOpen()).toBe(false);
-    expect(document.activeElement).toBe(bell);
-  });
-
-  it('does not consume Escape while closed', () => {
-    const f = setup();
-    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
-
-    f.componentInstance._onEscape(escape);
-
-    expect(escape.defaultPrevented).toBe(false);
+    expect(document.querySelector('.neu-nc__list')?.getAttribute('role')).toBeNull();
+    expect(document.querySelector('.neu-nc__empty')?.getAttribute('role')).toBe('status');
   });
 
   it('push with duration=0 should NOT auto-dismiss', async () => {
     const svc = TestBed.inject(NeuNotificationService);
     svc.push({ message: 'Persistente', duration: 0 });
     expect(svc.notifications().length).toBe(1);
+  });
+
+  it('moves focus into the panel and restores it to the bell on Escape', async () => {
+    const f = setup();
+    const bell = f.nativeElement.querySelector('.neu-nc__bell') as HTMLButtonElement;
+    bell.focus();
+    bell.click();
+    f.detectChanges();
+    await f.whenStable();
+    await Promise.resolve();
+
+    const panel = document.querySelector('.neu-nc__panel') as HTMLElement;
+    expect(document.activeElement).toBe(panel);
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    f.componentInstance['_onOverlayKeydown'](escape);
+    f.detectChanges();
+    await Promise.resolve();
+
+    expect(escape.defaultPrevented).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+    expect(document.activeElement).toBe(bell);
+  });
+
+  it('covers template Escape handling and close paths without focus restoration', async () => {
+    const f = setup();
+    f.componentInstance['_toggle']();
+    f.detectChanges();
+    await f.whenStable();
+    const panel = document.querySelector('.neu-nc__panel') as HTMLElement;
+    panel.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    await Promise.resolve();
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+
+    f.componentInstance['_toggle']();
+    f.componentInstance['_close'](false);
+    expect(f.componentInstance['_isOpen']()).toBe(false);
+    f.componentInstance['_onOverlayDetach']();
+    f.componentInstance['_onOverlayKeydown'](new KeyboardEvent('keydown', { key: 'Enter' }));
   });
 });

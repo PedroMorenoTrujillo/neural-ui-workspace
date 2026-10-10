@@ -14,7 +14,7 @@ body:
     id: angular
     attributes:
       label: Angular version
-      placeholder: '21.2.0'
+      placeholder: '22.1.0'
     validations:
       required: true
 

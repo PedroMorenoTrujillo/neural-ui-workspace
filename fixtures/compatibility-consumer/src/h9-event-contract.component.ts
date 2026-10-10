@@ -1,0 +1,272 @@
+import { Component, afterNextRender, signal, viewChild } from '@angular/core';
+import { JsonPipe } from '@angular/common';
+import { NeuAutocompleteComponent } from '@neural-ui/core/autocomplete';
+import { NeuOptionActivatedEvent } from '@neural-ui/core/option-api';
+import { NeuInputTagsComponent } from '@neural-ui/core/input-tags';
+import { NeuTreeSelectComponent } from '@neural-ui/core/tree-select';
+import { NeuCascadeSelectComponent } from '@neural-ui/core/cascade-select';
+import {
+  NeuDateInputComponent,
+  NeuDateViewChangeEvent,
+  civilDate,
+} from '@neural-ui/core/date-input';
+import { NeuVirtualListComponent } from '@neural-ui/core/virtual-list';
+import { NeuDialogComponent } from '@neural-ui/core/modal';
+import { NeuBottomSheetComponent } from '@neural-ui/core/bottom-sheet';
+import { NeuColorPickerComponent } from '@neural-ui/core/color-picker';
+import { NeuPickListComponent } from '@neural-ui/core/pick-list';
+import { NeuSplitterComponent } from '@neural-ui/core/splitter';
+import { NeuSplitButtonComponent } from '@neural-ui/core/split-button';
+import { NeuImageViewerDirective } from '@neural-ui/core/image-viewer';
+import { NeuNumberInputComponent } from '@neural-ui/core/number-input';
+
+interface Option {
+  value: string;
+  label: string;
+  children?: Option[];
+}
+@Component({
+  selector: 'h9-event-contract',
+  imports: [
+    JsonPipe,
+    NeuAutocompleteComponent,
+    NeuInputTagsComponent,
+    NeuTreeSelectComponent,
+    NeuCascadeSelectComponent,
+    NeuDateInputComponent,
+    NeuVirtualListComponent,
+    NeuDialogComponent,
+    NeuBottomSheetComponent,
+    NeuColorPickerComponent,
+    NeuPickListComponent,
+    NeuSplitterComponent,
+    NeuSplitButtonComponent,
+    NeuImageViewerDirective,
+    NeuNumberInputComponent,
+  ],
+  template: `
+    <h1>H9-A2 isolated event consumer</h1>
+    <button id="h9-reset" (click)="events.set([])">Reset log</button>
+    <button id="h9-destroy" (click)="mounted.set(false)">Destroy controls</button>
+    <button id="h9-native-select" (click)="selectText()">Select input text programmatically</button>
+    <button id="h9-dialog-toggle" (click)="dialogOpen.set(!dialogOpen())">Toggle dialog</button>
+    <button id="h9-sheet-toggle" (click)="sheetOpen.set(!sheetOpen())">Toggle sheet</button>
+    <button id="h9-write" (click)="writeValues()">Programmatic CVA writes</button>
+    <output id="h9-events">{{ events() | json }}</output>
+    @if (mounted()) {
+      <section id="h9-autocomplete">
+        <neu-autocomplete
+          [options]="options"
+          optionLabel="label"
+          [optionValue]="optionValue"
+          [delay]="0"
+          (optionActivated)="onSelect($event)"
+        />
+      </section>
+      <section id="h9-tags">
+        <neu-input-tags
+          [options]="options"
+          [typeahead]="true"
+          optionLabel="label"
+          [optionValue]="optionValue"
+          [delay]="0"
+          (optionActivated)="onTagSelect($event)"
+        />
+      </section>
+      <section id="h9-tree">
+        <neu-tree-select
+          [nodes]="tree"
+          [clearable]="true"
+          (filter)="record('filter', $event.query)"
+          (opened)="record('treeOpened')"
+          (closed)="record('treeClosed')"
+          (cleared)="record('treeCleared')"
+          (nodeExpansionChange)="record('expansion', $event)"
+        />
+      </section>
+      <section id="h9-cascade">
+        <neu-cascade-select
+          [options]="tree"
+          [optionValue]="optionValue"
+          (groupChange)="record('group', $event)"
+          (opened)="record('cascadeOpened')"
+          (closed)="record('cascadeClosed')"
+        />
+      </section>
+      <section id="h9-date">
+        <neu-date-input
+          locale="en"
+          [showMonthYearPicker]="true"
+          (viewChange)="onView($event)"
+          (opened)="record('dateOpened')"
+          (closed)="record('dateClosed')"
+          (cleared)="record('dateCleared')"
+        />
+      </section>
+      <section id="h9-virtual">
+        <neu-virtual-list
+          [items]="items"
+          [itemKey]="virtualItemKey"
+          [itemSize]="32"
+          [visibleRows]="4"
+          (rangeChange)="onRange($event)"
+        />
+      </section>
+      <neu-dialog
+        [open]="dialogOpen()"
+        title="Event dialog"
+        (opened)="record('dialogOpened')"
+        (closed)="record('dialogClosed')"
+        (closeRequested)="record('dialogRequest', $event)"
+      >
+        <button id="h9-dialog-close-owner" (click)="dialogOpen.set(false)">
+          Owner closes dialog
+        </button>
+      </neu-dialog>
+      <neu-bottom-sheet
+        [open]="sheetOpen()"
+        title="Event sheet"
+        (opened)="record('sheetOpened')"
+        (closed)="record('sheetClosed')"
+        (closeRequested)="record('sheetRequest', $event)"
+      >
+        <button id="h9-sheet-close-owner" (click)="sheetOpen.set(false)">Owner closes sheet</button>
+      </neu-bottom-sheet>
+      <section id="h9-color">
+        <neu-color-picker
+          mode="oklch"
+          [showAlpha]="true"
+          [showChannels]="true"
+          (opened)="record('colorOpened')"
+          (closed)="record('colorClosed')"
+          (valueChange)="record('colorChange', $event)"
+          (valueCommitted)="record('colorEnd', $event)"
+        />
+      </section>
+      <neu-pick-list
+        [source]="options"
+        [target]="[]"
+        (sourceSelectionChange)="record('sourceSelection', $event)"
+        (targetSelectionChange)="record('targetSelection', $event)"
+      />
+      <neu-splitter
+        [panes]="[{ size: 50 }, { size: 50 }]"
+        (resizeStart)="record('resizeStart', $event)"
+        (resize)="record('resize', $event)"
+      />
+      <neu-split-button
+        label="Actions"
+        [actions]="[{ id: 'save', label: 'Save' }]"
+        (opened)="record('splitOpened')"
+        (closed)="record('splitClosed')"
+      />
+      <img
+        id="h9-image"
+        [neuImageViewer]="image"
+        alt="Test image"
+        width="40"
+        height="40"
+        [src]="image"
+        (opened)="record('imageOpened')"
+        (closed)="record('imageClosed')"
+      />
+      <section id="h9-number">
+        <neu-number-input [(value)]="numberValue" (inputDetail)="onNumber($event)" />
+      </section>
+    }
+  `,
+  styles: [
+    `
+      :host {
+        display: block;
+        padding: 20px;
+      }
+      section {
+        margin: 16px 0;
+        max-width: 600px;
+      }
+      output {
+        display: block;
+        max-height: 160px;
+        overflow: auto;
+        white-space: pre;
+      }
+      neu-splitter {
+        display: block;
+        height: 60px;
+        width: 600px;
+      }
+    `,
+  ],
+})
+export class H9EventContractComponent {
+  readonly events = signal<{ name: string; payload?: unknown }[]>([]);
+  readonly mounted = signal(true);
+  readonly dialogOpen = signal(false);
+  readonly sheetOpen = signal(false);
+  readonly numberValue = signal<number | null>(null);
+  readonly options: Option[] = [
+    { value: 'a', label: 'Alpha' },
+    { value: 'b', label: 'Beta' },
+  ];
+  readonly tree: Option[] = [{ value: 'root', label: 'Root', children: this.options }];
+  readonly optionValue = (option: Option) => option.value;
+  readonly items = Array.from({ length: 300 }, (_, i) => `Row ${i}`);
+  readonly virtualItemKey = (item: string): string => item;
+  readonly image =
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="40" height="40" fill="blue"/%3E%3C/svg%3E';
+  readonly autocomplete = viewChild(NeuAutocompleteComponent);
+  readonly tags = viewChild(NeuInputTagsComponent);
+  readonly date = viewChild(NeuDateInputComponent);
+  readonly treeSelect = viewChild(NeuTreeSelectComponent);
+  readonly number = viewChild(NeuNumberInputComponent);
+  readonly color = viewChild(NeuColorPickerComponent);
+  readonly cascade = viewChild(NeuCascadeSelectComponent);
+  constructor() {
+    afterNextRender(() => {
+      this.autocomplete()?.optionActivated.subscribe((value) => this.record('acDirect', value));
+      this.tags()?.optionActivated.subscribe((value) => this.record('tagsDirect', value));
+      this.record('ready');
+    });
+  }
+  record(name: string, payload?: unknown): void {
+    this.events.update((values) => [...values, { name, payload }]);
+  }
+  onSelect(value: NeuOptionActivatedEvent<Option, string>): void {
+    this.record('acSelect', value);
+  }
+  onTagSelect(value: NeuOptionActivatedEvent<Option, string>): void {
+    this.record('tagsSelect', value);
+  }
+  onView(value: NeuDateViewChangeEvent): void {
+    this.record('view', value);
+  }
+  onRange(value: { start: number; end: number }): void {
+    this.record('range', value);
+  }
+  onNumber(value: {
+    rawText: string;
+    value: number | null;
+    state: 'valid' | 'incomplete' | 'invalid';
+  }): void {
+    this.record('number', value);
+  }
+  selectText(): void {
+    document
+      .querySelectorAll<HTMLInputElement>('#h9-autocomplete input, #h9-tags input')
+      .forEach((input) => {
+        input.value = 'Alpha';
+        input.focus();
+        input.setSelectionRange(0, 3);
+      });
+  }
+  writeValues(): void {
+    this.autocomplete()?.value.set('a');
+    this.tags()?.value.set([]);
+    this.treeSelect()?.value.set(null);
+    this.cascade()?.value.set(null);
+    this.date()?.value.set(civilDate('2026-01-01'));
+    this.color()?.value.set('oklch(0.7 0.12 280 / 0.65)');
+    this.numberValue.set(null);
+  }
+}

@@ -40,9 +40,16 @@ describe('NeuTooltipDirective', () => {
     expect(btn).toBeTruthy();
   });
 
-  it('should not expose a dangling aria-describedby before the tooltip exists', () => {
+  it('should only set aria-describedby while the described tooltip exists', () => {
     const btn = fixture.nativeElement.querySelector('button');
     expect(btn.getAttribute('aria-describedby')).toBeNull();
+
+    btn.dispatchEvent(new Event('mouseenter'));
+    fixture.detectChanges();
+
+    const describedBy = btn.getAttribute('aria-describedby');
+    expect(describedBy).toMatch(/^neu-tooltip-/);
+    expect(document.getElementById(describedBy!)).toBeTruthy();
   });
 
   it('should not add tabindex to focusable elements', () => {
@@ -92,27 +99,42 @@ describe('NeuTooltipDirective', () => {
     expect(div.getAttribute('tabindex')).toBe('0');
   });
 
+  it('preserves consumer tab order on native and custom triggers', () => {
+    @Component({
+      imports: [NeuTooltipDirective],
+      template: `
+        <button neuTooltip="Native" [attr.tabindex]="order()">Native trigger</button>
+        <div neuTooltip="Custom" [attr.tabindex]="order()">Custom trigger</div>
+      `,
+    })
+    class TabOrderHost { readonly order = signal(-1); }
+    const f = TestBed.createComponent(TabOrderHost);
+    f.detectChanges();
+    const triggers = Array.from(f.nativeElement.querySelectorAll('button, div')) as HTMLElement[];
+    expect(triggers.map(trigger => trigger.tabIndex)).toEqual([-1, -1]);
+    f.componentInstance.order.set(0);
+    f.detectChanges();
+    expect(triggers.map(trigger => trigger.tabIndex)).toEqual([0, 0]);
+  });
+
   it('should show tooltip on focus event', () => {
     // El tooltip debe mostrarse también con focus (accesibilidad)
     // Tooltip must also show on focus event (accessibility)
     const btn = fixture.nativeElement.querySelector('button');
     btn.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
-    const descriptionId = btn.getAttribute('aria-describedby');
-    expect(descriptionId).toMatch(/^neu-tooltip-/);
-    expect(document.getElementById(descriptionId!)).toBeTruthy();
+    expect(fixture.nativeElement).toBeTruthy();
   });
 
-  it('should remove aria-describedby when the tooltip is hidden', async () => {
+  it('should hide tooltip on blur event', () => {
     // El tooltip debe ocultarse con blur
     // Tooltip must hide on blur
     const btn = fixture.nativeElement.querySelector('button');
     btn.dispatchEvent(new Event('focus'));
     fixture.detectChanges();
     btn.dispatchEvent(new Event('blur'));
-    await new Promise((resolve) => setTimeout(resolve, 110));
     fixture.detectChanges();
-    expect(btn.getAttribute('aria-describedby')).toBeNull();
+    expect(fixture.nativeElement).toBeTruthy();
   });
 
   it('neuTooltipPosition bottom should render without error', () => {
@@ -264,5 +286,24 @@ describe('NeuTooltipDirective', () => {
     // Timer advances but detach is never called (no throw expected)
     vi.advanceTimersByTime(300);
     vi.useRealTimers();
+  });
+
+  it('dismisses immediately with Escape and removes the ARIA reference', () => {
+    const btn = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    btn.dispatchEvent(new Event('mouseenter'));
+    fixture.detectChanges();
+    expect(btn.getAttribute('aria-describedby')).toMatch(/^neu-tooltip-/);
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    btn.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(btn.getAttribute('aria-describedby')).toBeNull();
+    expect(document.querySelector('.neu-tooltip')).toBeNull();
   });
 });

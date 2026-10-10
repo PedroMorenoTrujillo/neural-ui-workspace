@@ -5,15 +5,16 @@ import {
   HostListener,
   Injector,
   OnDestroy,
+  OnInit,
   inject,
   input,
   signal,
 } from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { _IdGenerator } from '@angular/cdk/a11y';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { NeuTooltipOverlayComponent } from './neu-tooltip.component';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
@@ -31,11 +32,9 @@ export type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
   selector: '[neuTooltip]',
   host: {
     '[attr.aria-describedby]': '_isVisible() ? _tooltipId : null',
-    // Sólo añadimos tabindex en elementos que no son nativamente focusables
-    '[attr.tabindex]': '_needsTabindex() ? "0" : null',
   },
 })
-export class NeuTooltipDirective implements OnDestroy {
+export class NeuTooltipDirective implements OnDestroy, OnInit {
   readonly neuTooltip = input.required<string>();
   readonly neuTooltipPosition = input<NeuTooltipPosition>('top');
   readonly neuTooltipDisabled = input<boolean>(false);
@@ -44,8 +43,7 @@ export class NeuTooltipDirective implements OnDestroy {
   private readonly _elementRef = inject(ElementRef<HTMLElement>);
   private readonly _injector = inject(Injector);
 
-  readonly _tooltipId = inject(_IdGenerator).getId('neu-tooltip-');
-  readonly _isVisible = signal(false);
+  protected readonly _tooltipId = inject(NeuIdGenerator).getId('neu-tooltip-');
 
   /** Elementos HTML nativamente focusables que no necesitan tabindex extra / Natively focusable HTML elements that don't need extra tabindex */
   private readonly _NATIVE_FOCUSABLE = /^(a|button|input|select|textarea|details|summary)$/i;
@@ -55,6 +53,14 @@ export class NeuTooltipDirective implements OnDestroy {
   private _overlayRef: OverlayRef | null = null;
   private _tooltipRef: ComponentRef<NeuTooltipOverlayComponent> | null = null;
   private _hideTimeout: ReturnType<typeof setTimeout> | null = null;
+  protected readonly _isVisible = signal(false);
+
+  ngOnInit(): void {
+    const host = this._elementRef.nativeElement;
+    if (this._needsTabindex() && !host.hasAttribute('tabindex')) {
+      host.setAttribute('tabindex', '0');
+    }
+  }
 
   @HostListener('mouseenter')
   @HostListener('focus')
@@ -77,7 +83,20 @@ export class NeuTooltipDirective implements OnDestroy {
   @HostListener('mouseleave')
   @HostListener('blur')
   hide(): void {
+    if (this._hideTimeout) clearTimeout(this._hideTimeout);
     this._hideTimeout = setTimeout(() => this._detach(), 100);
+  }
+
+  @HostListener('keydown.escape', ['$event'])
+  protected dismiss(event: Event): void {
+    if (!(event instanceof KeyboardEvent) || !this._isVisible()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (this._hideTimeout) {
+      clearTimeout(this._hideTimeout);
+      this._hideTimeout = null;
+    }
+    this._detach();
   }
 
   private _createOverlay(): void {
@@ -130,13 +149,20 @@ export class NeuTooltipDirective implements OnDestroy {
   }
 
   private _detach(): void {
-    this._overlayRef?.detach();
+    const overlayRef = this._overlayRef;
+    this._overlayRef = null;
     this._tooltipRef = null;
+    this._hideTimeout = null;
     this._isVisible.set(false);
+    overlayRef?.dispose();
   }
 
   ngOnDestroy(): void {
     if (this._hideTimeout) clearTimeout(this._hideTimeout);
+    this._hideTimeout = null;
+    this._isVisible.set(false);
     this._overlayRef?.dispose();
+    this._overlayRef = null;
+    this._tooltipRef = null;
   }
 }

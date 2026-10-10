@@ -2,6 +2,8 @@
   display: flex;
   align-items: center;
   width: 100%;
+  box-sizing: border-box;
+  min-inline-size: 0;
   gap: 8px;
   background: var(--neu-toolbar-bg, var(--neu-surface-1, #ffffff));
   color: var(--neu-toolbar-color, var(--neu-text, #111));
@@ -21,9 +23,9 @@
     min-height: 64px;
   }
 
-  &--primary {
-    background: var(--neu-toolbar-primary-bg, var(--neu-primary-dark, var(--neu-primary)));
-    color: var(--neu-toolbar-primary-color, #fff);
+  &--solid.neu-toolbar--brand {
+    background: var(--neu-toolbar-primary-bg, var(--neu-primary-solid, var(--neu-primary)));
+    color: var(--neu-toolbar-primary-color, var(--neu-primary-solid-fg, #fff));
 
     .neu-button--ghost {
       color: rgb(255 255 255 / 0.92);
@@ -35,7 +37,47 @@
     }
   }
 
-  &--none {
+  &--solid.neu-toolbar--neutral {
+    background: var(--neu-text);
+    color: var(--neu-surface);
+  }
+
+  &--soft.neu-toolbar--brand {
+    background: var(--neu-primary-soft);
+    color: var(--neu-text);
+  }
+
+  @each $tone, $token, $fill, $foreground in (
+    (success, success, var(--neu-success), #fff),
+    (info, info, color-mix(in srgb, var(--neu-info) 82%, black), #fff),
+    (warning, warning, var(--neu-warning), #111827),
+    (danger, error, var(--neu-error), #fff)
+  ) {
+    &--solid.neu-toolbar--#{$tone} {
+      background: #{$fill};
+      color: #{$foreground};
+
+      .neu-button--ghost {
+        color: inherit;
+
+        &:hover:not(:disabled):not(.neu-button--disabled) {
+          background: color-mix(in srgb, #{$foreground} 12%, transparent);
+          color: inherit;
+        }
+      }
+    }
+
+    &--soft.neu-toolbar--#{$tone} {
+      background: var(--neu-#{$token}-bg);
+      color: var(--neu-#{$token}-text);
+    }
+
+    &--ghost.neu-toolbar--#{$tone} {
+      color: var(--neu-#{$token}-text);
+    }
+  }
+
+  &--ghost {
     background: transparent;
   }
 
@@ -66,12 +108,38 @@
     }
   }
 
+  &--density-relaxed {
+    gap: 12px;
+
+    &.neu-toolbar--sm {
+      padding: 8px 16px;
+      min-height: 46px;
+    }
+
+    &.neu-toolbar--md {
+      padding: 12px 20px;
+      min-height: 60px;
+    }
+
+    &.neu-toolbar--lg {
+      padding: 16px 24px;
+      min-height: 72px;
+    }
+  }
+
   &--wrap {
     flex-wrap: wrap;
 
     .neu-toolbar__section {
       min-width: 0;
+      max-inline-size: 100%;
+      flex-wrap: wrap;
+      overflow-wrap: anywhere;
     }
+  }
+
+  &--nowrap {
+    overflow-x: auto;
   }
 }
 

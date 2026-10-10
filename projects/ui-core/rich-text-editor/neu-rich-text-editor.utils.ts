@@ -94,6 +94,30 @@ export function escapeRichTextAttribute(value: string): string {
   return escapeRichTextHtml(value).replaceAll('`', '&#096;');
 }
 
+function decodeRichTextAttribute(value: string): string {
+  return value.replace(
+    /&(?:#([0-9]+)|#[xX]([0-9a-fA-F]+)|(amp|quot|lt|gt|apos));/g,
+    (
+      _reference,
+      decimal: string | undefined,
+      hexadecimal: string | undefined,
+      name: string | undefined,
+    ) => {
+      if (name === 'amp') return '&';
+      if (name === 'quot') return '"';
+      if (name === 'lt') return '<';
+      if (name === 'gt') return '>';
+      if (name === 'apos') return "'";
+      const point = Number.parseInt(decimal ?? hexadecimal ?? '', hexadecimal ? 16 : 10);
+      return String.fromCodePoint(
+        point === 0 || point > 0x10ffff || (point >= 0xd800 && point <= 0xdfff)
+          ? 0xfffd
+          : point,
+      );
+    },
+  );
+}
+
 function sanitizeAttributes(tag: string, rawAttributes: string): string {
   const attributes = new Map<string, string>();
   rawAttributes.replace(
@@ -107,7 +131,7 @@ function sanitizeAttributes(tag: string, rawAttributes: string): string {
       bareValue: string,
     ) => {
       const name = rawName.toLowerCase();
-      const value = doubleQuoted ?? singleQuoted ?? bareValue ?? '';
+      const value = decodeRichTextAttribute(doubleQuoted ?? singleQuoted ?? bareValue ?? '');
 
       if (name.startsWith('on') || name === 'style' || !isAllowedAttribute(tag, name)) {
         return '';

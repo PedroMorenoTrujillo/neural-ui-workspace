@@ -1,145 +1,186 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NeuTerminalComponent, NeuTerminalLine } from './neu-terminal.component';
+import { vi } from 'vitest';
+import { NeuTerminalComponent } from './neu-terminal.component';
 
 describe('NeuTerminalComponent', () => {
   let fixture: ComponentFixture<NeuTerminalComponent>;
-  let component: NeuTerminalComponent;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [NeuTerminalComponent] }).compileComponents();
     fixture = TestBed.createComponent(NeuTerminalComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('welcome', ['Welcome']);
-    fixture.componentRef.setInput('commands', {
-      echo: ({ args }: { args: string[] }) => args.join(' '),
-      list: () => ['one', 'two'],
-      rich: () => [{ id: 0, text: 'ok', tone: 'success' }],
-      empty: () => undefined,
-      fail: () => {
-        throw new Error('failed');
-      },
-      reject: async () => {
-        throw 'rejected';
-      },
-    });
+  });
+
+  it('renders welcome and external output as plain text', () => {
+    fixture.componentRef.setInput('welcomeMessage', 'Welcome');
+    fixture.componentRef.setInput('output', [
+      { text: '<img src=x onerror=alert(1)>', kind: 'error' },
+    ]);
     fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-terminal__welcome').textContent).toContain(
+      'Welcome',
+    );
+    expect(fixture.nativeElement.querySelector('.neu-terminal__output').textContent).toContain(
+      '<img src=x',
+    );
+    expect(fixture.nativeElement.querySelector('img')).toBeNull();
   });
 
-  it('initializes welcome content and ignores invalid submissions', async () => {
-    expect(component.lines()[0]?.text).toBe('Welcome');
-    await component.submit();
-    fixture.componentRef.setInput('disabled', true);
-    component.currentInput.set('echo no');
-    await component.submit();
-    fixture.componentRef.setInput('disabled', false);
-    component.busy.set(true);
-    await component.submit();
-    component.busy.set(false);
-    expect(component.lines()).toHaveLength(1);
-  });
-
-  it('tokenizes quotes and normalizes string, array, rich and empty results', async () => {
-    for (const value of ['echo "hello world"', "echo 'two words'", 'list', 'rich', 'empty']) {
-      component.currentInput.set(value);
-      await component.submit();
-    }
-    expect(component.lines().some((line) => line.text === 'hello world')).toBe(true);
-    expect(component.lines().some((line) => line.text === 'two words')).toBe(true);
-    expect(component.lines().some((line) => line.text === 'one')).toBe(true);
-    expect(component.lines().some((line) => line.text === 'ok' && line.tone === 'success')).toBe(
-      true,
+  it('submits exactly one typed command and records it', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const emitted = vi.spyOn(component.commandSubmit, 'emit');
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'status';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    fixture.detectChanges();
+    expect(emitted).toHaveBeenCalledTimes(1);
+    expect(emitted).toHaveBeenCalledWith({ command: 'status' });
+    expect(fixture.nativeElement.querySelector('.neu-terminal__command').textContent).toContain(
+      'status',
+    );
+    fixture.componentRef.setInput('response', 'healthy');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-terminal__output').textContent).toContain(
+      'healthy',
     );
   });
 
-  it('supports built-in help, clear, unknown commands and failures', async () => {
-    fixture.componentRef.setInput('commandsLabel', 'Comandos');
-    fixture.componentRef.setInput('commandNotFoundLabel', 'Comando no encontrado');
-    component.currentInput.set('help');
-    await component.submit();
-    expect(component.lines().at(-1)?.text).toContain('Comandos:');
-    component.currentInput.set('unknown');
-    await component.submit();
-    expect(component.lines().at(-1)?.text).toBe('Comando no encontrado: unknown');
-    expect(component.lines().at(-1)?.tone).toBe('error');
-    component.currentInput.set('fail');
-    await component.submit();
-    expect(component.lines().at(-1)?.text).toBe('failed');
-    component.currentInput.set('reject');
-    await component.submit();
-    expect(component.lines().at(-1)?.text).toBe('rejected');
-    component.currentInput.set('clear');
-    await component.submit();
-    expect(component.lines()).toEqual([]);
-  });
-
-  it('provides command history in both directions', async () => {
-    component.currentInput.set('echo first');
-    await component.submit();
-    component.currentInput.set('echo second');
-    await component.submit();
-    const event = { preventDefault: vi.fn() } as unknown as Event;
-    component.navigateHistory(-1, event);
-    expect(component.currentInput()).toBe('echo second');
-    component.navigateHistory(-1, event);
-    expect(component.currentInput()).toBe('echo first');
-    component.navigateHistory(1, event);
-    component.navigateHistory(1, event);
-    expect(component.currentInput()).toBe('');
-    fixture.componentRef.setInput('welcome', ['Reset']);
+  it('provides deterministic history and never emits commands for programmatic output', () => {
     fixture.detectChanges();
-    component.navigateHistory(-1, event);
-  });
-
-  it('completes unique commands and lists ambiguous matches', () => {
-    const event = { preventDefault: vi.fn() } as unknown as Event;
-    component.currentInput.set('ec');
-    component.complete(event);
-    expect(component.currentInput()).toBe('echo ');
-    component.currentInput.set('e');
-    component.complete(event);
-    expect(component.lines().at(-1)?.text).toContain('empty');
-    component.currentInput.set('missing');
-    component.complete(event);
-    component.currentInput.set('echo value');
-    component.complete(event);
-    component.currentInput.set('');
-    component.complete(event);
-  });
-
-  it('clears only with the expected shortcut and appends non-empty lines', async () => {
-    component.append([]);
-    const plain = {
-      ctrlKey: false,
-      metaKey: false,
-      preventDefault: vi.fn(),
-    } as unknown as KeyboardEvent;
-    component.clearShortcut(plain);
-    const meta = {
-      ctrlKey: false,
-      metaKey: true,
-      preventDefault: vi.fn(),
-    } as unknown as KeyboardEvent;
-    component.clearShortcut(meta);
-    expect(component.lines()).toEqual([]);
-    const lines: NeuTerminalLine[] = [{ id: 1, text: 'manual' }];
-    component.append(lines);
+    const component = fixture.componentInstance;
+    const emitted = vi.spyOn(component.commandSubmit, 'emit');
+    component.draft.set('first');
+    component.submit();
+    component.draft.set('second');
+    component.submit();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(component.draft()).toBe('second');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    expect(component.draft()).toBe('first');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(component.draft()).toBe('second');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(component.draft()).toBe('');
+    fixture.componentRef.setInput('output', [{ text: 'external' }]);
     fixture.detectChanges();
+    expect(component.entries().filter((entry) => entry.type === 'command')).toHaveLength(2);
+    component.appendOutput('ready');
+    component.clear();
+    expect(emitted).toHaveBeenCalledTimes(2);
+    expect(component.entries().map((entry) => entry.text)).toEqual(['external']);
+  });
+
+  it('does not submit when disabled or readonly', () => {
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    const emitted = vi.spyOn(fixture.componentInstance.commandSubmit, 'emit');
+    fixture.componentInstance.draft.set('ignored');
+    fixture.componentInstance.submit();
+    expect(emitted).not.toHaveBeenCalled();
+  });
+
+  it('focuses the input, handles empty history and accepts external transcript replacement', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.focusInput();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
+    component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    component.draft.set('');
+    component.submit();
+    fixture.componentRef.setInput('output', [{ text: 'one' }, { text: 'two', kind: 'info' }]);
+    fixture.detectChanges();
+    expect(component.entries().filter((entry) => entry.type === 'output')).toHaveLength(2);
+    fixture.componentRef.setInput('readonly', true);
+    fixture.detectChanges();
+    component.draft.set('nope');
+    component.submit();
+    expect(component.entries().some((entry) => entry.text === 'nope')).toBe(false);
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    component.focusInput();
+    expect(component.disabled()).toBe(true);
+  });
+
+  it('focuses the command input through the terminal surface click binding', () => {
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.blur();
+
+    (fixture.nativeElement.querySelector('.neu-terminal') as HTMLElement).click();
+
+    expect(document.activeElement).toBe(input);
+  });
+
+  it('keeps command and incremental controlled output chronological and clears the transcript', async () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.draft.set('help');
+    component.submit();
+    fixture.componentRef.setInput('output', [{ text: 'Available commands' }]);
+    fixture.detectChanges();
+    component.draft.set('version');
+    component.submit();
+    fixture.componentRef.setInput('output', [
+      { text: 'Available commands' },
+      { text: 'NeuralUI 1.0' },
+    ]);
+    fixture.detectChanges();
+    expect(component.entries().map((entry) => entry.text)).toEqual([
+      'help',
+      'Available commands',
+      'version',
+      'NeuralUI 1.0',
+    ]);
+
+    fixture.componentRef.setInput('output', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.entries()).toEqual([]);
+  });
+
+  it('reconciles a non-prefix controlled replacement and cancels queued scrolling on destroy', async () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.draft.set('status');
+    component.submit();
+    fixture.componentRef.setInput('output', [{ text: 'old' }]);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('output', [{ text: 'replacement', kind: 'info' }]);
+    fixture.detectChanges();
+    expect(component.entries().map((entry) => entry.text)).toEqual(['status', 'replacement']);
+    fixture.destroy();
     await Promise.resolve();
-    expect(component.lines().at(-1)?.text).toBe('manual');
   });
 
-  it('wires input, submit, history, completion and clear template events', async () => {
-    const input = fixture.nativeElement.querySelector('.neu-terminal__input') as HTMLInputElement;
-    input.value = 'echo wired';
+  it('projects reconstructed applied output without retaining the previous rows', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('output', [{ text: 'first' }]);
+    fixture.detectChanges();
+    const first = component.entries();
+    fixture.componentRef.setInput('output', [{ text: 'replacement' }]);
+    fixture.detectChanges();
+    expect(component.entries().map((entry) => entry.text)).toEqual(['replacement']);
+    expect(first.map((entry) => entry.text)).toEqual(['first']);
+  });
+
+  it('does not submit or navigate history while an IME composition is active', () => {
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const emitted = vi.spyOn(component.commandSubmit, 'emit');
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = '変換';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    await Promise.resolve();
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-    component.currentInput.set('ec');
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'l', ctrlKey: true, bubbles: true }));
-    expect(component.lines()).toEqual([]);
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'l', metaKey: true, bubbles: true }));
+    component.submit();
+    expect(emitted).not.toHaveBeenCalled();
+    expect(component.draft()).toBe('変換');
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(emitted).toHaveBeenCalledOnce();
+    expect(emitted).toHaveBeenCalledWith({ command: '変換' });
   });
 });

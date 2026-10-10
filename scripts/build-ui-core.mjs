@@ -1,12 +1,16 @@
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { optimizeUiCoreClasses } from './optimize-ui-core-classes.mjs';
+import { consolidateUiCoreTable } from './consolidate-ui-core-table.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = dirname(__dirname);
 const distPackageJsonPath = join(workspaceRoot, 'dist', 'neural-ui', 'core', 'package.json');
 const distPackageRoot = dirname(distPackageJsonPath);
+const rootLicensePath = join(workspaceRoot, 'LICENSE');
+const distLicensePath = join(distPackageRoot, 'LICENSE');
 const distNpmIgnorePath = join(distPackageRoot, '.npmignore');
 const distStylesEntryPath = join(distPackageRoot, 'styles.scss');
 const isWatchMode = process.argv.includes('--watch');
@@ -102,6 +106,14 @@ function patchDistPackageJson() {
   if (existsSync(distNpmIgnorePath)) {
     rmSync(distNpmIgnorePath);
   }
+
+  if (
+    existsSync(rootLicensePath) &&
+    (!existsSync(distLicensePath) ||
+      readFileSync(distLicensePath, 'utf8') !== readFileSync(rootLicensePath, 'utf8'))
+  ) {
+    copyFileSync(rootLicensePath, distLicensePath);
+  }
 }
 
 const child = spawn(
@@ -117,9 +129,18 @@ const patchInterval = setInterval(() => {
   patchDistPackageJson();
 }, 500);
 
-child.on('exit', (code) => {
+child.on('exit', async (code) => {
   clearInterval(patchInterval);
   patchDistPackageJson();
+  try {
+    if (code === 0 && !isWatchMode) {
+      await consolidateUiCoreTable(distPackageRoot);
+      optimizeUiCoreClasses(distPackageRoot);
+    }
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
   process.exit(code ?? 0);
 });
 

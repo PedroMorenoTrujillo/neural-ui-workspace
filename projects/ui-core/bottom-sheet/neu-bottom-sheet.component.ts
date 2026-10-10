@@ -1,20 +1,27 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   HostListener,
   ViewEncapsulation,
+  effect,
+  afterRenderEffect,
+  inject,
   input,
   output,
 } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconX as iconX } from '@neural-ui/core/internal';
+import { NeuFocusTrapDirective, NeuModalFocusDirective } from '@neural-ui/core/focus-trap';
+import { NeuCloseReason, NeuCloseRequest } from '@neural-ui/core/foundation';
+import { InternalNeuOverlayStack } from '@neural-ui/core/internal';
 
 export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
 
 @Component({
   selector: 'neu-bottom-sheet',
-  imports: [NeuButtonComponent],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent, NeuFocusTrapDirective, NeuModalFocusDirective],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-bottom-sheet-host',
     '[class.neu-bottom-sheet-host--open]': 'open()',
@@ -22,20 +29,22 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
   template: `
     @if (open()) {
       @if (backdrop()) {
-        <button
+        <div
           class="neu-bottom-sheet__backdrop"
-          type="button"
-          [attr.aria-label]="closeLabel()"
-          [disabled]="disableClose()"
-          (click)="requestClose()"
-        ></button>
+          aria-hidden="true"
+          (click)="requestClose('outside', $event)"
+        ></div>
       }
       <section
         class="neu-bottom-sheet"
+        neuFocusTrap
+        neuModalFocus
         [class.neu-bottom-sheet--full]="size() === 'full'"
+        [neuModalFocusInitial]="initialFocus()"
+        (neuModalFocusEscape)="requestClose('escape', $event)"
         role="dialog"
         aria-modal="true"
-        [attr.aria-label]="ariaLabel() || title()"
+        [attr.aria-label]="ariaLabel() || title() || 'Bottom sheet'"
       >
         <div class="neu-bottom-sheet__handle" aria-hidden="true"></div>
         @if (title()) {
@@ -45,14 +54,13 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
               neu-button
               class="neu-bottom-sheet__close"
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideX"
               [iconOnly]="true"
               [ariaLabel]="closeLabel()"
               [disabled]="disableClose()"
-              (click)="requestClose()"
-            ></button>
+              (click)="requestClose('action', $event)"
+            ><neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" size="1em" /></button>
           </header>
         }
         <div class="neu-bottom-sheet__body"><ng-content /></div>
@@ -62,6 +70,8 @@ export type NeuBottomSheetSize = 'sm' | 'md' | 'lg' | 'full';
   styleUrl: './neu-bottom-sheet.component.scss',
 })
 export class NeuBottomSheetComponent {
+  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly iconX = iconX;
   readonly open = input(false);
   readonly title = input('');
   readonly ariaLabel = input('');
@@ -69,18 +79,53 @@ export class NeuBottomSheetComponent {
   readonly backdrop = input(true);
   readonly disableClose = input(false);
   readonly size = input<NeuBottomSheetSize>('md');
+  readonly initialFocus = input('first');
+  readonly closeRequested = output<NeuCloseRequest>();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly overlayStack = inject(InternalNeuOverlayStack);
+
+  private eventPanelVisible = false;
+  private lifecycleInitialized = false;
+  /** Panel mounted in the browser, independently of the trigger source. */
+  readonly opened = output<void>();
+  /** Panel unmounted after an applied post-init transition. Silent on destroy. */
   readonly closed = output<void>();
 
-  requestClose(): void {
-    if (!this.disableClose()) {
-      this.closed.emit();
-    }
+  constructor() {
+    afterRenderEffect(() => {
+      const visible = this.open();
+      if (!this.lifecycleInitialized) {
+        this.lifecycleInitialized = true;
+        this.eventPanelVisible = visible;
+        return;
+      }
+      if (visible === this.eventPanelVisible) return;
+      this.eventPanelVisible = visible;
+      if (visible) this.opened.emit();
+      else this.closed.emit();
+    });
+    effect((onCleanup) => {
+      if (!this.open()) return;
+      onCleanup(this.overlayStack.activate(this));
+    });
   }
 
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (this.open()) {
-      this.requestClose();
-    }
+  requestClose(reason: NeuCloseReason = 'programmatic-command', originalEvent?: Event): void {
+    if (
+      this.disableClose() ||
+      this.destroyRef.destroyed ||
+      !this.open() ||
+      !this.overlayStack.isTop(this)
+    )
+      return;
+    this.closeRequested.emit({ reason, ...(originalEvent ? { originalEvent } : {}) });
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onDocumentEscape(event: Event): void {
+    if (event.defaultPrevented || !this.open() || !this.overlayStack.isTop(this)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.requestClose('escape', event);
   }
 }

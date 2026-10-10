@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { NeuSelectComponent } from '@neural-ui/core/select';
 import { NeuPaginationComponent } from './neu-pagination.component';
-import { Directionality } from '@angular/cdk/bidi';
 
 @Component({
   template: `<neu-pagination
@@ -23,6 +24,7 @@ describe('NeuPaginationComponent', () => {
   let host: TestHostComponent;
 
   beforeEach(async () => {
+    document.documentElement.lang = 'en';
     await TestBed.configureTestingModule({ imports: [TestHostComponent] }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
     host = fixture.componentInstance;
@@ -49,24 +51,6 @@ describe('NeuPaginationComponent', () => {
     const active = df.nativeElement.querySelector('[class*="--active"], [aria-current="page"]');
     expect(active).toBeTruthy();
     expect(active.textContent.trim()).toBe('3');
-  });
-
-  it('uses localizable accessible navigation and page labels', async () => {
-    const df = TestBed.createComponent(NeuPaginationComponent);
-    df.componentRef.setInput('total', 20);
-    df.componentRef.setInput('ariaLabel', 'Paginación de resultados');
-    df.componentRef.setInput('previousPageLabel', 'Página anterior');
-    df.componentRef.setInput('nextPageLabel', 'Página siguiente');
-    df.componentRef.setInput('pageLabel', 'Página');
-    df.detectChanges();
-    await df.whenStable();
-
-    const nav = df.nativeElement.querySelector('nav') as HTMLElement;
-    const buttons = nav.querySelectorAll('button');
-    expect(nav.getAttribute('aria-label')).toBe('Paginación de resultados');
-    expect(buttons[0]?.getAttribute('aria-label')).toBe('Página anterior');
-    expect(buttons[1]?.getAttribute('aria-label')).toBe('Página 1');
-    expect(buttons[buttons.length - 1]?.getAttribute('aria-label')).toBe('Página siguiente');
   });
 
   it('should emit pageChange when next page is clicked', () => {
@@ -158,6 +142,15 @@ describe('NeuPaginationComponent', () => {
     expect(df.componentInstance.totalPages()).toBe(5);
   });
 
+  it('normalizes non-finite totals and page sizes to a single safe page', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', Number.NaN);
+    df.componentRef.setInput('pageSize', Number.POSITIVE_INFINITY);
+    df.detectChanges();
+
+    expect(df.componentInstance.totalPages()).toBe(1);
+  });
+
   it('pages() computes visible page numbers', () => {
     const df = TestBed.createComponent(NeuPaginationComponent);
     df.componentRef.setInput('total', 30);
@@ -193,6 +186,106 @@ describe('NeuPaginationComponent', () => {
     expect(pages).toEqual([]);
   });
 
+  it('keeps page and page-size applied state when the parent rejects proposals', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', 100);
+    df.componentRef.setInput('page', 2);
+    df.componentRef.setInput('pageSize', 10);
+    df.detectChanges();
+    const pages: number[] = [];
+    const sizes: number[] = [];
+    df.componentInstance.pageChange.subscribe((value) => pages.push(value));
+    df.componentInstance.pageSizeChange.subscribe((value) => sizes.push(value));
+
+    df.componentInstance.go(3);
+    df.componentInstance.changePageSize(20);
+    df.detectChanges();
+
+    expect(pages).toEqual([3, 1]);
+    expect(sizes).toEqual([20]);
+    expect(df.componentInstance.page()).toBe(2);
+    expect(df.componentInstance.pageSize()).toBe(10);
+    expect(df.nativeElement.querySelector('[aria-current="page"]')?.textContent.trim()).toBe('2');
+  });
+
+  it('renders an optional Neural page-size selector and emits deterministic state proposals once', () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('total', 95);
+    df.componentRef.setInput('page', 5);
+    df.componentRef.setInput('pageSize', 10);
+    df.componentRef.setInput('pageSizeOptions', [10, 20, 20, 0]);
+    df.componentRef.setInput('pageSizeAriaLabel', 'Rows per page');
+    df.detectChanges();
+    const sizes: number[] = [];
+    const pages: number[] = [];
+    df.componentInstance.pageSizeChange.subscribe((value) => sizes.push(value));
+    df.componentInstance.pageChange.subscribe((value) => pages.push(value));
+    expect(df.nativeElement.querySelector('select')).toBeNull();
+    const selectDebug = df.debugElement.query(By.directive(NeuSelectComponent));
+    const select = selectDebug.componentInstance as NeuSelectComponent;
+    const trigger = selectDebug.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    expect(trigger.getAttribute('aria-label')).toBe('Rows per page');
+    expect(select.options()).toHaveLength(2);
+
+    select.selectOption(select.options()[1]);
+    expect(sizes).toEqual([20]);
+    expect(pages).toEqual([3]);
+    df.detectChanges();
+    expect(df.componentInstance['pageSizeControl'].value).toBe(10);
+    expect(select.value()).toBe(10);
+    df.componentInstance.changePageSize(10);
+    expect(sizes).toEqual([20]);
+  });
+
+  it.each([
+    ['es', 'Paginación', 'Elementos por página', 'Página anterior', 'Página 1', 'Página siguiente'],
+    ['en', 'Pagination', 'Items per page', 'Previous page', 'Page 1', 'Next page'],
+  ])(
+    'renders localized public labels for %s',
+    (locale, navLabel, sizeLabel, previousLabel, pageLabel, nextLabel) => {
+      document.documentElement.lang = locale;
+      const df = TestBed.createComponent(NeuPaginationComponent);
+      df.componentRef.setInput('total', 30);
+      df.componentRef.setInput('pageSizeOptions', [10, 20]);
+      df.detectChanges();
+
+      const nav = df.nativeElement.querySelector('.neu-pagination') as HTMLElement;
+      const selectDebug = df.debugElement.query(By.directive(NeuSelectComponent));
+      const selectTrigger = selectDebug.nativeElement.querySelector(
+        '.neu-select__trigger',
+      ) as HTMLElement;
+      const buttons = nav.querySelectorAll('button');
+
+      expect(nav.getAttribute('aria-label')).toBe(navLabel);
+      expect(selectTrigger.getAttribute('aria-label')).toBe(sizeLabel);
+      expect(buttons[0].getAttribute('aria-label')).toBe(previousLabel);
+      expect(nav.querySelector('[aria-current="page"]')?.getAttribute('aria-label')).toBe(
+        pageLabel,
+      );
+      expect(buttons[buttons.length - 1].getAttribute('aria-label')).toBe(nextLabel);
+    },
+  );
+
+  it('preserves a custom page-size label and reacts to an active document-locale change', async () => {
+    const df = TestBed.createComponent(NeuPaginationComponent);
+    df.componentRef.setInput('pageSizeOptions', [10, 20]);
+    df.componentRef.setInput('pageSizeAriaLabel', 'Rows per page');
+    df.detectChanges();
+
+    const trigger = () =>
+      df.debugElement
+        .query(By.directive(NeuSelectComponent))
+        .nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    expect(trigger().getAttribute('aria-label')).toBe('Rows per page');
+
+    df.componentRef.setInput('pageSizeAriaLabel', 'Items per page');
+    document.documentElement.lang = 'es';
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    df.detectChanges();
+
+    expect(trigger().getAttribute('aria-label')).toBe('Elementos por página');
+  });
+
   it('clicking the previous button from page 2 should emit page 1', async () => {
     const df = TestBed.createComponent(NeuPaginationComponent);
     df.componentRef.setInput('total', 100);
@@ -208,22 +301,5 @@ describe('NeuPaginationComponent', () => {
     df.detectChanges();
 
     expect(emitted).toEqual([1]);
-  });
-
-  it('mirrors previous and next chevrons when direction changes dynamically', () => {
-    const df = TestBed.createComponent(NeuPaginationComponent);
-    df.componentRef.setInput('total', 20);
-    df.detectChanges();
-
-    const chevrons = () =>
-      Array.from(
-        df.nativeElement.querySelectorAll('polyline') as NodeListOf<SVGPolylineElement>,
-      ).map((node) => node.getAttribute('points'));
-    expect(chevrons()).toEqual(['15 18 9 12 15 6', '9 18 15 12 9 6']);
-
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-    df.detectChanges();
-
-    expect(chevrons()).toEqual(['9 18 15 12 9 6', '15 18 9 12 15 6']);
   });
 });

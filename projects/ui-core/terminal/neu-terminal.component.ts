@@ -1,233 +1,227 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
   ElementRef,
+  OnChanges,
+  SimpleChanges,
   ViewEncapsulation,
-  effect,
   inject,
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 
-export type NeuTerminalTone = 'default' | 'success' | 'warning' | 'error' | 'muted';
-
 export interface NeuTerminalLine {
-  id: number;
   text: string;
-  tone?: NeuTerminalTone;
-  command?: boolean;
+  kind?: 'output' | 'error' | 'info';
 }
 
-export interface NeuTerminalCommandEvent {
+export interface NeuTerminalCommand {
   command: string;
-  args: string[];
 }
 
-export type NeuTerminalCommandHandler = (
-  event: NeuTerminalCommandEvent,
-) =>
-  | string
-  | string[]
-  | NeuTerminalLine[]
-  | void
-  | Promise<string | string[] | NeuTerminalLine[] | void>;
-
-let terminalLineId = 0;
-
+/**
+ * A terminal UI surface. It never evaluates a command: consumers receive a
+ * command event and decide whether and how to append safe, plain-text output.
+ */
 @Component({
   selector: 'neu-terminal',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-terminal-host' },
   template: `
-    <section class="neu-terminal" [attr.aria-label]="ariaLabel()" [attr.aria-busy]="busy()">
-      @if (title()) {
-        <header class="neu-terminal__header">
-          <span aria-hidden="true">● ● ●</span><strong>{{ title() }}</strong>
-        </header>
+    <section #terminal class="neu-terminal" [attr.aria-label]="ariaLabel()" (click)="focusInput()">
+      @if (welcomeMessage()) {
+        <p class="neu-terminal__welcome">{{ welcomeMessage() }}</p>
       }
       <div
-        #output
-        class="neu-terminal__output"
+        class="neu-terminal__transcript"
         role="log"
         aria-live="polite"
         aria-relevant="additions text"
-        [attr.aria-label]="outputAriaLabel()"
       >
-        @for (line of lines(); track line.id) {
-          <div
-            class="neu-terminal__line neu-terminal__line--{{ line.tone || 'default' }}"
-            [class.is-command]="line.command"
-          >
-            @if (line.command) {
-              <span class="neu-terminal__prompt" aria-hidden="true">{{ prompt() }}</span>
-            }
-            <span>{{ line.text }}</span>
-          </div>
-        }
-        @if (busy()) {
-          <div class="neu-terminal__line neu-terminal__line--muted">{{ busyLabel() }}</div>
+        @for (entry of entries(); track entry.id) {
+          @if (entry.type === 'command') {
+            <div class="neu-terminal__command">
+              <span class="neu-terminal__prompt">{{ prompt() }}</span
+              ><span>{{ entry.text }}</span>
+            </div>
+          } @else {
+            <div
+              class="neu-terminal__output"
+              [class]="'neu-terminal__output neu-terminal__output--' + entry.kind"
+            >
+              {{ entry.text }}
+            </div>
+          }
         }
       </div>
-      <label class="neu-terminal__input-row">
+      <div class="neu-terminal__input-row">
         <span class="neu-terminal__prompt" aria-hidden="true">{{ prompt() }}</span>
-        <span class="neu-terminal__sr-only">{{ inputLabel() }}</span>
         <input
+          #commandInput
           class="neu-terminal__input"
           type="text"
           autocomplete="off"
+          autocapitalize="off"
           spellcheck="false"
-          [disabled]="disabled() || busy()"
-          [value]="currentInput()"
-          [placeholder]="placeholder()"
-          (input)="currentInput.set($any($event.target).value)"
-          (keydown.enter)="submit()"
-          (keydown.arrowup)="navigateHistory(-1, $event)"
-          (keydown.arrowdown)="navigateHistory(1, $event)"
-          (keydown.tab)="complete($event)"
-          (keydown.control.l)="clearShortcut($event)"
-          (keydown.meta.l)="clearShortcut($event)"
+          [disabled]="disabled()"
+          [readOnly]="readonly()"
+          [attr.aria-label]="inputAriaLabel()"
+          [value]="draft()"
+          (input)="draft.set($any($event.target).value)"
+          (compositionstart)="onCompositionStart()"
+          (compositionend)="onCompositionEnd()"
+          (keydown)="onKeydown($event)"
         />
-      </label>
+      </div>
     </section>
   `,
   styleUrl: './neu-terminal.component.scss',
 })
-export class NeuTerminalComponent {
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  readonly title = input('Terminal');
+export class NeuTerminalComponent implements OnChanges {
+  readonly commandInput = viewChild.required<ElementRef<HTMLInputElement>>('commandInput');
+  private readonly terminal = viewChild.required<ElementRef<HTMLElement>>('terminal');
+  private readonly destroyRef = inject(DestroyRef);
+  readonly welcomeMessage = input('');
   readonly prompt = input('$');
-  readonly placeholder = input('Type a command');
-  readonly ariaLabel = input('Interactive terminal');
-  readonly outputAriaLabel = input('Terminal output');
-  readonly inputLabel = input('Command');
-  readonly busyLabel = input('Working…');
-  readonly commandsLabel = input('Commands');
-  readonly commandNotFoundLabel = input('Command not found');
+  /** Adds a safe response after the latest command. */
+  readonly response = input<string | undefined>(undefined);
+  readonly ariaLabel = input('Terminal');
+  readonly inputAriaLabel = input('Terminal command');
   readonly disabled = input(false);
-  readonly welcome = input<string[]>([]);
-  readonly commands = input<Record<string, NeuTerminalCommandHandler>>({});
-  readonly command = output<NeuTerminalCommandEvent>();
-  readonly clear = output<void>();
-  readonly linesChange = output<NeuTerminalLine[]>();
+  readonly readonly = input(false);
+  /** Replaces the externally-controlled transcript without creating command events. */
+  readonly output = input<readonly NeuTerminalLine[]>([]);
+  readonly commandSubmit = output<NeuTerminalCommand>();
+  private readonly localEntries = signal<LocalEntry[]>([]);
+  /** Applied output is projected, never copied into a second persistent transcript owner. */
+  readonly entries = computed<TerminalEntry[]>(() => {
+    const external = this.output();
+    const local = this.localEntries();
+    const projected: TerminalEntry[] = [];
+    let localIndex = 0;
+    for (let index = 0; index <= external.length; index++) {
+      while (localIndex < local.length && local[localIndex].afterOutput <= index) {
+        projected.push(local[localIndex++]);
+      }
+      if (index < external.length) {
+        const line = external[index];
+        projected.push({
+          id: -index - 1,
+          type: 'output',
+          text: line.text,
+          kind: line.kind ?? 'output',
+        });
+      }
+    }
+    while (localIndex < local.length) projected.push(local[localIndex++]);
+    return projected;
+  });
+  readonly draft = signal('');
+  private history: string[] = [];
+  private historyIndex = -1;
+  private previousOutputLength = 0;
+  private isComposing = false;
+  private nextId = 0;
 
-  readonly lines = signal<NeuTerminalLine[]>([]);
-  readonly currentInput = signal('');
-  readonly busy = signal(false);
-  private readonly history = signal<string[]>([]);
-  private historyIndex = 0;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['output']) {
+      const length = this.output().length;
+      if (!length && this.previousOutputLength) this.localEntries.set([]);
+      this.previousOutputLength = length;
+      this.scrollToEnd();
+    }
+    if (
+      changes['response'] &&
+      this.response() &&
+      this.localEntries().some((entry) => entry.type === 'command')
+    ) {
+      this.appendOutput(this.response()!);
+    }
+  }
 
-  constructor() {
-    effect(() => {
-      this.lines.set(this.welcome().map((text) => this.createLine(text, 'muted')));
-      this.history.set([]);
-      this.historyIndex = 0;
-    });
-  }
-
-  async submit(): Promise<void> {
-    const raw = this.currentInput().trim();
-    if (!raw || this.disabled() || this.busy()) return;
-    const [name = '', ...args] = this.tokenize(raw);
-    const event = { command: name, args };
-    this.append([this.createLine(raw, 'default', true)]);
-    this.history.update((items) => [...items.filter((item) => item !== raw), raw]);
-    this.historyIndex = this.history().length;
-    this.currentInput.set('');
-    if (name === 'clear') {
-      this.clearOutput();
-      return;
-    }
-    if (name === 'help' && !this.commands()[name]) {
-      const names = Object.keys(this.commands()).sort();
-      const commandNames = names.length ? ['clear', 'help', ...names] : ['clear', 'help'];
-      this.append([
-        this.createLine(`${this.commandsLabel()}: ${commandNames.join(', ')}`, 'muted'),
-      ]);
-      return;
-    }
-    this.command.emit(event);
-    const handler = this.commands()[name];
-    if (!handler) {
-      this.append([this.createLine(`${this.commandNotFoundLabel()}: ${name}`, 'error')]);
-      return;
-    }
-    try {
-      this.busy.set(true);
-      const result = await handler(event);
-      this.append(this.normalizeResult(result));
-    } catch (error) {
-      this.append([
-        this.createLine(error instanceof Error ? error.message : String(error), 'error'),
-      ]);
-    } finally {
-      this.busy.set(false);
-    }
-  }
-  clearOutput(): void {
-    this.lines.set([]);
-    this.linesChange.emit([]);
-    this.clear.emit();
-  }
-  append(lines: NeuTerminalLine[]): void {
-    if (!lines.length) return;
-    this.lines.update((current) => [...current, ...lines]);
-    this.linesChange.emit(this.lines());
-    queueMicrotask(() => {
-      const viewport = this.host.nativeElement.querySelector<HTMLElement>('.neu-terminal__output');
-      if (viewport) viewport.scrollTop = viewport.scrollHeight;
-    });
-  }
-  navigateHistory(direction: -1 | 1, event: Event): void {
-    event.preventDefault();
-    const history = this.history();
-    if (!history.length) return;
-    this.historyIndex = Math.max(0, Math.min(history.length, this.historyIndex + direction));
-    this.currentInput.set(
-      this.historyIndex === history.length ? '' : (history[this.historyIndex] ?? ''),
-    );
-  }
-  complete(event: Event): void {
-    const query = this.currentInput().trim();
-    if (!query || query.includes(' ')) return;
-    const matches = ['clear', 'help', ...Object.keys(this.commands())].filter((name) =>
-      name.startsWith(query),
-    );
-    if (!matches.length) return;
-    event.preventDefault();
-    if (matches.length === 1) this.currentInput.set(matches[0] + ' ');
-    else this.append([this.createLine(matches.join('  '), 'muted')]);
-  }
-  clearShortcut(event: Event): void {
-    const keyboardEvent = event as KeyboardEvent;
-    if (keyboardEvent.ctrlKey || keyboardEvent.metaKey) {
+  onKeydown(event: KeyboardEvent): void {
+    if (this.isComposing || event.isComposing || event.keyCode === 229) return;
+    if (event.key === 'Enter') {
       event.preventDefault();
-      this.clearOutput();
+      this.submit();
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.selectHistory(-1);
+      return;
+    }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.selectHistory(1);
     }
   }
-  private normalizeResult(result: string | string[] | NeuTerminalLine[] | void): NeuTerminalLine[] {
-    if (result == null) return [];
-    if (typeof result === 'string') return [this.createLine(result)];
-    return result.map((line) =>
-      typeof line === 'string'
-        ? this.createLine(line)
-        : { ...line, id: line.id || ++terminalLineId },
-    );
+
+  onCompositionStart(): void {
+    this.isComposing = true;
   }
-  private createLine(
-    text: string,
-    tone: NeuTerminalTone = 'default',
-    command = false,
-  ): NeuTerminalLine {
-    return { id: ++terminalLineId, text, tone, command };
+
+  onCompositionEnd(): void {
+    this.isComposing = false;
   }
-  private tokenize(command: string): string[] {
-    return (
-      command
-        .match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)
-        ?.map((part) => part.replace(/^(?:"|')|(?:"|')$/g, '')) ?? []
-    );
+
+  submit(): void {
+    if (this.disabled() || this.readonly() || this.isComposing) return;
+    const command = this.draft().trim();
+    if (!command) return;
+    this.localEntries.update((entries) => [
+      ...entries,
+      { id: ++this.nextId, type: 'command', text: command, afterOutput: this.output().length },
+    ]);
+    this.history.push(command);
+    this.historyIndex = this.history.length;
+    this.draft.set('');
+    this.commandSubmit.emit({ command });
+    this.scrollToEnd();
   }
+
+  appendOutput(text: string, kind: NeuTerminalLine['kind'] = 'output'): void {
+    this.localEntries.update((entries) => [
+      ...entries,
+      { id: ++this.nextId, type: 'output', text, kind, afterOutput: this.output().length },
+    ]);
+    this.scrollToEnd();
+  }
+
+  clear(): void {
+    this.localEntries.set([]);
+  }
+
+  focusInput(): void {
+    if (!this.disabled()) this.commandInput().nativeElement.focus();
+  }
+
+  private selectHistory(direction: -1 | 1): void {
+    if (!this.history.length) return;
+    this.historyIndex = Math.max(0, Math.min(this.history.length, this.historyIndex + direction));
+    this.draft.set(this.history[this.historyIndex] ?? '');
+  }
+
+  private scrollToEnd(): void {
+    queueMicrotask(() => {
+      if (this.destroyRef.destroyed) return;
+      const element = this.terminal().nativeElement;
+      element.scrollTop = element.scrollHeight;
+    });
+  }
+}
+
+interface TerminalEntry {
+  id: number;
+  type: 'command' | 'output';
+  text: string;
+  kind?: NeuTerminalLine['kind'];
+}
+
+interface LocalEntry extends TerminalEntry {
+  afterOutput: number;
 }

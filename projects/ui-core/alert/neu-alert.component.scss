@@ -1,9 +1,9 @@
 .neu-alert {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border-radius: var(--neu-radius-md, 8px);
+  border-radius: var(--neu-radius, 8px);
   border: 1px solid transparent;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -11,6 +11,12 @@
 
   &--dismissed {
     display: none;
+  }
+
+  &--neutral {
+    background: var(--neu-surface-2);
+    border-color: var(--neu-border);
+    color: var(--neu-text);
   }
 
   &--info {
@@ -31,7 +37,7 @@
     color: var(--neu-alert-warning-text, #b45309);
   }
 
-  &--error {
+  &--danger {
     background: var(--neu-alert-error-bg, #fef2f2);
     border-color: var(--neu-alert-error-border, #fecaca);
     color: var(--neu-alert-error-text, #b91c1c);
@@ -40,13 +46,21 @@
   &--outline {
     background: transparent;
   }
+
+  &--with-title {
+    align-items: flex-start;
+  }
 }
 
 /* ── Icon ──────────────────────────────────────────────────────── */
 .neu-alert__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   font-size: 1.1em;
-  line-height: 1.5;
+  line-height: 1;
+  block-size: 1.3125rem;
   font-style: normal;
 }
 
@@ -69,7 +83,6 @@
 /* ── Close button ───────────────────────────────────────────────── */
 .neu-alert__close {
   flex-shrink: 0;
-  align-self: flex-start;
   color: inherit;
   opacity: 0.78;
   --neu-button-ghost-hover-bg: var(--neu-alert-dismiss-hover-bg, rgba(0, 0, 0, 0.08));
@@ -81,4 +94,8 @@
   &:focus-visible {
     opacity: 1;
   }
+}
+
+.neu-alert--with-title .neu-alert__close {
+  align-self: flex-start;
 }

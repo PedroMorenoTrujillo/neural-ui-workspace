@@ -1,0 +1,60 @@
+{
+  "checkpoint": "N2-011D",
+  "capturedAt": "2026-09-20T09:06:07.166Z",
+  "metrics": {
+    "keysMembership10k": {
+      "samples": 15,
+      "p50Ms": 2.987,
+      "p95Ms": 4.971
+    },
+    "rows10kKeys5k": {
+      "samples": 15,
+      "p50Ms": 3.05,
+      "p95Ms": 4.721
+    },
+    "toggleOneKey": {
+      "samples": 15,
+      "p50Ms": 3.41,
+      "p95Ms": 4.536
+    },
+    "headerState10k": {
+      "samples": 15,
+      "p50Ms": 3.112,
+      "p95Ms": 5.093
+    },
+    "allMatchingExclusions1k": {
+      "samples": 15,
+      "p50Ms": 5.367,
+      "p95Ms": 6.432
+    },
+    "offscreenSelectionPageChange": {
+      "samples": 15,
+      "p50Ms": 0.851,
+      "p95Ms": 1.724
+    },
+    "columns100Projection": {
+      "samples": 15,
+      "p50Ms": 0.041,
+      "p95Ms": 0.096
+    },
+    "visibilityProjection100": {
+      "samples": 15,
+      "p50Ms": 0.043,
+      "p95Ms": 0.207
+    },
+    "reorderProposal100": {
+      "samples": 15,
+      "p50Ms": 0.031,
+      "p95Ms": 0.083
+    },
+    "resizeProposal100": {
+      "samples": 15,
+      "p50Ms": 0.003,
+      "p95Ms": 0.008
+    },
+    "repeatedUnchangedReadMs": 0.256,
+    "pipelineComputations": 1,
+    "selectionComputations": 2,
+    "layoutComputations": 2
+  }
+}

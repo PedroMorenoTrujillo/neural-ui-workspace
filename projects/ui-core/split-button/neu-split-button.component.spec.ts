@@ -1,11 +1,30 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuSplitButtonComponent, NeuSplitButtonAction } from './neu-split-button.component';
+import {
+  NeuSplitButtonAction,
+  NeuSplitButtonComponent,
+  NeuSplitButtonItemDirective,
+} from './neu-split-button.component';
 
 const ACTIONS: NeuSplitButtonAction[] = [
   { id: 'save', label: 'Guardar borrador' },
   { id: 'schedule', label: 'Programar' },
   { id: 'delete', label: 'Eliminar', disabled: true },
 ];
+
+@Component({
+  imports: [NeuSplitButtonComponent, NeuSplitButtonItemDirective],
+  template: `
+    <neu-split-button label="Publicar" [actions]="actions">
+      <ng-template neuSplitButtonItem let-action>
+        <span class="custom-split-action">custom:{{ action.id }}</span>
+      </ng-template>
+    </neu-split-button>
+  `,
+})
+class SplitButtonTemplateHostComponent {
+  readonly actions = ACTIONS;
+}
 
 describe('NeuSplitButtonComponent', () => {
   beforeEach(async () => {
@@ -239,15 +258,17 @@ describe('NeuSplitButtonComponent', () => {
     expect(fixture.componentInstance.isDisabled()).toBe(false);
   });
 
-  it('variant input produces the correct CSS class', async () => {
+  it('tone and variant inputs produce the correct CSS classes', async () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
-    fixture.componentRef.setInput('variant', 'danger');
+    fixture.componentRef.setInput('tone', 'danger');
+    fixture.componentRef.setInput('variant', 'solid');
     fixture.detectChanges();
     await fixture.whenStable();
-    // The variant class is applied to the main button inside, not to the host
+    // The visual-axis classes are applied to the main button inside, not to the host.
     expect(fixture.nativeElement.querySelector('.neu-button--danger')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.neu-button--solid')).toBeTruthy();
   });
 
   it('action with divider=true renders a separator in the dropdown', async () => {
@@ -268,28 +289,43 @@ describe('NeuSplitButtonComponent', () => {
     expect(sep).toBeTruthy();
   });
 
-  it('chevronClasses should include the variant CSS class', () => {
-    // chevronClasses debe incluir la clase CSS de la variante
-    // chevronClasses must include the variant CSS class
+  it('A1 Button applies tone and variant classes to the menu trigger', () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
-    fixture.componentRef.setInput('variant', 'secondary');
+    fixture.componentRef.setInput('tone', 'neutral');
+    fixture.componentRef.setInput('variant', 'solid');
     fixture.detectChanges();
-    const comp = fixture.componentInstance as any;
-    expect(comp.chevronClasses()).toContain('neu-button--secondary');
+    const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
+    expect(trigger.classList).toContain('neu-button--neutral');
+    expect(trigger.classList).toContain('neu-button--solid');
   });
 
-  it('chevronClasses should include size modifier', () => {
-    // chevronClasses debe incluir el modificador de tamaño
-    // chevronClasses must include the size modifier
+  it('A1 Button applies the size modifier to the menu trigger', () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
     fixture.componentRef.setInput('size', 'sm');
     fixture.detectChanges();
-    const comp = fixture.componentInstance as any;
-    expect(comp.chevronClasses()).toContain('sm');
+    const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
+    expect(trigger.classList).toContain('neu-button--sm');
+  });
+
+  it('uses A1 Button semantics and links the menu trigger to its panel', async () => {
+    const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Save');
+    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.detectChanges();
+    const primary = fixture.nativeElement.querySelector('.neu-split-button__main') as HTMLButtonElement;
+    const trigger = fixture.nativeElement.querySelector('.neu-split-button__chevron') as HTMLButtonElement;
+    expect(primary.classList).toContain('neu-button');
+    expect(trigger.classList).toContain('neu-button--icon-only');
+    expect(trigger.querySelector('neu-icon-outlet')).toBeTruthy();
+    const targetId = trigger.getAttribute('aria-controls');
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.getElementById(targetId!)).toBeTruthy();
   });
 
   it('clicking a dropdown action button from the DOM should emit actionClick', async () => {
@@ -353,96 +389,122 @@ describe('NeuSplitButtonComponent', () => {
     expect(fixture.componentInstance.isOpen()).toBe(false);
   });
 
-  it('opens with ArrowDown, focuses the first enabled action and supports roving focus', async () => {
+  it('opens with ArrowDown, skips disabled actions, and restores the trigger on Escape', async () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
     fixture.detectChanges();
-    const chevron = fixture.nativeElement.querySelector(
+    const trigger = fixture.nativeElement.querySelector(
       '.neu-split-button__chevron',
     ) as HTMLButtonElement;
-
-    chevron.dispatchEvent(
+    trigger.focus();
+    trigger.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
     );
     fixture.detectChanges();
     await fixture.whenStable();
     const actions = Array.from(
-      document.querySelectorAll('.neu-split-button__dropdown-item:not(:disabled)'),
+      document.querySelectorAll('.neu-split-button__dropdown-item'),
     ) as HTMLButtonElement[];
-    expect(fixture.componentInstance.isOpen()).toBe(true);
     expect(document.activeElement).toBe(actions[0]);
-    expect(actions.map((action) => action.tabIndex)).toEqual([0, -1]);
-
     actions[0].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
     );
     expect(document.activeElement).toBe(actions[1]);
     actions[1].dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
     );
-    expect(document.activeElement).toBe(actions[0]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
   });
 
-  it('opens on the last action with ArrowUp and Escape restores chevron focus', async () => {
+  it('renders the consumer action template with the selected action context', async () => {
+    const fixture = TestBed.createComponent(SplitButtonTemplateHostComponent);
+    fixture.detectChanges();
+    const splitButton = fixture.nativeElement.querySelector(
+      'neu-split-button',
+    ) as HTMLElement;
+    splitButton.querySelector<HTMLButtonElement>('.neu-split-button__chevron')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const customActions = document.querySelectorAll('.custom-split-action');
+    expect(customActions).toHaveLength(3);
+    expect(customActions[1].textContent?.trim()).toBe('custom:schedule');
+  });
+
+  it('opens from ArrowUp at the last eligible action and activates it with Enter', async () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
     fixture.componentRef.setInput('label', 'Publicar');
     fixture.componentRef.setInput('actions', ACTIONS);
+    const emitted: NeuSplitButtonAction[] = [];
+    fixture.componentInstance.actionClick.subscribe((action) => emitted.push(action));
     fixture.detectChanges();
-    const chevron = fixture.nativeElement.querySelector(
+    const trigger = fixture.nativeElement.querySelector(
       '.neu-split-button__chevron',
     ) as HTMLButtonElement;
 
-    chevron.dispatchEvent(
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(fixture.componentInstance.isOpen()).toBe(false);
+    trigger.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }),
     );
     fixture.detectChanges();
     await fixture.whenStable();
-    const actions = Array.from(
-      document.querySelectorAll('.neu-split-button__dropdown-item:not(:disabled)'),
-    ) as HTMLButtonElement[];
-    expect(document.activeElement).toBe(actions[1]);
+    const items = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.neu-split-button__dropdown-item'),
+    );
+    expect(document.activeElement).toBe(items[1]);
 
-    const escape = new KeyboardEvent('keydown', {
-      key: 'Escape',
-      bubbles: true,
-      cancelable: true,
-    });
-    document.dispatchEvent(escape);
+    items[1].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(escape.defaultPrevented).toBe(true);
+    expect(emitted.map((action) => action.id)).toEqual(['schedule']);
     expect(fixture.componentInstance.isOpen()).toBe(false);
-    expect(document.activeElement).toBe(chevron);
   });
 
-  it('does not open from the keyboard while disabled', () => {
+  it('does not open while disabled or reopen an already open menu', () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', ACTIONS);
     fixture.componentRef.setInput('disabled', true);
-    fixture.componentRef.setInput('actions', ACTIONS);
     fixture.detectChanges();
-    const event = new KeyboardEvent('keydown', {
-      key: 'ArrowDown',
-      cancelable: true,
-    });
-
-    fixture.componentInstance.openDropdown(event);
-
+    fixture.componentInstance.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+    );
     expect(fixture.componentInstance.isOpen()).toBe(false);
-    expect(event.defaultPrevented).toBe(false);
+
+    fixture.componentRef.setInput('disabled', false);
+    fixture.detectChanges();
+    fixture.componentInstance.isOpen.set(true);
+    fixture.componentInstance.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }),
+    );
+    expect(fixture.componentInstance.isOpen()).toBe(true);
   });
 
-  it('ignores Escape while closed and unrelated menu keys', () => {
+  it('handles an all-disabled action list without assigning a focus target', async () => {
     const fixture = TestBed.createComponent(NeuSplitButtonComponent);
-    fixture.componentRef.setInput('actions', ACTIONS);
+    fixture.componentRef.setInput('label', 'Publicar');
+    fixture.componentRef.setInput('actions', [
+      { id: 'one', label: 'One', disabled: true },
+      { id: 'two', label: 'Two', disabled: true },
+    ]);
     fixture.detectChanges();
-    const escape = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true });
-    const unrelated = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
+    fixture.componentInstance.onTriggerKeydown(
+      new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    fixture.componentInstance.onEscape(escape);
-    fixture.componentInstance.onMenuKeydown(unrelated);
-
-    expect(escape.defaultPrevented).toBe(false);
-    expect(unrelated.defaultPrevented).toBe(false);
+    expect(
+      Array.from(
+        document.querySelectorAll<HTMLButtonElement>('.neu-split-button__dropdown-item'),
+      ).every((item) => item.tabIndex === -1),
+    ).toBe(true);
   });
 });

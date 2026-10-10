@@ -94,26 +94,49 @@ describe('NeuCheckboxComponent', () => {
     expect(el).toBeTruthy();
   });
 
-  it('onChange fires registerOnChange callback', async () => {
+  it('emits checkedChange exactly once after a user change', async () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.detectChanges();
-    let emitted: boolean | undefined;
-    df.componentInstance.registerOnChange((v: boolean) => (emitted = v));
+    const emitted = vi.fn();
+    df.componentInstance.checked.subscribe(emitted);
     const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
     input.checked = true;
     input.dispatchEvent(new Event('change'));
     df.detectChanges();
     await df.whenStable();
-    expect(emitted).toBe(true);
+    expect(emitted).toHaveBeenCalledExactlyOnceWith(true);
   });
 
-  it('onBlur should call _onTouched callback', () => {
+  it('onBlur emits the Signal Forms touch boundary', () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.detectChanges();
-    let touched = false;
-    df.componentInstance.registerOnTouched(() => (touched = true));
+    const touched = vi.fn();
+    df.componentInstance.touch.subscribe(touched);
     df.componentInstance.onBlur();
-    expect(touched).toBe(true);
+    expect(touched).toHaveBeenCalledOnce();
+  });
+
+  it('restores a controlled mixed state after native activation, including readonly', () => {
+    const df = TestBed.createComponent(NeuCheckboxComponent);
+    df.componentRef.setInput('indeterminate', true);
+    df.componentRef.setInput('readonly', true);
+    df.detectChanges();
+    const emitted = vi.fn();
+    df.componentInstance.checked.subscribe(emitted);
+    const input: HTMLInputElement = df.nativeElement.querySelector('input');
+    input.click();
+    expect(input.checked).toBe(false);
+    expect(input.indeterminate).toBe(true);
+    expect(input.getAttribute('aria-checked')).toBe('mixed');
+    expect(emitted).not.toHaveBeenCalled();
+    df.componentRef.setInput('readonly', false);
+    df.detectChanges();
+    input.click();
+    expect(input.indeterminate).toBe(true);
+    expect(emitted).toHaveBeenCalledExactlyOnceWith(true);
+    df.componentRef.setInput('indeterminate', false);
+    df.detectChanges();
+    expect(input.indeterminate).toBe(false);
   });
 
   it('disabled input should disable the native input element', async () => {
@@ -126,37 +149,33 @@ describe('NeuCheckboxComponent', () => {
     expect(inputEl.disabled).toBe(true);
   });
 
-  it('onChange should not throw when no onChange callback registered (uses default noop)', () => {
-    // onChange sin callback registrado no debe lanzar error (usa función por defecto)
-    // onChange without registered callback must not throw (uses default noop function)
+  it('onChange should not throw when there are no output subscribers', () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.detectChanges();
     const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
     input.checked = true;
-    // No registerOnChange called — default () => {} is invoked
     expect(() => input.dispatchEvent(new Event('change'))).not.toThrow();
   });
 
-  it('onBlur should not throw when no onTouched callback registered (uses default noop)', () => {
-    // onBlur sin callback registrado no debe lanzar error (usa función por defecto)
-    // onBlur without registered callback must not throw (uses default noop function)
+  it('onBlur should not throw when there are no touch subscribers', () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.detectChanges();
-    // No registerOnTouched called — default () => {} is invoked
     expect(() => df.componentInstance.onBlur()).not.toThrow();
   });
 
-  it('writeValue(false) should uncheck the input', () => {
-    // writeValue(false) debe desmarcar el input
-    // writeValue(false) must uncheck the input
+  it('an external checked write should update without an output echo', () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.detectChanges();
-    df.componentInstance.writeValue(true);
+    const changed = vi.fn();
+    df.componentInstance.checked.subscribe(changed);
+    df.componentRef.setInput('checked', true);
     df.detectChanges();
-    df.componentInstance.writeValue(false);
+    expect((df.nativeElement.querySelector('input') as HTMLInputElement).checked).toBe(true);
+    df.componentRef.setInput('checked', false);
     df.detectChanges();
     const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
     expect(input.checked).toBe(false);
+    expect(changed).not.toHaveBeenCalled();
   });
 
   it('should support controlled checked input and checkedChange output', () => {
@@ -192,15 +211,62 @@ describe('NeuCheckboxComponent', () => {
     expect(input.getAttribute('aria-label')).toBe('Controlled checkbox');
   });
 
-  it('native blur event invokes the touched callback through the template listener', () => {
+  it('native blur event emits touch through the template listener', () => {
     const df = TestBed.createComponent(NeuCheckboxComponent);
     df.detectChanges();
     const touched = vi.fn();
-    df.componentInstance.registerOnTouched(touched);
+    df.componentInstance.touch.subscribe(touched);
 
     const input: HTMLInputElement = df.nativeElement.querySelector('input[type="checkbox"]');
     input.dispatchEvent(new Event('blur'));
 
     expect(touched).toHaveBeenCalledOnce();
+  });
+
+  it('readonly remains focusable and blocks mutation', () => {
+    const df = TestBed.createComponent(NeuCheckboxComponent);
+    df.componentRef.setInput('readonly', true);
+    df.detectChanges();
+    const changed = vi.fn();
+    df.componentInstance.checked.subscribe(changed);
+    const input = df.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.focus();
+    expect(document.activeElement).toBe(input);
+    input.checked = true;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(df.componentInstance.checked()).toBe(false);
+    expect(input.checked).toBe(false);
+    expect(changed).not.toHaveBeenCalled();
+    expect(input.getAttribute('aria-readonly')).toBe('true');
+  });
+
+  it('required, invalid and pending states reach the semantic checkbox', () => {
+    const df = TestBed.createComponent(NeuCheckboxComponent);
+    df.componentRef.setInput('required', true);
+    df.componentRef.setInput('invalid', true);
+    df.componentRef.setInput('pending', true);
+    df.detectChanges();
+    const input = df.nativeElement.querySelector('input') as HTMLInputElement;
+
+    expect(input.type).toBe('checkbox');
+    expect(input.required).toBe(true);
+    expect(input.getAttribute('aria-required')).toBe('true');
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('focus targets the native checkbox and reset emits no fictitious change', () => {
+    const df = TestBed.createComponent(NeuCheckboxComponent);
+    df.detectChanges();
+    const changed = vi.fn();
+    df.componentInstance.checked.subscribe(changed);
+    const input = df.nativeElement.querySelector('input') as HTMLInputElement;
+
+    df.componentInstance.focus({ preventScroll: true });
+    expect(document.activeElement).toBe(input);
+    df.componentInstance.reset();
+    expect(changed).not.toHaveBeenCalled();
   });
 });

@@ -1,102 +1,104 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   Directive,
   ElementRef,
   InjectionToken,
-  OnDestroy,
-  PLATFORM_ID,
-  Signal,
   TemplateRef,
   ViewEncapsulation,
   computed,
   contentChild,
-  effect,
   inject,
   input,
+  isDevMode,
   output,
   signal,
+  viewChildren,
 } from '@angular/core';
-import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
-import { Directionality } from '@angular/cdk/bidi';
-import { NeuUrlStateService } from '@neural-ui/core/url-state';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
-// ----------------------------------------------------------------
-// Token de contexto — permite a NeuTabPanelComponent inyectar
-// la instancia padre sin pasar signals manualmente.
-// ----------------------------------------------------------------
-export const NEU_TABS_CONTEXT = new InjectionToken<NeuTabsComponent>('NeuTabsContext');
+export type NeuTabKey = string | number;
 
-export interface NeuTab {
-  /** ID único de la pestaña — se usa como valor en la URL / Unique tab ID — used as the URL value */
-  id: string;
-  /** Etiqueta visible / Visible label */
-  label: string;
-  /** Badge opcional junto al label / Optional badge next to the label */
-  badge?: string;
-  /** Deshabilita la pestaña sin ocultarla / Disables the tab without hiding it */
-  disabled?: boolean;
+export interface NeuTab<K extends NeuTabKey = string> {
+  readonly id: K;
+  readonly label: string;
+  readonly badge?: string;
+  readonly disabled?: boolean;
 }
+
+export interface NeuTabLabelContext<
+  T extends NeuTab<NeuTabKey> = NeuTab<NeuTabKey>,
+> {
+  readonly $implicit: T;
+  readonly active: boolean;
+}
+
 @Directive({ selector: 'ng-template[neuTabLabel]' })
-export class NeuTabLabelDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTab; active: boolean }>) {}
+export class NeuTabLabelDirective<
+  T extends NeuTab<NeuTabKey> = NeuTab<NeuTabKey>,
+> {
+  constructor(readonly templateRef: TemplateRef<NeuTabLabelContext<T>>) {}
+
+  static ngTemplateContextGuard<T extends NeuTab<NeuTabKey>>(
+    _directive: NeuTabLabelDirective<T>,
+    context: unknown,
+  ): context is NeuTabLabelContext<T> {
+    return true;
+  }
 }
 
-/**
- * NeuralUI Tabs Component
- *
- * Sistema de pestañas con estado sincronizado a la URL via NeuUrlStateService. / Tab system with state synchronized to the URL via NeuUrlStateService.
- * El panel activo se determina por ?{tabParam}={tabId}. / The active panel is determined by ?{tabParam}={tabId}.
- *
- * Uso:
- *   <neu-tabs [tabs]="tabs" tabParam="tab">
- *     <neu-tab-panel tabId="preview">...</neu-tab-panel>
- *     <neu-tab-panel tabId="api">...</neu-tab-panel>
- *   </neu-tabs>
- */
+const NEGATIVE_ZERO_KEY = Symbol('neu-tabs-negative-zero');
+
+function keyToken(key: NeuTabKey): NeuTabKey | symbol {
+  return typeof key === 'number' && Object.is(key, -0) ? NEGATIVE_ZERO_KEY : key;
+}
+
+interface NeuTabsInternalContext {
+  isTabActive(id: NeuTabKey): boolean;
+  tabButtonId(id: NeuTabKey): string;
+  tabPanelId(id: NeuTabKey): string;
+}
+
+const NEU_TABS_CONTEXT = new InjectionToken<NeuTabsInternalContext>('NeuTabsContext');
+
 @Component({
   selector: 'neu-tabs',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{ provide: NEU_TABS_CONTEXT, useExisting: NeuTabsComponent }],
   template: `
-    <!-- Barra de pestañas -->
     <div class="neu-tabs" [class.neu-tabs--flush]="flush()">
       <div
         class="neu-tabs__nav"
         role="tablist"
-        [attr.aria-label]="resolvedAriaLabel()"
+        [attr.aria-label]="ariaLabel()"
         [class.neu-tabs__nav--dragging]="isDraggingNav()"
-        #navRef
         (pointerdown)="startNavDrag($event)"
         (pointermove)="moveNavDrag($event)"
         (pointerup)="endNavDrag($event)"
         (pointercancel)="endNavDrag($event)"
       >
-        @for (tab of tabs(); track tab.id) {
+        @for (tab of tabs(); track trackKey(tab.id)) {
           <button
+            #tabButton
             class="neu-tabs__tab"
-            [class.neu-tabs__tab--active]="activeTabId() === tab.id"
+            [class.neu-tabs__tab--active]="isTabActive(tab.id)"
             [class.neu-tabs__tab--disabled]="tab.disabled"
             role="tab"
-            [id]="'neu-tab-' + tab.id"
-            [attr.aria-selected]="activeTabId() === tab.id"
-            [attr.aria-controls]="'neu-tabpanel-' + tab.id"
-            [attr.tabindex]="activeTabId() === tab.id ? '0' : '-1'"
-            [disabled]="tab.disabled"
             type="button"
+            [id]="tabButtonId(tab.id)"
+            [attr.aria-selected]="isTabActive(tab.id)"
+            [attr.aria-controls]="tabPanelId(tab.id)"
+            [attr.tabindex]="tabIndex(tab.id)"
+            [disabled]="tab.disabled"
             (click)="handleTabClick($event, tab)"
-            (keydown.arrowRight)="focusTabFromArrow($any($event), 1)"
-            (keydown.arrowLeft)="focusTabFromArrow($any($event), -1)"
-            (keydown.home)="focusTab($any($event), 'first')"
-            (keydown.end)="focusTab($any($event), 'last')"
+            (focus)="onTabFocus(tab.id)"
+            (keydown)="onTabKeydown($event, tab.id)"
           >
             @if (labelTpl()) {
               <ng-container
                 [ngTemplateOutlet]="labelTpl()!.templateRef"
-                [ngTemplateOutletContext]="{ $implicit: tab, active: activeTabId() === tab.id }"
+                [ngTemplateOutletContext]="{ $implicit: tab, active: isTabActive(tab.id) }"
               />
             } @else {
               {{ tab.label }}
@@ -106,11 +108,8 @@ export class NeuTabLabelDirective {
             }
           </button>
         }
-        <!-- Indicador deslizante -->
-        <span class="neu-tabs__indicator" [style]="indicatorStyle()"></span>
       </div>
 
-      <!-- Paneles (proyectados desde NeuTabPanelComponent) -->
       <div class="neu-tabs__panels">
         <ng-content />
       </div>
@@ -118,257 +117,220 @@ export class NeuTabLabelDirective {
   `,
   styleUrl: './neu-tabs.component.scss',
 })
-export class NeuTabsComponent implements AfterViewInit, OnDestroy {
-  readonly labelTpl = contentChild(NeuTabLabelDirective);
-  private readonly urlState = inject(NeuUrlStateService);
-  private readonly elRef = inject(ElementRef);
-  private readonly document = inject(DOCUMENT);
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly directionality = inject(Directionality);
-  private resizeObserver?: ResizeObserver;
-  private readonly _urlParamSignals = new Map<string, Signal<string | null>>();
-  private _dragPointerId: number | null = null;
-  private _dragStartX = 0;
-  private _dragStartScrollLeft = 0;
-  private _suppressNextClick = false;
-  private readonly _optimisticActiveTabId = signal<string | null>(null);
+export class NeuTabsComponent<
+  K extends NeuTabKey = string,
+  T extends NeuTab<K> = NeuTab<K>,
+> implements NeuTabsInternalContext {
+  readonly labelTpl = contentChild(NeuTabLabelDirective<T>, { descendants: false });
+  private readonly tabButtons = viewChildren<ElementRef<HTMLButtonElement>>('tabButton');
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly uid = inject(NeuIdGenerator).getId('neu-tabs-');
+  private controlMode: 'controlled' | 'uncontrolled' | null = null;
+  private modeWarningEmitted = false;
+  private uncontrolledActiveId: K | null = null;
+  private readonly uncontrolledRevision = signal(0);
+  private readonly focusedId = signal<K | null>(null);
+  private dragPointerId: number | null = null;
+  private dragStartX = 0;
+  private dragStartScrollLeft = 0;
+  private suppressNextClick = false;
+
+  readonly tabs = input<readonly T[]>([]);
+  readonly activeId = input<K | null | undefined>(undefined);
+  readonly initialActiveId = input<K | null>(null);
+  readonly flush = input(false);
+  readonly ariaLabel = input('Content tabs');
+  readonly activeIdChange = output<K | null>();
   readonly isDraggingNav = signal(false);
 
-  private _getUrlParamSignal(key: string): Signal<string | null> {
-    let paramSignal = this._urlParamSignals.get(key);
-    if (!paramSignal) {
-      paramSignal = this.urlState.getParam(key);
-      this._urlParamSignals.set(key, paramSignal);
-    }
-    return paramSignal;
-  }
-
-  private _readUrlParam(key: string): string | null {
-    return this._getUrlParamSignal(key)();
-  }
-
-  private _requestFrame(callback: FrameRequestCallback): void {
-    if (isPlatformBrowser(this.platformId)) {
-      requestAnimationFrame(callback);
-    }
-  }
-
-  constructor() {
-    // Actualizar indicador cuando activeTabId cambie — debe estar en el constructor (injection context)
-    effect(() => {
-      this.activeTabId(); // dependencia reactiva
-      this.directionality.valueSignal();
-      this._requestFrame(() => this._updateIndicator());
-    });
-  }
-
-  /** Definición de pestañas / Tab definitions */
-  tabs = input<NeuTab[]>([]);
-
-  /** QueryParam que almacena la pestaña activa / QueryParam that stores the active tab */
-  tabParam = input<string>('tab');
-
-  /** Si true, elimina el padding interno de los paneles / If true, removes the internal padding from panels */
-  flush = input<boolean>(false);
-
-  /** Etiqueta accesible del rol tablist / Accessible label for the tablist role */
-  ariaLabel = input<string>('');
-
-  /** Uses the explicit label or a locale-aware English/Spanish fallback. */
-  protected resolvedAriaLabel(): string {
-    const explicitLabel = this.ariaLabel().trim();
-    if (explicitLabel) return explicitLabel;
-    return this.document.documentElement.lang.toLowerCase().startsWith('es')
-      ? 'Pestañas de contenido'
-      : 'Content tabs';
-  }
-
-  /** Emite al cambiar de pestaña / Emits when the tab changes */
-  tabChange = output<string>();
-
-  /** ID de la pestaña activa (de la URL o la primera disponible) / Active tab ID (from the URL or the first available) */
-  readonly activeTabId = computed(() => {
-    const tabList = this.tabs();
-    const fromUrl = this._readUrlParam(this.tabParam());
-    const available = tabList.find((t) => t.id === fromUrl && !t.disabled);
-    if (available) return available.id;
-
-    const optimistic = this._optimisticActiveTabId();
-    const optimisticAvailable = tabList.find((t) => t.id === optimistic && !t.disabled);
-    if (optimisticAvailable) return optimisticAvailable.id;
-
-    // Fallback: primera pestaña no deshabilitada
-    return tabList.find((t) => !t.disabled)?.id ?? '';
+  readonly activeTabId = computed<K | null>(() => {
+    this.uncontrolledRevision();
+    if (this.ensureControlMode() === 'controlled') return this.activeId() ?? null;
+    if (this.uncontrolledActiveId !== null) return this.uncontrolledActiveId;
+    return this.tabs().find((tab) => !tab.disabled)?.id ?? null;
   });
 
-  /** Posición del indicador calculada mediante medición DOM / Indicator position calculated via DOM measurement */
-  readonly _indicatorInlineStart = signal('0px');
-  readonly _indicatorWidth = signal('0px');
-  readonly indicatorStyle = computed(
-    () => `inset-inline-start: ${this._indicatorInlineStart()}; width: ${this._indicatorWidth()}`,
-  );
+  protected readonly trackKey = (id: K) => keyToken(id);
 
-  ngAfterViewInit(): void {
-    this._updateIndicator();
-    // Actualizar cuando cambie el tamaño del nav (p.ej. resize de ventana)
-    const nav = this.elRef.nativeElement.querySelector('.neu-tabs__nav');
-    if (nav && typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => this._updateIndicator());
-      this.resizeObserver.observe(nav);
-    }
+  isTabActive(id: NeuTabKey): boolean {
+    const active = this.activeTabId();
+    return (
+      active !== null &&
+      Object.is(active, id) &&
+      this.tabs().some((tab) => Object.is(tab.id, id) && !tab.disabled)
+    );
   }
 
-  ngOnDestroy(): void {
-    this.resizeObserver?.disconnect();
+  tabButtonId(id: NeuTabKey): string {
+    return `${this.uid}-tab-${this.domKey(id)}`;
   }
 
-  private _updateIndicator(): void {
-    const nav: HTMLElement | null = this.elRef.nativeElement.querySelector('.neu-tabs__nav');
-    if (!nav) return;
-    const tabEls = nav.querySelectorAll<HTMLElement>('.neu-tabs__tab');
-    const idx = this.tabs().findIndex((t) => t.id === this.activeTabId());
-    const tabEl = tabEls[idx];
-    if (tabEl) {
-      const inlineStart =
-        this.directionality.value === 'rtl'
-          ? nav.scrollWidth - tabEl.offsetLeft - tabEl.offsetWidth
-          : tabEl.offsetLeft;
-      this._indicatorInlineStart.set(inlineStart + 'px');
-      this._indicatorWidth.set(tabEl.offsetWidth + 'px');
-      if (typeof tabEl.scrollIntoView === 'function') {
-        tabEl.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'nearest',
-        });
-      }
-    }
+  tabPanelId(id: NeuTabKey): string {
+    return `${this.uid}-panel-${this.domKey(id)}`;
   }
 
-  handleTabClick(event: Event, tab: NeuTab): void {
-    if (this._suppressNextClick) {
+  tabIndex(id: K): 0 | -1 {
+    const tab = this.findTab(id);
+    if (!tab || tab.disabled) return -1;
+    const focused = this.focusedId();
+    if (focused !== null && this.isEnabled(focused)) return Object.is(focused, id) ? 0 : -1;
+    const active = this.activeTabId();
+    if (active !== null && this.isEnabled(active)) return Object.is(active, id) ? 0 : -1;
+    return Object.is(this.tabs().find((candidate) => !candidate.disabled)?.id, id) ? 0 : -1;
+  }
+
+  handleTabClick(event: Event, tab: T): void {
+    if (this.suppressNextClick) {
       event.preventDefault();
       event.stopPropagation();
-      this._suppressNextClick = false;
+      this.suppressNextClick = false;
       return;
     }
     this.selectTab(tab);
   }
 
-  selectTab(tab: NeuTab): void {
+  selectTab(tab: T): void {
     if (tab.disabled) return;
-    this._optimisticActiveTabId.set(tab.id);
-    this.urlState.setParam(this.tabParam(), tab.id);
-    this.tabChange.emit(tab.id);
-    this._requestFrame(() => this._updateIndicator());
+    const proposal = tab.id;
+    if (this.ensureControlMode() === 'uncontrolled') {
+      this.uncontrolledActiveId = proposal;
+      this.uncontrolledRevision.update((revision) => revision + 1);
+    }
+    this.focusedId.set(proposal);
+    this.activeIdChange.emit(proposal);
+  }
+
+  protected onTabFocus(id: K): void {
+    if (this.isEnabled(id)) this.focusedId.set(id);
+  }
+
+  protected onTabKeydown(event: KeyboardEvent, id: K): void {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    const enabled = this.tabs()
+      .map((tab, index) => ({ tab, index }))
+      .filter(({ tab }) => !tab.disabled);
+    if (!enabled.length) return;
+    const currentIndex = enabled.findIndex(({ tab }) => Object.is(tab.id, id));
+    const current = currentIndex < 0 ? 0 : currentIndex;
+    let target: (typeof enabled)[number] | undefined;
+    if (event.key === 'Home') target = enabled[0];
+    else if (event.key === 'End') target = enabled.at(-1);
+    else if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+      const forward = event.key === 'ArrowRight' ? !this.isRtl() : this.isRtl();
+      const offset = forward ? 1 : -1;
+      target = enabled[(current + offset + enabled.length) % enabled.length];
+    } else return;
+    if (!target) return;
+    event.preventDefault();
+    this.focusedId.set(target.tab.id);
+    const button = this.tabButtons()[target.index]?.nativeElement;
+    button?.focus();
+    if (button) this.revealWithinStrip(button);
   }
 
   startNavDrag(event: PointerEvent): void {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     const target = event.target as HTMLElement | null;
-    if (!target?.closest('.neu-tabs__nav')) return;
-    if (target.closest('.neu-tabs__tab')) return;
-
+    if (!target?.closest('.neu-tabs__nav') || target.closest('.neu-tabs__tab')) return;
     const nav = event.currentTarget as HTMLElement;
-    this._dragPointerId = event.pointerId;
-    this._dragStartX = event.clientX;
-    this._dragStartScrollLeft = nav.scrollLeft;
+    this.dragPointerId = event.pointerId;
+    this.dragStartX = event.clientX;
+    this.dragStartScrollLeft = nav.scrollLeft;
     this.isDraggingNav.set(false);
     nav.setPointerCapture(event.pointerId);
   }
 
   moveNavDrag(event: PointerEvent): void {
-    if (this._dragPointerId !== event.pointerId) return;
-
+    if (this.dragPointerId !== event.pointerId) return;
     const nav = event.currentTarget as HTMLElement;
-    const deltaX = event.clientX - this._dragStartX;
+    const deltaX = event.clientX - this.dragStartX;
     if (!this.isDraggingNav() && Math.abs(deltaX) > 6) {
       this.isDraggingNav.set(true);
-      this._suppressNextClick = true;
+      this.suppressNextClick = true;
     }
     if (!this.isDraggingNav()) return;
-
-    nav.scrollLeft = this._dragStartScrollLeft - deltaX;
+    nav.scrollLeft = this.dragStartScrollLeft - deltaX;
     event.preventDefault();
   }
 
   endNavDrag(event: PointerEvent): void {
-    if (this._dragPointerId !== event.pointerId) return;
-
+    if (this.dragPointerId !== event.pointerId) return;
     const nav = event.currentTarget as HTMLElement;
-    if (nav.hasPointerCapture(event.pointerId)) {
-      nav.releasePointerCapture(event.pointerId);
-    }
-    this._dragPointerId = null;
-    if (this.isDraggingNav()) {
-      this._requestFrame(() => this.isDraggingNav.set(false));
-    }
+    if (nav.hasPointerCapture(event.pointerId)) nav.releasePointerCapture(event.pointerId);
+    this.dragPointerId = null;
+    this.isDraggingNav.set(false);
   }
 
-  /** Mueve el foco entre tabs con flechas (roving tabindex — WAI-ARIA Tabs Pattern) / Moves focus between tabs with arrows (roving tabindex — WAI-ARIA Tabs Pattern) */
-  focusTabFromArrow(event: Event, physicalDirection: 1 | -1): void {
-    const logicalDirection: 1 | -1 =
-      this.directionality.value === 'rtl' ? (physicalDirection === 1 ? -1 : 1) : physicalDirection;
-    this.focusTab(event, logicalDirection);
+  private ensureControlMode(): 'controlled' | 'uncontrolled' {
+    const requested = this.activeId() === undefined ? 'uncontrolled' : 'controlled';
+    if (this.controlMode === null) {
+      this.controlMode = requested;
+      if (requested === 'uncontrolled') this.uncontrolledActiveId = this.initialActiveId();
+    } else if (this.controlMode !== requested && !this.modeWarningEmitted) {
+      this.modeWarningEmitted = true;
+      if (isDevMode()) console.warn('NeuTabs cannot switch between controlled and uncontrolled mode.');
+    }
+    return this.controlMode;
   }
 
-  focusTab(event: Event, dir: 1 | -1 | 'first' | 'last'): void {
-    event.preventDefault();
-    const enabledTabs = this.tabs().filter((t) => !t.disabled);
-    const currentIdx = enabledTabs.findIndex((t) => t.id === this.activeTabId());
-    let nextIdx: number;
-    if (dir === 'first') {
-      nextIdx = 0;
-    } else if (dir === 'last') {
-      nextIdx = enabledTabs.length - 1;
-    } else {
-      nextIdx = (currentIdx + dir + enabledTabs.length) % enabledTabs.length;
-    }
-    const next = enabledTabs[nextIdx];
-    this.selectTab(next);
-    const btn = (this.elRef.nativeElement as HTMLElement).querySelector(
-      `#neu-tab-${next.id}`,
-    ) as HTMLElement | null;
-    btn?.focus();
+  private findTab(id: K): T | undefined {
+    return this.tabs().find((tab) => Object.is(tab.id, id));
+  }
+
+  private isEnabled(id: K): boolean {
+    const tab = this.findTab(id);
+    return Boolean(tab && !tab.disabled);
+  }
+
+  private isRtl(): boolean {
+    const host = this.elementRef.nativeElement;
+    return (host.closest('[dir]')?.getAttribute('dir') ?? host.ownerDocument.documentElement.dir) === 'rtl';
+  }
+
+  private revealWithinStrip(button: HTMLElement): void {
+    const nav = button.closest('.neu-tabs__nav') as HTMLElement | null;
+    if (!nav || typeof nav.getBoundingClientRect !== 'function') return;
+    const bounds = nav.getBoundingClientRect();
+    const tabBounds = button.getBoundingClientRect();
+    if (tabBounds.left < bounds.left) nav.scrollLeft += tabBounds.left - bounds.left;
+    else if (tabBounds.right > bounds.right) nav.scrollLeft += tabBounds.right - bounds.right;
+  }
+
+  private domKey(id: NeuTabKey): string {
+    if (typeof id === 'number' && Object.is(id, -0)) return 'number-negative-zero';
+    const exactCodePoints = Array.from(String(id), (character) =>
+      character.codePointAt(0)!.toString(16),
+    ).join('-');
+    return `${typeof id}-${exactCodePoints || 'empty'}`;
   }
 }
 
-// ----------------------------------------------------------------
-// NeuTabPanelComponent — panel individual (usa DI para el contexto)
-// ----------------------------------------------------------------
-
-/**
- * NeuralUI Tab Panel
- *
- * Panel de contenido asociado a una pestaña de NeuTabsComponent. / Content panel associated with a NeuTabsComponent tab.
- * Solo se renderiza (no oculta con CSS) cuando la pestaña está activa. / Only rendered (not hidden with CSS) when the tab is active.
- *
- * Uso: hijo directo de <neu-tabs>
- *   <neu-tab-panel tabId="api">...</neu-tab-panel>
- */
 @Component({
   selector: 'neu-tab-panel',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isActive()) {
       <div
         class="neu-tab-panel"
         role="tabpanel"
-        [id]="'neu-tabpanel-' + tabId()"
-        [attr.aria-labelledby]="'neu-tab-' + tabId()"
+        [id]="panelId()"
+        [attr.aria-labelledby]="buttonId()"
       >
         <ng-content />
       </div>
     }
   `,
 })
-export class NeuTabPanelComponent {
+export class NeuTabPanelComponent<K extends NeuTabKey = string> {
   private readonly tabs = inject(NEU_TABS_CONTEXT, { optional: true });
-
-  /** ID que debe coincidir con NeuTab.id del padre / ID that must match the parent NeuTab.id */
-  tabId = input.required<string>();
-
-  readonly isActive = computed(() => this.tabs?.activeTabId() === this.tabId());
+  private readonly fallbackUid = inject(NeuIdGenerator).getId('neu-tab-panel-');
+  readonly tabId = input.required<K>();
+  readonly isActive = computed(() => this.tabs?.isTabActive(this.tabId()) ?? false);
+  readonly panelId = computed(
+    () => this.tabs?.tabPanelId(this.tabId()) ?? `${this.fallbackUid}-panel`,
+  );
+  readonly buttonId = computed(
+    () => this.tabs?.tabButtonId(this.tabId()) ?? `${this.fallbackUid}-tab`,
+  );
 }

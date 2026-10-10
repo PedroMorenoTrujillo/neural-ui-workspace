@@ -1,330 +1,293 @@
-import { provideZonelessChangeDetection } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { NeuSplitterComponent, NeuSplitterPane } from './neu-splitter.component';
+import { NeuSplitterComponent, type NeuSplitterPane } from './neu-splitter.component';
 
-function setup(panes: NeuSplitterPane[] = [], direction: 'horizontal' | 'vertical' = 'horizontal') {
-  const f = TestBed.createComponent(NeuSplitterComponent);
-  f.componentRef.setInput('panes', panes);
-  f.componentRef.setInput('direction', direction);
-  f.detectChanges();
-  return f;
+function setup(panes: readonly NeuSplitterPane[] = [{ size: 50 }, { size: 50 }]) {
+  const fixture = TestBed.createComponent(NeuSplitterComponent);
+  fixture.componentRef.setInput('panes', panes);
+  fixture.detectChanges();
+  Object.defineProperty(fixture.nativeElement, 'offsetWidth', { configurable: true, value: 200 });
+  Object.defineProperty(fixture.nativeElement, 'offsetHeight', { configurable: true, value: 200 });
+  return fixture;
 }
 
-beforeEach(() =>
-  TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection()],
-  }).compileComponents(),
-);
+function handle(fixture: ReturnType<typeof setup>, index = 0): HTMLElement {
+  return fixture.nativeElement.querySelectorAll('.neu-splitter__handle')[index];
+}
 
-describe('NeuSplitterComponent', () => {
-  it('should create', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    expect(f.componentInstance).toBeTruthy();
+function pointer(target: HTMLElement, type: string, x: number, y = 0, pointerId = 1): void {
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperties(event, {
+    pointerId: { value: pointerId }, button: { value: 0 },
+    clientX: { value: x }, clientY: { value: y },
   });
+  target.dispatchEvent(event);
+}
 
-  it('should apply neu-splitter class', async () => {
-    const f = setup();
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-splitter');
-  });
+function key(target: HTMLElement, name: string): void {
+  target.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true }));
+}
 
-  it('should apply horizontal class by default', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-splitter--horizontal');
-  });
+@Component({
+  imports: [NeuSplitterComponent],
+  template: `<neu-splitter [panes]="[{size: 50}, {size: 50}]">
+    <div ngProjectAs="neu-splitter-pane" class="pane-a">A</div>
+    <div ngProjectAs="neu-splitter-pane" class="pane-b">B</div>
+  </neu-splitter>`,
+})
+class ProjectionHost {}
 
-  it('should apply vertical class when direction is vertical', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }], 'vertical');
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-splitter--vertical');
-  });
+beforeEach(() => TestBed.configureTestingModule({
+  providers: [provideZonelessChangeDetection()],
+}).compileComponents());
 
-  it('_sizes should initialize from panes input', async () => {
+describe('NeuSplitterComponent controlled layout', () => {
+  it('keeps horizontal as default and renders percentages in pane order', () => {
     const f = setup([{ size: 30 }, { size: 70 }]);
-    await f.whenStable();
-    expect(f.componentInstance._sizes()).toEqual([30, 70]);
+    const panes = f.nativeElement.querySelectorAll('.neu-splitter__pane');
+    expect(f.nativeElement.classList).toContain('neu-splitter--horizontal');
+    expect(panes[0].style.flexBasis).toBe('30%');
+    expect(panes[1].style.flexBasis).toBe('70%');
+    expect(handle(f).getAttribute('aria-valuenow')).toBe('30');
   });
 
-  it('should leave sizes empty when panes are empty and preserve explicit zero sizes', async () => {
-    const empty = setup([]);
-    await empty.whenStable();
-    expect(empty.componentInstance._sizes()).toEqual([]);
-
-    const zero = setup([{ size: 0 }, { size: 100 }]);
-    await zero.whenStable();
-    expect(zero.componentInstance._sizes()).toEqual([0, 100]);
+  it('distributes unspecified sizes while preserving explicit zero', () => {
+    const f = setup([{ size: 0 }, {}]);
+    expect([...f.nativeElement.querySelectorAll('.neu-splitter__pane')].map((p: Element) =>
+      (p as HTMLElement).style.flexBasis)).toEqual(['0%', '100%']);
+    f.componentRef.setInput('panes', [{}, {}]);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('50%');
   });
 
-  it('_sizes should distribute remaining evenly when sizes not set', async () => {
-    const f = setup([{}, {}]);
-    await f.whenStable();
-    expect(f.componentInstance._sizes()).toEqual([50, 50]);
+  it('renders no handle for empty/one-pane layouts and N-1 handles for multiple panes', () => {
+    const f = setup([]);
+    expect(f.nativeElement.querySelectorAll('[role="separator"]')).toHaveLength(0);
+    f.componentRef.setInput('panes', [{ size: 100 }]);
+    f.detectChanges();
+    expect(f.nativeElement.querySelectorAll('[role="separator"]')).toHaveLength(0);
+    f.componentRef.setInput('panes', [{ size: 30 }, { size: 40 }, { size: 30 }]);
+    f.detectChanges();
+    expect(f.nativeElement.querySelectorAll('[role="separator"]')).toHaveLength(2);
   });
 
-  it('should render handles between panes', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
+  it('projects each pane into its matching slot', async () => {
+    const f = TestBed.createComponent(ProjectionHost);
     f.detectChanges();
     await f.whenStable();
-    const handles = f.nativeElement.querySelectorAll('.neu-splitter__handle');
-    expect(handles.length).toBe(1); // N-1 handles for N panes
+    const panes = f.nativeElement.querySelectorAll('.neu-splitter__pane');
+    expect(panes[0].querySelector('.pane-a')?.textContent).toContain('A');
+    expect(panes[1].querySelector('.pane-b')?.textContent).toContain('B');
   });
 
-  it('ArrowRight key on handle should increase size of first pane', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThan(initial);
+  it('proposes a fresh immutable keyboard value but does not apply it when parent rejects', () => {
+    const applied = Object.freeze([Object.freeze({ size: 50 }), Object.freeze({ size: 50 })]);
+    const f = setup(applied);
+    const proposals: readonly number[][] = [];
+    f.componentInstance.sizesChange.subscribe((value) => (proposals as number[][]).push([...value]));
+    key(handle(f), 'ArrowRight');
+    f.detectChanges();
+    expect(proposals).toEqual([[52, 48]]);
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('50%');
+    expect(applied[0].size).toBe(50);
+    expect('sizeChange' in f.componentInstance).toBe(false);
+    expect('direction' in f.componentInstance).toBe(false);
   });
 
-  it('ArrowLeft key on handle should decrease size of first pane', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
+  it('keeps accepted parent writes and reconstructed pane arrays', () => {
+    const f = setup();
+    f.componentInstance.sizesChange.subscribe((sizes) => {
+      f.componentRef.setInput('panes', sizes.map((size) => ({ size })));
+    });
+    key(handle(f), 'ArrowRight');
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('52%');
+    f.componentRef.setInput('panes', [{ size: 40 }, { size: 60 }]);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('40%');
   });
 
-  it('reverses horizontal keyboard resizing in RTL', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    TestBed.inject(Directionality).valueSignal.set('rtl');
+  it('uses physical horizontal arrows in LTR and RTL without reversing pane identity', () => {
+    const ltr = setup();
+    const ltrValues: readonly number[][] = [];
+    ltr.componentInstance.sizesChange.subscribe((v) => (ltrValues as number[][]).push([...v]));
+    key(handle(ltr), 'ArrowRight');
+    key(handle(ltr), 'ArrowLeft');
+    expect(ltrValues).toEqual([[52, 48], [48, 52]]);
 
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
-
-    expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
+    const rtl = setup();
+    rtl.nativeElement.style.direction = 'rtl';
+    const rtlValues: readonly number[][] = [];
+    rtl.componentInstance.sizesChange.subscribe((v) => (rtlValues as number[][]).push([...v]));
+    key(handle(rtl), 'ArrowRight');
+    key(handle(rtl), 'ArrowLeft');
+    expect(rtlValues).toEqual([[48, 52], [52, 48]]);
   });
 
-  it('sizeChange should emit after keyboard adjustment', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    // sizeChange only emits on mouse/touch release, not keyboard
-    // We test that _sizes change correctly
-    const before = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowDown' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThan(before);
+  it('uses physical vertical arrows regardless of RTL', () => {
+    const f = setup();
+    f.componentRef.setInput('orientation', 'vertical');
+    f.nativeElement.style.direction = 'rtl';
+    f.detectChanges();
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    key(handle(f), 'ArrowDown');
+    key(handle(f), 'ArrowUp');
+    key(handle(f), 'ArrowRight');
+    expect(values).toEqual([[52, 48], [48, 52]]);
+    expect(handle(f).getAttribute('aria-orientation')).toBe('horizontal');
   });
 
-  it('_sizes sum should remain approximately 100 after adjustment', async () => {
-    const f = setup([{ size: 60 }, { size: 40 }]);
-    await f.whenStable();
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 0);
-    const sum = f.componentInstance._sizes().reduce((a, b) => a + b, 0);
-    expect(Math.round(sum)).toBe(100);
+  it('enforces adjacent pixel min/max and exposes logical separator bounds', () => {
+    const f = setup([{ size: 50, min: 80, max: 110 }, { size: 50, min: 70, max: 120 }]);
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    const h = handle(f);
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 140);
+    expect(values.at(-1)?.[0]).toBeCloseTo(55);
+    f.detectChanges();
+    expect(handle(f).getAttribute('aria-valuemin')).toBe('40');
+    expect(Number(handle(f).getAttribute('aria-valuemax'))).toBeCloseTo(55);
   });
 
-  it('_startDrag then mouseup should emit sizeChange', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const emitted: number[][] = [];
-    f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
-    f.componentInstance._startDrag(
-      { preventDefault: vi.fn(), clientX: 200, clientY: 0 } as unknown as MouseEvent,
-      0,
-    );
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 210, clientY: 0 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
-    expect(emitted.length).toBe(1);
+  it('starts one pointer session, previews one proposal, then restores rejected layout', () => {
+    const f = setup();
+    const h = handle(f);
+    const capture = vi.fn();
+    const release = vi.fn();
+    Object.defineProperties(h, {
+      setPointerCapture: { configurable: true, value: capture },
+      hasPointerCapture: { configurable: true, value: () => true },
+      releasePointerCapture: { configurable: true, value: release },
+    });
+    const starts: number[][] = [], live: number[][] = [], proposals: number[][] = [];
+    f.componentInstance.resizeStart.subscribe((v) => starts.push([...v]));
+    f.componentInstance.resize.subscribe((v) => live.push([...v]));
+    f.componentInstance.sizesChange.subscribe((v) => proposals.push([...v]));
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 120);
+    f.detectChanges();
+    expect(capture).toHaveBeenCalledWith(1);
+    expect(starts).toEqual([[50, 50]]);
+    expect(live).toEqual([[60, 40]]);
+    expect(proposals).toEqual([[60, 40]]);
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('60%');
+    pointer(h, 'pointerup', 120);
+    f.detectChanges();
+    expect(release).toHaveBeenCalledWith(1);
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('50%');
+    expect(proposals).toHaveLength(1);
   });
 
-  it('_startTouchDrag then touchend should emit sizeChange', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const emitted: number[][] = [];
-    f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
-    const touch = { clientX: 100, clientY: 0 };
-    f.componentInstance._startTouchDrag({ touches: [touch] } as unknown as TouchEvent, 0);
-    window.dispatchEvent(new TouchEvent('touchend'));
-    expect(emitted.length).toBe(1);
+  it('cancels a pointer preview and releases capture on destroy', () => {
+    const f = setup();
+    const h = handle(f);
+    const release = vi.fn();
+    Object.defineProperties(h, {
+      setPointerCapture: { configurable: true, value: vi.fn() },
+      hasPointerCapture: { configurable: true, value: () => true },
+      releasePointerCapture: { configurable: true, value: release },
+    });
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 120);
+    pointer(h, 'pointercancel', 120);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('50%');
+    pointer(h, 'pointerdown', 100);
+    f.destroy();
+    expect(release).toHaveBeenCalledTimes(2);
   });
 
-  it('ArrowUp key should increase size when direction is vertical', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }], 'vertical');
-    await f.whenStable();
-    const initial = f.componentInstance._sizes()[0];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowUp' }), 0);
-    expect(f.componentInstance._sizes()[0]).toBeLessThan(initial);
-  });
-
-  it('pane with min should clamp size during drag', async () => {
-    const f = setup([
-      { size: 50, min: 30 },
-      { size: 50, min: 30 },
-    ]);
-    await f.whenStable();
-    // Try to reduce pane 0 below min
-    for (let i = 0; i < 20; i++) {
-      f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'ArrowLeft' }), 0);
-    }
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(f.componentInstance._sizes()[1]).toBeGreaterThanOrEqual(0);
-  });
-
-  it('non-arrow key on handle should do nothing', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const before = [...f.componentInstance._sizes()];
-    f.componentInstance._onHandleKey(new KeyboardEvent('keydown', { key: 'Tab' }), 0);
-    expect(f.componentInstance._sizes()).toEqual(before);
-  });
-
-  it('drag move returns without changing sizes when no drag is active or container has no size', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    const before = [...comp._sizes()];
-
-    comp._onDragMove(10, 10);
-    expect(comp._sizes()).toEqual(before);
-
-    comp._dragIndex = 0;
-    Object.defineProperty(f.nativeElement, 'offsetWidth', { configurable: true, value: 0 });
-    comp._onDragMove(20, 20);
-    expect(comp._sizes()).toEqual(before);
-  });
-
-  it('_sizes should handle 3 panes', async () => {
+  it('uses RTL pointer sign and only resizes the adjacent pair', () => {
     const f = setup([{ size: 30 }, { size: 40 }, { size: 30 }]);
-    await f.whenStable();
-    const handles = f.nativeElement.querySelectorAll('.neu-splitter__handle');
-    expect(handles.length).toBe(2);
-    expect(f.componentInstance._sizes().length).toBe(3);
+    f.nativeElement.style.direction = 'rtl';
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    const h = handle(f, 1);
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 120);
+    expect(values).toEqual([[30, 30, 40]]);
   });
 
-  it('_sizes with missing sizes distributes remaining evenly', async () => {
-    const f = setup([{ size: 60 }, {}]);
-    await f.whenStable();
-    expect(f.componentInstance._sizes()[1]).toBe(40);
+  it('does not emit a proposal when the pointer has not moved', () => {
+    const f = setup();
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    const h = handle(f);
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 100);
+    pointer(h, 'pointerup', 100);
+    expect(values).toEqual([]);
   });
 
-  it('_startDrag with vertical direction should respond to clientY movement', async () => {
-    // El drag vertical debe responder al eje Y del mouse
-    // Vertical drag must respond to the mouse Y axis
-    const f = setup([{ size: 50 }, { size: 50 }], 'vertical');
-    await f.whenStable();
-    const emitted: number[][] = [];
-    f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
-    f.componentInstance._startDrag(
-      { preventDefault: vi.fn(), clientX: 0, clientY: 200 } as unknown as MouseEvent,
-      0,
-    );
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 0, clientY: 210 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
-    expect(emitted.length).toBe(1);
-  });
-
-  it('_startTouchDrag with vertical direction should emit sizeChange', async () => {
-    // El drag táctil vertical debe emitir sizeChange al soltar
-    // Vertical touch drag must emit sizeChange on release
-    const f = setup([{ size: 50 }, { size: 50 }], 'vertical');
-    await f.whenStable();
-    const emitted: number[][] = [];
-    f.componentInstance.sizeChange.subscribe((s: number[]) => emitted.push(s));
-    const touch = { clientX: 0, clientY: 100 };
-    f.componentInstance._startTouchDrag({ touches: [touch] } as unknown as TouchEvent, 0);
-    window.dispatchEvent(new TouchEvent('touchend'));
-    expect(emitted.length).toBe(1);
-  });
-
-  it('_startTouchDrag touchmove event should call _onDragMove (covers onMove lambda)', async () => {
-    // El evento touchmove debe llamar a _onDragMove (cubre la lambda onMove)
-    // The touchmove event must call _onDragMove (covers the onMove lambda)
-    const f = setup([{ size: 50 }, { size: 50 }], 'horizontal');
-    await f.whenStable();
-    f.componentInstance._startTouchDrag(
-      { touches: [{ clientX: 100, clientY: 0 }] } as unknown as TouchEvent,
-      0,
-    );
-    // Dispatch touchmove — triggers the onMove lambda registered on window
-    window.dispatchEvent(
-      new TouchEvent('touchmove', { touches: [{ clientX: 120, clientY: 0 }] as any }),
-    );
-    window.dispatchEvent(new TouchEvent('touchend'));
-    // No throw, sizes should still be valid
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(f.componentInstance._sizes()[1]).toBeGreaterThanOrEqual(0);
-  });
-
-  it('_adjustPair should clamp pane sizes to 0 when dragging past boundary', async () => {
-    // _adjustPair debe limitar los tamaños de los paneles a 0 al arrastrar más allá del límite
-    // _adjustPair must clamp pane sizes to 0 when dragging past the boundary
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    // Apply a massive delta that would make newB go negative (covers clamping branch)
-    comp._adjustPair(0, 200);
-    expect(comp._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(comp._sizes()[1]).toBeGreaterThanOrEqual(0);
-  });
-
-  it('_adjustPair with large negative delta clamps first pane to 0', async () => {
-    // _adjustPair con delta negativo grande debe limitar el primer panel a 0
-    // _adjustPair with large negative delta must clamp first pane to 0
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    // Apply a large negative delta that would make newA go negative
-    comp._adjustPair(0, -200);
-    expect(comp._sizes()[0]).toBeGreaterThanOrEqual(0);
-    expect(comp._sizes()[1]).toBeGreaterThanOrEqual(0);
-  });
-
-  it('keydown on the handle should trigger _onHandleKey via the template listener', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-
-    const handle = f.nativeElement.querySelector('.neu-splitter__handle') as HTMLDivElement;
-    const before = f.componentInstance._sizes()[0];
-    handle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+  it('converts vertical pointer movement using container height', () => {
+    const f = setup();
+    f.componentRef.setInput('orientation', 'vertical');
     f.detectChanges();
-
-    expect(f.componentInstance._sizes()[0]).toBeGreaterThan(before);
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    const h = handle(f);
+    pointer(h, 'pointerdown', 0, 100);
+    pointer(h, 'pointermove', 0, 120);
+    expect(values).toEqual([[60, 40]]);
   });
 
-  it('mousedown on the handle should trigger drag listeners via the template listener', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-
-    Object.defineProperty(f.nativeElement, 'offsetWidth', { configurable: true, value: 200 });
-    const emitted: number[][] = [];
-    f.componentInstance.sizeChange.subscribe((sizes: number[]) => emitted.push(sizes));
-
-    const handle = f.nativeElement.querySelector('.neu-splitter__handle') as HTMLDivElement;
-    handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 0 }));
-    window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 0 }));
-    window.dispatchEvent(new MouseEvent('mouseup'));
-
-    expect(emitted.length).toBe(1);
+  it('increases the logical start pane for a physical left drag in RTL', () => {
+    const f = setup();
+    f.nativeElement.style.direction = 'rtl';
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    const h = handle(f);
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 80);
+    expect(values).toEqual([[60, 40]]);
   });
 
-  it('touchstart on the handle should trigger touch drag listeners via the template listener', async () => {
-    const f = setup([{ size: 50 }, { size: 50 }]);
-    await f.whenStable();
-
-    Object.defineProperty(f.nativeElement, 'offsetWidth', { configurable: true, value: 200 });
-    const emitted: number[][] = [];
-    f.componentInstance.sizeChange.subscribe((sizes: number[]) => emitted.push(sizes));
-
-    const handle = f.nativeElement.querySelector('.neu-splitter__handle') as HTMLDivElement;
-    const start = new Event('touchstart', { bubbles: true });
-    Object.defineProperty(start, 'touches', {
-      configurable: true,
-      value: [{ clientX: 100, clientY: 0 }],
+  it('keeps an accepted pointer proposal after its preview ends', () => {
+    const f = setup();
+    f.componentInstance.sizesChange.subscribe((v) => {
+      f.componentRef.setInput('panes', v.map((size) => ({ size })));
     });
-    handle.dispatchEvent(start);
+    const h = handle(f);
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 120);
+    f.detectChanges();
+    pointer(h, 'pointerup', 120);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('60%');
+  });
 
-    const move = new Event('touchmove', { bubbles: true });
-    Object.defineProperty(move, 'touches', {
-      configurable: true,
-      value: [{ clientX: 130, clientY: 0 }],
-    });
-    window.dispatchEvent(move);
-    window.dispatchEvent(new Event('touchend'));
+  it('clamps a pointer proposal to the pixel minimum of the logical start pane', () => {
+    const f = setup([{ size: 50, min: 80 }, { size: 50 }]);
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    const h = handle(f);
+    pointer(h, 'pointerdown', 100);
+    pointer(h, 'pointermove', 0);
+    expect(values).toEqual([[40, 60]]);
+  });
 
-    expect(emitted.length).toBe(1);
+  it('never echoes a parent-only panes replacement', () => {
+    const f = setup();
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    f.componentRef.setInput('panes', [{ size: 20 }, { size: 80 }]);
+    f.detectChanges();
+    expect(f.nativeElement.querySelector('.neu-splitter__pane').style.flexBasis).toBe('20%');
+    expect(values).toEqual([]);
+  });
+
+  it('ignores non-arrow keys, secondary pointer buttons and exposes no collapse owner', () => {
+    const f = setup();
+    const values: number[][] = [];
+    f.componentInstance.sizesChange.subscribe((v) => values.push([...v]));
+    key(handle(f), 'Tab');
+    const event = new Event('pointerdown', { bubbles: true });
+    Object.defineProperties(event, { button: { value: 2 }, pointerId: { value: 1 } });
+    handle(f).dispatchEvent(event);
+    expect(values).toEqual([]);
+    expect('collapsed' in f.componentInstance).toBe(false);
+    expect('collapse' in f.componentInstance).toBe(false);
   });
 });

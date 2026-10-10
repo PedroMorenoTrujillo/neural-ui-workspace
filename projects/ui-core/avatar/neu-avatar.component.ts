@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -25,21 +24,21 @@ export type NeuAvatarStatus = 'online' | 'offline' | 'busy' | 'away' | '';
   selector: 'neu-avatar',
   imports: [NgClass],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-avatar-host' },
   template: `
     <span
       class="neu-avatar"
       [ngClass]="hostClasses()"
-      [attr.aria-label]="alt() || name() || 'Avatar'"
-      role="img"
+      [attr.aria-label]="alt() || name() || null"
+      [attr.role]="alt() || name() ? 'img' : null"
+      [attr.aria-hidden]="alt() || name() ? null : 'true'"
     >
-      @if (src() && !imgError()) {
+      @if (src() && failedSrc() !== src()) {
         <img
           class="neu-avatar__img"
           [src]="src()"
-          [alt]="alt() || name()"
-          (error)="imgError.set(true)"
+          alt=""
+          (error)="failedSrc.set(src())"
         />
       } @else {
         <span class="neu-avatar__initials" aria-hidden="true">{{ initials() }}</span>
@@ -73,20 +72,20 @@ export class NeuAvatarComponent {
   status = input<NeuAvatarStatus>('');
 
   /** @internal Imagen fallida / Failed image */
-  protected readonly imgError = signal(false);
+  protected readonly failedSrc = signal('');
 
   protected readonly initials = computed(() => {
-    const n = this.name().trim();
+    const n = this.name().trim().normalize('NFC');
     if (!n) return '?';
     const parts = n.split(/\s+/);
     return parts.length === 1
-      ? parts[0].slice(0, 2).toUpperCase()
-      : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      ? Array.from(parts[0]).slice(0, 2).join('').toUpperCase()
+      : (Array.from(parts[0])[0] + Array.from(parts[parts.length - 1])[0]).toUpperCase();
   });
 
   protected readonly hostClasses = computed(() => [
     `neu-avatar--${this.size()}`,
     `neu-avatar--${this.shape()}`,
-    ...(!this.src() || this.imgError() ? [`neu-avatar--${this.color()}`] : []),
+    ...(!this.src() || this.failedSrc() === this.src() ? [`neu-avatar--${this.color()}`] : []),
   ]);
 }

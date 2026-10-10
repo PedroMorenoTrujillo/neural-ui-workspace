@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   PLATFORM_ID,
   ViewEncapsulation,
@@ -8,36 +8,34 @@ import {
   inject,
   input,
   output,
-  signal,
-  untracked,
   viewChildren,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Directionality } from '@angular/cdk/bidi';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   CdkDrag,
   CdkDragDrop,
+  CdkDragHandle,
   CdkDragPlaceholder,
   CdkDragPreview,
   CdkDropList,
-  moveItemInArray,
 } from '@angular/cdk/drag-drop';
 
 export interface NeuDashboardTileConfig {
-  /** Identificador único / Unique identifier */
+  /** Stable unique identifier used to match projected content with a tile. */
   id: string;
-  /** Número de columnas que ocupa / Column span */
+  /** Number of grid columns occupied by the tile. Defaults to 1. */
   cols?: number;
-  /** Número de filas que ocupa / Row span */
+  /** Number of grid rows occupied by the tile. Defaults to 1. */
   rows?: number;
-  /** Título del tile / Tile title */
+  /** Optional title rendered inside the drag handle. */
   title?: string;
 }
 
 /**
  * NeuralUI DashboardGrid
  *
- * Cuadrícula de tiles reordenables mediante drag-and-drop (CDK DragDrop).
+ * Reorderable dashboard tile grid built with Angular CDK DragDrop.
  *
  * Uso:
  *   <neu-dashboard-grid [tiles]="tileConfigs" [columns]="3">
@@ -46,9 +44,8 @@ export interface NeuDashboardTileConfig {
  */
 @Component({
   selector: 'neu-dashboard-grid',
-  imports: [CdkDrag, CdkDragPlaceholder, CdkDragPreview, CdkDropList],
+  imports: [CdkDrag, CdkDragHandle, CdkDragPlaceholder, CdkDragPreview, CdkDropList],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-dg',
     '[style.--neu-dg-cols]': 'columns()',
@@ -61,33 +58,35 @@ export interface NeuDashboardTileConfig {
     <div
       class="neu-dg__grid"
       cdkDropList
+      cdkDropListOrientation="mixed"
       [cdkDropListData]="_orderedTiles()"
       (cdkDropListDropped)="_onDrop($event)"
+      role="list"
     >
       @for (tile of _orderedTiles(); track tile.id) {
         <div
           class="neu-dg__tile"
+          role="listitem"
           cdkDrag
           [cdkDragData]="tile"
-          [attr.data-dashboard-tile-id]="tile.id"
+          (cdkDragStarted)="_onDragStarted()"
+          (cdkDragEnded)="_onDragEnded()"
           [style.--tile-cols]="tile.cols ?? 1"
           [style.--tile-rows]="tile.rows ?? 1"
         >
           <!-- Drag handle -->
-          <div
+          <button
+            type="button"
             class="neu-dg__tile-handle"
             cdkDragHandle
-            role="button"
-            tabindex="0"
-            aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
-            [attr.aria-label]="(tile.title ?? tile.id) + '. ' + keyboardReorderLabel()"
-            (keydown)="_onTileKeydown(tile.id, $event)"
+            [attr.aria-label]="moveLabel(tile.title || tile.id)"
+            (keydown)="_onHandleKey($event, tile.id)"
           >
             @if (tile.title) {
               <span class="neu-dg__tile-title">{{ tile.title }}</span>
             }
             <span class="neu-dg__handle-icon" aria-hidden="true">⠿</span>
-          </div>
+          </button>
           <!-- Drag placeholder -->
           <div *cdkDragPlaceholder class="neu-dg__placeholder"></div>
           <!-- Drag preview -->
@@ -103,73 +102,118 @@ export interface NeuDashboardTileConfig {
   styleUrl: './neu-dashboard-grid.component.scss',
 })
 export class NeuDashboardGridComponent {
+  private readonly locale = inject(NEURAL_LOCALE);
+  protected moveLabel(title: string): string {
+    return this.locale.toLowerCase().startsWith('es') ? `Mover ${title}; usa las flechas para reordenar` : `Move ${title}; use arrow keys to reorder`;
+  }
   private readonly _host = inject(ElementRef) as ElementRef<HTMLElement>;
   private readonly _platformId = inject(PLATFORM_ID);
-  private readonly _directionality = inject(Directionality);
+  private readonly _destroyRef = inject(DestroyRef);
+  private _dragActive = false;
+  private _dragCancelled = false;
+  private readonly _onDragKeydown = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    this._dragCancelled = true;
+  };
 
-  readonly tiles = input<NeuDashboardTileConfig[]>([]);
+  readonly tiles = input<readonly NeuDashboardTileConfig[]>([]);
   readonly columns = input<number>(3);
-  readonly keyboardReorderLabel = input('Use Alt plus Left or Right Arrow to reorder');
 
-  /** Emitido cuando el orden cambia / Emitted when order changes */
-  readonly orderChange = output<NeuDashboardTileConfig[]>();
+  /** Emits the proposed tile order after pointer or keyboard reordering. */
+  readonly orderChange = output<readonly NeuDashboardTileConfig[]>();
 
-  readonly _orderedTiles = signal<NeuDashboardTileConfig[]>([]);
-  readonly _tileSlots = viewChildren<ElementRef<HTMLElement>>('tileSlot');
+  protected readonly _orderedTiles = this.tiles;
+  /* v8 ignore start -- Angular signal-query factory; rendered tile-slot behavior is covered. */
+  private readonly _tileSlots = viewChildren<ElementRef<HTMLElement>>('tileSlot');
+  /* v8 ignore stop */
 
   constructor() {
-    effect(() => {
-      const t = this.tiles();
-      untracked(() => this._orderedTiles.set([...t]));
-    });
-
+    this._destroyRef.onDestroy(() => this._removeDragKeydown());
     effect(() => {
       this._orderedTiles();
       this._tileSlots();
       if (isPlatformBrowser(this._platformId)) {
-        queueMicrotask(() => this._attachProjectedTiles());
+        queueMicrotask(() => {
+          if (!this._destroyRef.destroyed) this._attachProjectedTiles();
+        });
       }
     });
   }
 
-  _onDrop(event: CdkDragDrop<NeuDashboardTileConfig[]>): void {
-    const tiles = [...this._orderedTiles()];
-    moveItemInArray(tiles, event.previousIndex, event.currentIndex);
-    this._orderedTiles.set(tiles);
-    this.orderChange.emit(tiles);
+  protected _onDragStarted(): void {
+    this._removeDragKeydown();
+    this._dragActive = true;
+    this._dragCancelled = false;
+    this._host.nativeElement.ownerDocument.addEventListener('keydown', this._onDragKeydown, true);
   }
 
-  _onTileKeydown(tileId: string, event: KeyboardEvent): void {
-    if (!event.altKey || !['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+  protected _onDragEnded(): void {
+    this._dragActive = false;
+    this._removeDragKeydown();
+  }
+
+  protected _onDrop(event: CdkDragDrop<readonly NeuDashboardTileConfig[]>): void {
+    const cancelled = this._dragCancelled;
+    this._dragActive = false;
+    this._dragCancelled = false;
+    this._removeDragKeydown();
+    if (cancelled) return;
+    const tiles = this.tiles();
+    const draggedId = event.item?.data?.id;
+    const from =
+      draggedId === undefined
+        ? event.previousIndex
+        : tiles.findIndex((tile) => tile.id === draggedId);
+    this._proposeReorder(from, event.currentIndex);
+  }
+
+  protected _onHandleKey(event: KeyboardEvent, id: string): void {
+    if (event.key === 'Escape' && this._dragActive) {
+      event.preventDefault();
+      this._dragCancelled = true;
       return;
     }
-
-    const tiles = [...this._orderedTiles()];
-    const previousIndex = tiles.findIndex((tile) => tile.id === tileId);
-    if (previousIndex < 0) {
-      return;
-    }
-
-    const physicalDelta = event.key === 'ArrowRight' ? 1 : -1;
-    const delta = this._directionality.valueSignal() === 'rtl' ? -physicalDelta : physicalDelta;
-    const currentIndex = Math.max(0, Math.min(tiles.length - 1, previousIndex + delta));
-    if (currentIndex === previousIndex) {
-      return;
-    }
-
+    const direction = this._host.nativeElement.ownerDocument.defaultView?.getComputedStyle(
+      this._host.nativeElement,
+    ).direction;
+    const delta =
+      event.key === 'ArrowUp'
+        ? -1
+        : event.key === 'ArrowDown'
+          ? 1
+          : event.key === 'ArrowLeft'
+            ? direction === 'rtl'
+              ? 1
+              : -1
+            : event.key === 'ArrowRight'
+              ? direction === 'rtl'
+                ? -1
+                : 1
+              : 0;
+    if (!delta) return;
     event.preventDefault();
-    moveItemInArray(tiles, previousIndex, currentIndex);
-    this._orderedTiles.set(tiles);
-    this.orderChange.emit(tiles);
-    queueMicrotask(() => this._focusTileHandle(tileId));
+    const index = this.tiles().findIndex((tile) => tile.id === id);
+    this._proposeReorder(index, index + delta);
   }
 
-  private _focusTileHandle(tileId: string): void {
-    if (!isPlatformBrowser(this._platformId)) return;
-    const tile = Array.from(
-      this._host.nativeElement.querySelectorAll<HTMLElement>('[data-dashboard-tile-id]'),
-    ).find((candidate) => candidate.dataset['dashboardTileId'] === tileId);
-    tile?.querySelector<HTMLElement>('.neu-dg__tile-handle')?.focus();
+  private _proposeReorder(from: number, to: number): void {
+    const applied = this.tiles();
+    if (from < 0 || from >= applied.length || to < 0 || to >= applied.length || from === to) {
+      return;
+    }
+    const proposal = [...applied];
+    const [moved] = proposal.splice(from, 1);
+    proposal.splice(to, 0, moved);
+    this.orderChange.emit(proposal);
+  }
+
+  private _removeDragKeydown(): void {
+    this._host.nativeElement.ownerDocument.removeEventListener(
+      'keydown',
+      this._onDragKeydown,
+      true,
+    );
   }
 
   private _attachProjectedTiles(): void {

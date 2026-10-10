@@ -1,40 +1,23 @@
-import { Component, Signal, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NeuCloseRequest } from '@neural-ui/core/foundation';
 import { NeuSidebarComponent } from './neu-sidebar.component';
-import { NeuUrlStateService } from '../url-state/neu-url-state.service';
-import { provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
-
-// ── Mock de NeuUrlStateService ────────────────────────────────────────────────
-// Signal controlable que simula el estado del parámetro de URL / Controllable signal simulating the URL param state
-
-let _menuParam: ReturnType<typeof signal<string | null>>;
-let _mockSetParam: ReturnType<typeof vi.fn>;
-let _mockGetParam: ReturnType<typeof vi.fn>;
-
-function createMockUrlState() {
-  _menuParam = signal<string | null>(null);
-  _mockSetParam = vi.fn();
-  _mockGetParam = vi.fn((_key: string): Signal<string | null> => _menuParam);
-  return {
-    params: signal<Record<string, string>>({}),
-    getParam: _mockGetParam,
-    setParam: _mockSetParam,
-    patchParams: vi.fn(),
-    clearParams: vi.fn(),
-  };
-}
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconX } from '@neural-icons/core/icons/x';
 
 // ── Host Component ─────────────────────────────────────────────────────────────
 
 @Component({
   template: `
     <neu-sidebar
+      [open]="open()"
       [persistent]="persistent"
       [side]="side"
       [hideHeader]="hideHeader"
       [ariaLabel]="ariaLabel"
-      (closeRequested)="closedCount = closedCount + 1"
+      (closeRequested)="closeRequests.push($event)"
+      (opened)="openedCount = openedCount + 1"
+      (closed)="closedCount = closedCount + 1"
     >
       <span neu-sidebar-header>Mi App</span>
       <p>Contenido del sidebar</p>
@@ -43,33 +26,36 @@ function createMockUrlState() {
   imports: [NeuSidebarComponent],
 })
 class HostComponent {
+  readonly open = signal(false);
   persistent = false;
   side: 'left' | 'right' = 'left';
   hideHeader = false;
   ariaLabel = 'Menú de navegación';
+  closeRequests: NeuCloseRequest[] = [];
+  openedCount = 0;
   closedCount = 0;
 }
 
 @Component({
   template: `
-    <neu-sidebar>
+    <neu-sidebar [open]="open()">
       <span neu-sidebar-header>Menu</span>
       <button class="inside-action" type="button">Action</button>
     </neu-sidebar>
   `,
   imports: [NeuSidebarComponent],
 })
-class FocusHostComponent {}
+class FocusHostComponent {
+  readonly open = signal(false);
+}
 
 // ── Suite ─────────────────────────────────────────────────────────────────────
 
 describe('NeuSidebarComponent', () => {
-  let mockUrlState: ReturnType<typeof createMockUrlState>;
   let originalHtmlOverflow: string;
   let originalBodyOverflow: string;
 
   beforeEach(async () => {
-    mockUrlState = createMockUrlState();
     originalHtmlOverflow = document.documentElement.style.overflow;
     originalBodyOverflow = document.body.style.overflow;
     document.documentElement.style.overflow = '';
@@ -77,15 +63,15 @@ describe('NeuSidebarComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [
-        provideZonelessChangeDetection(),
-        { provide: NeuUrlStateService, useValue: mockUrlState },
-        provideIcons({ lucideX }),
-      ],
+      providers: [provideZonelessChangeDetection(), provideNeuralIcons(iconX)],
     }).compileComponents();
   });
 
   afterEach(() => {
+    vi.useRealTimers();
+    document
+      .querySelectorAll('[data-sidebar-focus-trigger]')
+      .forEach((element) => element.remove());
     document.documentElement.style.overflow = originalHtmlOverflow;
     document.body.style.overflow = originalBodyOverflow;
   });
@@ -96,39 +82,6 @@ describe('NeuSidebarComponent', () => {
     const f = TestBed.createComponent(HostComponent);
     f.detectChanges();
     expect(f.nativeElement.querySelector('neu-sidebar')).toBeTruthy();
-  });
-
-  it('should localize its default navigation and close labels from the document language', () => {
-    const originalLanguage = document.documentElement.lang;
-    try {
-      document.documentElement.lang = 'en';
-      const englishFixture = TestBed.createComponent(FocusHostComponent);
-      englishFixture.detectChanges();
-      expect(englishFixture.nativeElement.querySelector('aside').getAttribute('aria-label')).toBe(
-        'Navigation menu',
-      );
-      expect(
-        englishFixture.nativeElement
-          .querySelector('.neu-sidebar__close')
-          .getAttribute('aria-label'),
-      ).toBe('Close navigation menu');
-      englishFixture.destroy();
-
-      document.documentElement.lang = 'es';
-      const spanishFixture = TestBed.createComponent(FocusHostComponent);
-      spanishFixture.detectChanges();
-      expect(spanishFixture.nativeElement.querySelector('aside').getAttribute('aria-label')).toBe(
-        'Menú de navegación',
-      );
-      expect(
-        spanishFixture.nativeElement
-          .querySelector('.neu-sidebar__close')
-          .getAttribute('aria-label'),
-      ).toBe('Cerrar menú de navegación');
-      spanishFixture.destroy();
-    } finally {
-      document.documentElement.lang = originalLanguage;
-    }
   });
 
   it('should render aside element', () => {
@@ -186,24 +139,24 @@ describe('NeuSidebarComponent', () => {
 
   // ── Modo overlay (no persistente) ─────────────────────────────────────────
 
-  it('should NOT have neu-sidebar--open class when not persistent and URL param is null', () => {
+  it('should NOT have neu-sidebar--open class when applied open is false', () => {
     const f = TestBed.createComponent(HostComponent);
     f.componentInstance.persistent = false;
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-sidebar--open')).toBeFalsy();
   });
 
-  it('should have neu-sidebar--open class when URL param is "open"', () => {
-    _menuParam.set('open');
+  it('should have neu-sidebar--open class when applied open is true', () => {
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-sidebar--open')).toBeTruthy();
   });
 
   it('should render aria-modal when opened as an overlay dialog', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
 
@@ -220,16 +173,16 @@ describe('NeuSidebarComponent', () => {
   });
 
   it('overlay div should have visible class when sidebar is open', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-sidebar__overlay--visible')).toBeTruthy();
   });
 
   it('should lock document scroll when overlay sidebar is open', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
 
@@ -237,22 +190,23 @@ describe('NeuSidebarComponent', () => {
     expect(document.body.style.overflow).toBe('hidden');
   });
 
-  it('should restore document scroll when overlay sidebar closes', () => {
-    _menuParam.set('open');
+  it('should restore document scroll when overlay sidebar closes', async () => {
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
 
-    _menuParam.set(null);
+    f.componentInstance.open.set(false);
     f.detectChanges();
+    await f.whenStable();
 
     expect(document.documentElement.style.overflow).toBe('');
     expect(document.body.style.overflow).toBe('');
   });
 
   it('should not lock document scroll in persistent mode', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = true;
     f.detectChanges();
 
@@ -261,8 +215,8 @@ describe('NeuSidebarComponent', () => {
   });
 
   it('should show close button in overlay mode when open', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-sidebar__close')).toBeTruthy();
@@ -320,62 +274,30 @@ describe('NeuSidebarComponent', () => {
     expect(f.nativeElement.querySelector('[role="navigation"]')).toBeTruthy();
   });
 
-  // ── close() ───────────────────────────────────────────────────────────────
+  // ── Controlled close intents ──────────────────────────────────────────────
 
-  it('close() should call urlState.setParam with null', () => {
-    const f = TestBed.createComponent(NeuSidebarComponent);
-    f.detectChanges();
-    f.componentInstance.close();
-    expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
-  });
-
-  it('close() should emit closeRequested', () => {
-    const f = TestBed.createComponent(NeuSidebarComponent);
-    f.detectChanges();
-    let emitted = false;
-    f.componentInstance.closeRequested.subscribe(() => {
-      emitted = true;
-    });
-    f.componentInstance.close();
-    expect(emitted).toBe(true);
-  });
-
-  // ── open() ────────────────────────────────────────────────────────────────
-
-  it('open() should call urlState.setParam with "open" and replaceUrl=false', () => {
-    const f = TestBed.createComponent(NeuSidebarComponent);
-    f.detectChanges();
-    f.componentInstance.open();
-    expect(_mockSetParam).toHaveBeenCalledWith('menu', 'open', false);
-  });
-
-  it('open(true) should call urlState.setParam with replaceUrl=true', () => {
-    const f = TestBed.createComponent(NeuSidebarComponent);
-    f.detectChanges();
-    f.componentInstance.open(true);
-    expect(_mockSetParam).toHaveBeenCalledWith('menu', 'open', true);
-  });
-
-  // ── Overlay click cierra ──────────────────────────────────────────────────
-
-  it('clicking the overlay should call close()', () => {
-    _menuParam.set('open');
+  it('clicking the overlay emits one outside intent without changing applied open', () => {
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
     f.nativeElement.querySelector('.neu-sidebar__overlay')?.click();
     f.detectChanges();
-    expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
+    expect(f.componentInstance.closeRequests).toHaveLength(1);
+    expect(f.componentInstance.closeRequests[0]?.reason).toBe('outside');
+    expect(f.nativeElement.querySelector('.neu-sidebar--open')).toBeTruthy();
   });
 
   it('clicking close button in overlay mode should emit closeRequested on host', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(HostComponent);
+    f.componentInstance.open.set(true);
     f.componentInstance.persistent = false;
     f.detectChanges();
     f.nativeElement.querySelector('.neu-sidebar__close')?.click();
     f.detectChanges();
-    expect(f.componentInstance.closedCount).toBe(1);
+    expect(f.componentInstance.closeRequests).toHaveLength(1);
+    expect(f.componentInstance.closeRequests[0]?.reason).toBe('action');
+    expect(f.componentInstance.closedCount).toBe(0);
   });
 
   // ── isOpen computed ───────────────────────────────────────────────────────
@@ -387,33 +309,31 @@ describe('NeuSidebarComponent', () => {
     expect(f.componentInstance.isOpen()).toBe(true);
   });
 
-  it('isOpen() should return false when not persistent and URL param is null', () => {
+  it('isOpen() should return false when not persistent and applied open is false', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.componentRef.setInput('persistent', false);
     f.detectChanges();
     expect(f.componentInstance.isOpen()).toBe(false);
   });
 
-  it('isOpen() should return true when not persistent and URL param is "open"', () => {
-    _menuParam.set('open');
+  it('isOpen() should return true when not persistent and applied open is true', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.componentRef.setInput('persistent', false);
+    f.componentRef.setInput('open', true);
     f.detectChanges();
     expect(f.componentInstance.isOpen()).toBe(true);
   });
 
-  it('should memoize getParam lookups across reactive URL updates', () => {
+  it('applies reconstructed parent writes without emitting close intent', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.componentRef.setInput('persistent', false);
     f.detectChanges();
-
-    expect(_mockGetParam).toHaveBeenCalledTimes(1);
-
-    _menuParam.set('open');
+    const requests = vi.fn();
+    f.componentInstance.closeRequested.subscribe(requests);
+    f.componentRef.setInput('open', true);
     f.detectChanges();
-
     expect(f.componentInstance.isOpen()).toBe(true);
-    expect(_mockGetParam).toHaveBeenCalledTimes(1);
+    expect(requests).not.toHaveBeenCalled();
   });
 
   // ── Collapsed mode ────────────────────────────────────────────────────────
@@ -454,7 +374,122 @@ describe('NeuSidebarComponent', () => {
 
   // ── Focus management ──────────────────────────────────────────────────────
 
-  it('collapsedChange should emit when collapsed input changes', () => {
+  function createFocusTrigger(): HTMLButtonElement {
+    const trigger = document.createElement('button');
+    trigger.dataset['sidebarFocusTrigger'] = '';
+    document.body.append(trigger);
+    trigger.focus();
+    return trigger;
+  }
+
+  it('restores focus once after a normal close', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.componentInstance.open.set(true);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    f.componentInstance.open.set(false);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    expect(document.activeElement).toBe(trigger);
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(f.componentInstance).toBeTruthy();
+  });
+
+  it('does not restore focus after destruction', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.componentInstance.open.set(true);
+    f.detectChanges();
+    const sidebar = f.debugElement.children[0].componentInstance as NeuSidebarComponent;
+    vi.runOnlyPendingTimers();
+
+    f.componentInstance.open.set(false);
+    f.detectChanges();
+    f.destroy();
+    vi.runAllTimers();
+
+    expect(focus).not.toHaveBeenCalled();
+    expect(sidebar['pendingFocusTimer']).toBeNull();
+    expect(sidebar['previousActiveElement']).toBeNull();
+  });
+
+  it('rejects a restoration target detached before the callback', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.componentInstance.open.set(true);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    f.componentInstance.open.set(false);
+    f.detectChanges();
+    trigger.remove();
+    vi.runOnlyPendingTimers();
+
+    expect(trigger.isConnected).toBe(false);
+    expect(focus).not.toHaveBeenCalled();
+    expect(f.debugElement.children[0].componentInstance['pendingFocusTimer']).toBeNull();
+    expect(f.debugElement.children[0].componentInstance['previousActiveElement']).toBeNull();
+  });
+
+  it('replaces pending focus work across close-reopen-close', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.componentInstance.open.set(true);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    f.componentInstance.open.set(false);
+    f.detectChanges();
+    f.componentInstance.open.set(true);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+    expect(focus).not.toHaveBeenCalled();
+
+    f.componentInstance.open.set(false);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+    vi.runAllTimers();
+
+    expect(document.activeElement).toBe(trigger);
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(f.debugElement.children[0].componentInstance['pendingFocusTimer']).toBeNull();
+  });
+
+  it('is safe to destroy after focus restoration completed', () => {
+    vi.useFakeTimers();
+    const trigger = createFocusTrigger();
+    const focus = vi.spyOn(trigger, 'focus');
+    focus.mockClear();
+    const f = TestBed.createComponent(FocusHostComponent);
+    f.componentInstance.open.set(true);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+
+    f.componentInstance.open.set(false);
+    f.detectChanges();
+    vi.runOnlyPendingTimers();
+    f.destroy();
+    vi.runAllTimers();
+
+    expect(focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('collapsedChange emits and applies an uncontrolled collapse gesture', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
     f.detectChanges();
     let emittedValue: boolean | null = null;
@@ -463,64 +498,117 @@ describe('NeuSidebarComponent', () => {
     });
     f.componentInstance.toggleCollapsed();
     expect(emittedValue).toBe(true);
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
   });
 
-  it('uses the configured URL parameter and exposes inert semantics while closed', () => {
+  it('keeps controlled collapse applied until the parent accepts', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
-    f.componentRef.setInput('urlParam', 'drawer');
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    const changes: boolean[] = [];
+    f.componentInstance.collapsedChange.subscribe((value) => changes.push(value));
+    f.componentInstance.toggleCollapsed();
+    f.detectChanges();
+    expect(changes).toEqual([true]);
+    expect(f.componentInstance.effectiveCollapsed()).toBe(false);
+    expect(f.nativeElement.querySelector('aside').classList).not.toContain(
+      'neu-sidebar--collapsed',
+    );
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    expect(changes).toEqual([true]);
+  });
+
+  it('reads initialCollapsed once and diagnoses lifetime mode switching once', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('initialCollapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    f.componentRef.setInput('initialCollapsed', false);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    expect(f.componentInstance.effectiveCollapsed()).toBe(true);
+    expect(warning).toHaveBeenCalledOnce();
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(warning).toHaveBeenCalledOnce();
+    warning.mockRestore();
+  });
+
+  it('exposes inert semantics while closed and removes URL-owned API', () => {
+    const f = TestBed.createComponent(NeuSidebarComponent);
     f.detectChanges();
     const aside = f.nativeElement.querySelector('aside.neu-sidebar') as HTMLElement;
     expect(aside.getAttribute('aria-hidden')).toBe('true');
     expect(aside.getAttribute('inert')).toBe('');
-    f.componentInstance.open();
-    f.componentInstance.close();
-    expect(_mockSetParam).toHaveBeenNthCalledWith(1, 'drawer', 'open', false);
-    expect(_mockSetParam).toHaveBeenNthCalledWith(2, 'drawer', null, true);
+    expect('urlParam' in f.componentInstance).toBe(false);
+    expect(typeof f.componentInstance.open).toBe('function');
+    expect('set' in f.componentInstance.open).toBe(false);
+    expect('close' in f.componentInstance).toBe(false);
   });
 
   it('traps Tab navigation and handles Escape only when enabled in drawer mode', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('open', true);
     f.detectChanges();
+    const requests = vi.fn();
+    f.componentInstance.closeRequested.subscribe(requests);
     const closeButton = f.nativeElement.querySelector('.neu-sidebar__close') as HTMLButtonElement;
     closeButton.focus();
-    const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+    const forward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true,
+      cancelable: true,
+    });
     const preventForward = vi.spyOn(forward, 'preventDefault');
-    f.componentInstance.onKeyDown(forward);
+    closeButton.dispatchEvent(forward);
     expect(preventForward).toHaveBeenCalled();
     expect(document.activeElement).toBe(closeButton);
 
-    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true });
+    const backward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     const preventBackward = vi.spyOn(backward, 'preventDefault');
-    f.componentInstance.onKeyDown(backward);
+    closeButton.dispatchEvent(backward);
     expect(preventBackward).toHaveBeenCalled();
 
     const escape = new KeyboardEvent('keydown', { key: 'Escape' });
     const preventEscape = vi.spyOn(escape, 'preventDefault');
-    f.componentInstance.onKeyDown(escape);
+    f.componentInstance['onKeyDown'](escape);
     expect(preventEscape).toHaveBeenCalled();
-    expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
+    expect(requests).toHaveBeenCalledOnce();
+    expect(requests.mock.calls[0]?.[0].reason).toBe('escape');
   });
 
   it('does not close with Escape when disabled or operating as persistent navigation', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('open', true);
     f.componentRef.setInput('closeOnEscape', false);
     f.detectChanges();
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(_mockSetParam).not.toHaveBeenCalled();
+    const requests = vi.fn();
+    f.componentInstance.closeRequested.subscribe(requests);
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(requests).not.toHaveBeenCalled();
 
     f.componentRef.setInput('persistent', true);
     f.componentRef.setInput('closeOnEscape', true);
     f.detectChanges();
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(_mockSetParam).not.toHaveBeenCalled();
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(requests).not.toHaveBeenCalled();
   });
 
   it('keeps scroll locked until every overlay sidebar is closed', () => {
-    _menuParam.set('open');
     const first = TestBed.createComponent(NeuSidebarComponent);
     const second = TestBed.createComponent(NeuSidebarComponent);
+    first.componentRef.setInput('open', true);
+    second.componentRef.setInput('open', true);
     first.detectChanges();
     second.detectChanges();
 
@@ -534,48 +622,55 @@ describe('NeuSidebarComponent', () => {
   });
 
   it('handles host keydown before the aside is rendered without focusable elements', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('open', true);
     const event = new KeyboardEvent('keydown', { key: 'Tab' });
     const preventDefault = vi.spyOn(event, 'preventDefault');
 
-    f.componentInstance.onKeyDown(event);
+    f.componentInstance['onKeyDown'](event);
 
     expect(preventDefault).not.toHaveBeenCalled();
   });
 
-  it('uses the HostListener for Escape keydown events', () => {
-    _menuParam.set('open');
+  it('uses the document HostListener for Escape even before focus enters the drawer', () => {
     const f = TestBed.createComponent(NeuSidebarComponent);
+    f.componentRef.setInput('open', true);
     f.detectChanges();
+    const requests = vi.fn();
+    f.componentInstance.closeRequested.subscribe(requests);
     const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
     const preventDefault = vi.spyOn(event, 'preventDefault');
 
-    f.nativeElement.dispatchEvent(event);
+    document.dispatchEvent(event);
 
     expect(preventDefault).toHaveBeenCalled();
-    expect(_mockSetParam).toHaveBeenCalledWith('menu', null, true);
+    expect(requests).toHaveBeenCalledOnce();
   });
 
   it('does not cycle focus when tabbing inside the focusable range', () => {
-    _menuParam.set('open');
     const f = TestBed.createComponent(FocusHostComponent);
+    f.componentInstance.open.set(true);
     f.detectChanges();
     const closeButton = f.nativeElement.querySelector('.neu-sidebar__close') as HTMLButtonElement;
     const action = f.nativeElement.querySelector('.inside-action') as HTMLButtonElement;
-    const sidebar = f.debugElement.children[0].componentInstance as NeuSidebarComponent;
-
     closeButton.focus();
-    const forward = new KeyboardEvent('keydown', { key: 'Tab' });
+    const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
     const preventForward = vi.spyOn(forward, 'preventDefault');
-    const backward = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true });
+    const backward = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     const preventBackward = vi.spyOn(backward, 'preventDefault');
 
-    sidebar.onKeyDown(forward);
+    closeButton.dispatchEvent(forward);
+    expect(document.activeElement).toBe(action);
     action.focus();
-    sidebar.onKeyDown(backward);
+    action.dispatchEvent(backward);
 
-    expect(preventForward).not.toHaveBeenCalled();
-    expect(preventBackward).not.toHaveBeenCalled();
+    expect(preventForward).toHaveBeenCalledTimes(1);
+    expect(preventBackward).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(closeButton);
   });
 });

@@ -41,8 +41,7 @@
     line-height: 1.5;
   }
 
-  &--sm,
-  &--compact {
+  &--sm {
     padding: var(--neu-space-5, 1.25rem) var(--neu-space-4, 1rem);
 
     .neu-empty-state__inner {
@@ -53,7 +52,7 @@
     .neu-empty-state__icon {
       width: 48px;
       height: 48px;
-      border-radius: var(--neu-radius-md, 12px);
+      border-radius: var(--neu-radius, 12px);
       margin-bottom: 0;
     }
 
@@ -63,6 +62,23 @@
 
     .neu-empty-state__desc {
       font-size: var(--neu-text-xs, 0.75rem);
+    }
+  }
+
+  &--density-compact {
+    padding: var(--neu-space-5, 1.25rem) var(--neu-space-4, 1rem);
+
+    .neu-empty-state__inner {
+      gap: var(--neu-space-2, 0.5rem);
+      max-width: 320px;
+    }
+  }
+
+  &--density-relaxed {
+    padding: var(--neu-space-12, 3rem) var(--neu-space-8, 2rem);
+
+    .neu-empty-state__inner {
+      gap: var(--neu-space-5, 1.25rem);
     }
   }
 
@@ -91,9 +107,9 @@
   }
 
   &--danger .neu-empty-state__icon {
-    background: color-mix(in srgb, var(--neu-danger, #ef4444) 12%, transparent);
-    color: var(--neu-danger, #ef4444);
-    border-color: color-mix(in srgb, var(--neu-danger, #ef4444) 24%, transparent);
+    background: color-mix(in srgb, var(--neu-error, #ef4444) 12%, transparent);
+    color: var(--neu-error, #ef4444);
+    border-color: color-mix(in srgb, var(--neu-error, #ef4444) 24%, transparent);
   }
 
   &--success .neu-empty-state__icon {

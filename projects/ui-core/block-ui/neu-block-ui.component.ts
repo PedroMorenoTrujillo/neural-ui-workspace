@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   Directive,
   ElementRef,
   ViewEncapsulation,
@@ -30,16 +30,14 @@ import {
   selector: 'neu-block-ui',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClasses()',
     '[attr.aria-busy]': 'blocked()',
     '[attr.aria-hidden]': '!blocked()',
-    role: 'status',
   },
   template: `
     @if (blocked()) {
-      <div class="neu-block-ui__overlay">
+      <div class="neu-block-ui__overlay" role="status" aria-live="polite">
         <div class="neu-block-ui__content">
           <span class="neu-block-ui__spinner" aria-hidden="true"></span>
           @if (message()) {
@@ -52,6 +50,7 @@ import {
   styleUrl: './neu-block-ui.component.scss',
 })
 export class NeuBlockUIComponent {
+  private static readonly ownedInertAttribute = 'data-neu-block-ui-inert';
   /** Activa la superposición / Activates the overlay */
   readonly blocked = input<boolean>(false);
 
@@ -65,6 +64,46 @@ export class NeuBlockUIComponent {
     'neu-block-ui': true,
     [`neu-block-ui--${this.variant()}`]: true,
   }));
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly siblingInertState = new Map<HTMLElement, boolean>();
+
+  constructor() {
+    effect(() => {
+      if (this.blocked()) {
+        this.blockSiblingInteraction();
+      } else {
+        this.restoreSiblingInteraction();
+      }
+    });
+    this.destroyRef.onDestroy(() => this.restoreSiblingInteraction());
+  }
+
+  private blockSiblingInteraction(): void {
+    const parent = this.host.parentElement;
+    if (!parent) return;
+
+    for (const sibling of Array.from(parent.children)) {
+      if (!(sibling instanceof HTMLElement) || sibling === this.host) continue;
+      if (this.siblingInertState.has(sibling)) continue;
+      // SSR can serialize the inert state applied by this component. Treat that
+      // marker as component-owned during hydration, not as consumer state that
+      // must remain after unblocking.
+      const wasOwned = sibling.hasAttribute(NeuBlockUIComponent.ownedInertAttribute);
+      this.siblingInertState.set(sibling, !wasOwned && sibling.hasAttribute('inert'));
+      sibling.setAttribute('inert', '');
+      sibling.setAttribute(NeuBlockUIComponent.ownedInertAttribute, '');
+    }
+  }
+
+  private restoreSiblingInteraction(): void {
+    for (const [sibling, wasInert] of this.siblingInertState) {
+      if (!wasInert) sibling.removeAttribute('inert');
+      sibling.removeAttribute(NeuBlockUIComponent.ownedInertAttribute);
+    }
+    this.siblingInertState.clear();
+  }
 }
 
 /**
@@ -74,17 +113,13 @@ export class NeuBlockUIComponent {
  */
 @Directive({
   selector: '[neuBlockUI]',
-  host: { '[class.neu-block-ui__host]': 'true' },
+  host: {
+    '[class.neu-block-ui__host]': 'true',
+    '[class.neu-block-ui__host--blocked]': 'neuBlockUI()',
+    '[attr.aria-busy]': 'neuBlockUI()',
+    '[attr.inert]': 'neuBlockUI() ? "" : null',
+  },
 })
 export class NeuBlockUIDirective {
   readonly neuBlockUI = input<boolean>(false);
-
-  private readonly _el = inject(ElementRef<HTMLElement>);
-
-  constructor() {
-    effect(() => {
-      const blocked = this.neuBlockUI();
-      this._el.nativeElement.classList.toggle('neu-block-ui__host--blocked', blocked);
-    });
-  }
 }

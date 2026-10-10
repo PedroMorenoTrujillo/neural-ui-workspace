@@ -1,5 +1,9 @@
 @use '../styles/breakpoints' as *;
 
+neu-uploader[hidden] {
+  display: none !important;
+}
+
 $uploader-height: 176px;
 $uploader-height-sm: 144px;
 $uploader-height-lg: 208px;
@@ -31,9 +35,7 @@ $uploader-height-lg: 208px;
 }
 
 .neu-uploader__label {
-  display: flex;
-  align-items: center;
-  min-height: 24px;
+  display: block;
   font-size: var(--neu-text-sm);
   font-weight: 500;
   color: var(--neu-text-muted);
@@ -305,7 +307,7 @@ $uploader-height-lg: 208px;
 }
 
 .neu-uploader__item--error {
-  border-color: var(--neu-danger, #dc2626);
+  border-color: var(--neu-error, #dc2626);
 }
 
 .neu-uploader__retry {

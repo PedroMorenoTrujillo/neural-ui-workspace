@@ -1,16 +1,16 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  ElementRef,
   ViewEncapsulation,
   computed,
-  forwardRef,
+  inject,
   input,
+  model,
   output,
-  signal,
+  viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-
-let _neuCheckboxIdSeq = 0;
+import type { FormCheckboxControl, ValidationError } from '@angular/forms/signals';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 /**
  * NeuralUI Checkbox Component
@@ -23,33 +23,37 @@ let _neuCheckboxIdSeq = 0;
 @Component({
   selector: 'neu-checkbox',
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'neu-checkbox-host' },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuCheckboxComponent),
-      multi: true,
-    },
-  ],
+  host: {
+    class: 'neu-checkbox-host',
+    '[hidden]': 'hidden()',
+  },
   template: `
-    <label class="neu-checkbox" [class.neu-checkbox--disabled]="_isDisabled()" [for]="_id">
+    <label class="neu-checkbox" [class.neu-checkbox--disabled]="disabled()" [for]="_id">
       <input
+        #nativeInput
         type="checkbox"
         class="neu-checkbox__input"
         [id]="_id"
+        [tabIndex]="tabIndex()"
         [attr.name]="name() || null"
         [attr.aria-label]="ariaLabel() || null"
-        [attr.aria-checked]="indeterminate() ? 'mixed' : _resolvedChecked()"
-        [checked]="_resolvedChecked()"
+        [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
+        [checked]="checked()"
         [indeterminate]="indeterminate()"
-        [disabled]="_isDisabled()"
+        [disabled]="disabled()"
+        [attr.required]="required() ? '' : null"
+        [attr.readonly]="readonly() ? '' : null"
+        [attr.aria-disabled]="disabled() ? 'true' : null"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-busy]="pending() ? 'true' : null"
         (change)="onChange($event)"
         (blur)="onBlur()"
       />
       <span
         class="neu-checkbox__box"
-        [class.neu-checkbox__box--checked]="_resolvedChecked()"
+        [class.neu-checkbox__box--checked]="checked()"
         [class.neu-checkbox__box--mixed]="indeterminate()"
       >
         <svg class="neu-checkbox__check" viewBox="0 0 12 10" fill="none" aria-hidden="true">
@@ -57,16 +61,16 @@ let _neuCheckboxIdSeq = 0;
             <path
               class="neu-checkbox__check-mark neu-checkbox__check-mark--visible"
               d="M2 5H10"
-              stroke="white"
+              stroke="currentColor"
               stroke-width="1.8"
               stroke-linecap="round"
             />
           } @else {
             <path
               class="neu-checkbox__check-mark"
-              [class.neu-checkbox__check-mark--visible]="_resolvedChecked()"
+              [class.neu-checkbox__check-mark--visible]="checked()"
               d="M1 5L4.5 8.5L11 1"
-              stroke="white"
+              stroke="currentColor"
               stroke-width="1.8"
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -81,51 +85,48 @@ let _neuCheckboxIdSeq = 0;
   `,
   styleUrl: './neu-checkbox.component.scss',
 })
-export class NeuCheckboxComponent implements ControlValueAccessor {
+export class NeuCheckboxComponent implements FormCheckboxControl {
   readonly label = input<string>('');
   readonly name = input<string>('');
   readonly disabled = input<boolean>(false);
-  readonly checked = input<boolean | undefined>(undefined);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly required = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly checked = model<boolean>(false);
   readonly indeterminate = input<boolean>(false);
   readonly ariaLabel = input<string>('');
+  /** Composite widgets can keep the indicator outside their roving tab order. */
+  readonly tabIndex = input<number>(0);
+  readonly touch = output<void>();
 
-  readonly checkedChange = output<boolean>();
+  protected readonly _id = inject(NeuIdGenerator).getId('neu-checkbox-');
+  private readonly nativeInput = viewChild.required<ElementRef<HTMLInputElement>>('nativeInput');
 
-  readonly _id = `neu-checkbox-${_neuCheckboxIdSeq++}`;
-
-  protected readonly _checked = signal(false);
-  /** Estado disabled interno — combina el input `disabled` con el CVA setDisabledState / Internal disabled state — combines the `disabled` input with CVA setDisabledState */
-  private readonly _cvaDisabled = signal(false);
-  protected readonly _isDisabled = computed(() => this.disabled() || this._cvaDisabled());
-  protected readonly _resolvedChecked = computed(() => this.checked() ?? this._checked());
-
-  private _onChange: (v: boolean) => void = () => {};
-  private _onTouched: () => void = () => {};
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
 
   onChange(event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
-    this._checked.set(checked);
-    this.checkedChange.emit(checked);
-    this._onChange(checked);
+    const target = event.target as HTMLInputElement;
+    // Native activation clears this property even when the controlled input stays mixed.
+    target.indeterminate = this.indeterminate();
+    if (this.disabled() || this.readonly()) {
+      target.checked = this.checked();
+      return;
+    }
+    this.checked.set(target.checked);
   }
 
   onBlur(): void {
-    this._onTouched();
+    this.touch.emit();
   }
 
-  writeValue(val: unknown): void {
-    this._checked.set(!!val);
+  focus(options?: FocusOptions): void {
+    this.nativeInput().nativeElement.focus(options);
   }
 
-  registerOnChange(fn: (v: boolean) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this._cvaDisabled.set(isDisabled);
-  }
+  reset(): void {}
 }

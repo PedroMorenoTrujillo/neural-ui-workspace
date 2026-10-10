@@ -1,544 +1,206 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuInputOTPComponent } from './neu-input-otp.component';
 
-function mk() {
-  return TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+function create(inputs: Record<string, unknown> = {}) {
+  const fixture = TestBed.createComponent(NeuInputOTPComponent);
+  for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+  fixture.detectChanges();
+  return {
+    fixture,
+    component: fixture.componentInstance,
+    cells: [...fixture.nativeElement.querySelectorAll('input')] as HTMLInputElement[],
+  };
 }
 
-describe('NeuInputOTPComponent', () => {
-  beforeEach(() => mk().compileComponents());
+function input(cell: HTMLInputElement, value: string): void {
+  cell.value = value;
+  cell.dispatchEvent(new InputEvent('input', { bubbles: true, data: value }));
+}
 
-  it('should render N cells matching length input', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    const cells = f.nativeElement.querySelectorAll('.neu-input-otp__cell');
-    expect(cells.length).toBe(6);
-  });
+function paste(cell: HTMLInputElement, value: string): ClipboardEvent {
+  const event = new Event('paste', { bubbles: true, cancelable: true }) as ClipboardEvent;
+  Object.defineProperty(event, 'clipboardData', { value: { getData: () => value } });
+  cell.dispatchEvent(event);
+  return event;
+}
 
-  it('should render 4 cells when length=4', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.querySelectorAll('.neu-input-otp__cell').length).toBe(4);
-  });
+describe('NeuInputOTPComponent Signal Forms contract', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
 
-  it('writeValue should fill digits', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    f.componentInstance.writeValue('123456');
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('123456');
-  });
-
-  it('writeValue should truncate to length', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    f.componentInstance.writeValue('123456789');
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('1234');
-  });
-
-  it('writeValue with null should clear digits', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    f.componentInstance.writeValue(null);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('');
-  });
-
-  it('setDisabledState should apply disabled class', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    f.componentInstance.setDisabledState(true);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-input-otp--disabled');
-  });
-
-  it('hostClasses should reflect the configured length modifier', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(f.nativeElement.classList).toContain('neu-input-otp--len-4');
-  });
-
-  it('onCellInput should update digit and call onChange', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    const changes: string[] = [];
-    comp._onChange = (v: string) => changes.push(v);
-    const fakeInput = document.createElement('input');
-    fakeInput.value = '5';
-    comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
-    expect(changes.length).toBe(1);
-    expect(comp._digits()[0]).toBe('5');
-  });
-
-  it('onCellInput should keep only the last typed character and focus the next cell', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    const comp = f.componentInstance as any;
-    const focusSpy = vi.spyOn(comp, '_focusCell');
-    const fakeInput = document.createElement('input');
-    fakeInput.value = '29';
-
-    comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
-
-    expect(fakeInput.value).toBe('9');
-    expect(comp._digits()[0]).toBe('9');
-    expect(focusSpy).toHaveBeenCalledWith(1);
-  });
-
-  it('numeric type should reject non-digit input', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.componentRef.setInput('type', 'numeric');
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    const fakeInput = document.createElement('input');
-    fakeInput.value = 'a';
-    comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
-    expect(comp._digits()[0]).toBe('');
-  });
-
-  it('should emit completed when all cells are filled', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    const completed: string[] = [];
-    f.componentInstance.completed.subscribe((v: string) => completed.push(v));
-    comp.writeValue('1234');
-    f.detectChanges();
-    // Simulate last cell input
-    const fakeInput = document.createElement('input');
-    fakeInput.value = '4';
-    comp._digits.set(['1', '2', '3', '4']);
-    comp.onCellInput({ target: fakeInput } as unknown as Event, 3);
-    expect(completed.length).toBeGreaterThanOrEqual(0); // may fire depending on impl
-  });
-
-  it('onKeyDown Backspace should clear digit at index', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    comp._digits.set(['1', '2', '3', '', '', '']);
-    comp.onKeyDown({ key: 'Backspace' } as KeyboardEvent, 2);
-    expect(comp._digits()[2]).toBe('');
-  });
-
-  it('clear() should reset all digits', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    f.componentInstance.writeValue('123456');
-    f.detectChanges();
-    f.componentInstance.clear();
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(comp._digits().join('')).toBe('');
-  });
-
-  it('onPaste should fill digits from clipboard text', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-    const comp = f.componentInstance as any;
-    const fakeEvent = {
-      preventDefault: () => {},
-      clipboardData: { getData: () => '5678' },
-    } as unknown as ClipboardEvent;
-    comp.onPaste(fakeEvent);
-    expect(comp._digits().slice(0, 4).join('')).toBe('5678');
-  });
-
-  it('should apply neu-input-otp class', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 6);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-input-otp');
-  });
-
-  it('registerOnChange stores callback invoked on input', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const values: string[] = [];
-    f.componentInstance.registerOnChange((v: string) => values.push(v));
-    // Simulate input on first cell
-    const cells = f.nativeElement.querySelectorAll('.neu-input-otp__cell');
-    cells[0].value = '5';
-    cells[0].dispatchEvent(new Event('input'));
-    f.detectChanges();
-    expect(values.some((v: string) => v.includes('5'))).toBe(true);
-  });
-
-  it('registerOnTouched stores callback', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    let touched = false;
-    f.componentInstance.registerOnTouched(() => (touched = true));
-    expect(typeof (f.componentInstance as any)._onTouched).toBe('function');
-  });
-
-  it('onKeyDown Backspace on empty cell should move focus left', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    f.componentInstance.writeValue('1');
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    const focusSpy = vi.spyOn(comp, '_focusCell');
-
-    comp.onKeyDown({ key: 'Backspace', preventDefault: () => {} } as KeyboardEvent, 1);
-
-    expect(focusSpy).toHaveBeenCalledWith(0);
-  });
-
-  it('onKeyDown ArrowLeft should move focus to previous cell', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(() =>
-      comp.onKeyDown({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent, 2),
-    ).not.toThrow();
-  });
-
-  it('onKeyDown ArrowRight should move focus to next cell', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(() =>
-      comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 1),
-    ).not.toThrow();
-  });
-
-  it('moves focus according to the physical arrow direction in RTL', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const focusSpy = vi.spyOn(f.componentInstance as any, '_focusCell');
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-
-    f.componentInstance.onKeyDown(
-      { key: 'ArrowLeft', preventDefault: vi.fn() } as unknown as KeyboardEvent,
-      1,
-    );
-    f.componentInstance.onKeyDown(
-      { key: 'ArrowRight', preventDefault: vi.fn() } as unknown as KeyboardEvent,
-      2,
-    );
-
-    expect(focusSpy).toHaveBeenNthCalledWith(1, 2);
-    expect(focusSpy).toHaveBeenNthCalledWith(2, 1);
-  });
-
-  it('completed output should emit when all cells filled', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const completed: string[] = [];
-    f.componentInstance.completed.subscribe((v: string) => completed.push(v));
-    // Use the public API to trigger complete
-    const comp = f.componentInstance as any;
-    comp._digits.set(['1', '2', '3', '4']);
-    const fakeInput = document.createElement('input');
-    fakeInput.value = '4';
-    comp.onCellInput({ target: fakeInput } as unknown as Event, 3);
-    expect(completed.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('onPaste should sanitize invalid numeric characters, emit valueChange and avoid completed when incomplete', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.componentRef.setInput('type', 'numeric');
-    f.detectChanges();
-
-    const comp = f.componentInstance as any;
-    const values: string[] = [];
-    const completed: string[] = [];
-    const focusSpy = vi.spyOn(comp, '_focusCell');
-    f.componentInstance.valueChange.subscribe((value: string) => values.push(value));
-    f.componentInstance.completed.subscribe((value: string) => completed.push(value));
-
-    comp.onPaste({
-      preventDefault: () => {},
-      clipboardData: { getData: () => '1a3' },
-    } as unknown as ClipboardEvent);
-
-    expect(comp._digits()).toEqual(['1', '3', '', '']);
-    expect(values).toEqual(['13']);
-    expect(completed).toEqual([]);
-    expect(focusSpy).toHaveBeenCalledWith(2);
-  });
-
-  it('onFocus should call onTouched and select the focused cell contents', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    const cells = f.nativeElement.querySelectorAll(
-      '.neu-input-otp__cell',
-    ) as NodeListOf<HTMLInputElement>;
-    const selectSpy = vi.spyOn(cells[1], 'select');
-    let touched = false;
-    f.componentInstance.registerOnTouched(() => {
-      touched = true;
+  it('renders a labelled semantic group and one accessible cell per configured digit', () => {
+    const { fixture, cells } = create({
+      length: 4,
+      ariaLabel: 'Verification code',
+      name: 'otp',
+      required: true,
+      readonly: true,
+      pending: true,
     });
-
-    f.componentInstance.onFocus(1);
-
-    expect(touched).toBe(true);
-    expect(selectSpy).toHaveBeenCalled();
+    expect(fixture.nativeElement.getAttribute('role')).toBe('group');
+    expect(fixture.nativeElement.getAttribute('aria-label')).toBe('Verification code');
+    expect(fixture.nativeElement.hasAttribute('aria-required')).toBe(false);
+    expect(fixture.nativeElement.hasAttribute('aria-readonly')).toBe(false);
+    expect(fixture.nativeElement.getAttribute('aria-busy')).toBe('true');
+    expect(cells).toHaveLength(4);
+    expect(cells[0].name).toBe('otp');
+    expect(cells[1].name).toBe('');
+    expect(cells[0].getAttribute('aria-label')).toBe('Digit 1 of 4');
+    expect(cells.every((cell) => cell.readOnly && cell.required)).toBe(true);
   });
 
-  it('should mark filled cells with the filled modifier class after writeValue', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    f.componentInstance.writeValue('12');
-    f.detectChanges();
-    await f.whenStable();
-
-    const cells = f.nativeElement.querySelectorAll('.neu-input-otp__cell');
-    expect(cells[0].classList.contains('neu-input-otp__cell--filled')).toBe(true);
-    expect(cells[1].classList.contains('neu-input-otp__cell--filled')).toBe(true);
-    expect(cells[2].classList.contains('neu-input-otp__cell--filled')).toBe(false);
-    expect((cells[2] as HTMLInputElement).value).toBe('');
+  it('renders and truncates an external value without emitting an interaction', () => {
+    const { fixture, component } = create();
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    fixture.componentRef.setInput('value', '123456789');
+    fixture.detectChanges();
+    const values = [...fixture.nativeElement.querySelectorAll('input')].map(
+      (cell) => (cell as HTMLInputElement).value,
+    );
+    expect(values.join('')).toBe('123456');
+    expect(changed).not.toHaveBeenCalled();
   });
 
-  it('numeric mode should sanitize non-numeric input', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.componentRef.setInput('type', 'numeric');
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    const sanitized = comp._sanitize('a');
-    expect(sanitized).toBe('');
+  it('publishes exactly once per cell edit and completes only on a real full value', () => {
+    const { component, cells } = create({ length: 4, value: '123' });
+    const changed = vi.fn();
+    const completed = vi.fn();
+    component.value.subscribe(changed);
+    component.completed.subscribe(completed);
+    input(cells[3], '4');
+    expect(component.value()).toBe('1234');
+    expect(changed).toHaveBeenCalledExactlyOnceWith('1234');
+    expect(completed).toHaveBeenCalledExactlyOnceWith('1234');
+    input(cells[3], '4');
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(completed).toHaveBeenCalledTimes(1);
   });
 
-  it('alphanumeric mode should allow letters and numbers', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.componentRef.setInput('type', 'alphanumeric');
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(comp._sanitize('a')).toBe('a');
-    expect(comp._sanitize('5')).toBe('5');
+  it('sanitizes numeric input and accepts alphanumeric input in its explicit mode', () => {
+    const numeric = create({ length: 2 });
+    input(numeric.cells[0], 'x');
+    expect(numeric.component.value()).toBe('');
+    input(numeric.cells[0], '7');
+    expect(numeric.component.value()).toBe('7');
+
+    const alphanumeric = create({ length: 2, type: 'alphanumeric' });
+    input(alphanumeric.cells[0], '-A');
+    expect(alphanumeric.component.value()).toBe('A');
   });
 
-  it('onPaste should distribute characters across cells', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    const fakeEvent = {
-      preventDefault: () => {},
-      clipboardData: { getData: () => '5678' },
-    } as unknown as ClipboardEvent;
-    comp.onPaste(fakeEvent);
-    expect(comp._digits().slice(0, 4).join('')).toBe('5678');
+  it('appends at the first empty position without leaving a ghost digit in a skipped cell', () => {
+    const { fixture, component, cells } = create({ value: '12' });
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    cells[4].focus();
+    input(cells[4], '3');
+    fixture.detectChanges();
+    expect(component.value()).toBe('123');
+    expect(cells.map((cell) => cell.value)).toEqual(['1', '2', '3', '', '', '']);
+    expect(changed).toHaveBeenCalledExactlyOnceWith('123');
+    expect(document.activeElement).toBe(cells[3]);
+    cells[1].focus();
+    input(cells[1], '9');
+    fixture.detectChanges();
+    expect(cells.map((cell) => cell.value)).toEqual(['1', '9', '3', '', '', '']);
   });
 
-  it('onKeyDown ArrowLeft should focus previous cell when index > 0', () => {
-    // ArrowLeft en index > 0 debe enfocar la celda anterior
-    // ArrowLeft at index > 0 must focus the previous cell
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    // If there's an _inputRefs or similar, focus tracking should work
-    // Just verify the handler does not throw
-    expect(() =>
-      comp.onKeyDown({ key: 'ArrowLeft', preventDefault: () => {} } as KeyboardEvent, 2),
-    ).not.toThrow();
+  it('distributes complete and partial paste from the active cell exactly once', () => {
+    const complete = create({ length: 4 });
+    const completeChange = vi.fn();
+    const completed = vi.fn();
+    complete.component.value.subscribe(completeChange);
+    complete.component.completed.subscribe(completed);
+    expect(paste(complete.cells[0], '12x34').defaultPrevented).toBe(true);
+    expect(complete.component.value()).toBe('1234');
+    expect(completeChange).toHaveBeenCalledExactlyOnceWith('1234');
+    expect(completed).toHaveBeenCalledExactlyOnceWith('1234');
+
+    const partial = create({ length: 6, value: '1299' });
+    paste(partial.cells[2], '34');
+    expect(partial.component.value()).toBe('1234');
   });
 
-  it('onKeyDown ArrowRight should not throw when at any index', () => {
-    // ArrowRight no debe lanzar un error en ningún îndice
-    // ArrowRight must not throw at any index
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    const comp = f.componentInstance as any;
-    expect(() =>
-      comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 0),
-    ).not.toThrow();
-    expect(() =>
-      comp.onKeyDown({ key: 'ArrowRight', preventDefault: () => {} } as KeyboardEvent, 3),
-    ).not.toThrow();
+  it('supports backspace and arrow/Home/End navigation without touching the group', () => {
+    const { component, cells } = create({ length: 4, value: '123' });
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    cells[2].focus();
+    cells[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+    expect(component.value()).toBe('12');
+    cells[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(document.activeElement).toBe(cells[1]);
+    cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(document.activeElement).toBe(cells[2]);
+    cells[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(document.activeElement).toBe(cells[0]);
+    cells[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).toBe(cells[3]);
+    cells[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(touched).not.toHaveBeenCalled();
   });
 
-  it('DOM paste event on a cell should invoke onPaste through the template listener', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    const comp = f.componentInstance as any;
-    const pasteSpy = vi.spyOn(comp, 'onPaste');
-    const cell = f.nativeElement.querySelector('.neu-input-otp__cell') as HTMLInputElement;
-    const event = new Event('paste', { bubbles: true });
-    Object.defineProperty(event, 'clipboardData', {
-      configurable: true,
-      value: { getData: () => '9876' },
-    });
-
-    cell.dispatchEvent(event);
-    f.detectChanges();
-
-    expect(pasteSpy).toHaveBeenCalled();
-    expect(comp._digits().join('')).toBe('9876');
+  it('backspace on an empty cell removes the previous digit and focuses it', () => {
+    const { component, cells } = create({ length: 4, value: '12' });
+    cells[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+    expect(component.value()).toBe('1');
+    expect(document.activeElement).toBe(cells[1]);
   });
 
-  it('DOM focus event on a cell should invoke onFocus through the template listener', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    const comp = f.componentInstance as any;
-    const focusSpy = vi.spyOn(comp, 'onFocus');
-    const cell = f.nativeElement.querySelectorAll('.neu-input-otp__cell')[2] as HTMLInputElement;
-
-    cell.dispatchEvent(new Event('focus', { bubbles: false }));
-    f.detectChanges();
-
-    expect(focusSpy).toHaveBeenCalledWith(2);
+  it('does not touch on focus or internal navigation and touches once on group exit', () => {
+    const { component, cells } = create({ length: 3 });
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    cells[0].dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    cells[0].dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: cells[1] }));
+    expect(touched).not.toHaveBeenCalled();
+    cells[1].dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    expect(touched).toHaveBeenCalledTimes(1);
   });
 
-  it('alphanumeric mode should keep the last typed character in onCellInput', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.componentRef.setInput('type', 'alphanumeric');
-    f.detectChanges();
+  it.each(['disabled', 'readonly'] as const)(
+    'blocks edit, paste, backspace and clear when %s',
+    (state) => {
+      const { component, cells } = create({ length: 4, value: '12', [state]: true });
+      const changed = vi.fn();
+      component.value.subscribe(changed);
+      input(cells[0], '9');
+      paste(cells[0], '9876');
+      cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+      component.clear();
+      expect(component.value()).toBe('12');
+      expect(changed).not.toHaveBeenCalled();
+    },
+  );
 
-    const comp = f.componentInstance as any;
-    const fakeInput = document.createElement('input');
-    fakeInput.value = 'AB';
-
-    comp.onCellInput({ target: fakeInput } as unknown as Event, 0);
-
-    expect(comp._digits()[0]).toBe('B');
-    expect(fakeInput.value).toBe('B');
+  it('clear is one user command while reset and parent reset are silent', () => {
+    const { fixture, component } = create({ value: '1234' });
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    component.clear();
+    expect(changed).toHaveBeenCalledExactlyOnceWith('');
+    component.reset();
+    expect(changed).toHaveBeenCalledTimes(1);
+    fixture.componentRef.setInput('value', '');
+    fixture.detectChanges();
+    expect(changed).toHaveBeenCalledTimes(1);
   });
 
-  it('DOM keydown events exercise keyboard navigation through the template listener', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    const comp = f.componentInstance as any;
-    const keySpy = vi.spyOn(comp, 'onKeyDown');
-    const cells = f.nativeElement.querySelectorAll(
-      '.neu-input-otp__cell',
-    ) as NodeListOf<HTMLInputElement>;
-    const focusSpy = vi.spyOn(cells[0], 'focus');
-
-    cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
-    cells[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
-    f.detectChanges();
-
-    expect(keySpy).toHaveBeenCalled();
-    expect(focusSpy).toHaveBeenCalled();
+  it('reflects disabled, invalid and hidden official states', () => {
+    const { fixture, component, cells } = create({ disabled: true, invalid: true, hidden: true });
+    expect(component.hasError()).toBe(true);
+    expect(fixture.nativeElement.hidden).toBe(true);
+    expect(fixture.nativeElement.getAttribute('aria-disabled')).toBe('true');
+    expect(fixture.nativeElement.getAttribute('aria-invalid')).toBe('true');
+    expect(cells.every((cell) => cell.disabled)).toBe(true);
   });
 
-  it('paste without clipboard data clears cells and still focuses the first cell', async () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-    await f.whenStable();
-
-    const comp = f.componentInstance as any;
-    const first = f.nativeElement.querySelector('.neu-input-otp__cell') as HTMLInputElement;
-    const focusSpy = vi.spyOn(first, 'focus');
-    const event = new Event('paste', { bubbles: true });
-    Object.defineProperty(event, 'clipboardData', { configurable: true, value: undefined });
-
-    first.dispatchEvent(event);
-    f.detectChanges();
-
-    expect(comp._digits().join('')).toBe('');
-    expect(focusSpy).toHaveBeenCalled();
-  });
-
-  it('empty input sanitizes to an empty string and keeps the rendered input blank', () => {
-    const f = TestBed.createComponent(NeuInputOTPComponent);
-    f.componentRef.setInput('length', 4);
-    f.detectChanges();
-
-    const comp = f.componentInstance as any;
-    const input = document.createElement('input');
-    input.value = '';
-
-    comp.onCellInput({ target: input } as unknown as Event, 0);
-
-    expect(comp._digits()[0]).toBe('');
-    expect(input.value).toBe('');
-  });
-
-  it('resolves the CVA provider through Reactive Forms', async () => {
-    @Component({
-      imports: [NeuInputOTPComponent, ReactiveFormsModule],
-      template: `<neu-input-otp [length]="4" [formControl]="control" />`,
-    })
-    class HostComponent {
-      readonly control = new FormControl('12', { nonNullable: true });
-    }
-
-    await TestBed.resetTestingModule()
-      .configureTestingModule({
-        imports: [HostComponent],
-        providers: [provideZonelessChangeDetection()],
-      })
-      .compileComponents();
-    const host = TestBed.createComponent(HostComponent);
-    host.detectChanges();
-    await host.whenStable();
-
-    const cells = host.nativeElement.querySelectorAll(
-      '.neu-input-otp__cell',
-    ) as NodeListOf<HTMLInputElement>;
-    cells[2].value = '3';
-    cells[2].dispatchEvent(new Event('input', { bubbles: true }));
-    host.detectChanges();
-
-    expect(host.componentInstance.control.value).toBe('123');
+  it('focuses the next empty cell through the official focus method', () => {
+    const { component, cells } = create({ length: 4, value: '12' });
+    component.focus();
+    expect(document.activeElement).toBe(cells[2]);
   });
 });

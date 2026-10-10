@@ -1,0 +1,16 @@
+.neu-avatar-group {
+  display: inline-flex;
+  align-items: center;
+  isolation: isolate;
+
+  > .neu-avatar-host {
+    position: relative;
+  }
+
+  > .neu-avatar-host > .neu-avatar { box-shadow: 0 0 0 2px var(--neu-surface); }
+  > .neu-avatar-host:not(:first-child) { margin-inline-start: -0.5rem; }
+}
+
+@media (forced-colors: active) {
+  .neu-avatar-group > .neu-avatar-host > .neu-avatar { outline: 2px solid Canvas; }
+}

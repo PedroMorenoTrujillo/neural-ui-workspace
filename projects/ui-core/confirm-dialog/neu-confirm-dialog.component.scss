@@ -30,6 +30,7 @@
   &__actions {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 8px;
     padding-top: 4px;
   }
@@ -37,14 +38,12 @@
   &__btn {
     all: unset;
     box-sizing: border-box;
+    min-height: 44px;
     padding: 8px 18px;
-    border-radius: var(--neu-radius-md, 8px);
+    border-radius: var(--neu-radius, 8px);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition:
-      background 120ms,
-      color 120ms;
 
     &:focus-visible {
       outline: 2px solid var(--neu-focus-ring, #0ea5e9);
@@ -60,7 +59,7 @@
       }
 
       &.neu-confirm-dialog__btn--danger {
-        background: var(--neu-color-danger, #ef4444);
+        background: var(--neu-error, #ef4444);
         color: var(--neu-primary-fg);
 
         &:hover {
@@ -70,16 +69,19 @@
     }
 
     &--primary {
-      background: var(--neu-color-primary, #0ea5e9);
+      background: var(
+        --neu-primary-solid,
+        var(--neu-primary-dark, var(--neu-primary, #006ee6))
+      );
       color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
 
       &:hover {
-        filter: brightness(1.08);
+        background: var(--neu-primary-solid-hover, var(--neu-primary-dark, #005fcc));
       }
     }
 
     &--danger {
-      background: var(--neu-color-danger, #ef4444);
+      background: var(--neu-error, #ef4444);
       color: var(--neu-primary-fg);
 
       &:hover {
@@ -89,13 +91,26 @@
   }
 }
 
+@media (max-width: 360px) {
+  .neu-confirm-dialog {
+    padding: 20px;
+
+    &__actions,
+    &__btn {
+      width: 100%;
+    }
+
+    &__btn {
+      text-align: center;
+    }
+  }
+}
+
 @keyframes neu-confirm-in {
   from {
-    opacity: 0;
     transform: translateY(8px) scale(0.97);
   }
   to {
-    opacity: 1;
     transform: translateY(0) scale(1);
   }
 }

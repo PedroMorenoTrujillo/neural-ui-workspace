@@ -56,9 +56,30 @@ describe('NeuDataViewComponent', () => {
   });
 
   it('uses NeuralUI primitives for sort and navigation controls', () => {
+    expect(fixture.nativeElement.querySelector('.neu-data-view__search neu-input')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('neu-select.neu-data-view__sort')).toBeTruthy();
     expect(fixture.nativeElement.querySelectorAll('button[neu-button]').length).toBeGreaterThan(0);
     expect(fixture.nativeElement.querySelector('.neu-data-view__sort select')).toBeFalsy();
+  });
+
+  it('supports localized display labels without changing the public mode values', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', ['Uno']);
+    direct.componentRef.setInput('modeLabels', {
+      list: 'Lista',
+      grid: 'Cuadrícula',
+      table: 'Tabla',
+    });
+    direct.detectChanges();
+
+    const buttons = Array.from(
+      direct.nativeElement.querySelectorAll('.neu-data-view__mode'),
+    ) as HTMLButtonElement[];
+    expect(buttons.map((button) => button.textContent?.trim())).toEqual([
+      'Lista',
+      'Cuadrícula',
+      'Tabla',
+    ]);
   });
 
   it('emits mode, search, sort and bounded page changes', () => {
@@ -82,7 +103,46 @@ describe('NeuDataViewComponent', () => {
     expect(searches).toEqual(['a']);
     expect(sorts).toEqual(['name']);
     expect(component.page()).toBe(1);
-    expect(pages.length).toBe(3);
+    expect(pages.length).toBe(2);
+  });
+
+  it('treats supplied total as a remote window and emits only user page proposals', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', [{ name: '21' }, { name: '22' }]);
+    direct.componentRef.setInput('total', 42);
+    direct.componentRef.setInput('pageSize', 10);
+    direct.componentRef.setInput('currentPage', 3);
+    direct.detectChanges();
+    const requests: unknown[] = [];
+    direct.componentInstance.pageChange.subscribe((event) => requests.push(event));
+
+    expect(direct.componentInstance.pageCount()).toBe(5);
+    expect(direct.componentInstance.pagedItems()).toHaveLength(2);
+    expect(requests).toEqual([]);
+
+    direct.componentInstance.nextPage();
+    expect(requests).toEqual([{ page: 4, pageSize: 10 }]);
+    direct.componentRef.setInput('currentPage', 4);
+    direct.detectChanges();
+    expect(requests).toHaveLength(1);
+  });
+
+  it('does not deliver callbacks after destruction following a remote page proposal', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', [{ name: '1' }]);
+    direct.componentRef.setInput('total', 20);
+    direct.componentRef.setInput('pageSize', 10);
+    direct.detectChanges();
+    const requests: unknown[] = [];
+    direct.componentInstance.pageChange.subscribe((event) => requests.push(event));
+
+    direct.componentInstance.nextPage();
+    expect(requests).toEqual([{ page: 2, pageSize: 10 }]);
+
+    const component = direct.componentInstance;
+    direct.destroy();
+    component.previousPage();
+    expect(requests).toHaveLength(1);
   });
 
   it('sorts configured items and displays primitive values', () => {
@@ -120,7 +180,7 @@ describe('NeuDataViewComponent', () => {
       '.neu-data-view__mode',
     ) as NodeListOf<HTMLButtonElement>;
     modeButtons[1].click();
-    component._sortControl.setValue('name');
+    component['_sortControl'].setValue('name');
     fixture.detectChanges();
 
     expect(searches).toEqual(['beta']);
@@ -211,7 +271,7 @@ describe('NeuDataViewComponent', () => {
     component.setSort('meta.name');
     direct.detectChanges();
     await direct.whenStable();
-    expect(component._sortControl.value).toBe('meta.name');
+    expect(component['_sortControl'].value).toBe('meta.name');
 
     component.setQuery('nested');
     expect(component.filteredItems()).toEqual([{ meta: { name: 'Nested' } }]);
@@ -223,7 +283,7 @@ describe('NeuDataViewComponent', () => {
     expect(component.filteredItems()).toEqual(['Plain text']);
   });
 
-  it('renders default items, semantic table roles and projected header and footer slots', async () => {
+  it('keeps native list semantics in visual table mode and renders template slots', async () => {
     @Component({
       imports: [
         NeuDataViewComponent,
@@ -262,10 +322,9 @@ describe('NeuDataViewComponent', () => {
     expect(component.itemTpl()).toBeTruthy();
     expect(component.headerTpl()).toBeTruthy();
     expect(component.footerTpl()).toBeTruthy();
-    expect(
-      slotsFixture.nativeElement.querySelector('.neu-data-view__items')?.getAttribute('role'),
-    ).toBe('table');
-    expect(slotsFixture.nativeElement.querySelectorAll('[role="row"]').length).toBe(3);
+    expect(slotsFixture.nativeElement.querySelector('ul.neu-data-view__items')).toBeTruthy();
+    expect(slotsFixture.nativeElement.querySelectorAll('li.neu-data-view__item').length).toBe(3);
+    expect(slotsFixture.nativeElement.querySelector('[role="table"]')).toBeNull();
     expect(slotsFixture.nativeElement.textContent).toContain('Item slot [object Object]');
   });
 
@@ -280,7 +339,7 @@ describe('NeuDataViewComponent', () => {
     expect(onlySort.nativeElement.querySelector('.neu-data-view__search')).toBeNull();
     expect(onlySort.nativeElement.querySelector('.neu-data-view__sort')).toBeTruthy();
     expect(onlySort.nativeElement.querySelector('.neu-data-view__modes')).toBeNull();
-    (onlySort.componentInstance as any)._sortControl.setValue(null);
+    (onlySort.componentInstance as any)['_sortControl'].setValue(null);
     expect(onlySort.componentInstance.sortKey()).toBe('');
 
     const onlySearch = TestBed.createComponent(NeuDataViewComponent);
@@ -299,5 +358,141 @@ describe('NeuDataViewComponent', () => {
     onlySwitcher.componentRef.setInput('sortOptions', []);
     onlySwitcher.detectChanges();
     expect(onlySwitcher.nativeElement.querySelector('.neu-data-view__modes')).toBeTruthy();
+  });
+
+  it('keeps remote total authoritative and never filters or sorts a loaded window', () => {
+    const items = Object.freeze([
+      Object.freeze({ name: 'Loaded B' }),
+      Object.freeze({ name: 'Loaded A' }),
+    ]);
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', items);
+    direct.componentRef.setInput('total', 1_000_000);
+    direct.componentRef.setInput('pageSize', 10);
+    direct.componentRef.setInput('sortOptions', [{ label: 'Name', value: 'name' }]);
+    direct.detectChanges();
+    const component = direct.componentInstance;
+    const searches: string[] = [];
+    const sorts: string[] = [];
+    component.searchChange.subscribe((value) => searches.push(value));
+    component.sortChange.subscribe((value) => sorts.push(value));
+
+    component.setQuery('not loaded');
+    component.setSort('name');
+    expect(component.filteredItems()).toBe(items);
+    expect(component.pagedItems()).toBe(items);
+    expect(component.pageCount()).toBe(100_000);
+    expect(searches).toEqual(['not loaded']);
+    expect(sorts).toEqual(['name']);
+    expect(items.map((item) => item.name)).toEqual(['Loaded B', 'Loaded A']);
+  });
+
+  it('proposes a mode without applying it until the parent writes the input', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', ['One']);
+    direct.detectChanges();
+    const modes: string[] = [];
+    direct.componentInstance.modeChange.subscribe((value) => modes.push(value));
+    direct.componentInstance.setMode('grid');
+    direct.detectChanges();
+    expect(modes).toEqual(['grid']);
+    expect(direct.nativeElement.classList).toContain('neu-data-view--list');
+
+    direct.componentRef.setInput('mode', 'grid');
+    direct.detectChanges();
+    expect(direct.nativeElement.classList).toContain('neu-data-view--grid');
+    expect(modes).toEqual(['grid']);
+    direct.componentInstance.setMode('grid');
+    expect(modes).toEqual(['grid']);
+  });
+
+  it('preserves immutable local items and skips an unnecessary unfiltered copy', () => {
+    const items = Object.freeze([
+      Object.freeze({ id: 'a', name: 'Zoe' }),
+      Object.freeze({ id: 'b', name: 'Ada' }),
+    ]);
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', items);
+    direct.componentRef.setInput('sortOptions', [{ label: 'Name', value: 'name' }]);
+    direct.detectChanges();
+    expect(direct.componentInstance.filteredItems()).toBe(items);
+
+    direct.componentInstance.setSort('name');
+    expect(direct.componentInstance.filteredItems().map((item: any) => item.id)).toEqual([
+      'b',
+      'a',
+    ]);
+    expect(items.map((item) => item.id)).toEqual(['a', 'b']);
+  });
+
+  it('keeps stable item DOM when a consumer trackBy key survives reconstruction', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', [{ name: 'Alpha' }, { name: 'Beta' }, { name: 'Gamma' }]);
+    direct.componentRef.setInput(
+      'trackBy',
+      (_index: number, item: unknown) => (item as { name: string }).name,
+    );
+    direct.componentRef.setInput('pagination', false);
+    direct.detectChanges();
+    const first = direct.nativeElement.querySelectorAll('li.neu-data-view__item')[0];
+    direct.componentRef.setInput('items', [{ name: 'Beta' }, { name: 'Alpha' }, { name: 'Gamma' }]);
+    direct.detectChanges();
+    expect(direct.nativeElement.querySelectorAll('li.neu-data-view__item')[1]).toBe(first);
+  });
+
+  it('normalizes invalid page size and emits each user query only once', () => {
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', ['One', 'Two']);
+    direct.componentRef.setInput('pageSize', Number.NaN);
+    direct.detectChanges();
+    expect(direct.componentInstance.pageCount()).toBe(2);
+    const searches: string[] = [];
+    direct.componentInstance.searchChange.subscribe((value) => searches.push(value));
+    direct.componentInstance.setQuery('one');
+    direct.componentInstance.setQuery('one');
+    expect(searches).toEqual(['one']);
+    expect(direct.componentInstance.pageCount()).toBe(1);
+    direct.componentInstance.setQuery('');
+    expect(direct.componentInstance.pageCount()).toBe(2);
+    direct.componentInstance.nextPage();
+    expect(direct.componentInstance.page()).toBe(2);
+  });
+
+  it('keeps a 100-item page stable and renders 1,000 local items without per-item effects', () => {
+    const items = Object.freeze(
+      Array.from({ length: 1_000 }, (_, index) =>
+        Object.freeze({ id: index, name: `Item ${index}` }),
+      ),
+    );
+    const direct = TestBed.createComponent(NeuDataViewComponent);
+    direct.componentRef.setInput('items', items);
+    direct.componentRef.setInput('pageSize', 100);
+    direct.componentRef.setInput(
+      'trackBy',
+      (_index: number, item: unknown) => (item as { id: number }).id,
+    );
+    direct.detectChanges();
+    expect(direct.componentInstance.filteredItems()).toBe(items);
+    expect(direct.nativeElement.querySelectorAll('li.neu-data-view__item')).toHaveLength(100);
+    const first = direct.nativeElement.querySelector('li.neu-data-view__item');
+
+    direct.componentRef.setInput('mode', 'grid');
+    direct.detectChanges();
+    expect(direct.nativeElement.querySelector('li.neu-data-view__item')).toBe(first);
+    direct.componentRef.setInput('pagination', false);
+    direct.detectChanges();
+    expect(direct.nativeElement.querySelectorAll('li.neu-data-view__item')).toHaveLength(1_000);
+    expect(direct.componentInstance.filteredItems()).toBe(items);
+  });
+
+  it('tears down Forms subscriptions over 50 create/destroy cycles', () => {
+    for (let index = 0; index < 50; index++) {
+      const direct = TestBed.createComponent(NeuDataViewComponent);
+      direct.componentRef.setInput('items', [`Item ${index}`]);
+      direct.detectChanges();
+      direct.destroy();
+      direct.componentInstance.setQuery('late');
+      direct.componentInstance.setSort('late');
+    }
   });
 });

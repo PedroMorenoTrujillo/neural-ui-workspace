@@ -93,6 +93,67 @@ describe('NeuBlockUIComponent', () => {
   });
 });
 
+@Component({
+  template: `
+    <section>
+      <button type="button">Action</button>
+      <neu-block-ui [blocked]="blocked()" message="Loading" />
+    </section>
+  `,
+  imports: [NeuBlockUIComponent],
+})
+class BlockUIComponentHostComponent {
+  blocked = signal(false);
+}
+
+describe('NeuBlockUIComponent interaction blocking', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      imports: [BlockUIComponentHostComponent],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents(),
+  );
+
+  it('makes sibling content inert while blocked and restores its previous state', async () => {
+    const f = TestBed.createComponent(BlockUIComponentHostComponent);
+    f.detectChanges();
+    const button = f.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.hasAttribute('inert')).toBe(false);
+
+    f.componentInstance.blocked.set(true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(button.hasAttribute('inert')).toBe(true);
+    expect(f.nativeElement.querySelector('.neu-block-ui__overlay')?.getAttribute('role')).toBe(
+      'status',
+    );
+
+    f.componentInstance.blocked.set(false);
+    f.detectChanges();
+    await f.whenStable();
+    expect(button.hasAttribute('inert')).toBe(false);
+  });
+
+  it('removes component-owned inert state carried through SSR hydration', async () => {
+    const f = TestBed.createComponent(BlockUIComponentHostComponent);
+    f.detectChanges();
+    await f.whenStable();
+    const button = f.nativeElement.querySelector('button') as HTMLButtonElement;
+    button.setAttribute('inert', '');
+    button.setAttribute('data-neu-block-ui-inert', '');
+
+    f.componentInstance.blocked.set(true);
+    f.detectChanges();
+    await f.whenStable();
+    f.componentInstance.blocked.set(false);
+    f.detectChanges();
+    await f.whenStable();
+
+    expect(button.hasAttribute('inert')).toBe(false);
+    expect(button.hasAttribute('data-neu-block-ui-inert')).toBe(false);
+  });
+});
+
 // Host component para probar la directiva / Host component to test the directive
 @Component({
   template: `<div [neuBlockUI]="blocked()"></div>`,
@@ -129,5 +190,19 @@ describe('NeuBlockUIDirective', () => {
     f.detectChanges();
     await f.whenStable();
     expect(host.classList).toContain('neu-block-ui__host--blocked');
+    expect(host.getAttribute('aria-busy')).toBe('true');
+    expect(host.hasAttribute('inert')).toBe(true);
+
+    f.componentInstance.blocked.set(false);
+    f.detectChanges();
+    await f.whenStable();
+    expect(host.hasAttribute('inert')).toBe(false);
+  });
+
+  it('safely skips sibling blocking when the host is detached', () => {
+    const f = TestBed.createComponent(NeuBlockUIComponent);
+    f.detectChanges();
+    f.nativeElement.remove();
+    expect(() => f.componentInstance['blockSiblingInteraction']()).not.toThrow();
   });
 });

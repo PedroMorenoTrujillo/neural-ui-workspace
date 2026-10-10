@@ -7,6 +7,10 @@
   font-family: var(--neu-font-sans);
 }
 
+.neu-rich-text-editor-host[hidden] {
+  display: none !important;
+}
+
 .neu-rich-text-editor {
   display: grid;
   gap: var(--neu-space-2, 0.5rem);
@@ -152,6 +156,13 @@
   color: var(--neu-primary-dark, var(--neu-primary));
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+:where([data-theme='dark'], .dark) {
+  .neu-rich-text-editor__variable,
+  .neu-rich-text-editor__surface :where(a) {
+    color: var(--neu-primary-light, #339dff);
+  }
 }
 
 .neu-rich-text-editor__surface :where(img) {

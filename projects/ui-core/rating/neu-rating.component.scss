@@ -1,3 +1,7 @@
+neu-rating[hidden] {
+  display: none !important;
+}
+
 // ============================================================
 // NeuralUI — Rating Component Styles
 // ViewEncapsulation.None — prefijo BEM .neu-rating
@@ -5,13 +9,26 @@
 
 .neu-rating {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-inline-size: 100%;
   align-items: center;
   gap: 2px;
   font-family: var(--neu-font-sans);
 
   &--readonly {
-    pointer-events: none;
+    .neu-rating__star {
+      cursor: default;
+    }
   }
+
+  &--disabled {
+    opacity: 0.55;
+  }
+}
+
+.neu-rating__item {
+  display: inline-flex;
+  flex: none;
 }
 
 .neu-rating__star {
@@ -24,7 +41,7 @@
   border: none;
   border-radius: var(--neu-radius-sm);
   cursor: pointer;
-  color: var(--neu-surface-3);
+  color: var(--neu-text-muted);
   padding: 2px;
   transition:
     transform 0.15s ease,
@@ -32,20 +49,60 @@
   outline: none;
 
   &--filled {
-    color: #f59e0b;
+    color: var(--neu-warning-text);
   }
 
-  &:hover:not(:disabled) {
+  .neu-rating:not(.neu-rating--readonly) &:hover:not(:disabled) {
     transform: scale(1.15);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--neu-primary);
-    outline-offset: 2px;
+    box-shadow: var(--neu-focus-ring);
   }
 
   &:disabled {
     cursor: default;
+  }
+
+  &--half {
+    position: relative;
+    width: 16px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 0;
+
+    .neu-rating__icon {
+      position: absolute;
+      flex: none;
+      width: 28px;
+      height: 28px;
+      max-width: none;
+    }
+  }
+
+  &--first-half .neu-rating__icon {
+    inset-inline-start: 2px;
+  }
+
+  &--second-half .neu-rating__icon {
+    inset-inline-end: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-rating__star {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-rating__star--filled {
+    color: Highlight;
+  }
+
+  .neu-rating__star:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
   }
 }
 

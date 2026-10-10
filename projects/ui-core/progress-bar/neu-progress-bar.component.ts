@@ -1,12 +1,13 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
+  inject,
   input,
 } from '@angular/core';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
-export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
+export type NeuProgressTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 
 /**
  * NeuralUI ProgressBar Component
@@ -16,14 +17,13 @@ export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
  *
  * Uso:
  *   <neu-progress-bar [value]="75" />
- *   <neu-progress-bar [value]="75" label="Cargando..." variant="success" [showValue]="true" />
+ *   <neu-progress-bar [value]="75" label="Cargando..." tone="success" [showValue]="true" />
  *   <neu-progress-bar [indeterminate]="true" />
  */
 @Component({
   selector: 'neu-progress-bar',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="neu-progress" [class]="hostClasses()">
       @if (label()) {
@@ -45,8 +45,8 @@ export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
         [attr.aria-valuenow]="indeterminate() ? null : clampedValue()"
         [attr.aria-valuemin]="0"
         [attr.aria-valuemax]="100"
-        [attr.aria-label]="label() || 'Progreso'"
-        [attr.aria-valuetext]="indeterminate() ? 'Cargando...' : clampedValue() + '%'"
+        [attr.aria-label]="label() || defaultLabel"
+        [attr.aria-valuetext]="indeterminate() ? loadingText : clampedValue() + '%'"
       >
         <div
           class="neu-progress__fill"
@@ -59,11 +59,15 @@ export type NeuProgressVariant = 'primary' | 'success' | 'warning' | 'danger';
   styleUrl: './neu-progress-bar.component.scss',
 })
 export class NeuProgressBarComponent {
+  private readonly spanish = (inject(NEURAL_LOCALE, { optional: true }) ?? 'en').toLowerCase().startsWith('es');
+  protected readonly defaultLabel = this.spanish ? 'Progreso' : 'Progress';
+  protected readonly loadingText = this.spanish ? 'Cargando…' : 'Loading…';
+
   /** Valor de 0 a 100 / Value from 0 to 100 */
   value = input<number>(0);
 
-  /** Variante de color / Color variant */
-  variant = input<NeuProgressVariant>('primary');
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuProgressTone>('brand');
 
   /** Etiqueta descriptiva sobre la barra / Descriptive label above the bar */
   label = input<string>('');
@@ -77,9 +81,12 @@ export class NeuProgressBarComponent {
   /** Altura de la barra / Bar height */
   size = input<'sm' | 'md' | 'lg'>('md');
 
-  readonly clampedValue = computed(() => Math.min(100, Math.max(0, this.value())));
+  readonly clampedValue = computed(() => {
+    const value = this.value();
+    return Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
+  });
 
   readonly hostClasses = computed(() =>
-    [`neu-progress--${this.variant()}`, `neu-progress--${this.size()}`].join(' '),
+    [`neu-progress--${this.tone()}`, `neu-progress--${this.size()}`].join(' '),
   );
 }

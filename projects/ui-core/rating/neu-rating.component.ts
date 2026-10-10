@@ -1,229 +1,242 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  ElementRef,
   ViewEncapsulation,
   computed,
-  forwardRef,
   inject,
   input,
+  model,
   output,
   signal,
 } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
-let _neuRatingIdSeq = 0;
-
-/**
- * NeuralUI Rating Component
- *
- * Selector de valoración con estrellas (o icono personalizable).
- * Soporta valores medios (half-star) y modo solo-lectura.
- *
- * Uso:
- *   <neu-rating [value]="rating" (valueChange)="rating = $event" />
- *   <neu-rating [value]="4.5" [readonly]="true" />
- */
+/** Accessible discrete rating backed by a nullable number ModelSignal. */
 @Component({
   selector: 'neu-rating',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuRatingComponent),
-      multi: true,
-    },
-  ],
+  host: { '[hidden]': 'hidden()' },
   template: `
     <div
       class="neu-rating"
-      [class.neu-rating--readonly]="isDisabled()"
-      [attr.role]="readonly() ? null : 'radiogroup'"
-      [attr.aria-disabled]="cvaDisabled() || null"
-      [attr.aria-label]="'Valoración: ' + currentValue() + ' de ' + stars() + ' estrellas'"
+      role="radiogroup"
+      [id]="inputId()"
+      [class.neu-rating--readonly]="readonly()"
+      [class.neu-rating--disabled]="disabled()"
+      [class.neu-rating--invalid]="hasError()"
+      [attr.aria-disabled]="disabled() ? 'true' : null"
+      [attr.aria-readonly]="readonly() ? 'true' : null"
+      [attr.aria-required]="required() ? 'true' : null"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-busy]="pending() ? 'true' : null"
+      [attr.aria-label]="label() || ariaLabel() || ratingLabel()"
+      [attr.aria-describedby]="ariaDescribedBy() || null"
+      (focusout)="onFocusOut($event)"
     >
-      @for (i of starsArray(); track i) {
-        <button
-          #starButton
-          class="neu-rating__star"
-          [class.neu-rating__star--filled]="i <= (hovered() ?? currentValue())"
-          [class.neu-rating__star--half]="
-            !isInteger(hovered() ?? currentValue()) && i === Math.ceil(hovered() ?? currentValue())
-          "
-          type="button"
-          [disabled]="isDisabled()"
-          [attr.aria-label]="i + ' star' + (i > 1 ? 's' : '')"
-          [attr.aria-checked]="i === currentValue()"
-          [attr.data-rating-value]="i"
-          [attr.tabindex]="isDisabled() ? -1 : starTabIndex(i)"
-          [attr.role]="'radio'"
-          (mouseenter)="onHover(i)"
-          (mouseleave)="onLeave()"
-          (click)="select(i)"
-          (focus)="activeStar.set(i)"
-          (blur)="markTouched()"
-          (keydown.arrowleft)="onHorizontalKey($any($event), -1, i)"
-          (keydown.arrowright)="onHorizontalKey($any($event), 1, i)"
-          (keydown.arrowup)="onDirectionalKey($any($event), -1, i)"
-          (keydown.arrowdown)="onDirectionalKey($any($event), 1, i)"
-          (keydown.home)="onBoundaryKey($any($event), 1)"
-          (keydown.end)="onBoundaryKey($any($event), stars())"
-        >
-          <svg class="neu-rating__icon" viewBox="0 0 24 24" aria-hidden="true">
-            <defs>
-              <linearGradient
-                [id]="gradientId(i)"
-                [attr.x1]="isRtl() ? 1 : 0"
-                [attr.x2]="isRtl() ? 0 : 1"
-                y1="0"
-                y2="0"
-              >
-                <stop offset="50%" stop-color="currentColor" />
-                <stop offset="50%" stop-color="transparent" />
-              </linearGradient>
-            </defs>
-            <polygon
-              points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
-              [attr.fill]="getFill(i)"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
+      @for (star of starsArray(); track star) {
+        <span class="neu-rating__item">
+          @for (i of resolvedStep() === 0.5 ? [star - 0.5, star] : [star]; track i) {
+            <button
+              class="neu-rating__star"
+              [class.neu-rating__star--half]="resolvedStep() === 0.5"
+              [class.neu-rating__star--first-half]="resolvedStep() === 0.5 && isHalf(i)"
+              [class.neu-rating__star--second-half]="resolvedStep() === 0.5 && !isHalf(i)"
+              [class.neu-rating__star--filled]="i <= (hovered() ?? selectedValue() ?? 0)"
+              type="button"
+              [disabled]="disabled()"
+              [tabIndex]="tabIndexFor(i)"
+              [attr.data-neu-rating-value]="i"
+              [attr.aria-label]="starLabel(i)"
+              [attr.aria-checked]="i === selectedValue()"
+              role="radio"
+              (mouseenter)="onHover(i)"
+              (mouseleave)="onLeave()"
+              (focus)="focusedValue.set(i)"
+              (click)="activate(i, true)"
+              (keydown)="onKeyDown(i, $event)"
+            >
+              <svg class="neu-rating__icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polygon
+                  points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+                  [attr.fill]="getFill(i)"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          }
+        </span>
       }
     </div>
   `,
   styleUrl: './neu-rating.component.scss',
 })
-export class NeuRatingComponent implements ControlValueAccessor {
-  protected readonly Math = Math;
-  private readonly _instanceId = `neu-rating-${++_neuRatingIdSeq}`;
-  private readonly directionality = inject(Directionality);
-  readonly isRtl = computed(() => this.directionality.valueSignal() === 'rtl');
+export class NeuRatingComponent implements FormValueControl<number | null> {
+  /** The sole committed value. Empty is always `null`. */
+  readonly value = model<number | null>(null);
 
-  /** Valor actual (1 a stars) / Current value (1 to stars) */
-  value = input<number>(0);
+  readonly stars = input<number>(5);
+  readonly step = input<1 | 0.5>(1);
+  readonly label = input<string>('');
+  readonly ariaLabel = input<string>('');
+  readonly ariaDescribedBy = input<string>('');
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-rating-'));
+  readonly name = input<string>('');
 
-  /** Número de estrellas / Number of stars */
-  stars = input<number>(5);
-
-  /** Modo solo lectura / Read-only mode */
-  readonly = input<boolean>(false);
-
-  /** Emite el nuevo valor al seleccionar / Emits the new value on selection */
-  valueChange = output<number>();
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly required = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly touch = output<void>();
 
   protected readonly hovered = signal<number | null>(null);
-  readonly activeStar = signal<number | null>(null);
-  readonly cvaDisabled = signal(false);
-  private readonly cvaActive = signal(false);
-  private readonly cvaValue = signal(0);
-  readonly currentValue = computed(() => (this.cvaActive() ? this.cvaValue() : this.value()));
-  readonly isDisabled = computed(() => this.readonly() || this.cvaDisabled());
-  readonly starsArray = computed(() => Array.from({ length: this.stars() }, (_, i) => i + 1));
+  protected readonly focusedValue = signal<number | null>(null);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
-  private onChange: (value: number) => void = () => {};
-  private onTouched: () => void = () => {};
+  readonly resolvedStars = computed(() =>
+    Number.isFinite(this.stars()) ? Math.max(1, Math.trunc(this.stars())) : 5,
+  );
+  readonly resolvedStep = computed<1 | 0.5>(() => this.step() === 0.5 ? 0.5 : 1);
+  readonly selectedValue = computed(() => {
+    const value = this.value();
+    if (value === null || !Number.isFinite(value)) return null;
+    return this.clamp(value);
+  });
+  readonly starsArray = computed(() =>
+    Array.from({ length: this.resolvedStars() }, (_, index) => index + 1),
+  );
+  readonly ratingOptions = computed(() =>
+    Array.from(
+      { length: this.resolvedStars() / this.resolvedStep() },
+      (_, index) => (index + 1) * this.resolvedStep(),
+    ),
+  );
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
+  readonly ratingLabel = computed(() =>
+    this.applicationLocale.toLowerCase().startsWith('es')
+      ? this.selectedValue() === null
+        ? `Sin valoración. ${this.resolvedStars()} estrellas disponibles`
+        : `Valoración: ${this.selectedValue()} de ${this.resolvedStars()} estrellas`
+      : this.selectedValue() === null
+      ? `No rating. ${this.resolvedStars()} stars available`
+      : `Rating: ${this.selectedValue()} of ${this.resolvedStars()} stars`,
+  );
 
-  writeValue(value: number | null): void {
-    this.cvaActive.set(true);
-    this.cvaValue.set(this.clamp(value ?? 0));
-    this.activeStar.set(null);
+  private readonly applicationLocale = inject(NEURAL_LOCALE);
+  protected starLabel(value: number): string {
+    const count = new Intl.NumberFormat(this.applicationLocale).format(value);
+    return this.applicationLocale.toLowerCase().startsWith('es')
+      ? `${count} ${value === 1 ? 'estrella' : 'estrellas'}`
+      : `${count} ${value === 1 ? 'star' : 'stars'}`;
   }
 
-  registerOnChange(fn: (value: number) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(disabled: boolean): void {
-    this.cvaDisabled.set(disabled);
-  }
-
-  markTouched(): void {
-    this.onTouched();
-  }
-
-  onHover(i: number): void {
-    if (!this.isDisabled()) this.hovered.set(i);
+  onHover(value: number): void {
+    if (!this.disabled() && !this.readonly()) this.hovered.set(this.clamp(value));
   }
 
   onLeave(): void {
     this.hovered.set(null);
   }
 
-  select(i: number): void {
-    if (this.isDisabled()) return;
-    const clamped = this.clamp(i, 1);
-    this.activeStar.set(clamped);
-    if (this.cvaActive()) this.cvaValue.set(clamped);
-    this.onChange(clamped);
-    this.onTouched();
-    this.valueChange.emit(clamped);
+  /** Selects a discrete rating without applying the same-value clear gesture. */
+  select(value: number, shouldFocus = false): void {
+    if (this.disabled() || this.readonly()) return;
+    const next = this.clamp(value);
+    this.focusedValue.set(next);
+    this.commit(next);
+    if (shouldFocus) this.focusStar(next);
   }
 
-  starTabIndex(star: number): 0 | -1 {
-    const active = this.activeStar();
-    const current = this.currentValue();
-    const fallback = current > 0 ? Math.round(current) : 1;
-    return star === this.clamp(active ?? fallback, 1) ? 0 : -1;
+  /** Activating the selected radio again explicitly clears the rating to `null`. */
+  activate(value: number, shouldFocus = false): void {
+    if (this.disabled() || this.readonly()) return;
+    const next = this.clamp(value);
+    this.focusedValue.set(next);
+    this.commit(this.selectedValue() === next ? null : next);
+    if (shouldFocus) this.focusStar(next);
   }
 
-  onHorizontalKey(
-    event: KeyboardEvent,
-    physicalDirection: -1 | 1,
-    fromStar = this.activeStar() ?? (Math.round(this.currentValue()) || 1),
-  ): void {
-    const logicalDirection: -1 | 1 = this.isRtl()
-      ? physicalDirection === 1
-        ? -1
-        : 1
-      : physicalDirection;
-    this.onDirectionalKey(event, logicalDirection, fromStar);
+  tabIndexFor(value: number): 0 | -1 {
+    if (this.disabled()) return -1;
+    const owner = this.focusedValue() ?? this.selectedValue() ?? this.resolvedStep();
+    return value === owner ? 0 : -1;
   }
 
-  onDirectionalKey(event: KeyboardEvent, direction: -1 | 1, fromStar: number): void {
+  onKeyDown(value: number, event: KeyboardEvent): void {
+    const group = this.host.querySelector<HTMLElement>('.neu-rating');
+    const direction = this.host.ownerDocument.defaultView?.getComputedStyle(group ?? this.host).direction;
+    const nextKey = direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+    const previousKey = direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+    const handled = [nextKey, previousKey, 'ArrowDown', 'ArrowUp', 'Home', 'End', ' ', 'Enter'];
+    if (!handled.includes(event.key) || this.disabled()) return;
     event.preventDefault();
-    const total = Math.max(1, this.stars());
-    const target = ((fromStar - 1 + direction + total) % total) + 1;
-    this.selectAndFocus(target, event);
+    if (this.readonly()) return;
+
+    let next = value;
+    let clearOnSame = false;
+    if (event.key === nextKey || event.key === 'ArrowDown') next = this.clamp(value + this.resolvedStep());
+    else if (event.key === previousKey || event.key === 'ArrowUp') next = this.clamp(value - this.resolvedStep());
+    else if (event.key === 'Home') next = this.resolvedStep();
+    else if (event.key === 'End') next = this.resolvedStars();
+    else clearOnSame = true;
+
+    if (clearOnSame) this.activate(next, true);
+    else this.select(next, true);
   }
 
-  onBoundaryKey(event: KeyboardEvent, target: number): void {
-    event.preventDefault();
-    this.selectAndFocus(target, event);
+  onFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.host.contains(next)) return;
+    this.hovered.set(null);
+    this.touch.emit();
   }
 
-  isInteger(n: number): boolean {
-    return Number.isInteger(n);
+  focus(options?: FocusOptions): void {
+    if (this.disabled()) return;
+    const owner = this.selectedValue() ?? this.resolvedStep();
+    this.focusedValue.set(owner);
+    this.star(owner)?.focus(options);
   }
 
-  readonly gradientId = (star: number) => `${this._instanceId}-half-${star}`;
-
-  getFill(i: number): string {
-    const val = this.hovered() ?? this.currentValue();
-    if (i <= Math.floor(val)) return 'currentColor';
-    if (!Number.isInteger(val) && i === Math.ceil(val)) return `url(#${this.gradientId(i)})`;
-    return 'transparent';
+  reset(): void {
+    this.hovered.set(null);
+    this.focusedValue.set(null);
   }
 
-  private clamp(value: number, minimum = 0): number {
-    return Math.min(this.stars(), Math.max(minimum, value));
+  getFill(value: number): 'currentColor' | 'transparent' {
+    return value <= (this.hovered() ?? this.selectedValue() ?? 0)
+      ? 'currentColor'
+      : 'transparent';
   }
 
-  private selectAndFocus(target: number, event: KeyboardEvent): void {
-    this.select(target);
-    const currentButton = event.currentTarget as HTMLElement | null;
-    const group = currentButton?.closest('.neu-rating');
-    group
-      ?.querySelector<HTMLElement>(`[data-rating-value="${target}"]`)
-      ?.focus({ preventScroll: true });
+  isHalf(value: number): boolean {
+    return !Number.isInteger(value);
+  }
+
+  private commit(value: number | null): void {
+    if (!Object.is(value, this.value())) this.value.set(value);
+  }
+
+  private clamp(value: number): number {
+    const step = this.resolvedStep();
+    return Math.min(this.resolvedStars(), Math.max(step, Math.round(value / step) * step));
+  }
+
+  private focusStar(value: number): void {
+    this.star(value)?.focus({ preventScroll: true });
+  }
+
+  private star(value: number): HTMLButtonElement | null {
+    return this.host.querySelector<HTMLButtonElement>(`[data-neu-rating-value="${value}"]`);
   }
 }

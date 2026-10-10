@@ -1,346 +1,665 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
+  PLATFORM_ID,
   ViewEncapsulation,
   computed,
-  effect,
-  forwardRef,
+  contentChild,
   inject,
   input,
+  model,
   output,
   signal,
 } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
-import { DOCUMENT } from '@angular/common';
-import { OverlayModule } from '@angular/cdk/overlay';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { DOCUMENT, isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
+import {
+  ConnectedOverlayPositionChange,
+  ConnectedPosition,
+  Overlay,
+  OverlayModule,
+} from '@angular/cdk/overlay';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { NeuIdGenerator, walkNeuTreeDepthFirst } from '@neural-ui/core/internal';
+import {
+  NeuOptionAccessor,
+  NeuOptionDisabledAccessor,
+  NeuOptionLabelAccessor,
+  NeuOptionValue,
+  NeuOptionActivatedEvent,
+  readNeuOptionAccessor,
+  resolveNeuOptionDisabled,
+  resolveNeuOptionLabel,
+  resolveNeuOptionValue,
+} from '@neural-ui/core/option-api';
+import {
+  NeuCascadeSelectEmptyDirective,
+  NeuCascadeSelectFooterDirective,
+  NeuCascadeSelectHeaderDirective,
+  NeuCascadeSelectItemDirective,
+  NeuCascadeSelectSelectedDirective,
+} from './neu-cascade-select.directives';
+import {
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
-export interface NeuCascadeOption<T = unknown> {
-  value: string;
+export {
+  NeuCascadeSelectEmptyDirective,
+  NeuCascadeSelectFooterDirective,
+  NeuCascadeSelectHeaderDirective,
+  NeuCascadeSelectItemDirective,
+  NeuCascadeSelectSelectedDirective,
+} from './neu-cascade-select.directives';
+export type {
+  NeuCascadeSelectItemContext,
+  NeuCascadeSelectSelectedContext,
+} from './neu-cascade-select.directives';
+
+export interface NeuCascadeSelectNode<V = string> {
+  value: V;
   label: string;
-  children?: NeuCascadeOption<T>[];
   disabled?: boolean;
-  data?: T;
+  children?: readonly NeuCascadeSelectNode<V>[];
+  data?: unknown;
 }
 
-let cascadeId = 0;
+interface SelectionPath<T> {
+  ancestors: T[];
+  node: T;
+  index: number;
+}
 
 @Component({
   selector: 'neu-cascade-select',
-  imports: [OverlayModule],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuCascadeSelectComponent),
-      multi: true,
-    },
-  ],
   host: {
-    class: 'neu-cascade-select-host',
-    '(keydown.escape)': 'close(true)',
+    class: 'neu-cascade-select',
+    '[hidden]': 'hidden()',
+    '(focusout)': 'onFocusOut($event)',
   },
+  imports: [NgTemplateOutlet, OverlayModule],
+  encapsulation: ViewEncapsulation.None,
   template: `
-    @if (!floatingLabel() && label()) {
-      <label class="neu-cascade-select__static-label" [for]="triggerId">{{ label() }}</label>
+    @if (label()) {
+      <label class="neu-cascade-select__label" [for]="triggerId">{{ label() }}</label>
     }
-    <div
-      cdkOverlayOrigin
-      #origin="cdkOverlayOrigin"
-      class="neu-cascade-select"
-      [class.neu-cascade-select--open]="open()"
-      [class.neu-cascade-select--disabled]="isDisabled()"
-      [class.neu-cascade-select--error]="error()"
-      [class.neu-cascade-select--has-value]="selectedPath().length > 0"
-    >
+    <div class="neu-cascade-select__control">
       <button
-        #trigger
-        class="neu-cascade-select__trigger"
+        cdkOverlayOrigin
+        #origin="cdkOverlayOrigin"
         type="button"
-        role="combobox"
-        aria-haspopup="listbox"
+        class="neu-cascade-select__trigger"
         [id]="triggerId"
-        [attr.aria-label]="label() || placeholder()"
         [disabled]="isDisabled()"
-        [attr.aria-expanded]="open()"
-        [attr.aria-controls]="panelId"
-        [attr.aria-invalid]="error() || null"
-        [attr.aria-describedby]="describedBy() || null"
+        [class.neu-cascade-select__trigger--open]="open()"
+        [class.neu-cascade-select__trigger--has-clear]="clearable() && selectedNode()"
+        [attr.aria-haspopup]="'listbox'"
+        [attr.aria-expanded]="open() ? 'true' : 'false'"
+        [attr.aria-controls]="panelId + '-listbox'"
+        [attr.aria-label]="label() || placeholder()"
+        [attr.aria-disabled]="isDisabled() ? 'true' : null"
         (click)="toggle()"
-        (keydown.arrowDown)="openPanel($event)"
+        (keydown)="onTriggerKeydown($any($event))"
       >
-        @if (floatingLabel() && label()) {
-          <span class="neu-cascade-select__label">{{ label() }}</span>
-        }
-        <span class="neu-cascade-select__value" [class.is-placeholder]="!selectedPath().length">
-          {{ displayValue() || placeholder() }}
-        </span>
-        <svg
-          class="neu-cascade-select__chevron"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
+        <span
+          class="neu-cascade-select__value"
+          [class.neu-cascade-select__placeholder]="!selectedNode()"
         >
+          @if (selectedTpl()) {
+            <ng-container
+              [ngTemplateOutlet]="selectedTpl()!.templateRef"
+              [ngTemplateOutletContext]="{ $implicit: selectedNode() }"
+            />
+          } @else {
+            {{ selectedNode() ? optionLabelOf(selectedNode()!) : placeholder() }}
+          }
+        </span>
+        <svg class="neu-cascade-select__chevron" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true" focusable="false">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
+      @if (clearable() && selectedNode()) {
+        <button
+          type="button"
+          class="neu-cascade-select__clear"
+          [disabled]="isDisabled()"
+          [attr.aria-label]="clearAriaLabel()"
+          (click)="clear($event)"
+        >
+          ×
+        </button>
+      }
     </div>
 
     <ng-template
       cdkConnectedOverlay
       [cdkConnectedOverlayOrigin]="origin"
       [cdkConnectedOverlayOpen]="open()"
+      [cdkConnectedOverlayPositions]="overlayPositions"
+      [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
       [cdkConnectedOverlayHasBackdrop]="true"
       [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+      [cdkConnectedOverlayWidth]="panelPosition().width ?? ''"
       [cdkConnectedOverlayPush]="true"
-      (backdropClick)="close()"
-      (detach)="close()"
+      [cdkConnectedOverlayViewportMargin]="viewportMargin"
+      (backdropClick)="requestClose('outside-pointer', $event)"
+      (detach)="onPanelDetached()"
+      (attach)="onPanelAttached()"
+      (positionChange)="onOverlayPositionChange($event)"
     >
       <div
         class="neu-cascade-select__panel"
+        [class.neu-cascade-select__panel--above]="isPanelAbove()"
         [id]="panelId"
-        role="group"
-        [attr.aria-label]="panelAriaLabel()"
-        (keydown)="onPanelKeydown($event)"
+        [style.max-height]="panelPosition().maxHeight"
       >
-        @for (column of columns(); track $index; let columnIndex = $index) {
-          <div
-            class="neu-cascade-select__column"
-            role="listbox"
-            [attr.aria-label]="levelAriaLabel() + ' ' + (columnIndex + 1)"
+        @if (headerTpl()) {
+          <ng-container [ngTemplateOutlet]="headerTpl()!.templateRef" />
+        }
+
+        <nav class="neu-cascade-select__breadcrumbs" [attr.aria-label]="breadcrumbAriaLabel()">
+          <button
+            type="button"
+            class="neu-cascade-select__breadcrumb"
+            [class.neu-cascade-select__breadcrumb--active]="activePath().length === 0"
+            [attr.aria-current]="activePath().length === 0 ? 'page' : null"
+            (click)="goToDepth(-1)"
           >
-            @for (option of column; track option.value; let optionIndex = $index) {
-              <button
-                class="neu-cascade-select__option"
-                type="button"
-                role="option"
-                [disabled]="option.disabled"
-                [attr.data-column]="columnIndex"
-                [attr.data-index]="optionIndex"
-                [attr.aria-selected]="selectedPath()[columnIndex]?.value === option.value"
-                [class.is-active]="selectedPath()[columnIndex]?.value === option.value"
-                [attr.tabindex]="
-                  columnIndex === activeColumn() && optionIndex === activeRow() ? 0 : -1
-                "
-                (click)="choose(option, columnIndex)"
-              >
-                <span>{{ option.label }}</span>
-                @if (option.children?.length) {
-                  <span aria-hidden="true">{{ childArrow() }}</span>
-                }
-              </button>
+            {{ rootLabel() }}
+          </button>
+          @for (node of activePath(); track trackByPath($index, node)) {
+            <span class="neu-cascade-select__separator" aria-hidden="true">/</span>
+            <button
+              type="button"
+              class="neu-cascade-select__breadcrumb"
+              [class.neu-cascade-select__breadcrumb--active]="$index === activePath().length - 1"
+              [attr.aria-current]="$index === activePath().length - 1 ? 'page' : null"
+              (click)="goToDepth($index)"
+            >
+              {{ optionLabelOf(node) }}
+            </button>
+          }
+        </nav>
+
+        <div class="neu-cascade-select__level-heading">
+          @if (activePath().length) {
+            <button
+              type="button"
+              class="neu-cascade-select__back"
+              [attr.aria-label]="backAriaLabel()"
+              (click)="goBack($event)"
+            >
+              ←
+            </button>
+          }
+          <span>{{
+            activePath().length ? optionLabelOf(activePath()[activePath().length - 1]) : rootLabel()
+          }}</span>
+        </div>
+
+        <div
+          class="neu-cascade-select__options"
+          [id]="panelId + '-listbox'"
+          role="listbox"
+          [attr.aria-label]="label() || placeholder()"
+          [attr.aria-activedescendant]="activeOptionId()"
+        >
+          @for (node of currentNodes(); track trackByOption($index, node)) {
+            <button
+              type="button"
+              class="neu-cascade-select__option"
+              [class.neu-cascade-select__option--active]="activeIndex() === $index"
+              [class.neu-cascade-select__option--selected]="isOptionSelected(node)"
+              [class.neu-cascade-select__option--disabled]="isOptionDisabled(node)"
+              [id]="optionDomId($index)"
+              role="option"
+              [attr.aria-selected]="isOptionSelected(node) ? 'true' : 'false'"
+              [attr.aria-disabled]="isOptionDisabled(node) ? 'true' : null"
+              [attr.tabindex]="
+                isOptionDisabled(node) ? '-1' : activeIndex() === $index ? '0' : '-1'
+              "
+              (click)="activate(node, $event)"
+              (keydown)="onOptionKeydown($any($event), $index)"
+            >
+              @if (itemTpl()) {
+                <ng-container
+                  [ngTemplateOutlet]="itemTpl()!.templateRef"
+                  [ngTemplateOutletContext]="{
+                    $implicit: node,
+                    depth: activePath().length,
+                    hasChildren: hasChildren(node),
+                  }"
+                />
+              } @else {
+                <span class="neu-cascade-select__option-label">{{ optionLabelOf(node) }}</span>
+              }
+              @if (hasChildren(node)) {
+                <span class="neu-cascade-select__option-arrow" aria-hidden="true">→</span>
+              }
+            </button>
+          }
+        </div>
+        @if (!currentNodes().length) {
+          <div class="neu-cascade-select__empty" role="status">
+            @if (emptyTpl()) {
+              <ng-container [ngTemplateOutlet]="emptyTpl()!.templateRef" />
+            } @else {
+              {{ emptyLabel() }}
             }
           </div>
         }
-        @if (!options().length) {
-          <div class="neu-cascade-select__empty" role="status">{{ emptyLabel() }}</div>
+
+        @if (footerTpl()) {
+          <ng-container [ngTemplateOutlet]="footerTpl()!.templateRef" />
         }
       </div>
     </ng-template>
-    @if (error()) {
-      <p class="neu-cascade-select__error" role="alert">{{ error() }}</p>
-    } @else if (hint()) {
-      <p class="neu-cascade-select__hint">{{ hint() }}</p>
-    }
   `,
   styleUrl: './neu-cascade-select.component.scss',
 })
-export class NeuCascadeSelectComponent implements ControlValueAccessor {
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+export class NeuCascadeSelectComponent<
+  T = NeuCascadeSelectNode,
+  V = NeuOptionValue<T>,
+> implements FormValueControl<V | null> {
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly document = inject(DOCUMENT);
-  private readonly directionality = inject(Directionality);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly overlay = inject(Overlay);
+  readonly viewportMargin = 8;
+  private readonly panelMaxHeight = 360;
 
-  readonly options = input<NeuCascadeOption[]>([]);
+  /* v8 ignore start -- Angular signal-query factories; projected-template behavior is covered. */
+  readonly itemTpl = contentChild(NeuCascadeSelectItemDirective<T>);
+  readonly selectedTpl = contentChild(NeuCascadeSelectSelectedDirective<T>);
+  readonly headerTpl = contentChild(NeuCascadeSelectHeaderDirective);
+  readonly footerTpl = contentChild(NeuCascadeSelectFooterDirective);
+  readonly emptyTpl = contentChild(NeuCascadeSelectEmptyDirective);
+  /* v8 ignore stop */
+
+  readonly options = input<readonly T[]>([]);
+  readonly optionLabel = input<NeuOptionLabelAccessor<T> | null>(null);
+  readonly optionValue = input<(option: T) => V>((option) => resolveNeuOptionValue<T, V>(option));
+  readonly compareWith = input<(left: V, right: V) => boolean>(Object.is);
+  readonly optionDisabled = input<NeuOptionDisabledAccessor<T> | null>(null);
+  readonly optionChildren = input<NeuOptionAccessor<T, readonly T[]> | null>(null);
+
   readonly label = input('');
-  readonly placeholder = input('Select an option');
-  readonly separator = input(' / ');
-  readonly floatingLabel = input(true);
+  readonly placeholder = input('Select...');
+  readonly rootLabel = input('All options');
+  readonly emptyLabel = input('No options found');
+  readonly breadcrumbAriaLabel = input('Cascade levels');
+  readonly backAriaLabel = input('Back to previous level');
+  readonly clearAriaLabel = input('Clear selection');
+  readonly clearable = input(false);
   readonly disabled = input(false);
-  readonly hint = input('');
-  readonly error = input('');
-  readonly describedBy = input('');
-  readonly panelAriaLabel = input('Hierarchical options');
-  readonly levelAriaLabel = input('Level');
-  readonly emptyLabel = input('No options available');
+  readonly readonly = input(false);
+  readonly hidden = input(false);
+  readonly invalid = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly required = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly touch = output<void>();
 
-  readonly valueChange = output<string | null>();
-  readonly pathChange = output<NeuCascadeOption[]>();
-  readonly openChange = output<boolean>();
+  /** Browser panel attached, regardless of opening source. */
+  readonly opened = output<void>();
+  /** Browser panel detached, regardless of closing source; silent during destroy. */
+  readonly closed = output<void>();
+  private readonly eventDestroyRef = inject(DestroyRef);
+  private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
+  private panelAttached = false;
 
-  readonly triggerId = `neu-cascade-select-${++cascadeId}`;
+  protected onPanelAttached(): void {
+    if (this.eventDestroyRef.destroyed || this.panelAttached) return;
+    this.panelAttached = true;
+    this.opened.emit();
+  }
+
+  protected onPanelDetached(): void {
+    const wasAttached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.eventDestroyRef.destroyed) return;
+    this.close();
+    if (wasAttached) this.closed.emit();
+  }
+
+  /** User ancestor path; restored/programmatic paths are silent. */
+  readonly groupChange = output<readonly T[]>();
+
+  readonly optionActivated = output<NeuOptionActivatedEvent<T, V>>();
+
+  readonly triggerId = inject(NeuIdGenerator).getId('neu-cascade-select-');
   readonly panelId = `${this.triggerId}-panel`;
   readonly open = signal(false);
-  readonly activeColumn = signal(0);
-  readonly activeRow = signal(0);
-  private readonly cvaDisabled = signal(false);
-  private readonly value = signal<string | null>(null);
-  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
-  readonly childArrow = computed(() => (this.directionality.valueSignal() === 'rtl' ? '‹' : '›'));
-  readonly selectedPath = computed(() => this.findPath(this.options(), this.value()) ?? []);
-  readonly columns = computed(() => {
-    const path = this.selectedPath();
-    const result: NeuCascadeOption[][] = [this.options()];
-    for (const item of path) {
-      if (item.children?.length) result.push(item.children);
-    }
-    return result;
+  readonly value = model<V | null>(null);
+  readonly activePath = signal<T[]>([]);
+  readonly activeIndex = signal(0);
+  readonly isPanelAbove = signal(false);
+  readonly panelPosition = signal<{ width: string | null; maxHeight: string | null }>({
+    width: null,
+    maxHeight: null,
   });
-  readonly displayValue = computed(() =>
-    this.selectedPath()
-      .map((option) => option.label)
-      .join(this.separator()),
-  );
+  readonly overlayPositions: ConnectedPosition[] = [
+    { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
+    { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -6 },
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -6 },
+  ];
+  readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
 
-  private onChange: (value: string | null) => void = () => {};
-  private onTouched: () => void = () => {};
-
-  constructor() {
-    effect(() => {
-      const columns = this.columns();
-      if (this.activeColumn() >= columns.length)
-        this.activeColumn.set(Math.max(0, columns.length - 1));
-    });
-  }
-
-  writeValue(value: string | null): void {
-    this.value.set(value);
-  }
-  registerOnChange(fn: (value: string | null) => void): void {
-    this.onChange = fn;
-  }
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-  setDisabledState(disabled: boolean): void {
-    this.cvaDisabled.set(disabled);
-  }
+  readonly isDisabled = computed(() => this.disabled());
+  readonly rootNodes = computed(() => this.options());
+  readonly currentNodes = computed(() => {
+    const path = this.activePath();
+    return path.length ? this.childrenOf(path[path.length - 1]) : this.rootNodes();
+  });
+  readonly activeOptionId = computed(() => {
+    const index = this.activeIndex();
+    return this.currentNodes()[index] === undefined ? null : this.optionDomId(index);
+  });
+  readonly selectedNode = computed(() => {
+    const current = this.value();
+    if (current === null) return null;
+    return this.findSelectionPath(this.rootNodes(), current)?.node ?? null;
+  });
 
   toggle(): void {
-    this.open() ? this.close() : this.openPanel();
-  }
-  openPanel(event?: Event): void {
     if (this.isDisabled()) return;
-    event?.preventDefault();
-    this.open.set(true);
-    this.openChange.emit(true);
-    queueMicrotask(() => this.focusActive());
-  }
-  close(restoreFocus = false): void {
-    if (!this.open()) return;
-    this.open.set(false);
-    this.openChange.emit(false);
-    this.onTouched();
-    if (restoreFocus)
-      queueMicrotask(() =>
-        this.host.nativeElement.querySelector<HTMLElement>('.neu-cascade-select__trigger')?.focus(),
-      );
-  }
-
-  choose(option: NeuCascadeOption, columnIndex: number): void {
-    if (option.disabled) return;
-    this.value.set(option.value);
-    this.activeColumn.set(columnIndex);
-    this.activeRow.set(
-      Math.max(
-        0,
-        this.columns()[columnIndex]?.findIndex((item) => item.value === option.value) ?? 0,
-      ),
-    );
-    this.onChange(option.value);
-    this.valueChange.emit(option.value);
-    this.pathChange.emit(this.selectedPath());
-    if (option.children?.length) {
-      this.activeColumn.set(columnIndex + 1);
-      this.activeRow.set(this.firstEnabledIndex(option.children));
-      queueMicrotask(() => this.focusActive());
+    if (this.open()) {
+      this.close();
     } else {
-      this.close(true);
+      this.openPanel();
     }
   }
 
-  onPanelKeydown(event: KeyboardEvent): void {
-    const rtl = this.directionality.valueSignal() === 'rtl';
-    const nextKey = rtl ? 'ArrowLeft' : 'ArrowRight';
-    const previousKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+  openPanel(): void {
+    if (this.isDisabled()) return;
+    this.restoreSelectionNavigation();
+    this.syncPanelPosition();
+    this.open.set(true);
+    this.focusCurrentOption();
+  }
+
+  close(): void {
+    const wasOpen = this.open();
+    this.restoreSelectionNavigation();
+    this.open.set(false);
+    if (wasOpen) this.focusTrigger();
+  }
+
+  requestClose(reason: 'escape' | 'outside-pointer', event: Event): void {
     if (
-      !['ArrowDown', 'ArrowUp', nextKey, previousKey, 'Home', 'End', 'Enter', ' '].includes(
-        event.key,
-      )
+      !allowsNeuOverlayDismissal(this.dismissGuard, {
+        source: 'cascade-select',
+        reason,
+        originalEvent: event,
+      })
     )
       return;
-    event.preventDefault();
-    const column = this.columns()[this.activeColumn()] ?? [];
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-      const direction = event.key === 'ArrowDown' ? 1 : -1;
-      this.activeRow.set(this.nextEnabledIndex(column, this.activeRow(), direction));
-    } else if (event.key === 'Home') {
-      this.activeRow.set(this.firstEnabledIndex(column));
-    } else if (event.key === 'End') {
-      this.activeRow.set(this.lastEnabledIndex(column));
-    } else if (event.key === nextKey) {
-      const active = column[this.activeRow()];
-      if (active?.children?.length) this.choose(active, this.activeColumn());
-    } else if (event.key === previousKey && this.activeColumn() > 0) {
-      this.activeColumn.update((value) => value - 1);
-      const selected = this.selectedPath()[this.activeColumn()];
-      this.activeRow.set(
-        Math.max(
-          0,
-          this.columns()[this.activeColumn()]?.findIndex(
-            (item) => item.value === selected?.value,
-          ) ?? 0,
-        ),
-      );
-    } else {
-      const active = column[this.activeRow()];
-      if (active) this.choose(active, this.activeColumn());
-    }
-    queueMicrotask(() => this.focusActive());
+    if (!this.open()) return;
+    this.close();
   }
 
-  private focusActive(): void {
-    this.document
-      .querySelector<HTMLElement>(
-        `#${this.panelId} .neu-cascade-select__option[data-column="${this.activeColumn()}"][data-index="${this.activeRow()}"]`,
-      )
-      ?.focus();
+  clear(event: Event): void {
+    event.stopPropagation();
+    if (this.isDisabled() || this.readonly()) return;
+    const wasOpen = this.open();
+    this.value.set(null);
+    this.close();
+    if (!wasOpen) this.focusTrigger();
   }
-  private firstEnabledIndex(options: NeuCascadeOption[]): number {
-    return Math.max(
-      0,
-      options.findIndex((option) => !option.disabled),
+
+  activate(node: T, originalEvent?: Event): void {
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || this.readonly() || this.isOptionDisabled(node)) return;
+    this.activeIndex.set(this.currentNodes().indexOf(node));
+    if (this.hasChildren(node)) {
+      this.activePath.update((path) => [...path, node]);
+      this.groupChange.emit([...this.activePath()]);
+      this.activeIndex.set(this.firstEnabledIndex(this.childrenOf(node)));
+      this.focusCurrentOption();
+      return;
+    }
+
+    const value = this.optionValueOf(node);
+    this.value.set(value);
+    if (originalEvent) this.optionActivated.emit({
+      option: node,
+      value,
+      source: originalEvent.type.startsWith('key') ? 'keyboard' : 'pointer',
+      originalEvent,
+    });
+    this.close();
+  }
+
+  goBack(event?: Event): void {
+    event?.preventDefault();
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || !this.activePath().length) return;
+    this.activePath.update((path) => path.slice(0, -1));
+    this.groupChange.emit([...this.activePath()]);
+    this.activeIndex.set(this.firstEnabledIndex(this.currentNodes()));
+    this.focusCurrentOption();
+  }
+
+  goToDepth(depth: number): void {
+    const nextPath = depth < 0 ? [] : this.activePath().slice(0, depth + 1);
+    if (this.eventDestroyRef.destroyed || this.isDisabled() || nextPath.length === this.activePath().length) return;
+    this.activePath.set(nextPath);
+    this.groupChange.emit([...nextPath]);
+    this.activeIndex.set(this.firstEnabledIndex(this.currentNodes()));
+    this.focusCurrentOption();
+  }
+
+  onTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.requestClose('escape', event);
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.toggle();
+      return;
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (!this.open()) this.openPanel();
+    }
+  }
+
+  onOptionKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.moveFocus(event.key === 'ArrowDown' ? 1 : -1, index);
+      return;
+    }
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      const enabled = this.enabledIndices(this.currentNodes());
+      if (enabled.length) {
+        this.activeIndex.set(event.key === 'Home' ? enabled[0] : enabled[enabled.length - 1]);
+        this.focusCurrentOption();
+      }
+      return;
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      const node = this.currentNodes()[index];
+      if (node && this.hasChildren(node) && !this.isOptionDisabled(node)) this.activate(node, event);
+      return;
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.goBack(event);
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const node = this.currentNodes()[index];
+      if (node) this.activate(node, event);
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.requestClose('escape', event);
+    }
+  }
+
+  optionLabelOf(option: T): string {
+    return resolveNeuOptionLabel(option, this.optionLabel());
+  }
+
+  optionValueOf(option: T): V {
+    return resolveNeuOptionValue<T, V>(option, this.optionValue());
+  }
+
+  isOptionDisabled(option: T): boolean {
+    return resolveNeuOptionDisabled(option, this.optionDisabled());
+  }
+
+  hasChildren(option: T): boolean {
+    return this.childrenOf(option).length > 0;
+  }
+
+  isOptionSelected(option: T): boolean {
+    const current = this.value();
+    return current !== null && this.compareWith()(this.optionValueOf(option), current);
+  }
+
+  trackByOption(index: number, _option: T): string {
+    return `${this.panelId}-depth-${this.activePath().length}-option-${index}`;
+  }
+
+  trackByPath(index: number, _node: T): string {
+    return `${this.panelId}-path-${index}`;
+  }
+
+  optionDomId(index: number): string {
+    return `${this.panelId}-depth-${this.activePath().length}-option-${index}`;
+  }
+
+  onOverlayPositionChange(event: ConnectedOverlayPositionChange): void {
+    this.isPanelAbove.set(event.connectionPair.originY === 'top');
+  }
+
+  focus(options?: FocusOptions): void {
+    if (this.isDisabled()) return;
+    this.elementRef.nativeElement
+      .querySelector<HTMLElement>('.neu-cascade-select__trigger')
+      ?.focus(options);
+  }
+
+  reset(): void {
+    this.activePath.set([]);
+    this.activeIndex.set(this.firstEnabledIndex(this.rootNodes()));
+    this.open.set(false);
+  }
+
+  onFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget;
+    if (next instanceof Node && (this.elementRef.nativeElement.contains(next) || this.document.getElementById(this.panelId)?.contains(next))) return;
+    this.touch.emit();
+  }
+
+  private childrenOf(node: T): readonly T[] {
+    const accessor = this.optionChildren();
+    const rawChildren = accessor
+      ? readNeuOptionAccessor(node, accessor)
+      : this.readLegacyChildren(node);
+    return Array.isArray(rawChildren) ? (rawChildren as readonly T[]) : [];
+  }
+
+  private readLegacyChildren(node: T): unknown {
+    if (typeof node !== 'object' || node === null) return undefined;
+    return (node as Record<PropertyKey, unknown>)['children'];
+  }
+
+  private findSelectionPath(nodes: readonly T[], value: V): SelectionPath<T> | null {
+    const entries = walkNeuTreeDepthFirst(nodes, (node) => this.childrenOf(node));
+    const entryIndex = entries.findIndex((entry) =>
+      this.compareWith()(this.optionValueOf(entry.node), value),
+    );
+    if (entryIndex < 0) return null;
+
+    const entry = entries[entryIndex];
+    const ancestors: T[] = [];
+    let parentEntryIndex = entry.parentEntryIndex;
+    while (parentEntryIndex != null) {
+      const parent = entries[parentEntryIndex];
+      ancestors.push(parent.node);
+      parentEntryIndex = parent.parentEntryIndex;
+    }
+    ancestors.reverse();
+    return { ancestors, node: entry.node, index: entry.index };
+  }
+
+  private restoreSelectionNavigation(): void {
+    const current = this.value();
+    if (current === null) {
+      this.activePath.set([]);
+      this.activeIndex.set(this.firstEnabledIndex(this.rootNodes()));
+      return;
+    }
+    const selected = this.findSelectionPath(this.rootNodes(), current);
+    if (!selected) {
+      this.activePath.set([]);
+      this.activeIndex.set(this.firstEnabledIndex(this.rootNodes()));
+      return;
+    }
+    this.activePath.set(selected.ancestors);
+    this.activeIndex.set(selected.index);
+  }
+
+  private enabledIndices(nodes: readonly T[]): number[] {
+    return nodes.reduce<number[]>((indices, node, index) => {
+      if (!this.isOptionDisabled(node)) indices.push(index);
+      return indices;
+    }, []);
+  }
+
+  private firstEnabledIndex(nodes: readonly T[]): number {
+    return this.enabledIndices(nodes)[0] ?? 0;
+  }
+
+  private moveFocus(direction: 1 | -1, currentIndex: number): void {
+    const enabled = this.enabledIndices(this.currentNodes());
+    if (!enabled.length) return;
+    const currentPosition = Math.max(0, enabled.indexOf(currentIndex));
+    const nextPosition = (currentPosition + direction + enabled.length) % enabled.length;
+    this.activeIndex.set(enabled[nextPosition]);
+    this.focusCurrentOption();
+  }
+
+  private focusCurrentOption(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    requestAnimationFrame(() => this.document.getElementById(this.activeOptionId() ?? '')?.focus());
+  }
+
+  private focusTrigger(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    requestAnimationFrame(() =>
+      this.elementRef.nativeElement.querySelector<HTMLElement>(`#${this.triggerId}`)?.focus(),
     );
   }
-  private lastEnabledIndex(options: NeuCascadeOption[]): number {
-    const index = [...options].reverse().findIndex((option) => !option.disabled);
-    return index < 0 ? 0 : options.length - index - 1;
-  }
-  private nextEnabledIndex(
-    options: NeuCascadeOption[],
-    current: number,
-    direction: 1 | -1,
-  ): number {
-    if (!options.length) return 0;
-    let index = current;
-    for (let attempt = 0; attempt < options.length; attempt += 1) {
-      index = (index + direction + options.length) % options.length;
-      if (!options[index]?.disabled) return index;
-    }
-    return current;
-  }
-  private findPath(options: NeuCascadeOption[], value: string | null): NeuCascadeOption[] | null {
-    if (value === null) return null;
-    for (const option of options) {
-      if (option.value === value) return [option];
-      const childPath = this.findPath(option.children ?? [], value);
-      if (childPath) return [option, ...childPath];
-    }
-    return null;
+
+  private syncPanelPosition(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const trigger = this.elementRef.nativeElement.querySelector<HTMLElement>(
+      '.neu-cascade-select__trigger',
+    );
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const width = Math.min(Math.max(rect.width, 280), viewportWidth - this.viewportMargin * 2);
+    const below = Math.max(0, viewportHeight - rect.bottom - this.viewportMargin - 6);
+    const above = Math.max(0, rect.top - this.viewportMargin - 6);
+    const aboveWins = above > below && above >= 180;
+    this.panelPosition.set({
+      width: `${width}px`,
+      maxHeight: `${Math.max(180, Math.min(this.panelMaxHeight, aboveWins ? above : below))}px`,
+    });
   }
 }

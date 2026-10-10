@@ -1,18 +1,30 @@
 import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
+  afterRenderEffect,
   computed,
-  forwardRef,
+  inject,
   input,
+  model,
   output,
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { DOCUMENT } from '@angular/common';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { NeuButtonComponent } from '@neural-ui/core/button';
+import { InternalNeuIconOutletComponent, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import { neuIconBold as iconBold } from '@neural-ui/core/internal';
+import { neuIconItalic as iconItalic } from '@neural-ui/core/internal';
+import { neuIconUnderline as iconUnderline } from '@neural-ui/core/internal';
+import { neuIconList as iconList } from '@neural-ui/core/internal';
+import { neuIconListOrdered as iconListOrdered } from '@neural-ui/core/internal';
+import { neuIconLink as iconLink } from '@neural-ui/core/internal';
+import { neuIconImage as iconImage } from '@neural-ui/core/internal';
+import { neuIconEraser as iconEraser } from '@neural-ui/core/internal';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
   escapeRichTextAttribute,
   escapeRichTextHtml,
@@ -80,25 +92,18 @@ const DEFAULT_RICH_TEXT_EDITOR_LABELS: NeuRichTextEditorLabels = {
   pastedImageAlt: 'Pasted image',
 };
 
-let _neuRichTextEditorIdSeq = 0;
-
 @Component({
   selector: 'neu-rich-text-editor',
-  imports: [NeuButtonComponent],
+  imports: [NeuButtonComponent, InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-rich-text-editor-host',
     '[class.neu-rich-text-editor-host--sm]': 'size() === "sm"',
     '[class.neu-rich-text-editor-host--lg]': 'size() === "lg"',
+    '[hidden]': 'hidden()',
+    '(focusin)': 'onBoundaryFocusIn()',
+    '(focusout)': 'onBoundaryFocusOut($event)',
   },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuRichTextEditorComponent),
-      multi: true,
-    },
-  ],
   template: `
     <div class="neu-rich-text-editor" [class.neu-rich-text-editor--disabled]="isDisabledFinal()">
       @if (label()) {
@@ -125,39 +130,36 @@ let _neuRichTextEditorIdSeq = 0;
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideBold"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().bold"
               [title]="mergedLabels().bold"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="format('bold')"
-            ></button>
+            ><neu-icon-outlet [icon]="iconBold" [fallbackText]="iconFallbackText(iconBold)" size="1em" /></button>
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideItalic"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().italic"
               [title]="mergedLabels().italic"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="format('italic')"
-            ></button>
+            ><neu-icon-outlet [icon]="iconItalic" [fallbackText]="iconFallbackText(iconItalic)" size="1em" /></button>
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideUnderline"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().underline"
               [title]="mergedLabels().underline"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="format('underline')"
-            ></button>
+            ><neu-icon-outlet [icon]="iconUnderline" [fallbackText]="iconFallbackText(iconUnderline)" size="1em" /></button>
           </div>
 
           <div
@@ -168,27 +170,25 @@ let _neuRichTextEditorIdSeq = 0;
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideList"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().unorderedList"
               [title]="mergedLabels().unorderedList"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="format('insertUnorderedList')"
-            ></button>
+            ><neu-icon-outlet [icon]="iconList" [fallbackText]="iconFallbackText(iconList)" size="1em" /></button>
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideListOrdered"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().orderedList"
               [title]="mergedLabels().orderedList"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="format('insertOrderedList')"
-            ></button>
+            ><neu-icon-outlet [icon]="iconListOrdered" [fallbackText]="iconFallbackText(iconListOrdered)" size="1em" /></button>
           </div>
 
           <div
@@ -199,27 +199,25 @@ let _neuRichTextEditorIdSeq = 0;
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideLink"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().addLink"
               [title]="mergedLabels().addLink"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="addLink()"
-            ></button>
+            ><neu-icon-outlet [icon]="iconLink" [fallbackText]="iconFallbackText(iconLink)" size="1em" /></button>
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideImage"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().addImageUrl"
               [title]="mergedLabels().addImageUrl"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="addImageUrl()"
-            ></button>
+            ><neu-icon-outlet [icon]="iconImage" [fallbackText]="iconFallbackText(iconImage)" size="1em" /></button>
           </div>
 
           <div
@@ -230,15 +228,14 @@ let _neuRichTextEditorIdSeq = 0;
             <button
               neu-button
               type="button"
-              variant="ghost"
+              tone="neutral" variant="ghost"
               size="sm"
-              icon="lucideEraser"
               [iconOnly]="true"
               [ariaLabel]="mergedLabels().clearFormat"
               [title]="mergedLabels().clearFormat"
-              [disabled]="isDisabledFinal()"
+              [disabled]="isInteractionBlocked()"
               (click)="format('removeFormat')"
-            ></button>
+            ><neu-icon-outlet [icon]="iconEraser" [fallbackText]="iconFallbackText(iconEraser)" size="1em" /></button>
           </div>
         </div>
 
@@ -249,7 +246,7 @@ let _neuRichTextEditorIdSeq = 0;
               <button
                 class="neu-rich-text-editor__variable"
                 type="button"
-                [disabled]="isDisabledFinal()"
+                [disabled]="isInteractionBlocked()"
                 (click)="insertVariable(variable)"
               >
                 {{ variable }}
@@ -266,11 +263,14 @@ let _neuRichTextEditorIdSeq = 0;
           [id]="editorId()"
           [attr.aria-label]="label() ? null : mergedLabels().toolbar"
           [attr.aria-labelledby]="label() ? editorId() + '-label' : null"
-          [attr.contenteditable]="isDisabledFinal() ? 'false' : 'true'"
+          [attr.contenteditable]="isInteractionBlocked() ? 'false' : 'true'"
+          [attr.aria-readonly]="readonly() ? 'true' : null"
+          [attr.tabindex]="disabled() ? -1 : 0"
           [attr.data-placeholder]="placeholder()"
           [attr.aria-describedby]="ariaDescribedBy()"
           [attr.aria-invalid]="hasError() ? 'true' : null"
           [style.min-height]="minHeight()"
+          [innerHTML]="sanitizedValue()"
           (input)="handleInput()"
           (focus)="onFocus()"
           (blur)="onBlur()"
@@ -286,17 +286,27 @@ let _neuRichTextEditorIdSeq = 0;
         <p class="neu-rich-text-editor__hint" [id]="editorId() + '-hint'">{{ hint() }}</p>
       }
 
-      @if (showPreview() && value()) {
+      @if (showPreview() && sanitizedValue()) {
         <details class="neu-rich-text-editor__preview">
           <summary>{{ previewLabel() }}</summary>
-          <div class="neu-rich-text-editor__preview-content" [innerHTML]="value()"></div>
+          <div class="neu-rich-text-editor__preview-content" [innerHTML]="sanitizedValue()"></div>
         </details>
       }
     </div>
   `,
   styleUrl: './neu-rich-text-editor.component.scss',
 })
-export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterViewInit {
+export class NeuRichTextEditorComponent implements FormValueControl<string> {
+  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconBold = iconBold;
+  protected readonly iconItalic = iconItalic;
+  protected readonly iconUnderline = iconUnderline;
+  protected readonly iconList = iconList;
+  protected readonly iconListOrdered = iconListOrdered;
+  protected readonly iconLink = iconLink;
+  protected readonly iconImage = iconImage;
+  protected readonly iconEraser = iconEraser;
+  readonly value = model<string>('');
   readonly label = input<string>('');
   readonly placeholder = input<string>('Write here...');
   readonly hint = input<string>('');
@@ -305,10 +315,13 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
   readonly minHeight = input<string>('180px');
   readonly disabled = input<boolean>(false);
   readonly readonly = input<boolean>(false);
-  /**
-   * @deprecated Use `labels.toolbar` instead.
-   */
-  readonly toolbarAriaLabel = input<string>('');
+  readonly hidden = input(false);
+  readonly invalid = input(false);
+  readonly pending = input(false);
+  readonly touched = input(false);
+  readonly dirty = input(false);
+  readonly required = input(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
   readonly labels = input<Partial<NeuRichTextEditorLabels>>({});
   readonly variables = input<readonly string[]>([]);
   readonly variablesLabel = input<string>('Variables');
@@ -316,29 +329,46 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
   readonly maxPastedImageBytes = input<number>(1_500_000);
   readonly showPreview = input<boolean>(false);
   readonly previewLabel = input<string>('Preview');
-  readonly editorId = input<string>(`neu-rich-text-editor-${++_neuRichTextEditorIdSeq}`);
+  readonly editorId = input<string>(inject(NeuIdGenerator).getId('neu-rich-text-editor-'));
 
-  readonly valueChange = output<string>();
   readonly imageRejected = output<NeuRichTextImageRejectedEvent>();
+  readonly valueCommitted = output<string>();
+  readonly touch = output<void>();
 
-  protected readonly value = signal('');
   protected readonly focused = signal(false);
-  private readonly cvaDisabled = signal(false);
   private readonly editorRef = viewChild<ElementRef<HTMLDivElement>>('editorRef');
 
-  private viewReady = false;
-  private onChange: (value: string) => void = () => undefined;
-  private onTouched: () => void = () => undefined;
+  private destroyed = false;
+  private readonly activeReaders = new Set<FileReader>();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+  private boundaryStart: string | null = null;
+  private touchSent = false;
+  private lastRenderedValue = '';
 
-  readonly isDisabledFinal = computed(
-    () => this.disabled() || this.readonly() || this.cvaDisabled(),
-  );
+  constructor() {
+    afterRenderEffect(() => {
+      const html = this.sanitizedValue();
+      if (html !== this.lastRenderedValue && this.activeReaders.size) this.abortReaders();
+      this.lastRenderedValue = html;
+      this.renderValue(html);
+    });
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+      this.abortReaders();
+    });
+  }
+
+  readonly isDisabledFinal = computed(() => this.disabled());
+  readonly isInteractionBlocked = computed(() => this.disabled() || this.readonly());
+  readonly sanitizedValue = computed(() => normalizeRichTextHtml(this.value() ?? ''));
   readonly mergedLabels = computed<NeuRichTextEditorLabels>(() => ({
     ...DEFAULT_RICH_TEXT_EDITOR_LABELS,
-    ...(this.toolbarAriaLabel() ? { toolbar: this.toolbarAriaLabel() } : {}),
     ...this.labels(),
   }));
-  readonly hasError = computed(() => !!this.errorMessage());
+  readonly hasError = computed(
+    () => this.invalid() || this.errors().length > 0 || !!this.errorMessage(),
+  );
   readonly ariaDescribedBy = computed(() => {
     if (this.hasError()) {
       return `${this.editorId()}-error`;
@@ -346,57 +376,35 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
     return this.hint() ? `${this.editorId()}-hint` : null;
   });
 
-  ngAfterViewInit(): void {
-    this.viewReady = true;
-    this.renderValue(this.value());
-  }
-
-  writeValue(value: string | null): void {
-    const html = normalizeRichTextHtml(value ?? '');
-    this.value.set(html);
-    this.renderValue(html);
-  }
-
-  registerOnChange(fn: (value: string) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.cvaDisabled.set(isDisabled);
-  }
-
   format(command: NeuRichTextEditorCommand): void {
-    if (this.isDisabledFinal()) return;
+    if (this.isInteractionBlocked()) return;
     this.focus();
-    document.execCommand(command);
+    this.document.execCommand?.(command);
     this.syncValueFromEditor();
   }
 
   addLink(): void {
-    if (this.isDisabledFinal()) return;
-    const url = window.prompt(this.mergedLabels().linkUrlPrompt);
+    if (this.isInteractionBlocked()) return;
+    const url = this.document.defaultView?.prompt(this.mergedLabels().linkUrlPrompt);
     if (!url) return;
-    const text = window.prompt(this.mergedLabels().linkTextPrompt) || url;
+    const text = this.document.defaultView?.prompt(this.mergedLabels().linkTextPrompt) || url;
     this.insertHtml(`<a href="${escapeRichTextAttribute(url)}">${escapeRichTextHtml(text)}</a>`);
   }
 
   addImageUrl(): void {
-    if (this.isDisabledFinal()) return;
-    const url = window.prompt(this.mergedLabels().imageUrlPrompt);
+    if (this.isInteractionBlocked()) return;
+    const url = this.document.defaultView?.prompt(this.mergedLabels().imageUrlPrompt);
     if (!url) return;
     const alt =
-      window.prompt(this.mergedLabels().imageAltPrompt) || this.mergedLabels().imageAltFallback;
+      this.document.defaultView?.prompt(this.mergedLabels().imageAltPrompt) ||
+      this.mergedLabels().imageAltFallback;
     this.insertHtml(
       `<img src="${escapeRichTextAttribute(url)}" alt="${escapeRichTextAttribute(alt)}">`,
     );
   }
 
   insertVariable(variable: string): void {
-    if (this.isDisabledFinal()) return;
+    if (this.isInteractionBlocked()) return;
     this.insertHtml(escapeRichTextHtml(variable));
   }
 
@@ -408,13 +416,31 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
     this.focused.set(true);
   }
 
-  onBlur(): void {
-    this.focused.set(false);
-    this.onTouched();
+  onBlur(): void {}
+
+  onBoundaryFocusIn(): void {
+    if (this.disabled()) return;
+    this.focused.set(true);
+    this.touchSent = false;
+    if (this.boundaryStart === null) this.boundaryStart = this.value();
+  }
+
+  onBoundaryFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget as Node | null;
+    if (next && (event.currentTarget as HTMLElement).contains(next)) return;
+    queueMicrotask(() => {
+      const host = this.editorRef()?.nativeElement.closest('neu-rich-text-editor');
+      if (host?.contains(this.document.activeElement)) return;
+      this.focused.set(false);
+      this.markTouched();
+      const start = this.boundaryStart;
+      this.boundaryStart = null;
+      if (start !== null && start !== this.value()) this.valueCommitted.emit(this.value());
+    });
   }
 
   handlePaste(event: ClipboardEvent): void {
-    if (this.isDisabledFinal()) return;
+    if (this.isInteractionBlocked()) return;
 
     const imageFile = Array.from(event.clipboardData?.files ?? []).find((file) =>
       file.type.startsWith('image/'),
@@ -446,9 +472,21 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
       return;
     }
 
-    const reader = new FileReader();
+    const FileReaderCtor = this.document.defaultView?.FileReader;
+    if (!FileReaderCtor) return;
+    const reader = new FileReaderCtor();
+    const baseValue = this.value();
+    const release = () => {
+      reader.onload = null;
+      reader.onerror = null;
+      reader.onabort = null;
+      this.activeReaders.delete(reader);
+    };
+    this.activeReaders.add(reader);
     reader.onload = () => {
       const src = typeof reader.result === 'string' ? reader.result : '';
+      release();
+      if (this.destroyed || this.value() !== baseValue) return;
       this.insertHtml(
         sanitizeRichTextHtml(
           `<img src="${escapeRichTextAttribute(src)}" alt="${escapeRichTextAttribute(
@@ -457,31 +495,60 @@ export class NeuRichTextEditorComponent implements ControlValueAccessor, AfterVi
         ),
       );
     };
-    reader.readAsDataURL(file);
+    reader.onerror = release;
+    reader.onabort = release;
+    try {
+      reader.readAsDataURL(file);
+    } catch (error) {
+      release();
+      throw error;
+    }
   }
 
   private insertHtml(html: string): void {
     this.focus();
-    document.execCommand('insertHTML', false, sanitizeRichTextHtml(html));
+    this.document.execCommand?.('insertHTML', false, sanitizeRichTextHtml(html));
     this.syncValueFromEditor();
   }
 
   private syncValueFromEditor(): void {
     const html = sanitizeRichTextHtml(this.editorRef()?.nativeElement.innerHTML ?? '');
     this.value.set(html);
-    this.onChange(html);
-    this.valueChange.emit(html);
   }
 
-  private focus(): void {
+  focus(): void {
     this.editorRef()?.nativeElement.focus();
+  }
+
+  reset(): void {
+    this.abortReaders();
+    this.focused.set(false);
+    this.boundaryStart = null;
+    this.touchSent = false;
+    this.renderValue(this.sanitizedValue());
   }
 
   private renderValue(html: string): void {
     const editor = this.editorRef()?.nativeElement;
-    if (!this.viewReady || !editor) return;
+    if (!editor) return;
     if (editor.innerHTML !== html) {
       editor.innerHTML = html;
     }
+  }
+
+  private abortReaders(): void {
+    for (const reader of this.activeReaders) {
+      reader.onload = null;
+      reader.onerror = null;
+      reader.onabort = null;
+      if (reader.readyState === 1) reader.abort();
+    }
+    this.activeReaders.clear();
+  }
+
+  private markTouched(): void {
+    if (this.touchSent) return;
+    this.touchSent = true;
+    this.touch.emit();
   }
 }

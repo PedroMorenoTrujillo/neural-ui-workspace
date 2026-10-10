@@ -1,2 +1,2 @@
-export * from './neu-tooltip.component';
-export * from './neu-tooltip.directive';
+export { NeuTooltipDirective } from './neu-tooltip.directive';
+export type { NeuTooltipPosition } from './neu-tooltip.directive';

@@ -9,80 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.14.3] - 2026-08-18
+<!-- next release -->
+
+## [1.15.0] - 2026-09-12
 
 ### Added
 
-- Recorded Pedro Moreno Trujillo's approval of the exact digest covering all 464 tracked visual baselines across the 89 public runtime routes, closing the strict quality matrix with 1864 `PASS`, 116 justified `N/A` and zero unresolved cells.
-
-## [1.14.2] - 2026-08-18
-
-### Fixed
-
-- Registered the nine public harnesses added in 1.14.0 in the generated quality matrix, closing their keyboard, CVA-applicability and harness classifications without unverified technical cells.
-- Corrected the public catalog taxonomy to 88 component entry points plus the `url-state` and `testing` utilities, and synchronized current test, evidence and quality-matrix metrics across both published READMEs.
-
-### Added
-
-- Recorded the project owner's complete validation across all 89 public runtime entry-point routes with NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack. NVDA was captured as 2026.1.1 on Windows 11 with current Chrome; exact versions were not recorded for the other four targets.
-
-## [1.14.1] - 2026-08-17
-
-### Fixed
-
-- Updated the published README feature summary to distinguish the public testing entry point from the 90-entry-point package snapshot.
-
-## [1.14.0] - 2026-08-17
-
-### Added
-
-- Added nine standalone, signals-first entry points: Carousel, Cascade Select, Dock, Image Compare, Mega Menu, Organization Chart, Panel Menu, Speed Dial and Terminal.
-- Added public Component Harness coverage and showcase documentation for the new interactive components, including bilingual examples, API tables, RTL scenarios and responsive evidence.
+- Table selection migration parity: typed none/single/multiple modes, radio and checkbox surfaces, focused controlled row selection, row preselection by `rowKey`, disabled rows, page or filtered/loaded header scopes, granular row events and aggregate select-all events.
+- Selection remains key-canonical across immutable row replacement, filters, sorting, pagination, virtual scrolling and server page replacement; server select-all explicitly covers loaded rows only.
+- Scope-derived select-all labels distinguish filtered rows from the current page unless a consumer supplies an override. Partial server selections report resolved/canonical counts and hide row-dependent actions when no selected row object is loaded.
+- Selection event arrays are isolated, `selectedRows()` is a shallow-frozen projection that preserves row identity, and single replacement emits `selectionChange`, then `rowUnselect(previous)`, then `rowSelect(next)`.
 
 ### Changed
 
-- Aligned Cascade Select's trigger icon, logical spacing, progressive keyboard navigation and dynamic RTL behavior with Select and Multiselect.
-- Made Terminal's visible defaults, ARIA labels and command-not-found output explicitly localizable.
-- Refined showcase demo panels and code examples with consistent rounded borders in light and dark themes.
-
-### Fixed
-
-- Kept Code Block's horizontal scrollbar inset from its rounded lower corners across Chromium/WebKit and standards-based scrollbar implementations.
-- Removed mixed Spanish/English defaults from the nine new showcase demos.
-
-## [1.13.1] - 2026-08-17
-
-### Fixed
-
-- Updated the published package metadata and README links to use the canonical showcase URL at [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app).
-
-## [1.13.0] - 2026-08-17
-
-### Added
-
-- Expanded the public testing entry point to 62 Component Harnesses, covering every interactive entry point; the remaining 19 entry points are explicitly classified as non-interactive.
-- Added reproducible local release evidence for the 81 entry points across WCAG 2.2 AA automation, dynamic RTL, responsive layouts, browser performance, Lighthouse CI, SSR, Angular 19–22 compatibility, public contracts, bundle budgets, licenses and governance.
-- Added a versioned quality matrix and manual assistive-technology protocol for NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack. JAWS is explicitly not claimed because it is paid.
-
-### Changed
-
-- Replaced the income-restricted ApexCharts runtime and Angular wrapper with direct Chart.js 4.5.1 rendering under the MIT license. `NeuChart` keeps its selector, inputs and documented chart types, adds an accessible data table fallback and no longer requires charting peer dependencies.
-- Made the showcase fully localizable, responsive and direction-aware, with zero static inline styles and an audited allowlist for the 14 runtime style bindings that require computed values.
-- Split the reproducible automated publication gate from the strict human-evidence certification gate. Publication remains blocked by all automated checks; full human-validation claims additionally require the separate strict gate.
-
-### Fixed
-
-- Rating keyboard navigation now uses the real Angular arrow-key event bindings, one roving tab stop, Home/End, wrapping, vertical arrows and direction-aware horizontal behavior in RTL.
-- Rendered IDs in tags, modal, tree select, tooltip, password, input mask and listbox now use Angular CDK's hydration-stable ID generator instead of random values.
-- Pagination now exposes localizable navigation, previous-page, next-page and page labels instead of hard-coded Spanish announcements.
-- Dark-mode pagination now reserves the accent fill for the active page, restoring a clear visual distinction from inactive pages.
-- The local accessibility auditor now fails fast when its server cannot start and prevents an older concurrent run from overwriting newer evidence.
-- Select, Multiselect, Filter Bar, Inline Editor, Spinner, Tabs, Sidebar and Tree Table no longer expose Spanish-only default copy on English pages; defaults now follow the document language and remain overridable through public inputs.
-- Direction-sensitive widgets now use the live Angular CDK `Directionality` state for RTL layout, icons, overlays and physical arrow-key behavior.
-- Showcase test-server shutdown now asks Angular CLI to stop gracefully, avoiding a misleading esbuild deadlock diagnostic after successful audits.
-- Isolated CI and publication tags now validate the checked-in showcase and performance evidence through the automated release gate; the separate strict gate continues to report incomplete human evidence without allowing it to be claimed as validated.
-- CI and npm publication now use the repository-pinned Node.js 22.22.3 runtime so V8 coverage evidence is reproducible across local and hosted release gates.
-- GitHub-hosted release workflows now use the current Node-runtime action majors for checkout, setup and artifact transfer.
+- The Select and Multiselect `ng-template` slot contexts retain explicit `ngTemplateContextGuard` typing while
+  Angular 21.2.17 does not propagate host component generics into projected template contexts during
+  compile-time checks. This is a documented DX limitation; runtime rendering and value mapping behavior
+  is unchanged.
 
 ## [1.12.1] - 2026-08-15
 
@@ -494,7 +437,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Corregida la URL del showcase en `README.md` y `package.json` (`homepage`) para usar el dominio de producción vigente en ese lanzamiento. El dominio canónico actual figura en la documentación de la versión más reciente.
+- Corregida la URL del showcase en `README.md` y `package.json` (`homepage`) — ahora apunta a [neural-ui-three.vercel.app](https://neural-ui-three.vercel.app).
 
 ---
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@angular/core';
+import { Component, ViewEncapsulation, input } from '@angular/core';
 
 /**
  * NeuralUI Divider
@@ -14,7 +14,6 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
   selector: 'neu-divider',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="neu-divider"
@@ -69,10 +68,13 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, input } from '@a
       }
 
       .neu-divider__label {
-        white-space: nowrap;
+        min-width: 0;
+        max-width: 100%;
         padding: 0 var(--neu-space-2);
         letter-spacing: 0.04em;
         font-weight: 500;
+        overflow-wrap: anywhere;
+        text-align: center;
       }
     `,
   ],

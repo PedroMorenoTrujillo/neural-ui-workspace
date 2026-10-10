@@ -4,8 +4,21 @@ import { join, relative } from 'node:path';
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
 
-const serviceOnlyEntryPoints = new Set(['url-state', 'testing']);
+const nonVisualEntryPoints = new Set([
+  'focus-trap',
+  'foundation',
+  'internal',
+  'internal-state',
+  'option-api',
+  'url-state',
+  'testing',
+]);
 const nonDemoEntryPoints = new Set(['button', 'confirm-dialog', 'toggle-button-group', 'testing']);
+const demoEntryPointOverrides = new Map([
+  ['animate-on-scroll', 'utilities-demo'],
+  ['key-filter', 'utilities-demo'],
+  ['ripple', 'utilities-demo'],
+]);
 
 function dirs(path) {
   return readdirSync(path)
@@ -20,6 +33,17 @@ function files(path, suffix) {
   return readdirSync(path).filter((entry) => entry.endsWith(suffix));
 }
 
+function filesRecursive(path, suffix) {
+  return readdirSync(path).flatMap((entry) => {
+    const full = join(path, entry);
+    return statSync(full).isDirectory()
+      ? filesRecursive(full, suffix)
+      : entry.endsWith(suffix)
+        ? [full]
+        : [];
+  });
+}
+
 function read(path) {
   return existsSync(path) ? readFileSync(path, 'utf8') : '';
 }
@@ -30,7 +54,13 @@ const exported = new Set();
 
 if (packageJson) {
   for (const key of Object.keys(packageJson.exports ?? {})) {
-    if (key === '.' || key === './package.json' || key.startsWith('./styles')) continue;
+    if (
+      key === '.' ||
+      key === './package.json' ||
+      key === './token-manifest.json' ||
+      key.startsWith('./styles')
+    )
+      continue;
     exported.add(key.replace(/^\.\//, ''));
   }
 }
@@ -56,10 +86,12 @@ for (const entry of entryPoints) {
     violations.push(`${rel}: missing spec file`);
   }
 
-  if (!serviceOnlyEntryPoints.has(entry)) {
-    const componentFiles = files(dir, '.component.ts');
-    if (componentFiles.length === 0) {
-      violations.push(`${rel}: missing standalone component file`);
+  if (!nonVisualEntryPoints.has(entry)) {
+    const visualFiles = filesRecursive(dir, '.ts').filter(
+      (file) => !file.endsWith('.spec.ts') && /@(?:Component|Directive)\s*\(/.test(read(file)),
+    );
+    if (visualFiles.length === 0) {
+      violations.push(`${rel}: missing standalone component or directive file`);
     }
   }
 }
@@ -72,14 +104,20 @@ if (packageJson) {
   }
 }
 
-const showcasePagesRoot = join(root, '..', 'neural-ui-showcase', 'projects/showcase/src/app/pages');
+const showcasePagesRoot = join(
+  root,
+  '..',
+  process.env.NEURAL_UI_SHOWCASE_PATH ?? 'neural-ui-showcase',
+  'projects/showcase/src/app/pages',
+);
 if (existsSync(showcasePagesRoot)) {
   for (const entry of entryPoints) {
-    if (serviceOnlyEntryPoints.has(entry) || nonDemoEntryPoints.has(entry)) {
+    if (nonVisualEntryPoints.has(entry) || nonDemoEntryPoints.has(entry)) {
       continue;
     }
 
-    const demoName = entry === 'modal' ? 'dialog-demo' : `${entry}-demo`;
+    const demoName =
+      demoEntryPointOverrides.get(entry) ?? (entry === 'modal' ? 'dialog-demo' : `${entry}-demo`);
     if (!existsSync(join(showcasePagesRoot, demoName))) {
       violations.push(`ui-core/${entry}: missing showcase demo page ${demoName}`);
     }

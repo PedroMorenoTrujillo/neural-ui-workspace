@@ -1,0 +1,18 @@
+// Shared behavior for Neural buttons and fixed-purpose structural actions.
+@mixin neu-button-interaction {
+  user-select: none;
+  transition: box-shadow var(--neu-transition), opacity var(--neu-transition);
+
+  &:active:not(:disabled):not(.neu-button--disabled) {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    box-shadow: var(--neu-focus-ring-strong);
+  }
+
+  &:disabled,
+  &.neu-button--disabled {
+    pointer-events: none;
+  }
+}

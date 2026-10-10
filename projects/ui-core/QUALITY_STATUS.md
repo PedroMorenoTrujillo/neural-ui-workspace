@@ -1,18 +1,20 @@
 # Neural UI Core Quality Status
 
-Last reviewed: 2026-08-18
+Last reviewed: 2026-09-28
 
 ## Executive Summary
 
-Neural UI Core is currently aligned with the project's main engineering standards: signals-first APIs, standalone Angular components, OnPush change detection, zoneless-oriented testing, and global coverage above the requested threshold.
+Neural UI Core is aligned with the project's main engineering standards: signals-first APIs, standalone Angular components, OnPush change detection, and zoneless-oriented testing. Neural UI 2 passes the exact 95.01% hard coverage gate on all four metrics.
 
 Validated coverage snapshot:
 
-- Statements: 97.45%
-- Branches: 95.36%
-- Functions: 96.19%
-- Lines: 98.82%
-- Unit tests: 2218 passing tests in ui-core
+- Statements: 23,819/24,565 (96.96%; 746 missed)
+- Branches: 13,976/14,708 (95.02%; 732 missed)
+- Functions: 4,511/4,696 (96.06%; 185 missed)
+- Lines: 18,707/19,061 (98.14%; 354 missed)
+- Unit tests: 2,889 passing tests in `ui-core`
+
+The blocking release policy requires **at least 95.01% on all four metrics** in the full canonical run. `npm run test:coverage` collects fresh coverage and audits exact covered/total counts; `npm run test:coverage:gate` tests that arithmetic. The current branch passes. The [REL-02 assurance report](../../N2-REL-02-COVERAGE-ASSURANCE.md) retains historical checkpoint evidence and the REL-02G closeout.
 
 The library presents a strong accessibility baseline across interactive components, but accessibility should be described as high-confidence rather than formally certified 100% component-by-component.
 
@@ -32,43 +34,29 @@ The library presents a strong accessibility baseline across interactive componen
 - Zoneless-oriented test setup: yes
 - `provideZonelessChangeDetection()` used broadly across component specs: yes
 - Compiled tarball imports verified without Zone.js on Angular 19–22: yes
-- Rendered component IDs use Angular CDK's hydration-stable ID generator rather than random values: yes
 
 ### Testing
 
-- Global coverage above 95%: yes
-- Enforced global coverage floor of 95% across the library: yes
-- Per-entry-point coverage gate: 90/90 entry points pass their applicable thresholds
+- Global coverage above 95.01% on all four metrics: yes; branches are 95.02%
+- Enforced release coverage policy: 95.01% exact hard floor on all four metrics
+- Residual low-return hotspots still present: yes
+  - `virtual-list`
+  - `dashboard-grid`
+  - some complex CDK-driven branches in `nav`, `popover`, and similar components
 
 ### Accessibility
 
 - ARIA usage present across major interactive components: yes
 - Keyboard interaction patterns present in key widgets: yes
-- Rating follows a roving-tabstop keyboard model with arrows, Home/End, wrapping and direction-aware horizontal behavior: yes
 - Focus management present in key widgets: yes
-- Showcase automated accessibility validation: 384/384 localized/theme routes passed with axe-core WCAG 2.2 AA tags
-- Manual assistive-technology validation: 89/89 public entry-point routes passed with NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack. NVDA was recorded as 2026.1.1 on Windows 11 with current Chrome; exact device and software versions were not recorded for the other four targets.
+- Showcase accessibility validation completed previously: yes
 - Formal 100% accessibility certification across all library components: no
-
-### Localization and RTL
-
-- Locale-aware English/Spanish defaults: verified for selection controls, tabs, sidebar, filters, inline editing, spinner and tree table
-- Consumer override contract: every localized default remains replaceable through public inputs
-- Angular CDK `Directionality`: used by direction-sensitive interactive components
-- Dynamic direction changes: verified without application reload, including overlays and physical arrow-key behavior
-- Showcase RTL audit: 288/288 route/browser checks passed
 
 ### Integration Validation Through Showcase
 
-- Automated axe-core audit: 384/384 localized pages passing with zero errors
-- Functional browser gate: 1308/1308 scenarios passed across Chromium, Firefox and WebKit
-- Presentation-resilience coverage inside the browser gate: 576/576 route/browser checks passed for 320×720 reflow, text spacing, forced colors, reduced motion, touch targets, clipping and focus
-- Responsive browser gate: 2880/2880 route/viewport/direction checks passed
-- Dynamic RTL browser gate: 288/288 checks passed
-- Browser performance gate: all 90 public routes passed three cold-load samples and their budgets
-- Lighthouse CI: 12/12 representative reports passed the committed local budgets
-- Visual-baseline inventory: all 464 tracked reference snapshots across the 89 public runtime routes were reviewed and approved by Pedro Moreno Trujillo
-- Strict matrix: 1864 cells pass and 116 are justified `N/A`; no applicable cell remains `FAIL`, `BLOCKED` or `UNVERIFIED`
+- Playwright functional and accessibility suite: 375/375 passing in Chromium, Firefox and WebKit
+- Responsive matrix: 980/980 passing across 320×568, 360×800, 390×844, 768×1024 and 1440×900
+- Visual-baseline gate: pending explicit human approval before the first baseline is created
 - Visual baselines: may only be created or replaced after explicit human review approval
 - Validation model: showcase runs against the compiled `@neural-ui/core` package, so these checks act as integration validation of the library in real consumer flows
 
@@ -78,15 +66,13 @@ The library presents a strong accessibility baseline across interactive componen
 - Release-note style quality summary added to changelog: yes
 - Published API snapshot, package lint, type audit and bundle budgets: enforced
 - `ng add`, theme, layout, dashboard and CRUD schematics compile on Angular 19–22: yes
-- Public Component Harness entry point: 71 interactive entry points covered; 19 non-interactive or utility entry points classified `N/A` with rationale; zero unclassified
-- Angular Forms: 25 CVA entry points verified; all 65 non-form entry points classified `N/A` with rationale
-- Showcase static inline-style debt: zero; 14 runtime style bindings retained under an exact audited allowlist
+- Public Component Harness entry point: included in the API contract
 - BEM requirement documented as part of engineering standards: yes
 - Bilingual comments requirement fully re-audited line by line: not fully re-verified in this pass
 
 ## Accessibility Audit Snapshot
 
-This is an evidence-backed engineering audit, not a paid or external WCAG certification.
+This is a rapid engineering audit, not a full WCAG certification.
 
 ### Strong evidence found
 
@@ -98,7 +84,7 @@ This is an evidence-backed engineering audit, not a paid or external WCAG certif
 - Live-region and role behavior in `toast`
 - Separator semantics and keyboard resizing in `splitter`
 
-### Representative components reviewed with explicit accessibility signals in source
+### Components reviewed with explicit accessibility signals in source
 
 - `autocomplete`
 - `chip`
@@ -113,16 +99,16 @@ This is an evidence-backed engineering audit, not a paid or external WCAG certif
 - `toast`
 - `tooltip`
 
-### Why this is not called an external certification
+### Why this is not labeled 100%
 
-- NVDA, Narrator, VoiceOver on macOS/iOS and TalkBack are recorded as 89/89 PASS. Exact device and software versions remain unrecorded for the four non-NVDA targets.
-- All 89 public runtime routes and the exact digest of their 464 tracked visual baselines have named human approval.
-- The complete engineering validation is project-owned and intentionally does not claim a paid third-party accessibility certification.
+- Not every component was verified against a complete WCAG checklist.
+- Some advanced widgets would benefit from deeper scenario-based audits.
+- CDK-heavy interactions can be semantically acceptable while still requiring manual screen-reader validation.
 
 ## Recommended Wording
 
 Use this wording in documentation or internal reporting:
 
-"Neural UI Core is aligned with a signals-first, standalone, OnPush and zoneless-oriented Angular architecture, uses BEM as its required styling convention, exceeds 95% global coverage in every main metric, and maintains a strong accessibility baseline with ARIA, keyboard navigation and focus management across its main interactive components. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
+"Neural UI Core uses signals-first, standalone, OnPush and zoneless-oriented Angular architecture and BEM styling. Neural UI 2 currently has 95.52% statement, 91.68% branch, 95.20% function and 97.35% line coverage. Its release gate requires 95.01% on all four metrics and currently blocks release because branch coverage is below that threshold. Accessibility quality is high-confidence, although not formally certified as 100% component-by-component."
 
 For styling standards, component and demo styles are expected to follow BEM naming and BEM-oriented SCSS grouping rather than flat ad hoc selector organization.

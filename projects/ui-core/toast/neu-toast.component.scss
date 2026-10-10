@@ -74,6 +74,11 @@
   animation: neu-toast-in 250ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   width: 100%;
 
+  &--neutral {
+    border-color: var(--neu-border);
+    .neu-toast__icon-wrap { color: var(--neu-text-muted); }
+  }
+
   &--success {
     border-color: var(--neu-success);
     .neu-toast__icon-wrap {
@@ -81,7 +86,7 @@
     }
   }
 
-  &--error {
+  &--danger {
     border-color: var(--neu-error);
     .neu-toast__icon-wrap {
       color: var(--neu-error);

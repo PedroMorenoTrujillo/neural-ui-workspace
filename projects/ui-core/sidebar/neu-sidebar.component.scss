@@ -11,7 +11,7 @@
   background: var(--neu-overlay-bg-soft);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: var(--neu-z-overlay);
+  z-index: var(--neu-z-overlay, 400);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--neu-transition-slow);
@@ -31,7 +31,9 @@
   width: 100%;
   background: var(--neu-sidebar-bg, var(--neu-surface));
   border-inline-end: 1px solid var(--neu-border);
-  z-index: var(--neu-z-sidebar);
+  // The drawer must always sit above its own blurred backdrop, regardless of
+  // the global token ordering used by the consuming application.
+  z-index: calc(var(--neu-z-overlay, 400) + 1);
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);

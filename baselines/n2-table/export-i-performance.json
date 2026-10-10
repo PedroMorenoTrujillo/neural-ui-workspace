@@ -1,0 +1,42 @@
+{
+  "checkpoint": "N2-011I",
+  "capturedAt": "2026-09-20T15:03:35.488Z",
+  "metrics": {
+    "csvLoadMs": 4.618500000000012,
+    "jsonLoadMs": 4.043165999999985,
+    "xlsxLoadMs": 6.676582999999994,
+    "csv1k": {
+      "samples": 25,
+      "p50Ms": 0.41885210000000084,
+      "p95Ms": 0.5016812500000001,
+      "outputBytes": 31013
+    },
+    "csv10k": {
+      "samples": 25,
+      "p50Ms": 4.408510250000006,
+      "p95Ms": 4.650791499999997,
+      "outputBytes": 339713
+    },
+    "json1k": {
+      "samples": 25,
+      "p50Ms": 0.621954199999999,
+      "p95Ms": 0.6783520500000009,
+      "outputBytes": 86982
+    },
+    "json10k": {
+      "samples": 25,
+      "p50Ms": 6.56342699999999,
+      "p95Ms": 6.744989750000002,
+      "outputBytes": 899682
+    },
+    "xlsx1k": {
+      "samples": 25,
+      "p50Ms": 5.767687500000022,
+      "p95Ms": 6.293989500000009,
+      "outputBytes": 177445
+    },
+    "heapDeltaBytes": 19412024,
+    "matrixCells1k": 4000,
+    "matrixCells10k": 40000
+  }
+}

@@ -1,1328 +1,1386 @@
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
+import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
 import {
-  ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  DestroyRef,
+  ElementRef,
   ViewEncapsulation,
   computed,
-  forwardRef,
   inject,
   input,
+  linkedSignal,
+  model,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { ConnectedPosition, Overlay, OverlayModule } from '@angular/cdk/overlay';
-import { Directionality } from '@angular/cdk/bidi';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
+import {
+  civilDate,
+  emptyDateValue,
+  isCivilDate,
+  isLocalDateTime,
+  isLocalTime,
+  localDateTime,
+  localTime,
+  type CivilDate,
+  type CivilDateRange,
+  type CivilMonth,
+  type CivilYear,
+  type LocalDateTime,
+  type LocalTime,
+  type NeuDateMode,
+  type NeuDatePresentation,
+  type NeuDateValue,
+} from './neu-date-value';
+import {
+  compareCivilMonth,
+  compareCivilYear,
+  isCivilMonth,
+  isCivilYear,
+  isoWeekNumber,
+  shiftCivilMonth,
+  validCivilYear,
+} from './neu-date-period';
 
-// ── Exported types ───────────────────────────────────────────────────────────
-
-/** Rango de fechas seleccionado / Selected date range */
-export interface NeuDateRange {
-  start: Date | null;
-  end: Date | null;
+export interface NeuDateViewChangeEvent {
+  readonly start: CivilDate;
+  /** Exclusive civil-date boundary. */
+  readonly end: CivilDate;
 }
 
 export interface NeuDatePreset {
-  label: string;
-  range: NeuDateRange | (() => NeuDateRange);
+  readonly label: string;
+  readonly range: CivilDateRange | (() => CivilDateRange);
 }
 
-// ── Private helpers ──────────────────────────────────────────────────────────
-
-let _neuDateInputIdSeq = 0;
-
-interface CalendarDay {
-  date: Date;
-  inMonth: boolean;
-  isToday: boolean;
-  isSelected: boolean;
-  disabled: boolean;
+interface CalendarCell {
+  readonly civil: CivilDate;
+  readonly day: number;
+  readonly inMonth: boolean;
+  readonly today: boolean;
+  readonly selected: boolean;
+  readonly rangeStart: boolean;
+  readonly rangeEnd: boolean;
+  readonly inRange: boolean;
+  readonly disabled: boolean;
+  readonly label: string;
 }
 
 interface DrumSlot {
-  value: number;
-  offset: number;
-  label: string;
+  readonly value: number;
+  readonly offset: number;
+  readonly label: string;
 }
 
-interface RangeCell {
-  date: Date;
-  day: number;
-  ts: number;
-  current: boolean;
-  today: boolean;
-  selected: boolean;
-  rangeStart: boolean;
-  rangeEnd: boolean;
-  inRange: boolean;
-  label: string;
-  disabled: boolean;
+interface CalendarWeek {
+  readonly number: number;
+  readonly cells: readonly CalendarCell[];
 }
 
-function sameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
+type ParseState = 'valid' | 'incomplete' | 'invalid';
+type NeuDateAnyValue = NeuDateValue<NeuDateMode>;
 
-function cloneDate(d: Date): Date {
-  return new Date(d.getTime());
-}
-
-// ── Component ────────────────────────────────────────────────────────────────
-
-/**
- * NeuralUI DateInput — campo de fecha/hora unificado con modo rango.
- * Unified date/time field with range mode.
- *
- * Uso básico / Basic usage:
- *   <neu-date-input type="date"             [formControl]="dateCtrl" />
- *   <neu-date-input type="time"             [formControl]="timeCtrl" />
- *   <neu-date-input type="datetime-local"   [formControl]="dateTimeCtrl" />
- *   <neu-date-input type="range"            [formControl]="rangeCtrl" />
- */
+/** Civil date/time field with a single mode-dependent ModelSignal. */
 @Component({
   selector: 'neu-date-input',
-  imports: [OverlayModule],
+  imports: [OverlayModule, NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'neu-date-input-host',
     '[class.neu-date-input-host--sm]': 'size() === "sm"',
     '[class.neu-date-input-host--lg]': 'size() === "lg"',
-    '[class.neu-drp]': '_isRange()',
-    '[class.neu-drp--open]': '_isRange() && isOpen()',
-    '[class.neu-drp--disabled]': '_isRange() && isDisabledFinal()',
-    '(keydown.escape)': 'close()',
+    '[hidden]': 'hidden()',
+    '(focusout)': 'onCompositeFocusOut()',
   },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuDateInputComponent),
-      multi: true,
-    },
-  ],
   template: `
-    @if (_isRange()) {
-      @if (label()) {
-        <label class="neu-drp__label" [for]="_id">{{ label() }}</label>
-      }
-      <button
-        cdkOverlayOrigin
-        #rangeOrigin="cdkOverlayOrigin"
-        type="button"
-        [id]="_id"
-        class="neu-drp__trigger"
-        [attr.aria-expanded]="isOpen()"
-        [attr.aria-label]="label() || _texts().rangeAriaLabel"
-        [disabled]="isDisabledFinal()"
-        (click)="toggle()"
-      >
-        <span class="neu-drp__icon" aria-hidden="true">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
+    @if (!floatingLabel() && label()) {
+      <label class="neu-date-input__label" [for]="controlId()">{{ label() }}</label>
+    }
+    <div
+      cdkOverlayOrigin
+      #origin="cdkOverlayOrigin"
+      class="neu-date-input"
+      [class.neu-date-input--open]="isOpen() && presentation() === 'overlay'"
+      [class.neu-date-input--inline]="presentation() === 'inline'"
+      [class.neu-date-input--disabled]="disabled()"
+      [class.neu-date-input--readonly]="readonly()"
+      [class.neu-date-input--error]="hasError()"
+      [class.neu-date-input--has-value]="hasValue()"
+      [class.neu-date-input--float]="floatingLabel()"
+    >
+      <div class="neu-date-input__trigger" (click)="onTriggerClick($event)">
+        <span class="neu-date-input__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            @if (mode() === 'time') {
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 2" />
+            } @else {
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M16 3v4M8 3v4M3 11h18" />
+            }
           </svg>
         </span>
-        <span class="neu-drp__value" [class.neu-drp__value--placeholder]="!_hasRange()">
-          {{ _hasRange() ? _rangeDisplayValue() : _rangePlaceholderText() }}
-        </span>
-      </button>
-      <ng-template
-        cdkConnectedOverlay
-        [cdkConnectedOverlayOrigin]="rangeOrigin"
-        [cdkConnectedOverlayOpen]="isOpen()"
-        [cdkConnectedOverlayPositions]="rangeOverlayPositions"
-        [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
-        [cdkConnectedOverlayHasBackdrop]="true"
-        [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
-        [cdkConnectedOverlayPush]="true"
-        [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-        (backdropClick)="close()"
-        (detach)="close()"
+        <input
+          #textInput
+          class="neu-date-input__field"
+          type="text"
+          autocomplete="off"
+          [id]="controlId()"
+          [attr.name]="name() || null"
+          [attr.placeholder]="floatingLabel() ? null : placeholderText()"
+          [attr.required]="required() ? '' : null"
+          [attr.readonly]="textReadonly() ? '' : null"
+          [attr.aria-label]="label() || ariaLabel() || null"
+          [attr.aria-describedby]="resolvedDescribedBy() || null"
+          [attr.role]="presentation() === 'overlay' ? 'combobox' : null"
+          [attr.aria-autocomplete]="presentation() === 'overlay' ? 'none' : null"
+          [attr.aria-expanded]="presentation() === 'overlay' ? isOpen() : null"
+          [attr.aria-haspopup]="presentation() === 'overlay' ? 'dialog' : null"
+          [attr.aria-controls]="presentation() === 'overlay' ? panelId() : null"
+          [attr.aria-invalid]="hasError() ? 'true' : null"
+          [attr.aria-required]="required() ? 'true' : null"
+          [attr.aria-readonly]="readonly() ? 'true' : null"
+          [attr.aria-busy]="pending() ? 'true' : null"
+          [disabled]="disabled()"
+          [value]="displayText()"
+          (focus)="beginEditing()"
+          (input)="onTextInput($event)"
+          (keydown)="onInputKeydown($event)"
+        />
+        @if (hasValue() && !disabled() && !readonly()) {
+          <button
+            type="button"
+            class="neu-date-input__clear"
+            [attr.aria-label]="texts().clear"
+            (click)="clear()"
+          >
+            ×
+          </button>
+        }
+        @if (presentation() === 'overlay') {
+          <button
+            type="button"
+            class="neu-date-input__open"
+            [disabled]="disabled()"
+            [attr.aria-label]="texts().chooseDate"
+            [attr.aria-expanded]="isOpen()"
+            [attr.aria-controls]="panelId()"
+            (click)="toggle()"
+          >
+            <svg class="neu-date-input__chevron" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        }
+      </div>
+      @if (floatingLabel() && label()) {
+        <label class="neu-date-input__float-label" [for]="controlId()">{{ label() }}</label>
+      }
+    </div>
+    @if (hasError() && errorMessage()) {
+      <p class="neu-date-input__error" role="alert" [id]="errorId()">{{ errorMessage() }}</p>
+    } @else if (hint()) {
+      <p class="neu-date-input__hint" [id]="hintId()">{{ hint() }}</p>
+    }
+
+    <ng-template #pickerSurface>
+      <div
+        class="neu-date-input__panel"
+        [class.neu-date-input__panel--time-only]="mode() === 'time'"
+        [class.neu-date-input__panel--inline]="presentation() === 'inline'"
+        [id]="panelId()"
+        [attr.data-neu-date-owner]="controlId()"
+        [attr.role]="presentation() === 'inline' ? 'group' : 'dialog'"
+        [attr.aria-modal]="presentation() === 'overlay' ? 'true' : null"
+        [attr.aria-label]="texts().chooseDate"
+        (focusin)="onPickerFocusIn()"
+        (focusout)="onCompositeFocusOut()"
+        (keydown.escape)="onPickerEscape($event)"
       >
-        <div
-          class="neu-drp__panel"
-          role="dialog"
-          aria-modal="true"
-          [attr.aria-label]="_texts().rangeAriaLabel"
-          (click)="$event.stopPropagation()"
-        >
-          @if (presets().length > 0) {
-            <div class="neu-drp__presets" role="list">
-              @for (preset of presets(); track preset.label) {
-                <button type="button" class="neu-drp__preset" (click)="_applyPreset(preset)">
-                  {{ preset.label }}
-                </button>
+        @if (presets().length && mode() === 'range') {
+          <div class="neu-drp__presets" role="list">
+            @for (preset of presets(); track preset.label) {
+              <button
+                type="button"
+                class="neu-drp__preset"
+                [disabled]="readonly()"
+                (click)="applyPreset(preset)"
+              >
+                {{ preset.label }}
+              </button>
+            }
+          </div>
+        }
+        @if (mode() !== 'time') {
+          <div class="neu-date-input__calendar">
+            <div class="neu-date-input__cal-nav">
+              <button
+                type="button"
+                class="neu-date-input__cal-arrow"
+                [attr.aria-label]="mode() === 'year' ? texts().prevYearPage : texts().prevMonth"
+                [disabled]="disabled()"
+                (click)="navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)"
+              >
+                <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 6 9 12 15 18" />
+                </svg>
+              </button>
+              @if (mode() === 'month' || mode() === 'year') {
+                <span class="neu-date-input__cal-title" aria-live="polite">
+                  {{ mode() === 'month' ? viewYear() : yearPageLabel() }}
+                </span>
+              } @else if (showMonthYearPicker()) {
+                <span class="neu-date-input__cal-title neu-date-input__cal-title--pickers">
+                  <select
+                    class="neu-date-input__picker"
+                    [attr.aria-label]="texts().chooseMonth"
+                    [value]="viewMonth()"
+                    (change)="onMonthSelect($event)"
+                  >
+                    @for (month of monthOptions(); track month.value) {
+                      <option [value]="month.value" [selected]="month.value === viewMonth()">{{ month.label }}</option>
+                    }
+                  </select>
+                  <select
+                    class="neu-date-input__picker"
+                    [attr.aria-label]="texts().chooseYear"
+                    [value]="viewYear()"
+                    (change)="onYearSelect($event)"
+                  >
+                    @for (year of yearOptions(); track year) {
+                      <option [value]="year" [selected]="year === viewYear()">{{ year }}</option>
+                    }
+                  </select>
+                </span>
+              } @else {
+                <span class="neu-date-input__cal-title" aria-live="polite">{{ monthLabel() }}</span>
+              }
+              <button
+                type="button"
+                class="neu-date-input__cal-arrow"
+                [attr.aria-label]="mode() === 'year' ? texts().nextYearPage : texts().nextMonth"
+                [disabled]="disabled()"
+                (click)="navigateMonth(mode() === 'year' ? 12 : mode() === 'month' ? 12 : 1)"
+              >
+                <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+              </button>
+            </div>
+            @if (mode() === 'month') {
+              <div class="neu-date-input__period-grid neu-date-input__period-grid--month" role="grid">
+                @for (row of monthRows(); track $index) {
+                  <div class="neu-date-input__period-row" role="row">
+                  @for (month of row; track month.value) {
+                  <button type="button" role="gridcell" class="neu-date-input__period-cell"
+                    [attr.data-civil-month]="month.value + 1"
+                    [attr.aria-label]="month.label + ' ' + viewYear()"
+                    [attr.aria-selected]="isMonthSelected(month.value + 1)"
+                    [disabled]="disabled()"
+                    [attr.aria-disabled]="readonly() || isMonthDisabled(month.value + 1) ? 'true' : null"
+                    [tabindex]="focusedMonth() === month.value + 1 ? 0 : -1"
+                    (click)="selectMonth(month.value + 1)"
+                    (keydown)="onMonthKeydown($event, month.value + 1)"
+                  >{{ month.label }}</button>
+                  }
+                  </div>
+                }
+              </div>
+            } @else if (mode() === 'year') {
+              <div class="neu-date-input__period-grid neu-date-input__period-grid--year" role="grid">
+                @for (row of yearRows(); track $index) {
+                  <div class="neu-date-input__period-row" role="row">
+                  @for (year of row; track $index) {
+                  <button type="button" role="gridcell" class="neu-date-input__period-cell"
+                    [attr.data-civil-year]="year"
+                    [attr.aria-label]="year"
+                    [attr.aria-selected]="isYearSelected(year)"
+                    [disabled]="disabled()"
+                    [attr.aria-disabled]="readonly() || isYearDisabled(year) ? 'true' : null"
+                    [tabindex]="focusedYear() === year ? 0 : -1"
+                    (click)="selectYear(year)"
+                    (keydown)="onYearKeydown($event, year)"
+                  >{{ year }}</button>
+                  }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="neu-date-input__cal-weekdays" [class.neu-date-input__cal-weekdays--numbered]="showWeekNumbers()" aria-hidden="true">
+                @if (showWeekNumbers()) { <span></span> }
+                @for (day of weekdays(); track $index) { <span>{{ day }}</span> }
+              </div>
+              <div class="neu-date-input__cal-grid" role="grid"
+                [class.neu-date-input__cal-grid--numbered]="showWeekNumbers()"
+                [attr.aria-multiselectable]="mode() === 'multiple' || mode() === 'range' ? 'true' : null">
+                @for (week of calendarWeeks(); track $index) {
+                  <div class="neu-date-input__cal-week" role="row">
+                    @if (showWeekNumbers()) {
+                      <span class="neu-date-input__week-number" aria-hidden="true">{{ week.number }}</span>
+                    }
+                    @for (cell of week.cells; track cell.civil) {
+                      <button type="button" role="gridcell" class="neu-date-input__cal-day"
+                        [class.neu-date-input__cal-day--other]="!cell.inMonth"
+                        [class.neu-date-input__cal-day--today]="cell.today"
+                        [class.neu-date-input__cal-day--selected]="cell.selected"
+                        [class.neu-drp__cell--range-start]="cell.rangeStart"
+                        [class.neu-drp__cell--range-end]="cell.rangeEnd"
+                        [class.neu-drp__cell--in-range]="cell.inRange"
+                        [disabled]="cell.disabled"
+                        [tabindex]="cell.civil === activeDate() ? 0 : -1"
+                        [attr.data-civil-date]="cell.civil"
+                        [attr.aria-label]="cell.label"
+                        [attr.aria-selected]="cell.selected"
+                        [attr.aria-current]="cell.today ? 'date' : null"
+                        (click)="selectCivilDate(cell.civil)"
+                        (mouseenter)="hoverDate.set(cell.disabled ? null : cell.civil)"
+                        (keydown)="onCalendarKeydown($event, cell.civil)"
+                      >{{ cell.day }}</button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            <div class="neu-date-input__cal-footer">
+              <button type="button" class="neu-date-input__cal-footer-btn" [disabled]="readonly()" (click)="clear()">{{ texts().clear }}</button>
+              @if (mode() !== 'month' && mode() !== 'year') {
+                <button type="button" class="neu-date-input__cal-footer-btn neu-date-input__cal-footer-btn--today"
+                  [disabled]="readonly() || isDateDisabled(todayCivil)" (click)="selectCivilDate(todayCivil)">{{ texts().today }}</button>
               }
             </div>
-          }
-          <div class="neu-drp__calendars">
-            <div class="neu-drp__cal">
-              <div class="neu-drp__cal-nav">
-                <button type="button" [attr.aria-label]="_texts().prevMonth" (click)="_prevLeft()">
-                  {{ _previousArrow() }}
-                </button>
-                <span class="neu-drp__cal-title">{{ _leftTitle() }}</span>
-                <button type="button" [attr.aria-label]="_texts().nextMonth" (click)="_nextLeft()">
-                  {{ _nextArrow() }}
-                </button>
-              </div>
-              <div class="neu-drp__cal-grid">
-                @for (d of _weekDayLabels(); track d) {
-                  <span class="neu-drp__day-label">{{ d }}</span>
-                }
-                @for (cell of _leftDays(); track cell.ts) {
-                  <button
-                    type="button"
-                    class="neu-drp__cell"
-                    [class.neu-drp__cell--other-month]="!cell.current"
-                    [class.neu-drp__cell--today]="cell.today"
-                    [class.neu-drp__cell--selected]="cell.selected"
-                    [class.neu-drp__cell--range-start]="cell.rangeStart"
-                    [class.neu-drp__cell--range-end]="cell.rangeEnd"
-                    [class.neu-drp__cell--in-range]="cell.inRange"
-                    [disabled]="cell.disabled"
-                    [attr.aria-label]="cell.label"
-                    [attr.aria-pressed]="cell.selected"
-                    (click)="_selectDay(cell.date)"
-                    (mouseenter)="_hoverDay(cell.date)"
-                  >
-                    {{ cell.day }}
-                  </button>
-                }
-              </div>
-            </div>
-            <div class="neu-drp__cal">
-              <div class="neu-drp__cal-nav">
-                <button type="button" [attr.aria-label]="_texts().prevMonth" (click)="_prevRight()">
-                  {{ _previousArrow() }}
-                </button>
-                <span class="neu-drp__cal-title">{{ _rightTitle() }}</span>
-                <button type="button" [attr.aria-label]="_texts().nextMonth" (click)="_nextRight()">
-                  {{ _nextArrow() }}
-                </button>
-              </div>
-              <div class="neu-drp__cal-grid">
-                @for (d of _weekDayLabels(); track d) {
-                  <span class="neu-drp__day-label">{{ d }}</span>
-                }
-                @for (cell of _rightDays(); track cell.ts) {
-                  <button
-                    type="button"
-                    class="neu-drp__cell"
-                    [class.neu-drp__cell--other-month]="!cell.current"
-                    [class.neu-drp__cell--today]="cell.today"
-                    [class.neu-drp__cell--selected]="cell.selected"
-                    [class.neu-drp__cell--range-start]="cell.rangeStart"
-                    [class.neu-drp__cell--range-end]="cell.rangeEnd"
-                    [class.neu-drp__cell--in-range]="cell.inRange"
-                    [disabled]="cell.disabled"
-                    [attr.aria-label]="cell.label"
-                    [attr.aria-pressed]="cell.selected"
-                    (click)="_selectDay(cell.date)"
-                    (mouseenter)="_hoverDay(cell.date)"
-                  >
-                    {{ cell.day }}
-                  </button>
-                }
-              </div>
-            </div>
-          </div>
-          <div class="neu-drp__footer">
-            <button type="button" class="neu-drp__clear" (click)="_clearRange()">
-              {{ _texts().clear }}
-            </button>
-            <button
-              type="button"
-              class="neu-drp__apply"
-              [disabled]="!_canApply()"
-              (click)="_applyRange()"
-            >
-              {{ _texts().apply }}
-            </button>
-          </div>
-        </div>
-      </ng-template>
-    } @else {
-      @if (!floatingLabel() && label()) {
-        <label class="neu-date-input__label" [for]="_id">{{ label() }}</label>
-      }
-      <div
-        class="neu-date-input"
-        [class.neu-date-input--open]="isOpen()"
-        [class.neu-date-input--disabled]="isDisabledFinal()"
-        [class.neu-date-input--error]="hasError()"
-        [class.neu-date-input--has-value]="_value()"
-        [class.neu-date-input--float]="floatingLabel()"
-      >
-        <button
-          cdkOverlayOrigin
-          #singleOrigin="cdkOverlayOrigin"
-          class="neu-date-input__trigger"
-          type="button"
-          [id]="_id"
-          [disabled]="isDisabledFinal() || readonly()"
-          [attr.aria-expanded]="isOpen()"
-          [attr.aria-haspopup]="'dialog'"
-          (click)="toggle()"
-        >
-          <span class="neu-date-input__icon" aria-hidden="true">
-            @if (type() === 'time') {
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            } @else {
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
+            @if (mode() === 'range') {
+              <p class="neu-date-input__range-announcement" aria-live="polite">{{ rangeAnnouncement() }}</p>
             }
-          </span>
-          <span
-            class="neu-date-input__display"
-            [class.neu-date-input__display--placeholder]="!_value()"
-          >
-            {{ displayValue() || (floatingLabel() ? '' : placeholderText()) }}
-          </span>
-        </button>
-        @if (floatingLabel() && label()) {
-          <label class="neu-date-input__float-label" [for]="_id">{{ label() }}</label>
+          </div>
         }
-        <ng-template
-          cdkConnectedOverlay
-          [cdkConnectedOverlayOrigin]="singleOrigin"
-          [cdkConnectedOverlayOpen]="isOpen()"
-          [cdkConnectedOverlayPositions]="singleOverlayPositions"
-          [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
-          [cdkConnectedOverlayHasBackdrop]="true"
-          [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
-          [cdkConnectedOverlayPush]="true"
-          [cdkConnectedOverlayViewportMargin]="_viewportMargin"
-          (backdropClick)="close()"
-          (detach)="close()"
-        >
-          <div
-            class="neu-date-input__panel"
-            [class.neu-date-input__panel--time-only]="type() === 'time'"
-            role="dialog"
-            [attr.aria-label]="_texts().chooseDate + (monthLabel() ? ': ' + monthLabel() : '')"
-            (click)="$event.stopPropagation()"
-          >
-            @if (type() !== 'time') {
-              <div class="neu-date-input__calendar">
-                <div class="neu-date-input__cal-nav">
-                  <button
-                    class="neu-date-input__cal-arrow"
-                    type="button"
-                    (click)="prevMonth()"
-                    [attr.aria-label]="_texts().prevMonth"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      aria-hidden="true"
-                    >
-                      <polyline [attr.points]="_previousChevronPoints()" />
-                    </svg>
-                  </button>
-                  @if (showMonthYearPicker()) {
-                    <span class="neu-date-input__cal-title neu-date-input__cal-title--pickers">
-                      <select
-                        class="neu-date-input__picker"
-                        [value]="_viewMonth()"
-                        [attr.aria-label]="_texts().chooseMonth"
-                        (change)="setViewMonth($any($event.target).value)"
-                      >
-                        @for (month of monthOptions(); track month.value) {
-                          <option [value]="month.value">{{ month.label }}</option>
-                        }
-                      </select>
-                      <select
-                        class="neu-date-input__picker"
-                        [value]="_viewYear()"
-                        [attr.aria-label]="_texts().chooseYear"
-                        (change)="setViewYear($any($event.target).value)"
-                      >
-                        @for (year of yearOptions(); track year) {
-                          <option [value]="year">{{ year }}</option>
-                        }
-                      </select>
-                    </span>
-                  } @else {
-                    <span class="neu-date-input__cal-title">{{ monthLabel() }}</span>
-                  }
-                  <button
-                    class="neu-date-input__cal-arrow"
-                    type="button"
-                    (click)="nextMonth()"
-                    [attr.aria-label]="_texts().nextMonth"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      aria-hidden="true"
-                    >
-                      <polyline [attr.points]="_nextChevronPoints()" />
-                    </svg>
-                  </button>
-                </div>
-                <div class="neu-date-input__cal-weekdays">
-                  @for (d of weekdays(); track d) {
-                    <span>{{ d }}</span>
-                  }
-                </div>
-                <div class="neu-date-input__cal-grid">
-                  @for (day of calendarDays(); track day.date.getTime()) {
-                    <button
-                      class="neu-date-input__cal-day"
-                      type="button"
-                      [class.neu-date-input__cal-day--other]="!day.inMonth"
-                      [class.neu-date-input__cal-day--today]="day.isToday"
-                      [class.neu-date-input__cal-day--selected]="day.isSelected"
-                      [disabled]="day.disabled"
-                      [attr.aria-label]="formatDayLabel(day.date)"
-                      [attr.aria-pressed]="day.isSelected"
-                      (click)="selectDay(day)"
-                    >
-                      {{ day.date.getDate() }}
-                    </button>
-                  }
-                </div>
-                <div class="neu-date-input__cal-footer">
-                  <button class="neu-date-input__cal-footer-btn" type="button" (click)="clear()">
-                    {{ _texts().delete }}
-                  </button>
-                  <button
-                    class="neu-date-input__cal-footer-btn neu-date-input__cal-footer-btn--today"
-                    type="button"
-                    (click)="today()"
-                  >
-                    {{ _texts().today }}
-                  </button>
-                </div>
+        @if (mode() === 'time' || mode() === 'datetime') {
+          <div class="neu-date-input__time" role="group" [attr.aria-label]="texts().chooseTime">
+            <div class="neu-date-input__drum">
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().prevHour" (click)="changeHour(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 15 12 9 18 15" /></svg>
+              </button>
+              <div class="neu-date-input__drum-track">
+                @for (slot of hourSlots(); track slot.offset) {
+                  <button type="button" class="neu-date-input__drum-item" [class.neu-date-input__drum-item--adjacent]="slot.offset !== 0" [class.neu-date-input__drum-item--selected]="slot.offset === 0" [disabled]="readonly()" (click)="slot.offset && changeHour(slot.offset)">{{ slot.label }}</button>
+                }
               </div>
-            }
-            @if (type() === 'datetime-local') {
-              <div class="neu-date-input__sep"></div>
-            }
-            @if (type() !== 'date') {
-              <div class="neu-date-input__time">
-                <div class="neu-date-input__drum">
-                  <button
-                    class="neu-date-input__drum-arrow"
-                    type="button"
-                    (click)="changeHour(-1)"
-                    [attr.aria-label]="_texts().prevHour"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="18 15 12 9 6 15" />
-                    </svg>
-                  </button>
-                  <div class="neu-date-input__drum-track" (wheel)="onHourWheel($event)">
-                    @for (slot of hourSlots(); track slot.offset) {
-                      <div
-                        class="neu-date-input__drum-item"
-                        [class.neu-date-input__drum-item--selected]="slot.offset === 0"
-                        [class.neu-date-input__drum-item--adjacent]="slot.offset !== 0"
-                        (click)="slot.offset !== 0 && changeHour(slot.offset)"
-                      >
-                        {{ slot.label }}
-                      </div>
-                    }
-                  </div>
-                  <button
-                    class="neu-date-input__drum-arrow"
-                    type="button"
-                    (click)="changeHour(1)"
-                    [attr.aria-label]="_texts().nextHour"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-                </div>
-                <span class="neu-date-input__time-colon">:</span>
-                <div class="neu-date-input__drum">
-                  <button
-                    class="neu-date-input__drum-arrow"
-                    type="button"
-                    (click)="changeMinute(-1)"
-                    [attr.aria-label]="_texts().prevMinute"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="18 15 12 9 6 15" />
-                    </svg>
-                  </button>
-                  <div class="neu-date-input__drum-track" (wheel)="onMinuteWheel($event)">
-                    @for (slot of minuteSlots(); track slot.offset) {
-                      <div
-                        class="neu-date-input__drum-item"
-                        [class.neu-date-input__drum-item--selected]="slot.offset === 0"
-                        [class.neu-date-input__drum-item--adjacent]="slot.offset !== 0"
-                        (click)="slot.offset !== 0 && changeMinute(slot.offset)"
-                      >
-                        {{ slot.label }}
-                      </div>
-                    }
-                  </div>
-                  <button
-                    class="neu-date-input__drum-arrow"
-                    type="button"
-                    (click)="changeMinute(1)"
-                    [attr.aria-label]="_texts().nextMinute"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      stroke-linecap="round"
-                      aria-hidden="true"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-                </div>
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().nextHour" (click)="changeHour(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9" /></svg>
+              </button>
+            </div>
+            <span class="neu-date-input__time-colon">:</span>
+            <div class="neu-date-input__drum">
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().prevMinute" (click)="changeMinute(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 15 12 9 18 15" /></svg>
+              </button>
+              <div class="neu-date-input__drum-track">
+                @for (slot of minuteSlots(); track slot.offset) {
+                  <button type="button" class="neu-date-input__drum-item" [class.neu-date-input__drum-item--adjacent]="slot.offset !== 0" [class.neu-date-input__drum-item--selected]="slot.offset === 0" [disabled]="readonly()" (click)="slot.offset && changeMinute(slot.offset)">{{ slot.label }}</button>
+                }
               </div>
-            }
+              <button type="button" class="neu-date-input__drum-arrow" [disabled]="readonly()" [attr.aria-label]="texts().nextMinute" (click)="changeMinute(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9" /></svg>
+              </button>
+            </div>
           </div>
-        </ng-template>
+        }
       </div>
-      @if (hasError()) {
-        <p class="neu-date-input__error" role="alert">{{ errorMessage() }}</p>
-      } @else if (hint()) {
-        <p class="neu-date-input__hint">{{ hint() }}</p>
-      }
+    </ng-template>
+    @if (presentation() === 'inline') {
+      <ng-container [ngTemplateOutlet]="pickerSurface" />
     }
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="origin"
+      [cdkConnectedOverlayOpen]="presentation() === 'overlay' && isOpen()"
+      [cdkConnectedOverlayPositions]="overlayPositions"
+      [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="16"
+      (backdropClick)="close(true)"
+      (attach)="onPanelAttached()"
+      (detach)="onPanelDetached()"
+    >
+      <ng-container [ngTemplateOutlet]="pickerSurface" />
+    </ng-template>
   `,
   styleUrl: './neu-date-input.component.scss',
 })
-export class NeuDateInputComponent implements ControlValueAccessor, OnDestroy {
+export class NeuDateInputControl<V = NeuDateAnyValue> implements FormValueControl<V> {
+  /** `V` is inferred directly from Angular Forms and remains exact in mode specializations. */
+  readonly value = model<V>(null as V);
+  readonly mode = input<NeuDateMode>('date');
+  readonly presentation = input<NeuDatePresentation>('overlay');
+  readonly showWeekNumbers = input<boolean>(false);
+
+  readonly label = input<string>('');
+  readonly hint = input<string>('');
+  readonly errorMessage = input<string>('');
+  readonly size = input<'sm' | 'md' | 'lg'>('md');
+  readonly name = input<string>('');
+  readonly inputId = input<string>('');
+  readonly ariaLabel = input<string>('');
+  readonly ariaDescribedBy = input<string>('');
+  readonly minDate = input<NonNullable<V> | undefined>(undefined, { alias: 'min' });
+  readonly maxDate = input<NonNullable<V> | undefined>(undefined, { alias: 'max' });
+  readonly step = input<number>(1);
+  readonly locale = input<string | null>(null);
+  readonly disabledDates = input<readonly CivilDate[] | ((date: CivilDate) => boolean)>([]);
+  readonly showMonthYearPicker = input<boolean>(false);
+  readonly yearRange = input<number>(12);
+  readonly placeholder = input<string>('');
+  readonly dateFormat = input<'short' | 'medium' | 'long' | 'full' | 'numeric'>('short');
+  readonly floatingLabel = input<boolean>(false);
+  readonly presets = input<readonly NeuDatePreset[]>([]);
+  readonly firstDayOfWeek = input<number>(1);
+
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly required = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly touch = output<void>();
+
+  readonly opened = output<void>();
+  readonly closed = output<void>();
+  readonly cleared = output<void>();
+  readonly viewChange = output<NeuDateViewChangeEvent>();
+
   private readonly doc = inject(DOCUMENT);
   private readonly overlay = inject(Overlay);
-  private readonly directionality = inject(Directionality);
-  readonly _previousArrow = computed(() =>
-    this.directionality.valueSignal() === 'rtl' ? '›' : '‹',
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
+  private readonly initialToday = inject(NeuInitialTemporalState).today();
+  private readonly generatedId = inject(NeuIdGenerator).getId('neu-date-input-');
+  private readonly textInput = viewChild.required<ElementRef<HTMLInputElement>>('textInput');
+
+  readonly todayCivil = civilDate(
+    `${this.initialToday.getFullYear().toString().padStart(4, '0')}-${String(this.initialToday.getMonth() + 1).padStart(2, '0')}-${String(this.initialToday.getDate()).padStart(2, '0')}`,
   );
-  readonly _nextArrow = computed(() => (this.directionality.valueSignal() === 'rtl' ? '‹' : '›'));
-  readonly _previousChevronPoints = computed(() =>
-    this.directionality.valueSignal() === 'rtl' ? '9 18 15 12 9 6' : '15 18 9 12 15 6',
-  );
-  readonly _nextChevronPoints = computed(() =>
-    this.directionality.valueSignal() === 'rtl' ? '15 18 9 12 15 6' : '9 18 15 12 9 6',
-  );
-  private _langObserver?: MutationObserver;
+  readonly isOpen = linkedSignal<boolean>(() => {
+    this.presentation();
+    return false;
+  });
+  readonly viewYear = linkedSignal(() => this.initialViewAnchor().year);
+  readonly viewMonth = linkedSignal(() => this.initialViewAnchor().monthIndex);
+  readonly focusedMonth = signal(this.initialToday.getMonth() + 1);
+  readonly focusedYear = signal(this.initialToday.getFullYear());
+  readonly activeDate = signal<CivilDate>(this.todayCivil);
+  readonly hoverDate = signal<CivilDate | null>(null);
+  readonly draftState = signal<ParseState>('valid');
+  private readonly draft = signal<{ readonly raw: string; readonly base: string } | null>(null);
+  private panelAttached = false;
+  private focusVisitActive = false;
+  private returnFocusElement: HTMLElement | null = null;
+  private destroyed = false;
 
-  /** Tipo del campo / Field type */
-  type = input<'date' | 'time' | 'datetime-local' | 'range'>('date');
-  /** Etiqueta / Label */
-  label = input<string>('');
-  /** Texto de ayuda / Help text */
-  hint = input<string>('');
-  /** Mensaje de error / Error message */
-  errorMessage = input<string>('');
-  /** Deshabilita / Disabled */
-  disabled = input<boolean>(false);
-  /** Tamaño del campo: 'sm' = 36px | 'md' = 48px | 'lg' = 56px / Field size */
-  size = input<'sm' | 'md' | 'lg'>('md');
-  /** Solo lectura / Read only */
-  readonly = input<boolean>(false);
-  /** Nombre / Field name */
-  name = input<string>('');
-  /** ID accesible / Accessible ID */
-  inputId = input<string>('');
-  /** Requerido / Required */
-  required = input<boolean>(false);
-  /** Mínimo / Minimum */
-  min = input<string | null>(null);
-  /** Máximo / Maximum */
-  max = input<string | null>(null);
-  /** Paso / Step */
-  step = input<number | null>(null);
-  /** Locale explícito opcional / Optional explicit locale */
-  locale = input<string | null>(null);
-  /** Fechas deshabilitadas / Disabled dates */
-  disabledDates = input<((date: Date) => boolean) | Array<Date | string>>([]);
-  /** Permite seleccionar varias fechas en type="date" / Multiple date selection for type="date" */
-  multiple = input<boolean>(false);
-  /** Muestra selectores de mes/año en el calendario / Shows month/year picker controls */
-  showMonthYearPicker = input<boolean>(false);
-  /** Rango de años para el selector / Year picker range */
-  yearRange = input<number>(12);
-
-  // ── Range-mode inputs ────────────────────────────────────────────
-  /** Placeholder del trigger / Trigger placeholder */
-  placeholder = input<string>('');
-  /** Formato de fecha en modo rango / Date display format in range mode */
-  dateFormat = input<'short' | 'medium' | 'long' | 'full' | 'numeric'>('short');
-  /** Etiqueta flotante / Floating label */
-  floatingLabel = input<boolean>(false);
-  /** Presets rápidos para rangos / Quick range presets */
-  presets = input<NeuDatePreset[]>([]);
-  /** First weekday, using JavaScript day numbers (0 Sunday … 6 Saturday). Default: 1 (Monday). */
-  firstDayOfWeek = input<number>(1);
-
-  // ── Outputs ──────────────────────────────────────────────────────
-  /** Emitido al confirmar el rango / Emitted when range is confirmed */
-  readonly rangeChange = output<NeuDateRange>();
-
-  // ── Estado interno / Internal state ──────────────────────────────
-  protected readonly _id = `neu-date-input-${++_neuDateInputIdSeq}`;
-  readonly isOpen = signal(false);
-  readonly _viewportMargin = 16;
-  readonly singleOverlayPositions: ConnectedPosition[] = [
-    {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 6,
-    },
-    {
-      originX: 'start',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-    {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'end',
-      overlayY: 'top',
-      offsetY: 6,
-    },
-    {
-      originX: 'end',
-      originY: 'top',
-      overlayX: 'end',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-  ];
-  readonly rangeOverlayPositions: ConnectedPosition[] = [
-    {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 6,
-    },
-    {
-      originX: 'end',
-      originY: 'bottom',
-      overlayX: 'end',
-      overlayY: 'top',
-      offsetY: 6,
-    },
-    {
-      originX: 'start',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
-    {
-      originX: 'end',
-      originY: 'top',
-      overlayX: 'end',
-      overlayY: 'bottom',
-      offsetY: -6,
-    },
+  readonly overlayPositions: ConnectedPosition[] = [
+    { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 6 },
+    { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -6 },
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 6 },
   ];
   readonly overlayScrollStrategy = this.overlay.scrollStrategies.reposition();
-  readonly _isRange = computed(() => this.type() === 'range');
-  private readonly _cvaDisabled = signal(false);
-  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
-  readonly hasError = computed(() => !!this.errorMessage());
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private _onChange: (v: any) => void = () => {};
-  private _onTouched: () => void = () => {};
-
-  // ── State — single ────────────────────────────────────────────────
-  protected readonly _value = signal<string>('');
-  protected readonly _viewYear = signal(new Date().getFullYear());
-  protected readonly _viewMonth = signal(new Date().getMonth());
-  protected readonly _selYear = signal<number | null>(null);
-  protected readonly _selMonth = signal<number | null>(null);
-  protected readonly _selDay = signal<number | null>(null);
-  protected readonly _selHour = signal(0);
-  protected readonly _selMinute = signal(0);
-  protected readonly _selectedDates = signal<string[]>([]);
-
-  // ── State — range ─────────────────────────────────────────────────
-  private readonly _today = new Date();
-  private readonly _documentLang = signal(
-    this.#normalizedLocale(this.doc.documentElement.lang) || 'es',
+  readonly controlId = computed(() => this.inputId() || this.generatedId);
+  readonly panelId = computed(() => `${this.controlId()}-panel`);
+  readonly errorId = computed(() => `${this.controlId()}-error`);
+  readonly hintId = computed(() => `${this.controlId()}-hint`);
+  readonly resolvedLocale = computed(() => this.locale()?.trim() || this.defaultLocale || 'en-US');
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0 || this.draftState() === 'invalid');
+  readonly resolvedDescribedBy = computed(() =>
+    [
+      this.ariaDescribedBy(),
+      this.hasError() && this.errorMessage() ? this.errorId() : '',
+      !this.hasError() && this.hint() ? this.hintId() : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
   );
-  private readonly _pickStart = signal<Date | null>(null);
-  private readonly _pickEnd = signal<Date | null>(null);
-  private readonly _hoverDate = signal<Date | null>(null);
-  readonly _leftCursor = signal<Date>(
-    new Date(this._today.getFullYear(), this._today.getMonth(), 1),
+  readonly textReadonly = computed(
+    () => this.readonly() || ['multiple', 'range', 'month', 'year'].includes(this.mode()),
   );
-  readonly _rightCursor = computed(() => {
-    const l = this._leftCursor();
-    return new Date(l.getFullYear(), l.getMonth() + 1, 1);
+  readonly valueSignature = computed(() => JSON.stringify(this.value()));
+  readonly hasValue = computed(() => !this.isEmptyValue() || this.displayText().length > 0);
+  readonly displayText = computed(() => {
+    const draft = this.draft();
+    return draft && draft.base === this.valueSignature() ? draft.raw : this.formatValue();
   });
-  readonly _hasRange = computed(() => !!this._pickStart());
-  readonly _canApply = computed(() => this._pickStart() !== null && this._pickEnd() !== null);
-  readonly _resolvedLocale = computed(
-    () => this.#normalizedLocale(this.locale()) || this._documentLang() || 'es',
-  );
-  readonly _texts = computed(() => {
-    const spanish = this._resolvedLocale().toLowerCase().startsWith('es');
+  readonly placeholderText = computed(() => {
+    if (this.placeholder()) return this.placeholder();
+    if (this.mode() === 'time') return this.texts().timePlaceholder;
+    if (this.mode() === 'datetime') return this.texts().dateTimePlaceholder;
+    if (this.mode() === 'range') return this.texts().rangePlaceholder;
+    if (this.mode() === 'multiple') return this.texts().multiplePlaceholder;
+    if (this.mode() === 'month') return this.texts().chooseMonth;
+    if (this.mode() === 'year') return this.texts().chooseYear;
+    return this.texts().datePlaceholder;
+  });
+  readonly texts = computed(() => {
+    const spanish = this.resolvedLocale().toLowerCase().startsWith('es');
     return spanish
       ? {
-          rangeAriaLabel: 'Seleccionar rango de fechas',
+          chooseDate: 'Seleccionar fecha',
+          chooseTime: 'Seleccionar hora',
           prevMonth: 'Mes anterior',
           nextMonth: 'Mes siguiente',
           clear: 'Limpiar',
-          apply: 'Aplicar',
-          chooseDate: 'Seleccionar fecha',
-          delete: 'Borrar',
           today: 'Hoy',
           prevHour: 'Hora anterior',
           nextHour: 'Hora siguiente',
           prevMinute: 'Minuto anterior',
           nextMinute: 'Minuto siguiente',
-          rangePlaceholder: 'Seleccionar fechas',
-          timePlaceholder: 'hh:mm',
-          datePlaceholder: 'dd/mm/aaaa',
-          dateTimePlaceholder: 'dd/mm/aaaa, hh:mm',
           chooseMonth: 'Seleccionar mes',
           chooseYear: 'Seleccionar año',
+          prevYearPage: 'Años anteriores',
+          nextYearPage: 'Años siguientes',
+          datePlaceholder: 'aaaa-mm-dd',
+          timePlaceholder: 'hh:mm',
+          dateTimePlaceholder: 'aaaa-mm-ddThh:mm',
+          rangePlaceholder: 'Seleccionar rango',
+          multiplePlaceholder: 'Seleccionar fechas',
+          rangeStart: 'Inicio',
+          rangeEnd: 'Fin',
         }
       : {
-          rangeAriaLabel: 'Select date range',
+          chooseDate: 'Choose date',
+          chooseTime: 'Choose time',
           prevMonth: 'Previous month',
           nextMonth: 'Next month',
           clear: 'Clear',
-          apply: 'Apply',
-          chooseDate: 'Choose date',
-          delete: 'Clear',
           today: 'Today',
           prevHour: 'Previous hour',
           nextHour: 'Next hour',
           prevMinute: 'Previous minute',
           nextMinute: 'Next minute',
-          rangePlaceholder: 'Select dates',
-          timePlaceholder: 'hh:mm',
-          datePlaceholder: 'mm/dd/yyyy',
-          dateTimePlaceholder: 'mm/dd/yyyy, hh:mm',
           chooseMonth: 'Choose month',
           chooseYear: 'Choose year',
+          prevYearPage: 'Previous years',
+          nextYearPage: 'Next years',
+          datePlaceholder: 'yyyy-mm-dd',
+          timePlaceholder: 'hh:mm',
+          dateTimePlaceholder: 'yyyy-mm-ddThh:mm',
+          rangePlaceholder: 'Select date range',
+          multiplePlaceholder: 'Select dates',
+          rangeStart: 'Start',
+          rangeEnd: 'End',
         };
   });
-
-  readonly _weekDayLabels = computed(() => this.#buildWeekdayLabels('short'));
-  readonly _leftTitle = computed(() => this._monthTitle(this._leftCursor()));
-  readonly _rightTitle = computed(() => this._monthTitle(this._rightCursor()));
-  readonly _leftDays = computed(() => this._buildRangeMonth(this._leftCursor()));
-  readonly _rightDays = computed(() => this._buildRangeMonth(this._rightCursor()));
-  readonly _rangePlaceholderText = computed(
-    () => this.placeholder() || this._texts().rangePlaceholder,
+  readonly monthLabel = computed(() =>
+    this.capitalize(
+      new Intl.DateTimeFormat(this.resolvedLocale(), {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(new Date(Date.UTC(this.viewYear(), this.viewMonth(), 1))),
+    ),
   );
+  readonly monthOptions = computed(() =>
+    Array.from({ length: 12 }, (_, value) => ({
+      value,
+      label: this.capitalize(
+        new Intl.DateTimeFormat(this.resolvedLocale(), {
+          month: 'long',
+          timeZone: 'UTC',
+        }).format(new Date(Date.UTC(2024, value, 1))),
+      ),
+    })),
+  );
+  readonly monthRows = computed(() =>
+    Array.from({ length: 4 }, (_, row) => this.monthOptions().slice(row * 3, row * 3 + 3)),
+  );
+  readonly yearOptions = computed(() => {
+    const span = Math.max(1, Math.trunc(this.yearRange()));
+    return Array.from({ length: span * 2 + 1 }, (_, index) => this.viewYear() - span + index);
+  });
+  readonly yearPage = computed(() => {
+    const start = Math.floor((this.viewYear() - 1) / 12) * 12 + 1;
+    return Array.from({ length: Math.min(12, 10000 - start) }, (_, index) => start + index);
+  });
+  readonly yearRows = computed(() =>
+    Array.from({ length: Math.ceil(this.yearPage().length / 4) }, (_, row) =>
+      this.yearPage().slice(row * 4, row * 4 + 4),
+    ),
+  );
+  readonly yearPageLabel = computed(() => {
+    const page = this.yearPage();
+    return `${page[0]}–${page.at(-1)}`;
+  });
+  readonly weekdays = computed(() => {
+    const formatter = new Intl.DateTimeFormat(this.resolvedLocale(), {
+      weekday: 'narrow',
+      timeZone: 'UTC',
+    });
+    return Array.from({ length: 7 }, (_, index) =>
+      formatter
+        .format(new Date(Date.UTC(2024, 0, 7 + this.normalizedFirstDay() + index)))
+        .toUpperCase(),
+    );
+  });
+  readonly calendarDays = computed(() => this.buildCalendarDays());
+  readonly calendarWeeks = computed<readonly CalendarWeek[]>(() => {
+    const cells = this.calendarDays();
+    const thursdayIndex = (4 - this.normalizedFirstDay() + 7) % 7;
+    return Array.from({ length: 6 }, (_, row) => {
+      const start = row * 7;
+      return {
+        number: this.showWeekNumbers() ? isoWeekNumber(cells[start + thursdayIndex].civil) : 0,
+        cells: cells.slice(start, start + 7),
+      };
+    });
+  });
+  readonly currentTime = computed(() => this.readCurrentTime() ?? localTime('00:00'));
+  readonly hourSlots = computed(() => this.drumSlots(Number(this.currentTime().slice(0, 2)), 24));
+  readonly minuteSlots = computed(() => this.drumSlots(Number(this.currentTime().slice(3, 5)), 60));
+  readonly rangeAnnouncement = computed(() => {
+    const range = this.readRange();
+    const start = range.start ? `${this.texts().rangeStart}: ${this.formatCivil(range.start)}` : '';
+    const end = range.end ? `${this.texts().rangeEnd}: ${this.formatCivil(range.end)}` : '';
+    return [start, end].filter(Boolean).join('. ');
+  });
 
   constructor() {
-    if (typeof MutationObserver !== 'undefined') {
-      this._langObserver = new MutationObserver(() => {
-        this._documentLang.set(this.#normalizedLocale(this.doc.documentElement.lang) || 'es');
-      });
-      this._langObserver.observe(this.doc.documentElement, {
-        attributes: true,
-        attributeFilter: ['lang'],
+    this.destroyRef.onDestroy(() => {
+      this.destroyed = true;
+      this.isOpen.set(false);
+      this.draft.set(null);
+      this.hoverDate.set(null);
+    });
+  }
+
+  beginEditing(): void {
+    if (this.disabled()) return;
+    this.focusVisitActive = true;
+    if (!this.textReadonly()) {
+      this.draft.set({ raw: this.editableValue(), base: this.valueSignature() });
+      this.draftState.set('valid');
+    }
+  }
+
+  focus(options?: FocusOptions): void {
+    this.textInput().nativeElement.focus(options);
+  }
+
+  onTextInput(event: Event): void {
+    if (this.destroyed || this.disabled() || this.readonly() || this.textReadonly()) return;
+    const raw = (event.target as HTMLInputElement).value;
+    const base = this.valueSignature();
+    if (raw.trim() === '') {
+      const changed = this.commitEmpty();
+      this.draft.set({ raw: '', base: this.valueSignature() });
+      this.draftState.set('valid');
+      if (changed) this.cleared.emit();
+      return;
+    }
+    const state = this.parseAndCommit(raw.trim());
+    this.draft.set({ raw, base: state === 'valid' ? this.valueSignature() : base });
+    this.draftState.set(state);
+  }
+
+  onInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'ArrowDown' && this.mode() !== 'time' && this.presentation() === 'overlay') {
+      event.preventDefault();
+      this.open();
+    } else if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && this.mode() === 'time') {
+      event.preventDefault();
+      this.changeMinute(event.key === 'ArrowUp' ? 1 : -1);
+    } else if (event.key === 'Enter') {
+      this.finishEditing();
+    } else if (event.key === 'Escape') {
+      // Leave an unhandled Escape to the enclosing editor/dialog once our
+      // picker is closed and there is no unfinished text to discard.
+      const hasDraft = this.draftState() !== 'valid' ||
+        (this.draft() !== null && this.draft()!.raw !== this.editableValue());
+      const wasOpen = this.isOpen();
+      if (wasOpen || hasDraft) event.preventDefault();
+      this.finishEditing();
+      if (wasOpen) this.close(true);
+    }
+  }
+
+  toggle(): void {
+    if (this.disabled() || this.presentation() !== 'overlay') return;
+    if (this.isOpen()) this.close(true);
+    else this.open();
+  }
+
+  protected onTriggerClick(event: MouseEvent): void {
+    if (this.disabled() || this.destroyed || this.presentation() !== 'overlay') return;
+    if (event.target instanceof Element && event.target.closest('button')) return;
+    this.focus({ preventScroll: true });
+    this.open();
+  }
+
+  open(): void {
+    if (this.disabled() || this.destroyed || this.isOpen() || this.presentation() !== 'overlay') return;
+    this.focusVisitActive = true;
+    const active = this.doc.activeElement;
+    this.returnFocusElement =
+      active instanceof HTMLElement && this.host.nativeElement.contains(active) ? active : null;
+    this.seedCalendarView();
+    this.isOpen.set(true);
+  }
+
+  close(returnFocus = false): void {
+    if (!this.isOpen() || this.presentation() !== 'overlay') return;
+    this.isOpen.set(false);
+    this.hoverDate.set(null);
+    this.finishEditing();
+    if (returnFocus) {
+      const target = this.returnFocusElement;
+      queueMicrotask(() => {
+        if (!this.destroyed && this.presentation() === 'overlay')
+          (target?.isConnected ? target : this.textInput().nativeElement).focus();
       });
     }
   }
 
-  ngOnDestroy(): void {
-    this._langObserver?.disconnect();
+  onPanelAttached(): void {
+    if (this.destroyed || this.panelAttached || this.presentation() !== 'overlay') return;
+    this.panelAttached = true;
+    this.opened.emit();
+    if (this.mode() !== 'time') queueMicrotask(() => this.focusActiveCell());
   }
 
-  private _monthTitle(d: Date): string {
-    return this.#capitalize(
-      new Intl.DateTimeFormat(this._resolvedLocale(), { month: 'long', year: 'numeric' }).format(d),
-    );
+  onPanelDetached(): void {
+    const attached = this.panelAttached;
+    this.panelAttached = false;
+    if (this.destroyed) return;
+    this.isOpen.set(false);
+    if (attached) this.closed.emit();
   }
 
-  readonly _rangeDisplayValue = computed(() => {
-    const s = this._pickStart();
-    const e = this._pickEnd();
-    if (!s) return this.placeholder();
-    if (!e) return this._fmtDate(s);
-    return `${this._fmtDate(s)} – ${this._fmtDate(e)}`;
-  });
+  onPickerEscape(event: Event): void {
+    if (this.presentation() === 'overlay') {
+      event.stopPropagation();
+      this.close(true);
+    }
+  }
 
-  private _fmtDate(d: Date): string {
-    const fmt = this.dateFormat();
-    const opts: Record<string, Intl.DateTimeFormatOptions> = {
+  onPickerFocusIn(): void {
+    if (!this.disabled() && !this.destroyed) this.focusVisitActive = true;
+  }
+
+  onCompositeFocusOut(): void {
+    queueMicrotask(() => {
+      if (this.destroyed || !this.focusVisitActive) return;
+      const active = this.doc.activeElement;
+      const insideHost = active instanceof Node && this.host.nativeElement.contains(active);
+      const panel = this.doc.querySelector(`[data-neu-date-owner="${this.controlId()}"]`);
+      const insidePanel = active instanceof Node && !!panel?.contains(active);
+      if (insideHost || insidePanel) return;
+      this.focusVisitActive = false;
+      this.touch.emit();
+    });
+  }
+
+  clear(): void {
+    if (this.disabled() || this.readonly() || this.destroyed) return;
+    if (this.commitEmpty()) this.cleared.emit();
+    this.resetEphemeral();
+    if (this.presentation() === 'overlay') this.close(true);
+  }
+
+  reset(): void {
+    this.resetEphemeral();
+    this.isOpen.set(false);
+    this.focusVisitActive = false;
+  }
+
+  navigateMonth(delta: number): void {
+    if (this.disabled() || this.destroyed || this.mode() === 'time') return;
+    if (this.mode() === 'month') {
+      const next = shiftCivilMonth({ year: this.viewYear(), month: this.viewMonth() + 1 }, delta);
+      if (!next) return;
+      this.viewYear.set(next.year);
+      this.viewMonth.set(next.month - 1);
+      this.focusedMonth.set(next.month);
+      return;
+    }
+    if (this.mode() === 'year') {
+      const next = this.viewYear() + delta;
+      if (!validCivilYear(next)) return;
+      this.viewYear.set(next);
+      this.focusedYear.set(next);
+      return;
+    }
+    const previous = this.visibleInterval();
+    const next = new Date(Date.UTC(this.viewYear(), this.viewMonth() + delta, 1));
+    this.viewYear.set(next.getUTCFullYear());
+    this.viewMonth.set(next.getUTCMonth());
+    this.emitViewChange(previous);
+  }
+
+  onMonthSelect(event: Event): void {
+    if (this.disabled() || this.mode() === 'time') return;
+    const month = Number((event.target as HTMLSelectElement).value);
+    if (!Number.isInteger(month) || month < 0 || month > 11) return;
+    const previous = this.visibleInterval();
+    this.viewMonth.set(month);
+    this.emitViewChange(previous);
+  }
+
+  onYearSelect(event: Event): void {
+    if (this.disabled() || this.mode() === 'time') return;
+    const year = Number((event.target as HTMLSelectElement).value);
+    if (!Number.isInteger(year) || year < 1 || year > 9999) return;
+    const previous = this.visibleInterval();
+    this.viewYear.set(year);
+    this.emitViewChange(previous);
+  }
+
+  selectCivilDate(date: CivilDate): void {
+    if (this.mode() === 'month' || this.mode() === 'year') return;
+    if (this.disabled() || this.readonly() || this.isDateDisabled(date)) return;
+    this.activeDate.set(date);
+    if (this.mode() === 'multiple') {
+      const values = this.readMultiple();
+      const next = values.includes(date)
+        ? values.filter((item) => item !== date)
+        : [...values, date];
+      this.commit(next);
+      return;
+    }
+    if (this.mode() === 'range') {
+      const range = this.readRange();
+      if (!range.start || range.end) this.commit({ start: date, end: null });
+      else if (date < range.start) this.commit({ start: date, end: range.start });
+      else this.commit({ start: range.start, end: date });
+      this.hoverDate.set(null);
+      return;
+    }
+    if (this.mode() === 'datetime') {
+      this.commit(localDateTime(`${date}T${this.readCurrentTime() ?? '00:00'}`));
+      return;
+    }
+    this.commit(date);
+    if (this.presentation() === 'overlay') this.close(true);
+  }
+
+  isMonthDisabled(month: number): boolean {
+    const candidate = { year: this.viewYear(), month };
+    if (!isCivilMonth(candidate)) return true;
+    const min: unknown = this.minDate();
+    const max: unknown = this.maxDate();
+    return (isCivilMonth(min) && compareCivilMonth(candidate, min) < 0) ||
+      (isCivilMonth(max) && compareCivilMonth(candidate, max) > 0);
+  }
+
+  isYearDisabled(year: number): boolean {
+    const candidate = { year };
+    if (!isCivilYear(candidate)) return true;
+    const min: unknown = this.minDate();
+    const max: unknown = this.maxDate();
+    return (isCivilYear(min) && compareCivilYear(candidate, min) < 0) ||
+      (isCivilYear(max) && compareCivilYear(candidate, max) > 0);
+  }
+
+  isMonthSelected(month: number): boolean {
+    const value: unknown = this.value();
+    return isCivilMonth(value) && value.year === this.viewYear() && value.month === month;
+  }
+
+  isYearSelected(year: number): boolean {
+    const value: unknown = this.value();
+    return isCivilYear(value) && value.year === year;
+  }
+
+  selectMonth(month: number): void {
+    if (this.mode() !== 'month' || this.disabled() || this.readonly() || this.isMonthDisabled(month)) return;
+    this.focusedMonth.set(month);
+    this.commit({ year: this.viewYear(), month });
+    if (this.presentation() === 'overlay') this.close(true);
+  }
+
+  selectYear(year: number): void {
+    if (this.mode() !== 'year' || this.disabled() || this.readonly() || this.isYearDisabled(year)) return;
+    this.focusedYear.set(year);
+    this.commit({ year });
+    if (this.presentation() === 'overlay') this.close(true);
+  }
+
+  onMonthKeydown(event: KeyboardEvent, month: number): void {
+    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -3, ArrowDown: 3 };
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectMonth(month);
+      return;
+    }
+    let target: CivilMonth | null = null;
+    if (event.key in moves) target = shiftCivilMonth({ year: this.viewYear(), month }, moves[event.key]);
+    else if (event.key === 'Home') target = { year: this.viewYear(), month: Math.floor((month - 1) / 3) * 3 + 1 };
+    else if (event.key === 'End') target = { year: this.viewYear(), month: Math.floor((month - 1) / 3) * 3 + 3 };
+    else if (event.key === 'PageUp' || event.key === 'PageDown')
+      target = shiftCivilMonth({ year: this.viewYear(), month }, event.key === 'PageUp' ? -12 : 12);
+    if (!target) return;
+    event.preventDefault();
+    this.viewYear.set(target.year);
+    this.focusedMonth.set(target.month);
+    queueMicrotask(() => this.focusPeriodCell('data-civil-month', target!.month));
+  }
+
+  onYearKeydown(event: KeyboardEvent, year: number): void {
+    const moves: Record<string, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4 };
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectYear(year);
+      return;
+    }
+    const page = this.yearPage();
+    let target: number | null = null;
+    if (event.key in moves) target = year + moves[event.key];
+    else if (event.key === 'Home') target = page[0];
+    else if (event.key === 'End') target = page.at(-1)!;
+    else if (event.key === 'PageUp' || event.key === 'PageDown') target = year + (event.key === 'PageUp' ? -12 : 12);
+    if (target === null || !validCivilYear(target)) return;
+    event.preventDefault();
+    this.viewYear.set(target);
+    this.focusedYear.set(target);
+    queueMicrotask(() => this.focusPeriodCell('data-civil-year', target));
+  }
+
+  applyPreset(preset: NeuDatePreset): void {
+    if (this.disabled() || this.readonly() || this.mode() !== 'range') return;
+    const range = typeof preset.range === 'function' ? preset.range() : preset.range;
+    if (
+      (range.start && this.isDateDisabled(range.start)) ||
+      (range.end && this.isDateDisabled(range.end))
+    )
+      return;
+    this.commit({ start: range.start, end: range.end });
+    this.hoverDate.set(null);
+  }
+
+  changeHour(delta: number): void {
+    this.changeTime(delta * 60);
+  }
+
+  changeMinute(delta: number): void {
+    this.changeTime(delta * this.resolvedStep());
+  }
+
+  onCalendarKeydown(event: KeyboardEvent, date: CivilDate): void {
+    if (this.disabled()) return;
+    let next: CivilDate | null = null;
+    if (event.key === 'ArrowLeft') next = this.addDays(date, -1);
+    else if (event.key === 'ArrowRight') next = this.addDays(date, 1);
+    else if (event.key === 'ArrowUp') next = this.addDays(date, -7);
+    else if (event.key === 'ArrowDown') next = this.addDays(date, 7);
+    else if (event.key === 'Home')
+      next = this.addDays(date, -this.weekOffset(this.toUtcDate(date)));
+    else if (event.key === 'End')
+      next = this.addDays(date, 6 - this.weekOffset(this.toUtcDate(date)));
+    else if (event.key === 'PageUp') next = this.addMonths(date, -1);
+    else if (event.key === 'PageDown') next = this.addMonths(date, 1);
+    else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectCivilDate(date);
+      return;
+    } else return;
+    event.preventDefault();
+    this.moveActive(next);
+  }
+
+  isDateDisabled(date: CivilDate): boolean {
+    const min = this.dateBoundary(this.minDate());
+    const max = this.dateBoundary(this.maxDate());
+    if ((min && date < min) || (max && date > max)) return true;
+    const disabled = this.disabledDates();
+    return typeof disabled === 'function' ? disabled(date) : disabled.includes(date);
+  }
+
+  private parseAndCommit(raw: string): ParseState {
+    try {
+      if (this.mode() === 'date') this.commit(civilDate(raw));
+      else if (this.mode() === 'time') this.commit(localTime(raw));
+      else if (this.mode() === 'datetime') this.commit(localDateTime(raw));
+      else return 'invalid';
+      return 'valid';
+    } catch {
+      return this.isIncompleteText(raw) ? 'incomplete' : 'invalid';
+    }
+  }
+
+  private isIncompleteText(raw: string): boolean {
+    if (this.mode() === 'date')
+      return raw.length < 10 && /^\d{0,4}(?:-\d{0,2}(?:-\d{0,2})?)?$/.test(raw);
+    if (this.mode() === 'time')
+      return raw.length < 5 && /^\d{0,2}(?::\d{0,2}(?::\d{0,2})?)?$/.test(raw);
+    if (this.mode() === 'datetime')
+      return (
+        raw.length < 16 &&
+        /^\d{0,4}(?:-\d{0,2}(?:-\d{0,2})?)?(?:T\d{0,2}(?::\d{0,2}(?::\d{0,2})?)?)?$/.test(raw)
+      );
+    return false;
+  }
+
+  private finishEditing(): void {
+    this.draft.set(null);
+    this.draftState.set('valid');
+    this.textInput().nativeElement.value = this.displayText();
+  }
+
+  private commit(
+    next: CivilDate | LocalTime | LocalDateTime | readonly CivilDate[] | CivilDateRange | CivilMonth | CivilYear,
+  ): boolean {
+    if (this.sameValue(this.value(), next)) return false;
+    this.value.set(next as V);
+    return true;
+  }
+
+  private commitEmpty(): boolean {
+    const next = emptyDateValue(this.mode()) as V;
+    if (this.sameValue(this.value(), next)) return false;
+    this.value.set(next);
+    return true;
+  }
+
+  private sameValue(left: unknown, right: unknown): boolean {
+    if (Object.is(left, right)) return true;
+    if (Array.isArray(left) && Array.isArray(right))
+      return (
+        left.length === right.length && left.every((value, index) => Object.is(value, right[index]))
+      );
+    if (this.isRangeObject(left) && this.isRangeObject(right))
+      return Object.is(left.start, right.start) && Object.is(left.end, right.end);
+    if (isCivilMonth(left) && isCivilMonth(right))
+      return left.year === right.year && left.month === right.month;
+    if (isCivilYear(left) && isCivilYear(right)) return left.year === right.year;
+    return false;
+  }
+
+  private isEmptyValue(): boolean {
+    const value: unknown = this.value();
+    if (this.mode() === 'multiple') return !Array.isArray(value) || value.length === 0;
+    if (this.mode() === 'range') {
+      const range = this.readRange();
+      return !range.start && !range.end;
+    }
+    return value === null;
+  }
+
+  private readDate(): CivilDate | null {
+    const value: unknown = this.value();
+    if (this.mode() === 'date') return isCivilDate(value) ? value : null;
+    if (this.mode() === 'datetime' && isLocalDateTime(value)) return civilDate(value.slice(0, 10));
+    return null;
+  }
+
+  private readCurrentTime(): LocalTime | null {
+    const value: unknown = this.value();
+    if (this.mode() === 'time') return isLocalTime(value) ? value : null;
+    if (this.mode() === 'datetime' && isLocalDateTime(value)) return localTime(value.slice(11));
+    return null;
+  }
+
+  private readMultiple(): readonly CivilDate[] {
+    const value: unknown = this.value();
+    return Array.isArray(value) && value.every(isCivilDate) ? value : [];
+  }
+
+  private readRange(): CivilDateRange {
+    const value: unknown = this.value();
+    if (!this.isRangeObject(value)) return { start: null, end: null };
+    return {
+      start: isCivilDate(value.start) ? value.start : null,
+      end: isCivilDate(value.end) ? value.end : null,
+    };
+  }
+
+  private isRangeObject(value: unknown): value is CivilDateRange {
+    return typeof value === 'object' && value !== null && 'start' in value && 'end' in value;
+  }
+
+  private editableValue(): string {
+    const value: unknown = this.value();
+    return typeof value === 'string' ? value : '';
+  }
+
+  private formatValue(): string {
+    const value: unknown = this.value();
+    if (this.mode() === 'month') {
+      if (!isCivilMonth(value)) return '';
+      const label = this.monthOptions()[value.month - 1]?.label;
+      return label ? `${label} ${value.year}` : '';
+    }
+    if (this.mode() === 'year') return isCivilYear(value) ? String(value.year) : '';
+    if (this.mode() === 'date') return isCivilDate(value) ? this.formatCivil(value) : '';
+    if (this.mode() === 'time') return isLocalTime(value) ? value : '';
+    if (this.mode() === 'datetime') {
+      if (!isLocalDateTime(value)) return '';
+      return `${this.formatCivil(civilDate(value.slice(0, 10)))}, ${value.slice(11)}`;
+    }
+    if (this.mode() === 'multiple')
+      return this.readMultiple()
+        .map((date) => this.formatCivil(date))
+        .join(', ');
+    const range = this.readRange();
+    if (!range.start && !range.end) return '';
+    if (!range.start) return this.formatCivil(range.end!);
+    if (!range.end) return this.formatCivil(range.start);
+    return `${this.formatCivil(range.start)} – ${this.formatCivil(range.end)}`;
+  }
+
+  private formatCivil(value: CivilDate): string {
+    const options: Record<string, Intl.DateTimeFormatOptions> = {
       short: { day: '2-digit', month: '2-digit', year: 'numeric' },
       medium: { day: '2-digit', month: 'short', year: 'numeric' },
       long: { day: 'numeric', month: 'long', year: 'numeric' },
       full: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
       numeric: { day: 'numeric', month: 'numeric', year: '2-digit' },
     };
-    return d.toLocaleDateString(this._resolvedLocale(), opts[fmt] ?? opts['short']);
+    return new Intl.DateTimeFormat(this.resolvedLocale(), {
+      ...options[this.dateFormat()],
+      timeZone: 'UTC',
+    }).format(this.toUtcDate(value));
   }
 
-  private _buildRangeMonth(cursor: Date): RangeCell[] {
-    const year = cursor.getFullYear();
-    const month = cursor.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startOffset = this.#weekOffset(firstDay);
-    const cells: RangeCell[] = [];
-    for (let i = startOffset - 1; i >= 0; i--) {
-      cells.push(this._rangeCell(new Date(year, month, -i), false));
-    }
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      cells.push(this._rangeCell(new Date(year, month, d), true));
-    }
-    while (cells.length % 7 !== 0 || cells.length < 42) {
-      cells.push(
-        this._rangeCell(
-          new Date(year, month + 1, cells.length - startOffset - lastDay.getDate() + 1),
-          false,
-        ),
-      );
-    }
-    return cells;
-  }
-
-  private _rangeCell(date: Date, current: boolean): RangeCell {
-    const s = this._pickStart();
-    const e = this._pickEnd();
-    const h = this._hoverDate();
-    const rangeEnd = e ?? h;
-    const inRange =
-      s && rangeEnd
-        ? (date > s && date < rangeEnd) || (rangeEnd < s && date > rangeEnd && date < s)
-        : false;
-    return {
-      date,
-      day: date.getDate(),
-      ts: date.getTime(),
-      current,
-      today: sameDay(date, this._today),
-      selected: (s && sameDay(date, s)) || (e && sameDay(date, e)) || false,
-      rangeStart: s ? sameDay(date, s) : false,
-      rangeEnd: e ? sameDay(date, e) : false,
-      inRange: !!inRange,
-      label: date.toLocaleDateString(this._resolvedLocale()),
-      disabled: this.isDateDisabled(date),
-    };
-  }
-
-  // ── Range actions ─────────────────────────────────────────────────
-  _prevLeft(): void {
-    this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  }
-  _nextLeft(): void {
-    this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
-  }
-  _prevRight(): void {
-    this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  }
-  _nextRight(): void {
-    this._leftCursor.update((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
-  }
-
-  _selectDay(date: Date): void {
-    if (this.isDateDisabled(date)) return;
-    const s = this._pickStart();
-    if (!s || this._pickEnd()) {
-      this._pickStart.set(cloneDate(date));
-      this._pickEnd.set(null);
-      this._hoverDate.set(null);
-    } else {
-      if (date < s) {
-        this._pickEnd.set(cloneDate(s));
-        this._pickStart.set(cloneDate(date));
-      } else {
-        this._pickEnd.set(cloneDate(date));
-      }
-      this._hoverDate.set(null);
-    }
-  }
-
-  _hoverDay(date: Date): void {
-    if (this._pickStart() && !this._pickEnd()) this._hoverDate.set(date);
-  }
-
-  _applyRange(): void {
-    const range: NeuDateRange = { start: this._pickStart(), end: this._pickEnd() };
-    this._onChange(range);
-    this.rangeChange.emit(range);
-    this._onTouched();
-    this.isOpen.set(false);
-  }
-
-  _applyPreset(preset: NeuDatePreset): void {
-    const range = typeof preset.range === 'function' ? preset.range() : preset.range;
-    this._pickStart.set(range.start ? cloneDate(range.start) : null);
-    this._pickEnd.set(range.end ? cloneDate(range.end) : null);
-  }
-
-  _clearRange(): void {
-    this._pickStart.set(null);
-    this._pickEnd.set(null);
-    this._hoverDate.set(null);
-    const range: NeuDateRange = { start: null, end: null };
-    this._onChange(range);
-    this.rangeChange.emit(range);
-  }
-
-  // ── Single computed ───────────────────────────────────────────────
-  readonly displayValue = computed(() => {
-    const v = this._value();
-    if (!v) return '';
-    const t = this.type();
-    if (t === 'date' && this.multiple()) {
-      return this._selectedDates()
-        .map((value) => new Date(value + 'T00:00:00'))
-        .filter((date) => !isNaN(date.getTime()))
-        .map((date) =>
-          date.toLocaleDateString(this._resolvedLocale(), {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          }),
-        )
-        .join(', ');
-    }
-    if (t === 'date') {
-      const d = new Date(v + 'T00:00:00');
-      return isNaN(d.getTime())
-        ? v
-        : d.toLocaleDateString(this._resolvedLocale(), {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          });
-    }
-    if (t === 'time') return v;
-    const [datePart, timePart] = v.split('T');
-    const d = new Date(datePart + 'T00:00:00');
-    return (
-      (isNaN(d.getTime())
-        ? datePart
-        : d.toLocaleDateString(this._resolvedLocale(), {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })) +
-      ', ' +
-      (timePart?.slice(0, 5) ?? '')
-    );
-  });
-
-  readonly placeholderText = computed(() => {
-    if (this.placeholder()) {
-      return this.placeholder();
-    }
-
-    switch (this.type()) {
-      case 'time':
-        return this._texts().timePlaceholder;
-      case 'datetime-local':
-        return this._texts().dateTimePlaceholder;
-      default:
-        return this._texts().datePlaceholder;
-    }
-  });
-
-  readonly monthLabel = computed(() =>
-    this.#capitalize(
-      new Date(this._viewYear(), this._viewMonth(), 1).toLocaleDateString(this._resolvedLocale(), {
-        month: 'long',
-        year: 'numeric',
-      }),
-    ),
-  );
-
-  readonly weekdays = computed(() => this.#buildWeekdayLabels('narrow'));
-
-  readonly monthOptions = computed(() =>
-    Array.from({ length: 12 }, (_, value) => ({
-      value,
-      label: this.#capitalize(
-        new Date(2024, value, 1).toLocaleDateString(this._resolvedLocale(), { month: 'long' }),
-      ),
-    })),
-  );
-
-  readonly yearOptions = computed(() => {
-    const center = this._viewYear();
-    const span = Math.max(1, this.yearRange());
-    const start = center - span;
-    return Array.from({ length: span * 2 + 1 }, (_, index) => start + index);
-  });
-
-  readonly calendarDays = computed((): CalendarDay[] => {
-    const year = this._viewYear();
-    const month = this._viewMonth();
-    const today = new Date();
-    const firstDay = new Date(year, month, 1);
-    const startDow = this.#weekOffset(firstDay);
-    const days: CalendarDay[] = [];
-    for (let i = startDow; i > 0; i--) {
-      days.push({
-        date: new Date(year, month, 1 - i),
-        inMonth: false,
-        isToday: false,
-        isSelected: false,
-        disabled: this.isDateDisabled(new Date(year, month, 1 - i)),
-      });
-    }
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
-      days.push({
-        date,
-        inMonth: true,
-        isToday: date.toDateString() === today.toDateString(),
-        isSelected: this.isDateSelected(date),
-        disabled: this.isDateDisabled(date),
-      });
-    }
-    let next = 1;
-    while (days.length < 42) {
-      days.push({
-        date: new Date(year, month + 1, next++),
-        inMonth: false,
-        isToday: false,
-        isSelected: false,
-        disabled: this.isDateDisabled(new Date(year, month + 1, next - 1)),
-      });
-    }
-    return days;
-  });
-
-  readonly hourSlots = computed(() => this._drumSlots(this._selHour(), 24));
-  readonly minuteSlots = computed(() => this._drumSlots(this._selMinute(), 60));
-
-  private _drumSlots(value: number, max: number): DrumSlot[] {
-    return [-1, 0, 1].map((offset) => {
-      const v = (((value + offset) % max) + max) % max;
-      return { value: v, offset, label: String(v).padStart(2, '0') };
+  private buildCalendarDays(): CalendarCell[] {
+    const year = this.viewYear();
+    const month = this.viewMonth();
+    const first = new Date(Date.UTC(year, month, 1));
+    const offset = this.weekOffset(first);
+    const firstCell = new Date(Date.UTC(year, month, 1 - offset));
+    return Array.from({ length: 42 }, (_, index) => {
+      const date = new Date(firstCell.getTime());
+      date.setUTCDate(firstCell.getUTCDate() + index);
+      const value = this.fromUtcDate(date);
+      const range = this.readRange();
+      const previewEnd = range.end ?? this.hoverDate();
+      const lower =
+        range.start && previewEnd ? (range.start < previewEnd ? range.start : previewEnd) : null;
+      const upper =
+        range.start && previewEnd ? (range.start < previewEnd ? previewEnd : range.start) : null;
+      return {
+        civil: value,
+        day: date.getUTCDate(),
+        inMonth: date.getUTCMonth() === month,
+        today: value === this.todayCivil,
+        selected: this.isSelected(value),
+        rangeStart: range.start === value,
+        rangeEnd: range.end === value,
+        inRange: !!lower && !!upper && value > lower && value < upper,
+        disabled: this.isDateDisabled(value),
+        label: this.formatDayLabel(value),
+      };
     });
   }
 
-  // ── Single actions ────────────────────────────────────────────────
-  toggle(): void {
-    if (this.isDisabledFinal()) return;
-    if (!this._isRange() && this.readonly()) return;
-    this.isOpen.update((v) => !v);
-  }
-
-  close(): void {
-    this.isOpen.set(false);
-  }
-
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as Element | null;
-    const isInsidePanel = !!target?.closest('.neu-date-input__panel, .neu-drp__panel');
-    if (!isInsidePanel) {
-      this.close();
+  private isSelected(value: CivilDate): boolean {
+    if (this.mode() === 'multiple') return this.readMultiple().includes(value);
+    if (this.mode() === 'range') {
+      const range = this.readRange();
+      return range.start === value || range.end === value;
     }
+    return this.readDate() === value;
   }
 
-  prevMonth(): void {
-    if (this._viewMonth() === 0) {
-      this._viewMonth.set(11);
-      this._viewYear.update((y) => y - 1);
-    } else this._viewMonth.update((m) => m - 1);
-  }
-
-  nextMonth(): void {
-    if (this._viewMonth() === 11) {
-      this._viewMonth.set(0);
-      this._viewYear.update((y) => y + 1);
-    } else this._viewMonth.update((m) => m + 1);
-  }
-
-  selectDay(day: CalendarDay): void {
-    if (!day.inMonth || day.disabled) return;
-    const value = this._toDateValue(day.date);
-    if (this.type() === 'date' && this.multiple()) {
-      this._selectedDates.update((current) =>
-        current.includes(value) ? current.filter((item) => item !== value) : [...current, value],
-      );
-      this._value.set(this._selectedDates().join(','));
-      this._onChange(this._selectedDates());
-      return;
-    }
-    this._selYear.set(day.date.getFullYear());
-    this._selMonth.set(day.date.getMonth());
-    this._selDay.set(day.date.getDate());
-    this._emitValue();
-    if (this.type() === 'date') this.close();
-  }
-
-  setViewMonth(value: string | number): void {
-    const month = Number(value);
-    if (Number.isInteger(month) && month >= 0 && month <= 11) {
-      this._viewMonth.set(month);
-    }
-  }
-
-  setViewYear(value: string | number): void {
-    const year = Number(value);
-    if (Number.isInteger(year)) {
-      this._viewYear.set(year);
-    }
-  }
-
-  formatDayLabel(date: Date): string {
-    return date.toLocaleDateString(this._resolvedLocale(), {
+  private formatDayLabel(value: CivilDate): string {
+    return new Intl.DateTimeFormat(this.resolvedLocale(), {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'UTC',
+    }).format(this.toUtcDate(value));
+  }
+
+  private seedCalendarView(): void {
+    const anchor = this.initialViewAnchor();
+    this.viewYear.set(anchor.year);
+    this.viewMonth.set(anchor.monthIndex);
+    this.focusedMonth.set(anchor.monthIndex + 1);
+    this.focusedYear.set(anchor.year);
+    if (this.mode() === 'month' || this.mode() === 'year') return;
+    const range = this.readRange();
+    const date = this.readDate() ?? this.readMultiple()[0] ?? range.start ?? this.todayCivil;
+    const parsed = this.toUtcDate(date);
+    this.viewYear.set(parsed.getUTCFullYear());
+    this.viewMonth.set(parsed.getUTCMonth());
+    this.activeDate.set(date);
+  }
+
+  private visibleInterval(): NeuDateViewChangeEvent {
+    const cells = this.buildCalendarDays();
+    return { start: cells[0].civil, end: this.addDays(cells.at(-1)!.civil, 1) };
+  }
+
+  private emitViewChange(previous: NeuDateViewChangeEvent): void {
+    if (!this.isOpen() || this.destroyed) return;
+    const next = this.visibleInterval();
+    if (next.start !== previous.start || next.end !== previous.end) this.viewChange.emit(next);
+  }
+
+  private moveActive(candidate: CivilDate): void {
+    let next = candidate;
+    const direction = candidate < this.activeDate() ? -1 : 1;
+    for (let attempts = 0; attempts < 366 && this.isDateDisabled(next); attempts += 1)
+      next = this.addDays(next, direction);
+    const previous = this.visibleInterval();
+    const parsed = this.toUtcDate(next);
+    this.viewYear.set(parsed.getUTCFullYear());
+    this.viewMonth.set(parsed.getUTCMonth());
+    this.activeDate.set(next);
+    this.emitViewChange(previous);
+    queueMicrotask(() => this.focusActiveCell());
+  }
+
+  private focusActiveCell(): void {
+    if (this.destroyed || this.presentation() !== 'overlay' || !this.isOpen()) return;
+    if (this.mode() === 'month') {
+      this.focusPeriodCell('data-civil-month', this.focusedMonth());
+      return;
+    }
+    if (this.mode() === 'year') {
+      this.focusPeriodCell('data-civil-year', this.focusedYear());
+      return;
+    }
+    this.doc
+      .querySelector<HTMLElement>(
+        `[data-neu-date-owner="${this.controlId()}"] [data-civil-date="${this.activeDate()}"]`,
+      )
+      ?.focus();
+  }
+
+  private focusPeriodCell(attribute: 'data-civil-month' | 'data-civil-year', value: number): void {
+    if (this.destroyed) return;
+    this.doc.querySelector<HTMLElement>(
+      `[data-neu-date-owner="${this.controlId()}"] [${attribute}="${value}"]`,
+    )?.focus();
+  }
+
+  private initialViewAnchor(): { year: number; monthIndex: number } {
+    const value: unknown = this.value();
+    if (this.mode() === 'month') {
+      const min: unknown = this.minDate();
+      const max: unknown = this.maxDate();
+      const today = { year: this.initialToday.getFullYear(), month: this.initialToday.getMonth() + 1 };
+      const chosen = isCivilMonth(value) ? value : today;
+      const bounded = isCivilMonth(min) && compareCivilMonth(chosen, min) < 0 ? min :
+        isCivilMonth(max) && compareCivilMonth(chosen, max) > 0 ? max : chosen;
+      return { year: bounded.year, monthIndex: bounded.month - 1 };
+    }
+    if (this.mode() === 'year') {
+      const min: unknown = this.minDate();
+      const max: unknown = this.maxDate();
+      const chosen = isCivilYear(value) ? value : { year: this.initialToday.getFullYear() };
+      const bounded = isCivilYear(min) && compareCivilYear(chosen, min) < 0 ? min :
+        isCivilYear(max) && compareCivilYear(chosen, max) > 0 ? max : chosen;
+      return { year: bounded.year, monthIndex: this.initialToday.getMonth() };
+    }
+    const range = this.readRange();
+    const date = this.readDate() ?? this.readMultiple()[0] ?? range.start ?? this.todayCivil;
+    return { year: Number(date.slice(0, 4)), monthIndex: Number(date.slice(5, 7)) - 1 };
+  }
+
+  private changeTime(deltaMinutes: number): void {
+    if (
+      this.disabled() ||
+      this.readonly() ||
+      (this.mode() !== 'time' && this.mode() !== 'datetime')
+    )
+      return;
+    const current = this.readCurrentTime() ?? localTime('00:00');
+    const seconds = current.length === 8 ? current.slice(6) : '';
+    const total = Number(current.slice(0, 2)) * 60 + Number(current.slice(3, 5));
+    const nextTotal = (((total + deltaMinutes) % 1440) + 1440) % 1440;
+    const next = localTime(
+      `${String(Math.floor(nextTotal / 60)).padStart(2, '0')}:${String(nextTotal % 60).padStart(2, '0')}${seconds ? `:${seconds}` : ''}`,
+    );
+    if (this.mode() === 'time') this.commit(next);
+    else this.commit(localDateTime(`${this.readDate() ?? this.todayCivil}T${next}`));
+  }
+
+  private resolvedStep(): number {
+    return Number.isFinite(this.step()) && this.step() > 0
+      ? Math.max(1, Math.trunc(this.step()))
+      : 1;
+  }
+
+  private drumSlots(value: number, max: number): DrumSlot[] {
+    return [-1, 0, 1].map((offset) => {
+      const next = (((value + offset) % max) + max) % max;
+      return { value: next, offset, label: String(next).padStart(2, '0') };
     });
   }
 
-  today(): void {
-    const d = new Date();
-    this._viewYear.set(d.getFullYear());
-    this._viewMonth.set(d.getMonth());
-    this.selectDay({ date: d, inMonth: true, isToday: true, isSelected: false, disabled: false });
+  private dateBoundary(value: unknown): CivilDate | null {
+    if (isCivilDate(value)) return value;
+    return isLocalDateTime(value) ? civilDate(value.slice(0, 10)) : null;
   }
 
-  clear(): void {
-    this._selYear.set(null);
-    this._selMonth.set(null);
-    this._selDay.set(null);
-    this._selectedDates.set([]);
-    this._value.set('');
-    this._onChange('');
-    this.close();
+  private resetEphemeral(): void {
+    this.draft.set(null);
+    this.draftState.set('valid');
+    this.hoverDate.set(null);
   }
 
-  changeHour(delta: number): void {
-    this._selHour.update((h) => (((h + delta) % 24) + 24) % 24);
-    this._emitValue();
+  private addDays(value: CivilDate, amount: number): CivilDate {
+    const date = this.toUtcDate(value);
+    date.setUTCDate(date.getUTCDate() + amount);
+    return this.fromUtcDate(date);
   }
 
-  changeMinute(delta: number): void {
-    this._selMinute.update((m) => (((m + delta) % 60) + 60) % 60);
-    this._emitValue();
+  private addMonths(value: CivilDate, amount: number): CivilDate {
+    const date = this.toUtcDate(value);
+    const day = date.getUTCDate();
+    date.setUTCDate(1);
+    date.setUTCMonth(date.getUTCMonth() + amount);
+    const lastDay = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0),
+    ).getUTCDate();
+    date.setUTCDate(Math.min(day, lastDay));
+    return this.fromUtcDate(date);
   }
 
-  onHourWheel(e: WheelEvent): void {
-    e.preventDefault();
-    this.changeHour(e.deltaY > 0 ? 1 : -1);
-  }
-  onMinuteWheel(e: WheelEvent): void {
-    e.preventDefault();
-    this.changeMinute(e.deltaY > 0 ? 1 : -1);
-  }
-
-  private _emitValue(): void {
-    const t = this.type();
-    let v = '';
-    if (t === 'date' || t === 'datetime-local') {
-      if (this._selYear() === null) return;
-      const y = this._selYear()!;
-      const mo = String(this._selMonth()! + 1).padStart(2, '0');
-      const d = String(this._selDay()!).padStart(2, '0');
-      const ds = `${y}-${mo}-${d}`;
-      v =
-        t === 'date'
-          ? ds
-          : `${ds}T${String(this._selHour()).padStart(2, '0')}:${String(this._selMinute()).padStart(2, '0')}`;
-    } else {
-      v = `${String(this._selHour()).padStart(2, '0')}:${String(this._selMinute()).padStart(2, '0')}`;
-    }
-    this._value.set(v);
-    this._onChange(v);
-  }
-
-  isDateSelected(date: Date): boolean {
-    if (this.type() === 'date' && this.multiple()) {
-      return this._selectedDates().includes(this._toDateValue(date));
-    }
-
-    return (
-      this._selYear() === date.getFullYear() &&
-      this._selMonth() === date.getMonth() &&
-      this._selDay() === date.getDate()
+  private toUtcDate(value: CivilDate): Date {
+    return new Date(
+      Date.UTC(
+        Number(value.slice(0, 4)),
+        Number(value.slice(5, 7)) - 1,
+        Number(value.slice(8, 10)),
+      ),
     );
   }
 
-  isDateDisabled(date: Date): boolean {
-    const disabled = this.disabledDates();
-    if (typeof disabled === 'function') {
-      return disabled(date);
-    }
-
-    return disabled.some((value) => {
-      const candidate = value instanceof Date ? value : new Date(`${value}T00:00:00`);
-      return !isNaN(candidate.getTime()) && sameDay(candidate, date);
-    });
+  private fromUtcDate(value: Date): CivilDate {
+    return civilDate(
+      `${String(value.getUTCFullYear()).padStart(4, '0')}-${String(value.getUTCMonth() + 1).padStart(2, '0')}-${String(value.getUTCDate()).padStart(2, '0')}`,
+    );
   }
 
-  private _toDateValue(date: Date): string {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
-      date.getDate(),
-    ).padStart(2, '0')}`;
-  }
-
-  // ── CVA ───────────────────────────────────────────────────────────
-  writeValue(value: string | string[] | NeuDateRange | null): void {
-    if (this.type() === 'range') {
-      const v = value as NeuDateRange | null;
-      this._pickStart.set(v?.start ?? null);
-      this._pickEnd.set(v?.end ?? null);
-    } else {
-      if (this.type() === 'date' && this.multiple()) {
-        const values = Array.isArray(value)
-          ? value
-          : typeof value === 'string' && value
-            ? value.split(',').map((item) => item.trim())
-            : [];
-        this._selectedDates.set(values.filter(Boolean));
-        this._value.set(this._selectedDates().join(','));
-        return;
-      }
-      const v = (value as string) ?? '';
-      this._value.set(v);
-      if (!v) return;
-      const t = this.type();
-      if (t === 'date') {
-        const d = new Date(v + 'T00:00:00');
-        if (!isNaN(d.getTime())) {
-          this._selYear.set(d.getFullYear());
-          this._selMonth.set(d.getMonth());
-          this._selDay.set(d.getDate());
-          this._viewYear.set(d.getFullYear());
-          this._viewMonth.set(d.getMonth());
-        }
-      } else if (t === 'time') {
-        const [h, m] = v.split(':').map(Number);
-        if (!isNaN(h)) this._selHour.set(h);
-        if (!isNaN(m)) this._selMinute.set(m);
-      } else {
-        const [datePart, timePart] = v.split('T');
-        if (datePart) {
-          const d = new Date(datePart + 'T00:00:00');
-          if (!isNaN(d.getTime())) {
-            this._selYear.set(d.getFullYear());
-            this._selMonth.set(d.getMonth());
-            this._selDay.set(d.getDate());
-            this._viewYear.set(d.getFullYear());
-            this._viewMonth.set(d.getMonth());
-          }
-        }
-        if (timePart) {
-          const [h, m] = timePart.split(':').map(Number);
-          if (!isNaN(h)) this._selHour.set(h);
-          if (!isNaN(m)) this._selMinute.set(m);
-        }
-      }
-    }
-  }
-
-  registerOnChange(fn: (v: string | string[] | NeuDateRange) => void): void {
-    this._onChange = fn;
-  }
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-  setDisabledState(isDisabled: boolean): void {
-    this._cvaDisabled.set(isDisabled);
-  }
-
-  #normalizedLocale(locale: string | null | undefined): string {
-    return locale?.trim() || '';
-  }
-
-  #capitalize(value: string): string {
-    return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
-  }
-
-  #buildWeekdayLabels(style: 'short' | 'narrow'): string[] {
-    const formatter = new Intl.DateTimeFormat(this._resolvedLocale(), {
-      weekday: style,
-      timeZone: 'UTC',
-    });
-    return Array.from({ length: 7 }, (_, index) => {
-      const firstDay = this.#normalizedFirstDayOfWeek();
-      const label = formatter
-        .format(new Date(Date.UTC(2024, 0, 7 + firstDay + index)))
-        .replace(/\.$/, '')
-        .trim();
-      if (style === 'narrow') {
-        return label.slice(0, 1).toUpperCase();
-      }
-      return this.#capitalize(label);
-    });
-  }
-
-  #normalizedFirstDayOfWeek(): number {
+  private normalizedFirstDay(): number {
     return Math.min(6, Math.max(0, Math.trunc(this.firstDayOfWeek())));
   }
 
-  #weekOffset(date: Date): number {
-    return (date.getDay() - this.#normalizedFirstDayOfWeek() + 7) % 7;
+  private weekOffset(value: Date): number {
+    return (value.getUTCDay() - this.normalizedFirstDay() + 7) % 7;
+  }
+
+  private capitalize(value: string): string {
+    return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
   }
 }
+
+/** Public mode-specialized instance type. */
+export type NeuDateInputComponent<M extends NeuDateMode = 'date'> = NeuDateInputControl<
+  NeuDateValue<M>
+>;
+
+/** Runtime Angular component constructor with direct field-value inference. */
+export const NeuDateInputComponent = NeuDateInputControl;

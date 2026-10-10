@@ -5,6 +5,11 @@
 @use '../styles/breakpoints' as *;
 @use '../styles/floating-label' as floating;
 @use '../styles/text-overflow' as text;
+@use '../styles/focus-state' as focus;
+
+neu-input[hidden] {
+  display: none !important;
+}
 
 $input-height: 48px; // md — default
 $input-height-sm: 36px; // sm
@@ -37,10 +42,10 @@ $label-font-floating: 12px;
   position: relative;
   display: flex;
   align-items: center;
-  background: var(--neu-surface);
-  border: 1.5px solid var(--neu-border);
+  background: var(--neu-input-background, var(--neu-surface));
+  border: 1.5px solid var(--neu-input-border, var(--neu-border));
   border-radius: var(--neu-radius);
-  height: $input-height;
+  height: var(--neu-control-height, #{$input-height});
   transition:
     border-color var(--neu-transition),
     box-shadow var(--neu-transition),
@@ -51,15 +56,15 @@ $label-font-floating: 12px;
   }
 
   &--focused {
-    border-color: var(--neu-primary);
-    box-shadow: var(--neu-focus-ring);
+    border-color: var(--neu-input-focus-border, var(--neu-primary));
+    box-shadow: var(--neu-input-focus-ring, var(--neu-focus-ring));
   }
 
   &--error {
     border-color: var(--neu-error);
 
     &.neu-input__wrapper--focused {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+      @include focus.invalid-focus;
     }
   }
 
@@ -109,9 +114,7 @@ $label-font-floating: 12px;
 }
 
 @keyframes neu-autofill-start {
-  to {
-    opacity: 1;
-  }
+  to { opacity: 1; }
 }
 
 // Placeholder visible cuando el wrapper está enfocado (label ya flotó)
@@ -147,13 +150,13 @@ $label-font-floating: 12px;
     font-size: $label-font-floating;
     font-weight: 600;
     letter-spacing: 0.01em;
-    background: var(--neu-surface);
+    background: var(--neu-input-background, var(--neu-surface));
     padding: 0 4px;
     inset-inline-start: calc(var(--neu-space-3) - 4px);
   }
 
   .neu-input__wrapper--focused & {
-    color: var(--neu-primary);
+    color: var(--neu-text);
   }
 
   .neu-input__wrapper--error & {

@@ -1,0 +1,60 @@
+{
+  "checkpoint": "N2-011G",
+  "capturedAt": "2026-09-20T12:41:10.803Z",
+  "metrics": {
+    "pureRangeMath": {
+      "samples": 25,
+      "p50Ms": 0.000028016600000000836,
+      "p95Ms": 0.00006723329999999805
+    },
+    "client10kTop": {
+      "samples": 25,
+      "p50Ms": 0.00004874999999998408,
+      "p95Ms": 0.00014808300000001396
+    },
+    "client10kMiddle": {
+      "samples": 25,
+      "p50Ms": 0.000051708000000019184,
+      "p95Ms": 0.00014300000000000068
+    },
+    "client10kEnd": {
+      "samples": 25,
+      "p50Ms": 0.00004279200000001993,
+      "p95Ms": 0.00010408300000000282
+    },
+    "repeatedScroll1000": {
+      "samples": 25,
+      "p50Ms": 0.009266660000000116,
+      "p95Ms": 0.011614999999999896
+    },
+    "remote1MProjection": {
+      "samples": 25,
+      "p50Ms": 0.000029100000000002523,
+      "p95Ms": 0.00003634999999999877
+    },
+    "rangeCoverage": {
+      "samples": 25,
+      "p50Ms": 0.00000996669999999824,
+      "p95Ms": 0.000011087500000002138
+    },
+    "requestDecision": {
+      "samples": 25,
+      "p50Ms": 0.0005649580000000185,
+      "p95Ms": 0.001230707999999993
+    },
+    "largeJump": {
+      "samples": 25,
+      "p50Ms": 0.000029766700000001834,
+      "p95Ms": 0.00003767079999999794
+    },
+    "createDestroy50": {
+      "samples": 25,
+      "p50Ms": 0.001396790999999979,
+      "p95Ms": 0.0015276660000000106
+    },
+    "maxClientRenderRows": 28,
+    "remoteLogicalTotal": 1000000,
+    "repeatedScrollRequests": 10,
+    "repeatedScrollEvents": 1000
+  }
+}

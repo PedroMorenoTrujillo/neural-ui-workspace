@@ -1,35 +1,68 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   Directive,
   TemplateRef,
   ViewEncapsulation,
+  computed,
   contentChild,
   input,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import type { NeuDensity } from '@neural-ui/core';
 
-export type NeuTimelineItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuTimelineItemTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuTimelineAlign = 'left' | 'right' | 'alternate';
+
+export interface NeuTimelineItemContext {
+  /** Current timeline item. / Elemento actual del timeline. */
+  readonly $implicit: NeuTimelineItem;
+  /** Zero-based visual position after applying reverse. / Posición visual base cero tras aplicar reverse. */
+  readonly index: number;
+}
+
+export interface NeuTimelineMarkerContext {
+  /** Current timeline item. / Elemento actual del timeline. */
+  readonly $implicit: NeuTimelineItem;
+}
 
 export interface NeuTimelineItem {
+  /** Optional stable identity; visual index is the fallback when omitted. */
+  id?: string | number;
   /** Etiqueta de tiempo (ej. "Hace 2h", "12 Mar") / Time label (e.g. "2h ago", "Mar 12") */
   time?: string;
   /** Título del evento / Event title */
   title: string;
   /** Descripción opcional / Optional description */
   description?: string;
-  /** Variante de color del punto / Dot color variant */
-  variant?: NeuTimelineItemVariant;
+  /** Intención semántica del punto / Dot semantic intent */
+  tone?: NeuTimelineItemTone;
   /** Icono SVG path opcional / Optional SVG path icon */
   icon?: string;
 }
+/** Replaces the complete content area of every timeline item. / Sustituye el contenido completo de cada elemento. */
 @Directive({ selector: 'ng-template[neuTimelineItem]' })
 export class NeuTimelineItemDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem; index: number }>) {}
+  constructor(readonly templateRef: TemplateRef<NeuTimelineItemContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuTimelineItemDirective,
+    context: unknown,
+  ): context is NeuTimelineItemContext {
+    return true;
+  }
 }
+
+/** Replaces the marker rendered on the timeline axis. / Sustituye el marcador mostrado en el eje del timeline. */
 @Directive({ selector: 'ng-template[neuTimelineMarker]' })
 export class NeuTimelineMarkerDirective {
-  constructor(readonly templateRef: TemplateRef<{ $implicit: NeuTimelineItem }>) {}
+  constructor(readonly templateRef: TemplateRef<NeuTimelineMarkerContext>) {}
+
+  static ngTemplateContextGuard(
+    _directive: NeuTimelineMarkerDirective,
+    context: unknown,
+  ): context is NeuTimelineMarkerContext {
+    return true;
+  }
 }
 
 /**
@@ -45,16 +78,22 @@ export class NeuTimelineMarkerDirective {
   selector: 'neu-timeline',
   imports: [NgTemplateOutlet],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ol class="neu-timeline">
-      @for (item of items(); track item.title; let last = $last) {
+    <ol
+      class="neu-timeline"
+      [class.neu-timeline--right]="align() === 'right'"
+      [class.neu-timeline--alternate]="align() === 'alternate'"
+      [class.neu-timeline--density-compact]="density() === 'compact'"
+      [class.neu-timeline--density-relaxed]="density() === 'relaxed'"
+      [attr.aria-label]="ariaLabel() || null"
+    >
+      @for (item of renderedItems(); track item.id ?? $index; let last = $last) {
         <li class="neu-timeline__item" [class.neu-timeline__item--last]="last">
           <!-- Eje izquierdo (punto + línea) -->
           <div class="neu-timeline__axis">
             <div
               class="neu-timeline__dot"
-              [class]="'neu-timeline__dot--' + (item.variant ?? 'default')"
+              [class]="'neu-timeline__dot--' + (item.tone ?? 'neutral')"
             >
               @if (markerTpl()) {
                 <ng-container
@@ -106,8 +145,22 @@ export class NeuTimelineMarkerDirective {
   styleUrl: './neu-timeline.component.scss',
 })
 export class NeuTimelineComponent {
+  /* v8 ignore start -- Angular signal-query factories; projected item/marker behavior is covered. */
   readonly itemTpl = contentChild(NeuTimelineItemDirective);
   readonly markerTpl = contentChild(NeuTimelineMarkerDirective);
-  /** Eventos a mostrar / Events to display */
-  items = input<NeuTimelineItem[]>([]);
+  /* v8 ignore stop */
+  /** Events rendered in chronological order. / Eventos renderizados en orden cronológico. */
+  readonly items = input<readonly NeuTimelineItem[]>([]);
+  /** Places the axis on the left, right or alternating sides. / Sitúa el eje a la izquierda, derecha o en lados alternos. */
+  readonly align = input<NeuTimelineAlign>('left');
+  /** Spatial compactness. / Compactación espacial. */
+  readonly density = input<NeuDensity>('normal');
+  /** Renders the supplied collection from last to first without mutating it. / Renderiza la colección de último a primero sin modificarla. */
+  readonly reverse = input(false);
+  /** Optional accessible name for the chronological list. / Nombre accesible opcional para la lista cronológica. */
+  readonly ariaLabel = input('');
+
+  protected readonly renderedItems = computed(() =>
+    this.reverse() ? [...this.items()].reverse() : this.items(),
+  );
 }

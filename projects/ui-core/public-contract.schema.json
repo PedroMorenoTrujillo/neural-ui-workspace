@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neural-ui.dev/schemas/public-contract-v2.json",
+  "title": "Neural UI declaration public contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "generator",
+    "package",
+    "entrypoints",
+    "items",
+    "bindings",
+    "designTokens",
+    "summary"
+  ],
+  "properties": {
+    "$schema": { "const": "./public-contract.schema.json" },
+    "schemaVersion": { "const": 2 },
+    "generator": {
+      "type": "object",
+      "required": ["name", "source", "classificationPolicyVersion"],
+      "properties": {
+        "name": { "type": "string" },
+        "source": { "const": "compiled TypeScript and Angular declarations" },
+        "classificationPolicyVersion": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "package": { "type": "string" },
+    "entrypoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entrypoint", "types", "exports"],
+        "properties": {
+          "entrypoint": { "type": "string" },
+          "types": { "type": "string" },
+          "exports": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/declaration" }
+    },
+    "bindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/binding" }
+    },
+    "designTokens": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^--neu-" }
+    },
+    "summary": { "type": "object" }
+  },
+  "$defs": {
+    "status": {
+      "enum": ["SUPPORTED", "COMPATIBILITY", "DEPRECATED", "INTERNAL/UNSUPPORTED", "REVIEW"]
+    },
+    "member": {
+      "type": "object",
+      "required": ["id", "name", "kind", "static", "status", "signature"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "kind": { "type": "string" },
+        "publicName": { "type": "string" },
+        "changePublicName": { "type": "string" },
+        "required": { "type": "boolean" },
+        "static": { "type": "boolean" },
+        "status": { "$ref": "#/$defs/status" },
+        "canonicalReplacement": { "type": "string" },
+        "deprecated": { "oneOf": [{ "type": "boolean" }, { "type": "string" }] },
+        "signature": { "type": "string" }
+      }
+    },
+    "declaration": {
+      "type": "object",
+      "required": ["id", "entrypoint", "name", "kind", "status", "signature", "members"],
+      "properties": {
+        "id": { "type": "string" },
+        "entrypoint": { "type": "string" },
+        "name": { "type": "string" },
+        "kind": { "type": "string" },
+        "status": { "$ref": "#/$defs/status" },
+        "selector": { "type": "string" },
+        "target": { "type": "string" },
+        "canonicalReplacement": { "type": "string" },
+        "deprecated": { "oneOf": [{ "type": "boolean" }, { "type": "string" }] },
+        "signature": { "type": "string" },
+        "members": { "type": "array", "items": { "$ref": "#/$defs/member" } }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "required": [
+        "id",
+        "entrypoint",
+        "declaration",
+        "propertyName",
+        "publicName",
+        "kind",
+        "required",
+        "status",
+        "signature"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "entrypoint": { "type": "string" },
+        "declaration": { "type": "string" },
+        "selector": { "type": "string" },
+        "propertyName": { "type": "string" },
+        "publicName": { "type": "string" },
+        "changePublicName": { "type": "string" },
+        "kind": { "enum": ["input", "output", "model"] },
+        "required": { "type": "boolean" },
+        "status": { "$ref": "#/$defs/status" },
+        "canonicalReplacement": { "type": "string" },
+        "signature": { "type": "string" }
+      }
+    }
+  }
+}

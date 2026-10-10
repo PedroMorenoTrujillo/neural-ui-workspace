@@ -1,13 +1,19 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ViewEncapsulation,
   computed,
+  effect,
   inject,
   input,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
-import { Directionality } from '@angular/cdk/bidi';
+import { DOCUMENT } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
+import { NeuSelectComponent, type NeuSelectOption } from '@neural-ui/core/select';
 
 /**
  * NeuralUI Pagination Component
@@ -20,17 +26,27 @@ import { Directionality } from '@angular/cdk/bidi';
  */
 @Component({
   selector: 'neu-pagination',
-  imports: [],
+  imports: [ReactiveFormsModule, NeuSelectComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <nav class="neu-pagination" [attr.aria-label]="ariaLabel()">
+    <nav class="neu-pagination" [attr.aria-label]="labels().pagination">
+      @if (normalizedPageSizeOptions().length) {
+        <neu-select
+          class="neu-pagination__size"
+          size="sm"
+          [floatingLabel]="false"
+          [ariaLabel]="resolvedPageSizeAriaLabel()"
+          [options]="pageSizeSelectOptions()"
+          optionLabel="label"
+          [formControl]="pageSizeControl"
+        />
+      }
       <!-- Anterior -->
       <button
         class="neu-pagination__btn neu-pagination__btn--nav"
         type="button"
         [disabled]="page() <= 1"
-        [attr.aria-label]="previousPageLabel()"
+        [attr.aria-label]="labels().previousPage"
         (click)="go(page() - 1)"
       >
         <svg
@@ -44,12 +60,12 @@ import { Directionality } from '@angular/cdk/bidi';
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <polyline [attr.points]="previousChevronPoints()" />
+          <polyline points="15 18 9 12 15 6" />
         </svg>
       </button>
 
       <!-- Páginas -->
-      @for (p of pages(); track p) {
+      @for (p of pages(); track p === -1 ? 'gap-' + $index : p) {
         @if (p === -1) {
           <span class="neu-pagination__ellipsis" aria-hidden="true">…</span>
         } @else {
@@ -57,7 +73,7 @@ import { Directionality } from '@angular/cdk/bidi';
             class="neu-pagination__btn"
             [class.neu-pagination__btn--active]="p === page()"
             type="button"
-            [attr.aria-label]="pageLabel() + ' ' + p"
+            [attr.aria-label]="labels().page(p)"
             [attr.aria-current]="p === page() ? 'page' : null"
             (click)="go(p)"
           >
@@ -71,7 +87,7 @@ import { Directionality } from '@angular/cdk/bidi';
         class="neu-pagination__btn neu-pagination__btn--nav"
         type="button"
         [disabled]="page() >= totalPages()"
-        [attr.aria-label]="nextPageLabel()"
+        [attr.aria-label]="labels().nextPage"
         (click)="go(page() + 1)"
       >
         <svg
@@ -85,7 +101,7 @@ import { Directionality } from '@angular/cdk/bidi';
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <polyline [attr.points]="nextChevronPoints()" />
+          <polyline points="9 18 15 12 9 6" />
         </svg>
       </button>
     </nav>
@@ -93,25 +109,9 @@ import { Directionality } from '@angular/cdk/bidi';
   styleUrl: './neu-pagination.component.scss',
 })
 export class NeuPaginationComponent {
-  private readonly directionality = inject(Directionality);
-  readonly previousChevronPoints = computed(() =>
-    this.directionality.valueSignal() === 'rtl' ? '9 18 15 12 9 6' : '15 18 9 12 15 6',
-  );
-  readonly nextChevronPoints = computed(() =>
-    this.directionality.valueSignal() === 'rtl' ? '15 18 9 12 15 6' : '9 18 15 12 9 6',
-  );
-
-  /** Nombre accesible de la navegación. / Accessible navigation name. */
-  ariaLabel = input<string>('Pagination');
-
-  /** Etiqueta del botón de página anterior. / Previous-page button label. */
-  previousPageLabel = input<string>('Previous page');
-
-  /** Etiqueta del botón de página siguiente. / Next-page button label. */
-  nextPageLabel = input<string>('Next page');
-
-  /** Prefijo accesible para cada número de página. / Accessible prefix for each page number. */
-  pageLabel = input<string>('Page');
+  private readonly doc = inject(DOCUMENT);
+  private readonly defaultLocale = inject(NEURAL_LOCALE);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Página actual (1-indexed) / Current page (1-indexed) */
   page = input<number>(1);
@@ -122,13 +122,74 @@ export class NeuPaginationComponent {
   /** Ítems por página / Items per page */
   pageSize = input<number>(10);
 
+  /** Empty by default so basic pagination retains no selector UI. */
+  pageSizeOptions = input<readonly number[]>([]);
+
+  pageSizeAriaLabel = input('Items per page');
+
   /** Número máximo de botones de página visibles (sin contar anterior/siguiente) / Maximum number of visible page buttons (not counting prev/next) */
   maxVisible = input<number>(7);
 
   /** Emite la nueva página al hacer click / Emits the new page on click */
   pageChange = output<number>();
 
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
+  pageSizeChange = output<number>();
+
+  readonly normalizedPageSizeOptions = computed(() => [
+    ...new Set(
+      this.pageSizeOptions()
+        .map((value) => Math.trunc(value))
+        .filter((value) => Number.isFinite(value) && value > 0),
+    ),
+  ]);
+
+  readonly pageSizeSelectOptions = computed<NeuSelectOption<number>[]>(() =>
+    this.normalizedPageSizeOptions().map((size) => ({
+      label: String(size),
+      value: size,
+    })),
+  );
+  private readonly activeLocale = signal(resolveDocumentLocale(this.doc, this.defaultLocale));
+  protected readonly labels = computed(() => paginationLabels(this.activeLocale()));
+  protected readonly resolvedPageSizeAriaLabel = computed(() => {
+    const configured = this.pageSizeAriaLabel().trim();
+    return configured && configured !== 'Items per page' ? configured : this.labels().itemsPerPage;
+  });
+
+  protected readonly pageSizeControl = new FormControl(10, { nonNullable: true });
+  private readonly pageSizeSelect = viewChild(NeuSelectComponent);
+
+  constructor() {
+    const pageSizeSubscription = this.pageSizeControl.valueChanges.subscribe((value) =>
+      this.changePageSize(value),
+    );
+    this.destroyRef.onDestroy(() => pageSizeSubscription.unsubscribe());
+
+    effect(() => {
+      const pageSize = this.pageSize();
+      if (this.pageSizeControl.value !== pageSize) {
+        this.pageSizeControl.setValue(pageSize, { emitEvent: false });
+      }
+    });
+
+    const win = this.doc.defaultView;
+    if (win?.MutationObserver) {
+      const observer = new win.MutationObserver(() => {
+        this.activeLocale.set(resolveDocumentLocale(this.doc, this.defaultLocale));
+      });
+      observer.observe(this.doc.documentElement, {
+        attributes: true,
+        attributeFilter: ['lang'],
+      });
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    }
+  }
+
+  readonly totalPages = computed(() => {
+    const size = Number.isFinite(this.pageSize()) ? Math.max(1, this.pageSize()) : 1;
+    const total = Number.isFinite(this.total()) ? Math.max(0, this.total()) : 0;
+    return Math.max(1, Math.ceil(total / size));
+  });
 
   readonly pages = computed((): (number | -1)[] => {
     const total = this.totalPages();
@@ -158,4 +219,47 @@ export class NeuPaginationComponent {
       this.pageChange.emit(clamped);
     }
   }
+
+  changePageSize(value: string | number | null): void {
+    const nextSize = Math.trunc(Number(value));
+    if (!Number.isFinite(nextSize) || nextSize <= 0 || nextSize === this.pageSize()) return;
+    const first = Math.max(0, (Math.max(1, this.page()) - 1) * Math.max(1, this.pageSize()));
+    const nextTotalPages = Math.max(1, Math.ceil(Math.max(0, this.total()) / nextSize));
+    const nextPage = Math.min(nextTotalPages, Math.floor(first / nextSize) + 1);
+    this.pageSizeChange.emit(nextSize);
+    if (nextPage !== this.page()) this.pageChange.emit(nextPage);
+    // The selector is a UI adapter; only the parent can apply the proposed size.
+    this.pageSizeControl.setValue(this.pageSize(), { emitEvent: false });
+    this.pageSizeSelect()?.value.set(this.pageSize());
+  }
+}
+
+interface NeuPaginationLocaleLabels {
+  readonly pagination: string;
+  readonly itemsPerPage: string;
+  readonly previousPage: string;
+  readonly nextPage: string;
+  readonly page: (page: number) => string;
+}
+
+function resolveDocumentLocale(doc: Document, fallback: string): string {
+  return doc.documentElement.lang.trim() || fallback;
+}
+
+function paginationLabels(locale: string): NeuPaginationLocaleLabels {
+  return locale.toLowerCase().startsWith('es')
+    ? {
+        pagination: 'Paginación',
+        itemsPerPage: 'Elementos por página',
+        previousPage: 'Página anterior',
+        nextPage: 'Página siguiente',
+        page: (page) => `Página ${page}`,
+      }
+    : {
+        pagination: 'Pagination',
+        itemsPerPage: 'Items per page',
+        previousPage: 'Previous page',
+        nextPage: 'Next page',
+        page: (page) => `Page ${page}`,
+      };
 }

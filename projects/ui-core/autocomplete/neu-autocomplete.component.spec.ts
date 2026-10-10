@@ -1,12 +1,72 @@
 import { Component } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { COMPOSITION_BUFFER_MODE, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   NeuAutocompleteComponent,
+  NeuAutocompleteClearIconDirective,
+  NeuAutocompleteDropdownIconDirective,
+  NeuAutocompleteEmptyDirective,
+  NeuAutocompleteFooterDirective,
+  NeuAutocompleteGroupDirective,
+  NeuAutocompleteHeaderDirective,
   NeuAutocompleteItemDirective,
+  NeuAutocompleteLoaderDirective,
+  NeuAutocompleteLoadingIconDirective,
   NeuAutocompleteOption,
 } from './neu-autocomplete.component';
+
+@Component({
+  imports: [
+    NeuAutocompleteComponent,
+    NeuAutocompleteItemDirective,
+    NeuAutocompleteGroupDirective,
+    NeuAutocompleteLoaderDirective,
+    NeuAutocompleteHeaderDirective,
+    NeuAutocompleteFooterDirective,
+    NeuAutocompleteEmptyDirective,
+    NeuAutocompleteLoadingIconDirective,
+    NeuAutocompleteClearIconDirective,
+    NeuAutocompleteDropdownIconDirective,
+  ],
+  template: `
+    <neu-autocomplete
+      mode="free-text"
+      [options]="options"
+      [groups]="groups"
+      [loading]="loading"
+      [lazy]="lazy"
+      [dropdown]="true"
+      [clearable]="true"
+    >
+      <ng-template neuAutocompleteHeader><span class="auto-header">Header</span></ng-template>
+      <ng-template neuAutocompleteFooter><span class="auto-footer">Footer</span></ng-template>
+      <ng-template neuAutocompleteItem let-option
+        ><span class="auto-item">{{ option.label }}</span></ng-template
+      >
+      <ng-template neuAutocompleteGroup let-group
+        ><span class="auto-group">{{ $any(group).label }}</span></ng-template
+      >
+      <ng-template neuAutocompleteLoader let-index="logicalIndex"
+        ><span class="auto-loader">{{ index }}</span></ng-template
+      >
+      <ng-template neuAutocompleteEmpty><span class="auto-empty">Empty</span></ng-template>
+      <ng-template neuAutocompleteLoadingIcon><span class="auto-loading-icon">L</span></ng-template>
+      <ng-template neuAutocompleteClearIcon><span class="auto-clear-icon">C</span></ng-template>
+      <ng-template neuAutocompleteDropdownIcon
+        ><span class="auto-dropdown-icon">D</span></ng-template
+      >
+    </neu-autocomplete>
+  `,
+})
+class AutocompleteTemplatesHost {
+  options = OPTIONS;
+  groups: Array<{ label: string; items: readonly NeuAutocompleteOption[] }> = [];
+  loading = false;
+  lazy = false;
+}
 
 const OPTIONS: NeuAutocompleteOption[] = [
   { value: 1, label: 'Angular' },
@@ -29,6 +89,67 @@ beforeEach(() =>
 );
 
 describe('NeuAutocompleteComponent', () => {
+  it('keeps an unconfirmed query when consumer suggestions change, then clears it on blur', async () => {
+    const f = setup();
+    f.componentRef.setInput('floatingLabel', true);
+    f.componentRef.setInput('label', 'Destination');
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.dispatchEvent(new FocusEvent('focus'));
+    input.value = 'B';
+    input.dispatchEvent(new Event('input'));
+    f.componentRef.setInput('options', [...OPTIONS]);
+    await f.whenStable();
+    expect(f.componentInstance.displayText()).toBe('B');
+    expect(input.value).toBe('B');
+    expect(f.nativeElement.classList.contains('neu-autocomplete--has-value')).toBe(true);
+    input.dispatchEvent(new FocusEvent('blur'));
+    await f.whenStable();
+    expect(input.value).toBe('');
+    expect(f.componentInstance.value()).toBeNull();
+    expect(f.nativeElement.classList.contains('neu-autocomplete--has-value')).toBe(false);
+  });
+
+  it('clears an invalid native edit even when input and blur happen before rendering', async () => {
+    const f = setup();
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'B';
+    input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new FocusEvent('blur'));
+    await f.whenStable();
+    expect(input.value).toBe('');
+    expect(f.componentInstance.displayText()).toBe('');
+  });
+
+  it('preserves free text and floats the label after blur', async () => {
+    const f = setup();
+    f.componentRef.setInput('mode', 'free-text');
+    f.componentRef.setInput('floatingLabel', true);
+    await f.whenStable();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'B';
+    input.dispatchEvent(new Event('input'));
+    f.componentRef.setInput('options', [...OPTIONS]);
+    input.dispatchEvent(new FocusEvent('blur'));
+    await f.whenStable();
+    expect(input.value).toBe('B');
+    expect(f.componentInstance.value()).toBe('B');
+    expect(f.nativeElement.classList.contains('neu-autocomplete--has-value')).toBe(true);
+  });
+
+  it('uses the shared outline chevron and rotates it when expanded', async () => {
+    const f = setup();
+    f.componentRef.setInput('dropdown', true);
+    await f.whenStable();
+    const icon = f.nativeElement.querySelector('.neu-autocomplete__chevron');
+    expect(icon.getAttribute('fill')).toBe('none');
+    expect(icon.querySelector('polyline').getAttribute('points')).toBe('6 9 12 15 18 9');
+    f.componentInstance.open();
+    await f.whenStable();
+    expect(f.nativeElement.classList.contains('neu-autocomplete--open')).toBe(true);
+  });
+
   it('should create', async () => {
     const f = setup();
     await f.whenStable();
@@ -46,63 +167,128 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     // Con query vacía el componente no muestra opciones (autocomplete ≠ select)
     // With empty query the component shows no options (autocomplete ≠ select)
-    expect(f.componentInstance._filtered().length).toBe(0);
+    expect(f.componentInstance['_filtered']().length).toBe(0);
   });
 
   it('_filtered should filter by label (case-insensitive)', () => {
     const f = setup();
-    f.componentInstance.onQueryChange('ang');
-    expect(f.componentInstance._filtered().map((o) => o.label)).toContain('Angular');
-    expect(f.componentInstance._filtered().length).toBe(1);
+    f.componentInstance['onQueryChange']('ang');
+    expect(
+      (f.componentInstance['_filtered']() as NeuAutocompleteOption[]).map((o) => o.label),
+    ).toContain('Angular');
+    expect(f.componentInstance['_filtered']().length).toBe(1);
   });
 
   it('onQueryChange should open the list', () => {
     const f = setup();
-    f.componentInstance.onQueryChange('a');
-    expect(f.componentInstance._isOpen()).toBe(true);
+    f.componentInstance['onQueryChange']('a');
+    expect(f.componentInstance['_isOpen']()).toBe(true);
+  });
+
+  it('buffers IME value, query, and completion outputs until composition commits', () => {
+    const f = setup();
+    f.componentRef.setInput('mode', 'free-text');
+    f.componentRef.setInput('delay', 0);
+    f.detectChanges();
+    const values: unknown[] = [];
+    const queries: string[] = [];
+    const completions: string[] = [];
+    f.componentInstance.value.subscribe((value) => values.push(value));
+    f.componentInstance.queryChange.subscribe((value) => queries.push(value));
+    f.componentInstance.suggestionsRequest.subscribe((event) => completions.push(event.query));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = 'に';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+    input.value = '日本';
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+
+    expect(values).toEqual(['日本']);
+    expect(queries).toEqual(['日本']);
+    expect(completions).toEqual(['日本']);
+  });
+
+  it('respects Angular COMPOSITION_BUFFER_MODE=false', () => {
+    TestBed.overrideProvider(COMPOSITION_BUFFER_MODE, { useValue: false });
+    const f = setup();
+    f.componentRef.setInput('mode', 'free-text');
+    f.componentRef.setInput('delay', 0);
+    f.detectChanges();
+    const values: unknown[] = [];
+    const queries: string[] = [];
+    f.componentInstance.value.subscribe((value) => values.push(value));
+    f.componentInstance.queryChange.subscribe((value) => queries.push(value));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = 'に';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+    input.value = '日本';
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+
+    expect(values).toEqual(['に', '日本']);
+    expect(queries).toEqual(['に', '日本']);
+  });
+
+  it('does not commit a composition that becomes disabled', () => {
+    const f = setup();
+    const values: unknown[] = [];
+    f.componentInstance.value.subscribe((value) => values.push(value));
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    input.value = 'draft';
+    f.componentRef.setInput('disabled', true);
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+
+    expect(values).toEqual([]);
   });
 
   it('onQueryChange empty should emit null via CVA', () => {
     const f = setup();
+    f.componentInstance.value.set(1);
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
-    f.componentInstance.onQueryChange('');
+    f.componentInstance.value.subscribe((v) => values.push(v));
+    f.componentInstance['onQueryChange']('');
     expect(values[0]).toBeNull();
   });
 
   it('selectOption should set query, close, and emit CVA change', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
-    f.componentInstance.selectOption(OPTIONS[0]);
-    expect(f.componentInstance._query()).toBe('Angular');
-    expect(f.componentInstance._isOpen()).toBe(false);
+    f.componentInstance.value.subscribe((v) => values.push(v));
+    f.componentInstance['selectOption'](OPTIONS[0]);
+    expect(f.componentInstance['_query']()).toBe('Angular');
+    expect(f.componentInstance['_isOpen']()).toBe(false);
     expect(values[0]).toBe(1);
   });
 
   it('selectOption on disabled should not emit', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
-    f.componentInstance.selectOption(OPTIONS[3]); // disabled
+    f.componentInstance.value.subscribe((v) => values.push(v));
+    f.componentInstance['selectOption'](OPTIONS[3]); // disabled
     expect(values.length).toBe(0);
   });
 
   it('optionSelected output should emit the selected option', () => {
     const f = setup();
-    const selected: NeuAutocompleteOption[] = [];
-    f.componentInstance.optionSelected.subscribe((o: NeuAutocompleteOption) => selected.push(o));
-    f.componentInstance.selectOption(OPTIONS[1]);
-    expect(selected[0].label).toBe('React');
+    const selected: unknown[] = [];
+    f.componentInstance.optionActivated.subscribe((o) => selected.push(o));
+    f.componentInstance['selectOption'](OPTIONS[1], new MouseEvent('click'));
+    expect((selected[0] as { option: NeuAutocompleteOption }).option.label).toBe('React');
   });
 
   it('clear() should reset query and emit null', () => {
     const f = setup();
+    f.componentInstance.value.set(3);
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
-    f.componentInstance._query.set('Vue');
+    f.componentInstance.value.subscribe((v) => values.push(v));
     f.componentInstance.clear();
-    expect(f.componentInstance._query()).toBe('');
+    expect(f.componentInstance['_query']()).toBe('');
     expect(values[0]).toBeNull();
   });
 
@@ -110,64 +296,67 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     // 'a' coincide con Angular y React → 2 opciones
     // 'a' matches Angular and React → 2 options
-    f.componentInstance.onQueryChange('a');
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(f.componentInstance._activeIndex()).toBe(0);
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(f.componentInstance._activeIndex()).toBe(1);
+    f.componentInstance['onQueryChange']('a');
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(f.componentInstance['_activeIndex']()).toBe(0);
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('ArrowUp should decrease _activeIndex', () => {
     const f = setup();
     // Necesitamos _filtered() no vacío para que onKeyDown no salga temprano
     // Need _filtered() non-empty so onKeyDown doesn't exit early
-    f.componentInstance.onQueryChange('a'); // Angular, React
-    f.componentInstance._activeIndex.set(1);
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
-    expect(f.componentInstance._activeIndex()).toBe(0);
+    f.componentInstance['onQueryChange']('a'); // Angular, React
+    f.componentInstance['_activeIndex'].set(1);
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(f.componentInstance['_activeIndex']()).toBe(0);
   });
 
   it('Enter should select the active option', () => {
     const f = setup();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
+    f.componentInstance.value.subscribe((v) => values.push(v));
     // 'vue' → _filtered() = [Vue] en índice 0
     // 'vue' → _filtered() = [Vue] at index 0
-    f.componentInstance.onQueryChange('vue');
-    f.componentInstance._activeIndex.set(0);
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
-    expect(values[0]).toBe(3); // value of Vue
+    f.componentInstance['onQueryChange']('vue');
+    f.componentInstance['_activeIndex'].set(0);
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(values.at(-1)).toBe(3); // value of Vue; typed custom text emits first
   });
 
   it('Escape should close the list', () => {
     const f = setup();
-    f.componentInstance._isOpen.set(true);
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(f.componentInstance._isOpen()).toBe(false);
+    f.componentInstance['_isOpen'].set(true);
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(f.componentInstance['_isOpen']()).toBe(false);
   });
 
   it('writeValue with known value should set query to label', () => {
     const f = setup();
-    f.componentInstance.writeValue(2); // React
-    expect(f.componentInstance._query()).toBe('React');
+    f.componentInstance.value.set(2); // React
+    f.detectChanges();
+    expect(f.componentInstance['_query']()).toBe('React');
   });
 
   it('writeValue with null should clear query', () => {
     const f = setup();
-    f.componentInstance._query.set('Angular');
-    f.componentInstance.writeValue(null);
-    expect(f.componentInstance._query()).toBe('');
+    f.componentInstance.value.set(1);
+    f.detectChanges();
+    f.componentInstance.value.set(null);
+    f.detectChanges();
+    expect(f.componentInstance['_query']()).toBe('');
   });
 
   it('setDisabledState should set _cvaDisabled', () => {
     const f = setup();
-    f.componentInstance.setDisabledState(true);
-    expect(f.componentInstance._cvaDisabled()).toBe(true);
+    f.componentRef.setInput('disabled', true);
+    expect(f.componentInstance.disabled()).toBe(true);
   });
 
   it('disabled input should have disabled attribute', async () => {
     const f = setup();
-    f.componentInstance.setDisabledState(true);
+    f.componentRef.setInput('disabled', true);
     f.detectChanges();
     await f.whenStable();
     const input = f.nativeElement.querySelector('.neu-autocomplete__input');
@@ -176,73 +365,74 @@ describe('NeuAutocompleteComponent', () => {
 
   it('_onFocus should open list when query has minimum length', async () => {
     const f = setup();
-    (f.componentInstance as any)._query.set('ca');
-    (f.componentInstance as any)._onFocus();
-    expect((f.componentInstance as any)._isOpen()).toBe(true);
+    f.componentInstance['onQueryChange']('ang');
+    f.componentInstance['_closePanel']();
+    (f.componentInstance as any)['_onFocus']();
+    expect((f.componentInstance as any)['_isOpen']()).toBe(true);
   });
 
   it('_onFocus should NOT open list when query is empty', () => {
     const f = setup();
-    (f.componentInstance as any)._query.set('');
-    (f.componentInstance as any)._onFocus();
-    expect((f.componentInstance as any)._isOpen()).toBe(false);
+    (f.componentInstance as any)['_query'].set('');
+    (f.componentInstance as any)['_onFocus']();
+    expect((f.componentInstance as any)['_isOpen']()).toBe(false);
   });
 
   it('_onBlur should call _onTouched and close after delay', async () => {
     const f = setup();
-    (f.componentInstance as any)._isOpen.set(true);
+    (f.componentInstance as any)['_isOpen'].set(true);
     let touched = false;
-    f.componentInstance.registerOnTouched(() => (touched = true));
-    (f.componentInstance as any)._onBlur();
+    f.componentInstance.touch.subscribe(() => (touched = true));
+    (f.componentInstance as any)['_onBlur']();
     expect(touched).toBe(true);
     // After the 150ms timeout the list should close (use fake timers or just check _focused)
-    expect((f.componentInstance as any)._focused()).toBe(false);
+    expect((f.componentInstance as any)['_focused']()).toBe(false);
   });
 
   it('onDocClick outside the component should close the list', () => {
     const f = setup();
-    (f.componentInstance as any)._isOpen.set(true);
+    (f.componentInstance as any)['_isOpen'].set(true);
     const externalEl = document.createElement('div');
-    f.componentInstance.onDocClick({ target: externalEl } as unknown as MouseEvent);
-    expect((f.componentInstance as any)._isOpen()).toBe(false);
+    f.componentInstance['onDocClick']({ target: externalEl } as unknown as MouseEvent);
+    expect((f.componentInstance as any)['_isOpen']()).toBe(false);
   });
 
   it('onDocClick inside the component should NOT close the list', () => {
     const f = setup();
-    (f.componentInstance as any)._isOpen.set(true);
+    (f.componentInstance as any)['_isOpen'].set(true);
     const internalEl = f.nativeElement.querySelector('.neu-autocomplete__input');
-    f.componentInstance.onDocClick({ target: internalEl } as unknown as MouseEvent);
-    expect((f.componentInstance as any)._isOpen()).toBe(true);
+    f.componentInstance['onDocClick']({ target: internalEl } as unknown as MouseEvent);
+    expect((f.componentInstance as any)['_isOpen']()).toBe(true);
   });
 
   it('queryChange output should emit when onQueryChange is called', () => {
     const f = setup();
     const values: string[] = [];
     f.componentInstance.queryChange.subscribe((v: string) => values.push(v));
-    f.componentInstance.onQueryChange('ca');
+    f.componentInstance['onQueryChange']('ca');
     expect(values).toContain('ca');
   });
 
   it('minLength=3 should not open list when query < 3 chars', () => {
     const f = setup();
-    f.componentRef.setInput('minLength', 3);
-    f.componentInstance.onQueryChange('ca');
-    expect((f.componentInstance as any)._isOpen()).toBe(false);
-    expect(f.componentInstance._filtered()).toEqual([]);
+    f.componentRef.setInput('minQueryLength', 3);
+    f.componentInstance['onQueryChange']('ca');
+    expect((f.componentInstance as any)['_isOpen']()).toBe(false);
+    expect(f.componentInstance['_filtered']()).toEqual([]);
   });
 
   it('minLength=3 should open list when query >= 3 chars', () => {
     const f = setup();
     f.componentRef.setInput('options', OPTIONS.slice(0, 3));
-    f.componentRef.setInput('minLength', 3);
-    f.componentInstance.onQueryChange('cat');
-    expect((f.componentInstance as any)._isOpen()).toBe(true);
+    f.componentRef.setInput('minQueryLength', 3);
+    f.componentInstance['onQueryChange']('cat');
+    expect((f.componentInstance as any)['_isOpen']()).toBe(true);
   });
 
   it('emptyLabel input should be rendered when no results', async () => {
     const f = setup();
     f.componentRef.setInput('emptyLabel', 'No hay resultados');
-    f.componentInstance.onQueryChange('zzz');
+    f.componentInstance['onQueryChange']('zzz');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.textContent).toContain('No hay resultados');
@@ -261,7 +451,7 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     const queries: string[] = [];
     f.componentInstance.queryChange.subscribe((v: string) => queries.push(v));
-    f.componentInstance.onQueryChange('cat');
+    f.componentInstance['onQueryChange']('cat');
     f.componentInstance.clear();
     expect(queries).toContain('');
   });
@@ -278,7 +468,8 @@ describe('NeuAutocompleteComponent', () => {
     // writeValue con valor desconocido debe mostrar String(val) como query
     // writeValue with unknown value must display String(val) as query
     const f = setup();
-    f.componentInstance.writeValue('unknown-val');
+    f.componentInstance.value.set('unknown-val');
+    f.detectChanges();
     expect(f.componentInstance['_query']()).toBe('unknown-val');
   });
 
@@ -286,8 +477,8 @@ describe('NeuAutocompleteComponent', () => {
     // writeValue con null debe limpiar la query
     // writeValue with null must clear the query
     const f = setup();
-    f.componentInstance.writeValue('cat');
-    f.componentInstance.writeValue(null);
+    f.componentInstance.value.set('cat');
+    f.componentInstance.value.set(null);
     expect(f.componentInstance['_query']()).toBe('');
   });
 
@@ -307,7 +498,7 @@ describe('NeuAutocompleteComponent', () => {
     // La lista de opciones debe renderizarse en el DOM después de onQueryChange + detectChanges
     // Options list must render in DOM after onQueryChange + detectChanges
     const f = setup();
-    f.componentInstance.onQueryChange('ang');
+    f.componentInstance['onQueryChange']('ang');
     f.detectChanges();
     await f.whenStable();
     const list = document.querySelector('.neu-autocomplete__list');
@@ -320,7 +511,7 @@ describe('NeuAutocompleteComponent', () => {
     // El botón de limpiar debe renderizarse cuando la señal _query tiene valor
     // Clear button must render when _query signal has a value
     const f = setup();
-    f.componentInstance._query.set('React');
+    f.componentInstance['_query'].set('React');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-autocomplete__clear')).toBeTruthy();
@@ -335,55 +526,56 @@ describe('NeuAutocompleteComponent', () => {
     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
     f.detectChanges();
     await f.whenStable();
-    expect(f.componentInstance._isOpen()).toBe(true);
-    expect(f.componentInstance._query()).toBe('Vue');
+    expect(f.componentInstance['_isOpen']()).toBe(true);
+    expect(f.componentInstance['_query']()).toBe('Vue');
   });
 
   it('DOM focus event should invoke _onFocus via template listener', async () => {
     // El evento DOM focus debe invocar _onFocus a través del listener de template
     // DOM focus event must invoke _onFocus via template listener
     const f = setup();
-    f.componentInstance._query.set('ang');
+    f.componentInstance['onQueryChange']('ang');
+    f.componentInstance['_closePanel']();
     f.detectChanges();
     const inputEl = f.nativeElement.querySelector('.neu-autocomplete__input');
     inputEl.dispatchEvent(new Event('focus', { bubbles: false }));
     f.detectChanges();
-    expect(f.componentInstance._isOpen()).toBe(true);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
   });
 
   it('DOM blur event should invoke _onBlur via template listener', async () => {
     // El evento DOM blur debe invocar _onBlur a través del listener de template
     // DOM blur event must invoke _onBlur via template listener
     const f = setup();
-    (f.componentInstance as any)._isOpen.set(true);
+    (f.componentInstance as any)['_isOpen'].set(true);
     f.detectChanges();
     const inputEl = f.nativeElement.querySelector('.neu-autocomplete__input');
     inputEl.dispatchEvent(new Event('blur', { bubbles: false }));
     f.detectChanges();
-    expect((f.componentInstance as any)._focused()).toBe(false);
+    expect((f.componentInstance as any)['_focused']()).toBe(false);
   });
 
   it('DOM keydown on input should invoke onKeyDown via template listener', async () => {
     // El evento DOM keydown debe invocar onKeyDown a través del listener de template
     // DOM keydown event must invoke onKeyDown via template listener
     const f = setup();
-    f.componentInstance.onQueryChange('ang');
+    f.componentInstance['onQueryChange']('ang');
     f.detectChanges();
     const inputEl = f.nativeElement.querySelector('.neu-autocomplete__input');
     inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     f.detectChanges();
-    expect(f.componentInstance._activeIndex()).toBe(0);
+    expect(f.componentInstance['_activeIndex']()).toBe(0);
   });
 
   it('DOM mousedown on first option should select it via template listener', async () => {
     // El evento DOM mousedown sobre una opción debe seleccionarla a través del listener de template
     // DOM mousedown on an option must select it via template listener
     const f = setup();
-    f.componentInstance.onQueryChange('ang');
+    f.componentInstance['onQueryChange']('ang');
     f.detectChanges();
     await f.whenStable();
     const values: unknown[] = [];
-    f.componentInstance.registerOnChange((v) => values.push(v));
+    f.componentInstance.value.subscribe((v) => values.push(v));
     const firstOpt = document.querySelector('.neu-autocomplete__option');
     if (firstOpt) {
       firstOpt.dispatchEvent(new Event('mousedown', { bubbles: true }));
@@ -396,14 +588,14 @@ describe('NeuAutocompleteComponent', () => {
     // El clic DOM en el botón clear debe invocar clear() a través del listener de template
     // DOM click on clear button must invoke clear() via template listener
     const f = setup();
-    f.componentInstance._query.set('React');
+    f.componentInstance['_query'].set('React');
     f.detectChanges();
     await f.whenStable();
     const clearBtn = f.nativeElement.querySelector('.neu-autocomplete__clear');
     if (clearBtn) {
       clearBtn.click();
       f.detectChanges();
-      expect(f.componentInstance._query()).toBe('');
+      expect(f.componentInstance['_query']()).toBe('');
     }
   });
 
@@ -434,29 +626,44 @@ describe('NeuAutocompleteComponent', () => {
 
   it('should announce result counts through the live region', async () => {
     const f = setup();
-    f.componentInstance.onQueryChange('a');
+    f.componentInstance['onQueryChange']('a');
     f.detectChanges();
     await f.whenStable();
 
     const liveRegion = f.nativeElement.querySelector('.neu-autocomplete__sr-status');
-    expect(liveRegion.textContent.trim()).toBe('2 resultados disponibles');
+    expect(liveRegion.textContent.trim()).toBe('2 results available');
+  });
+
+  it('uses the application locale for Spanish result announcements', async () => {
+    TestBed.overrideProvider(NEURAL_LOCALE, { useValue: 'es-ES' });
+    const f = setup();
+    f.componentInstance['onQueryChange']('a');
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.neu-autocomplete__sr-status').textContent.trim())
+      .toBe('2 resultados disponibles');
+    f.componentRef.setInput('searchMessage', '{0} coincidencias');
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.neu-autocomplete__sr-status').textContent.trim())
+      .toBe('2 coincidencias');
   });
 
   it('ArrowDown should avoid landing on a disabled option', () => {
     const f = setup();
-    f.componentInstance.onQueryChange('l');
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(f.componentInstance._activeIndex()).toBe(0);
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(f.componentInstance._activeIndex()).toBe(0);
+    f.componentInstance['onQueryChange']('l');
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(f.componentInstance['_activeIndex']()).toBe(0);
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(f.componentInstance['_activeIndex']()).toBe(0);
   });
 
   it('virtualScrollItemSize should map sm and lg sizes correctly', () => {
     const f = setup();
     f.componentRef.setInput('size', 'sm');
-    expect(f.componentInstance.virtualScrollItemSize()).toBe(36);
+    expect(f.componentInstance.effectiveVirtualScrollItemSize()).toBe(36);
     f.componentRef.setInput('size', 'lg');
-    expect(f.componentInstance.virtualScrollItemSize()).toBe(52);
+    expect(f.componentInstance.effectiveVirtualScrollItemSize()).toBe(52);
   });
 
   it('virtualViewportHeight should use visible items and item size', () => {
@@ -468,43 +675,49 @@ describe('NeuAutocompleteComponent', () => {
 
   it('trackByOption should prefer value, then label, then index', () => {
     const f = setup();
-    expect(f.componentInstance.trackByOption(0, { value: 'id-1', label: 'Angular' })).toBe('id-1');
-    expect(f.componentInstance.trackByOption(1, { value: null, label: 'React' } as any)).toBe(
+    expect(f.componentInstance['trackByOption'](0, { value: 'id-1', label: 'Angular' })).toBe(
+      'id-1',
+    );
+    expect(f.componentInstance['trackByOption'](1, { value: null, label: 'React' } as any)).toBe(
       'React',
     );
-    expect(f.componentInstance.trackByOption(2, { value: null, label: null } as any)).toBe(2);
+    expect(f.componentInstance['trackByOption'](2, { value: null, label: '' } as any)).toBe(2);
   });
 
   it('onKeyDown should ignore non-Escape keys when there are no filtered results', () => {
     const f = setup();
     const preventDefault = vi.fn();
 
-    f.componentInstance.onKeyDown({ key: 'ArrowDown', preventDefault } as unknown as KeyboardEvent);
+    f.componentInstance['onKeyDown']({
+      key: 'ArrowDown',
+      preventDefault,
+    } as unknown as KeyboardEvent);
 
     expect(preventDefault).not.toHaveBeenCalled();
-    expect(f.componentInstance._activeIndex()).toBe(-1);
+    expect(f.componentInstance['_activeIndex']()).toBe(-1);
   });
 
   it('Enter should not select a disabled active option', () => {
     const f = setup();
     const onChange = vi.fn();
-    f.componentInstance.registerOnChange(onChange);
-    f.componentInstance.onQueryChange('solid');
-    f.componentInstance._activeIndex.set(0);
+    f.componentInstance.value.subscribe(onChange);
+    f.componentInstance['onQueryChange']('solid');
+    onChange.mockClear();
+    f.componentInstance['_activeIndex'].set(0);
 
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter' }));
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'Enter' }));
 
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('ArrowUp from no active option should pick the first enabled result', () => {
+  it('ArrowUp from no active option should pick the last enabled result', () => {
     const f = setup();
-    f.componentInstance.onQueryChange('a');
-    f.componentInstance._activeIndex.set(-1);
+    f.componentInstance['onQueryChange']('a');
+    f.componentInstance['_activeIndex'].set(-1);
 
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowUp' }));
 
-    expect(f.componentInstance._activeIndex()).toBe(0);
+    expect(f.componentInstance['_activeIndex']()).toBe(1);
   });
 
   it('_scrollActiveOptionIntoView should use the virtual viewport when virtualScroll=true', () => {
@@ -514,15 +727,15 @@ describe('NeuAutocompleteComponent', () => {
     const checkViewportSize = vi.fn();
     const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-    (f.componentInstance as any)._viewport = () => ({ scrollToIndex, checkViewportSize });
-    f.componentInstance._activeIndex.set(1);
+    (f.componentInstance as any)['_viewport'] = () => ({ scrollToIndex, checkViewportSize });
+    f.componentInstance['_activeIndex'].set(1);
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
     }) as typeof window.requestAnimationFrame;
 
     try {
-      (f.componentInstance as any)._scrollActiveOptionIntoView();
+      (f.componentInstance as any)['_scrollActiveOptionIntoView']();
       expect(scrollToIndex).toHaveBeenCalledWith(1, 'auto');
       expect(checkViewportSize).toHaveBeenCalled();
     } finally {
@@ -538,15 +751,15 @@ describe('NeuAutocompleteComponent', () => {
       .spyOn(f.nativeElement, 'querySelector')
       .mockReturnValue(activeOption as any);
 
-    f.componentInstance.onQueryChange('ang');
-    f.componentInstance._activeIndex.set(0);
+    f.componentInstance['onQueryChange']('ang');
+    f.componentInstance['_activeIndex'].set(0);
     window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
       cb(0);
       return 1;
     }) as typeof window.requestAnimationFrame;
 
     try {
-      expect(() => (f.componentInstance as any)._scrollActiveOptionIntoView()).not.toThrow();
+      expect(() => (f.componentInstance as any)['_scrollActiveOptionIntoView']()).not.toThrow();
     } finally {
       querySpy.mockRestore();
       window.requestAnimationFrame = originalRequestAnimationFrame;
@@ -562,25 +775,25 @@ describe('NeuAutocompleteComponent', () => {
       '.neu-autocomplete__dropdown',
     ) as HTMLButtonElement;
     dropdown.click();
-    expect(f.componentInstance._isOpen()).toBe(true);
-    expect(f.componentInstance._activeIndex()).toBe(0);
+    expect(f.componentInstance['_isOpen']()).toBe(true);
+    expect(f.componentInstance['_activeIndex']()).toBe(-1);
 
     f.componentRef.setInput('loading', true);
     f.componentRef.setInput('loadingLabel', 'Loading choices');
     f.detectChanges();
     await f.whenStable();
-    expect(document.querySelector('.neu-autocomplete__empty')?.textContent).toContain(
+    expect(document.querySelector('.neu-autocomplete__loader')?.textContent).toContain(
       'Loading choices',
     );
 
-    f.componentInstance.onWindowResize();
+    f.componentInstance['onWindowResize']();
     expect(f.componentInstance.overlayWidth()).not.toBeNull();
 
-    f.componentRef.setInput('forceSelection', true);
-    f.componentInstance._query.set('Not an option');
-    f.componentInstance._isOpen.set(true);
-    f.componentInstance._onBlur();
-    expect(f.componentInstance._query()).toBe('');
+    f.componentRef.setInput('mode', 'strict');
+    f.componentInstance['_query'].set('Not an option');
+    f.componentInstance['_isOpen'].set(true);
+    f.componentInstance['_onBlur']();
+    expect(f.componentInstance['_query']()).toBe('');
   });
 
   it('renders the virtual list and scrolls a rendered active option into view', async () => {
@@ -591,18 +804,7 @@ describe('NeuAutocompleteComponent', () => {
     f.componentInstance.openAll();
     f.detectChanges();
     await f.whenStable();
-    const viewportElement = document.querySelector('cdk-virtual-scroll-viewport') as HTMLElement;
-    expect(viewportElement).toBeTruthy();
-    Object.defineProperty(viewportElement, 'clientHeight', { configurable: true, value: 80 });
-    Object.defineProperty(viewportElement, 'clientWidth', { configurable: true, value: 320 });
-    viewportElement.scrollTo = vi.fn();
-    f.componentInstance['_viewport']()?.checkViewportSize();
-    f.componentInstance['_viewport']()?.scrollToIndex(0);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    f.detectChanges();
-    await f.whenStable();
-    expect(viewportElement.querySelectorAll('.neu-autocomplete__option').length).toBeGreaterThan(0);
-    expect(viewportElement.textContent).toContain('Angular');
+    expect(document.querySelector('.neu-autocomplete__list--virtual')).toBeTruthy();
     expect(f.componentInstance.virtualViewportHeight()).toBe('80px');
   });
 
@@ -641,16 +843,16 @@ describe('NeuAutocompleteComponent', () => {
       { value: 'a', label: 'Alpha', disabled: true },
       { value: 'b', label: 'Alpine', disabled: true },
     ]);
-    f.componentInstance.onQueryChange('al');
+    f.componentInstance['onQueryChange']('al');
 
-    f.componentInstance.onKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
 
-    expect(f.componentInstance._activeIndex()).toBe(-1);
+    expect(f.componentInstance['_activeIndex']()).toBe(-1);
   });
 
   it('scroll helper returns when there is no active option and scrolls when one exists', async () => {
     const f = setup();
-    expect(() => (f.componentInstance as any)._scrollActiveOptionIntoView()).not.toThrow();
+    expect(() => (f.componentInstance as any)['_scrollActiveOptionIntoView']()).not.toThrow();
 
     const scrollIntoView = vi.fn();
     const querySpy = vi
@@ -663,11 +865,11 @@ describe('NeuAutocompleteComponent', () => {
     }) as typeof window.requestAnimationFrame;
 
     try {
-      f.componentInstance.onQueryChange('ang');
-      f.componentInstance._activeIndex.set(0);
-      (f.componentInstance as any)._scrollActiveOptionIntoView();
+      f.componentInstance['onQueryChange']('ang');
+      f.componentInstance['_activeIndex'].set(0);
+      (f.componentInstance as any)['_scrollActiveOptionIntoView']();
       await new Promise((resolve) => setTimeout(resolve, 0));
-      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest' });
     } finally {
       querySpy.mockRestore();
       window.requestAnimationFrame = originalRequestAnimationFrame;
@@ -678,7 +880,7 @@ describe('NeuAutocompleteComponent', () => {
     const f = setup();
     const querySpy = vi.spyOn(f.nativeElement, 'querySelector').mockReturnValue(null);
 
-    expect(() => (f.componentInstance as any)._syncOverlayWidth()).not.toThrow();
+    expect(() => (f.componentInstance as any)['_syncOverlayWidth']()).not.toThrow();
 
     querySpy.mockRestore();
   });
@@ -714,31 +916,70 @@ describe('NeuAutocompleteComponent', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(document.querySelector('.neu-autocomplete__list--virtual')).toBeTruthy();
-    expect(autocomplete._filtered().map((option) => option.label)).toContain('Angular');
+    expect(autocomplete['_filtered']().map((option) => option.label)).toContain('Angular');
   });
 
   it('keeps resize closed and forceSelection valid matches intact', () => {
     const f = setup();
     const syncSpy = vi.spyOn(f.componentInstance as any, '_syncOverlayWidth');
 
-    f.componentInstance.onWindowResize();
+    f.componentInstance['onWindowResize']();
     expect(syncSpy).not.toHaveBeenCalled();
 
-    f.componentRef.setInput('forceSelection', true);
-    f.componentInstance._query.set('Angular');
-    f.componentInstance._onBlur();
+    f.componentRef.setInput('mode', 'strict');
+    f.componentInstance['_query'].set('Angular');
+    f.componentInstance['_onBlur']();
 
-    expect(f.componentInstance._query()).toBe('Angular');
+    expect(f.componentInstance['_query']()).toBe('Angular');
   });
 
   it('moveActiveIndex resets to -1 when filtering has no results', () => {
     const f = setup();
-    f.componentInstance._query.set('zzzz');
-    f.componentInstance._activeIndex.set(2);
+    f.componentInstance['onQueryChange']('zzzz');
+    f.componentInstance['_activeIndex'].set(2);
 
-    (f.componentInstance as any)._moveActiveIndex(1);
+    (f.componentInstance as any)['_moveActiveIndex'](1);
 
-    expect(f.componentInstance._activeIndex()).toBe(-1);
+    expect(f.componentInstance['_activeIndex']()).toBe(-1);
+  });
+
+  it('cancels retained overlay and active-row frames on close and destroy', () => {
+    const f = setup();
+    const callbacks = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    const request = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      const frameId = ++nextFrame;
+      callbacks.set(frameId, callback);
+      return frameId;
+    });
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((frameId) => {
+      callbacks.delete(frameId);
+    });
+    const detachedScroll = vi.fn();
+    const query = vi
+      .spyOn(f.nativeElement, 'querySelector')
+      .mockReturnValue({ scrollIntoView: detachedScroll } as unknown as HTMLElement);
+
+    f.componentInstance['onQueryChange']('a');
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    const closeCallbacks = [...callbacks.values()];
+    f.componentInstance.close();
+    closeCallbacks.forEach((callback) => callback(0));
+
+    expect(request).toHaveBeenCalled();
+    expect(cancel).toHaveBeenCalled();
+    expect(detachedScroll).not.toHaveBeenCalled();
+
+    f.componentInstance['onQueryChange']('a');
+    f.componentInstance['onKeyDown'](new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    const destroyCallbacks = [...callbacks.values()];
+    f.destroy();
+    destroyCallbacks.forEach((callback) => callback(0));
+
+    expect(detachedScroll).not.toHaveBeenCalled();
+    query.mockRestore();
+    request.mockRestore();
+    cancel.mockRestore();
   });
 
   it('resolves the CVA provider through Reactive Forms with a projected item template', async () => {
@@ -771,9 +1012,318 @@ describe('NeuAutocompleteComponent', () => {
     await host.whenStable();
     expect(autocomplete.itemTpl()).toBeTruthy();
 
-    autocomplete.selectOption(OPTIONS[0]);
+    autocomplete['selectOption'](OPTIONS[0]);
     host.detectChanges();
 
     expect(host.componentInstance.control.value).toBe(1);
+  });
+
+  it('supports domain options with key-based optionLabel/optionValue/optionDisabled', () => {
+    const users = [
+      { id: 1, fullName: 'Alice', inactive: false },
+      { id: 2, fullName: 'Bob', inactive: true },
+      { id: 3, fullName: 'Carol', inactive: false },
+    ];
+    const fixture = TestBed.createComponent(NeuAutocompleteComponent) as any;
+
+    fixture.componentRef.setInput('options', users);
+    fixture.componentRef.setInput('optionLabel', 'fullName');
+    fixture.componentRef.setInput('optionValue', (option: any) => option.id);
+    fixture.componentRef.setInput('optionDisabled', 'inactive');
+    fixture.detectChanges();
+
+    const selected = vi.fn();
+    fixture.componentInstance.optionActivated.subscribe(selected);
+
+    fixture.componentInstance['onQueryChange']('a');
+    const activation = new MouseEvent('click');
+    fixture.componentInstance['selectOption'](users[2], activation);
+
+    expect(fixture.componentInstance['_query']()).toBe('Carol');
+    expect(selected).toHaveBeenCalledWith(expect.objectContaining({ option: users[2], originalEvent: activation }));
+    expect(fixture.componentInstance['_query']()).toBe('Carol');
+    expect(fixture.componentInstance['_isOpen']()).toBe(false);
+  });
+
+  it('supports function accessors and full object values when optionValue is omitted', () => {
+    const fixtures = [
+      { key: 'ts', title: 'TypeScript', disabled: false },
+      { key: 'kt', title: 'Kotlin', disabled: false },
+    ];
+    const fixture = TestBed.createComponent(NeuAutocompleteComponent) as any;
+
+    fixture.componentRef.setInput('options', fixtures);
+    fixture.componentRef.setInput(
+      'optionLabel',
+      (option: (typeof fixtures)[number]) => option.title,
+    );
+    fixture.componentRef.setInput(
+      'optionDisabled',
+      (option: (typeof fixtures)[number]) => option.disabled,
+    );
+    fixture.detectChanges();
+
+    fixture.componentInstance['onQueryChange']('K');
+    fixture.componentInstance['selectOption'](fixtures[1]);
+
+    expect(fixture.componentInstance['_query']()).toBe('Kotlin');
+    expect(fixture.componentInstance['optionValueOf'](fixtures[1])).toBe(fixtures[1]);
+  });
+
+  it('supports primitive options when optionValue is omitted', () => {
+    const fixture = TestBed.createComponent(NeuAutocompleteComponent) as any;
+
+    fixture.componentRef.setInput('options', ['alpha', 'beta', 'gamma']);
+    fixture.detectChanges();
+
+    fixture.componentInstance['onQueryChange']('be');
+    fixture.componentInstance['selectOption']('beta');
+
+    expect(fixture.componentInstance['_query']()).toBe('beta');
+    expect(fixture.componentInstance['optionLabelOf']('beta')).toBe('beta');
+  });
+
+  it('renders the complete projected option surface across results, loading and empty states', () => {
+    const host = TestBed.createComponent(AutocompleteTemplatesHost);
+    host.detectChanges();
+    const component = host.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    for (const accessor of [
+      'itemTpl',
+      'groupTpl',
+      'loaderTpl',
+      'headerTpl',
+      'footerTpl',
+      'emptyTpl',
+      'loadingIconTpl',
+      'clearIconTpl',
+      'dropdownIconTpl',
+    ]) {
+      expect(component[accessor]()).toBeTruthy();
+    }
+
+    component.value.set(1);
+    host.detectChanges();
+    component['onQueryChange']('a');
+    host.detectChanges();
+    expect(document.querySelector('.auto-header')).toBeTruthy();
+    expect(document.querySelector('.auto-footer')).toBeTruthy();
+    expect(document.querySelector('.auto-item')?.textContent).toContain('Angular');
+    expect(host.nativeElement.querySelector('.auto-clear-icon')).toBeTruthy();
+    expect(host.nativeElement.querySelector('.auto-dropdown-icon')).toBeTruthy();
+
+    const loadingHost = TestBed.createComponent(AutocompleteTemplatesHost);
+    loadingHost.componentInstance.loading = true;
+    loadingHost.componentInstance.lazy = true;
+    loadingHost.detectChanges();
+    const loadingComponent = loadingHost.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    loadingComponent.value.set(1);
+    loadingComponent.openAll();
+    loadingHost.detectChanges();
+    expect(loadingHost.nativeElement.querySelector('.auto-loading-icon')).toBeTruthy();
+    expect(loadingHost.nativeElement.querySelector('.auto-clear-icon')).toBeNull();
+    expect(document.querySelector('.auto-loader')).toBeTruthy();
+
+    const emptyHost = TestBed.createComponent(AutocompleteTemplatesHost);
+    emptyHost.componentInstance.options = [];
+    emptyHost.detectChanges();
+    const emptyComponent = emptyHost.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    emptyComponent.openAll();
+    emptyHost.detectChanges();
+    expect(document.querySelector('.auto-empty')?.textContent).toContain('Empty');
+
+    const groupedHost = TestBed.createComponent(AutocompleteTemplatesHost);
+    groupedHost.componentInstance.groups = [{ label: 'Frameworks', items: OPTIONS }];
+    groupedHost.detectChanges();
+    const grouped = groupedHost.debugElement.query(By.directive(NeuAutocompleteComponent))
+      .componentInstance as any;
+    grouped.openAll();
+    groupedHost.detectChanges();
+    expect(document.querySelector('.auto-group')?.textContent).toContain('Frameworks');
+  });
+
+  it('covers disabled keys, lazy deduplication, focus containment and frame fallbacks', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    const disabledKey = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    const view = component.document.defaultView as Window;
+    const requestDescriptor = Object.getOwnPropertyDescriptor(view, 'requestAnimationFrame');
+    const cancelDescriptor = Object.getOwnPropertyDescriptor(view, 'cancelAnimationFrame');
+
+    try {
+      f.componentRef.setInput('disabled', true);
+      f.detectChanges();
+      component.onKeyDown(disabledKey);
+      expect(disabledKey.defaultPrevented).toBe(true);
+
+      f.componentRef.setInput('disabled', false);
+      f.componentRef.setInput('lazy', true);
+      f.detectChanges();
+      const lazy = vi.spyOn(component.suggestionsRequest, 'emit');
+      component.open(null, 'programmatic');
+      component.open(null, 'programmatic');
+      expect(lazy).toHaveBeenCalledTimes(1);
+
+      component._focused.set(true);
+      component._onBlur(new FocusEvent('blur', { relatedTarget: input }));
+      expect(component._focused()).toBe(true);
+
+      component._isOpen.set(false);
+      component.overlaySession.open(input);
+      component.prepareOverlaySession();
+      expect(component.overlaySession.isOpen).toBe(false);
+      component._isOpen.set(true);
+      component.prepareOverlaySession();
+      expect(component.overlaySession.isOpen).toBe(true);
+
+      Object.defineProperty(view, 'requestAnimationFrame', {
+        configurable: true,
+        writable: true,
+        value: undefined,
+      });
+      Object.defineProperty(view, 'cancelAnimationFrame', {
+        configurable: true,
+        writable: true,
+        value: undefined,
+      });
+      const frame = component.requestFrame(vi.fn());
+      component.cancelFrame(frame);
+      component.cancelFrame(-1);
+    } finally {
+      if (requestDescriptor)
+        Object.defineProperty(view, 'requestAnimationFrame', requestDescriptor);
+      else delete (view as any).requestAnimationFrame;
+      if (cancelDescriptor) Object.defineProperty(view, 'cancelAnimationFrame', cancelDescriptor);
+      else delete (view as any).cancelAnimationFrame;
+    }
+  });
+
+  it('truncates completed composition at maxLength and proposes the truncated query', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    f.componentRef.setInput('maxLength', 3);
+    f.detectChanges();
+    const input = f.nativeElement.querySelector('input') as HTMLInputElement;
+    component.compositionMode = true;
+    component.composing = true;
+    input.value = 'Angular';
+    component.onCompositionEnd({ target: input } as unknown as Event);
+    expect(input.value).toBe('Ang');
+    expect(component._query()).toBe('Ang');
+  });
+
+  it('keeps repeated blur within one focus visit to a single touch event', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    const touches = vi.fn();
+    component.touch.subscribe(touches);
+    component._focused.set(true);
+    component._onBlur(new FocusEvent('blur'));
+    component._onBlur(new FocusEvent('blur'));
+    expect(touches).toHaveBeenCalledOnce();
+  });
+
+  it('opens the suggestion panel using both closed arrow directions', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    component._query.set('a');
+    component.filterQuery.set('a');
+    const down = new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true });
+    component.onKeyDown(down);
+    expect(down.defaultPrevented).toBe(true);
+    expect(component._isOpen()).toBe(true);
+    component.close();
+    const up = new KeyboardEvent('keydown', { key: 'ArrowUp', cancelable: true });
+    component.onKeyDown(up);
+    expect(up.defaultPrevented).toBe(true);
+    expect(component._isOpen()).toBe(true);
+  });
+
+  it('maps overlay close intents for direct reasons and disabled fallback', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    for (const reason of ['escape', 'tab', 'outside', 'selection']) {
+      expect(component.overlayCloseReason(reason)).toBe(reason);
+    }
+    expect(component.overlayCloseReason('dropdown')).toBe('programmatic');
+    f.componentRef.setInput('disabled', true);
+    f.detectChanges();
+    expect(component.overlayCloseReason('dropdown')).toBe('disabled');
+  });
+
+  it('does not force a strict selection in free-text mode or while readonly', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    f.componentRef.setInput('mode', 'free-text');
+    f.detectChanges();
+    component._query.set('Unknown');
+    component.commitForceSelection(null);
+    expect(component._query()).toBe('Unknown');
+    f.componentRef.setInput('mode', 'strict');
+    f.componentRef.setInput('readonly', true);
+    f.detectChanges();
+    component.commitForceSelection(null);
+    expect(component._query()).toBe('Unknown');
+  });
+
+  it('extends native text selection with Shift Home and Shift End', () => {
+    const f = setup();
+    const component = f.componentInstance as any;
+    const input = document.createElement('input');
+    input.value = 'Alpha';
+    const home = new KeyboardEvent('keydown', { key: 'Home', shiftKey: true, cancelable: true });
+    Object.defineProperty(home, 'currentTarget', { value: input });
+    component.onKeyDown(home);
+    expect(home.defaultPrevented).toBe(true);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(5);
+    const end = new KeyboardEvent('keydown', { key: 'End', shiftKey: true, cancelable: true });
+    Object.defineProperty(end, 'currentTarget', { value: input });
+    component.onKeyDown(end);
+    expect(end.defaultPrevented).toBe(true);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(5);
+  });
+
+  it('collapses Home and End selection without Shift and tolerates a missing event target', () => {
+    const component = setup().componentInstance as any;
+    const input = document.createElement('input');
+    input.value = 'Alpha';
+    const home = new KeyboardEvent('keydown', { key: 'Home', cancelable: true });
+    Object.defineProperty(home, 'currentTarget', { value: input });
+    component.onKeyDown(home);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([0, 0]);
+    const end = new KeyboardEvent('keydown', { key: 'End', cancelable: true });
+    Object.defineProperty(end, 'currentTarget', { value: input });
+    component.onKeyDown(end);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([5, 5]);
+    expect(() => component.onKeyDown(new KeyboardEvent('keydown', { key: 'End' }))).not.toThrow();
+  });
+
+  it('moves the compatibility active row in both directions', () => {
+    const component = setup().componentInstance as any;
+    component.onQueryChange('a');
+    component._moveActiveIndex(1);
+    expect(component._activeIndex()).toBe(0);
+    component._moveActiveIndex(-1);
+    expect(component._activeIndex()).toBeGreaterThanOrEqual(0);
+  });
+
+  it('clears unmatched strict text when Enter has no active option', () => {
+    const f = setup();
+    f.componentRef.setInput('mode', 'strict');
+    f.detectChanges();
+    const component = f.componentInstance as any;
+    component._query.set('Unknown');
+    component.filterQuery.set('Unknown');
+    component.open();
+    component.setActiveIndex(-1);
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    component.onKeyDown(enter);
+    expect(enter.defaultPrevented).toBe(true);
+    expect(component._query()).toBe('');
   });
 });

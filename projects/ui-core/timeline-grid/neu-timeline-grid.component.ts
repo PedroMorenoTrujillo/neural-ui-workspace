@@ -1,13 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  output,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, computed, input, output, ViewEncapsulation } from '@angular/core';
+import type { NeuDensity } from '@neural-ui/core';
 
-export type NeuTimelineGridItemVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuTimelineGridItemTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info';
 
 export interface NeuTimelineGridColumn {
   id: string;
@@ -22,14 +16,14 @@ export interface NeuTimelineGridItem {
   span?: number;
   subtitle?: string;
   meta?: string;
-  variant?: NeuTimelineGridItemVariant;
+  tone?: NeuTimelineGridItemTone;
 }
 
 export interface NeuTimelineGridRow {
   id: string;
   label: string;
   description?: string;
-  items: NeuTimelineGridItem[];
+  items: readonly NeuTimelineGridItem[];
 }
 
 export interface NeuTimelineGridSlotSelection {
@@ -41,14 +35,14 @@ export interface NeuTimelineGridSlotSelection {
   selector: 'neu-timeline-grid',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.neu-timeline-grid--compact]': 'compact()',
+    '[class.neu-timeline-grid--density-compact]': 'density() === "compact"',
+    '[class.neu-timeline-grid--density-relaxed]': 'density() === "relaxed"',
     '[class.neu-timeline-grid--sticky-labels]': 'stickyLabels()',
     '[style.--neu-timeline-grid-min-column-width]': 'minColumnWidth()',
   },
   template: `
-    <div class="neu-timeline-grid">
+    <div class="neu-timeline-grid" tabindex="0">
       <div class="neu-timeline-grid__header">
         <div class="neu-timeline-grid__corner" aria-hidden="true"></div>
         <div
@@ -81,25 +75,16 @@ export interface NeuTimelineGridSlotSelection {
               [style.gridTemplateColumns]="gridTemplateColumns()"
             >
               @for (column of columns(); track column.id) {
-                @if (isSlotOccupied(row, column.id)) {
-                  <div
-                    class="neu-timeline-grid__slot neu-timeline-grid__slot--occupied"
-                    [class.neu-timeline-grid__slot--selected]="isSlotSelected(row.id, column.id)"
-                    [style.gridColumn]="slotGridColumn(column.id)"
-                    aria-hidden="true"
-                  ></div>
-                } @else {
-                  <button
-                    type="button"
-                    class="neu-timeline-grid__slot neu-timeline-grid__slot-button"
-                    [class.neu-timeline-grid__slot--selected]="isSlotSelected(row.id, column.id)"
-                    [style.gridColumn]="slotGridColumn(column.id)"
-                    [attr.aria-label]="slotAriaLabel(row, column)"
-                    [attr.aria-pressed]="isSlotSelected(row.id, column.id)"
-                    [attr.data-slot-key]="slotKey(row.id, column.id)"
-                    (click)="onSlotClick(row.id, column.id)"
-                  ></button>
-                }
+                <button
+                  type="button"
+                  class="neu-timeline-grid__slot neu-timeline-grid__slot-button"
+                  [class.neu-timeline-grid__slot--selected]="isSlotSelected(row.id, column.id)"
+                  [style.gridColumn]="slotGridColumn(column.id)"
+                  [attr.aria-label]="slotAriaLabel(row, column)"
+                  [attr.aria-pressed]="isSlotSelected(row.id, column.id)"
+                  [attr.data-slot-key]="slotKey(row.id, column.id)"
+                  (click)="onSlotClick(row.id, column.id)"
+                ></button>
               }
 
               @for (item of validItems(row); track item.id) {
@@ -131,9 +116,9 @@ export interface NeuTimelineGridSlotSelection {
   styleUrl: './neu-timeline-grid.component.scss',
 })
 export class NeuTimelineGridComponent {
-  readonly columns = input<NeuTimelineGridColumn[]>([]);
-  readonly rows = input<NeuTimelineGridRow[]>([]);
-  readonly compact = input<boolean>(false);
+  readonly columns = input<readonly NeuTimelineGridColumn[]>([]);
+  readonly rows = input<readonly NeuTimelineGridRow[]>([]);
+  readonly density = input<NeuDensity>('normal');
   readonly stickyLabels = input<boolean>(true);
   readonly minColumnWidth = input<string>('112px');
   readonly selectedItemId = input<string | null>(null);
@@ -142,10 +127,22 @@ export class NeuTimelineGridComponent {
   readonly itemClick = output<NeuTimelineGridItem>();
   readonly slotClick = output<NeuTimelineGridSlotSelection>();
 
-  readonly _columnIndexMap = computed(() => {
+  private readonly _columnIndexMap = computed(() => {
     const indexMap = new Map<string, number>();
     this.columns().forEach((column, index) => indexMap.set(column.id, index + 1));
     return indexMap;
+  });
+
+  private readonly _validItemsByRow = computed(() => {
+    const columns = this._columnIndexMap();
+    const projected = new Map<string, NeuTimelineGridItem[]>();
+    for (const row of this.rows()) {
+      projected.set(
+        row.id,
+        row.items.filter((item) => columns.has(item.start)),
+      );
+    }
+    return projected;
   });
 
   readonly gridTemplateColumns = computed(
@@ -154,13 +151,16 @@ export class NeuTimelineGridComponent {
   );
 
   validItems(row: NeuTimelineGridRow): NeuTimelineGridItem[] {
-    const indexMap = this._columnIndexMap();
-    return row.items.filter((item) => indexMap.has(item.start));
+    return this._validItemsByRow().get(row.id) ?? [];
   }
 
   itemGridColumn(item: NeuTimelineGridItem): string {
     const start = this._columnIndexMap().get(item.start) ?? 1;
-    const span = Math.max(1, item.span ?? 1);
+    const requested = item.span ?? 1;
+    const span = Math.min(
+      Math.max(1, Number.isFinite(requested) ? Math.floor(requested) : 1),
+      Math.max(1, this.columns().length - start + 1),
+    );
     return `${start} / span ${span}`;
   }
 
@@ -169,20 +169,9 @@ export class NeuTimelineGridComponent {
     return `${start} / span 1`;
   }
 
-  isSlotOccupied(row: NeuTimelineGridRow, columnId: string): boolean {
-    const columnIndex = this._columnIndexMap().get(columnId);
-    if (columnIndex === undefined) return false;
-
-    return this.validItems(row).some((item) => {
-      const start = this._columnIndexMap().get(item.start);
-      if (start === undefined) return false;
-      return columnIndex >= start && columnIndex < start + Math.max(1, item.span ?? 1);
-    });
-  }
-
   itemClass(item: NeuTimelineGridItem): string {
     const selectedClass = this.isItemSelected(item.id) ? ' neu-timeline-grid__item--selected' : '';
-    return `neu-timeline-grid__item neu-timeline-grid__item--${item.variant ?? 'default'}${selectedClass}`;
+    return `neu-timeline-grid__item neu-timeline-grid__item--${item.tone ?? 'neutral'}${selectedClass}`;
   }
 
   itemAriaLabel(row: NeuTimelineGridRow, item: NeuTimelineGridItem): string {

@@ -1,26 +1,22 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
-  computed,
-  inject,
   input,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
 
-export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuSpinnerTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 
 /**
  * NeuralUI Spinner Component
  *
  * Indicador de carga circular animado para estados de espera.
- * Permite personalizar color via severity o color CSS directo.
+ * Permite personalizar color mediante tone o color CSS directo.
  *
  * Uso básico:
  *   <neu-spinner />
  *
- * Con severity:
- *   <neu-spinner severity="success" size="48px" />
+ * Con tone:
+ *   <neu-spinner tone="success" size="48px" />
  *
  * Con color personalizado:
  *   <neu-spinner color="#ff6b35" strokeWidth="6" />
@@ -29,12 +25,11 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   selector: 'neu-spinner',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'neu-spinner-host', role: 'status', 'aria-live': 'polite' },
   template: `
     <svg
       class="neu-spinner"
-      [class]="'neu-spinner--' + severity()"
+      [class]="'neu-spinner--' + tone()"
       [style.width]="size()"
       [style.height]="size()"
       [style.animation-duration]="animationDuration()"
@@ -68,12 +63,10 @@ export type NeuSpinnerSeverity = 'primary' | 'success' | 'warning' | 'danger' | 
   styleUrl: './neu-spinner.component.scss',
 })
 export class NeuSpinnerComponent {
-  private readonly _document = inject(DOCUMENT);
+  /** Intención semántica / Semantic intent */
+  tone = input<NeuSpinnerTone>('brand');
 
-  /** Variante de color semántica / Semantic color variant */
-  severity = input<NeuSpinnerSeverity>('primary');
-
-  /** Color CSS directo — sobreescribe severity / Direct CSS color — overrides severity */
+  /** Color CSS directo — sobreescribe tone / Direct CSS color — overrides tone */
   color = input<string>('');
 
   /** Grosor del trazo SVG (unidades SVG) / SVG stroke width (SVG units) */
@@ -89,20 +82,6 @@ export class NeuSpinnerComponent {
   label = input<string>('');
 
   /** Texto accesible cuando no se muestra label / Accessible text when label is not displayed */
-  ariaLabel = input<string>(this._localizedDefault('Loading...', 'Cargando...'));
+  ariaLabel = input<string>('Loading...');
 
-  readonly _severityColor = computed(() => {
-    const map: Record<NeuSpinnerSeverity, string> = {
-      primary: 'var(--neu-primary)',
-      success: 'var(--neu-success)',
-      warning: 'var(--neu-warning)',
-      danger: 'var(--neu-danger)',
-      info: 'var(--neu-info)',
-    };
-    return map[this.severity()];
-  });
-
-  private _localizedDefault(english: string, spanish: string): string {
-    return this._document.documentElement.lang.toLowerCase().startsWith('es') ? spanish : english;
-  }
 }

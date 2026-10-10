@@ -5,11 +5,15 @@
 
 .neu-chip {
   display: inline-flex;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  box-sizing: border-box;
   align-items: center;
   gap: 6px;
   font-family: var(--neu-font-sans);
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   cursor: pointer;
   border: 1.5px solid transparent;
   transition:
@@ -38,32 +42,32 @@
     border-radius: var(--neu-radius-full);
   }
 
-  // ---- Variantes / Variants ----
-  &--default {
+  // ---- Tonos / Tones ----
+  &--neutral {
     background: var(--neu-surface-2);
     color: var(--neu-text);
     border-color: var(--neu-border);
 
-    &:hover:not(.neu-chip--disabled) {
+    &:hover:not(.neu-chip--disabled):not(.neu-chip--selected) {
       background: var(--neu-surface-3);
       border-color: var(--neu-border-hover);
     }
 
     &.neu-chip--selected {
-      background: var(--neu-primary-100);
-      color: var(--neu-primary);
-      border-color: var(--neu-primary);
+      background: var(--neu-primary-solid, var(--neu-primary));
+      color: var(--neu-primary-solid-fg, var(--neu-primary-fg));
+      border-color: var(--neu-primary-solid, var(--neu-primary));
     }
   }
 
-  &--primary {
+  &--brand {
     background: var(--neu-primary-50);
-    color: var(--neu-primary-dark, var(--neu-primary));
+    color: var(--neu-text);
     border-color: color-mix(in srgb, var(--neu-primary-dark, var(--neu-primary)) 28%, transparent);
 
-    &:hover:not(.neu-chip--disabled) {
+    &:hover:not(.neu-chip--disabled):not(.neu-chip--selected) {
       background: var(--neu-primary-100);
-      color: var(--neu-primary-dark, var(--neu-primary));
+      color: var(--neu-text);
     }
 
     &.neu-chip--selected {
@@ -79,8 +83,19 @@
     border-color: transparent;
 
     &.neu-chip--selected {
-      background: var(--neu-success);
-      color: var(--neu-primary-fg);
+      background: var(--neu-success-text);
+      color: var(--neu-surface);
+    }
+  }
+
+  &--info {
+    background: var(--neu-info-bg);
+    color: var(--neu-info-text);
+    border-color: transparent;
+
+    &.neu-chip--selected {
+      background: var(--neu-info-text);
+      color: var(--neu-surface);
     }
   }
 
@@ -90,8 +105,8 @@
     border-color: transparent;
 
     &.neu-chip--selected {
-      background: var(--neu-warning);
-      color: var(--neu-primary-fg);
+      background: var(--neu-warning-text);
+      color: var(--neu-surface);
     }
   }
 
@@ -101,8 +116,8 @@
     border-color: transparent;
 
     &.neu-chip--selected {
-      background: var(--neu-error);
-      color: var(--neu-primary-fg);
+      background: var(--neu-error-text);
+      color: var(--neu-surface);
     }
   }
 
@@ -116,42 +131,6 @@
   }
 }
 
-html[data-theme='dark'] {
-  .neu-chip--default {
-    color: #f2f7fb;
-    background: #21262d;
-    border-color: #6e7681;
-  }
-
-  .neu-chip--primary {
-    color: #e8f4ff;
-    background: #0b3b74;
-    border-color: #65b7ff;
-  }
-
-  .neu-chip--success {
-    color: #d7fbe8;
-    background: #0f5132;
-    border-color: #55d98c;
-  }
-
-  .neu-chip--warning {
-    color: #fff4cc;
-    background: #6b4e00;
-    border-color: #facc15;
-  }
-
-  .neu-chip--danger {
-    color: #ffe2e2;
-    background: #7f1d1d;
-    border-color: #f87171;
-  }
-
-  .neu-chip--warning.neu-chip--selected {
-    background: #a16207;
-    color: #ffffff;
-  }
-}
 
 // ---- Botón de cierre / Close button ----
 .neu-chip__remove {

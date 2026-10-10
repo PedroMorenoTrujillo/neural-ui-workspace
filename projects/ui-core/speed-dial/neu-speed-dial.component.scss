@@ -1,17 +1,260 @@
-.neu-speed-dial-host { display: inline-block; }
-.neu-speed-dial { position: relative; display: inline-grid; place-items: center; }
-.neu-speed-dial__trigger, .neu-speed-dial__action { display: inline-grid; place-items: center; border: 0; border-radius: 50%; color: var(--neu-primary-fg); box-shadow: var(--neu-shadow); cursor: pointer; }
-.neu-speed-dial__trigger { z-index: 2; inline-size: 3.25rem; block-size: 3.25rem; background: var(--neu-primary); font-size: 1.5rem; }
-.neu-speed-dial__trigger:hover { background: var(--neu-primary-dark); }
-.neu-speed-dial__action { inline-size: 2.75rem; block-size: 2.75rem; background: var(--neu-surface-inverse); }
-.neu-speed-dial__trigger:focus-visible, .neu-speed-dial__action:focus-visible { outline: 3px solid color-mix(in srgb, var(--neu-primary) 38%, transparent); outline-offset: 2px; }
-.neu-speed-dial__menu { position: absolute; inset: 0; z-index: 1; }
-.neu-speed-dial--linear .neu-speed-dial__menu { display: flex; gap: .625rem; }
-.neu-speed-dial--linear.neu-speed-dial--up .neu-speed-dial__menu { inset-block: auto calc(100% + .625rem); inset-inline: auto; flex-direction: column-reverse; }
-.neu-speed-dial--linear.neu-speed-dial--down .neu-speed-dial__menu { inset-block-start: calc(100% + .625rem); flex-direction: column; }
-.neu-speed-dial--linear.neu-speed-dial--start .neu-speed-dial__menu { inset-inline: auto calc(100% + .625rem); flex-direction: row-reverse; }
-.neu-speed-dial--linear.neu-speed-dial--end .neu-speed-dial__menu { inset-inline-start: calc(100% + .625rem); flex-direction: row; }
-.neu-speed-dial--circle .neu-speed-dial__action, .neu-speed-dial--semi-circle .neu-speed-dial__action, .neu-speed-dial--quarter-circle .neu-speed-dial__action { position: absolute; inset: .25rem; transform: rotate(var(--neu-speed-angle)) translateY(calc(var(--neu-speed-radius) * -1)) rotate(calc(var(--neu-speed-angle) * -1)); transform-origin: center; }
-.neu-speed-dial__label { position: absolute; inset-inline-end: calc(100% + .5rem); inline-size: max-content; max-inline-size: 12rem; padding: .25rem .5rem; border-radius: var(--neu-radius-sm); background: var(--neu-surface-inverse); color: var(--neu-text-inverse); font-size: var(--neu-text-xs); pointer-events: none; }
-.neu-speed-dial__action:disabled { opacity: .45; cursor: not-allowed; }
-@media (prefers-reduced-motion: reduce) { .neu-speed-dial__action { transition: none; } }
+.neu-speed-dial {
+  --_neu-speed-dial-step: 4.5rem;
+
+  position: relative;
+  display: inline-block;
+}
+
+.neu-speed-dial__root {
+  position: relative;
+  z-index: calc(var(--neu-z-overlay, 400) + 1);
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+}
+
+.neu-speed-dial__mask {
+  position: fixed;
+  z-index: var(--neu-z-overlay, 400);
+  inset: 0;
+  background: rgb(2 6 23 / 52%);
+  backdrop-filter: blur(2px);
+}
+
+.neu-speed-dial__trigger,
+.neu-speed-dial__action {
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--neu-radius-full, 999px);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.neu-speed-dial__trigger {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  border: 1px solid var(--neu-primary-solid, var(--neu-primary, #007aff));
+  background: var(--neu-primary-solid, var(--neu-primary, #007aff));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg, #fff));
+  box-shadow:
+    var(--neu-shadow-lg, 0 10px 30px rgb(15 23 42 / 18%)),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+.neu-speed-dial__trigger:hover:not(:disabled) {
+  border-color: var(--neu-primary-solid-hover, var(--neu-primary-dark, #005fcc));
+  background: var(--neu-primary-solid-hover, var(--neu-primary-dark, #005fcc));
+  transform: translateY(-1px);
+}
+
+.neu-speed-dial__trigger:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.neu-speed-dial__trigger:focus-visible,
+.neu-speed-dial__action:focus-visible {
+  outline: 3px solid var(--neu-focus-ring-color, var(--neu-primary, #007aff));
+  outline-offset: 3px;
+}
+
+.neu-speed-dial__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  box-shadow: var(--neu-shadow-sm, 0 1px 3px rgb(15 23 42 / 8%));
+}
+
+.neu-speed-dial__trigger-icon {
+  transition: transform 180ms ease;
+}
+
+.neu-speed-dial__trigger-icon--rotate {
+  transform: rotate(45deg);
+}
+
+.neu-speed-dial__list {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.neu-speed-dial__item {
+  position: absolute;
+  inset: 0;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(0, 0) scale(0.72);
+  transform-origin: center;
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--neu-speed-delay),
+    opacity 140ms ease var(--neu-speed-delay),
+    visibility 0s linear 220ms;
+}
+
+.neu-speed-dial__item--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: var(--neu-speed-delay), var(--neu-speed-delay), 0s;
+}
+
+.neu-speed-dial__action {
+  position: relative;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  padding: 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--neu-border, #cbd5e1) 88%, transparent);
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #0f172a);
+  box-shadow: var(--neu-shadow, 0 4px 12px rgb(15 23 42 / 12%));
+}
+
+.neu-speed-dial__action:hover,
+.neu-speed-dial__action--active,
+.neu-speed-dial__action--router-active {
+  border-color: var(--neu-primary-solid, var(--neu-primary, #007aff));
+  background: var(--neu-primary-solid, var(--neu-primary, #007aff));
+  color: var(--neu-primary-solid-fg, var(--neu-primary-fg, #fff));
+  box-shadow:
+    var(--neu-shadow-lg, 0 10px 30px rgb(15 23 42 / 18%)),
+    inset 0 1px 0 rgb(255 255 255 / 16%);
+  transform: translateY(-1px);
+}
+
+.neu-speed-dial__action:active {
+  transform: scale(0.96);
+}
+
+.neu-speed-dial__action:disabled,
+.neu-speed-dial__action--disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+  box-shadow: var(--neu-shadow-xs, 0 1px 2px rgb(15 23 42 / 8%));
+}
+
+.neu-speed-dial__label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.neu-speed-dial__badge {
+  position: absolute;
+  inset-block-start: -0.25rem;
+  inset-inline-end: -0.25rem;
+}
+
+.neu-speed-dial--circle .neu-speed-dial__item--visible {
+  transform: translate(var(--neu-speed-x), var(--neu-speed-y)) scale(1);
+}
+
+.neu-speed-dial--linear .neu-speed-dial__item {
+  --neu-speed-offset: calc((var(--neu-speed-index, 0) + 1) * var(--_neu-speed-dial-step));
+}
+
+.neu-speed-dial--linear[data-direction='up'] .neu-speed-dial__item--visible {
+  transform: translateY(calc(-1 * var(--neu-speed-offset))) scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='down'] .neu-speed-dial__item--visible {
+  transform: translateY(var(--neu-speed-offset)) scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='left'] .neu-speed-dial__item--visible {
+  transform: translateX(calc(-1 * var(--neu-speed-offset))) scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='right'] .neu-speed-dial__item--visible {
+  transform: translateX(var(--neu-speed-offset)) scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='up-left'] .neu-speed-dial__item--visible {
+  transform: translate(
+      calc(-0.70710678 * var(--neu-speed-offset)),
+      calc(-0.70710678 * var(--neu-speed-offset))
+    )
+    scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='up-right'] .neu-speed-dial__item--visible {
+  transform: translate(
+      calc(0.70710678 * var(--neu-speed-offset)),
+      calc(-0.70710678 * var(--neu-speed-offset))
+    )
+    scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='down-left'] .neu-speed-dial__item--visible {
+  transform: translate(
+      calc(-0.70710678 * var(--neu-speed-offset)),
+      calc(0.70710678 * var(--neu-speed-offset))
+    )
+    scale(1);
+}
+
+.neu-speed-dial--linear[data-direction='down-right'] .neu-speed-dial__item--visible {
+  transform: translate(
+      calc(0.70710678 * var(--neu-speed-offset)),
+      calc(0.70710678 * var(--neu-speed-offset))
+    )
+    scale(1);
+}
+
+@media (max-width: 480px) {
+  .neu-speed-dial {
+    --_neu-speed-dial-step: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-speed-dial__trigger,
+  .neu-speed-dial__action,
+  .neu-speed-dial__item,
+  .neu-speed-dial__trigger-icon {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-speed-dial__mask {
+    background: Canvas;
+    opacity: 0.7;
+  }
+
+  .neu-speed-dial__trigger,
+  .neu-speed-dial__action {
+    border: 2px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  .neu-speed-dial__trigger:focus-visible,
+  .neu-speed-dial__action:focus-visible {
+    outline-color: Highlight;
+  }
+
+  .neu-speed-dial__action--active,
+  .neu-speed-dial__action--router-active {
+    border-color: Highlight;
+  }
+}

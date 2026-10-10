@@ -1,0 +1,385 @@
+{
+  "checkpoint": "N2-011E",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 116980,
+        "gzip": 19400,
+        "brotli": 16556
+      },
+      "entrySize": {
+        "raw": 75,
+        "gzip": 89,
+        "brotli": 79
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 116905,
+            "gzip": 19359,
+            "brotli": 16506
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": []
+    },
+    "sort": {
+      "size": {
+        "raw": 117078,
+        "gzip": 19435,
+        "brotli": 16578
+      },
+      "entrySize": {
+        "raw": 173,
+        "gzip": 160,
+        "brotli": 128
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 116905,
+            "gzip": 19359,
+            "brotli": 16506
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 81
+        }
+      ]
+    },
+    "pagination": {
+      "size": {
+        "raw": 117098,
+        "gzip": 19468,
+        "brotli": 16591
+      },
+      "entrySize": {
+        "raw": 193,
+        "gzip": 176,
+        "brotli": 154
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 116905,
+            "gzip": 19359,
+            "brotli": 16506
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 95
+        }
+      ]
+    },
+    "simpleFilters": {
+      "size": {
+        "raw": 117098,
+        "gzip": 19460,
+        "brotli": 16552
+      },
+      "entrySize": {
+        "raw": 193,
+        "gzip": 177,
+        "brotli": 137
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 116905,
+            "gzip": 19359,
+            "brotli": 16506
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 99
+        }
+      ]
+    },
+    "advancedFilters": {
+      "size": {
+        "raw": 117089,
+        "gzip": 19452,
+        "brotli": 16582
+      },
+      "entrySize": {
+        "raw": 184,
+        "gzip": 173,
+        "brotli": 132
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 116905,
+            "gzip": 19359,
+            "brotli": 16506
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 90
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 117290,
+        "gzip": 19543,
+        "brotli": 16649
+      },
+      "entrySize": {
+        "raw": 385,
+        "gzip": 294,
+        "brotli": 232
+      },
+      "chunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        },
+        {
+          "kind": "shared-core",
+          "size": {
+            "raw": 116905,
+            "gzip": 19359,
+            "brotli": 16506
+          }
+        }
+      ],
+      "lazyChunks": [
+        {
+          "kind": "advanced-builder",
+          "size": {
+            "raw": 7521,
+            "gzip": 1939,
+            "brotli": 1662
+          }
+        }
+      ],
+      "attribution": [
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 297
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "entrySize": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "chunks": [],
+      "lazyChunks": [],
+      "attribution": []
+    }
+  },
+  "comparison": {
+    "layoutSelectionDBasic": {
+      "raw": 78665,
+      "gzip": 13819,
+      "brotli": 11818
+    },
+    "queryUiEBasic": {
+      "raw": 116980,
+      "gzip": 19400,
+      "brotli": 16556
+    },
+    "basicGzipDelta": 5581,
+    "layoutSelectionDCombined": {
+      "raw": 78811,
+      "gzip": 13872,
+      "brotli": 11884
+    },
+    "queryUiECombined": {
+      "raw": 117290,
+      "gzip": 19543,
+      "brotli": 16649
+    },
+    "combinedGzipDelta": 5671
+  },
+  "isolated": {
+    "queryTransitions": {
+      "size": {
+        "raw": 4782,
+        "gzip": 1709,
+        "brotli": 1526
+      },
+      "entrySize": {
+        "raw": 4782,
+        "gzip": 1709,
+        "brotli": 1526
+      },
+      "chunks": [],
+      "lazyChunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/query-ui/neu-table-query-transitions.ts",
+          "bytesInOutput": 3668
+        },
+        {
+          "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+          "bytesInOutput": 620
+        }
+      ]
+    },
+    "advancedBuilder": {
+      "size": {
+        "raw": 4723,
+        "gzip": 1820,
+        "brotli": 1548
+      },
+      "entrySize": {
+        "raw": 4723,
+        "gzip": 1820,
+        "brotli": 1548
+      },
+      "chunks": [],
+      "lazyChunks": [],
+      "attribution": [
+        {
+          "path": "projects/ui-core/table/next/internal/features/advanced-filters/neu-table-advanced-filter-builder.component.ts",
+          "bytesInOutput": 3906
+        },
+        {
+          "path": "projects/ui-core/table/next/internal/query-ui/neu-table-query-transitions.ts",
+          "bytesInOutput": 564
+        }
+      ]
+    }
+  },
+  "packageImports": [
+    "./<private-feature-chunk>"
+  ],
+  "forbiddenGraphTokens": [],
+  "classification": {
+    "core": [
+      "controlled query proposal helpers",
+      "sort/search/simple-filter/pagination controls"
+    ],
+    "optionalSplittable": [
+      "row/menu filter presentation"
+    ],
+    "dynamicCandidate": [
+      "advanced filter builder"
+    ],
+    "notWorthSplitting": [
+      "small pure query transforms and equality"
+    ]
+  }
+}

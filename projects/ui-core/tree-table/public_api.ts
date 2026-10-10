@@ -1,1 +1,1 @@
-export * from './neu-tree-table.component';
+export * from './public/public-api';

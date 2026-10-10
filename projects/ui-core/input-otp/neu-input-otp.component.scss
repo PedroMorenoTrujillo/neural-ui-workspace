@@ -1,3 +1,7 @@
+neu-input-otp[hidden] {
+  display: none !important;
+}
+
 .neu-input-otp {
   display: inline-flex;
   align-items: center;
@@ -20,22 +24,22 @@
   font-size: 1.25rem;
   font-weight: 600;
   border: 2px solid var(--neu-otp-cell-border, var(--neu-border-color, #d1d5db));
-  border-radius: var(--neu-otp-cell-radius, var(--neu-radius-md, 8px));
+  border-radius: var(--neu-otp-cell-radius, var(--neu-radius, 8px));
   background: var(--neu-otp-cell-bg, var(--neu-surface-1, #fff));
   color: var(--neu-text-primary, #111);
-  caret-color: var(--neu-color-primary, #0ea5e9);
+  caret-color: var(--neu-primary, #0ea5e9);
   outline: none;
   transition:
     border-color 150ms,
     box-shadow 150ms;
 
   &:focus {
-    border-color: var(--neu-color-primary, #0ea5e9);
+    border-color: var(--neu-primary, #0ea5e9);
     box-shadow: 0 0 0 3px var(--neu-focus-ring-alpha, rgb(14 165 233 / 0.25));
   }
 
   &.neu-input-otp__cell--filled {
-    border-color: var(--neu-color-primary, #0ea5e9);
+    border-color: var(--neu-primary, #0ea5e9);
   }
 
   /* Remove number input arrows in Firefox and Chrome */

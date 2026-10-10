@@ -1,20 +1,22 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewEncapsulation,
   afterNextRender,
   computed,
-  forwardRef,
+  inject,
   input,
+  model,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NeuIconComponent } from '@neural-ui/core/icon';
-
-/** Contador global para IDs estables — seguro en SSR, predecible en hidratación / Global counter for stable IDs — SSR-safe, predictable on hydration */
-let _neuInputIdSeq = 0;
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { InternalNeuIconOutletComponent, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import type { NeuIconKey } from '@neural-ui/core/foundation';
+import { neuIconCircleAlert as iconCircleAlert } from '@neural-ui/core/internal';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
 
 export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'search';
 
@@ -32,23 +34,16 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
  */
 @Component({
   selector: 'neu-input',
-  imports: [NeuIconComponent],
+  imports: [InternalNeuIconOutletComponent],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   // Los atributos del host (class, style, data-*) no deben llegar al <input> nativo
   // — se gestionan de forma explícita con los inputs del componente.
   host: {
     class: 'neu-input-host',
     '[class.neu-input-host--sm]': 'size() === "sm"',
     '[class.neu-input-host--lg]': 'size() === "lg"',
+    '[hidden]': 'hidden()',
   },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuInputComponent),
-      multi: true,
-    },
-  ],
   template: `
     @if (!floatingLabel() && label()) {
       <label class="neu-input__static-label" [for]="inputId()">{{ label() }}</label>
@@ -67,24 +62,13 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
       @if (startIcon()) {
         <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
           <ng-content select="[neu-input-start]" />
-          @if (!hasStartContent()) {
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              [innerHTML]="startIconPath()"
-            ></svg>
-          }
         </span>
       }
 
       <!-- Icono izquierdo (por nombre) -->
       @if (_hasIconLeft()) {
         <span class="neu-input__icon neu-input__icon--start" aria-hidden="true">
-          <neu-icon [name]="icon()" size="16px" />
+          <neu-icon-outlet [icon]="icon()!" [fallbackText]="iconFallbackText(icon()!)" size="16px" />
         </span>
       }
 
@@ -98,18 +82,23 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
         [attr.name]="name() || null"
         [attr.required]="required() ? '' : null"
         [attr.readonly]="readonly() ? '' : null"
-        [attr.maxlength]="maxlength() ?? null"
-        [attr.minlength]="minlength() ?? null"
+        [attr.maxlength]="maxLength() ?? null"
+        [attr.minlength]="minLength() ?? null"
         [attr.min]="min() ?? null"
         [attr.max]="max() ?? null"
-        [attr.pattern]="pattern() ?? null"
+        [attr.pattern]="nativePattern()"
         [attr.autocomplete]="autocomplete()"
         [attr.aria-invalid]="hasError() ? 'true' : null"
+        [attr.aria-required]="required() ? 'true' : null"
+        [attr.aria-readonly]="readonly() ? 'true' : null"
+        [attr.aria-busy]="pending() ? 'true' : null"
         [attr.aria-describedby]="
-          hasError() ? inputId() + '-error' : hint() ? inputId() + '-hint' : null
+          hasVisibleError() ? inputId() + '-error' : hint() ? inputId() + '-hint' : null
         "
-        [value]="_value()"
+        [value]="displayValue()"
         [attr.placeholder]="floatingLabel() ? ' ' : placeholder() || null"
+        (compositionstart)="onCompositionStart()"
+        (compositionend)="onCompositionEnd($event)"
         (input)="onInput($event)"
         (animationstart)="onAnimationStart($event)"
         (focus)="onFocus()"
@@ -131,15 +120,15 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
       <!-- Icono derecho (por nombre) -->
       @if (_hasIconRight()) {
         <span class="neu-input__icon neu-input__icon--end" aria-hidden="true">
-          <neu-icon [name]="icon()" size="16px" />
+          <neu-icon-outlet [icon]="icon()!" [fallbackText]="iconFallbackText(icon()!)" size="16px" />
         </span>
       }
     </div>
 
     <!-- Mensajes de ayuda / error -->
-    @if (hasError()) {
+    @if (hasVisibleError()) {
       <p class="neu-input__error" [id]="inputId() + '-error'" role="alert">
-        <neu-icon name="lucideAlertCircle" size="13px" aria-hidden="true" />
+        <neu-icon-outlet [icon]="iconCircleAlert" [fallbackText]="iconFallbackText(iconCircleAlert)" size="13px" aria-hidden="true" />
         {{ errorMessage() }}
       </p>
     } @else if (hint()) {
@@ -148,129 +137,187 @@ export type NeuInputType = 'text' | 'email' | 'password' | 'tel' | 'url' | 'sear
   `,
   styleUrl: './neu-input.component.scss',
 })
-export class NeuInputComponent implements ControlValueAccessor {
+export class NeuInputComponent implements FormValueControl<string> {
+  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconCircleAlert = iconCircleAlert;
+  /** Editable value. `model()` also exposes the public `valueChange` output. */
+  readonly value = model<string>('');
+
   /** Tipo de input HTML / HTML input type */
-  type = input<NeuInputType>('text');
+  readonly type = input<NeuInputType>('text');
 
   /** Texto del floating label / Floating label text */
-  label = input<string>('');
+  readonly label = input<string>('');
 
   /** Placeholder visible cuando floatingLabel=false / Visible placeholder when floatingLabel=false */
-  placeholder = input<string>('');
+  readonly placeholder = input<string>('');
 
   /** Muestra el label como flotante (true) o estático encima del campo (false) / Shows the label as floating (true) or static above the field (false) */
-  floatingLabel = input<boolean>(true);
+  readonly floatingLabel = input<boolean>(true);
 
   /** Tamaño del campo: 'sm' = 36px | 'md' = 48px | 'lg' = 56px / Field size */
-  size = input<'sm' | 'md' | 'lg'>('md');
+  readonly size = input<'sm' | 'md' | 'lg'>('md');
 
   /** Hint de ayuda (visible cuando no hay error) / Help hint (visible when there is no error) */
-  hint = input<string>('');
+  readonly hint = input<string>('');
 
   /** Mensaje de error (activa el estado de error) / Error message (activates the error state) */
-  errorMessage = input<string>('');
+  readonly errorMessage = input<string>('');
 
   /** Deshabilita el campo / Disables the field */
-  disabled = input<boolean>(false);
+  readonly disabled = input<boolean>(false);
+
+  /** Signal Forms field state. */
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
 
   /** Atributo autocomplete HTML / HTML autocomplete attribute */
-  autocomplete = input<string>('off');
+  readonly autocomplete = input<string>('off');
 
   /** Muestra zona para icono al inicio / Shows icon slot at the start */
-  startIcon = input<boolean>(false);
+  readonly startIcon = input<boolean>(false);
 
   /** Muestra zona para icono al final / Shows icon slot at the end */
-  endIcon = input<boolean>(false);
+  readonly endIcon = input<boolean>(false);
 
   /** Nombre del icono lucide a renderizar dentro del campo / Lucide icon name to render inside the field */
-  icon = input<string>('');
+  readonly icon = input<NeuIconKey | null>(null);
 
   /** Posición del icono cuando se usa `icon` / Icon position when using `icon` */
-  iconPosition = input<'left' | 'right'>('left');
+  readonly iconPosition = input<'left' | 'right'>('left');
 
-  /** ID accesible para el input — generado con contador estable (seguro en SSR) / Accessible ID for the input — generated with stable counter (SSR-safe) */
-  inputId = input<string>(`neu-input-${++_neuInputIdSeq}`);
+  /** ID accesible para el input — generado por aplicación (seguro en SSR) / Application-scoped accessible ID (SSR-safe) */
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-input-'));
 
   /** Nombre del campo para formularios nativos / Field name for native forms */
-  name = input<string>('');
+  readonly name = input<string>('');
 
   /** Marca el campo como requerido / Marks the field as required */
-  required = input<boolean>(false);
-
-  /** Hace el campo de solo lectura / Makes the field read-only */
-  readonly = input<boolean>(false);
+  readonly required = input<boolean>(false);
 
   /** Longitud máxima de caracteres / Maximum character length */
-  maxlength = input<number | null>(null);
+  readonly maxLength = input<number | undefined>(undefined);
 
   /** Longitud mínima de caracteres / Minimum character length */
-  minlength = input<number | null>(null);
+  readonly minLength = input<number | undefined>(undefined);
 
   /** Valor mínimo (para type=number/date) / Minimum value (for type=number/date) */
-  min = input<string | null>(null);
+  readonly min = input<string | undefined>(undefined);
 
   /** Valor máximo (para type=number/date) / Maximum value (for type=number/date) */
-  max = input<string | null>(null);
+  readonly max = input<string | undefined>(undefined);
 
   /** Patrón de validación HTML5 / HTML5 validation pattern */
-  pattern = input<string | null>(null);
+  readonly pattern = input<readonly RegExp[]>([]);
+
+  /** Emits at the real interaction boundary consumed by Angular Forms. */
+  readonly touch = output<void>();
 
   // --- Estado interno reactivo ---
-  protected readonly _value = signal('');
   protected readonly _focused = signal(false);
   private readonly nativeInput = viewChild.required<ElementRef<HTMLInputElement>>('nativeInput');
 
-  readonly hasValue = computed(() => this._value().length > 0);
-  readonly hasError = computed(() => !!this.errorMessage());
+  private readonly _compositionDraft = signal<string | null>(null);
+  protected readonly displayValue = computed(() => {
+    const draft = this._compositionDraft();
+    const current = this.value();
+    const normalized = typeof current === 'string' ? current : '';
+    return draft !== null && normalized === this._compositionBaseValue ? draft : normalized;
+  });
+  readonly hasValue = computed(() => this.displayValue().length > 0);
+  readonly hasError = computed(
+    () => this.invalid() || this.errors().length > 0 || !!this.errorMessage(),
+  );
+  protected readonly hasVisibleError = computed(() => this.hasError() && !!this.errorMessage());
+  protected readonly nativePattern = computed(() => {
+    const patterns = this.pattern();
+    return patterns.length === 1 ? patterns[0].source : null;
+  });
   readonly startIconPath = computed(() => '');
   readonly hasStartContent = computed(() => false);
-  readonly _hasIconLeft = computed(() => !!this.icon() && this.iconPosition() === 'left');
-  readonly _hasIconRight = computed(() => !!this.icon() && this.iconPosition() === 'right');
+  protected readonly _hasIconLeft = computed(() => !!this.icon() && this.iconPosition() === 'left');
+  protected readonly _hasIconRight = computed(
+    () => !!this.icon() && this.iconPosition() === 'right',
+  );
 
-  // --- ControlValueAccessor ---
-  private _onChange: (v: string) => void = () => {};
-  private _onTouched: () => void = () => {};
+  private readonly _destroyRef = inject(DestroyRef);
+  private _composing = false;
+  private _compositionBaseValue = '';
+  private _compositionCommit: string | null = null;
+  private _destroyed = false;
 
   constructor() {
     // Credential managers can fill the native control without emitting an input event.
-    afterNextRender(() => queueMicrotask(() => this.syncNativeValue()));
+    afterNextRender(() => {
+      // An empty initial DOM value is not autofill: NgModel may still be writing
+      // its initial value. Keep this callback in Angular's destroy-aware render phase.
+      if (this.nativeInput().nativeElement.value) this.syncNativeValue();
+    });
+    this._destroyRef.onDestroy(() => {
+      this._destroyed = true;
+      this.cancelComposition();
+    });
   }
 
-  writeValue(val: unknown): void {
-    this._value.set(val == null ? '' : String(val));
-  }
-
-  registerOnChange(fn: (v: string) => void): void {
-    this._onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-
-  private readonly _cvaDisabled = signal(false);
-  setDisabledState(isDisabled: boolean): void {
-    this._cvaDisabled.set(isDisabled);
-  }
-
-  readonly isDisabledFinal = computed(() => this.disabled() || this._cvaDisabled());
+  readonly isDisabledFinal = computed(() => this.disabled());
 
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this._value.set(value);
-    this._onChange(value);
+    if (this._destroyed || this.isDisabledFinal() || this.readonly()) return;
+    if (this._composing) {
+      this._compositionDraft.set(value);
+      return;
+    }
+    if (this._compositionCommit === value) {
+      this._compositionCommit = null;
+      return;
+    }
+    this._compositionCommit = null;
+    this.value.set(value);
+  }
+
+  onCompositionStart(): void {
+    if (this.isDisabledFinal() || this.readonly() || this._destroyed) return;
+    this._composing = true;
+    this._compositionBaseValue = this.displayValue();
+    this._compositionDraft.set(this.nativeInput().nativeElement.value);
+    this._compositionCommit = null;
+  }
+
+  onCompositionEnd(event: Event): void {
+    if (!this._composing) return;
+    this._composing = false;
+    if (this._destroyed || this.isDisabledFinal() || this.readonly()) {
+      this._compositionDraft.set(null);
+      this._compositionCommit = null;
+      return;
+    }
+    const value = (event.target as HTMLInputElement).value;
+    const externalWriteWon = this.displayValue() !== this._compositionBaseValue;
+    this._compositionDraft.set(null);
+    if (externalWriteWon) {
+      this._compositionCommit = null;
+      return;
+    }
+    this._compositionCommit = value;
+    this.value.set(value);
   }
 
   onAnimationStart(event: AnimationEvent): void {
     if (event.animationName === 'neu-autofill-start') this.syncNativeValue();
   }
 
-  /** Synchronises browser autofill with the CVA and floating-label state. */
+  /** Synchronises credential-manager autofill with the public value model. */
   syncNativeValue(): void {
+    if (this._destroyed || this.isDisabledFinal() || this.readonly()) return;
     const value = this.nativeInput().nativeElement.value;
-    if (value === this._value()) return;
-    this._value.set(value);
-    this._onChange(value);
+    if (value === this.value()) return;
+    this.value.set(value);
   }
 
   onFocus(): void {
@@ -278,7 +325,23 @@ export class NeuInputComponent implements ControlValueAccessor {
   }
 
   onBlur(): void {
+    this.cancelComposition();
     this._focused.set(false);
-    this._onTouched();
+    this.touch.emit();
+  }
+
+  focus(options?: FocusOptions): void {
+    this.nativeInput().nativeElement.focus(options);
+  }
+
+  reset(): void {
+    this.cancelComposition();
+    this._focused.set(false);
+  }
+
+  private cancelComposition(): void {
+    this._composing = false;
+    this._compositionDraft.set(null);
+    this._compositionCommit = null;
   }
 }

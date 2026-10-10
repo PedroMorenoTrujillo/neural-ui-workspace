@@ -4,7 +4,7 @@ import { NeuChipComponent } from './neu-chip.component';
 
 @Component({
   template: `<neu-chip
-    [variant]="variant"
+    [tone]="tone"
     [size]="size"
     [selected]="selected"
     [removable]="removable"
@@ -16,7 +16,7 @@ import { NeuChipComponent } from './neu-chip.component';
   imports: [NeuChipComponent],
 })
 class TestHostComponent {
-  variant: any = 'default';
+  tone: any = 'neutral';
   size: any = 'md';
   selected = false;
   removable = false;
@@ -26,6 +26,35 @@ class TestHostComponent {
 }
 
 describe('NeuChipComponent', () => {
+  it('click proposes selection without mutating the controlled input', () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.detectChanges();
+    const changes: boolean[] = [];
+    df.componentInstance.selectedChange.subscribe(value => changes.push(value));
+    df.nativeElement.click();
+    expect(changes).toEqual([true]);
+    expect(df.componentInstance.selected()).toBe(false);
+  });
+
+  it('Space prevents page scrolling and emits exactly one selection proposal', () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.detectChanges();
+    const changes: boolean[] = [];
+    df.componentInstance.selectedChange.subscribe(value => changes.push(value));
+    const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    df.nativeElement.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(changes).toEqual([true]);
+  });
+
+  it('removable chips do not intercept the native remove button keyboard action', () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.componentRef.setInput('removable', true);
+    df.detectChanges();
+    const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    df.nativeElement.querySelector('button').dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
 
@@ -45,12 +74,12 @@ describe('NeuChipComponent', () => {
     expect(comp).toBeInstanceOf(NeuChipComponent);
   });
 
-  it('should apply variant class', async () => {
+  it('should apply tone class', async () => {
     const df = TestBed.createComponent(NeuChipComponent);
-    df.componentRef.setInput('variant', 'primary');
+    df.componentRef.setInput('tone', 'brand');
     df.detectChanges();
     await df.whenStable();
-    expect(df.nativeElement.className).toContain('neu-chip--primary');
+    expect(df.nativeElement.className).toContain('neu-chip--brand');
   });
 
   it('should apply selected class when selected', async () => {
@@ -88,12 +117,31 @@ describe('NeuChipComponent', () => {
     expect(removed).toBe(true);
   });
 
+  it('emits one removal intent without hiding itself and labels its native control', async () => {
+    const df = TestBed.createComponent(NeuChipComponent);
+    df.componentRef.setInput('removable', true);
+    df.componentRef.setInput('removeAriaLabel', 'Remove filter');
+    df.detectChanges();
+    await df.whenStable();
+    const button = df.nativeElement.querySelector('.neu-chip__remove') as HTMLButtonElement;
+    const events: unknown[] = [];
+    df.componentInstance.removed.subscribe(() => events.push(true));
+    expect(button.type).toBe('button');
+    expect(button.getAttribute('aria-label')).toBe('Remove filter');
+    expect(button.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    button.click();
+    df.detectChanges();
+    expect(events).toHaveLength(1);
+    expect(df.nativeElement.querySelector('.neu-chip__remove')).toBe(button);
+  });
+
   it('should apply disabled class when disabled', async () => {
     const df = TestBed.createComponent(NeuChipComponent);
     df.componentRef.setInput('disabled', true);
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.className).toContain('disabled');
+    expect(df.nativeElement.getAttribute('aria-disabled')).toBe('true');
   });
 
   it('onToggle should NOT emit when disabled', () => {
@@ -193,17 +241,17 @@ describe('NeuChipComponent', () => {
     df.componentRef.setInput('selected', true);
     df.detectChanges();
 
-    expect((df.componentInstance as any)._hostRole()).toBe('button');
-    expect((df.componentInstance as any)._hostAriaPressed()).toBe(true);
-    expect((df.componentInstance as any)._hostTabindex()).toBe(0);
+    expect((df.componentInstance as any)['_hostRole']()).toBe('button');
+    expect((df.componentInstance as any)['_hostAriaPressed']()).toBe(true);
+    expect((df.componentInstance as any)['_hostTabindex']()).toBe(0);
 
     df.componentRef.setInput('removable', true);
     df.componentRef.setInput('disabled', true);
     df.detectChanges();
 
-    expect((df.componentInstance as any)._hostRole()).toBe('group');
-    expect((df.componentInstance as any)._hostAriaPressed()).toBeNull();
-    expect((df.componentInstance as any)._hostTabindex()).toBeNull();
+    expect((df.componentInstance as any)['_hostRole']()).toBe('group');
+    expect((df.componentInstance as any)['_hostAriaPressed']()).toBeNull();
+    expect((df.componentInstance as any)['_hostTabindex']()).toBeNull();
   });
 
   it('keydown.enter on the host should trigger the toggle host listener', () => {

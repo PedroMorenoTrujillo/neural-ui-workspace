@@ -1,15 +1,29 @@
 import { TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
+import { Component } from '@angular/core';
 import { NeuCodeBlockComponent } from './neu-code-block.component';
 
+@Component({
+  imports: [NeuCodeBlockComponent],
+  template: '<neu-code-block />',
+})
+class CodeBlockHostComponent {}
+
 describe('NeuCodeBlockComponent', () => {
+  let navigatorDescriptor: PropertyDescriptor | undefined;
+
   beforeEach(async () => {
+    navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
     await TestBed.configureTestingModule({
-      imports: [NeuCodeBlockComponent],
+      imports: [NeuCodeBlockComponent, CodeBlockHostComponent],
     }).compileComponents();
 
     const doc = TestBed.inject(DOCUMENT);
     doc.documentElement.lang = 'en';
+  });
+
+  afterEach(() => {
+    if (navigatorDescriptor) Object.defineProperty(globalThis, 'navigator', navigatorDescriptor);
   });
 
   // ── Rendering ─────────────────────────────────────────────────────────────
@@ -18,6 +32,47 @@ describe('NeuCodeBlockComponent', () => {
     const f = TestBed.createComponent(NeuCodeBlockComponent);
     f.detectChanges();
     expect(f.nativeElement.querySelector('.neu-code-block')).toBeTruthy();
+  });
+
+  it('allows the host to shrink inside flex and grid layouts', () => {
+    const f = TestBed.createComponent(CodeBlockHostComponent);
+    f.detectChanges();
+    const style = getComputedStyle(f.nativeElement.querySelector('neu-code-block'));
+    expect(style.display).toBe('block');
+    expect(style.minInlineSize).toBe('0px');
+    expect(style.maxInlineSize).toBe('100%');
+  });
+
+  it('contains the copy announcement within the block instead of the document', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const block = f.nativeElement.querySelector('.neu-code-block');
+    const status = block.querySelector('[role="status"]');
+    expect(status).toBeTruthy();
+    expect(getComputedStyle(block).position).toBe('relative');
+    expect(getComputedStyle(status).position).toBe('absolute');
+  });
+
+  it('should apply compact density only when requested', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const block = f.nativeElement.querySelector('.neu-code-block');
+    expect(block.classList).not.toContain('neu-code-block--density-compact');
+
+    f.componentRef.setInput('density', 'compact');
+    f.detectChanges();
+    expect(block.classList).toContain('neu-code-block--density-compact');
+  });
+
+  it('should apply the wrapping variant only when requested', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const block = f.nativeElement.querySelector('.neu-code-block');
+    expect(block.classList).not.toContain('neu-code-block--wrap');
+
+    f.componentRef.setInput('wrap', true);
+    f.detectChanges();
+    expect(block.classList).toContain('neu-code-block--wrap');
   });
 
   it('should display the language label', () => {
@@ -57,6 +112,19 @@ describe('NeuCodeBlockComponent', () => {
     f.detectChanges();
     const code = f.nativeElement.querySelector('.neu-code-block__code');
     expect(code.textContent).toContain('const x = 42;');
+  });
+
+  it('isolates source code from an RTL interface without changing the copy text', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    const source = '<neu-avatar name="Ana Martín" />';
+    f.nativeElement.setAttribute('dir', 'rtl');
+    f.componentRef.setInput('code', source);
+    f.detectChanges();
+    const pre = f.nativeElement.querySelector('pre') as HTMLPreElement;
+    expect(pre.getAttribute('dir')).toBe('ltr');
+    expect(getComputedStyle(pre).direction).toBe('ltr');
+    expect(getComputedStyle(pre).textAlign).toBe('start');
+    expect(pre.textContent).toBe(source);
   });
 
   it('should render a copy button', () => {
@@ -202,6 +270,29 @@ describe('NeuCodeBlockComponent', () => {
     f.detectChanges();
     const btn = f.nativeElement.querySelector('.neu-code-block__copy');
     expect(btn.textContent).toContain('Copied!');
+    expect(f.nativeElement.querySelector('[role="status"]').textContent).toContain('Copied!');
+    vi.useRealTimers();
+  });
+
+  it('ignores a late clipboard completion after destroy without scheduling feedback', async () => {
+    vi.useFakeTimers();
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    let finish!: () => void;
+    const writeText = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
+    const doc: Document = TestBed.inject(DOCUMENT);
+    const win = doc.defaultView as Window & typeof globalThis;
+    Object.defineProperty(win, 'navigator', {
+      value: { ...win.navigator, clipboard: { writeText } },
+      configurable: true,
+    });
+    f.componentInstance.copy();
+    const baselineTimers = vi.getTimerCount();
+    f.destroy();
+    finish();
+    await Promise.resolve();
+    expect(vi.getTimerCount()).toBe(baselineTimers);
+    expect(f.componentInstance['copied']()).toBe(false);
     vi.useRealTimers();
   });
 
@@ -245,6 +336,55 @@ describe('NeuCodeBlockComponent', () => {
       configurable: true,
     });
     expect(() => comp.copy()).not.toThrow();
+  });
+
+  it('falls back without an unhandled rejection when clipboard permission is denied', async () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.componentRef.setInput('code', 'safe fallback');
+    f.detectChanges();
+    const doc: Document = TestBed.inject(DOCUMENT);
+    const win = doc.defaultView as Window & typeof globalThis;
+    const focused = doc.createElement('button');
+    doc.body.appendChild(focused);
+    focused.focus();
+    Object.defineProperty(win, 'navigator', {
+      value: {
+        ...win.navigator,
+        clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+      },
+      configurable: true,
+    });
+    Object.defineProperty(doc, 'execCommand', {
+      value: vi.fn().mockReturnValue(true),
+      writable: true,
+      configurable: true,
+    });
+
+    f.componentInstance.copy();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect((f.componentInstance as any).copied()).toBe(true);
+    expect(doc.activeElement).toBe(focused);
+    focused.remove();
+  });
+
+  it('does not report success when the fallback copy command returns false', () => {
+    const f = TestBed.createComponent(NeuCodeBlockComponent);
+    f.detectChanges();
+    const doc: Document = TestBed.inject(DOCUMENT);
+    const win = doc.defaultView as Window & typeof globalThis;
+    Object.defineProperty(win, 'navigator', {
+      value: { ...win.navigator, clipboard: undefined },
+      configurable: true,
+    });
+    Object.defineProperty(doc, 'execCommand', {
+      value: vi.fn().mockReturnValue(false),
+      writable: true,
+      configurable: true,
+    });
+    f.componentInstance.copy();
+    expect((f.componentInstance as any).copied()).toBe(false);
   });
 
   // ── Custom aria-labels ─────────────────────────────────────────────────────

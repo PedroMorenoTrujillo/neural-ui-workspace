@@ -1,0 +1,2780 @@
+{
+  "baseline": {
+    "head": "c959fe56ee555cecbb1375a3047658bfb5e3bf47",
+    "tree": "75fe7890e1025d720ae35d9abfc7f827249cc735",
+    "contract": {
+      "entrypoints": 105,
+      "exportedDeclarations": 802,
+      "declarationKinds": {
+        "class": 14,
+        "component": 102,
+        "directive": 144,
+        "function": 40,
+        "interface": 258,
+        "reexport": 55,
+        "service": 11,
+        "token": 3,
+        "type": 174,
+        "variable": 1
+      },
+      "publicSymbols": 5459,
+      "statuses": {
+        "SUPPORTED": 3445,
+        "COMPATIBILITY": 2,
+        "DEPRECATED": 2,
+        "INTERNAL/UNSUPPORTED": 2010,
+        "REVIEW": 0
+      },
+      "bindings": {
+        "input": 1142,
+        "output": 230,
+        "model": 2,
+        "total": 1374
+      },
+      "designTokens": 258
+    }
+  },
+  "candidate": {
+    "contract": {
+      "entrypoints": 105,
+      "exportedDeclarations": 804,
+      "declarationKinds": {
+        "class": 14,
+        "component": 102,
+        "directive": 144,
+        "function": 40,
+        "interface": 260,
+        "reexport": 55,
+        "service": 11,
+        "token": 3,
+        "type": 174,
+        "variable": 1
+      },
+      "publicSymbols": 5500,
+      "statuses": {
+        "SUPPORTED": 3485,
+        "COMPATIBILITY": 2,
+        "DEPRECATED": 2,
+        "INTERNAL/UNSUPPORTED": 2011,
+        "REVIEW": 0
+      },
+      "bindings": {
+        "input": 1142,
+        "output": 260,
+        "model": 2,
+        "total": 1404
+      },
+      "designTokens": 258
+    }
+  },
+  "fesms": [
+    {
+      "component": "autocomplete",
+      "before": 116543,
+      "after": 116631,
+      "delta": 88,
+      "gzipDelta": 7,
+      "sha256": "778478d9c8b5b08ed17b99af9cfcc3da0e48a37fa37598c44e8ffdc7d0a94e86"
+    },
+    {
+      "component": "input-tags",
+      "before": 53322,
+      "after": 53410,
+      "delta": 88,
+      "gzipDelta": 21,
+      "sha256": "0f3e998acd95b66dedd110f95cc01901933c4a64242f5f866db667d7f3ce9110"
+    },
+    {
+      "component": "chart",
+      "before": 18244,
+      "after": 20219,
+      "delta": 1975,
+      "gzipDelta": 488,
+      "sha256": "b27b5cf019c428b190c675351a45bf8b67bf12b8c18d9417a5a3da0eea3cac66"
+    },
+    {
+      "component": "tree-select",
+      "before": 41792,
+      "after": 44069,
+      "delta": 2277,
+      "gzipDelta": 459,
+      "sha256": "9c908ed05845d05572b7e4dbc235267e98b4300a5e7e56339491b8ed5d515df3"
+    },
+    {
+      "component": "cascade-select",
+      "before": 47360,
+      "after": 48868,
+      "delta": 1508,
+      "gzipDelta": 301,
+      "sha256": "fa1998f8cdf462dd75bb1d64a1396bdb2fe87141543e033ba6cba7852911f07e"
+    },
+    {
+      "component": "date-input",
+      "before": 107053,
+      "after": 111527,
+      "delta": 4474,
+      "gzipDelta": 646,
+      "sha256": "a83c24d59c283376e9eeee2aea61672a098e71619688b3569e1676100d8c6571"
+    },
+    {
+      "component": "virtual-list",
+      "before": 12686,
+      "after": 13282,
+      "delta": 596,
+      "gzipDelta": 215,
+      "sha256": "3fb5ca9d0a2f889c2a86c84a3eb65d51851da9a319c7daeb8b0cfe55bd1184e0"
+    },
+    {
+      "component": "modal",
+      "before": 26409,
+      "after": 27132,
+      "delta": 723,
+      "gzipDelta": 193,
+      "sha256": "be292a6cc144148d0a5d36a144747ce4dfa6ccae7c5b91bace8ca3d3bfa15e88"
+    },
+    {
+      "component": "bottom-sheet",
+      "before": 10667,
+      "after": 11384,
+      "delta": 717,
+      "gzipDelta": 202,
+      "sha256": "ad903934519ba05c2cf2493fcba30e7fc7b69b7cf9784fd0471efbc3e3d10536"
+    },
+    {
+      "component": "color-picker",
+      "before": 32304,
+      "after": 34617,
+      "delta": 2313,
+      "gzipDelta": 446,
+      "sha256": "0e9917f52482b2b7fde05139fa03d5a25c15b10f319aead1da9c4215cd5262b0"
+    },
+    {
+      "component": "pick-list",
+      "before": 27944,
+      "after": 28796,
+      "delta": 852,
+      "gzipDelta": 125,
+      "sha256": "38b426f82c2ab6fde0708dc814846dcf9b825401741f6152dad204c5e6bee90e"
+    },
+    {
+      "component": "splitter",
+      "before": 15757,
+      "after": 16410,
+      "delta": 653,
+      "gzipDelta": 151,
+      "sha256": "c3409f31396d6c4680c4b4e7214fd8a089da9a91764c11c0cdd40c5e6363d0e0"
+    },
+    {
+      "component": "split-button",
+      "before": 35932,
+      "after": 36982,
+      "delta": 1050,
+      "gzipDelta": 231,
+      "sha256": "4c472bfd303055698e593e9cf76507e0ca9b0d6058ee6b334358fb5b4c37623a"
+    },
+    {
+      "component": "image-viewer",
+      "before": 19029,
+      "after": 19582,
+      "delta": 553,
+      "gzipDelta": 131,
+      "sha256": "19d441abdf98f66ad6f4c2d17dd629b1baf073b17ab6ee55fe6c3dcd75327c7e"
+    },
+    {
+      "component": "number-input",
+      "before": 28435,
+      "after": 29347,
+      "delta": 912,
+      "gzipDelta": 240,
+      "sha256": "6cbfe57f86a47738ef76ebf5fe30fabd7af4bf629b1ad119eb83dcb8f77ab217"
+    }
+  ],
+  "fesmDelta": 18779,
+  "gzipDelta": 3856,
+  "packageBefore": 7722247,
+  "packageAfter": 7779641,
+  "coverage": {
+    "total": {
+      "lines": {
+        "total": 18895,
+        "covered": 18682,
+        "skipped": 0,
+        "pct": 98.87
+      },
+      "statements": {
+        "total": 24317,
+        "covered": 23871,
+        "skipped": 0,
+        "pct": 98.16
+      },
+      "functions": {
+        "total": 5078,
+        "covered": 5007,
+        "skipped": 0,
+        "pct": 98.6
+      },
+      "branches": {
+        "total": 16547,
+        "covered": 15971,
+        "skipped": 0,
+        "pct": 96.51
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "components": {
+      "projects/ui-core/accordion/neu-accordion.component.ts": {
+        "lines": {
+          "total": 45,
+          "covered": 45,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 13,
+          "covered": 13,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 68,
+          "covered": 68,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 29,
+          "covered": 29,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/alert/neu-alert.component.ts": {
+        "lines": {
+          "total": 38,
+          "covered": 38,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 7,
+          "covered": 7,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 53,
+          "covered": 53,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/autocomplete/neu-autocomplete.component.ts": {
+        "lines": {
+          "total": 709,
+          "covered": 708,
+          "skipped": 0,
+          "pct": 99.85
+        },
+        "functions": {
+          "total": 150,
+          "covered": 150,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 857,
+          "covered": 847,
+          "skipped": 0,
+          "pct": 98.83
+        },
+        "branches": {
+          "total": 627,
+          "covered": 598,
+          "skipped": 0,
+          "pct": 95.37
+        }
+      },
+      "projects/ui-core/avatar/neu-avatar.component.ts": {
+        "lines": {
+          "total": 26,
+          "covered": 26,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 4,
+          "covered": 4,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 34,
+          "covered": 34,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/avatar-group/neu-avatar-group.component.ts": {
+        "lines": {
+          "total": 5,
+          "covered": 5,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 12,
+          "covered": 12,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/badge/neu-badge.component.ts": {
+        "lines": {
+          "total": 10,
+          "covered": 10,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 16,
+          "covered": 16,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 18,
+          "covered": 18,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/block-ui/neu-block-ui.component.ts": {
+        "lines": {
+          "total": 35,
+          "covered": 35,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 8,
+          "covered": 8,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 54,
+          "covered": 53,
+          "skipped": 0,
+          "pct": 98.14
+        },
+        "branches": {
+          "total": 42,
+          "covered": 40,
+          "skipped": 0,
+          "pct": 95.23
+        }
+      },
+      "projects/ui-core/bottom-sheet/neu-bottom-sheet.component.ts": {
+        "lines": {
+          "total": 43,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 11,
+          "covered": 11,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 64,
+          "covered": 64,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 34,
+          "covered": 34,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/breadcrumb/neu-breadcrumb.component.ts": {
+        "lines": {
+          "total": 16,
+          "covered": 16,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 35,
+          "covered": 35,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 16,
+          "covered": 16,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/button/neu-button.component.ts": {
+        "lines": {
+          "total": 29,
+          "covered": 29,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 7,
+          "covered": 7,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 42,
+          "covered": 42,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 37,
+          "covered": 37,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/button-group/neu-button-group.component.ts": {
+        "lines": {
+          "total": 9,
+          "covered": 9,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 15,
+          "covered": 15,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 15,
+          "covered": 15,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/calendar/neu-calendar.component.ts": {
+        "lines": {
+          "total": 214,
+          "covered": 214,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 66,
+          "covered": 65,
+          "skipped": 0,
+          "pct": 98.48
+        },
+        "statements": {
+          "total": 293,
+          "covered": 290,
+          "skipped": 0,
+          "pct": 98.97
+        },
+        "branches": {
+          "total": 119,
+          "covered": 114,
+          "skipped": 0,
+          "pct": 95.79
+        }
+      },
+      "projects/ui-core/card/neu-card.component.ts": {
+        "lines": {
+          "total": 15,
+          "covered": 15,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 22,
+          "covered": 22,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 15,
+          "covered": 15,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/carousel/neu-carousel.component.ts": {
+        "lines": {
+          "total": 54,
+          "covered": 54,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 47,
+          "covered": 45,
+          "skipped": 0,
+          "pct": 95.74
+        },
+        "statements": {
+          "total": 225,
+          "covered": 222,
+          "skipped": 0,
+          "pct": 98.66
+        },
+        "branches": {
+          "total": 149,
+          "covered": 145,
+          "skipped": 0,
+          "pct": 97.31
+        }
+      },
+      "projects/ui-core/cascade-select/neu-cascade-select.component.ts": {
+        "lines": {
+          "total": 292,
+          "covered": 291,
+          "skipped": 0,
+          "pct": 99.65
+        },
+        "functions": {
+          "total": 63,
+          "covered": 63,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 364,
+          "covered": 357,
+          "skipped": 0,
+          "pct": 98.07
+        },
+        "branches": {
+          "total": 197,
+          "covered": 188,
+          "skipped": 0,
+          "pct": 95.43
+        }
+      },
+      "projects/ui-core/chart/neu-chart.component.ts": {
+        "lines": {
+          "total": 94,
+          "covered": 94,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 26,
+          "covered": 26,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 112,
+          "covered": 111,
+          "skipped": 0,
+          "pct": 99.1
+        },
+        "branches": {
+          "total": 103,
+          "covered": 101,
+          "skipped": 0,
+          "pct": 98.05
+        }
+      },
+      "projects/ui-core/checkbox/neu-checkbox.component.ts": {
+        "lines": {
+          "total": 41,
+          "covered": 41,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 14,
+          "covered": 14,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 56,
+          "covered": 55,
+          "skipped": 0,
+          "pct": 98.21
+        },
+        "branches": {
+          "total": 28,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/chip/neu-chip.component.ts": {
+        "lines": {
+          "total": 28,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 9,
+          "covered": 9,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 43,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/code-block/neu-code-block.component.ts": {
+        "lines": {
+          "total": 80,
+          "covered": 80,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 96,
+          "covered": 95,
+          "skipped": 0,
+          "pct": 98.95
+        },
+        "branches": {
+          "total": 54,
+          "covered": 52,
+          "skipped": 0,
+          "pct": 96.29
+        }
+      },
+      "projects/ui-core/color-picker/neu-color-picker.component.ts": {
+        "lines": {
+          "total": 229,
+          "covered": 229,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 58,
+          "covered": 58,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 291,
+          "covered": 288,
+          "skipped": 0,
+          "pct": 98.96
+        },
+        "branches": {
+          "total": 131,
+          "covered": 129,
+          "skipped": 0,
+          "pct": 98.47
+        }
+      },
+      "projects/ui-core/command-palette/neu-command-palette.component.ts": {
+        "lines": {
+          "total": 116,
+          "covered": 116,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 37,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 97.29
+        },
+        "statements": {
+          "total": 184,
+          "covered": 183,
+          "skipped": 0,
+          "pct": 99.45
+        },
+        "branches": {
+          "total": 78,
+          "covered": 78,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/compare/neu-compare.component.ts": {
+        "lines": {
+          "total": 42,
+          "covered": 42,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 28,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 119,
+          "covered": 117,
+          "skipped": 0,
+          "pct": 98.31
+        },
+        "branches": {
+          "total": 100,
+          "covered": 98,
+          "skipped": 0,
+          "pct": 98
+        }
+      },
+      "projects/ui-core/confirm-dialog/neu-confirm-dialog.component.ts": {
+        "lines": {
+          "total": 25,
+          "covered": 25,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 8,
+          "covered": 8,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 43,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 29,
+          "covered": 29,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/confirm-popup/neu-confirm-popup.component.ts": {
+        "lines": {
+          "total": 47,
+          "covered": 47,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 16,
+          "covered": 16,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 65,
+          "covered": 65,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 35,
+          "covered": 35,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/context-menu/neu-context-menu.component.ts": {
+        "lines": {
+          "total": 143,
+          "covered": 140,
+          "skipped": 0,
+          "pct": 97.9
+        },
+        "functions": {
+          "total": 35,
+          "covered": 34,
+          "skipped": 0,
+          "pct": 97.14
+        },
+        "statements": {
+          "total": 182,
+          "covered": 178,
+          "skipped": 0,
+          "pct": 97.8
+        },
+        "branches": {
+          "total": 83,
+          "covered": 79,
+          "skipped": 0,
+          "pct": 95.18
+        }
+      },
+      "projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts": {
+        "lines": {
+          "total": 62,
+          "covered": 62,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 13,
+          "covered": 13,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 83,
+          "covered": 82,
+          "skipped": 0,
+          "pct": 98.79
+        },
+        "branches": {
+          "total": 41,
+          "covered": 41,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/data-view/neu-data-view.component.ts": {
+        "lines": {
+          "total": 142,
+          "covered": 142,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 33,
+          "covered": 33,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 176,
+          "covered": 176,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 111,
+          "covered": 111,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/date-input/neu-date-input.component.ts": {
+        "lines": {
+          "total": 590,
+          "covered": 590,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 142,
+          "covered": 142,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 773,
+          "covered": 763,
+          "skipped": 0,
+          "pct": 98.7
+        },
+        "branches": {
+          "total": 400,
+          "covered": 383,
+          "skipped": 0,
+          "pct": 95.75
+        }
+      },
+      "projects/ui-core/divider/neu-divider.component.ts": {
+        "lines": {
+          "total": 8,
+          "covered": 8,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 14,
+          "covered": 14,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 14,
+          "covered": 14,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/dock/neu-dock.component.ts": {
+        "lines": {
+          "total": 89,
+          "covered": 88,
+          "skipped": 0,
+          "pct": 98.87
+        },
+        "functions": {
+          "total": 30,
+          "covered": 30,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 134,
+          "covered": 132,
+          "skipped": 0,
+          "pct": 98.5
+        },
+        "branches": {
+          "total": 58,
+          "covered": 56,
+          "skipped": 0,
+          "pct": 96.55
+        }
+      },
+      "projects/ui-core/empty-state/neu-empty-state.component.ts": {
+        "lines": {
+          "total": 24,
+          "covered": 24,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 37,
+          "covered": 37,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 24,
+          "covered": 23,
+          "skipped": 0,
+          "pct": 95.83
+        }
+      },
+      "projects/ui-core/filter-bar/neu-filter-bar.component.ts": {
+        "lines": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 22,
+          "covered": 22,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 58,
+          "covered": 58,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 26,
+          "covered": 26,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/form-field/neu-form-field.component.ts": {
+        "lines": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 11,
+          "covered": 11,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 66,
+          "covered": 66,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 55,
+          "covered": 55,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/gallery/neu-gallery.component.ts": {
+        "lines": {
+          "total": 215,
+          "covered": 215,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 54,
+          "covered": 54,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 297,
+          "covered": 296,
+          "skipped": 0,
+          "pct": 99.66
+        },
+        "branches": {
+          "total": 110,
+          "covered": 105,
+          "skipped": 0,
+          "pct": 95.45
+        }
+      },
+      "projects/ui-core/icon/neu-icon.component.ts": {
+        "lines": {
+          "total": 8,
+          "covered": 8,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 16,
+          "covered": 16,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 26,
+          "covered": 26,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/image-gallery/neu-image-gallery.component.ts": {
+        "lines": {
+          "total": 72,
+          "covered": 72,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 14,
+          "covered": 14,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 90,
+          "covered": 90,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 44,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 97.72
+        }
+      },
+      "projects/ui-core/image-viewer/neu-image-viewer.component.ts": {
+        "lines": {
+          "total": 134,
+          "covered": 134,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 38,
+          "covered": 38,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 174,
+          "covered": 171,
+          "skipped": 0,
+          "pct": 98.27
+        },
+        "branches": {
+          "total": 71,
+          "covered": 69,
+          "skipped": 0,
+          "pct": 97.18
+        }
+      },
+      "projects/ui-core/inline-editor/neu-inline-editor.component.ts": {
+        "lines": {
+          "total": 146,
+          "covered": 146,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 37,
+          "covered": 37,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 174,
+          "covered": 173,
+          "skipped": 0,
+          "pct": 99.42
+        },
+        "branches": {
+          "total": 113,
+          "covered": 112,
+          "skipped": 0,
+          "pct": 99.11
+        }
+      },
+      "projects/ui-core/input/neu-input.component.ts": {
+        "lines": {
+          "total": 91,
+          "covered": 91,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 29,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 96.55
+        },
+        "statements": {
+          "total": 126,
+          "covered": 124,
+          "skipped": 0,
+          "pct": 98.41
+        },
+        "branches": {
+          "total": 76,
+          "covered": 74,
+          "skipped": 0,
+          "pct": 97.36
+        }
+      },
+      "projects/ui-core/input-mask/neu-input-mask.component.ts": {
+        "lines": {
+          "total": 47,
+          "covered": 47,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 12,
+          "covered": 12,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 60,
+          "covered": 59,
+          "skipped": 0,
+          "pct": 98.33
+        },
+        "branches": {
+          "total": 43,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/input-otp/neu-input-otp.component.ts": {
+        "lines": {
+          "total": 82,
+          "covered": 82,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 29,
+          "covered": 29,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 101,
+          "covered": 100,
+          "skipped": 0,
+          "pct": 99
+        },
+        "branches": {
+          "total": 58,
+          "covered": 57,
+          "skipped": 0,
+          "pct": 98.27
+        }
+      },
+      "projects/ui-core/input-tags/neu-input-tags.component.ts": {
+        "lines": {
+          "total": 209,
+          "covered": 209,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 88,
+          "covered": 88,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 393,
+          "covered": 388,
+          "skipped": 0,
+          "pct": 98.72
+        },
+        "branches": {
+          "total": 302,
+          "covered": 290,
+          "skipped": 0,
+          "pct": 96.02
+        }
+      },
+      "projects/ui-core/kanban/neu-kanban.component.ts": {
+        "lines": {
+          "total": 79,
+          "covered": 79,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 13,
+          "covered": 13,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 112,
+          "covered": 112,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 55,
+          "covered": 54,
+          "skipped": 0,
+          "pct": 98.18
+        }
+      },
+      "projects/ui-core/knob/neu-knob.component.ts": {
+        "lines": {
+          "total": 125,
+          "covered": 125,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 39,
+          "covered": 39,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 157,
+          "covered": 154,
+          "skipped": 0,
+          "pct": 98.08
+        },
+        "branches": {
+          "total": 69,
+          "covered": 67,
+          "skipped": 0,
+          "pct": 97.1
+        }
+      },
+      "projects/ui-core/listbox/neu-listbox.component.ts": {
+        "lines": {
+          "total": 516,
+          "covered": 507,
+          "skipped": 0,
+          "pct": 98.25
+        },
+        "functions": {
+          "total": 134,
+          "covered": 130,
+          "skipped": 0,
+          "pct": 97.01
+        },
+        "statements": {
+          "total": 627,
+          "covered": 614,
+          "skipped": 0,
+          "pct": 97.92
+        },
+        "branches": {
+          "total": 521,
+          "covered": 497,
+          "skipped": 0,
+          "pct": 95.39
+        }
+      },
+      "projects/ui-core/mega-menu/neu-mega-menu.component.ts": {
+        "lines": {
+          "total": 232,
+          "covered": 228,
+          "skipped": 0,
+          "pct": 98.27
+        },
+        "functions": {
+          "total": 61,
+          "covered": 61,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 316,
+          "covered": 309,
+          "skipped": 0,
+          "pct": 97.78
+        },
+        "branches": {
+          "total": 156,
+          "covered": 149,
+          "skipped": 0,
+          "pct": 95.51
+        }
+      },
+      "projects/ui-core/menu/neu-menu.component.ts": {
+        "lines": {
+          "total": 169,
+          "covered": 169,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 46,
+          "covered": 46,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 225,
+          "covered": 225,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 127,
+          "covered": 124,
+          "skipped": 0,
+          "pct": 97.63
+        }
+      },
+      "projects/ui-core/meter-group/neu-meter-group.component.ts": {
+        "lines": {
+          "total": 31,
+          "covered": 31,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 7,
+          "covered": 7,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 45,
+          "covered": 45,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 32,
+          "covered": 32,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/modal/neu-modal.component.ts": {
+        "lines": {
+          "total": 83,
+          "covered": 83,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 17,
+          "covered": 17,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 101,
+          "covered": 101,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 62,
+          "covered": 60,
+          "skipped": 0,
+          "pct": 96.77
+        }
+      },
+      "projects/ui-core/multiselect/neu-multiselect.component.ts": {
+        "lines": {
+          "total": 907,
+          "covered": 893,
+          "skipped": 0,
+          "pct": 98.45
+        },
+        "functions": {
+          "total": 238,
+          "covered": 236,
+          "skipped": 0,
+          "pct": 99.15
+        },
+        "statements": {
+          "total": 1102,
+          "covered": 1072,
+          "skipped": 0,
+          "pct": 97.27
+        },
+        "branches": {
+          "total": 704,
+          "covered": 672,
+          "skipped": 0,
+          "pct": 95.45
+        }
+      },
+      "projects/ui-core/nav/neu-nav.component.ts": {
+        "lines": {
+          "total": 226,
+          "covered": 226,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 32,
+          "covered": 32,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 302,
+          "covered": 302,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 128,
+          "covered": 122,
+          "skipped": 0,
+          "pct": 95.31
+        }
+      },
+      "projects/ui-core/notification-center/neu-notification-center.component.ts": {
+        "lines": {
+          "total": 124,
+          "covered": 124,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 38,
+          "covered": 37,
+          "skipped": 0,
+          "pct": 97.36
+        },
+        "statements": {
+          "total": 174,
+          "covered": 171,
+          "skipped": 0,
+          "pct": 98.27
+        },
+        "branches": {
+          "total": 80,
+          "covered": 76,
+          "skipped": 0,
+          "pct": 95
+        }
+      },
+      "projects/ui-core/number-input/neu-number-input.component.ts": {
+        "lines": {
+          "total": 111,
+          "covered": 111,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 41,
+          "covered": 39,
+          "skipped": 0,
+          "pct": 95.12
+        },
+        "statements": {
+          "total": 156,
+          "covered": 151,
+          "skipped": 0,
+          "pct": 96.79
+        },
+        "branches": {
+          "total": 89,
+          "covered": 87,
+          "skipped": 0,
+          "pct": 97.75
+        }
+      },
+      "projects/ui-core/organization-chart/neu-organization-chart.component.ts": {
+        "lines": {
+          "total": 276,
+          "covered": 271,
+          "skipped": 0,
+          "pct": 98.18
+        },
+        "functions": {
+          "total": 68,
+          "covered": 67,
+          "skipped": 0,
+          "pct": 98.52
+        },
+        "statements": {
+          "total": 353,
+          "covered": 347,
+          "skipped": 0,
+          "pct": 98.3
+        },
+        "branches": {
+          "total": 242,
+          "covered": 239,
+          "skipped": 0,
+          "pct": 98.76
+        }
+      },
+      "projects/ui-core/pagination/neu-pagination.component.ts": {
+        "lines": {
+          "total": 46,
+          "covered": 46,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 8,
+          "covered": 8,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 64,
+          "covered": 64,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 28,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/panel/neu-panel.component.ts": {
+        "lines": {
+          "total": 113,
+          "covered": 112,
+          "skipped": 0,
+          "pct": 99.11
+        },
+        "functions": {
+          "total": 32,
+          "covered": 31,
+          "skipped": 0,
+          "pct": 96.87
+        },
+        "statements": {
+          "total": 175,
+          "covered": 173,
+          "skipped": 0,
+          "pct": 98.85
+        },
+        "branches": {
+          "total": 118,
+          "covered": 114,
+          "skipped": 0,
+          "pct": 96.61
+        }
+      },
+      "projects/ui-core/password/neu-password.component.ts": {
+        "lines": {
+          "total": 66,
+          "covered": 66,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 23,
+          "covered": 22,
+          "skipped": 0,
+          "pct": 95.65
+        },
+        "statements": {
+          "total": 91,
+          "covered": 89,
+          "skipped": 0,
+          "pct": 97.8
+        },
+        "branches": {
+          "total": 52,
+          "covered": 51,
+          "skipped": 0,
+          "pct": 98.07
+        }
+      },
+      "projects/ui-core/pick-list/neu-pick-list.component.ts": {
+        "lines": {
+          "total": 100,
+          "covered": 100,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 43,
+          "covered": 41,
+          "skipped": 0,
+          "pct": 95.34
+        },
+        "statements": {
+          "total": 181,
+          "covered": 177,
+          "skipped": 0,
+          "pct": 97.79
+        },
+        "branches": {
+          "total": 94,
+          "covered": 91,
+          "skipped": 0,
+          "pct": 96.8
+        }
+      },
+      "projects/ui-core/popover/neu-popover.component.ts": {
+        "lines": {
+          "total": 88,
+          "covered": 87,
+          "skipped": 0,
+          "pct": 98.86
+        },
+        "functions": {
+          "total": 23,
+          "covered": 22,
+          "skipped": 0,
+          "pct": 95.65
+        },
+        "statements": {
+          "total": 116,
+          "covered": 112,
+          "skipped": 0,
+          "pct": 96.55
+        },
+        "branches": {
+          "total": 78,
+          "covered": 75,
+          "skipped": 0,
+          "pct": 96.15
+        }
+      },
+      "projects/ui-core/progress-bar/neu-progress-bar.component.ts": {
+        "lines": {
+          "total": 26,
+          "covered": 26,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 38,
+          "covered": 38,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 24,
+          "covered": 24,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/radio/neu-radio-group.component.ts": {
+        "lines": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 10,
+          "covered": 10,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 25,
+          "covered": 24,
+          "skipped": 0,
+          "pct": 96
+        },
+        "branches": {
+          "total": 20,
+          "covered": 20,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/radio/neu-radio.component.ts": {
+        "lines": {
+          "total": 22,
+          "covered": 22,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 7,
+          "covered": 7,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 34,
+          "covered": 34,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/rating/neu-rating.component.ts": {
+        "lines": {
+          "total": 63,
+          "covered": 63,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 91,
+          "covered": 88,
+          "skipped": 0,
+          "pct": 96.7
+        },
+        "branches": {
+          "total": 74,
+          "covered": 71,
+          "skipped": 0,
+          "pct": 95.94
+        }
+      },
+      "projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts": {
+        "lines": {
+          "total": 198,
+          "covered": 195,
+          "skipped": 0,
+          "pct": 98.48
+        },
+        "functions": {
+          "total": 46,
+          "covered": 44,
+          "skipped": 0,
+          "pct": 95.65
+        },
+        "statements": {
+          "total": 250,
+          "covered": 244,
+          "skipped": 0,
+          "pct": 97.6
+        },
+        "branches": {
+          "total": 98,
+          "covered": 95,
+          "skipped": 0,
+          "pct": 96.93
+        }
+      },
+      "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.ts": {
+        "lines": {
+          "total": 133,
+          "covered": 132,
+          "skipped": 0,
+          "pct": 99.24
+        },
+        "functions": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 149,
+          "covered": 148,
+          "skipped": 0,
+          "pct": 99.32
+        },
+        "branches": {
+          "total": 117,
+          "covered": 115,
+          "skipped": 0,
+          "pct": 98.29
+        }
+      },
+      "projects/ui-core/scroll-top/neu-scroll-top.component.ts": {
+        "lines": {
+          "total": 51,
+          "covered": 51,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 15,
+          "covered": 15,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 70,
+          "covered": 70,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 46,
+          "covered": 46,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/select/neu-select.component.ts": {
+        "lines": {
+          "total": 829,
+          "covered": 810,
+          "skipped": 0,
+          "pct": 97.7
+        },
+        "functions": {
+          "total": 207,
+          "covered": 205,
+          "skipped": 0,
+          "pct": 99.03
+        },
+        "statements": {
+          "total": 1003,
+          "covered": 972,
+          "skipped": 0,
+          "pct": 96.9
+        },
+        "branches": {
+          "total": 770,
+          "covered": 739,
+          "skipped": 0,
+          "pct": 95.97
+        }
+      },
+      "projects/ui-core/sidebar/neu-sidebar.component.ts": {
+        "lines": {
+          "total": 109,
+          "covered": 108,
+          "skipped": 0,
+          "pct": 99.08
+        },
+        "functions": {
+          "total": 25,
+          "covered": 24,
+          "skipped": 0,
+          "pct": 96
+        },
+        "statements": {
+          "total": 125,
+          "covered": 123,
+          "skipped": 0,
+          "pct": 98.4
+        },
+        "branches": {
+          "total": 68,
+          "covered": 66,
+          "skipped": 0,
+          "pct": 97.05
+        }
+      },
+      "projects/ui-core/skeleton/neu-skeleton.component.ts": {
+        "lines": {
+          "total": 5,
+          "covered": 5,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 9,
+          "covered": 9,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 14,
+          "covered": 14,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/slider/neu-slider.component.ts": {
+        "lines": {
+          "total": 40,
+          "covered": 40,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 4,
+          "covered": 4,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 62,
+          "covered": 62,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 28,
+          "covered": 28,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/speed-dial/neu-speed-dial.component.ts": {
+        "lines": {
+          "total": 216,
+          "covered": 214,
+          "skipped": 0,
+          "pct": 99.07
+        },
+        "functions": {
+          "total": 63,
+          "covered": 60,
+          "skipped": 0,
+          "pct": 95.23
+        },
+        "statements": {
+          "total": 290,
+          "covered": 282,
+          "skipped": 0,
+          "pct": 97.24
+        },
+        "branches": {
+          "total": 190,
+          "covered": 181,
+          "skipped": 0,
+          "pct": 95.26
+        }
+      },
+      "projects/ui-core/spinner/neu-spinner.component.ts": {
+        "lines": {
+          "total": 21,
+          "covered": 21,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 30,
+          "covered": 30,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 22,
+          "covered": 22,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/split-button/neu-split-button.component.ts": {
+        "lines": {
+          "total": 129,
+          "covered": 129,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 37,
+          "covered": 37,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 170,
+          "covered": 169,
+          "skipped": 0,
+          "pct": 99.41
+        },
+        "branches": {
+          "total": 85,
+          "covered": 84,
+          "skipped": 0,
+          "pct": 98.82
+        }
+      },
+      "projects/ui-core/splitter/neu-splitter.component.ts": {
+        "lines": {
+          "total": 137,
+          "covered": 137,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 31,
+          "covered": 30,
+          "skipped": 0,
+          "pct": 96.77
+        },
+        "statements": {
+          "total": 172,
+          "covered": 169,
+          "skipped": 0,
+          "pct": 98.25
+        },
+        "branches": {
+          "total": 112,
+          "covered": 107,
+          "skipped": 0,
+          "pct": 95.53
+        }
+      },
+      "projects/ui-core/stats-card/neu-stats-card.component.ts": {
+        "lines": {
+          "total": 41,
+          "covered": 41,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 55,
+          "covered": 55,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 32,
+          "covered": 32,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/stepper/neu-stepper.component.ts": {
+        "lines": {
+          "total": 52,
+          "covered": 52,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 8,
+          "covered": 8,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 66,
+          "covered": 66,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 39,
+          "covered": 39,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/switch/neu-switch.component.ts": {
+        "lines": {
+          "total": 30,
+          "covered": 30,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 13,
+          "covered": 13,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 44,
+          "covered": 43,
+          "skipped": 0,
+          "pct": 97.72
+        },
+        "branches": {
+          "total": 20,
+          "covered": 20,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/table/neu-table-checkbox.component.ts": {
+        "lines": {
+          "total": 24,
+          "covered": 24,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 36,
+          "covered": 36,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/table/neu-table-optional-feature-error.component.ts": {
+        "lines": {
+          "total": 12,
+          "covered": 12,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 4,
+          "covered": 4,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 14,
+          "covered": 14,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/table/neu-table-optional-features.component.ts": {
+        "lines": {
+          "total": 368,
+          "covered": 365,
+          "skipped": 0,
+          "pct": 99.18
+        },
+        "functions": {
+          "total": 82,
+          "covered": 82,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 459,
+          "covered": 455,
+          "skipped": 0,
+          "pct": 99.12
+        },
+        "branches": {
+          "total": 331,
+          "covered": 321,
+          "skipped": 0,
+          "pct": 96.97
+        }
+      },
+      "projects/ui-core/table/neu-table.component.ts": {
+        "lines": {
+          "total": 3129,
+          "covered": 3068,
+          "skipped": 0,
+          "pct": 98.05
+        },
+        "functions": {
+          "total": 810,
+          "covered": 787,
+          "skipped": 0,
+          "pct": 97.16
+        },
+        "statements": {
+          "total": 3738,
+          "covered": 3634,
+          "skipped": 0,
+          "pct": 97.21
+        },
+        "branches": {
+          "total": 2636,
+          "covered": 2505,
+          "skipped": 0,
+          "pct": 95.03
+        }
+      },
+      "projects/ui-core/table-core/neu-table-core.component.ts": {
+        "lines": {
+          "total": 122,
+          "covered": 122,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 12,
+          "covered": 12,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 153,
+          "covered": 153,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 78,
+          "covered": 76,
+          "skipped": 0,
+          "pct": 97.43
+        }
+      },
+      "projects/ui-core/tabs/neu-tabs.component.ts": {
+        "lines": {
+          "total": 140,
+          "covered": 139,
+          "skipped": 0,
+          "pct": 99.28
+        },
+        "functions": {
+          "total": 41,
+          "covered": 40,
+          "skipped": 0,
+          "pct": 97.56
+        },
+        "statements": {
+          "total": 192,
+          "covered": 189,
+          "skipped": 0,
+          "pct": 98.43
+        },
+        "branches": {
+          "total": 100,
+          "covered": 97,
+          "skipped": 0,
+          "pct": 97
+        }
+      },
+      "projects/ui-core/tag/neu-tag.component.ts": {
+        "lines": {
+          "total": 19,
+          "covered": 19,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 4,
+          "covered": 4,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 34,
+          "covered": 34,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 32,
+          "covered": 32,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/tags/neu-tags.component.ts": {
+        "lines": {
+          "total": 57,
+          "covered": 57,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 25,
+          "covered": 25,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 99,
+          "covered": 98,
+          "skipped": 0,
+          "pct": 98.98
+        },
+        "branches": {
+          "total": 63,
+          "covered": 63,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/terminal/neu-terminal.component.ts": {
+        "lines": {
+          "total": 83,
+          "covered": 83,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 23,
+          "covered": 23,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 118,
+          "covered": 118,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 68,
+          "covered": 65,
+          "skipped": 0,
+          "pct": 95.58
+        }
+      },
+      "projects/ui-core/textarea/neu-textarea.component.ts": {
+        "lines": {
+          "total": 61,
+          "covered": 61,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 22,
+          "covered": 21,
+          "skipped": 0,
+          "pct": 95.45
+        },
+        "statements": {
+          "total": 82,
+          "covered": 80,
+          "skipped": 0,
+          "pct": 97.56
+        },
+        "branches": {
+          "total": 50,
+          "covered": 49,
+          "skipped": 0,
+          "pct": 98
+        }
+      },
+      "projects/ui-core/timeline/neu-timeline.component.ts": {
+        "lines": {
+          "total": 26,
+          "covered": 26,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 51,
+          "covered": 51,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 33,
+          "covered": 33,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/timeline-grid/neu-timeline-grid.component.ts": {
+        "lines": {
+          "total": 71,
+          "covered": 71,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 17,
+          "covered": 17,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 97,
+          "covered": 97,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 39,
+          "covered": 39,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/toast/neu-toast.component.ts": {
+        "lines": {
+          "total": 18,
+          "covered": 18,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 3,
+          "covered": 3,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 30,
+          "covered": 30,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 12,
+          "covered": 12,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.ts": {
+        "lines": {
+          "total": 62,
+          "covered": 62,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 25,
+          "covered": 24,
+          "skipped": 0,
+          "pct": 96
+        },
+        "statements": {
+          "total": 87,
+          "covered": 85,
+          "skipped": 0,
+          "pct": 97.7
+        },
+        "branches": {
+          "total": 76,
+          "covered": 75,
+          "skipped": 0,
+          "pct": 98.68
+        }
+      },
+      "projects/ui-core/toolbar/neu-toolbar.component.ts": {
+        "lines": {
+          "total": 21,
+          "covered": 21,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 2,
+          "covered": 2,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 27,
+          "covered": 27,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 17,
+          "covered": 17,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/tooltip/neu-tooltip.component.ts": {
+        "lines": {
+          "total": 4,
+          "covered": 4,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 1,
+          "covered": 1,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 11,
+          "covered": 11,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 12,
+          "covered": 12,
+          "skipped": 0,
+          "pct": 100
+        }
+      },
+      "projects/ui-core/tree/neu-tree.component.ts": {
+        "lines": {
+          "total": 193,
+          "covered": 190,
+          "skipped": 0,
+          "pct": 98.44
+        },
+        "functions": {
+          "total": 51,
+          "covered": 50,
+          "skipped": 0,
+          "pct": 98.03
+        },
+        "statements": {
+          "total": 233,
+          "covered": 229,
+          "skipped": 0,
+          "pct": 98.28
+        },
+        "branches": {
+          "total": 128,
+          "covered": 123,
+          "skipped": 0,
+          "pct": 96.09
+        }
+      },
+      "projects/ui-core/tree-select/neu-tree-select.component.ts": {
+        "lines": {
+          "total": 250,
+          "covered": 247,
+          "skipped": 0,
+          "pct": 98.8
+        },
+        "functions": {
+          "total": 80,
+          "covered": 80,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 327,
+          "covered": 320,
+          "skipped": 0,
+          "pct": 97.85
+        },
+        "branches": {
+          "total": 218,
+          "covered": 212,
+          "skipped": 0,
+          "pct": 97.24
+        }
+      },
+      "projects/ui-core/tree-table/neu-tree-table.component.ts": {
+        "lines": {
+          "total": 539,
+          "covered": 537,
+          "skipped": 0,
+          "pct": 99.62
+        },
+        "functions": {
+          "total": 157,
+          "covered": 155,
+          "skipped": 0,
+          "pct": 98.72
+        },
+        "statements": {
+          "total": 631,
+          "covered": 625,
+          "skipped": 0,
+          "pct": 99.04
+        },
+        "branches": {
+          "total": 389,
+          "covered": 370,
+          "skipped": 0,
+          "pct": 95.11
+        }
+      },
+      "projects/ui-core/uploader/neu-uploader.component.ts": {
+        "lines": {
+          "total": 285,
+          "covered": 285,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 67,
+          "covered": 66,
+          "skipped": 0,
+          "pct": 98.5
+        },
+        "statements": {
+          "total": 342,
+          "covered": 340,
+          "skipped": 0,
+          "pct": 99.41
+        },
+        "branches": {
+          "total": 190,
+          "covered": 185,
+          "skipped": 0,
+          "pct": 97.36
+        }
+      },
+      "projects/ui-core/virtual-list/neu-virtual-list.component.ts": {
+        "lines": {
+          "total": 35,
+          "covered": 35,
+          "skipped": 0,
+          "pct": 100
+        },
+        "functions": {
+          "total": 15,
+          "covered": 15,
+          "skipped": 0,
+          "pct": 100
+        },
+        "statements": {
+          "total": 53,
+          "covered": 53,
+          "skipped": 0,
+          "pct": 100
+        },
+        "branches": {
+          "total": 39,
+          "covered": 38,
+          "skipped": 0,
+          "pct": 97.43
+        }
+      }
+    }
+  }
+}

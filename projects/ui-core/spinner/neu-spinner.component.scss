@@ -5,6 +5,8 @@
 
 .neu-spinner-host {
   display: inline-flex;
+  max-inline-size: 100%;
+  min-inline-size: 0;
   align-items: center;
   justify-content: center;
   gap: var(--neu-space-2, 0.5rem);
@@ -12,6 +14,7 @@
 }
 
 .neu-spinner {
+  flex-shrink: 0;
   animation: neu-spinner-rotate linear infinite;
   animation-duration: inherit;
 
@@ -30,7 +33,9 @@
   }
 
   // Severities — stroke del arco
-  &--primary &__arc {
+  &--neutral &__arc { stroke: var(--neu-text-muted); }
+
+  &--brand &__arc {
     stroke: var(--neu-primary);
   }
 
@@ -43,7 +48,7 @@
   }
 
   &--danger &__arc {
-    stroke: var(--neu-danger);
+    stroke: var(--neu-error);
   }
 
   &--info &__arc {
@@ -55,7 +60,8 @@
   color: inherit;
   font-size: var(--neu-text-sm, 0.875rem);
   line-height: 1.25;
-  white-space: nowrap;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .neu-spinner__sr-only {
@@ -92,5 +98,17 @@
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -124px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-spinner,
+  .neu-spinner__arc {
+    animation: none;
+  }
+
+  .neu-spinner__arc {
+    stroke-dasharray: 70, 200;
+    stroke-dashoffset: 0;
   }
 }

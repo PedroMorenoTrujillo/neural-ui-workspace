@@ -14,12 +14,12 @@ if (!existsSync(packageJsonPath)) {
 }
 
 const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-const requiredFiles = ['README.md', 'styles.scss', 'styles/index.scss'];
+const requiredFiles = ['LICENSE', 'README.md', 'styles.scss', 'styles/index.scss'];
 const missingFiles = requiredFiles.filter((file) => !existsSync(join(packageRoot, file)));
 const missingExports = Object.entries(packageJson.exports ?? {})
   .filter(([entry]) => entry !== './styles' && entry !== './styles/*')
   .filter(([, target]) => {
-    const path = typeof target === 'string' ? target : (target.default ?? target.import);
+    const path = typeof target === 'string' ? target : target.default ?? target.import;
     return !path || !existsSync(join(packageRoot, path));
   })
   .map(([entry]) => entry);

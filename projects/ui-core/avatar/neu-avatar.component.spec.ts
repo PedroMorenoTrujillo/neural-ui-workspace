@@ -46,7 +46,23 @@ describe('NeuAvatarComponent', () => {
     const img = df.nativeElement.querySelector('img');
     expect(img).toBeTruthy();
     expect(img.src).toContain('avatar.jpg');
-    expect(img.alt).toBe('Test user');
+    expect(img.alt).toBe('');
+    expect(df.nativeElement.querySelector('.neu-avatar').getAttribute('aria-label')).toBe('Test user');
+  });
+
+  it('exposes one accessible name for initials and hides an unnamed decorative avatar', () => {
+    const named = TestBed.createComponent(NeuAvatarComponent);
+    named.componentRef.setInput('name', 'Jane Doe');
+    named.detectChanges();
+    const namedAvatar = named.nativeElement.querySelector('.neu-avatar');
+    expect(namedAvatar.getAttribute('role')).toBe('img');
+    expect(namedAvatar.getAttribute('aria-label')).toBe('Jane Doe');
+    expect(namedAvatar.querySelector('.neu-avatar__initials').getAttribute('aria-hidden')).toBe('true');
+
+    const decorative = fixture.nativeElement.querySelector('.neu-avatar');
+    expect(decorative.getAttribute('role')).toBeNull();
+    expect(decorative.getAttribute('aria-label')).toBeNull();
+    expect(decorative.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should show initials when name is provided without src', async () => {
@@ -55,6 +71,19 @@ describe('NeuAvatarComponent', () => {
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.textContent).toContain('JD');
+  });
+
+  it.each([
+    ['𐐀 Ada', '𐐀A'],
+    ['𐐀lex', '𐐀L'],
+    ['E\u0301lodie Nu\u0301n\u0303ez', 'ÉN'],
+    ['E\u0301lodie', 'ÉL'],
+  ])('preserves Unicode characters when deriving initials for %s', (name, expected) => {
+    const df = TestBed.createComponent(NeuAvatarComponent);
+    df.componentRef.setInput('name', name);
+    df.detectChanges();
+    expect(df.nativeElement.querySelector('.neu-avatar__initials').textContent).toBe(expected);
+    expect(df.nativeElement.querySelector('.neu-avatar').getAttribute('aria-label')).toBe(name);
   });
 
   it('should show single initial for single word name', async () => {
@@ -128,5 +157,50 @@ describe('NeuAvatarComponent', () => {
     await df.whenStable();
     // Color class is on inner span.neu-avatar, not on the host
     expect(df.nativeElement.querySelector('.neu-avatar--blue')).toBeTruthy();
+  });
+
+  it('keeps the adjusted initials palette at WCAG AA contrast', async () => {
+    const parse = (value: string) => value.match(/\d+/g)!.slice(0, 3).map(Number);
+    const luminance = (value: string) => {
+      const channels = parse(value).map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045
+          ? normalized / 12.92
+          : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+    };
+    for (const color of ['green', 'amber']) {
+      const df = TestBed.createComponent(NeuAvatarComponent);
+      df.componentRef.setInput('name', 'Accessible Initials');
+      df.componentRef.setInput('color', color);
+      df.detectChanges();
+      await df.whenStable();
+
+      const avatar = df.nativeElement.querySelector(`.neu-avatar--${color}`) as HTMLElement;
+      const style = getComputedStyle(avatar);
+      const foreground = luminance(style.color);
+      const background = luminance(style.backgroundColor);
+      const ratio =
+        (Math.max(foreground, background) + 0.05) /
+        (Math.min(foreground, background) + 0.05);
+
+      expect(ratio).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('recovers when a failed source is replaced with a different image', async () => {
+    const df = TestBed.createComponent(NeuAvatarComponent);
+    df.componentRef.setInput('src', 'broken.jpg');
+    df.componentRef.setInput('name', 'Test User');
+    df.detectChanges();
+    (df.nativeElement.querySelector('img') as HTMLImageElement).dispatchEvent(new Event('error'));
+    df.detectChanges();
+    expect(df.nativeElement.querySelector('.neu-avatar__initials')).toBeTruthy();
+
+    df.componentRef.setInput('src', 'working.jpg');
+    df.detectChanges();
+    await df.whenStable();
+    expect((df.nativeElement.querySelector('img') as HTMLImageElement).src).toContain('working.jpg');
   });
 });

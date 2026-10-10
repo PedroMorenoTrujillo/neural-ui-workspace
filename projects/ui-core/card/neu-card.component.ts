@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   computed,
@@ -25,7 +24,6 @@ export type NeuCardPadding = 'none' | 'sm' | 'md' | 'lg';
   selector: 'neu-card',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `
     <div class="neu-card__inner">

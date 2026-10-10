@@ -16,43 +16,43 @@ describe('NeuAlertComponent', () => {
     expect(f.nativeElement).toBeTruthy();
   });
 
-  it('should apply type class', async () => {
+  it('should apply tone class', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'success');
+    f.componentRef.setInput('tone', 'success');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.classList).toContain('neu-alert--success');
   });
 
-  it('should apply error and info type classes', async () => {
+  it('should apply danger and info tone classes', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'error');
+    f.componentRef.setInput('tone', 'danger');
     f.detectChanges();
-    expect(f.nativeElement.classList).toContain('neu-alert--error');
+    expect(f.nativeElement.classList).toContain('neu-alert--danger');
 
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.detectChanges();
     expect(f.nativeElement.classList).toContain('neu-alert--info');
   });
 
   it('should show default icon', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'warning');
+    f.componentRef.setInput('tone', 'warning');
     f.componentRef.setInput('showIcon', true);
     f.detectChanges();
     await f.whenStable();
     const icon = f.nativeElement.querySelector('.neu-alert__icon');
     expect(icon).toBeTruthy();
-    expect(icon.querySelector('neu-icon')).toBeTruthy();
+    expect(icon.querySelector('neu-icon-outlet')).toBeTruthy();
   });
 
   it('should use custom icon when provided', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'info');
-    f.componentRef.setInput('icon', '🔔');
+    f.componentRef.setInput('tone', 'info');
+    f.componentRef.setInput('icon', 'close');
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.querySelector('.neu-alert__icon').textContent.trim()).toBe('🔔');
+    expect(f.nativeElement.querySelector('.neu-alert__icon neu-icon-outlet svg')).toBeTruthy();
   });
 
   it('should hide icon when showIcon=false', async () => {
@@ -72,6 +72,7 @@ describe('NeuAlertComponent', () => {
     expect(close).toBeTruthy();
     expect(close.classList).toContain('neu-button');
     expect(close.getAttribute('aria-label')).toBe('Close alert');
+    expect(close.querySelector('neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('should not show close button when closable=false', async () => {
@@ -92,6 +93,7 @@ describe('NeuAlertComponent', () => {
     f.componentInstance.closed.subscribe(() => emitted.push(true));
 
     f.componentInstance.dismiss();
+    f.componentInstance.dismiss();
     f.detectChanges();
     await f.whenStable();
 
@@ -110,12 +112,12 @@ describe('NeuAlertComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    expect((f.componentInstance as any)._dismissed()).toBe(true);
+    expect((f.componentInstance as any)['_dismissed']()).toBe(true);
   });
 
   it('should apply outline class', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('outline', true);
+    f.componentRef.setInput('variant', 'outline');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.classList).toContain('neu-alert--outline');
@@ -127,6 +129,7 @@ describe('NeuAlertComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-alert__title').textContent.trim()).toBe('Atención');
+    expect(f.nativeElement.classList).toContain('neu-alert--with-title');
   });
 
   it('should not render title element when empty', async () => {
@@ -135,29 +138,30 @@ describe('NeuAlertComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-alert__title')).toBeNull();
+    expect(f.nativeElement.classList).not.toContain('neu-alert--with-title');
   });
 
-  it('liveRegion returns assertive for error type', async () => {
+  it('liveRegion returns assertive for danger tone', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'error');
+    f.componentRef.setInput('tone', 'danger');
     f.detectChanges();
     expect((f.componentInstance as any).liveRegion()).toBe('assertive');
   });
 
-  it('liveRegion returns polite for non-error types', async () => {
+  it('liveRegion returns polite for non-danger tones', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.detectChanges();
     expect((f.componentInstance as any).liveRegion()).toBe('polite');
   });
 
   it('uses an assertive alert role only for errors', async () => {
     const f = TestBed.createComponent(NeuAlertComponent);
-    f.componentRef.setInput('type', 'info');
+    f.componentRef.setInput('tone', 'info');
     f.detectChanges();
     expect(f.nativeElement.getAttribute('role')).toBe('status');
 
-    f.componentRef.setInput('type', 'error');
+    f.componentRef.setInput('tone', 'danger');
     f.detectChanges();
     expect(f.nativeElement.getAttribute('role')).toBe('alert');
     expect(f.nativeElement.getAttribute('aria-live')).toBe('assertive');

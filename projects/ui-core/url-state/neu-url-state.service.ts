@@ -122,7 +122,9 @@ export class NeuUrlStateService {
     const params = { ...this._pendingParams };
 
     this._pendingParams = {};
-    this._pendingParamsState.set({});
+    // Consuming the queue starts navigation; it does not finish it. Keep the
+    // optimistic values visible until that navigation settles, otherwise a
+    // slow guard/resolver can briefly restore the previous query state.
     this._pendingReplaceUrl = true;
     this._batchScheduled = false;
 

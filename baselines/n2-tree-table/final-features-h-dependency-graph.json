@@ -1,0 +1,155 @@
+{
+  "checkpoint": "N2-015H",
+  "basic": [
+    {
+      "path": "projects/ui-core/tree-table/next/internal/renderer/neu-tree-table-renderer.component.ts",
+      "bytesInOutput": 20716
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table.component-contract.ts",
+      "bytesInOutput": 6650
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/query/neu-tree-table-query.ts",
+      "bytesInOutput": 5794
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/remote/neu-tree-table-remote.ts",
+      "bytesInOutput": 5671
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/selection/neu-tree-table-selection.ts",
+      "bytesInOutput": 4375
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/export/neu-tree-table-xlsx-export.ts",
+      "bytesInOutput": 4035
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/hierarchy/neu-tree-table-hierarchy.ts",
+      "bytesInOutput": 3930
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/export/neu-tree-table-export.ts",
+      "bytesInOutput": 2172
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/editing/neu-tree-table-editing.ts",
+      "bytesInOutput": 1852
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table-template-contracts.ts",
+      "bytesInOutput": 1733
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/editing/neu-tree-table-active-editor.component.ts",
+      "bytesInOutput": 1411
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/interaction/neu-tree-table-interaction.ts",
+      "bytesInOutput": 1021
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/virtualization/neu-tree-table-virtualization.ts",
+      "bytesInOutput": 948
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/export/neu-tree-table-json-export.ts",
+      "bytesInOutput": 938
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/export/neu-tree-table-csv-export.ts",
+      "bytesInOutput": 635
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/export/neu-tree-table-export-loader.ts",
+      "bytesInOutput": 296
+    },
+    {
+      "path": "projects/ui-core/internal/neu-field-value-resolver.ts",
+      "bytesInOutput": 136
+    },
+    {
+      "path": "projects/ui-core/internal/neu-exact-key.ts",
+      "bytesInOutput": 75
+    }
+  ],
+  "templates": [
+    {
+      "path": "projects/ui-core/tree-table/next/internal/renderer/neu-tree-table-renderer.component.ts",
+      "bytesInOutput": 20724
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table.component-contract.ts",
+      "bytesInOutput": 6652
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/query/neu-tree-table-query.ts",
+      "bytesInOutput": 5801
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/remote/neu-tree-table-remote.ts",
+      "bytesInOutput": 5678
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/selection/neu-tree-table-selection.ts",
+      "bytesInOutput": 4375
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/export/neu-tree-table-xlsx-export.ts",
+      "bytesInOutput": 4035
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/hierarchy/neu-tree-table-hierarchy.ts",
+      "bytesInOutput": 3937
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/export/neu-tree-table-export.ts",
+      "bytesInOutput": 2172
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/editing/neu-tree-table-editing.ts",
+      "bytesInOutput": 1852
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/neu-tree-table-template-contracts.ts",
+      "bytesInOutput": 1715
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/editing/neu-tree-table-active-editor.component.ts",
+      "bytesInOutput": 1414
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/interaction/neu-tree-table-interaction.ts",
+      "bytesInOutput": 1021
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/virtualization/neu-tree-table-virtualization.ts",
+      "bytesInOutput": 948
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/export/neu-tree-table-json-export.ts",
+      "bytesInOutput": 938
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/features/export/neu-tree-table-csv-export.ts",
+      "bytesInOutput": 635
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/public/public-api.ts",
+      "bytesInOutput": 422
+    },
+    {
+      "path": "projects/ui-core/tree-table/next/internal/export/neu-tree-table-export-loader.ts",
+      "bytesInOutput": 296
+    },
+    {
+      "path": "projects/ui-core/internal/neu-field-value-resolver.ts",
+      "bytesInOutput": 136
+    },
+    {
+      "path": "projects/ui-core/internal/neu-exact-key.ts",
+      "bytesInOutput": 75
+    }
+  ]
+}

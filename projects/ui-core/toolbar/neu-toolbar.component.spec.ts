@@ -1,6 +1,18 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { NeuToolbarComponent } from './neu-toolbar.component';
+
+@Component({
+  imports: [NeuToolbarComponent],
+  template: `<neu-toolbar dir="rtl">
+    <button neu-toolbar-start id="first">First</button>
+    <button neu-toolbar-start id="second">Second</button>
+    <span neu-toolbar-center>Title</span>
+    <button neu-toolbar-end id="last">Last</button>
+    <button neu-toolbar-secondary id="secondary">Secondary</button>
+  </neu-toolbar>`,
+})
+class ToolbarHost {}
 
 function mk() {
   return TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
@@ -55,12 +67,14 @@ describe('NeuToolbarComponent', () => {
     expect(f.nativeElement.classList).toContain('neu-toolbar--bordered');
   });
 
-  it('should apply primary surface class', async () => {
+  it('should apply brand solid classes', async () => {
     const f = TestBed.createComponent(NeuToolbarComponent);
-    f.componentRef.setInput('surface', 'primary');
+    f.componentRef.setInput('tone', 'brand');
+    f.componentRef.setInput('variant', 'solid');
     f.detectChanges();
     await f.whenStable();
-    expect(f.nativeElement.classList).toContain('neu-toolbar--primary');
+    expect(f.nativeElement.classList).toContain('neu-toolbar--brand');
+    expect(f.nativeElement.classList).toContain('neu-toolbar--solid');
   });
 
   it('should render the three section slots', async () => {
@@ -70,5 +84,20 @@ describe('NeuToolbarComponent', () => {
     expect(f.nativeElement.querySelector('.neu-toolbar__section--start')).toBeTruthy();
     expect(f.nativeElement.querySelector('.neu-toolbar__section--center')).toBeTruthy();
     expect(f.nativeElement.querySelector('.neu-toolbar__section--end')).toBeTruthy();
+  });
+
+  it('preserves projected action order and native keyboard ownership in RTL', () => {
+    const fixture = TestBed.createComponent(ToolbarHost);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const toolbar = root.querySelector('neu-toolbar')!;
+    expect(toolbar.getAttribute('dir')).toBe('rtl');
+    expect([...toolbar.querySelectorAll('.neu-toolbar__section--start button')].map((button) => button.id))
+      .toEqual(['first', 'second']);
+    expect(toolbar.querySelector('.neu-toolbar__section--center')?.textContent).toContain('Title');
+    expect(toolbar.querySelector('.neu-toolbar__section--end button')?.id).toBe('last');
+    expect(toolbar.querySelector('.neu-toolbar__section--secondary button')?.id).toBe('secondary');
+    expect([...toolbar.querySelectorAll('button')].every((button) => button.getAttribute('tabindex') === null)).toBe(true);
+    expect(toolbar.getAttribute('role')).toBeNull();
   });
 });

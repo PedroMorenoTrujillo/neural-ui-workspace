@@ -1,5 +1,4 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ViewEncapsulation,
@@ -8,7 +7,9 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
+import type { NeuDensity } from '@neural-ui/core';
 
 /**
  * NeuralUI Code Block
@@ -27,9 +28,13 @@ import { DOCUMENT } from '@angular/common';
   selector: 'neu-code-block',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="neu-code-block">
+    <div
+      class="neu-code-block"
+      [class.neu-code-block--density-compact]="density() === 'compact'"
+      [class.neu-code-block--density-relaxed]="density() === 'relaxed'"
+      [class.neu-code-block--wrap]="wrap()"
+    >
       <!-- Encabezado del editor -->
       <div class="neu-code-block__header">
         <!-- Traffic lights decorativos -->
@@ -70,11 +75,15 @@ import { DOCUMENT } from '@angular/common';
             {{ resolvedCopyLabel() }}
           }
         </button>
+        <span class="neu-code-block__status" role="status" aria-live="polite">{{
+          copied() ? resolvedCopiedLabel() : ''
+        }}</span>
       </div>
 
       <!-- Bloque de código -->
       <pre
         class="neu-code-block__pre"
+        dir="ltr"
         tabindex="0"
       ><code class="neu-code-block__code">{{ code() }}</code></pre>
     </div>
@@ -85,9 +94,16 @@ import { DOCUMENT } from '@angular/common';
 export class NeuCodeBlockComponent {
   private readonly doc = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /** Código fuente a mostrar / Source code to display */
   code = input<string>('');
+
+  /** Compactación espacial / Spatial compactness */
+  density = input<NeuDensity>('normal');
+
+  /** Ajusta las líneas largas al ancho disponible y evita el scroll horizontal / Wraps long lines to the available width and avoids horizontal scrolling */
+  wrap = input<boolean>(false);
 
   /** Nombre del lenguaje (decorativo) / Language name (decorative) */
   lang = input<string>('');
@@ -166,7 +182,7 @@ export class NeuCodeBlockComponent {
 
     this.destroyRef.onDestroy(() => clearTimeout(this._copyTimer));
 
-    if (!root || !win?.MutationObserver) return;
+    if (!this.browser || !root || !win?.MutationObserver) return;
 
     const observer = new win.MutationObserver(() => {
       this.localeLabels.set(this._getLocaleLabels());
@@ -181,32 +197,47 @@ export class NeuCodeBlockComponent {
   }
 
   copy(): void {
+    if (!this.browser || this.destroyRef.destroyed) return;
     const text = this.code();
     const win = this.doc.defaultView;
 
     if (win?.navigator?.clipboard) {
-      void win.navigator.clipboard.writeText(text).then(() => this._markCopied());
+      void win.navigator.clipboard
+        .writeText(text)
+        .then(() => this._markCopied())
+        .catch(() => this._copyWithTextarea(text));
     } else {
-      // Fallback para HTTP o navegadores sin Clipboard API
-      const ta = this.doc.createElement('textarea');
-      ta.value = text;
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
-      this.doc.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try {
-        this.doc.execCommand('copy');
-        this._markCopied();
-      } finally {
-        this.doc.body.removeChild(ta);
-      }
+      this._copyWithTextarea(text);
+    }
+  }
+
+  private _copyWithTextarea(text: string): void {
+    if (this.destroyRef.destroyed) return;
+    const previousFocus = this.doc.activeElement as HTMLElement | null;
+    const ta = this.doc.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+    this.doc.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      if (this.doc.execCommand?.('copy')) this._markCopied();
+    } catch {
+      // The component stays in its idle state when both copy mechanisms fail.
+    } finally {
+      this.doc.body.removeChild(ta);
+      previousFocus?.focus();
     }
   }
 
   private _markCopied(): void {
+    if (this.destroyRef.destroyed) return;
     this.copied.set(true);
     clearTimeout(this._copyTimer);
-    this._copyTimer = setTimeout(() => this.copied.set(false), 2000);
+    this._copyTimer = setTimeout(() => {
+      this._copyTimer = undefined;
+      if (!this.destroyRef.destroyed) this.copied.set(false);
+    }, 2000);
   }
 
   private _getLocaleLabels(): {

@@ -1,12 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { NeuStatsCardComponent } from './neu-stats-card.component';
-import { provideIcons } from '@ng-icons/core';
-import {
-  lucideTrendingUp,
-  lucideTrendingDown,
-  lucideMinus,
-  lucideDollarSign,
-} from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconTrendingUp } from '@neural-icons/core/icons/trending-up';
+import { iconTrendingDown } from '@neural-icons/core/icons/trending-down';
+import { iconMinus } from '@neural-icons/core/icons/minus';
+import { iconDollarSign } from '@neural-icons/core/icons/dollar-sign';
 
 function mk(inputs: Record<string, unknown> = {}) {
   const f = TestBed.createComponent(NeuStatsCardComponent);
@@ -21,7 +20,7 @@ describe('NeuStatsCardComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
-        provideIcons({ lucideTrendingUp, lucideTrendingDown, lucideMinus, lucideDollarSign }),
+        provideNeuralIcons(iconTrendingUp, iconTrendingDown, iconMinus, iconDollarSign),
       ],
     }).compileComponents();
   });
@@ -80,7 +79,7 @@ describe('NeuStatsCardComponent', () => {
   // ── Icon ──────────────────────────────────────────────────────────────────
 
   it('should render icon when icon input is provided', () => {
-    const f = mk({ title: 'T', value: 'V', icon: 'lucideDollarSign' });
+    const f = mk({ title: 'T', value: 'V', icon: 'dollar-sign' });
     expect(f.nativeElement.querySelector('.neu-stats-card__icon')).toBeTruthy();
   });
 
@@ -89,46 +88,10 @@ describe('NeuStatsCardComponent', () => {
     expect(f.nativeElement.querySelector('.neu-stats-card__icon')).toBeFalsy();
   });
 
-  // ── Sparkline ─────────────────────────────────────────────────────────────
-
-  it('should render sparkline when sparkData has 2+ points', () => {
-    const f = mk({ title: 'T', value: 'V', sparkData: [10, 20, 15, 30] });
-    expect(f.nativeElement.querySelector('.neu-stats-card__sparkline')).toBeTruthy();
-  });
-
-  it('should NOT render sparkline when sparkData has less than 2 points', () => {
-    const f = mk({ title: 'T', value: 'V', sparkData: [10] });
-    expect(f.nativeElement.querySelector('.neu-stats-card__sparkline')).toBeFalsy();
-  });
-
-  it('should NOT render sparkline when sparkData is empty', () => {
-    const f = mk({ title: 'T', value: 'V', sparkData: [] });
-    expect(f.nativeElement.querySelector('.neu-stats-card__sparkline')).toBeFalsy();
-  });
-
-  it('sparkPoints computed should return empty string for fewer than two points', () => {
-    const f = mk({ title: 'T', value: 'V', sparkData: [10] });
-    const comp = f.componentInstance as any;
-
-    expect(comp.sparkPoints()).toBe('');
-  });
-
-  it('sparkPoints computed should return valid SVG polyline points', () => {
-    const f = mk({ title: 'T', value: 'V', sparkData: [10, 30, 20] });
-    const comp = f.componentInstance as any;
-    const points = comp.sparkPoints();
-    expect(typeof points).toBe('string');
-    expect(points.length).toBeGreaterThan(0);
-    // Should contain comma-separated coordinate pairs
-    expect(points).toMatch(/\d+/);
-  });
-
-  it('sparkPoints handles flat data (all same value)', () => {
-    const f = mk({ title: 'T', value: 'V', sparkData: [5, 5, 5] });
-    const comp = f.componentInstance as any;
-    const points = comp.sparkPoints();
-    expect(typeof points).toBe('string');
-    expect(points.length).toBeGreaterThan(0);
+  it('has no chart-specific API or built-in SVG', () => {
+    const f = mk({ title: 'T', value: 'V' });
+    expect('sparkData' in f.componentInstance).toBe(false);
+    expect(f.nativeElement.querySelector('svg')).toBeNull();
   });
 
   // ── Host class ────────────────────────────────────────────────────────────
@@ -168,9 +131,26 @@ describe('NeuStatsCardComponent', () => {
   });
 
   it('icon input renders the icon component', async () => {
-    const f = mk({ title: 'T', value: 'V', icon: 'lucideDollarSign' });
+    const f = mk({ title: 'T', value: 'V', icon: 'dollar-sign' });
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('.neu-stats-card__icon')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.neu-stats-card__icon neu-icon-outlet')?.getAttribute('aria-hidden')).toBe('true');
+  });
+});
+
+@Component({
+  imports: [NeuStatsCardComponent],
+  template: `<neu-stats-card title="Revenue" value="$200"><span data-metric-visual>Consumer visual</span></neu-stats-card>`,
+})
+class StatsProjectionHost {}
+
+describe('NeuStatsCard composition', () => {
+  it('projects consumer-owned visual content without interpreting it', () => {
+    TestBed.configureTestingModule({ imports: [StatsProjectionHost] });
+    const fixture = TestBed.createComponent(StatsProjectionHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-metric-visual]')?.textContent).toBe('Consumer visual');
+    expect(fixture.nativeElement.querySelector('svg')).toBeNull();
   });
 });

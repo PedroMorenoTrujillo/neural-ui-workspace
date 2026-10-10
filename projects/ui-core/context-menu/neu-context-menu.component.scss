@@ -5,7 +5,10 @@
   box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.14);
   padding: 6px;
   min-width: 180px;
-  max-width: 260px;
+  max-width: min(260px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   z-index: 2000;
   outline: none;
   animation: neu-ctx-in 80ms ease;
@@ -31,7 +34,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 7px 10px;
-  border-radius: var(--neu-radius-md, 8px);
+  border-radius: var(--neu-radius, 8px);
   font-size: 0.875rem;
   color: var(--neu-context-menu-color, var(--neu-text, var(--neu-text-primary, #111827)));
   cursor: pointer;
@@ -48,7 +51,7 @@
   }
 
   &.neu-context-menu__item--danger {
-    color: var(--neu-color-danger, #ef4444);
+    color: var(--neu-error, #ef4444);
   }
 
   &.neu-context-menu__item--disabled {
@@ -77,4 +80,22 @@
 /* Invisible backdrop */
 .neu-context-menu-backdrop {
   background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-context-menu,
+  .neu-context-menu__item {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-context-menu {
+    border-color: CanvasText;
+  }
+
+  .neu-context-menu__item:focus-visible {
+    outline-color: Highlight;
+  }
 }

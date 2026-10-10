@@ -1,306 +1,211 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NeuTextareaComponent } from './neu-textarea.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideAlertCircle } from '@ng-icons/lucide';
 
-function mk(inputs: Record<string, unknown> = {}) {
-  const f = TestBed.createComponent(NeuTextareaComponent);
-  for (const [k, v] of Object.entries(inputs)) {
-    f.componentRef.setInput(k, v);
-  }
-  f.detectChanges();
-  return { f, comp: f.componentInstance as any };
+function create(inputs: Record<string, unknown> = {}) {
+  const fixture = TestBed.createComponent(NeuTextareaComponent);
+  for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
+  fixture.detectChanges();
+  return {
+    fixture,
+    component: fixture.componentInstance,
+    textarea: fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement,
+  };
 }
 
-describe('NeuTextareaComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      providers: [provideIcons({ lucideAlertCircle })],
-    }).compileComponents();
+function compose(element: HTMLTextAreaElement, intermediate: string, final: string): void {
+  element.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  element.value = intermediate;
+  element.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+  element.value = final;
+  element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: final }));
+  element.dispatchEvent(new InputEvent('input', { bubbles: true, data: final }));
+}
+
+describe('NeuTextareaComponent Signal Forms contract', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
+
+  it('renders labels, sizing, native constraints and accessible hint relationships', () => {
+    const { fixture, textarea } = create({
+      label: 'Biography',
+      size: 'lg',
+      rows: 5,
+      hint: 'Public profile',
+      name: 'bio',
+      required: true,
+      minLength: 2,
+      maxLength: 20,
+      pattern: [/^[A-Z]/],
+      readonly: true,
+      pending: true,
+    });
+    const label = fixture.nativeElement.querySelector('label') as HTMLLabelElement;
+    const hint = fixture.nativeElement.querySelector('.neu-textarea__hint') as HTMLElement;
+    expect(label.htmlFor).toBe(textarea.id);
+    expect(fixture.nativeElement.classList).toContain('neu-textarea-host--lg');
+    expect(textarea.rows).toBe(5);
+    expect(textarea.name).toBe('bio');
+    expect(textarea.required).toBe(true);
+    expect(textarea.minLength).toBe(2);
+    expect(textarea.maxLength).toBe(20);
+    expect(textarea.getAttribute('pattern')).toBe('^[A-Z]');
+    expect(textarea.readOnly).toBe(true);
+    expect(textarea.getAttribute('aria-required')).toBe('true');
+    expect(textarea.getAttribute('aria-readonly')).toBe('true');
+    expect(textarea.getAttribute('aria-busy')).toBe('true');
+    expect(textarea.getAttribute('aria-describedby')).toBe(hint.id);
   });
 
-  // ── Rendering ─────────────────────────────────────────────────────────────
-
-  it('should render textarea element', () => {
-    const { f } = mk({ label: 'Descripción' });
-    expect(f.nativeElement.querySelector('textarea')).toBeTruthy();
+  it('renders official error state ahead of a hint', () => {
+    const { fixture, textarea, component } = create({
+      hint: 'Hint',
+      errorMessage: 'Invalid biography',
+      invalid: true,
+    });
+    const error = fixture.nativeElement.querySelector('.neu-textarea__error') as HTMLElement;
+    expect(component.hasError()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.neu-textarea__hint')).toBeNull();
+    expect(error.textContent).toContain('Invalid biography');
+    expect(textarea.getAttribute('aria-invalid')).toBe('true');
+    expect(textarea.getAttribute('aria-describedby')).toBe(error.id);
   });
 
-  it('should render label', () => {
-    const { f } = mk({ label: 'Descripción' });
-    expect(f.nativeElement.textContent).toContain('Descripción');
+  it('merges external FormField descriptions without losing local hint or error IDs', () => {
+    const { fixture, textarea } = create({ inputId: 'notes', ariaLabel: 'Notes', ariaLabelledBy: 'field-label', ariaDescribedBy: 'field-hint field-hint', hint: 'Local hint' });
+    expect(textarea.getAttribute('aria-label')).toBe('Notes');
+    expect(textarea.getAttribute('aria-labelledby')).toBe('field-label');
+    expect(textarea.getAttribute('aria-describedby')).toBe('field-hint notes-hint');
+    fixture.componentRef.setInput('errorMessage', 'Required');
+    fixture.detectChanges();
+    expect(textarea.getAttribute('aria-describedby')).toBe('field-hint notes-error');
   });
 
-  it('should set rows attribute', () => {
-    const { f } = mk({ rows: 5 });
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.rows).toBe(5);
+  it('writes the model exactly once for a user input and never echoes a parent write', () => {
+    const { fixture, component, textarea } = create();
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    fixture.componentRef.setInput('value', 'parent');
+    fixture.detectChanges();
+    expect(textarea.value).toBe('parent');
+    expect(changes).not.toHaveBeenCalled();
+    textarea.value = 'user';
+    textarea.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    expect(component.value()).toBe('user');
+    expect(changes).toHaveBeenCalledExactlyOnceWith('user');
   });
 
-  // ── Error / hint ──────────────────────────────────────────────────────────
-
-  it('should show error message', () => {
-    const { f } = mk({ errorMessage: 'Campo inválido', label: 'Test' });
-    expect(f.nativeElement.textContent).toContain('Campo inválido');
+  it('buffers IME changes and suppresses the duplicate input after compositionend', () => {
+    const { component, textarea } = create();
+    const values: string[] = [];
+    component.value.subscribe((value) => values.push(value));
+    compose(textarea, 'に', '日本');
+    expect(values).toEqual(['日本']);
+    expect(component.value()).toBe('日本');
   });
 
-  it('should apply error wrapper class when errorMessage is set', () => {
-    const { f } = mk({ errorMessage: 'Error', label: 'Test' });
-    expect(f.nativeElement.querySelector('.neu-textarea__wrapper--error')).toBeTruthy();
-  });
-
-  it('should show hint when no error', () => {
-    const { f } = mk({ hint: 'Máximo 500 caracteres', label: 'Test' });
-    expect(f.nativeElement.querySelector('.neu-textarea__hint')).toBeTruthy();
-    expect(f.nativeElement.textContent).toContain('Máximo 500 caracteres');
-  });
-
-  it('should NOT show hint when error is present', () => {
-    const { f } = mk({ errorMessage: 'Error', hint: 'Hint', label: 'Test' });
-    expect(f.nativeElement.querySelector('.neu-textarea__hint')).toBeFalsy();
-  });
-
-  // ── Disabled ──────────────────────────────────────────────────────────────
-
-  it('should be disabled when disabled input=true', () => {
-    const { f } = mk({ disabled: true, label: 'Test' });
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.disabled).toBe(true);
-  });
-
-  it('setDisabledState should disable the textarea', () => {
-    const { f, comp } = mk({ label: 'Test' });
-    comp.setDisabledState(true);
-    f.detectChanges();
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.disabled).toBe(true);
-  });
-
-  // ── CVA ───────────────────────────────────────────────────────────────────
-
-  it('writeValue should update _value', () => {
-    const { comp } = mk({ label: 'Test' });
-    comp.writeValue('Hola mundo');
-    expect(comp._value()).toBe('Hola mundo');
-  });
-
-  it('writeValue with null should set empty string', () => {
-    const { comp } = mk({ label: 'Test' });
-    comp.writeValue(null);
-    expect(comp._value()).toBe('');
-  });
-
-  it('should call onChange when typing', () => {
-    const { f, comp } = mk({ label: 'Test' });
-    const onChange = vi.fn();
-    comp.registerOnChange(onChange);
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    el.value = 'Nuevo texto';
-    el.dispatchEvent(new Event('input'));
-    expect(onChange).toHaveBeenCalledWith('Nuevo texto');
-  });
-
-  it('onBlur should call onTouched', () => {
-    const { f, comp } = mk({ label: 'Test' });
-    const onTouched = vi.fn();
-    comp.registerOnTouched(onTouched);
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    el.dispatchEvent(new Event('blur'));
-    expect(onTouched).toHaveBeenCalled();
-  });
-
-  it('onFocus should set _focused to true', () => {
-    const { f, comp } = mk({ label: 'Test' });
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    el.dispatchEvent(new Event('focus'));
-    expect(comp._focused()).toBe(true);
-    el.dispatchEvent(new Event('blur'));
-    expect(comp._focused()).toBe(false);
-  });
-
-  // ── hasValue / hasError computed ──────────────────────────────────────────
-
-  it('hasValue should be true when value is non-empty', () => {
-    const { comp } = mk({ label: 'Test' });
-    comp.writeValue('Texto');
-    expect(comp.hasValue()).toBe(true);
-  });
-
-  it('hasError should be true when errorMessage is set', () => {
-    const { comp } = mk({ errorMessage: 'Error', label: 'Test' });
-    expect(comp.hasError()).toBe(true);
-  });
-
-  // ── resizable / autoResize ────────────────────────────────────────────────
-
-  it('_resizeStyle should be "none" when autoResize=true', () => {
-    const { comp } = mk({ autoResize: true, label: 'Test' });
-    expect(comp._resizeStyle()).toBe('none');
-  });
-
-  it('_resizeStyle should be "vertical" when resizable=true', () => {
-    const { comp } = mk({ resizable: true, label: 'Test' });
-    expect(comp._resizeStyle()).toBe('vertical');
-  });
-
-  it('_resizeStyle should be "none" when resizable=false', () => {
-    const { comp } = mk({ resizable: false, label: 'Test' });
-    expect(comp._resizeStyle()).toBe('none');
-  });
-
-  // ── readonly / required / maxlength ───────────────────────────────────────
-
-  it('should set readonly attribute', () => {
-    const { f } = mk({ readonly: true, label: 'Test' });
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.readOnly).toBe(true);
-  });
-
-  it('should set required attribute', () => {
-    const { f } = mk({ required: true, label: 'Test' });
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.required).toBe(true);
-  });
-
-  it('should set maxlength attribute', () => {
-    const { f } = mk({ maxlength: 200, label: 'Test' });
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.maxLength).toBe(200);
-  });
-
-  // ── ReactiveFormsModule ───────────────────────────────────────────────────
-
-  it('should integrate with FormControl', async () => {
-    await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
-    }).compileComponents();
-
-    @Component({
-      template: `<neu-textarea label="Bio" [formControl]="ctrl" />`,
-      imports: [NeuTextareaComponent, ReactiveFormsModule],
-    })
-    class HostComp {
-      ctrl = new FormControl('');
-    }
-
-    const f = TestBed.createComponent(HostComp);
-    f.detectChanges();
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    el.value = 'Hola';
-    el.dispatchEvent(new Event('input'));
-    f.detectChanges();
-    expect(f.componentInstance.ctrl.value).toBe('Hola');
-  });
-
-  it('should disable textarea when formControl is disabled', async () => {
-    await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
-    }).compileComponents();
-
-    @Component({
-      template: `<neu-textarea label="Bio" [formControl]="ctrl" />`,
-      imports: [NeuTextareaComponent, ReactiveFormsModule],
-    })
-    class HostComp {
-      ctrl = new FormControl({ value: '', disabled: true });
-    }
-
-    const f = TestBed.createComponent(HostComp);
-    f.detectChanges();
-    const el: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    expect(el.disabled).toBe(true);
-  });
-
-  it('onBlur should call _onTouched callback', () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.detectChanges();
-    let touched = false;
-    f.componentInstance.registerOnTouched(() => (touched = true));
-    f.componentInstance.onBlur();
-    expect(touched).toBe(true);
-  });
-
-  it('writeValue null should set empty string', () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.detectChanges();
-    f.componentInstance.writeValue(null);
-    expect(f.componentInstance['_value']()).toBe('');
-  });
-
-  it('autoResize=true should add auto-resize class', async () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.componentRef.setInput('autoResize', true);
-    f.componentRef.setInput('label', 'Bio');
-    f.detectChanges();
-    await f.whenStable();
-    // autoResize=true sets resize style to 'none' on the textarea
-    const textareaEl = f.nativeElement.querySelector('textarea');
-    expect(textareaEl).toBeTruthy();
-    expect(f.componentInstance.autoResize()).toBe(true);
-  });
-
-  it('hint input is rendered', async () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.componentRef.setInput('hint', 'Max 200 chars');
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('Max 200 chars');
-  });
-
-  it('errorMessage is rendered', async () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.componentRef.setInput('errorMessage', 'This field is required');
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('This field is required');
-  });
-
-  it('_resizeStyle returns vertical when resizable=true and autoResize=false', () => {
-    // resizable=true debe devolver 'vertical' en _resizeStyle
-    // resizable=true must return 'vertical' in _resizeStyle
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.componentRef.setInput('autoResize', false);
-    f.componentRef.setInput('resizable', true);
-    f.detectChanges();
-    expect((f.componentInstance as any)._resizeStyle()).toBe('vertical');
-  });
-
-  it('onInput with autoResize=true should resize the textarea', async () => {
-    // onInput con autoResize=true debe ajustar la altura del textarea
-    // onInput with autoResize=true must adjust textarea height
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.componentRef.setInput('autoResize', true);
-    f.detectChanges();
-    await f.whenStable();
-    const textarea: HTMLTextAreaElement = f.nativeElement.querySelector('textarea');
-    if (textarea) {
-      const fakeEvent = { target: textarea } as unknown as Event;
-      Object.defineProperty(textarea, 'scrollHeight', { value: 120, configurable: true });
-      (f.componentInstance as any).onInput(fakeEvent);
-      // Verify the handler ran without throwing
-      expect(textarea).toBeTruthy();
-    }
-  });
-
-  it('input and blur before CVA registration use default callbacks safely', async () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const textarea = f.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+  it('lets a parent write win during IME composition', () => {
+    const { fixture, component, textarea } = create();
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    textarea.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
     textarea.value = 'draft';
-
-    expect(() => textarea.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
-    expect(() => textarea.dispatchEvent(new Event('blur'))).not.toThrow();
-    expect((f.componentInstance as any)._value()).toBe('draft');
+    textarea.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+    fixture.componentRef.setInput('value', 'server');
+    fixture.detectChanges();
+    textarea.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    expect(component.value()).toBe('server');
+    expect(changes).not.toHaveBeenCalled();
   });
 
-  it('constructor auto-resize effect is safe before a textarea ref is available', () => {
-    const f = TestBed.createComponent(NeuTextareaComponent);
-    f.componentRef.setInput('autoResize', true);
+  it('cancels an active composition if the field becomes disabled before commit', () => {
+    const { fixture, component, textarea } = create();
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    component.onCompositionStart();
+    textarea.value = 'draft';
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    component.onCompositionEnd({ target: textarea } as unknown as Event);
+    expect(component.value()).toBe('');
+    expect(changed).not.toHaveBeenCalled();
+  });
 
-    expect(() => f.componentInstance['_isDisabledState']()).not.toThrow();
-    expect(() => f.detectChanges()).not.toThrow();
+  it.each(['disabled', 'readonly'] as const)('blocks mutation and IME when %s', (state) => {
+    const { component, textarea } = create({ [state]: true, value: 'fixed' });
+    const changes = vi.fn();
+    component.value.subscribe(changes);
+    textarea.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    textarea.value = 'changed';
+    textarea.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    textarea.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    expect(component.value()).toBe('fixed');
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('cancels a pending composition on blur and destroy', () => {
+    const first = create();
+    const changed = vi.fn();
+    const touched = vi.fn();
+    first.component.value.subscribe(changed);
+    first.component.touch.subscribe(touched);
+    first.textarea.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    first.textarea.value = 'draft';
+    first.textarea.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    first.textarea.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    expect(changed).not.toHaveBeenCalled();
+    expect(touched).toHaveBeenCalledTimes(1);
+
+    const second = create();
+    const destroyedChange = vi.fn();
+    second.component.value.subscribe(destroyedChange);
+    second.textarea.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    second.fixture.destroy();
+    second.textarea.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    expect(destroyedChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps focus separate from touch and exposes focus/reset boundaries', () => {
+    const { component, textarea } = create();
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    textarea.dispatchEvent(new FocusEvent('focus'));
+    expect(touched).not.toHaveBeenCalled();
+    component.focus();
+    expect(document.activeElement).toBe(textarea);
+    component.reset();
+    textarea.dispatchEvent(new FocusEvent('blur'));
+    expect(touched).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports diagonal, fixed and automatic resize without changing the value', async () => {
+    const manual = create();
+    expect(manual.textarea.style.resize).toBe('both');
+    expect(manual.textarea.classList).not.toContain('neu-textarea__field--auto-resize');
+    manual.textarea.style.width = '180px';
+    manual.textarea.style.height = '120px';
+    manual.fixture.detectChanges();
+    expect(manual.textarea.style.resize).toBe('both');
+    expect(manual.component.value()).toBe('');
+    const fixed = create({ resizable: false });
+    expect(fixed.textarea.style.resize).toBe('none');
+    const automatic = create({ autoResize: true });
+    Object.defineProperty(automatic.textarea, 'scrollHeight', { configurable: true, value: 84 });
+    Object.defineProperty(automatic.textarea, 'offsetHeight', { configurable: true, value: 86 });
+    Object.defineProperty(automatic.textarea, 'clientHeight', { configurable: true, value: 84 });
+    automatic.textarea.value = 'two\nlines';
+    automatic.textarea.dispatchEvent(new InputEvent('input'));
+    await Promise.resolve();
+    expect(automatic.textarea.style.height).toBe('86px');
+    expect(automatic.textarea.style.resize).toBe('none');
+    expect(automatic.textarea.classList).toContain('neu-textarea__field--auto-resize');
+  });
+
+  it('normalizes an unexpected transient non-string only for display and supports hidden', () => {
+    const { fixture, textarea } = create({ value: null, hidden: true, size: 'sm' });
+    expect(textarea.value).toBe('');
+    expect(fixture.nativeElement.hidden).toBe(true);
+    expect(fixture.nativeElement.classList).toContain('neu-textarea-host--sm');
   });
 });

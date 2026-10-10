@@ -1,0 +1,45 @@
+.neu-button-group-host { display: inline-block; max-inline-size: 100%; }
+
+.neu-button-group {
+  display: inline-flex;
+  max-inline-size: 100%;
+
+  > .neu-button {
+    border-radius: 0;
+    margin-inline-start: -1px;
+  }
+
+  > .neu-button:first-child {
+    margin-inline-start: 0;
+    border-start-start-radius: var(--neu-radius);
+    border-end-start-radius: var(--neu-radius);
+  }
+
+  > .neu-button:last-child {
+    border-start-end-radius: var(--neu-radius);
+    border-end-end-radius: var(--neu-radius);
+  }
+
+  &--fluid { display: flex; inline-size: 100%; }
+  &--fluid > .neu-button { flex: 1 1 0; }
+
+  &--vertical { flex-direction: column; align-items: stretch; }
+  &--vertical > .neu-button { margin-inline-start: 0; margin-block-start: -1px; }
+  &--vertical > .neu-button:first-child {
+    margin-block-start: 0;
+    border-start-start-radius: var(--neu-radius);
+    border-start-end-radius: var(--neu-radius);
+    border-end-start-radius: 0;
+  }
+  &--vertical > .neu-button:last-child {
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--neu-radius);
+    border-end-end-radius: var(--neu-radius);
+  }
+
+  > .neu-button:focus-visible { position: relative; z-index: 1; }
+}
+
+@media (forced-colors: active) {
+  .neu-button-group > .neu-button:focus-visible { outline: 2px solid Highlight; outline-offset: -2px; }
+}

@@ -1,0 +1,56 @@
+{
+  "checkpoint": "281b658",
+  "capturedAt": "2026-09-20T02:43:34.007Z",
+  "environment": "Angular test builder + jsdom; zoneless",
+  "datasets": [1000, 10000],
+  "metrics": {
+    "render1k": {
+      "samples": 5,
+      "p50Ms": 79.044,
+      "p95Ms": 287.376,
+      "domNodes": 546
+    },
+    "render10k": {
+      "samples": 5,
+      "p50Ms": 70.76,
+      "p95Ms": 83.265,
+      "domNodes": 546
+    },
+    "sort10k": {
+      "samples": 5,
+      "p50Ms": 36.774,
+      "p95Ms": 39.663,
+      "domNodes": 100
+    },
+    "filter10k": {
+      "samples": 5,
+      "p50Ms": 5.896,
+      "p95Ms": 10.238,
+      "domNodes": 96
+    },
+    "selection10k": {
+      "samples": 5,
+      "p50Ms": 9.25,
+      "p95Ms": 12.386,
+      "domNodes": 178
+    },
+    "virtual10k": {
+      "samples": 5,
+      "p50Ms": 22.053,
+      "p95Ms": 24.275,
+      "domNodes": 218
+    },
+    "lifecycle50": {
+      "samples": 50,
+      "p50Ms": 0.271,
+      "p95Ms": 0.441,
+      "domNodes": 0
+    }
+  },
+  "resources": 0,
+  "heapBytes": null,
+  "listeners": null,
+  "observers": null,
+  "effects": null,
+  "unavailableReason": "The current Angular/jsdom harness exposes no stable listener, observer or effect census."
+}

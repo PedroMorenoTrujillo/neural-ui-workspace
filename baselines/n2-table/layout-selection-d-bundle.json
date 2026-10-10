@@ -1,0 +1,290 @@
+{
+  "checkpoint": "N2-011D",
+  "method": "Angular-compiled minified ESM; Angular dependencies external; gzip 9; Brotli 11",
+  "consumers": {
+    "basic": {
+      "size": {
+        "raw": 78665,
+        "gzip": 13819,
+        "brotli": 11818
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        }
+      ]
+    },
+    "keys": {
+      "size": {
+        "raw": 78713,
+        "gzip": 13838,
+        "brotli": 11863
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 32
+        }
+      ]
+    },
+    "allMatching": {
+      "size": {
+        "raw": 78781,
+        "gzip": 13872,
+        "brotli": 11854
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 100
+        }
+      ]
+    },
+    "layout": {
+      "size": {
+        "raw": 78769,
+        "gzip": 13858,
+        "brotli": 11855
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 91
+        }
+      ]
+    },
+    "combined": {
+      "size": {
+        "raw": 78811,
+        "gzip": 13872,
+        "brotli": 11884
+      },
+      "attribution": [
+        {
+          "path": "dist/neural-ui/core/fesm2022/neural-ui-core-table-next.mjs",
+          "bytesInOutput": 78633
+        },
+        {
+          "path": "<stdin>",
+          "bytesInOutput": 133
+        }
+      ]
+    },
+    "root-unused": {
+      "size": {
+        "raw": 0,
+        "gzip": 20,
+        "brotli": 1
+      },
+      "attribution": []
+    }
+  },
+  "packageImports": ["@angular/common", "@angular/core"],
+  "forbiddenGraphTokens": [],
+  "retention": {
+    "comparison": {
+      "clientCBasic": {
+        "raw": 50496,
+        "gzip": 8371,
+        "brotli": 7123
+      },
+      "clientCCombined": {
+        "raw": 50676,
+        "gzip": 8460,
+        "brotli": 7173
+      },
+      "layoutSelectionDBasic": {
+        "raw": 78665,
+        "gzip": 13819,
+        "brotli": 11818
+      },
+      "basicToBasicGzipDelta": 5448,
+      "combinedToBasicGzipDelta": 5359,
+      "compiledModuleRawDelta": 28169
+    },
+    "sourceContributionDelta": [
+      {
+        "path": "projects/ui-core/table/next/internal/selection/neu-table-selection.ts",
+        "bytesInOutput": 6045
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/renderer/neu-table-basic-renderer.component.ts",
+        "bytesInOutput": 3909
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/layout/neu-table-layout.ts",
+        "bytesInOutput": 2341
+      },
+      {
+        "path": "projects/ui-core/table/next/public/neu-table.component-contract.ts",
+        "bytesInOutput": 1661
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/semantics/neu-table-basic-projections.ts",
+        "bytesInOutput": -211
+      },
+      {
+        "path": "projects/ui-core/table/next/public/neu-table-template-contracts.ts",
+        "bytesInOutput": 12
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+        "bytesInOutput": 8
+      },
+      {
+        "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+        "bytesInOutput": 1
+      }
+    ],
+    "sourceContributionRaw": 13766,
+    "templateStylesAndAngularCompilationRemainderRaw": 14403,
+    "isolatedFeatureBundles": {
+      "selectionPureEngine": {
+        "size": {
+          "raw": 8989,
+          "gzip": 2867,
+          "brotli": 2606
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/selection/neu-table-selection.ts",
+            "bytesInOutput": 6019
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+            "bytesInOutput": 2626
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+            "bytesInOutput": 47
+          }
+        ]
+      },
+      "allMatchingSupport": {
+        "size": {
+          "raw": 3553,
+          "gzip": 1343,
+          "brotli": 1221
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+            "bytesInOutput": 2626
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/selection/neu-table-selection.ts",
+            "bytesInOutput": 809
+          }
+        ]
+      },
+      "rangeModifierSelection": {
+        "size": {
+          "raw": 6177,
+          "gzip": 2168,
+          "brotli": 1999
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/selection/neu-table-selection.ts",
+            "bytesInOutput": 3462
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+            "bytesInOutput": 2626
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+            "bytesInOutput": 47
+          }
+        ]
+      },
+      "headerSelection": {
+        "size": {
+          "raw": 6989,
+          "gzip": 2327,
+          "brotli": 2130
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/selection/neu-table-selection.ts",
+            "bytesInOutput": 4247
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/client-pipeline/neu-table-client-pipeline.ts",
+            "bytesInOutput": 2626
+          },
+          {
+            "path": "projects/ui-core/table/next/internal/identity/neu-table-row-identity.ts",
+            "bytesInOutput": 47
+          }
+        ]
+      },
+      "layoutProjection": {
+        "size": {
+          "raw": 873,
+          "gzip": 442,
+          "brotli": 398
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/layout/neu-table-layout.ts",
+            "bytesInOutput": 807
+          }
+        ]
+      },
+      "resizeInteractionPure": {
+        "size": {
+          "raw": 853,
+          "gzip": 472,
+          "brotli": 420
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/layout/neu-table-layout.ts",
+            "bytesInOutput": 788
+          }
+        ]
+      },
+      "reorderInteractionPure": {
+        "size": {
+          "raw": 1493,
+          "gzip": 673,
+          "brotli": 622
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/layout/neu-table-layout.ts",
+            "bytesInOutput": 1431
+          }
+        ]
+      },
+      "pinningPure": {
+        "size": {
+          "raw": 562,
+          "gzip": 311,
+          "brotli": 265
+        },
+        "attribution": [
+          {
+            "path": "projects/ui-core/table/next/internal/layout/neu-table-layout.ts",
+            "bytesInOutput": 529
+          }
+        ]
+      }
+    },
+    "note": "Isolated feature bundles overlap through shared helpers and are non-additive; template-bound component methods remain reachable as one compiled Angular definition."
+  }
+}

@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { auditFormModels } from './forms-model-type-audit.mjs';
 
 const root = new URL('..', import.meta.url).pathname;
 const uiCore = join(root, 'projects/ui-core');
@@ -26,12 +27,103 @@ function componentFiles(dir) {
 }
 
 const requiredMethods = ['writeValue', 'registerOnChange', 'registerOnTouched', 'setDisabledState'];
+const expectedSignalControls = new Map([
+  ['projects/ui-core/input/neu-input.component.ts', /readonly\s+value\s*=\s*model<string>\(''\)/],
+  [
+    'projects/ui-core/textarea/neu-textarea.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(''\)/,
+  ],
+  [
+    'projects/ui-core/password/neu-password.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(''\)/,
+  ],
+  [
+    'projects/ui-core/input-mask/neu-input-mask.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(''\)/,
+  ],
+  [
+    'projects/ui-core/input-otp/neu-input-otp.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(''\)/,
+  ],
+  [
+    'projects/ui-core/checkbox/neu-checkbox.component.ts',
+    /readonly\s+checked\s*=\s*model<boolean>\(false\)/,
+  ],
+  [
+    'projects/ui-core/switch/neu-switch.component.ts',
+    /readonly\s+checked\s*=\s*model<boolean>\(false\)/,
+  ],
+  [
+    'projects/ui-core/radio/neu-radio-group.component.ts',
+    /readonly\s+value\s*=\s*model<V\s*\|\s*null>\(null\)/,
+  ],
+  [
+    'projects/ui-core/number-input/neu-number-input.component.ts',
+    /readonly\s+value\s*=\s*model<number\s*\|\s*null>\(null\)/,
+  ],
+  ['projects/ui-core/knob/neu-knob.component.ts', /readonly\s+value\s*=\s*model<number>\(0\)/],
+  ['projects/ui-core/date-input/neu-date-input.component.ts', /readonly\s+value\s*=\s*model<V>\(/],
+  [
+    'projects/ui-core/select/neu-select.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<V,\s*M>>\(/,
+  ],
+  [
+    'projects/ui-core/autocomplete/neu-autocomplete.component.ts',
+    /readonly\s+value\s*=\s*model<NeuAutocompleteValue<V,\s*F>>\(/,
+  ],
+  [
+    'projects/ui-core/cascade-select/neu-cascade-select.component.ts',
+    /readonly\s+value\s*=\s*model<V\s*\|\s*null>\(null\)/,
+  ],
+  [
+    'projects/ui-core/listbox/neu-listbox.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<V,\s*M>>\(/,
+  ],
+  [
+    'projects/ui-core/toggle-button-group/neu-toggle-button-group.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<NeuToggleValue<T,\s*V>,\s*M>>\(/,
+  ],
+  [
+    'projects/ui-core/input-tags/neu-input-tags.component.ts',
+    /readonly\s+value\s*=\s*model<readonly\s+V\[\]>\(\[\]\)/,
+  ],
+  [
+    'projects/ui-core/inline-editor/neu-inline-editor.component.ts',
+    /readonly\s+value\s*=\s*model<V>\(/,
+  ],
+  [
+    'projects/ui-core/color-picker/neu-color-picker.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(/,
+  ],
+  [
+    'projects/ui-core/rich-text-editor/neu-rich-text-editor.component.ts',
+    /readonly\s+value\s*=\s*model<string>\(''\)/,
+  ],
+  [
+    'projects/ui-core/uploader/neu-uploader.component.ts',
+    /readonly\s+value\s*=\s*model<readonly\s+File\[\]>\(\[\]\)/,
+  ],
+  [
+    'projects/ui-core/slider/neu-slider.component.ts',
+    { pattern: /readonly\s+value\s*=\s*model<V>\(0\s+as\s+V\)/, boundedGeneric: true },
+  ],
+  [
+    'projects/ui-core/rating/neu-rating.component.ts',
+    /readonly\s+value\s*=\s*model<number\s*\|\s*null>\(null\)/,
+  ],
+  [
+    'projects/ui-core/tree-select/neu-tree-select.component.ts',
+    /readonly\s+value\s*=\s*model<NeuSelectionValue<V,\s*M>>\(/,
+  ],
+]);
 
 const violations = [];
 const cvaComponents = [];
+const signalComponents = [];
 
 for (const file of componentFiles(uiCore)) {
   const source = readFileSync(file, 'utf8');
+  const rel = relative(root, file);
   const templateTags = source.match(/<[a-z][^>]*>/gs) ?? [];
   for (const tag of templateTags) {
     if (/\[disabled\]\s*=\s*"[^"]*\?\s*''\s*:\s*null"/.test(tag)) {
@@ -49,11 +141,55 @@ for (const file of componentFiles(uiCore)) {
     }
   }
 
+  const valueSignalControl = /implements\s+[^{}]*FormValueControl\s*</.test(source);
+  const checkboxSignalControl = /implements\s+[^{}]*FormCheckboxControl\b/.test(source);
+  if (valueSignalControl || checkboxSignalControl) {
+    signalComponents.push(rel);
+    if (/\bControlValueAccessor\b|\bNG_VALUE_ACCESSOR\b/.test(source)) {
+      violations.push(`${rel}: Signal Form control must not contain a CVA contract or provider`);
+    }
+    for (const method of requiredMethods) {
+      if (new RegExp(`\\b${method}\\s*\\(`).test(source)) {
+        violations.push(`${rel}: Signal Form control must not implement legacy ${method}()`);
+      }
+    }
+    if (!/readonly\s+touch\s*=\s*output<void>\(\)/.test(source)) {
+      violations.push(`${rel}: Signal Form control must expose the touch output`);
+    }
+    if (!/readonly\s+disabled\s*=\s*input(?:<boolean>)?\(false\)/.test(source)) {
+      violations.push(`${rel}: Signal Form control must consume disabled state`);
+    }
+    if (!/readonly\s+readonly\s*=\s*input(?:<boolean>)?\(false\)/.test(source)) {
+      violations.push(`${rel}: Signal Form control must consume readonly state`);
+    }
+    if (
+      !/\bfocus\s*\([^)]*\)\s*:\s*void/.test(source) ||
+      !/\breset\s*\([^)]*\)\s*:\s*void/.test(source)
+    ) {
+      violations.push(`${rel}: Signal Form control must implement focus() and reset()`);
+    }
+    const expectedModel = expectedSignalControls.get(rel);
+    if (!expectedModel)
+      violations.push(
+        `${rel}: unexpected Signal Form control outside the authorized migration set`,
+      );
+    else if (!(expectedModel.pattern ?? expectedModel).test(source))
+      violations.push(`${rel}: canonical public model does not match its approved typed contract`);
+    else if (expectedModel.boundedGeneric) {
+      const models = auditFormModels(file).filter((model) => model.formValueControl);
+      if (models.length !== 1 || !models[0].ok) {
+        violations.push(`${rel}: canonical generic model must have a closed, non-any TypeScript constraint`);
+      }
+    }
+    if (/readonly\s+(?:valueChange|checkedChange)\s*=\s*output/.test(source)) {
+      violations.push(`${rel}: model output must not be duplicated manually`);
+    }
+  }
+
   if (!source.includes('ControlValueAccessor') && !source.includes('NG_VALUE_ACCESSOR')) {
     continue;
   }
 
-  const rel = relative(root, file);
   cvaComponents.push(rel);
 
   if (!source.includes('NG_VALUE_ACCESSOR')) {
@@ -79,6 +215,31 @@ for (const file of componentFiles(uiCore)) {
   }
 }
 
+if (cvaComponents.length !== 0) {
+  violations.push(
+    `expected 0 LEGACY-CVA-YET-TO-MIGRATE components, found ${cvaComponents.length}`,
+  );
+}
+
+if (signalComponents.length !== 24) {
+  violations.push(`expected 24 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+}
+
+for (const expected of expectedSignalControls.keys()) {
+  if (!signalComponents.includes(expected))
+    violations.push(`${expected}: authorized Signal Form control missing`);
+}
+
+const radioGroupSource = readFileSync(
+  join(root, 'projects/ui-core/radio/neu-radio-group.component.ts'),
+  'utf8',
+);
+if (/\bunknown\b/.test(radioGroupSource)) {
+  violations.push(
+    'projects/ui-core/radio/neu-radio-group.component.ts: public typed radio contract must not use unknown',
+  );
+}
+
 if (violations.length) {
   console.error('ui-core CVA contract audit failed:');
   for (const violation of violations) {
@@ -87,4 +248,7 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`ui-core CVA contract audit passed (${cvaComponents.length} CVA components)`);
+console.log('ui-core Forms contract audit passed');
+console.log(`- LEGACY-CVA-YET-TO-MIGRATE: ${cvaComponents.length}`);
+console.log(`- SIGNAL-FORM-CONTROL: ${signalComponents.length}`);
+for (const component of signalComponents) console.log(`  - ${component}`);

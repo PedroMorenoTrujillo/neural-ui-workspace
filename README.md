@@ -1,74 +1,83 @@
 # @neural-ui/core
 
+**Built for Angular. Designed for developers. Open to everyone.**
+
+> Documentation and live examples for Neural UI 2 → [ui.neuralui.org/v2/](https://ui.neuralui.org/v2/)
+
 <p>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
-  <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
+  <img src="https://img.shields.io/badge/Angular-22-dd0031?logo=angular" alt="Angular 22" />
   <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license" />
 </p>
 
 Modern Angular UI component library — **signals-first**, fully **standalone**, with dedicated subpath entry points and no Zone.js requirement.
 
-> Live documentation and examples → [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app)
-
 > Building a full admin product? Try [Neural Admin Pro](https://neural-ui-admin-pro.vercel.app/login), a premium Angular dashboard template built with Neural UI and ready to connect to your own backend.
-
-> Performance evidence is produced by a free, local laboratory using browser Performance APIs, Lighthouse CI and Size Limit. Results are regression budgets, not field-data claims or an adoption comparison with other libraries.
 
 ---
 
 ## Features
 
-- **88 component entry points + url-state + testing** — components, overlays, utilities, styles and public harnesses
+- **94 public components** — forms, navigation, data, overlays, feedback and display, with dedicated subpath entry points
 - **Signals API** — inputs, outputs and internal state are built with `input()`, `output()`, `signal()`, `computed()` and `effect()`
 - **Standalone** — every component is standalone, import only what you need
 - **OnPush everywhere** — maximum performance out of the box
 - **Accessible by design** — ARIA attributes, keyboard navigation and focus management across the main interactive components
-- **Locale and direction aware** — English/Spanish defaults follow the document language, while Angular CDK `Directionality` drives live LTR/RTL behavior
-- **Release-gated** — unit, package, compatibility, SSR, accessibility and browser checks run before publication
+- **Release-gated** — unit, package, Angular compatibility and SSR checks, complemented by showcase accessibility and browser audits
 - **Themeable** — full design token system via CSS custom properties
+- **Controlled state and Signal Forms** — explicit value/model contracts and Angular 22 form integration
+- **Icon-provider agnostic** — structural icons work without an external icon package; optional resolvers are application-owned
+- **SSR-aware configuration** — explicit locale, timezone and injectable clock for deterministic rendering
 
 ---
+
+## Architecture
+
+A modern, open-source Angular component library. Not a fork. Not a wrapper. Built with its own architecture.
+
+Neural UI implements its own components, state contracts and design tokens. Its signals-first, standalone architecture uses dedicated entry points so applications import only what they need. Angular CDK provides supporting infrastructure for capabilities such as overlays and accessibility; it does not replace Neural UI's component implementation.
 
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.14.3
-- **Entry points:** 90
-- **Automated tests:** 2218
-- **Coverage:** 97.45% statements · 95.36% branches · 96.19% functions · 98.82% lines
-- **Public component harnesses:** 71 interactive entry points · 19 justified N/A
-- **Showcase evidence:** 91 demos · 88 API pages · 384/384 accessibility · 288 RTL · 2880 responsive checks
-- **Quality matrix:** 1864 PASS · 116 N/A · 0 pending human validation
-- **Visual evidence:** 464 tracked snapshots · human review approved
+- **Version:** 2.0.0
+- **Entry points:** 100
+- **Automated tests:** 3230
+- **Coverage:** 96.9% statements · 95.07% branches · 95.94% functions · 98.14% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
 - Standalone + OnPush component model
 - BEM as the required styling convention for component and demo SCSS
 - Zoneless-oriented test setup
-- Global coverage above the enforced 95% floor in every main metric
+- Neural UI 2 release coverage passes the exact 95.01% floor on statements, branches, functions and lines in the full canonical run
 - Strong accessibility baseline validated in showcase and reinforced in core components
 
 For the current quality checklist and accessibility audit snapshot, see [projects/ui-core/QUALITY_STATUS.md](projects/ui-core/QUALITY_STATUS.md).
+The exact-count coverage gate is enforced by `npm run test:coverage` and the release verifier.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide
+npm install @neural-ui/core@2.0.0 @angular/cdk@22
 ```
 
 ---
 
 ## Setup
 
+Use Angular 22 and a Node.js version compatible with its CLI:
+`^22.22.3 || ^24.15.0 || >=26.0.0`. Keep Angular packages on compatible versions.
+External icon packages are optional, not peer dependencies of Core.
+
 Automated setup is additive and idempotent:
 
 ```bash
-ng add @neural-ui/core
+ng add @neural-ui/core@2.0.0
 ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
 ng generate @neural-ui/core:layout app-shell
 ng generate @neural-ui/core:dashboard sales
@@ -82,10 +91,10 @@ La configuración automática es aditiva e idempotente: conserva providers y est
 | Schematic                | Public options / Opciones públicas                                                                          | Result / Resultado                                                                                                                                                                           | Revert / Reversión                                                                                                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ng add @neural-ui/core` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos.                                                   |
-| `:theme [name]`          | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida.                                                                       | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos.                                            |
+| `:theme`          | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida.                                                                       | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos.                                            |
 | `:layout NAME`           | `--project`, `--path`, `--force`                                                                            | Creates `NAME.component.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell.                                                                                                  | Delete the generated directory and any route you added; existing routes are not modified automatically. / Elimina el directorio y la ruta añadida; no se alteran rutas existentes. |
 | `:dashboard NAME`        | `--project`, `--path`, `--force`                                                                            | Creates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas.                                                              | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                                                |
-| `:crud-page NAME`        | `--project`, `--path`, `--force`                                                                            | Creates the three component files with Reactive Forms, input, table and actions. / Genera una base CRUD con formularios reactivos, input, tabla y acciones.                                  | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                                                |
+| `:crud-page NAME`        | `--project`, `--path`, `--force`                                                                            | Creates the three component files with Signal Forms, input, table and actions. / Genera una base CRUD con Signal Forms, input, tabla y acciones.                                  | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                                                |
 
 Generated page copy is starter content: connect it to the consumer application's translation system before shipping. / Los textos de las páginas generadas son contenido inicial: intégralos con el sistema de traducciones de la aplicación antes de publicar.
 
@@ -93,11 +102,10 @@ Add `provideNeuralUI()` to your `app.config.ts`:
 
 ```typescript
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
 import { provideNeuralUI } from '@neural-ui/core';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideNeuralUI()],
+  providers: [provideNeuralUI()],
 };
 ```
 
@@ -114,6 +122,54 @@ import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuInputComponent } from '@neural-ui/core/input';
 import { NeuTableComponent } from '@neural-ui/core/table';
 import { NeuToastService } from '@neural-ui/core/toast';
+```
+
+### Table server query contract
+
+`NeuTableQueryState` is the canonical server-oriented state: 1-based `page`, `pageSize`, `search`, an explicit nullable single `sort`, ordered `sortEntries` for multisort, stable global-filter fields, and complete column filters. Every column filter contains its deterministic `and`/`or` operator plus every ordered typed constraint. Selection, expansion, layout, keyboard focus, and filter drafts are intentionally not query state.
+
+Supplying `[query]` controls all query slices. A UI action emits one immutable `queryChange` proposal and the rendered query stays authoritative until the consumer echoes it; that echo is silent. `query` takes precedence over the sort-specific input and URL restoration/writes. When control is released, active URL, `pageSize`, and sort adapters resume; query slices without an active adapter retain the last authoritative snapshot. Without `query`, existing uncontrolled and URL behavior remains unchanged. `queryChange` is available in both client and server modes. Existing server-only `serverStateChange` consumers remain supported through a compatibility projection derived from the same canonical query; multi-rule filters are not reduced to a misleading first rule in that legacy shape.
+
+`lazyLoadOnInit` is an additive, mount-time opt-in and defaults to `false` for existing Neural consumers. With `serverSide=true`, enabling it emits exactly one initial canonical query after initial inputs, a controlled query, or URL restoration has been applied. Changing `serverSide` or `lazyLoadOnInit` after that initial decision does not trigger a retroactive initial load. Neural pages remain 1-based; the zero-based `first` offset is `(page - 1) * pageSize`.
+
+Custom predicates without `serverSerializer` are marked `local-only`. Select/MultiSelect values that are not transport-safe JSON primitives preserve identity and are marked `requires-consumer` unless a serializer is configured. Serializer exceptions fail fast. JSON-like serializer results are recursively snapshotted and frozen; non-finite numbers, bigint, symbols, functions, cycles, and non-plain objects remain `requires-consumer`. Date-only values use `YYYY-MM-DD`; instants use UTC ISO strings. The query-level `serialization` summary exposes both categories and global accessors without `serverField`.
+
+```html
+<neu-table
+  [serverSide]="true"
+  [lazyLoadOnInit]="true"
+  [query]="query()"
+  (queryChange)="query.set($event)"
+  (serverStateChange)="loadLegacy($event)"
+/>
+```
+
+### Table selection migration contract
+
+`NeuTable` supports `selectionMode="single"` (radio) and `selectionMode="multiple"` (checkbox). The legacy `[selectable]="true"` input remains an alias for uncontrolled multiple selection. Supply `[selection]` to make only selection controlled; each user action emits one proposed `T[]` through `selectionChange`, and the rendered state changes when the consumer supplies the replacement value. Selection is canonical by `rowKey`, so preselection and immutable row replacement do not depend on object references.
+
+Bind `rowSelectable` to a component callback with signature `(row, index) => boolean`, for example `[rowSelectable]="canSelectUser"`, to disable row, checkbox and radio interaction. Disabled rows remain selected when already supplied by a consumer but are excluded from header selection. `selectAllScope="page"` changes only the current page; the default `"filtered"` preserves selection across client pages and affects all filtered client rows. Unless `selectAllAriaLabel` is supplied, the header label follows that scope: “Select all rows on this page” or “Select all filtered rows”. In server mode both scopes are limited to loaded rows—full-record server selection is intentionally not claimed.
+
+`rowSelect` and `rowUnselect` emit typed row deltas. `selectAllChange` is one aggregate header event, while the backward-compatible `selectionChange` remains one whole-selection event per action. A single-row replacement deterministically emits `selectionChange`, then `rowUnselect(previous)`, then `rowSelect(next)`; echoing a controlled value emits nothing. Each public event receives its own shallow array copies, and the shallow-frozen `selectedRows()` projection preserves each `T` identity.
+
+Canonical count can exceed resolved rows when selected server records are not loaded. The bar then reports `resolved/canonical selected` (for example `0/1 selected`) and hides row-dependent bulk actions at zero resolved rows; clearing selection remains available and unknown keys are never deleted or represented by fabricated rows. `rowKey` values should be unique. If current data contains duplicates, every row with that key renders selected, while the first current-data occurrence wins the resolved projection. Sorting, filtering, pagination, virtual-window recycling and immutable data replacement never change canonical selected keys. Full roving-focus, keyboard range selection and Shift-range selection remain part of the dedicated keyboard phase.
+
+### Table body composition
+
+`neuTableBody` keeps Neural ownership of the primary row and gives the consumer its cells. `neuTableBodySection` is the advanced full-section escape hatch: it renders directly under `<tbody>` and can emit one managed primary row plus any number of sibling rows. Use `[neuTableManagedRow]="entry"` on the primary `<tr>` to preserve selection, keyboard focus, ARIA, context-menu and reorder behavior. If both body templates are present, the section template wins. `[neuTableBodySectionOf]="rows"` optionally anchors exact strict-template row typing. Variable-height sibling rows are intentionally restricted to non-virtual mode; virtual contexts expose `siblingRowsSupported=false`.
+
+```html
+<neu-table
+  [data]="users"
+  [columns]="columns"
+  rowKey="id"
+  selectionMode="multiple"
+  [selection]="selectedUsers"
+  [rowSelectable]="canSelectUser"
+  selectAllScope="page"
+  (selectionChange)="selectedUsers = $event"
+  (rowSelect)="onUserSelected($event)"
+/>
 ```
 
 ### Density and high contrast / Densidad y alto contraste
@@ -137,17 +193,7 @@ const input = await loader.getHarness(NeuInputHarness);
 await input.setValue('Ada');
 ```
 
-The dedicated testing entry point exports 71 Angular CDK harnesses: one for every interactive public entry point. The remaining 19 entry points (17 non-interactive components plus the `url-state` and `testing` utilities) are explicitly classified as not applicable in the quality matrix. / El entry point dedicado de testing exporta 71 harnesses de Angular CDK: uno para cada entry point público interactivo. Los 19 restantes (17 componentes no interactivos más las utilidades `url-state` y `testing`) constan explícitamente como no aplicables en la matriz de calidad.
-
-### Language and direction / Idioma y dirección
-
-Neural UI reads the document `lang` when creating locale-aware default copy. English is the fallback and Spanish is selected when `<html lang="es">` is active. Consumer inputs such as `placeholder`, `searchPlaceholder`, `ariaLabel` and the component-specific label inputs always take precedence, so applications can supply any language through their own translation system.
-
-Neural UI usa el atributo `lang` del documento al crear los textos por defecto sensibles al idioma. Inglés es el fallback y español se activa con `<html lang="es">`. Los inputs públicos siempre tienen prioridad, por lo que cada aplicación puede proporcionar cualquier idioma desde su propio sistema de traducciones.
-
-Direction-sensitive components subscribe to Angular CDK `Directionality`. Changing the application direction between `ltr` and `rtl` updates layouts, directional icons, overlays and physical arrow-key behavior without recreating the application. The live showcase header exposes an RTL/LTR switch for verification; it changes direction, not language.
-
-Los componentes sensibles a la dirección usan `Directionality` de Angular CDK. El cambio dinámico entre `ltr` y `rtl` adapta layouts, iconos, overlays y navegación física con flechas. El botón RTL/LTR del showcase sirve para verificar esta capacidad y no cambia el idioma.
+Harnesses are available for button, input, checkbox, switch, select, date input, table and dialog. / Hay harnesses para button, input, checkbox, switch, select, date input, table y dialog.
 
 ---
 
@@ -156,36 +202,149 @@ Los componentes sensibles a la dirección usan `Directionality` de Angular CDK. 
 Import any component directly into your standalone component:
 
 ```typescript
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuInputComponent } from '@neural-ui/core/input';
 
 @Component({
-  imports: [NeuButtonComponent, NeuInputComponent, ReactiveFormsModule],
+  selector: 'app-login',
+  imports: [NeuButtonComponent, NeuInputComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <neu-input label="Email" type="email" [formControl]="email" />
-    <neu-button variant="primary" (click)="submit()">Send</neu-button>
+    <neu-input
+      label="Email"
+      type="email"
+      [value]="email()"
+      (valueChange)="email.set($event)"
+    />
+    <button
+      neu-button
+      type="button"
+      tone="brand"
+      variant="solid"
+      [disabled]="!email()"
+      (click)="submit()"
+    >
+      Send
+    </button>
+    @if (submittedEmail(); as submitted) {
+      <p role="status">Submitted: {{ submitted }}</p>
+    }
   `,
 })
 export class LoginComponent {
-  email = new FormControl('');
+  readonly email = signal('');
+  readonly submittedEmail = signal<string | null>(null);
+
+  submit(): void {
+    this.submittedEmail.set(this.email());
+  }
 }
 ```
 
 ---
 
+## Signal Forms and state ownership
+
+Editable controls expose their documented value/model and change events. The
+application owns authoritative state; controlled outputs propose a change and
+the application echoes the accepted value. Use Angular 22 Signal Forms through
+`FormField` when building a form:
+
+```typescript
+import { Component, signal } from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
+import { NeuInputComponent } from '@neural-ui/core/input';
+
+@Component({
+  selector: 'app-email-field',
+  imports: [NeuInputComponent, FormField],
+  template: `
+    <neu-input label="Email" type="email" [formField]="fields.email" />
+  `,
+})
+export class EmailFieldComponent {
+  readonly model = signal({ email: '' });
+  readonly fields = form(this.model);
+}
+```
+
+V1 `[formControl]`/`ngModel` examples are not interchangeable with V2
+`[formField]`. Migrate to Signal Forms or connect the documented value/change
+bindings to your application-owned form state explicitly.
+
+See [Signal Forms](https://ui.neuralui.org/v2/en/foundations/signal-forms) and
+[state ownership](https://ui.neuralui.org/v2/en/foundations/state-ownership).
+
+## Themes, icons and public types
+
+Core includes light/dark tokens, density presets and high-contrast support.
+Use `data-theme="dark"` on the document root to select dark appearance.
+`data-neu-density` accepts `compact`, `comfortable` and `spacious`;
+`data-neu-theme="high-contrast"` enables the high-contrast preset.
+
+A typed, named preset can be installed without a custom build script:
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { defineNeuPreset, provideNeuralUI } from '@neural-ui/core';
+
+const productPreset = defineNeuPreset({
+  name: 'product',
+  light: { '--neu-primary': '#2563eb' },
+  dark: { '--neu-primary': '#60a5fa' },
+});
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideNeuralUI({ theme: { preset: productPreset } })],
+};
+```
+
+Public CSS tokens are also available from
+`@neural-ui/core/token-manifest.json`. Read the
+[theming guide](https://ui.neuralui.org/v2/en/foundations/theming) for custom
+tokens, scoped themes, forced colors and CSP-aware preset registration.
+
+Structural icons have built-in Core fallbacks. An optional application-owned
+resolver is registered with `provideNeuIconResolver` from
+`@neural-ui/core/foundation`; no external icon renderer is mandatory.
+See the [icons guide](https://ui.neuralui.org/v2/en/foundations/icons).
+The optional companion project has its own catalog and documentation:
+[Neural Icons](https://icons.neuralui.org/). It is not required to use Core.
+
+Import public interfaces, event types and models from the owning entry point,
+not internal source paths. For example:
+
+```typescript
+import type { NeuButtonTone, NeuButtonVariant } from '@neural-ui/core/button';
+
+const tone: NeuButtonTone = 'success';
+const variant: NeuButtonVariant = 'outline';
+```
+
+Button tones are `brand`, `neutral`, `success`, `info`, `warning` and
+`danger`; variants are `solid`, `outline` and `ghost`. Other components
+have their own documented contracts; do not assume their `variant` names
+mean the same thing.
+
 ## Components
 
 Representative entry points:
 
-- **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/multiselect`, `@neural-ui/core/autocomplete`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
-- **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
-- **Data and overlays**: `@neural-ui/core/table`, `@neural-ui/core/tree`, `@neural-ui/core/tree-table`, `@neural-ui/core/modal`, `@neural-ui/core/popover`, `@neural-ui/core/context-menu`, `@neural-ui/core/command-palette`, `@neural-ui/core/virtual-list`, `@neural-ui/core/confirm-dialog`
-- **Rich data display**: `@neural-ui/core/kanban`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/image-gallery`, `@neural-ui/core/uploader`
-- **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
-- **Visualization and display**: `@neural-ui/core/chart`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
+Single-select and multiselect use `NeuSelectComponent` from
+`@neural-ui/core/select`. Set `mode="multiple"` for multiselect;
+there is no separate multiselect component or package export.
 
-For the complete catalog, examples, and API tables, use the live docs at [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app).
+- **Forms**: `@neural-ui/core/input`, `@neural-ui/core/select`, `@neural-ui/core/autocomplete`, `@neural-ui/core/input-tags`, `@neural-ui/core/date-input`, `@neural-ui/core/number-input`, `@neural-ui/core/input-otp`
+- **Navigation and layout**: `@neural-ui/core/tabs`, `@neural-ui/core/nav`, `@neural-ui/core/sidebar`, `@neural-ui/core/menu`, `@neural-ui/core/dock`, `@neural-ui/core/speed-dial`, `@neural-ui/core/mega-menu`, `@neural-ui/core/accordion`, `@neural-ui/core/toolbar`, `@neural-ui/core/dashboard-grid`
+- **Data and overlays**: `@neural-ui/core/table`, `@neural-ui/core/tree`, `@neural-ui/core/tree-table`, `@neural-ui/core/modal`, `@neural-ui/core/popover`, `@neural-ui/core/context-menu`, `@neural-ui/core/command-palette`, `@neural-ui/core/virtual-list`, `@neural-ui/core/confirm-dialog`
+- **Rich data display**: `@neural-ui/core/kanban`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/gallery`, `@neural-ui/core/uploader`
+- **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
+- **Visualization and display**: `@neural-ui/core/compare`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
+
+For the complete catalog, interactive configurators, examples and API tables, use
+the [Neural UI 2 showcase](https://ui.neuralui.org/v2/). Each page documents Inputs,
+Outputs, Models, Public Types and Templates, including the public imports.
 
 ---
 
@@ -204,89 +363,63 @@ Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, aut
 
 | Package            | Required version   |
 | ------------------ | ------------------ |
-| `@angular/core`    | `>=19.0.0 <23.0.0` |
-| `@angular/cdk`     | `>=19.0.0 <23.0.0` |
-| `@angular/common`  | `>=19.0.0 <23.0.0` |
-| `@angular/forms`   | `>=19.0.0 <23.0.0` |
-| `@angular/router`  | `>=19.0.0 <23.0.0` |
-| `@ng-icons/core`   | `>=31.4.0 <34.0.0` |
-| `@ng-icons/lucide` | `>=31.4.0 <34.0.0` |
+| `@angular/core`    | `>=22.0.0 <23.0.0` |
+| `@angular/cdk`     | `>=22.0.0 <23.0.0` |
+| `@angular/common`  | `>=22.0.0 <23.0.0` |
+| `@angular/forms`   | `>=22.0.0 <23.0.0` |
+| `@angular/router`  | `>=22.0.0 <23.0.0` |
+| `@angular-devkit/schematics` | `>=22.0.0 <23.0.0` |
+| `@schematics/angular` | `>=22.0.0 <23.0.0` |
 
-The Chart entry point uses the bundled MIT-licensed `chart.js` runtime and requires no charting peer dependency.
+Neural UI 2.x supports Angular 22 only. Follow the V2 migration guidance before
+upgrading an existing 1.x application; the V1 documentation has its own
+compatibility requirements. Do not mix V1 components or examples with V2 imports.
+
+### Migrating from 1.x
+
+Neural UI 2 is a major release, not a drop-in upgrade. Update component
+imports, templates, value/event bindings and forms together. Do not import
+components from the package root or from private implementation paths.
+
+| V1 entry point | V2 direction |
+| --- | --- |
+| `@neural-ui/core/multiselect` | `NeuSelectComponent` from `@neural-ui/core/select`, with `mode="multiple"` |
+| `@neural-ui/core/image-gallery` | Review the new `@neural-ui/core/gallery` API |
+| `@neural-ui/core/image-compare` | Review the new `@neural-ui/core/compare` API |
+| `@neural-ui/core/tags` | Review the new `@neural-ui/core/input-tags` API |
+| `@neural-ui/core/icon` | Application-owned icons and the optional foundation icon resolver |
+| `@neural-ui/core/panel-menu`, `@neural-ui/core/org-chart`, `@neural-ui/core/scheduler-gantt` | These legacy entry points are not exported by Core 2.0.0; there is no drop-in replacement |
+
+These are migration directions, not automatic renames: compare each V2 API
+and its examples before replacing a V1 component.
+
+### Charts in Neural UI 2
+
+Neural UI 1.x included the `@neural-ui/core/chart` entry point backed by ApexCharts.
+That entry point is **removed in Neural UI 2.0**. Charts are not replaced by another
+library inside Neural UI; Neural Charts is planned as a separate future product, with
+no package name or release date announced.
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the complete workflow.
-
-Project policies: [security](./SECURITY.md) · [support](./SUPPORT.md) · [deprecations](./DEPRECATIONS.md) · [migrations](./MIGRATIONS.md) · [release checklist](./RELEASE.md)
-
----
-
-## Known issues & workarounds
-
-### Angular 20.x — npm peer resolution on install
-
-**Affected versions:** Angular 20.x projects with mixed Angular/CDK minors  
-**Symptom:** `npm install` may fail with `ERESOLVE` or peer dependency conflicts while installing `@neural-ui/core` and its required peers.
-
-**Root cause:** Angular 20.x is supported, but installation can fail when `@angular/*` packages and `@angular/cdk` are not aligned to the same minor version in the host app.
-
-**Solution — align Angular packages before installing:**
-
-Make sure all Angular packages, especially `@angular/cdk`, use the same 20.x minor in your app, then reinstall dependencies.
-
-```bash
-npm install @angular/core@20.x @angular/common@20.x @angular/forms@20.x @angular/router@20.x @angular/cdk@20.x
-npm install @neural-ui/core @ng-icons/core @ng-icons/lucide
-```
-
-### Angular 21.2.x — NG3004 with `FormsModule`
-
-**Affected versions:** Angular 21.2.0 – 21.2.7  
-**Symptom:** Using `FormsModule` (even standalone imports) in any component causes the build error:
-
-```
-NG3004: NeuXxx is not a known element... ɵNgNoValidate is not exported from the types definition file
-```
-
-**Root cause:** `ɵNgNoValidate` is accidentally not `export`ed from `@angular/forms/types/forms.d.ts` in those patch releases.
-
-**Solution — use `ReactiveFormsModule` + `FormControl`:**
-
-Replace every template-driven value binding with a `FormControl` + `[formControl]` directive:
-
-```typescript
-// Before (triggers NG3004)
-import { FormsModule } from '@angular/forms';
-// ...
-imports: ([FormsModule],
-  // ...
-  (isChecked = false));
-```
-
-```typescript
-// After (works correctly)
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-// ...
-imports: [ReactiveFormsModule],
-// ...
-readonly isChecked = new FormControl(false, { nonNullable: true });
-```
-
-```html
-<!-- Before -->
-<neu-checkbox [value]="isChecked" (valueChange)="isChecked = $event" label="Accept" />
-
-<!-- After -->
-<neu-checkbox [formControl]="isChecked" label="Accept" />
-```
-
-All NeuralUI form components implement `ControlValueAccessor` (`NG_VALUE_ACCESSOR`) and work with both binding strategies. Prefer `ReactiveFormsModule` for Angular 21+.
+1. Fork the repository and create a feature branch
+2. Run `npm install`
+3. Run tests: `npm test`
+4. Run the release gate: `npm run verify:release`
+5. Open a pull request
 
 ---
 
 ## License
 
-MIT © [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo)
+Neural UI was created and is maintained by [Pedro Moreno Trujillo](https://github.com/PedroMorenoTrujillo).
+
+Copyright © 2026 Pedro Moreno Trujillo. Released under the MIT License.
+
+## Previous version
+
+Maintaining a Neural UI 1.x application? Use the separate
+[Neural UI v1 showcase and documentation](https://ui.neuralui.org/v1/).
+Its examples and compatibility requirements apply to V1, not this 2.0.0 package.

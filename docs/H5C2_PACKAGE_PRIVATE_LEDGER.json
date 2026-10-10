@@ -1,0 +1,3325 @@
+{
+  "schemaVersion": 1,
+  "baseline": "83cb607bec4258e578112ea5ecddee4b0262e78e",
+  "sourceClassificationBaseline": "9bf0142bd36c706f693d0951c80064938eab258d",
+  "summary": {
+    "total": 330,
+    "actions": {
+      "PROTECTED_TEMPLATE_VISIBLE_MEMBER": 245,
+      "PRIVATE_CLASS_MEMBER": 73,
+      "KEEP_PHYSICALLY_PUBLISHED_DEPENDENCY": 3,
+      "TYPE_ONLY_INTERNALIZATION": 9
+    }
+  },
+  "symbols": [
+    {
+      "id": "./alert#NeuAlertComponent.property:_defaultIconName",
+      "definingFile": "projects/ui-core/alert/neu-alert.component.ts",
+      "declaration": "NeuAlertComponent",
+      "member": "_defaultIconName",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./alert#NeuAlertComponent.property:_dismissed",
+      "definingFile": "projects/ui-core/alert/neu-alert.component.ts",
+      "declaration": "NeuAlertComponent",
+      "member": "_dismissed",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./alert#NeuAlertComponent.property:_id",
+      "definingFile": "projects/ui-core/alert/neu-alert.component.ts",
+      "declaration": "NeuAlertComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_closePanel",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_closePanel",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_moveActiveIndex",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_moveActiveIndex",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_onBlur",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_onBlur",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_onFocus",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_onFocus",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_optionId",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_optionId",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_scrollActiveOptionIntoView",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_scrollActiveOptionIntoView",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:_syncOverlayWidth",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_syncOverlayWidth",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:groupTemplateContext",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "groupTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:handleDropdownClick",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "handleDropdownClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:iconTemplateContext",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "iconTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:isOptionDisabled",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "isOptionDisabled",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:isOptionSelected",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "isOptionSelected",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:itemTemplateContext",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "itemTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:loaderTemplateContext",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "loaderTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onDocClick",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onDocClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onInput",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onInput",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onKeyDown",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onKeyDown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onOptionMouseEnter",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onOptionMouseEnter",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onOptionPointerDown",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onOptionPointerDown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onPanelScroll",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onPanelScroll",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onPositionChange",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onPositionChange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onQueryChange",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onQueryChange",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:onWindowResize",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "onWindowResize",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:optionLabelOf",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "optionLabelOf",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:optionsEqual",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "optionsEqual",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:optionValueOf",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "optionValueOf",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:rowId",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "rowId",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.method:trackRow",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "trackRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_activeId",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_activeId",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_activeIndex",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_activeIndex",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_cvaDisabled",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_cvaDisabled",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_filtered",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_filtered",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_focused",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_focused",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_id",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_isOpen",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_isOpen",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_listId",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_listId",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_query",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_query",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./autocomplete#NeuAutocompleteComponent.property:_viewport",
+      "definingFile": "projects/ui-core/autocomplete/neu-autocomplete.component.ts",
+      "declaration": "NeuAutocompleteComponent",
+      "member": "_viewport",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./button#NeuButtonComponent.method:_onHostClick",
+      "definingFile": "projects/ui-core/button/neu-button.component.ts",
+      "declaration": "NeuButtonComponent",
+      "member": "_onHostClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./checkbox#NeuCheckboxComponent.property:_id",
+      "definingFile": "projects/ui-core/checkbox/neu-checkbox.component.ts",
+      "declaration": "NeuCheckboxComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./chip#NeuChipComponent.property:_hostAriaPressed",
+      "definingFile": "projects/ui-core/chip/neu-chip.component.ts",
+      "declaration": "NeuChipComponent",
+      "member": "_hostAriaPressed",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./chip#NeuChipComponent.property:_hostRole",
+      "definingFile": "projects/ui-core/chip/neu-chip.component.ts",
+      "declaration": "NeuChipComponent",
+      "member": "_hostRole",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./chip#NeuChipComponent.property:_hostTabindex",
+      "definingFile": "projects/ui-core/chip/neu-chip.component.ts",
+      "declaration": "NeuChipComponent",
+      "member": "_hostTabindex",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_canvasDown",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_canvasDown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_canvasDrag",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_canvasDrag",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_canvasUp",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_canvasUp",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_onHueChange",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_onHueChange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_onTextChange",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_onTextChange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_outsideClick",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_outsideClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_pickSwatch",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_pickSwatch",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.method:_toggle",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_toggle",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_activeMode",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_activeMode",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_cvaDisabled",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_cvaDisabled",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_hasValue",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_hasValue",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_hexValue",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_hexValue",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_hue",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_hue",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_id",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_isDisabled",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_isDisabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_isOpen",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_isOpen",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_modes",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_modes",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_sv",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_sv",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_swatches",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_swatches",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_textValue",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_textValue",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./color-picker#NeuColorPickerComponent.property:_viewportMargin",
+      "definingFile": "projects/ui-core/color-picker/neu-color-picker.component.ts",
+      "declaration": "NeuColorPickerComponent",
+      "member": "_viewportMargin",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.method:_onDocKey",
+      "definingFile": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "declaration": "NeuCommandPaletteComponent",
+      "member": "_onDocKey",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.method:_onInputKey",
+      "definingFile": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "declaration": "NeuCommandPaletteComponent",
+      "member": "_onInputKey",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.property:_activeIndex",
+      "definingFile": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "declaration": "NeuCommandPaletteComponent",
+      "member": "_activeIndex",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./command-palette#NeuCommandPaletteComponent.property:_svc",
+      "definingFile": "projects/ui-core/command-palette/neu-command-palette.component.ts",
+      "declaration": "NeuCommandPaletteComponent",
+      "member": "_svc",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./dashboard-grid#NeuDashboardGridComponent.method:_onDrop",
+      "definingFile": "projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts",
+      "declaration": "NeuDashboardGridComponent",
+      "member": "_onDrop",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./dashboard-grid#NeuDashboardGridComponent.property:_orderedTiles",
+      "definingFile": "projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts",
+      "declaration": "NeuDashboardGridComponent",
+      "member": "_orderedTiles",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./dashboard-grid#NeuDashboardGridComponent.property:_tileSlots",
+      "definingFile": "projects/ui-core/dashboard-grid/neu-dashboard-grid.component.ts",
+      "declaration": "NeuDashboardGridComponent",
+      "member": "_tileSlots",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./data-view#NeuDataViewComponent.property:_selectSortOptions",
+      "definingFile": "projects/ui-core/data-view/neu-data-view.component.ts",
+      "declaration": "NeuDataViewComponent",
+      "member": "_selectSortOptions",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./data-view#NeuDataViewComponent.property:_sortControl",
+      "definingFile": "projects/ui-core/data-view/neu-data-view.component.ts",
+      "declaration": "NeuDataViewComponent",
+      "member": "_sortControl",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_applyPreset",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_applyPreset",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_applyRange",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_applyRange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_clearRange",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_clearRange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_hoverDay",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_hoverDay",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_nextLeft",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_nextLeft",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_nextRight",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_nextRight",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_prevLeft",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_prevLeft",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_prevRight",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_prevRight",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.method:_selectDay",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_selectDay",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_canApply",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_canApply",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_hasRange",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_hasRange",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_isRange",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_isRange",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_leftCursor",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_leftCursor",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_leftDays",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_leftDays",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_leftTitle",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_leftTitle",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_rangeDisplayValue",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_rangeDisplayValue",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_rangePlaceholderText",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_rangePlaceholderText",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_resolvedLocale",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_resolvedLocale",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_rightCursor",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_rightCursor",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_rightDays",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_rightDays",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_rightTitle",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_rightTitle",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_texts",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_texts",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_viewportMargin",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_viewportMargin",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./date-input#NeuDateInputComponent.property:_weekDayLabels",
+      "definingFile": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "declaration": "NeuDateInputComponent",
+      "member": "_weekDayLabels",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./filter-bar#NeuFilterBarComponent.property:_chips",
+      "definingFile": "projects/ui-core/filter-bar/neu-filter-bar.component.ts",
+      "declaration": "NeuFilterBarComponent",
+      "member": "_chips",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./filter-bar#NeuFilterBarComponent.property:_hasActive",
+      "definingFile": "projects/ui-core/filter-bar/neu-filter-bar.component.ts",
+      "declaration": "NeuFilterBarComponent",
+      "member": "_hasActive",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./filter-bar#NeuFilterBarComponent.property:_id",
+      "definingFile": "projects/ui-core/filter-bar/neu-filter-bar.component.ts",
+      "declaration": "NeuFilterBarComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./focus-trap#NeuFocusTrapDirective.method:onFocusin",
+      "definingFile": "projects/ui-core/focus-trap/neu-focus-trap.directive.ts",
+      "declaration": "NeuFocusTrapDirective",
+      "member": "onFocusin",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./focus-trap#NeuFocusTrapDirective.method:onKeydown",
+      "definingFile": "projects/ui-core/focus-trap/neu-focus-trap.directive.ts",
+      "declaration": "NeuFocusTrapDirective",
+      "member": "onKeydown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input-otp#NeuInputOTPComponent.property:_cells",
+      "definingFile": "projects/ui-core/input-otp/neu-input-otp.component.ts",
+      "declaration": "NeuInputOTPComponent",
+      "member": "_cells",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input-otp#NeuInputOTPComponent.property:_cvaDisabled",
+      "definingFile": "projects/ui-core/input-otp/neu-input-otp.component.ts",
+      "declaration": "NeuInputOTPComponent",
+      "member": "_cvaDisabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input-otp#NeuInputOTPComponent.property:_digits",
+      "definingFile": "projects/ui-core/input-otp/neu-input-otp.component.ts",
+      "declaration": "NeuInputOTPComponent",
+      "member": "_digits",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input-otp#NeuInputOTPComponent.property:_id",
+      "definingFile": "projects/ui-core/input-otp/neu-input-otp.component.ts",
+      "declaration": "NeuInputOTPComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input-otp#NeuInputOTPComponent.property:_paddedDigits",
+      "definingFile": "projects/ui-core/input-otp/neu-input-otp.component.ts",
+      "declaration": "NeuInputOTPComponent",
+      "member": "_paddedDigits",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input#NeuInputComponent.property:_hasIconLeft",
+      "definingFile": "projects/ui-core/input/neu-input.component.ts",
+      "declaration": "NeuInputComponent",
+      "member": "_hasIconLeft",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./input#NeuInputComponent.property:_hasIconRight",
+      "definingFile": "projects/ui-core/input/neu-input.component.ts",
+      "declaration": "NeuInputComponent",
+      "member": "_hasIconRight",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./kanban#NeuKanbanComponent.property:_columns",
+      "definingFile": "projects/ui-core/kanban/neu-kanban.component.ts",
+      "declaration": "NeuKanbanComponent",
+      "member": "_columns",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_arcDashArray",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_arcDashArray",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_arcDashOffset",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_arcDashOffset",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_arcLength",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_arcLength",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_circumference",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_circumference",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_cvaDisabled",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_cvaDisabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_id",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_indicatorAngle",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_indicatorAngle",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_indicatorX",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_indicatorX",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_indicatorY",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_indicatorY",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_normalizedValue",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_normalizedValue",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_radius",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_radius",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_strokeWidth",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_strokeWidth",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./knob#NeuKnobComponent.property:_value",
+      "definingFile": "projects/ui-core/knob/neu-knob.component.ts",
+      "declaration": "NeuKnobComponent",
+      "member": "_value",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:allSelected",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "allSelected",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:canDrag",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "canDrag",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:filterTemplateContext",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "filterTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:groupId",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "groupId",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:groupTemplateContext",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "groupTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:indicatorTemplateContext",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "indicatorTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:isOptionDisabled",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "isOptionDisabled",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:isOptionSelected",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "isOptionSelected",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:isSelected",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "isSelected",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:itemTemplateContext",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "itemTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:loaderTemplateContext",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "loaderTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:markTouchInteraction",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "markTouchInteraction",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onDropRow",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onDropRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onFilterInput",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onFilterInput",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onFilterKeyDown",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onFilterKeyDown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onKeyDown",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onKeyDown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onListBlur",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onListBlur",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onListFocus",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onListFocus",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onOptionDoubleClick",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onOptionDoubleClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onOptionMouseEnter",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onOptionMouseEnter",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:onScroll",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "onScroll",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:optionLabelOf",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "optionLabelOf",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:optionPosition",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "optionPosition",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:optionValueOf",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "optionValueOf",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:rowId",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "rowId",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:selectOption",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "selectOption",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:setActiveRow",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "setActiveRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:toggleOption",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "toggleOption",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:trackByOption",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "trackByOption",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./listbox#NeuListboxComponent.method:trackRow",
+      "definingFile": "projects/ui-core/listbox/neu-listbox.component.ts",
+      "declaration": "NeuListboxComponent",
+      "member": "trackRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./meter-group#NeuMeterGroupComponent.property:_effectiveTotal",
+      "definingFile": "projects/ui-core/meter-group/neu-meter-group.component.ts",
+      "declaration": "NeuMeterGroupComponent",
+      "member": "_effectiveTotal",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./meter-group#NeuMeterGroupComponent.property:_segments",
+      "definingFile": "projects/ui-core/meter-group/neu-meter-group.component.ts",
+      "declaration": "NeuMeterGroupComponent",
+      "member": "_segments",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./meter-group#NeuMeterGroupComponent.property:_usedSum",
+      "definingFile": "projects/ui-core/meter-group/neu-meter-group.component.ts",
+      "declaration": "NeuMeterGroupComponent",
+      "member": "_usedSum",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./modal#NeuDialogComponent.property:_uid",
+      "definingFile": "projects/ui-core/modal/neu-modal.component.ts",
+      "declaration": "NeuDialogComponent",
+      "member": "_uid",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./multiselect#NeuMultiselectComponent.property:_chipMode",
+      "definingFile": "projects/ui-core/multiselect/neu-multiselect.component.ts",
+      "declaration": "NeuMultiselectComponent",
+      "member": "_chipMode",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./multiselect#NeuMultiselectComponent.property:_panelId",
+      "definingFile": "projects/ui-core/multiselect/neu-multiselect.component.ts",
+      "declaration": "NeuMultiselectComponent",
+      "member": "_panelId",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./multiselect#NeuMultiselectComponent.property:_triggerId",
+      "definingFile": "projects/ui-core/multiselect/neu-multiselect.component.ts",
+      "declaration": "NeuMultiselectComponent",
+      "member": "_triggerId",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./multiselect#NeuMultiselectComponent.property:_viewportMargin",
+      "definingFile": "projects/ui-core/multiselect/neu-multiselect.component.ts",
+      "declaration": "NeuMultiselectComponent",
+      "member": "_viewportMargin",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./multiselect#NeuMultiselectComponent.property:_visibleChips",
+      "definingFile": "projects/ui-core/multiselect/neu-multiselect.component.ts",
+      "declaration": "NeuMultiselectComponent",
+      "member": "_visibleChips",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./notification-center#NeuNotificationCenterComponent.method:_relativeTime",
+      "definingFile": "projects/ui-core/notification-center/neu-notification-center.component.ts",
+      "declaration": "NeuNotificationCenterComponent",
+      "member": "_relativeTime",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./notification-center#NeuNotificationCenterComponent.method:_toggle",
+      "definingFile": "projects/ui-core/notification-center/neu-notification-center.component.ts",
+      "declaration": "NeuNotificationCenterComponent",
+      "member": "_toggle",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./notification-center#NeuNotificationCenterComponent.property:_isOpen",
+      "definingFile": "projects/ui-core/notification-center/neu-notification-center.component.ts",
+      "declaration": "NeuNotificationCenterComponent",
+      "member": "_isOpen",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./notification-center#NeuNotificationCenterComponent.property:_panelId",
+      "definingFile": "projects/ui-core/notification-center/neu-notification-center.component.ts",
+      "declaration": "NeuNotificationCenterComponent",
+      "member": "_panelId",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./notification-center#NeuNotificationCenterComponent.property:_svc",
+      "definingFile": "projects/ui-core/notification-center/neu-notification-center.component.ts",
+      "declaration": "NeuNotificationCenterComponent",
+      "member": "_svc",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./notification-center#NeuNotificationCenterComponent.property:_viewportMargin",
+      "definingFile": "projects/ui-core/notification-center/neu-notification-center.component.ts",
+      "declaration": "NeuNotificationCenterComponent",
+      "member": "_viewportMargin",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./number-input#NeuNumberInputComponent.property:_cvaDisabled",
+      "definingFile": "projects/ui-core/number-input/neu-number-input.component.ts",
+      "declaration": "NeuNumberInputComponent",
+      "member": "_cvaDisabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./number-input#NeuNumberInputComponent.property:_focused",
+      "definingFile": "projects/ui-core/number-input/neu-number-input.component.ts",
+      "declaration": "NeuNumberInputComponent",
+      "member": "_focused",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./number-input#NeuNumberInputComponent.property:_id",
+      "definingFile": "projects/ui-core/number-input/neu-number-input.component.ts",
+      "declaration": "NeuNumberInputComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./number-input#NeuNumberInputComponent.property:_value",
+      "definingFile": "projects/ui-core/number-input/neu-number-input.component.ts",
+      "declaration": "NeuNumberInputComponent",
+      "member": "_value",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./popover#NeuPopoverDirective.property:_isOpen",
+      "definingFile": "projects/ui-core/popover/neu-popover.component.ts",
+      "declaration": "NeuPopoverDirective",
+      "member": "_isOpen",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./radio#NeuRadioComponent.property:_groupName",
+      "definingFile": "projects/ui-core/radio/neu-radio.component.ts",
+      "declaration": "NeuRadioComponent",
+      "member": "_groupName",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./radio#NeuRadioComponent.property:_id",
+      "definingFile": "projects/ui-core/radio/neu-radio.component.ts",
+      "declaration": "NeuRadioComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./radio#NeuRadioGroupComponent.property:_isDisabled",
+      "definingFile": "projects/ui-core/radio/neu-radio-group.component.ts",
+      "declaration": "NeuRadioGroupComponent",
+      "member": "_isDisabled",
+      "kind": "property",
+      "action": "KEEP_PHYSICALLY_PUBLISHED_DEPENDENCY",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./radio#NeuRadioGroupComponent.property:_name",
+      "definingFile": "projects/ui-core/radio/neu-radio-group.component.ts",
+      "declaration": "NeuRadioGroupComponent",
+      "member": "_name",
+      "kind": "property",
+      "action": "KEEP_PHYSICALLY_PUBLISHED_DEPENDENCY",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./radio#NeuRadioGroupComponent.property:_value",
+      "definingFile": "projects/ui-core/radio/neu-radio-group.component.ts",
+      "declaration": "NeuRadioGroupComponent",
+      "member": "_value",
+      "kind": "property",
+      "action": "KEEP_PHYSICALLY_PUBLISHED_DEPENDENCY",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./scheduler-gantt#NeuSchedulerGanttComponent.property:_bounds",
+      "definingFile": "projects/ui-core/scheduler-gantt/neu-scheduler-gantt.component.ts",
+      "declaration": "NeuSchedulerGanttComponent",
+      "member": "_bounds",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./select#NeuSelectComponent.property:_panelId",
+      "definingFile": "projects/ui-core/select/neu-select.component.ts",
+      "declaration": "NeuSelectComponent",
+      "member": "_panelId",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./select#NeuSelectComponent.property:_selectedOption",
+      "definingFile": "projects/ui-core/select/neu-select.component.ts",
+      "declaration": "NeuSelectComponent",
+      "member": "_selectedOption",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./select#NeuSelectComponent.property:_triggerId",
+      "definingFile": "projects/ui-core/select/neu-select.component.ts",
+      "declaration": "NeuSelectComponent",
+      "member": "_triggerId",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./select#NeuSelectComponent.property:_viewport",
+      "definingFile": "projects/ui-core/select/neu-select.component.ts",
+      "declaration": "NeuSelectComponent",
+      "member": "_viewport",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./select#NeuSelectComponent.property:_viewportMargin",
+      "definingFile": "projects/ui-core/select/neu-select.component.ts",
+      "declaration": "NeuSelectComponent",
+      "member": "_viewportMargin",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./spinner#NeuSpinnerComponent.property:_severityColor",
+      "definingFile": "projects/ui-core/spinner/neu-spinner.component.ts",
+      "declaration": "NeuSpinnerComponent",
+      "member": "_severityColor",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./split-button#NeuSplitButtonComponent.property:_viewportMargin",
+      "definingFile": "projects/ui-core/split-button/neu-split-button.component.ts",
+      "declaration": "NeuSplitButtonComponent",
+      "member": "_viewportMargin",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.method:_onHandleKey",
+      "definingFile": "projects/ui-core/splitter/neu-splitter.component.ts",
+      "declaration": "NeuSplitterComponent",
+      "member": "_onHandleKey",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.method:_startDrag",
+      "definingFile": "projects/ui-core/splitter/neu-splitter.component.ts",
+      "declaration": "NeuSplitterComponent",
+      "member": "_startDrag",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.method:_startTouchDrag",
+      "definingFile": "projects/ui-core/splitter/neu-splitter.component.ts",
+      "declaration": "NeuSplitterComponent",
+      "member": "_startTouchDrag",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./splitter#NeuSplitterComponent.property:_sizes",
+      "definingFile": "projects/ui-core/splitter/neu-splitter.component.ts",
+      "declaration": "NeuSplitterComponent",
+      "member": "_sizes",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./switch#NeuSwitchComponent.property:_id",
+      "definingFile": "projects/ui-core/switch/neu-switch.component.ts",
+      "declaration": "NeuSwitchComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:_filterOpts",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_filterOpts",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:bodyContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "bodyContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cancelConfirm",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cancelConfirm",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cancelSelectionConfirm",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cancelSelectionConfirm",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:canMoveColumn",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "canMoveColumn",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:canMoveRow",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "canMoveRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:canReorderRow",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "canReorderRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cellEditingError",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cellEditingError",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cellEditingInvalid",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cellEditingInvalid",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cellEditorContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cellEditorContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cellEditorTemplate",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cellEditorTemplate",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cellViewContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cellViewContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:cellViewTemplate",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "cellViewTemplate",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:columnFilterControl",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "columnFilterControl",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:columnWidth",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "columnWidth",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:editingValue",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "editingValue",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:getCellValue",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "getCellValue",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:getColumnFilterValue",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "getColumnFilterValue",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:getRowClass",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "getRowClass",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:getRowKey",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "getRowKey",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:getSortPriority",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "getSortPriority",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:groupExpansionAriaLabel",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "groupExpansionAriaLabel",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:groupRowspan",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "groupRowspan",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:groupTemplateContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "groupTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:handleAction",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "handleAction",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:handleSelectionAction",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "handleSelectionAction",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:hideGroupRowspanCell",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "hideGroupRowspanCell",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:inlineEditorOptions",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "inlineEditorOptions",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:inlineEditorType",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "inlineEditorType",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isColumnDraggable",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isColumnDraggable",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isColumnResizable",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isColumnResizable",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isColumnVisible",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isColumnVisible",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isConfirmPending",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isConfirmPending",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isEditingCell",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isEditingCell",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isEditingRow",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isEditingRow",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isFirstFrozenRightColumn",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isFirstFrozenRightColumn",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isFirstVisibleColumn",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isFirstVisibleColumn",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isLastFrozenLeftColumn",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isLastFrozenLeftColumn",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isLastVisibleColumn",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isLastVisibleColumn",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isRowExpanded",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isRowExpanded",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isRowSelectable",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isRowSelectable",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isRowSelected",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isRowSelected",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isRowspanGroupCell",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isRowspanGroupCell",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:isSelectionConfirmPending",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "isSelectionConfirmPending",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:moveColumn",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "moveColumn",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:moveRow",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "moveRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:onEditableCellKeydown",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "onEditableCellKeydown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:onPageSizeChange",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "onPageSizeChange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:onRowClick",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "onRowClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:onSearch",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "onSearch",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:onTableScroll",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "onTableScroll",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:pageButtonAriaLabel",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "pageButtonAriaLabel",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:paginatorTemplateContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "paginatorTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:resetColumnWidth",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "resetColumnWidth",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:rowEditContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "rowEditContext",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:setEditingValue",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "setEditingValue",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:setRowEditingValue",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "setRowEditingValue",
+      "kind": "method",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:startColumnResize",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "startColumnResize",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:structuralContext",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "structuralContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:toggleColumnChooser",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "toggleColumnChooser",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:toggleColumnVisibility",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "toggleColumnVisibility",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:toggleGroup",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "toggleGroup",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:toggleRow",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "toggleRow",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.method:visibleRowNumber",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "visibleRowNumber",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_appendOnlyActive",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_appendOnlyActive",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_ariaRowCount",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_ariaRowCount",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_columnFilters",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_columnFilters",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_expansionEnabled",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_expansionEnabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_firstFrozenRightKey",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_firstFrozenRightKey",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_frozenLeftOffsets",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_frozenLeftOffsets",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_hasFilterableCol",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_hasFilterableCol",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_jumpPageOptions",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_jumpPageOptions",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_lastFrozenLeftKey",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_lastFrozenLeftKey",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_lazyVirtualActive",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_lazyVirtualActive",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_logicalTotalItems",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_logicalTotalItems",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_pageSizeControl",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_pageSizeControl",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_pageSizeOptions",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./table",
+      "declaration": "NeuTableComponent",
+      "member": "_pageSizeOptions",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_paginatorEvent",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_paginatorEvent",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_scrollContainerMaxHeight",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_scrollContainerMaxHeight",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_sortEntries",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_sortEntries",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_tableEmpty",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_tableEmpty",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_verticalScrollEnabled",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_verticalScrollEnabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualBottomSpacerHeight",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualBottomSpacerHeight",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualDelay",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualDelay",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualEndIndex",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualEndIndex",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualHeaderHeight",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualHeaderHeight",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualItemSize",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualItemSize",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualOverscan",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualOverscan",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualRange",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualRange",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualRowHeight",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualRowHeight",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualScrollActive",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualScrollActive",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualSlots",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualSlots",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualStartIndex",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualStartIndex",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualTopSpacerHeight",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualTopSpacerHeight",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./table#NeuTableComponent.property:_virtualVisibleItems",
+      "definingFile": "projects/ui-core/table/neu-table.component.ts",
+      "declaration": "NeuTableComponent",
+      "member": "_virtualVisibleItems",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.property:_id",
+      "definingFile": "projects/ui-core/textarea/neu-textarea.component.ts",
+      "declaration": "NeuTextareaComponent",
+      "member": "_id",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.property:_isDisabledState",
+      "definingFile": "projects/ui-core/textarea/neu-textarea.component.ts",
+      "declaration": "NeuTextareaComponent",
+      "member": "_isDisabledState",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./textarea#NeuTextareaComponent.property:_resizeStyle",
+      "definingFile": "projects/ui-core/textarea/neu-textarea.component.ts",
+      "declaration": "NeuTextareaComponent",
+      "member": "_resizeStyle",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./timeline-grid#NeuTimelineGridComponent.property:_columnIndexMap",
+      "definingFile": "projects/ui-core/timeline-grid/neu-timeline-grid.component.ts",
+      "declaration": "NeuTimelineGridComponent",
+      "member": "_columnIndexMap",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./toggle-button-group#NeuToggleButtonGroupComponent.property:_isDisabled",
+      "definingFile": "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.ts",
+      "declaration": "NeuToggleButtonGroupComponent",
+      "member": "_isDisabled",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./toggle-button-group#NeuToggleButtonGroupComponent.property:_value",
+      "definingFile": "projects/ui-core/toggle-button-group/neu-toggle-button-group.component.ts",
+      "declaration": "NeuToggleButtonGroupComponent",
+      "member": "_value",
+      "kind": "property",
+      "action": "PRIVATE_CLASS_MEMBER",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tooltip#NeuTooltipDirective.property:_tooltipId",
+      "definingFile": "projects/ui-core/tooltip/neu-tooltip.directive.ts",
+      "declaration": "NeuTooltipDirective",
+      "member": "_tooltipId",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:expandTemplateContext",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "expandTemplateContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:expandTemplateRef",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "expandTemplateRef",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:isTreeRowDisabled",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "isTreeRowDisabled",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onHostKeydown",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onHostKeydown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableActionClick",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableActionClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableCellEditCommit",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableCellEditCommit",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableCellEditLifecycle",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableCellEditLifecycle",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableEditValidationError",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableEditValidationError",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableLazyRequest",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableLazyRequest",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableQueryChange",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableQueryChange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableRowClick",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableRowClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableRowDblClick",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableRowDblClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableRowEdit",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableRowEdit",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableRowSelect",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableRowSelect",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableRowUnselect",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableRowUnselect",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableSelectionActionClick",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableSelectionActionClick",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTableSelectionChange",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTableSelectionChange",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:onTreeToggleKeydown",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "onTreeToggleKeydown",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:treeBodyContext",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "treeBodyContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:treeBodySectionContext",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "treeBodySectionContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:treeIndent",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "treeIndent",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:treeNodeContext",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "treeNodeContext",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableComponent.method:treeToggleAriaLabel",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.component.ts",
+      "declaration": "NeuTreeTableComponent",
+      "member": "treeToggleAriaLabel",
+      "kind": "method",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeDisabled",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeDisabled",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeExpanded",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeExpanded",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeHasChildren",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeHasChildren",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeLevel",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeLevel",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeNode",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeNode",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeParentId",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeParentId",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treePosInSet",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treePosInSet",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./tree-table#NeuTreeTableRow.property:__treeSetSize",
+      "definingFile": "projects/ui-core/tree-table/neu-tree-table.types.ts",
+      "entrypoint": "./tree-table",
+      "declaration": "NeuTreeTableRow",
+      "member": "__treeSetSize",
+      "kind": "property",
+      "action": "TYPE_ONLY_INTERNALIZATION",
+      "templateVisible": false,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListComponent.property:_containerHeight",
+      "definingFile": "projects/ui-core/virtual-list/neu-virtual-list.component.ts",
+      "declaration": "NeuVirtualListComponent",
+      "member": "_containerHeight",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListComponent.property:_isEmpty",
+      "definingFile": "projects/ui-core/virtual-list/neu-virtual-list.component.ts",
+      "declaration": "NeuVirtualListComponent",
+      "member": "_isEmpty",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    },
+    {
+      "id": "./virtual-list#NeuVirtualListComponent.property:_trackBy",
+      "definingFile": "projects/ui-core/virtual-list/neu-virtual-list.component.ts",
+      "declaration": "NeuVirtualListComponent",
+      "member": "_trackBy",
+      "kind": "property",
+      "action": "PROTECTED_TEMPLATE_VISIBLE_MEMBER",
+      "templateVisible": true,
+      "frameworkVisible": false
+    }
+  ]
+}

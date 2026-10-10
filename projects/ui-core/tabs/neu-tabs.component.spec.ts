@@ -1,774 +1,531 @@
+import { Component, provideZonelessChangeDetection, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { NeuTabsComponent, NeuTab, NeuTabPanelComponent } from './neu-tabs.component';
-import { NeuUrlStateService } from '../url-state/neu-url-state.service';
-import { Directionality } from '@angular/cdk/bidi';
+import { vi } from 'vitest';
+import {
+  NeuTab,
+  NeuTabLabelDirective,
+  NeuTabPanelComponent,
+  NeuTabsComponent,
+} from './neu-tabs.component';
 
-const TABS: NeuTab[] = [
-  { id: 'preview', label: 'Preview' },
-  { id: 'code', label: 'Código' },
+const TABS: readonly NeuTab[] = [
+  { id: 'preview', label: 'Preview', badge: '2' },
+  { id: 'code', label: 'Code' },
   { id: 'api', label: 'API', disabled: true },
 ];
 
+describe('NeuTabPanelComponent without a parent context', () => {
+  it('stays inactive and assigns unique fallback accessibility IDs', () => {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    const first = TestBed.createComponent(NeuTabPanelComponent);
+    const second = TestBed.createComponent(NeuTabPanelComponent);
+    for (const fixture of [first, second]) {
+      fixture.componentRef.setInput('tabId', 'preview');
+      fixture.detectChanges();
+      expect(fixture.componentInstance.isActive()).toBe(false);
+      expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+      expect(fixture.componentInstance.panelId()).toMatch(/^neu-tab-panel-.+-panel$/);
+      expect(fixture.componentInstance.buttonId()).toMatch(/^neu-tab-panel-.+-tab$/);
+    }
+    expect(first.componentInstance.panelId()).not.toBe(second.componentInstance.panelId());
+    expect(first.componentInstance.buttonId()).not.toBe(second.componentInstance.buttonId());
+  });
+});
+
 @Component({
+  imports: [NeuTabsComponent, NeuTabPanelComponent],
   template: `
-    <neu-tabs [tabs]="tabs" tabParam="tab" (tabChange)="lastTab = $event">
-      <neu-tab-panel tabId="preview">Contenido Preview</neu-tab-panel>
-      <neu-tab-panel tabId="code">Contenido Código</neu-tab-panel>
-      <neu-tab-panel tabId="api">Contenido API</neu-tab-panel>
+    <neu-tabs
+      [tabs]="tabs()"
+      [activeId]="activeId()"
+      (activeIdChange)="proposals.push($event)"
+    >
+      <neu-tab-panel tabId="preview">Preview content</neu-tab-panel>
+      <neu-tab-panel tabId="code">Code content</neu-tab-panel>
+      <neu-tab-panel tabId="api">API content</neu-tab-panel>
     </neu-tabs>
   `,
-  imports: [NeuTabsComponent, NeuTabPanelComponent],
 })
-class HostComponent {
-  tabs = TABS;
-  lastTab: string | undefined;
+class ControlledHost {
+  readonly tabs = signal(TABS);
+  readonly activeId = signal<string | null>('preview');
+  readonly proposals: (string | null)[] = [];
+  readonly component = viewChild.required(NeuTabsComponent<string>);
 }
 
-describe('NeuTabsComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [HostComponent],
-      providers: [provideRouter([]), provideZonelessChangeDetection()],
-    }).compileComponents();
+@Component({
+  imports: [NeuTabsComponent, NeuTabPanelComponent],
+  template: `
+    <neu-tabs
+      [tabs]="tabs()"
+      [initialActiveId]="initialActiveId()"
+      (activeIdChange)="proposals.push($event)"
+    >
+      <neu-tab-panel tabId="preview">Preview content</neu-tab-panel>
+      <neu-tab-panel tabId="code">Code content</neu-tab-panel>
+    </neu-tabs>
+  `,
+})
+class UncontrolledHost {
+  readonly tabs = signal<readonly NeuTab[]>(TABS);
+  readonly initialActiveId = signal<string | null>(null);
+  readonly proposals: (string | null)[] = [];
+  readonly component = viewChild.required(NeuTabsComponent<string>);
+}
+
+@Component({
+  imports: [NeuTabsComponent, NeuTabLabelDirective, NeuTabPanelComponent],
+  template: `
+    <neu-tabs [tabs]="outerTabs" initialActiveId="outer">
+      <neu-tab-panel tabId="outer">
+        <neu-tabs [tabs]="innerTabs" initialActiveId="inner">
+          <ng-template neuTabLabel let-tab let-active="active">
+            <span class="inner-label">{{ tab.label }}:{{ active }}</span>
+          </ng-template>
+        </neu-tabs>
+      </neu-tab-panel>
+    </neu-tabs>
+  `,
+})
+class NestedHost {
+  readonly outerTabs: readonly NeuTab[] = [{ id: 'outer', label: 'Outer' }];
+  readonly innerTabs: readonly NeuTab[] = [{ id: 'inner', label: 'Inner' }];
+}
+
+@Component({
+  imports: [NeuTabsComponent],
+  template: `
+    <neu-tabs [tabs]="tabs" activeId="preview" />
+    <neu-tabs [tabs]="tabs" activeId="preview" />
+  `,
+})
+class MultipleInstancesHost {
+  readonly tabs = TABS;
+}
+
+@Component({
+  imports: [NeuTabsComponent, NeuTabPanelComponent],
+  template: `
+    <neu-tabs
+      [tabs]="tabs"
+      [activeId]="urlActiveId()"
+      (activeIdChange)="writeUrl($event)"
+    >
+      <neu-tab-panel tabId="preview">Preview URL content</neu-tab-panel>
+      <neu-tab-panel tabId="code">Code URL content</neu-tab-panel>
+    </neu-tabs>
+  `,
+})
+class ExternalUrlAdapterHost {
+  readonly tabs = TABS;
+  readonly urlActiveId = signal<string | null>('preview');
+  readonly writes: (string | null)[] = [];
+
+  writeUrl(id: string | null): void {
+    this.writes.push(id);
+    this.urlActiveId.set(id);
+  }
+}
+
+function controlledFixture() {
+  const fixture = TestBed.createComponent(ControlledHost);
+  fixture.detectChanges();
+  return { fixture, host: fixture.componentInstance, component: fixture.componentInstance.component() };
+}
+
+describe('NeuTabsComponent N2-021', () => {
+  beforeEach(() =>
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
+  );
+
+  it('hides orphaned panels after live model removal without mutating the controlled id', () => {
+    const { fixture, host, component } = controlledFixture();
+    host.activeId.set('code');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]').textContent).toContain('Code content');
+
+    host.tabs.set(TABS.filter((tab) => tab.id !== 'code'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(component.activeTabId()).toBe('code');
+    expect(host.proposals).toEqual([]);
+
+    host.tabs.set(TABS);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]').textContent).toContain('Code content');
   });
 
-  // ── Rendering ─────────────────────────────────────────────────────────────
-
-  it('should render all tab labels', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const text = f.nativeElement.textContent;
-    expect(text).toContain('Preview');
-    expect(text).toContain('Código');
-    expect(text).toContain('API');
+  it('does not expose a panel for a disabled controlled tab', () => {
+    const { fixture, host } = controlledFixture();
+    host.activeId.set('api');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[aria-selected="true"]')).toBeNull();
+    expect(host.proposals).toEqual([]);
   });
 
-  it('should have a tablist', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    expect(f.nativeElement.querySelector('[role="tablist"]')).toBeTruthy();
+  it('renders native tab semantics, badge, disabled state and the applied panel', () => {
+    const { fixture } = controlledFixture();
+    const tablist = fixture.nativeElement.querySelector('[role="tablist"]');
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    expect(tablist.getAttribute('aria-label')).toBe('Content tabs');
+    expect(tabs).toHaveLength(3);
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+    expect(tabs[2].disabled).toBe(true);
+    expect(tabs[0].textContent).toContain('2');
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]').textContent).toContain(
+      'Preview content',
+    );
   });
 
-  it('should render a single tablist container', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    expect(f.nativeElement.querySelectorAll('[role="tablist"]').length).toBe(1);
-  });
-
-  it('should localize the default tablist label from the document language', () => {
-    const originalLanguage = document.documentElement.lang;
-    try {
-      document.documentElement.lang = 'en';
-      const englishFixture = TestBed.createComponent(HostComponent);
-      englishFixture.detectChanges();
-      expect(
-        englishFixture.nativeElement.querySelector('[role="tablist"]').getAttribute('aria-label'),
-      ).toBe('Content tabs');
-      englishFixture.destroy();
-
-      document.documentElement.lang = 'es';
-      const spanishFixture = TestBed.createComponent(HostComponent);
-      spanishFixture.detectChanges();
-      expect(
-        spanishFixture.nativeElement.querySelector('[role="tablist"]').getAttribute('aria-label'),
-      ).toBe('Pestañas de contenido');
-      spanishFixture.destroy();
-    } finally {
-      document.documentElement.lang = originalLanguage;
-    }
-  });
-
-  it('should render tab buttons', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabs = f.nativeElement.querySelectorAll('[role="tab"]');
-    expect(tabs.length).toBe(3);
-  });
-
-  // ── Tab selection ─────────────────────────────────────────────────────────
-
-  it('should emit tabChange when a tab is clicked', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabs = f.nativeElement.querySelectorAll('[role="tab"]');
+  it('emits a controlled proposal exactly once without changing rejected applied state', () => {
+    const { fixture, host, component } = controlledFixture();
+    const changes = vi.fn();
+    component.activeIdChange.subscribe(changes);
+    const tabs = fixture.nativeElement.querySelectorAll('[role="tab"]');
     tabs[1].click();
-    f.detectChanges();
-    expect(f.componentInstance.lastTab).toBe('code');
+    fixture.detectChanges();
+    expect(host.proposals).toEqual(['code']);
+    expect(changes).toHaveBeenCalledExactlyOnceWith('code');
+    expect(component.activeTabId()).toBe('preview');
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true');
   });
 
-  it('should mark clicked tab as active', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabs = f.nativeElement.querySelectorAll('[role="tab"]');
+  it('renders accepted and reconstructed parent writes without echo', () => {
+    const { fixture, host, component } = controlledFixture();
+    const changes = vi.fn();
+    component.activeIdChange.subscribe(changes);
+    host.activeId.set('code');
+    fixture.detectChanges();
+    expect(component.activeTabId()).toBe('code');
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]').textContent).toContain(
+      'Code content',
+    );
+    host.tabs.set(TABS.map((tab) => ({ ...tab })));
+    fixture.detectChanges();
+    expect(component.activeTabId()).toBe('code');
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('supports an explicitly applied null state', () => {
+    const { fixture, host, component } = controlledFixture();
+    host.activeId.set(null);
+    fixture.detectChanges();
+    expect(component.activeTabId()).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(
+      [...fixture.nativeElement.querySelectorAll('[role="tab"]')].every(
+        (tab: Element) => tab.getAttribute('aria-selected') === 'false',
+      ),
+    ).toBe(true);
+  });
+
+  it('uses the first enabled tab by default in uncontrolled mode', () => {
+    const fixture = TestBed.createComponent(UncontrolledHost);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.component().activeTabId()).toBe('preview');
+  });
+
+  it('reads initialActiveId once and owns later uncontrolled gestures', () => {
+    const fixture = TestBed.createComponent(UncontrolledHost);
+    fixture.componentInstance.initialActiveId.set('code');
+    fixture.detectChanges();
+    const component = fixture.componentInstance.component();
+    expect(component.activeTabId()).toBe('code');
+    fixture.componentInstance.initialActiveId.set('preview');
+    fixture.detectChanges();
+    expect(component.activeTabId()).toBe('code');
+    component.selectTab(TABS[0]);
+    expect(component.activeTabId()).toBe('preview');
+    expect(fixture.componentInstance.proposals).toEqual(['preview']);
+  });
+
+  it('retains an initial key until asynchronous tabs arrive', () => {
+    const fixture = TestBed.createComponent(UncontrolledHost);
+    fixture.componentInstance.tabs.set([]);
+    fixture.componentInstance.initialActiveId.set('async');
+    fixture.detectChanges();
+    expect(fixture.componentInstance.component().activeTabId()).toBe('async');
+    fixture.componentInstance.tabs.set([{ id: 'async', label: 'Async' }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="tab"]').getAttribute('aria-selected')).toBe(
+      'true',
+    );
+  });
+
+  it('blocks disabled selection proposals', () => {
+    const { component, host } = controlledFixture();
+    component.selectTab(TABS[2]);
+    expect(host.proposals).toEqual([]);
+  });
+
+  it('keeps nested label templates scoped to their own Tabs instance', () => {
+    const fixture = TestBed.createComponent(NestedHost);
+    fixture.detectChanges();
+    const tablists = fixture.nativeElement.querySelectorAll('[role="tablist"]');
+    expect(tablists).toHaveLength(2);
+    expect(tablists[0].querySelector('.inner-label')).toBeNull();
+    expect(tablists[1].querySelector('.inner-label')?.textContent).toContain('Inner:true');
+  });
+
+  it('namespaces tab and panel ids across instances with the same keys', () => {
+    const fixture = TestBed.createComponent(MultipleInstancesHost);
+    fixture.detectChanges();
+    const buttons = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLElement[];
+    const ids = buttons.map((button) => button.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids[0]).not.toBe(ids[3]);
+  });
+
+  it('keeps URL back/forward synchronization opt-in and consumer-owned', () => {
+    const fixture = TestBed.createComponent(ExternalUrlAdapterHost);
+    fixture.detectChanges();
+    const tabs = fixture.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
     tabs[1].click();
-    f.detectChanges();
-    await f.whenStable();
-    f.detectChanges();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.writes).toEqual(['code']);
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+
+    fixture.componentInstance.urlActiveId.set('preview');
+    fixture.detectChanges();
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+    expect(fixture.componentInstance.writes).toEqual(['code']);
   });
 
-  it('should read the active tab from the URL param when available', async () => {
-    const router = TestBed.inject(await import('@angular/router').then((m) => m.Router));
-    await router.navigateByUrl('/?tab=code');
-
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabs = f.nativeElement.querySelectorAll('[role="tab"]');
-    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+  it('preserves exact numeric identity including 0 and -0', () => {
+    const fixture = TestBed.createComponent(NeuTabsComponent<number, NeuTab<number>>);
+    fixture.componentRef.setInput('tabs', [
+      { id: 0, label: 'Zero' },
+      { id: -0, label: 'Negative zero' },
+    ]);
+    fixture.componentRef.setInput('activeId', -0);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isTabActive(-0)).toBe(true);
+    expect(fixture.componentInstance.isTabActive(0)).toBe(false);
+    const ids = [...fixture.nativeElement.querySelectorAll('[role="tab"]')].map(
+      (tab: HTMLElement) => tab.id,
+    );
+    expect(new Set(ids).size).toBe(2);
   });
 
-  it('should expose the optimistic active tab immediately after selectTab', async () => {
-    const mockUrlParam = signal<string | null>(null);
-    const mockUrlState = {
-      params: signal<Record<string, string>>({}),
-      getParam: vi.fn(() => mockUrlParam),
-      setParam: vi.fn(),
-      patchParams: vi.fn(),
-      clearParams: vi.fn(),
-    };
-
-    await TestBed.resetTestingModule()
-      .configureTestingModule({
-        imports: [HostComponent],
-        providers: [
-          provideRouter([]),
-          provideZonelessChangeDetection(),
-          { provide: NeuUrlStateService, useValue: mockUrlState },
-        ],
-      })
-      .compileComponents();
-
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-
-    tabsComp.selectTab(TABS[1]);
-    f.detectChanges();
-
-    expect(tabsComp.activeTabId()).toBe('code');
-    expect(mockUrlState.setParam).toHaveBeenCalledWith('tab', 'code');
+  it('uses an injective DOM token for otherwise ambiguous string keys', () => {
+    const fixture = TestBed.createComponent(NeuTabsComponent<string>);
+    fixture.componentRef.setInput('tabs', [
+      { id: 'a b', label: 'Space' },
+      { id: 'a-20b', label: 'Encoded-looking' },
+      { id: '', label: 'Empty' },
+    ]);
+    fixture.detectChanges();
+    const ids = [...fixture.nativeElement.querySelectorAll('[role="tab"]')].map(
+      (tab: HTMLElement) => tab.id,
+    );
+    expect(new Set(ids).size).toBe(3);
   });
 
-  it('should not select disabled tab', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const comp = f.nativeElement.querySelector('neu-tabs') as any;
-    // Disabled tab has disabled attribute
-    const tabs: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('[role="tab"]');
-    const disabledTab = Array.from(tabs).find((t) => t.disabled);
-    expect(disabledTab).toBeTruthy();
+  it('moves roving focus with arrows without selecting or emitting', () => {
+    const { fixture, component } = controlledFixture();
+    const changes = vi.fn();
+    component.activeIdChange.subscribe(changes);
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(tabs[1]);
+    expect(component.activeTabId()).toBe('preview');
+    expect(changes).not.toHaveBeenCalled();
+    expect(tabs[1].tabIndex).toBe(0);
   });
 
-  it('should keep tab clicks working when pointer interaction starts on a tab button', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const tabs = f.nativeElement.querySelectorAll('[role="tab"]') as NodeListOf<HTMLButtonElement>;
-
-    tabsComp.startNavDrag({
-      pointerId: 1,
-      pointerType: 'mouse',
-      button: 0,
-      clientX: 24,
-      target: tabs[1],
-      currentTarget: nav,
-    } as unknown as PointerEvent);
-
-    tabs[1].click();
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(f.componentInstance.lastTab).toBe('code');
-    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+  it('starts keyboard focus from the first enabled tab when the current key is absent', () => {
+    const { fixture, component } = controlledFixture();
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    (component as unknown as { onTabKeydown(event: KeyboardEvent, id: string): void })
+      .onTabKeydown(new KeyboardEvent('keydown', { key: 'ArrowRight' }), 'missing');
+    expect(document.activeElement).toBe(tabs[1]);
+    const unrelated = new KeyboardEvent('keydown', { key: 'PageDown', cancelable: true });
+    (component as unknown as { onTabKeydown(event: KeyboardEvent, id: string): void })
+      .onTabKeydown(unrelated, 'preview');
+    expect(unrelated.defaultPrevented).toBe(false);
   });
 
-  it('moveNavDrag should activate dragging after threshold and update scroll', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-
-    nav.scrollLeft = 12;
-    (tabsComp as any)._dragPointerId = 7;
-    (tabsComp as any)._dragStartX = 100;
-    (tabsComp as any)._dragStartScrollLeft = 12;
-
-    const preventDefault = vi.fn();
-    tabsComp.moveNavDrag({
-      pointerId: 7,
-      clientX: 84,
-      currentTarget: nav,
-      preventDefault,
-    } as unknown as PointerEvent);
-
-    expect(tabsComp.isDraggingNav()).toBe(true);
-    expect(nav.scrollLeft).toBe(28);
-    expect(preventDefault).toHaveBeenCalled();
+  it('keeps keyboard navigation inert when every tab is disabled', () => {
+    const { fixture, host, component } = controlledFixture();
+    host.tabs.set([{ id: 'api', label: 'API', disabled: true }]);
+    fixture.detectChanges();
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true });
+    (component as unknown as { onTabKeydown(event: KeyboardEvent, id: string): void })
+      .onTabKeydown(event, 'api');
+    expect(event.defaultPrevented).toBe(false);
   });
 
-  it('handleTabClick should suppress the next click after a drag gesture', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const preventDefault = vi.fn();
-    const stopPropagation = vi.fn();
-
-    (tabsComp as any)._suppressNextClick = true;
-    tabsComp.handleTabClick({ preventDefault, stopPropagation } as unknown as Event, TABS[1]);
-
-    expect(preventDefault).toHaveBeenCalled();
-    expect(stopPropagation).toHaveBeenCalled();
-    expect((tabsComp as any)._suppressNextClick).toBe(false);
+  it('reveals clipped tabs at either edge of the navigation strip', () => {
+    const { fixture } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    vi.spyOn(nav, 'getBoundingClientRect').mockReturnValue({ left: 0, right: 100 } as DOMRect);
+    vi.spyOn(tabs[1], 'getBoundingClientRect').mockReturnValue({ left: 110, right: 130 } as DOMRect);
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(nav.scrollLeft).toBe(30);
+    vi.spyOn(tabs[0], 'getBoundingClientRect').mockReturnValue({ left: -20, right: 20 } as DOMRect);
+    tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(nav.scrollLeft).toBe(10);
   });
 
-  it('startNavDrag should ignore non-left mouse buttons and tab button targets', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const firstTab = f.nativeElement.querySelector('[role="tab"]') as HTMLElement;
-
-    tabsComp.startNavDrag({
-      pointerId: 1,
-      pointerType: 'mouse',
-      button: 1,
-      target: nav,
-      currentTarget: nav,
-      clientX: 40,
-    } as unknown as PointerEvent);
-    expect((tabsComp as any)._dragPointerId).toBeNull();
-
-    tabsComp.startNavDrag({
-      pointerId: 2,
-      pointerType: 'mouse',
-      button: 0,
-      target: firstTab,
-      currentTarget: nav,
-      clientX: 40,
-    } as unknown as PointerEvent);
-    expect((tabsComp as any)._dragPointerId).toBeNull();
+  it('supports Home/End and skips disabled tabs', () => {
+    const { fixture } = controlledFixture();
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[1]);
+    tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[0]);
   });
 
-  it('startNavDrag should capture the pointer when dragging starts on nav chrome', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const setPointerCapture = vi.fn();
-    (nav as any).setPointerCapture = setPointerCapture;
-
-    tabsComp.startNavDrag({
-      pointerId: 5,
-      pointerType: 'touch',
-      button: 0,
-      target: nav,
-      currentTarget: nav,
-      clientX: 88,
-    } as unknown as PointerEvent);
-
-    expect((tabsComp as any)._dragPointerId).toBe(5);
-    expect((tabsComp as any)._dragStartX).toBe(88);
-    expect(setPointerCapture).toHaveBeenCalledWith(5);
+  it('reverses horizontal arrow focus in RTL', () => {
+    const fixture = TestBed.createComponent(NeuTabsComponent);
+    fixture.componentRef.setInput('tabs', [
+      { id: 'one', label: 'One' },
+      { id: 'two', label: 'Two' },
+      { id: 'three', label: 'Three' },
+    ]);
+    fixture.componentRef.setInput('activeId', 'one');
+    fixture.detectChanges();
+    fixture.nativeElement.setAttribute('dir', 'rtl');
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[2]);
   });
 
-  it('endNavDrag should release pointer capture and reset dragging state', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const releasePointerCapture = vi.fn();
-    const originalRequestAnimationFrame = window.requestAnimationFrame;
-
-    (nav as any).hasPointerCapture = vi.fn(() => true);
-    (nav as any).releasePointerCapture = releasePointerCapture;
-    (tabsComp as any)._dragPointerId = 9;
-    tabsComp.isDraggingNav.set(true);
-    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
-      cb(0);
-      return 1;
-    }) as typeof window.requestAnimationFrame;
-
-    try {
-      tabsComp.endNavDrag({ pointerId: 9, currentTarget: nav } as unknown as PointerEvent);
-      expect(releasePointerCapture).toHaveBeenCalledWith(9);
-      expect((tabsComp as any)._dragPointerId).toBeNull();
-      expect(tabsComp.isDraggingNav()).toBe(false);
-    } finally {
-      window.requestAnimationFrame = originalRequestAnimationFrame;
-    }
+  it('wraps left arrow focus in LTR and advances left arrow focus in RTL', () => {
+    const { fixture } = controlledFixture();
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[1]);
+    fixture.nativeElement.querySelector('neu-tabs').setAttribute('dir', 'rtl');
+    tabs[0].focus();
+    tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    expect(document.activeElement).toBe(tabs[1]);
   });
 
-  it('endNavDrag should finish a matching pointer without capture or active dragging', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const releasePointerCapture = vi.fn();
-    (nav as any).hasPointerCapture = vi.fn(() => false);
-    (nav as any).releasePointerCapture = releasePointerCapture;
-    (tabsComp as any)._dragPointerId = 13;
-    tabsComp.isDraggingNav.set(false);
-
-    tabsComp.endNavDrag({ pointerId: 13, currentTarget: nav } as unknown as PointerEvent);
-
-    expect(releasePointerCapture).not.toHaveBeenCalled();
-    expect((tabsComp as any)._dragPointerId).toBeNull();
-    expect(tabsComp.isDraggingNav()).toBe(false);
-  });
-
-  it('startNavDrag should ignore targets outside the tab nav', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const outsideTarget = document.createElement('div');
-    outsideTarget.closest = vi.fn(() => null) as any;
-
-    tabsComp.startNavDrag({
-      pointerId: 11,
-      pointerType: 'touch',
-      button: 0,
-      target: outsideTarget,
-      currentTarget: nav,
-      clientX: 10,
-    } as unknown as PointerEvent);
-
-    expect((tabsComp as any)._dragPointerId).toBeNull();
-  });
-
-  it('moveNavDrag and endNavDrag should ignore mismatched pointer ids', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const preventDefault = vi.fn();
-
-    (tabsComp as any)._dragPointerId = 5;
-    tabsComp.moveNavDrag({
-      pointerId: 6,
-      clientX: 80,
-      currentTarget: nav,
-      preventDefault,
-    } as unknown as PointerEvent);
-    tabsComp.endNavDrag({ pointerId: 6, currentTarget: nav } as unknown as PointerEvent);
-
-    expect(preventDefault).not.toHaveBeenCalled();
-    expect((tabsComp as any)._dragPointerId).toBe(5);
-  });
-
-  it('moveNavDrag should return early when the drag threshold is not reached', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    const preventDefault = vi.fn();
-
-    (tabsComp as any)._dragPointerId = 7;
-    (tabsComp as any)._dragStartX = 100;
-    (tabsComp as any)._dragStartScrollLeft = 12;
-    tabsComp.moveNavDrag({
-      pointerId: 7,
-      clientX: 96,
-      currentTarget: nav,
-      preventDefault,
-    } as unknown as PointerEvent);
-
-    expect(tabsComp.isDraggingNav()).toBe(false);
-    expect(preventDefault).not.toHaveBeenCalled();
+  it('ignores invalid drag starts, unrelated pointers and movement below the drag threshold', () => {
+    const { fixture, component, host } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tab = fixture.nativeElement.querySelector('.neu-tabs__tab') as HTMLElement;
+    const capture = vi.fn();
+    const release = vi.fn();
+    Object.assign(nav, { setPointerCapture: capture, hasPointerCapture: () => true,
+      releasePointerCapture: release });
+    const start = (pointerType: string, button: number, target: HTMLElement) =>
+      component.startNavDrag({ pointerType, button, pointerId: 4, clientX: 100,
+        currentTarget: nav, target } as unknown as PointerEvent);
+    start('mouse', 2, nav);
+    start('touch', 0, tab);
+    expect(capture).not.toHaveBeenCalled();
+    start('touch', 0, nav);
+    component.moveNavDrag({ pointerId: 9, clientX: 50, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
+    component.moveNavDrag({ pointerId: 4, clientX: 97, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
     expect(nav.scrollLeft).toBe(0);
+    component.endNavDrag({ pointerId: 9, currentTarget: nav } as unknown as PointerEvent);
+    expect(release).not.toHaveBeenCalled();
+    component.endNavDrag({ pointerId: 4, currentTarget: nav } as unknown as PointerEvent);
+    expect(release).toHaveBeenCalledWith(4);
+    expect(host.proposals).toEqual([]);
   });
 
-  it('activeTabId should return an empty string when there are no enabled tabs', async () => {
-    await TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideZonelessChangeDetection()],
-    }).compileComponents();
-
-    @Component({
-      template: `<neu-tabs [tabs]="tabs" />`,
-      imports: [NeuTabsComponent],
-    })
-    class DisabledTabsHost {
-      tabs: NeuTab[] = [{ id: 'a', label: 'A', disabled: true }];
-    }
-
-    const f = TestBed.createComponent(DisabledTabsHost);
-    f.detectChanges();
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-
-    expect(tabsComp.activeTabId()).toBe('');
+  it('ignores modified arrow shortcuts', () => {
+    const { fixture } = controlledFixture();
+    const tabs = [...fixture.nativeElement.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    tabs[0].focus();
+    tabs[0].dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowRight', ctrlKey: true, bubbles: true }),
+    );
+    expect(document.activeElement).toBe(tabs[0]);
   });
 
-  // ── selectTab directly ────────────────────────────────────────────────────
-
-  it('selectTab should not emit for disabled tab', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const emitted: string[] = [];
-    tabsComp.tabChange.subscribe((v: string) => emitted.push(v));
-    tabsComp.selectTab(TABS[2]); // disabled
-    expect(emitted.length).toBe(0);
-  });
-
-  it('selectTab should emit for enabled tab', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const emitted: string[] = [];
-    tabsComp.tabChange.subscribe((v: string) => emitted.push(v));
-    tabsComp.selectTab(TABS[1]);
-    expect(emitted).toContain('code');
-  });
-
-  // ── focusTab keyboard ─────────────────────────────────────────────────────
-
-  it('focusTab should not throw when called with direction 1', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    expect(() => tabsComp.focusTab({ preventDefault: () => {} } as Event, 1)).not.toThrow();
-  });
-
-  it('focusTab with "first" should select first enabled tab', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    expect(() => tabsComp.focusTab({ preventDefault: () => {} } as Event, 'first')).not.toThrow();
-  });
-
-  it('focusTab with "last" should select last enabled tab', () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    expect(() => tabsComp.focusTab({ preventDefault: () => {} } as Event, 'last')).not.toThrow();
-  });
-
-  // ── flush input ───────────────────────────────────────────────────────────
-
-  it('flush input should render with neu-tabs--flush class', async () => {
-    await TestBed.configureTestingModule({
-      providers: [provideRouter([])],
-    }).compileComponents();
-
-    @Component({
-      template: `<neu-tabs [tabs]="tabs" [flush]="true" />`,
-      imports: [NeuTabsComponent],
-    })
-    class FlushHost {
-      tabs: NeuTab[] = [{ id: 'a', label: 'A' }];
-    }
-
-    const f = TestBed.createComponent(FlushHost);
-    f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-tabs--flush')).toBeTruthy();
-  });
-
-  // ── badge ─────────────────────────────────────────────────────────────────
-
-  it('should render tab badge when provided', async () => {
-    await TestBed.configureTestingModule({
-      providers: [provideRouter([])],
-    }).compileComponents();
-
-    const tabsWithBadge: NeuTab[] = [{ id: 'a', label: 'Alpha', badge: '3' }];
-
-    @Component({
-      template: `<neu-tabs [tabs]="tabs" />`,
-      imports: [NeuTabsComponent],
-    })
-    class BadgeHost {
-      tabs = tabsWithBadge;
-    }
-
-    const f = TestBed.createComponent(BadgeHost);
-    f.detectChanges();
-    expect(f.nativeElement.querySelector('.neu-tabs__tab-badge')).toBeTruthy();
-    expect(f.nativeElement.textContent).toContain('3');
-  });
-
-  // ── NeuTabPanelComponent ──────────────────────────────────────────────────
-
-  it('NeuTabPanelComponent renders projected content for active tab', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    // First tab (preview) is active by default — its panel should be visible
-    expect(f.nativeElement.textContent).toContain('Contenido Preview');
-  });
-
-  it('focusTab with direction=1 moves focus to next tab button', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    // focusTab is bound to keydown.arrowRight — call it directly to cover the code path
-    const comp = f.componentInstance as any;
-    const tabsComp = f.debugElement.query(
-      (d) => d.componentInstance instanceof NeuTabsComponent,
-    )?.componentInstance;
-    if (tabsComp) {
-      const buttons = f.nativeElement.querySelectorAll('[role="tab"]');
-      if (buttons[0]) {
-        const evt = new KeyboardEvent('keydown', { key: 'ArrowRight' });
-        Object.defineProperty(evt, 'target', { value: buttons[0] });
-        tabsComp.focusTab(evt, 1);
-      }
-    }
-    expect(f.nativeElement).toBeTruthy();
-  });
-
-  it('ngOnDestroy should not throw', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    expect(() => f.destroy()).not.toThrow();
-  });
-
-  it('tab with badge should render badge label', async () => {
-    // Una pestaña con badge debe mostrar el valor del badge
-    // A tab with badge must render the badge value
-    await TestBed.configureTestingModule({
-      providers: [provideRouter([])],
-    }).compileComponents();
-    const tabsWithBadge: NeuTab[] = [
-      { id: 't1', label: 'Messages', badge: '5' },
-      { id: 't2', label: 'Settings' },
-    ];
-    @Component({
-      template: `<neu-tabs [tabs]="tabs" />`,
-      imports: [NeuTabsComponent],
-    })
-    class BadgeHostComponent {
-      tabs = tabsWithBadge;
-    }
-    const f = TestBed.createComponent(BadgeHostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    expect(f.nativeElement.textContent).toContain('5');
-  });
-
-  // ── Keyboard DOM dispatch (covers template event handlers at lines 70-72) ─
-
-  it('keydown ArrowRight DOM event on tab button should call focusTab(1)', async () => {
-    // El evento DOM keydown ArrowRight en el botón de tab debe llamar a focusTab(1)
-    // DOM keydown ArrowRight on tab button must call focusTab(1)
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const tabBtns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('[role="tab"]');
-    const firstBtn = tabBtns[0];
-    expect(firstBtn).toBeTruthy();
-    // Dispatch ArrowRight - triggers the (keydown.arrowRight) template handler
-    firstBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-    f.detectChanges();
-    expect(f.nativeElement).toBeTruthy(); // no errors, focusTab was called
-  });
-
-  it('keydown ArrowLeft DOM event on tab button should call focusTab(-1)', async () => {
-    // El evento DOM keydown ArrowLeft en el botón de tab debe llamar a focusTab(-1)
-    // DOM keydown ArrowLeft on tab button must call focusTab(-1)
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const tabBtns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('[role="tab"]');
-    tabBtns[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
-    f.detectChanges();
-    expect(f.nativeElement).toBeTruthy();
-  });
-
-  it('reverses horizontal arrow navigation in RTL', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.componentInstance.tabs = [
-      { id: 'first', label: 'First' },
-      { id: 'second', label: 'Second' },
-      { id: 'third', label: 'Third' },
-    ];
-    f.detectChanges();
-    await f.whenStable();
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-
-    const tabs = f.debugElement.query(
-      (debugElement) => debugElement.componentInstance instanceof NeuTabsComponent,
-    ).componentInstance as NeuTabsComponent;
-    tabs.focusTabFromArrow(new KeyboardEvent('keydown'), 1);
-    f.detectChanges();
-
-    expect(tabs.activeTabId()).toBe('third');
-  });
-
-  it('keydown Home DOM event on tab button should call focusTab("first")', async () => {
-    // El evento DOM keydown Home en el botón de tab debe llamar a focusTab("first")
-    // DOM keydown Home on tab button must call focusTab("first")
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const tabBtns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('[role="tab"]');
-    tabBtns[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
-    f.detectChanges();
-    expect(f.nativeElement).toBeTruthy();
-  });
-
-  it('keydown End DOM event on tab button should call focusTab("last")', async () => {
-    // El evento DOM keydown End en el botón de tab debe llamar a focusTab("last")
-    // DOM keydown End on tab button must call focusTab("last")
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-    const tabBtns: NodeListOf<HTMLButtonElement> = f.nativeElement.querySelectorAll('[role="tab"]');
-    tabBtns[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-    f.detectChanges();
-    expect(f.nativeElement).toBeTruthy();
-  });
-
-  it('pointer DOM events on nav should hit drag handlers from the template', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    (nav as any).setPointerCapture = vi.fn();
-    (nav as any).hasPointerCapture = vi.fn(() => true);
-    (nav as any).releasePointerCapture = vi.fn();
-
+  it('retains pointer drag scrolling without selecting tabs', () => {
+    const { fixture, host } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    Object.assign(nav, {
+      setPointerCapture: vi.fn(),
+      hasPointerCapture: vi.fn(() => true),
+      releasePointerCapture: vi.fn(),
+    });
     nav.dispatchEvent(
       new PointerEvent('pointerdown', {
         bubbles: true,
-        pointerId: 21,
+        pointerId: 4,
         pointerType: 'touch',
-        clientX: 120,
+        clientX: 100,
       }),
     );
     nav.dispatchEvent(
       new PointerEvent('pointermove', {
         bubbles: true,
-        pointerId: 21,
+        pointerId: 4,
         pointerType: 'touch',
-        clientX: 90,
+        clientX: 70,
       }),
     );
+    expect(nav.scrollLeft).toBe(30);
     nav.dispatchEvent(
-      new PointerEvent('pointerup', {
-        bubbles: true,
-        pointerId: 21,
-        pointerType: 'touch',
-        clientX: 90,
-      }),
+      new PointerEvent('pointerup', { bubbles: true, pointerId: 4, pointerType: 'touch' }),
     );
-    f.detectChanges();
-
-    expect(f.nativeElement).toBeTruthy();
+    expect(host.proposals).toEqual([]);
   });
 
-  it('pointercancel DOM event on nav should hit the template cancel handler', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const nav = f.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
-    (nav as any).setPointerCapture = vi.fn();
-    (nav as any).hasPointerCapture = vi.fn(() => false);
-    (nav as any).releasePointerCapture = vi.fn();
-
-    nav.dispatchEvent(
-      new PointerEvent('pointerdown', {
-        bubbles: true,
-        pointerId: 31,
-        pointerType: 'touch',
-        clientX: 60,
-      }),
-    );
-    nav.dispatchEvent(
-      new PointerEvent('pointercancel', {
-        bubbles: true,
-        pointerId: 31,
-        pointerType: 'touch',
-        clientX: 60,
-      }),
-    );
-    f.detectChanges();
-
-    expect((nav as any).releasePointerCapture).not.toHaveBeenCalled();
+  it('suppresses the first click after a drag gesture', () => {
+    const { fixture, host, component } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    Object.assign(nav, { setPointerCapture: vi.fn(), hasPointerCapture: vi.fn(() => false) });
+    component.startNavDrag({
+      pointerType: 'touch',
+      pointerId: 1,
+      clientX: 100,
+      currentTarget: nav,
+      target: nav,
+    } as unknown as PointerEvent);
+    component.moveNavDrag({
+      pointerId: 1,
+      clientX: 50,
+      currentTarget: nav,
+      preventDefault: vi.fn(),
+    } as unknown as PointerEvent);
+    component.handleTabClick(new Event('click'), TABS[1]);
+    expect(host.proposals).toEqual([]);
   });
 
-  it('updates the indicator without forcing scroll when scrollIntoView is unavailable', async () => {
-    const f = TestBed.createComponent(HostComponent);
-    f.detectChanges();
-    await f.whenStable();
-
-    const tabsComp = f.debugElement.query((de) => de.componentInstance instanceof NeuTabsComponent)
-      ?.componentInstance as NeuTabsComponent;
-    const firstTab = f.nativeElement.querySelector('[role="tab"]') as HTMLElement & {
-      scrollIntoView?: unknown;
-    };
-    Object.defineProperty(firstTab, 'scrollIntoView', { configurable: true, value: undefined });
-
-    (tabsComp as any)._updateIndicator();
-
-    expect(tabsComp.indicatorStyle()).toContain('width:');
+  it('applies flush styling', () => {
+    const fixture = TestBed.createComponent(NeuTabsComponent);
+    fixture.componentRef.setInput('flush', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-tabs--flush')).toBeTruthy();
   });
 
-  it('ngAfterViewInit should wire ResizeObserver when available', async () => {
-    const originalResizeObserver = (globalThis as any).ResizeObserver;
-    const observe = vi.fn();
-    const disconnect = vi.fn();
+  it('warns once and keeps lifetime mode stable on an invalid mode switch', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const fixture = TestBed.createComponent(NeuTabsComponent);
+    fixture.componentRef.setInput('tabs', TABS);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('activeId', 'code');
+    fixture.detectChanges();
+    expect(component.activeTabId()).toBe('preview');
+    expect(warning).toHaveBeenCalledOnce();
+    fixture.componentRef.setInput('activeId', 'preview');
+    fixture.detectChanges();
+    expect(warning).toHaveBeenCalledOnce();
+    warning.mockRestore();
+  });
 
-    (globalThis as any).ResizeObserver = vi.fn(function (this: any, callback: () => void) {
-      this.observe = observe;
-      this.disconnect = disconnect;
-      callback();
-    });
-
-    try {
-      const f = TestBed.createComponent(HostComponent);
-      f.detectChanges();
-      await f.whenStable();
-      expect(observe).toHaveBeenCalled();
-      f.destroy();
-      expect(disconnect).toHaveBeenCalled();
-    } finally {
-      (globalThis as any).ResizeObserver = originalResizeObserver;
-    }
+  it('renders no active panel when every tab is disabled', () => {
+    const fixture = TestBed.createComponent(NeuTabsComponent);
+    fixture.componentRef.setInput('tabs', [{ id: 'disabled', label: 'Disabled', disabled: true }]);
+    fixture.detectChanges();
+    const tab = fixture.nativeElement.querySelector('[role="tab"]') as HTMLButtonElement;
+    expect(fixture.componentInstance.activeTabId()).toBeNull();
+    expect(tab.tabIndex).toBe(-1);
   });
 });

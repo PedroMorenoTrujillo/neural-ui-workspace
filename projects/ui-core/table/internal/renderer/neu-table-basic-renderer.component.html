@@ -1,0 +1,533 @@
+<ng-template #paginator>
+  <nav class="neu-table2__pagination" [attr.aria-label]="labels().pagination">
+    @if (paginatorTemplate(); as customPaginator) {
+      <ng-container
+        [ngTemplateOutlet]="customPaginator"
+        [ngTemplateOutletContext]="paginatorContext()"
+      />
+    } @else {
+      <neu-table-query-host
+        [controls]="{
+          pagination: paginatorContext(),
+          options: paginationOptions(),
+          report: paginationReport(),
+          messages: labels().messages,
+        }"
+      />
+    }
+  </nav>
+</ng-template>
+
+@if (interactionOptions().announceChanges) {
+  <span class="neu-table2__visually-hidden" role="status" aria-live="polite" aria-atomic="true">{{
+    announcement()
+  }}</span>
+}
+
+@if (hasGlobalSearch() || hasBuilder() || toolbarTemplate()) {
+  <div class="neu-table2__query-toolbar">
+    @if (hasGlobalSearch()) {
+      <neu-table-query-host
+        [controls]="{
+          search: {
+            value: searchEditing() ? searchDraft() : query().search,
+            appliedValue: query().search,
+            immediate: filterOptions().commit === 'immediate',
+            begin: beginSearch,
+            update: updateSearchDraft,
+            cancel: cancelSearch,
+            commit: commitSearch,
+            clear: clearSearch,
+          },
+          messages: labels().messages,
+        }"
+      />
+    }
+    @if (toolbarTemplate(); as template) {
+      <div class="neu-table2__toolbar">
+        <ng-container [ngTemplateOutlet]="template" />
+      </div>
+    }
+    @if (hasBuilder()) {
+      <div class="neu-table2__builder-host">
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="builderOpen()"
+          (click)="openBuilder($event)"
+        >
+          {{ text('advancedFilters') }}
+        </button>
+        @defer (when builderOpen()) {
+          @if (builderOpen()) {
+            <neu-table-advanced-filter-builder
+              [messages]="labels().messages"
+              [columns]="allColumns()"
+              [filters]="query().filters"
+              [applyFilters]="applyAdvancedFilters"
+              [close]="closeBuilder"
+            />
+          }
+        }
+      </div>
+    }
+  </div>
+}
+
+@if (columnOptions().hideable && hiddenColumns().length > 0) {
+  <div class="neu-table2__hidden-columns" [attr.aria-label]="text('hiddenColumns')">
+    @for (column of hiddenColumns(); track column.id) {
+      <button type="button" (click)="showColumn(column.id)">
+        {{ text('showColumn', { column: column.header }) }}
+      </button>
+    }
+  </div>
+}
+
+@if (
+  paginationOptions().enabled &&
+  !virtualizationOptions().enabled &&
+  (paginationOptions().position === 'top' || paginationOptions().position === 'both')
+) {
+  <ng-container [ngTemplateOutlet]="paginator" />
+}
+
+<div
+  #viewport
+  class="neu-table2__viewport"
+  tabindex="0"
+  role="region"
+  [attr.aria-label]="labels().ariaLabel"
+  [attr.data-density]="appearance().density"
+  [attr.data-borders]="appearance().borders"
+  [attr.data-responsive]="appearance().responsive"
+  [class.neu-table2__viewport--striped]="appearance().striped"
+  [class.neu-table2__viewport--sticky-header]="appearance().stickyHeader"
+  [class.neu-table2__viewport--virtual]="virtualizationOptions().enabled"
+>
+  <table
+    class="neu-table2__table"
+    role="table"
+    [attr.aria-label]="labels().ariaLabel"
+    [attr.aria-rowcount]="virtualizationOptions().enabled ? logicalRowCount() : null"
+  >
+    @if (captionTemplate(); as template) {
+      <caption>
+        <ng-container [ngTemplateOutlet]="template" />
+      </caption>
+    }
+
+    <thead>
+      <tr>
+        @if (expansionActive()) {
+          <th scope="col" class="neu-table2__expansion-column">
+            <span class="neu-table2__visually-hidden">{{ text('expansion') }}</span>
+          </th>
+        }
+        @if (hasSelectionColumn()) {
+          <th scope="col" class="neu-table2__selection-column">
+            @if (selectionIndicator() === 'checkbox') {
+              <neu-table-query-host [controls]="{ selection: selectionControls() }" />
+            } @else {
+              <span class="neu-table2__visually-hidden">{{ labels().selection }}</span>
+            }
+          </th>
+        }
+        @for (column of columns(); track column.id) {
+          <th
+            scope="col"
+            [draggable]="columnOptions().reorderable === true"
+            [attr.aria-sort]="ariaSort(column)"
+            [attr.data-column-id]="column.id"
+            [attr.data-column-pin]="columnPin(column)"
+            [style.inset-inline-start]="
+              columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
+            "
+            [style.inset-inline-end]="
+              columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
+            "
+            [style.inline-size]="columnWidth(column)"
+            [style.min-inline-size]="column.minWidth"
+            [style.max-inline-size]="column.maxWidth"
+            [style.text-align]="column.align"
+            (dragstart)="columnOptions().reorderable && onColumnDragStart(column.id)"
+            (dragover)="columnOptions().reorderable && $event.preventDefault()"
+            (drop)="onColumnDrop(column.id, $event)"
+            (dragend)="cancelColumnDrag()"
+          >
+            <div class="neu-table2__header-content">
+              @if (column.sort !== undefined) {
+                <button
+                  type="button"
+                  class="neu-table2__sort-button"
+                  [attr.aria-label]="sortActionLabel(column)"
+                  (click)="sortColumn(column, $event)"
+                >
+                  <span class="neu-table2__header-label">
+                    @if (headerTemplate(column.id); as template) {
+                      <ng-container
+                        [ngTemplateOutlet]="template"
+                        [ngTemplateOutletContext]="headerContext(column)"
+                      />
+                    } @else {
+                      {{ column.header }}
+                    }
+                  </span>
+                  <svg class="neu-table2__sort-icon" [attr.data-direction]="ariaSort(column) ?? 'none'"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path [attr.d]="sortIconPath(column)" />
+                  </svg>
+                  @if (sortOptions().mode === 'multiple' && sortPriority(column); as priority) {
+                    <span
+                      class="neu-table2__sort-priority"
+                      [attr.aria-label]="'priority ' + priority"
+                    >
+                      {{ priority }}
+                    </span>
+                  }
+                </button>
+              } @else {
+                <span class="neu-table2__header-label">
+                  @if (headerTemplate(column.id); as template) {
+                    <ng-container
+                      [ngTemplateOutlet]="template"
+                      [ngTemplateOutletContext]="headerContext(column)"
+                    />
+                  } @else {
+                    {{ column.header }}
+                  }
+                </span>
+              }
+              @if (
+                hasMenuFilters() ||
+                columnOptions().reorderable ||
+                columnOptions().pinnable ||
+                columnOptions().hideable ||
+                columnOptions().resizable
+              ) {
+                <neu-table-query-host
+                  [controls]="{ column: queryColumnControls(column), messages: labels().messages }"
+                />
+              }
+            </div>
+          </th>
+        }
+        @if (rowEditColumn()) {
+          <th scope="col" class="neu-table2__edit-column"><span class="neu-table2__visually-hidden">{{ text('edit', { column: '' }) }}</span></th>
+        }
+      </tr>
+      @if (hasRowFilters()) {
+        <tr class="neu-table2__filter-row">
+          @if (expansionActive()) {
+            <td class="neu-table2__expansion-column"></td>
+          }
+          @if (hasSelectionColumn()) {
+            <td class="neu-table2__selection-column"></td>
+          }
+          @for (column of columns(); track column.id) {
+            <td [attr.data-column-id]="column.id">
+              @if (column.filter !== undefined) {
+                <div class="neu-table2__row-filter">
+                  @if (filterTemplate(column.id); as customFilter) {
+                    <ng-container
+                      [ngTemplateOutlet]="customFilter"
+                      [ngTemplateOutletContext]="filterContext(column)"
+                    />
+                  } @else {
+                    <neu-table-query-host
+                      [controls]="{
+                        filter: queryFilterControls(column, false),
+                        messages: labels().messages,
+                      }"
+                    />
+                  }
+                </div>
+              }
+            </td>
+          }
+          @if (rowEditColumn()) { <td class="neu-table2__edit-column"></td> }
+        </tr>
+      }
+    </thead>
+
+    <tbody>
+      <ng-template #dataRow let-renderRow="row" let-presentationNode="presentationNode">
+        <tr
+          [attr.data-row-key]="renderRow.key"
+          [attr.data-row-token]="rowIdentity(renderRow)"
+          [attr.data-row-pin]="renderRow.pin"
+          [attr.tabindex]="
+            interactionOptions().navigation === 'rows' ? navigationTabIndex(renderRow) : null
+          "
+          (focus)="rememberFocus(renderRow)"
+          (keydown)="navigate($event)"
+          [attr.data-logical-index]="
+            virtualizationOptions().enabled && renderRow.pin === null ? renderRow.index : null
+          "
+          [attr.aria-rowindex]="
+            virtualizationOptions().enabled && renderRow.pin === null ? renderRow.index + 1 : null
+          "
+          [style.block-size.px]="virtualRowSize(renderRow)"
+          [attr.data-selected]="rowSelected(renderRow) || null"
+          [attr.aria-selected]="selectionOptions().mode === 'none' ? null : rowSelected(renderRow)"
+          [attr.aria-disabled]="rowDisabled(renderRow) || null"
+          [attr.draggable]="rowOptions().reorderable ? 'true' : null"
+          [class]="rowClass(renderRow)"
+          (click)="onRowClick(renderRow, $event)"
+          (dblclick)="emitRowAction(renderRow, 'double-activate', $event)"
+          (contextmenu)="emitRowAction(renderRow, 'context-menu', $event)"
+          (dragstart)="onRowDragStart(renderRow)"
+          (dragover)="rowOptions().reorderable && $event.preventDefault()"
+          (drop)="onRowDrop(renderRow, $event)"
+          (dragend)="cancelRowDrag()"
+        >
+          @if (expansionActive()) {
+            <td class="neu-table2__expansion-column">
+              @if (rowExpandable(renderRow)) {
+                <neu-table-query-host [controls]="{ toggle: queryExpansionToggle(renderRow) }" />
+              }
+            </td>
+          }
+          @if (hasSelectionColumn()) {
+            <td class="neu-table2__selection-column">
+              @if (selectionIndicator() === 'checkbox') {
+                <neu-table-query-host [controls]="{ selection: selectionControls(renderRow) }" />
+              } @else {
+                <input type="radio" [checked]="rowSelected(renderRow)" [disabled]="rowDisabled(renderRow)"
+                  [attr.aria-label]="text('selectRow', { key: renderRow.key })"
+                  (click)="onSelectionControlClick(renderRow, $event)"
+                  (keydown.enter)="onSelectionEnter(renderRow, $event)" />
+              }
+            </td>
+          }
+          @for (column of columns(); track column.id) {
+            @if (groupingCellVisible(presentationNode, column)) {
+              <td
+                [attr.tabindex]="
+                  interactionOptions().navigation === 'cells'
+                    ? navigationTabIndex(renderRow, column.id, presentationNode)
+                    : virtualizationOptions().enabled
+                      ? -1
+                      : editingOptions().mode !== 'none' && column.edit !== undefined
+                        ? 0
+                        : null
+                "
+                [attr.data-column-id]="column.id"
+                (focus)="rememberFocus(renderRow, column.id)"
+                [attr.data-column-header]="column.header"
+                [attr.data-column-pin]="columnPin(column)"
+                [style.inset-inline-start]="
+                  columnPin(column) === 'start' ? columnPinOffset(column, 'start') : null
+                "
+                [style.inset-inline-end]="
+                  columnPin(column) === 'end' ? columnPinOffset(column, 'end') : null
+                "
+                [style.text-align]="column.align"
+                [attr.rowspan]="groupingRowspan(presentationNode, column)"
+                (click)="onCellClick(renderRow, column, $event)"
+                (dblclick)="onCellDoubleClick(renderRow, column, $event)"
+                (keydown)="onCellKeydown(renderRow, column, $event)"
+              >
+                @if (isCellEditing(renderRow, column)) {
+                  @if (editorContext(renderRow, column); as context) {
+                    <span class="neu-table2__editor" data-neu-selection-stop>
+                      @if (editorTemplate(column.id); as template) {
+                        <ng-container
+                          [ngTemplateOutlet]="template"
+                          [ngTemplateOutletContext]="context"
+                        />
+                      } @else {
+                        @defer (when isCellEditing(renderRow, column)) {
+                          <neu-table-active-editor
+                            [messages]="labels().messages"
+                            [editorId]="editorId(renderRow, column)"
+                            [label]="column.header"
+                            [value]="context.valueSignal()"
+                            [errors]="context.errors()"
+                            [pending]="activeEditSession()?.pending() ?? false"
+                             [commitOnBlur]="editCommitOnBlur()"
+                             [showActions]="editingOptions().mode !== 'row'"
+                            [setValue]="context.setValue"
+                            [commit]="context.commit"
+                            [cancel]="cancelEdit()"
+                          />
+                        }
+                      }
+                    </span>
+                  }
+                } @else if (cellTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="cellContext(renderRow, column)"
+                  />
+                } @else {
+                  {{ basicValue(renderRow.row, column) }}
+                }
+              </td>
+            }
+          }
+          @if (rowEditColumn(); as column) {
+            <td class="neu-table2__edit-column" data-neu-selection-stop>
+              <neu-table-query-host [controls]="{ edit: {
+                active: isRowEditing(renderRow), disabled: rowDisabled(renderRow),
+                pending: activeEditSession()?.pending() ?? false,
+                label: text('edit', { column: renderRow.key }),
+                begin: startRowEditAction(renderRow, column), commit: commitEdit(),
+                cancel: cancelRowEditAction,
+              }, messages: labels().messages }" />
+            </td>
+          }
+        </tr>
+        @if (rowExpanded(renderRow)) {
+          <tr class="neu-table2__detail-row" [id]="detailId(renderRow)">
+            <td [attr.colspan]="columnCount()">
+              @if (rowDetailTemplate(); as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="detailContext(renderRow)"
+                />
+              }
+            </td>
+          </tr>
+        }
+      </ng-template>
+
+      @let state = metadata().loading ? 'loading' : metadata().error !== null ? 'error' : rows().length === 0 ? 'empty' : null;
+      @if (state) {
+        <tr class="neu-table2__state-row" [attr.data-state]="state">
+          <td [attr.colspan]="columnCount()">
+            <div class="neu-table2__state" [attr.role]="state === 'error' ? 'alert' : 'status'"
+              [attr.aria-live]="state === 'loading' ? 'polite' : null">
+              @let stateTemplate = state === 'loading' ? loadingTemplate() : state === 'error' ? errorTemplate() : emptyTemplate();
+              @if (stateTemplate; as template) {
+                <ng-container
+                  [ngTemplateOutlet]="template"
+                  [ngTemplateOutletContext]="state === 'empty' ? null : stateContext()"
+                />
+              } @else {
+                {{ labels()[state] }}
+                @if (state === 'error') {
+                <button type="button" [attr.aria-label]="labels().retry" (click)="retry()()">
+                  {{ labels().retry }}
+                </button>
+                }
+              }
+            </div>
+          </td>
+        </tr>
+      } @else {
+        @for (renderRow of pinnedStartRows(); track renderRow.track) {
+          <ng-container
+            [ngTemplateOutlet]="dataRow"
+            [ngTemplateOutletContext]="{
+              row: renderRow,
+              presentationNode: {
+                kind: 'row',
+                row: renderRow,
+                track: renderRow.track,
+                rowspan: emptyRowspan,
+              },
+            }"
+          />
+        }
+        @if (virtualizationOptions().enabled && spacerBefore() > 0) {
+          <tr class="neu-table2__virtual-spacer" aria-hidden="true">
+            <td [attr.colspan]="columnCount()" [style.block-size.px]="spacerBefore()"></td>
+          </tr>
+        }
+        @for (node of normalPresentation(); track node.track) {
+          @if (node.kind === 'row') {
+            <ng-container
+              [ngTemplateOutlet]="dataRow"
+              [ngTemplateOutletContext]="{ row: node.row, presentationNode: node }"
+            />
+          } @else if (node.kind === 'group-header') {
+            <tr class="neu-table2__group-row" [attr.data-group-id]="node.id">
+              <th [attr.colspan]="columnCount()" scope="rowgroup">
+                <neu-table-query-host [controls]="{ toggle: queryGroupToggle(node) }" />
+              </th>
+            </tr>
+          } @else if (node.kind === 'group-footer') {
+            @if (groupFooterTemplate(); as template) {
+              <tr class="neu-table2__group-footer" [attr.data-group-id]="node.id">
+                <td [attr.colspan]="columnCount()">
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="node.context"
+                  />
+                </td>
+              </tr>
+            } @else if (node.aggregates.length > 0) {
+              <tr class="neu-table2__group-footer" [attr.data-group-id]="node.id">
+                <td [attr.colspan]="columnCount()">
+                  {{ groupAggregateLabel(node) }}
+                </td>
+              </tr>
+            }
+          }
+        }
+        @if (virtualizationOptions().enabled && spacerAfter() > 0) {
+          <tr class="neu-table2__virtual-spacer" aria-hidden="true">
+            <td [attr.colspan]="columnCount()" [style.block-size.px]="spacerAfter()"></td>
+          </tr>
+        }
+        @for (renderRow of pinnedEndRows(); track renderRow.track) {
+          <ng-container
+            [ngTemplateOutlet]="dataRow"
+            [ngTemplateOutletContext]="{
+              row: renderRow,
+              presentationNode: {
+                kind: 'row',
+                row: renderRow,
+                track: renderRow.track,
+                rowspan: emptyRowspan,
+              },
+            }"
+          />
+        }
+      }
+    </tbody>
+
+    @if (hasFooterTemplates()) {
+      <tfoot>
+        @if (footerTemplates().size > 0) {
+          <tr>
+            @if (expansionActive()) {
+              <td class="neu-table2__expansion-column"></td>
+            }
+            @if (hasSelectionColumn()) {
+              <td class="neu-table2__selection-column"></td>
+            }
+            @for (column of columns(); track column.id) {
+              <td [attr.data-column-id]="column.id">
+                @if (footerTemplate(column.id); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="headerContext(column)"
+                  />
+                }
+              </td>
+            }
+            @if (rowEditColumn()) { <td class="neu-table2__edit-column"></td> }
+          </tr>
+        }
+        @if (summaryTemplate(); as template) {
+          <tr>
+            <td [attr.colspan]="columnCount()">
+              <ng-container [ngTemplateOutlet]="template" />
+            </td>
+          </tr>
+        }
+      </tfoot>
+    }
+  </table>
+</div>
+
+@if (
+  paginationOptions().enabled &&
+  !virtualizationOptions().enabled &&
+  (paginationOptions().position === 'bottom' || paginationOptions().position === 'both')
+) {
+  <ng-container [ngTemplateOutlet]="paginator" />
+}

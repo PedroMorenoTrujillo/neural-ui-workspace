@@ -49,18 +49,10 @@ function extractClassName(content) {
 }
 
 function extractImportsFromPublicApi(content) {
-  const lines = content
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
+  const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
   return lines
     .filter((line) => line.startsWith('export * from'))
-    .map((line) =>
-      line
-        .replace(/\s*;/g, '')
-        .replace(/^export \* from /, '')
-        .replace(/["']/g, ''),
-    );
+    .map((line) => line.replace(/\s*;/g, '').replace(/^export \* from /, '').replace(/["']/g, ''));
 }
 
 function mergeUnique(values) {
@@ -121,9 +113,7 @@ function extractTokenValue(line) {
 
 function parseTokenBlocks(content, theme) {
   const lines = content.split('\n');
-  const startLine = lines.findIndex(
-    (line) => line.trim().startsWith(`:root`) || line.trim().startsWith("[data-theme='dark']"),
-  );
+  const startLine = lines.findIndex((line) => line.trim().startsWith(`:root`) || line.trim().startsWith("[data-theme='dark']"));
 
   if (startLine < 0) {
     return [];
@@ -200,19 +190,8 @@ function extractDemoFileForComponent(componentName, showcaseRoot) {
 
 async function buildManifest() {
   const dirs = await fs.readdir(uiCoreRoot, { withFileTypes: true });
-  const publicApiDirList = dirs
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => path.join(uiCoreRoot, entry.name));
-  const showcaseRoot = path.join(
-    workspaceRoot,
-    '..',
-    'neural-ui-showcase',
-    'projects',
-    'showcase',
-    'src',
-    'app',
-    'pages',
-  );
+  const publicApiDirList = dirs.filter((entry) => entry.isDirectory()).map((entry) => path.join(uiCoreRoot, entry.name));
+  const showcaseRoot = path.join(workspaceRoot, '..', 'neural-ui-showcase', 'projects', 'showcase', 'src', 'app', 'pages');
 
   const hasShowcase = await fs
     .access(showcaseRoot)
@@ -233,9 +212,7 @@ async function buildManifest() {
     const publicApi = await readText(publicApiPath);
     const exports = extractImportsFromPublicApi(publicApi);
 
-    const srcFiles = (await resolveFileList(dir)).filter(
-      (file) => FILE_GLOBS.component.test(file) && !FILE_GLOBS.spec.test(file),
-    );
+    const srcFiles = (await resolveFileList(dir)).filter((file) => FILE_GLOBS.component.test(file) && !FILE_GLOBS.spec.test(file));
 
     if (!srcFiles.length) {
       continue;
@@ -318,8 +295,7 @@ async function buildManifest() {
     figmaGuide: {
       modeHandling: 'importa light y dark como dos sets de variables o variantes',
       recommendedVariantKeys: ['variant', 'size', 'state', 'tone', 'density', 'disabled'],
-      componentStateRule:
-        'si un input/output cambia en código, regenerar este manifiesto y validar Figma',
+      componentStateRule: 'si un input/output cambia en código, regenerar este manifiesto y validar Figma',
     },
   };
 
@@ -335,19 +311,13 @@ async function buildManifest() {
     generatedAt: new Date().toISOString(),
     light: orderedTokens.reduce((acc, token) => {
       if (token.light) {
-        acc[token.name.replace(/^--/, '')] = {
-          value: token.light,
-          type: inferTokenType(token.light),
-        };
+        acc[token.name.replace(/^--/, '')] = { value: token.light, type: inferTokenType(token.light) };
       }
       return acc;
     }, {}),
     dark: orderedTokens.reduce((acc, token) => {
       if (token.dark) {
-        acc[token.name.replace(/^--/, '')] = {
-          value: token.dark,
-          type: inferTokenType(token.dark),
-        };
+        acc[token.name.replace(/^--/, '')] = { value: token.dark, type: inferTokenType(token.dark) };
       }
       return acc;
     }, {}),
@@ -397,14 +367,7 @@ async function buildManifest() {
 
 function inferTokenType(value) {
   const v = (value || '').toLowerCase();
-  if (
-    v.startsWith('#') ||
-    v.startsWith('rgb') ||
-    v.startsWith('hsl') ||
-    v.startsWith('var(') ||
-    /rgba\(/.test(v) ||
-    /hsla\(/.test(v)
-  ) {
+  if (v.startsWith('#') || v.startsWith('rgb') || v.startsWith('hsl') || v.startsWith('var(') || /rgba\(/.test(v) || /hsla\(/.test(v)) {
     return 'color';
   }
   if (/\b\d+(\.\d+)?(px|rem|em|vh|vw|%)$/.test(v)) {

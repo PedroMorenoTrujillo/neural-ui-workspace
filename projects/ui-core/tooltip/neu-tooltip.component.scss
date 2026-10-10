@@ -18,10 +18,9 @@
   line-height: 1.4;
   border-radius: var(--neu-tooltip-radius, 6px);
   box-shadow: var(--neu-tooltip-shadow, 0 4px 12px rgba(15, 23, 42, 0.24));
-  white-space: nowrap;
-  max-width: 280px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  max-width: min(280px, calc(100vw - 16px));
+  overflow-wrap: anywhere;
 }
 
 @keyframes neu-tooltip-in {

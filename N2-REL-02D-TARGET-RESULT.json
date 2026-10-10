@@ -1,0 +1,1312 @@
+{
+  "baseline": "checkpoint 09e181859076dca0e379378814d0074dfa7f38c4 canonical coverage",
+  "final": "fresh canonical ng test ui-core --watch=false --coverage after six REL-02D scenarios",
+  "targetCount": 50,
+  "targetHits": 19,
+  "targetUncovered": 31,
+  "targetIdentityDisappeared": 0,
+  "unexpectedlyHitCount": 10,
+  "newlyUncoveredCount": 3,
+  "disappearedBaselineSlotCount": 0,
+  "unexpectedlyHit": [
+    "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts:765:84:1",
+    "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts:488:49:0",
+    "projects/ui-core/date-input/neu-date-input.component.ts:764:93:0",
+    "projects/ui-core/date-input/neu-date-input.component.ts:766:94:1",
+    "projects/ui-core/date-input/neu-date-input.component.ts:997:178:0",
+    "projects/ui-core/table/internal/query-ui/neu-table-query-transitions.ts:126:18:1",
+    "projects/ui-core/select/neu-select.directives.ts:103:22:0",
+    "projects/ui-core/select/neu-select.directives.ts:103:22:1",
+    "projects/ui-core/select/neu-select.directives.ts:108:24:0",
+    "projects/ui-core/select/neu-select.directives.ts:108:24:1"
+  ],
+  "newlyUncovered": [
+    "projects/ui-core/select/neu-select.component.ts:947:88:0",
+    "projects/ui-core/select/neu-select.component.ts:1689:266:1",
+    "projects/ui-core/select/neu-select.component.ts:1691:267:0"
+  ],
+  "disappeared": [],
+  "before": {
+    "lines": {
+      "total": 19060,
+      "covered": 18269,
+      "skipped": 0,
+      "pct": 95.84
+    },
+    "statements": {
+      "total": 24564,
+      "covered": 22979,
+      "skipped": 0,
+      "pct": 93.54
+    },
+    "functions": {
+      "total": 4695,
+      "covered": 4365,
+      "skipped": 0,
+      "pct": 92.97
+    },
+    "branches": {
+      "total": 14708,
+      "covered": 13060,
+      "skipped": 0,
+      "pct": 88.79
+    },
+    "branchesTrue": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "after": {
+    "lines": {
+      "total": 19060,
+      "covered": 18283,
+      "skipped": 0,
+      "pct": 95.92
+    },
+    "statements": {
+      "total": 24564,
+      "covered": 23002,
+      "skipped": 0,
+      "pct": 93.64
+    },
+    "functions": {
+      "total": 4695,
+      "covered": 4368,
+      "skipped": 0,
+      "pct": 93.03
+    },
+    "branches": {
+      "total": 14708,
+      "covered": 13086,
+      "skipped": 0,
+      "pct": 88.97
+    },
+    "branchesTrue": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "files": [
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "targetCount": 17,
+      "targetHits": 9,
+      "before": {
+        "statements": {
+          "covered": 842,
+          "total": 917
+        },
+        "branches": {
+          "covered": 552,
+          "total": 620
+        },
+        "functions": {
+          "covered": 136,
+          "total": 152
+        },
+        "lines": {
+          "covered": 641,
+          "total": 678
+        }
+      },
+      "after": {
+        "statements": {
+          "covered": 855,
+          "total": 917
+        },
+        "branches": {
+          "covered": 564,
+          "total": 620
+        },
+        "functions": {
+          "covered": 137,
+          "total": 152
+        },
+        "lines": {
+          "covered": 648,
+          "total": 678
+        }
+      }
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "targetCount": 12,
+      "targetHits": 3,
+      "before": {
+        "statements": {
+          "covered": 878,
+          "total": 954
+        },
+        "branches": {
+          "covered": 556,
+          "total": 655
+        },
+        "functions": {
+          "covered": 175,
+          "total": 191
+        },
+        "lines": {
+          "covered": 730,
+          "total": 781
+        }
+      },
+      "after": {
+        "statements": {
+          "covered": 882,
+          "total": 954
+        },
+        "branches": {
+          "covered": 556,
+          "total": 655
+        },
+        "functions": {
+          "covered": 175,
+          "total": 191
+        },
+        "lines": {
+          "covered": 735,
+          "total": 781
+        }
+      }
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "targetCount": 11,
+      "targetHits": 5,
+      "before": {
+        "statements": {
+          "covered": 527,
+          "total": 619
+        },
+        "branches": {
+          "covered": 225,
+          "total": 330
+        },
+        "functions": {
+          "covered": 138,
+          "total": 156
+        },
+        "lines": {
+          "covered": 480,
+          "total": 540
+        }
+      },
+      "after": {
+        "statements": {
+          "covered": 528,
+          "total": 619
+        },
+        "branches": {
+          "covered": 231,
+          "total": 330
+        },
+        "functions": {
+          "covered": 138,
+          "total": 156
+        },
+        "lines": {
+          "covered": 481,
+          "total": 540
+        }
+      }
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "targetCount": 6,
+      "targetHits": 1,
+      "before": {
+        "statements": {
+          "covered": 560,
+          "total": 649
+        },
+        "branches": {
+          "covered": 326,
+          "total": 451
+        },
+        "functions": {
+          "covered": 103,
+          "total": 114
+        },
+        "lines": {
+          "covered": 505,
+          "total": 549
+        }
+      },
+      "after": {
+        "statements": {
+          "covered": 562,
+          "total": 649
+        },
+        "branches": {
+          "covered": 328,
+          "total": 451
+        },
+        "functions": {
+          "covered": 103,
+          "total": 114
+        },
+        "lines": {
+          "covered": 505,
+          "total": 549
+        }
+      }
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "targetCount": 4,
+      "targetHits": 1,
+      "before": {
+        "statements": {
+          "covered": 248,
+          "total": 302
+        },
+        "branches": {
+          "covered": 155,
+          "total": 215
+        },
+        "functions": {
+          "covered": 49,
+          "total": 61
+        },
+        "lines": {
+          "covered": 203,
+          "total": 233
+        }
+      },
+      "after": {
+        "statements": {
+          "covered": 248,
+          "total": 302
+        },
+        "branches": {
+          "covered": 156,
+          "total": 215
+        },
+        "functions": {
+          "covered": 49,
+          "total": 61
+        },
+        "lines": {
+          "covered": 203,
+          "total": 233
+        }
+      }
+    }
+  ],
+  "targeted": [
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 213,
+      "block": 8,
+      "branch": 0,
+      "condition": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\"",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 213,
+      "block": 8,
+      "branch": 1,
+      "condition": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\"",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 213,
+      "block": 9,
+      "branch": 0,
+      "condition": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\"",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 213,
+      "block": 9,
+      "branch": 1,
+      "condition": "(click)=\"navigateMonth(mode() === 'year' ? -12 : mode() === 'month' ? -12 : -1)\"",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 252,
+      "block": 10,
+      "branch": 0,
+      "condition": "(click)=\"navigateMonth(mode() === 'year' ? 12 : mode() === 'month' ? 12 : 1)\"",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 252,
+      "block": 11,
+      "branch": 0,
+      "condition": "(click)=\"navigateMonth(mode() === 'year' ? 12 : mode() === 'month' ? 12 : 1)\"",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 883,
+      "block": 133,
+      "branch": 0,
+      "condition": "else if (event.key === 'Home') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 1 };",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 2
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 884,
+      "block": 134,
+      "branch": 0,
+      "condition": "else if (event.key === 'End') target = { year: this.viewYear(), month: Math.floor((month - 1) / 4) * 4 + 4 };",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 2
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 885,
+      "block": 135,
+      "branch": 1,
+      "condition": "else if (event.key === 'PageUp' || event.key === 'PageDown')",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 2
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 896,
+      "block": 139,
+      "branch": 0,
+      "condition": "if (event.key === 'Enter' || event.key === ' ') {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 4
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 904,
+      "block": 142,
+      "branch": 0,
+      "condition": "else if (event.key === 'Home') target = page[0];",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 3
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 905,
+      "block": 143,
+      "branch": 0,
+      "condition": "else if (event.key === 'End') target = page.at(-1)!;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 3
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 906,
+      "block": 144,
+      "branch": 1,
+      "condition": "else if (event.key === 'PageUp' || event.key === 'PageDown') target = year + (event.key === 'PageUp' ? -12 : 12);",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 3
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 935,
+      "block": 154,
+      "branch": 0,
+      "condition": "if (this.disabled()) return;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 10
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 947,
+      "block": 163,
+      "branch": 1,
+      "condition": "else if (event.key === 'Enter' || event.key === ' ') {",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 947,
+      "block": 164,
+      "branch": 1,
+      "condition": "else if (event.key === 'Enter' || event.key === ' ') {",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/date-input/neu-date-input.component.ts",
+      "line": 968,
+      "block": 170,
+      "branch": 1,
+      "condition": "else if (this.mode() === 'datetime') this.commit(localDateTime(raw));",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 5
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render month/year picker modes, use previous/next and Home/End/Page keys, then activate a period.",
+      "assertion": "Visible period grid, active period, and committed civil month/year change once.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 210,
+      "block": 2,
+      "branch": 0,
+      "condition": "@if (clearIconTpl()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 4
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 5,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 293,
+      "block": 3,
+      "branch": 0,
+      "condition": "@if (filterIconTpl()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 56
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 4,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 287,
+      "block": 4,
+      "branch": 0,
+      "condition": "@if (filterTpl()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 56
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 350,
+      "block": 7,
+      "branch": 1,
+      "condition": "@if (groupTpl()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 361,
+      "block": 8,
+      "branch": 1,
+      "condition": "@if (loaderTpl()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 14
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 420,
+      "block": 12,
+      "branch": 1,
+      "condition": "{{ currentFilter() ? noResultsMessage() : emptyMessage() }}",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 4
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 921,
+      "block": 84,
+      "branch": 0,
+      "condition": "if (this.lazy()) this.emitLazyRequest('initial', this.virtualFirst());",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 45
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 923,
+      "block": 85,
+      "branch": 0,
+      "condition": "if (this.autofocusFilter() && this.filterEnabled()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 3
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 923,
+      "block": 86,
+      "branch": 1,
+      "condition": "if (this.autofocusFilter() && this.filterEnabled()) {",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 3
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1026,
+      "block": 108,
+      "branch": 0,
+      "condition": "if (event.key === 'ArrowUp') this.applyActiveRow(this.activeRowController.last(), true);",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 2
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1067,
+      "block": 116,
+      "branch": 1,
+      "condition": "if (row?.kind === 'option') this.selectRow(event, row, next);",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/select/neu-select.component.ts",
+      "line": 1180,
+      "block": 149,
+      "branch": 1,
+      "condition": "if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Open projected clear/filter/group/loader states, then keyboard-navigate a lazy filtered list.",
+      "assertion": "Projected DOM and active option/filtered request reflect the selected state without extra selection.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 461,
+      "block": 34,
+      "branch": 1,
+      "condition": "const defaultState = this.sortOptions().defaultDirection === 'asc' ? 'ascending' : 'descending';",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 915
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 12,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 462,
+      "block": 35,
+      "branch": 1,
+      "condition": "const oppositeState = defaultState === 'ascending' ? 'descending' : 'ascending';",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 915
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 12,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 468,
+      "block": 38,
+      "branch": 1,
+      "condition": ": this.sortOptions().removable",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 122
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 533,
+      "block": 47,
+      "branch": 1,
+      "condition": "const rules = column.filter?.rules.filter(isNeuTableFilterRule) ?? [];",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 620
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 534,
+      "block": 48,
+      "branch": 0,
+      "condition": "return rules.length === 0 ? ['equals'] : rules;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 620
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 603,
+      "block": 67,
+      "branch": 0,
+      "condition": "if (this.filterOptions().commit !== 'immediate') return;",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 603,
+      "block": 67,
+      "branch": 1,
+      "condition": "if (this.filterOptions().commit !== 'immediate') return;",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 760,
+      "block": 82,
+      "branch": 1,
+      "condition": "if (Number.isFinite(page)) this.changePage(page);",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 764,
+      "block": 83,
+      "branch": 0,
+      "condition": "if (this.paginationOptions().report === 'summary') {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 565
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 8,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 767,
+      "block": 85,
+      "branch": 0,
+      "condition": ": `Page ${state.humanPage} of ${Math.max(1, state.pageCount ?? 1)}`;",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 8,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/table/internal/renderer/neu-table-basic-renderer.component.ts",
+      "line": 767,
+      "block": 85,
+      "branch": 1,
+      "condition": ": `Page ${state.humanPage} of ${Math.max(1, state.pageCount ?? 1)}`;",
+      "currentCoveredSides": [],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render alternate sort direction/removal, explicit filter commit, and summary/page-jump pagination.",
+      "assertion": "Sort ARIA, committed query/filter and page summary show the accepted state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 338,
+      "block": 17,
+      "branch": 0,
+      "condition": "return draft?.base === this.query().search ? draft.value : this.query().search;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 633
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Use rendered sortable/filterable header with explicit filter draft and accepted query.",
+      "assertion": "Visible filter draft and exactly one accepted query proposal differ from applied state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 384,
+      "block": 30,
+      "branch": 0,
+      "condition": "if (this.filterOptions().commit !== 'explicit') return;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Use rendered sortable/filterable header with explicit filter draft and accepted query.",
+      "assertion": "Visible filter draft and exactly one accepted query proposal differ from applied state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 410,
+      "block": 34,
+      "branch": 0,
+      "condition": "if (this.filterOptions().commit !== 'explicit' || !column.filter) return;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 2
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Use rendered sortable/filterable header with explicit filter draft and accepted query.",
+      "assertion": "Visible filter draft and exactly one accepted query proposal differ from applied state.",
+      "finalHits": 1,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 444,
+      "block": 41,
+      "branch": 1,
+      "condition": "if (delay === 0) {",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Use rendered sortable/filterable header with explicit filter draft and accepted query.",
+      "assertion": "Visible filter draft and exactly one accepted query proposal differ from applied state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 463,
+      "block": 43,
+      "branch": 0,
+      "condition": "if (search === this.query().search) return;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Use rendered sortable/filterable header with explicit filter draft and accepted query.",
+      "assertion": "Visible filter draft and exactly one accepted query proposal differ from applied state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree-table/internal/renderer/neu-tree-table-renderer.component.ts",
+      "line": 482,
+      "block": 45,
+      "branch": 0,
+      "condition": "if (!Object.is(current, base)) {",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 3
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Use rendered sortable/filterable header with explicit filter draft and accepted query.",
+      "assertion": "Visible filter draft and exactly one accepted query proposal differ from applied state.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 120,
+      "block": 4,
+      "branch": 1,
+      "condition": "const buffer = Math.max(0, Math.floor(options.buffer ?? 3));",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 4
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render virtualized tree with nondefault buffer and mixed/unchecked checkbox state.",
+      "assertion": "Visible node window and checkbox ARIA state match the user-visible tree model.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 197,
+      "block": 28,
+      "branch": 1,
+      "condition": "return this.checkboxStates().get(treeToken(key)) ?? 'unchecked';",
+      "currentCoveredSides": [
+        {
+          "branch": 0,
+          "hits": 10
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 1,
+        "hits": 0
+      },
+      "state": "Render virtualized tree with nondefault buffer and mixed/unchecked checkbox state.",
+      "assertion": "Visible node window and checkbox ARIA state match the user-visible tree model.",
+      "finalHits": 0,
+      "result": "uncovered"
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 202,
+      "block": 29,
+      "branch": 0,
+      "condition": "return state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false';",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 2
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render virtualized tree with nondefault buffer and mixed/unchecked checkbox state.",
+      "assertion": "Visible node window and checkbox ARIA state match the user-visible tree model.",
+      "finalHits": 2,
+      "result": "hit"
+    },
+    {
+      "file": "projects/ui-core/tree/neu-tree.component.ts",
+      "line": 238,
+      "block": 34,
+      "branch": 0,
+      "condition": "if (!this.virtualization()) return;",
+      "currentCoveredSides": [
+        {
+          "branch": 1,
+          "hits": 1
+        }
+      ],
+      "uncoveredSide": {
+        "branch": 0,
+        "hits": 0
+      },
+      "state": "Render virtualized tree with nondefault buffer and mixed/unchecked checkbox state.",
+      "assertion": "Visible node window and checkbox ARIA state match the user-visible tree model.",
+      "finalHits": 0,
+      "result": "uncovered"
+    }
+  ]
+}

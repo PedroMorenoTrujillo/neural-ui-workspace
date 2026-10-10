@@ -1,0 +1,78 @@
+{
+  "checkpoint": "N2-015C",
+  "capturedAt": "2026-09-20T20:19:27.297Z",
+  "metrics": {
+    "proposal100": {
+      "p50Ms": 0.0066,
+      "p95Ms": 0.0098
+    },
+    "proposal1k": {
+      "p50Ms": 0.0479,
+      "p95Ms": 0.0488
+    },
+    "focusNext1k": {
+      "p50Ms": 0.0002,
+      "p95Ms": 0.0013
+    },
+    "focusPrevious1k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusHome1k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusEnd1k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusNext10k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusPrevious10k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusHome10k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusEnd10k": {
+      "p50Ms": 0.0001,
+      "p95Ms": 0.0003
+    },
+    "focusParentNested": {
+      "p50Ms": 0.0002,
+      "p95Ms": 0.0003
+    },
+    "focusFirstChildNested": {
+      "p50Ms": 0.0002,
+      "p95Ms": 0.0004
+    },
+    "expand100": {
+      "p50Ms": 0.1639,
+      "p95Ms": 0.3303
+    },
+    "collapse100": {
+      "p50Ms": 0.0615,
+      "p95Ms": 0.1255
+    },
+    "nestedBranch": {
+      "p50Ms": 0.1255,
+      "p95Ms": 0.1752
+    },
+    "navigation100Cycles": {
+      "p50Ms": 0.0038,
+      "p95Ms": 0.0039
+    },
+    "proposal100Cycles": {
+      "p50Ms": 0.1317,
+      "p95Ms": 0.1609
+    },
+    "destroy50": {
+      "p50Ms": 36.883,
+      "p95Ms": 44.043
+    }
+  }
+}

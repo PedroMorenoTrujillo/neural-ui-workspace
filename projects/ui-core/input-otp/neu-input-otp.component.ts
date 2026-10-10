@@ -1,197 +1,212 @@
 import {
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
   ViewEncapsulation,
   computed,
-  forwardRef,
   inject,
   input,
+  model,
   output,
-  signal,
   viewChildren,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Directionality } from '@angular/cdk/bidi';
+import type { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { NeuIdGenerator } from '@neural-ui/core/internal';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
-let _seq = 0;
-
-/**
- * NeuralUI InputOTP Component
- *
- * N-digit OTP code input split into individual cells. Implements CVA.
- *
- * Uso: <neu-input-otp [length]="6" (completed)="onOtp($event)" formControlName="code" />
- */
+/** One-time-code string field split into a single, focus-managed group of cells. */
 @Component({
   selector: 'neu-input-otp',
   imports: [],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class]': 'hostClasses()' },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => NeuInputOTPComponent),
-      multi: true,
-    },
-  ],
+  host: {
+    '[class]': 'hostClasses()',
+    '[hidden]': 'hidden()',
+    role: 'group',
+    '(focusout)': 'onGroupFocusOut($event)',
+    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-invalid]': 'hasError() ? "true" : null',
+    '[attr.aria-disabled]': 'disabled() ? "true" : null',
+    '[attr.aria-busy]': 'pending() ? "true" : null',
+  },
   template: `
-    @for (cell of _cells(); track $index) {
+    @for (cell of cells(); track $index) {
       <input
         #cellEl
         class="neu-input-otp__cell"
         type="text"
-        inputmode="numeric"
+        [inputMode]="type() === 'numeric' ? 'numeric' : 'text'"
+        autocomplete="one-time-code"
         maxlength="1"
-        [id]="_id + '_' + $index"
-        [value]="_paddedDigits()[$index]"
-        [disabled]="_cvaDisabled()"
-        [attr.aria-label]="'Dígito ' + ($index + 1) + ' de ' + length()"
-        [class.neu-input-otp__cell--filled]="!!_paddedDigits()[$index]"
+        [id]="inputId() + '_' + $index"
+        [attr.name]="$index === 0 && name() ? name() : null"
+        [value]="paddedDigits()[$index]"
+        [disabled]="disabled()"
+        [attr.readonly]="readonly() ? '' : null"
+        [attr.required]="required() ? '' : null"
+        [attr.aria-label]="cellLabel($index)"
+        [attr.aria-invalid]="hasError() ? 'true' : null"
+        [class.neu-input-otp__cell--filled]="!!paddedDigits()[$index]"
         (input)="onCellInput($event, $index)"
         (keydown)="onKeyDown($event, $index)"
-        (paste)="onPaste($event)"
+        (paste)="onPaste($event, $index)"
         (focus)="onFocus($index)"
       />
     }
   `,
   styleUrl: './neu-input-otp.component.scss',
 })
-export class NeuInputOTPComponent implements ControlValueAccessor {
-  /** Número de celdas / Number of cells */
+export class NeuInputOTPComponent implements FormValueControl<string> {
+  readonly value = model<string>('');
+
   readonly length = input<number>(6);
-
-  /** Tipo de caracteres: numeric | alphanumeric / Character type */
   readonly type = input<'numeric' | 'alphanumeric'>('numeric');
-
-  /** Emitido cuando todas las celdas están completas / Emitted when all cells are filled */
   readonly completed = output<string>();
+  readonly disabled = input<boolean>(false);
+  readonly readonly = input<boolean>(false);
+  readonly hidden = input<boolean>(false);
+  readonly invalid = input<boolean>(false);
+  readonly pending = input<boolean>(false);
+  readonly touched = input<boolean>(false);
+  readonly dirty = input<boolean>(false);
+  readonly errors = input<readonly ValidationError.WithOptionalFieldTree[]>([]);
+  readonly required = input<boolean>(false);
+  readonly name = input<string>('');
+  readonly minLength = input<number | undefined>(undefined);
+  readonly maxLength = input<number | undefined>(undefined);
+  readonly inputId = input<string>(inject(NeuIdGenerator).getId('neu-input-otp-'));
+  readonly ariaLabel = input<string>('One-time code');
+  readonly touch = output<void>();
 
-  /** Emitido en cada cambio parcial / Emitted on each partial change */
-  readonly valueChange = output<string>();
-
-  readonly _id = `neu-input-otp-${++_seq}`;
-  readonly _cvaDisabled = signal(false);
-  readonly _digits = signal<string[]>([]);
-
-  readonly _cells = computed(() => Array.from({ length: this.length() }));
-
-  /** Array de dígitos con padding de vacíos — nunca undefined / Digits array padded with empty strings — never undefined */
-  readonly _paddedDigits = computed(() =>
-    Array.from({ length: this.length() }, (_, i) => this._digits()[i] ?? ''),
-  );
-
+  protected readonly cells = computed(() => Array.from({ length: this.length() }));
+  protected readonly paddedDigits = computed(() => {
+    const current = this.normalize(this.value());
+    return Array.from({ length: this.length() }, (_, index) => current[index] ?? '');
+  });
+  readonly hasError = computed(() => this.invalid() || this.errors().length > 0);
   readonly hostClasses = computed(() => ({
     'neu-input-otp': true,
     [`neu-input-otp--len-${this.length()}`]: true,
-    'neu-input-otp--disabled': this._cvaDisabled(),
+    'neu-input-otp--disabled': this.disabled(),
   }));
 
-  private readonly _cellEls = viewChildren<ElementRef<HTMLInputElement>>('cellEl');
-  private readonly _directionality = inject(Directionality);
-  private _onChange: (v: string) => void = () => {};
-  private _onTouched: () => void = () => {};
-
-  writeValue(val: string | null): void {
-    const str = (val ?? '').substring(0, this.length());
-    this._digits.set(str.split(''));
-  }
-
-  registerOnChange(fn: (v: string) => void): void {
-    this._onChange = fn;
-  }
-  registerOnTouched(fn: () => void): void {
-    this._onTouched = fn;
-  }
-  setDisabledState(disabled: boolean): void {
-    this._cvaDisabled.set(disabled);
-  }
+  private readonly cellEls = viewChildren<ElementRef<HTMLInputElement>>('cellEl');
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   onCellInput(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
-    const char = this._sanitize(input.value.slice(-1));
-    input.value = char;
-    this._digits.update((d) => {
-      const copy = [...d];
-      copy[index] = char;
-      return copy;
-    });
-    const value = this._digits().join('');
-    this._onChange(value);
-    this.valueChange.emit(value);
-    if (char && index < this.length() - 1) {
-      this._focusCell(index + 1);
+    if (this.disabled() || this.readonly()) {
+      input.value = this.paddedDigits()[index];
+      return;
     }
-    if (value.length === this.length() && this._digits().every((d) => d !== '')) {
-      this.completed.emit(value);
-    }
+    const char = this.sanitize(input.value.slice(-1));
+    const current = this.normalize(this.value());
+    const target = Math.min(index, current.length);
+    const next = this.normalize(`${current.slice(0, target)}${char}${current.slice(target + 1)}`);
+    // A skipped empty cell appends at the first gap. Restore the cell that
+    // actually received native input, even if its bound value stays empty.
+    input.value = next[index] ?? '';
+    this.commitUserValue(next);
+    if (char && target < this.length() - 1) this.focusCell(target + 1);
   }
 
   onKeyDown(event: KeyboardEvent, index: number): void {
     if (event.key === 'Backspace') {
-      const d = this._digits();
-      if (d[index]) {
-        this._digits.update((d) => {
-          const c = [...d];
-          c[index] = '';
-          return c;
-        });
-        const value = this._digits().join('');
-        this._onChange(value);
-        this.valueChange.emit(value);
-      } else if (index > 0) {
-        this._focusCell(index - 1);
-      }
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-      const physicalDelta = event.key === 'ArrowRight' ? 1 : -1;
-      const logicalDelta = this._directionality.value === 'rtl' ? -physicalDelta : physicalDelta;
-      const nextIndex = index + logicalDelta;
-      if (nextIndex >= 0 && nextIndex < this.length()) {
-        event.preventDefault();
-        this._focusCell(nextIndex);
-      }
+      if (this.disabled() || this.readonly()) return;
+      const current = this.normalize(this.value());
+      const target = current[index] ? index : Math.max(0, index - 1);
+      if (!current[target]) return;
+      event.preventDefault();
+      const next = `${current.slice(0, target)}${current.slice(target + 1)}`;
+      this.commitUserValue(next);
+      this.focusCell(target);
+      return;
+    }
+    if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault();
+      this.focusCell(index - 1);
+    } else if (event.key === 'ArrowRight' && index < this.length() - 1) {
+      event.preventDefault();
+      this.focusCell(index + 1);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      this.focusCell(0);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      this.focusCell(this.length() - 1);
     }
   }
 
-  onPaste(event: ClipboardEvent): void {
+  onPaste(event: ClipboardEvent, index: number): void {
+    if (this.disabled() || this.readonly()) return;
     event.preventDefault();
-    const raw = event.clipboardData?.getData('text') ?? '';
-    const sanitized = raw
-      .split('')
-      .map((c) => this._sanitize(c))
-      .filter(Boolean);
-    const digits = Array.from({ length: this.length() }, (_, i) => sanitized[i] ?? '');
-    this._digits.set(digits);
-    const value = digits.join('');
-    this._onChange(value);
-    this.valueChange.emit(value);
-    const lastFilled = Math.min(sanitized.length, this.length() - 1);
-    this._focusCell(lastFilled);
-    if (value.replace(/\s/g, '').length === this.length()) {
-      this.completed.emit(value);
-    }
+    const pasted = this.normalize(event.clipboardData?.getData('text') ?? '');
+    const current = this.normalize(this.value());
+    const next = this.normalize(
+      `${current.slice(0, index)}${pasted}${current.slice(index + pasted.length)}`,
+    );
+    this.commitUserValue(next);
+    this.focusCell(Math.min(index + Math.max(pasted.length, 1), this.length()) - 1);
   }
 
   onFocus(index: number): void {
-    this._onTouched();
-    const el = this._cellEls()[index]?.nativeElement;
-    el?.select();
+    this.cellEls()[index]?.nativeElement.select();
+  }
+
+  onGroupFocusOut(event: FocusEvent): void {
+    const next = event.relatedTarget;
+    if (next instanceof Node && this.host.nativeElement.contains(next)) return;
+    this.touch.emit();
   }
 
   clear(): void {
-    this._digits.set([]);
-    this._onChange('');
-    this.valueChange.emit('');
-    this._focusCell(0);
+    if (this.disabled() || this.readonly()) return;
+    this.commitUserValue('');
+    this.focusCell(0);
   }
 
-  private _sanitize(char: string): string {
+  focus(options?: FocusOptions): void {
+    const index = Math.min(this.normalize(this.value()).length, this.length() - 1);
+    this.cellEls()[Math.max(0, index)]?.nativeElement.focus(options);
+  }
+
+  reset(): void {}
+
+  cellLabel(index: number): string {
+    return this.applicationLocale.toLowerCase().startsWith('es')
+      ? `${this.type() === 'numeric' ? 'Dígito' : 'Carácter'} ${index + 1} de ${this.length()}`
+      : `${this.type() === 'numeric' ? 'Digit' : 'Character'} ${index + 1} of ${this.length()}`;
+  }
+
+  private readonly applicationLocale = inject(NEURAL_LOCALE);
+
+  private commitUserValue(next: string): void {
+    const normalized = this.normalize(next);
+    const previous = this.normalize(this.value());
+    if (normalized === previous) return;
+    this.value.set(normalized);
+    if (normalized.length === this.length()) this.completed.emit(normalized);
+  }
+
+  private normalize(value: string): string {
+    return [...(typeof value === 'string' ? value : '')]
+      .map((char) => this.sanitize(char))
+      .filter(Boolean)
+      .join('')
+      .slice(0, Math.max(0, this.length()));
+  }
+
+  private sanitize(char: string): string {
     if (!char) return '';
-    return this.type() === 'numeric' ? (/\d/.test(char) ? char : '') : char.slice(0, 1);
+    return this.type() === 'numeric'
+      ? /\d/.test(char)
+        ? char
+        : ''
+      : /[a-z0-9]/i.test(char)
+        ? char
+        : '';
   }
 
-  private _focusCell(index: number): void {
-    this._cellEls()[index]?.nativeElement.focus();
+  private focusCell(index: number): void {
+    this.cellEls()[index]?.nativeElement.focus();
   }
 }

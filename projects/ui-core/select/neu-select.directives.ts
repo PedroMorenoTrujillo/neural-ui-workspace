@@ -1,55 +1,110 @@
-import { Directive, TemplateRef, inject } from '@angular/core';
-import { NeuSelectOption } from './neu-select.types';
+import { Directive, TemplateRef, input } from '@angular/core';
+import { NeuOptionFilterConfig } from '@neural-ui/core/option-api';
+import {
+  NeuSelectFilterContext,
+  NeuSelectGroupContext,
+  NeuSelectIconContext,
+  NeuSelectItemContext,
+  NeuSelectLoaderContext,
+  NeuSelectOption,
+  NeuSelectSelectedContext,
+} from './neu-select.types';
 
-/**
- * Directiva para personalizar el template de cada ítem del dropdown.
- *
- * Uso:
- * ```html
- * <neu-select [options]="opts" [formControl]="valueCtrl">
- *   <ng-template neuSelectItem let-item>
- *     <span class="flag flag-{{ item.value }}"></span>
- *     {{ item.label }}
- *   </ng-template>
- * </neu-select>
- * ```
- */
-@Directive({ selector: '[neuSelectItem]', standalone: true })
-export class NeuSelectItemDirective {
-  readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption }>>(TemplateRef);
+@Directive({ selector: 'ng-template[neuSelectItem]' })
+export class NeuSelectItemDirective<T = NeuSelectOption> {
+  readonly neuSelectItem = input<readonly T[] | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuSelectItemContext<T>>) {}
+  static ngTemplateContextGuard<T>(
+    _directive: NeuSelectItemDirective<T>,
+    context: unknown,
+  ): context is NeuSelectItemContext<T> {
+    return true;
+  }
 }
 
-/**
- * Directiva para personalizar el template del ítem seleccionado (trigger).
- *
- * Uso:
- * ```html
- * <neu-select [options]="opts" [formControl]="valueCtrl">
- *   <ng-template neuSelectSelected let-item>
- *     <strong>{{ item?.label }}</strong>
- *   </ng-template>
- * </neu-select>
- * ```
- */
-@Directive({ selector: '[neuSelectSelected]', standalone: true })
-export class NeuSelectSelectedDirective {
-  readonly templateRef = inject<TemplateRef<{ $implicit: NeuSelectOption | null }>>(TemplateRef);
+@Directive({ selector: 'ng-template[neuSelectSelected]' })
+export class NeuSelectSelectedDirective<T = NeuSelectOption, V = unknown> {
+  readonly neuSelectSelected = input<readonly T[] | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuSelectSelectedContext<T, V>>) {}
+  static ngTemplateContextGuard<T, V>(
+    _directive: NeuSelectSelectedDirective<T, V>,
+    context: unknown,
+  ): context is NeuSelectSelectedContext<T, V> {
+    return true;
+  }
 }
 
-/** Optional content slots for the select panel. */
-@Directive({ selector: '[neuSelectHeader]', standalone: true })
+@Directive({ selector: 'ng-template[neuSelectGroup]' })
+export class NeuSelectGroupDirective<G = unknown> {
+  readonly neuSelectGroup = input<readonly G[] | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuSelectGroupContext<G>>) {}
+  static ngTemplateContextGuard<G>(
+    _directive: NeuSelectGroupDirective<G>,
+    context: unknown,
+  ): context is NeuSelectGroupContext<G> {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuSelectFilter]' })
+export class NeuSelectFilterDirective<T = unknown> {
+  readonly neuSelectFilter = input<Readonly<NeuOptionFilterConfig<T>> | ''>('');
+  constructor(readonly templateRef: TemplateRef<NeuSelectFilterContext<T>>) {}
+  static ngTemplateContextGuard<T>(
+    _directive: NeuSelectFilterDirective<T>,
+    context: unknown,
+  ): context is NeuSelectFilterContext<T> {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuSelectLoader]' })
+export class NeuSelectLoaderDirective {
+  constructor(readonly templateRef: TemplateRef<NeuSelectLoaderContext>) {}
+  static ngTemplateContextGuard(
+    _directive: NeuSelectLoaderDirective,
+    context: unknown,
+  ): context is NeuSelectLoaderContext {
+    return true;
+  }
+}
+
+@Directive({ selector: 'ng-template[neuSelectHeader]' })
 export class NeuSelectHeaderDirective {
-  readonly templateRef = inject<TemplateRef<void>>(TemplateRef);
+  constructor(readonly templateRef: TemplateRef<void>) {}
 }
-@Directive({ selector: '[neuSelectFooter]', standalone: true })
+
+@Directive({ selector: 'ng-template[neuSelectFooter]' })
 export class NeuSelectFooterDirective {
-  readonly templateRef = inject<TemplateRef<void>>(TemplateRef);
+  constructor(readonly templateRef: TemplateRef<void>) {}
 }
-@Directive({ selector: '[neuSelectEmpty]', standalone: true })
+
+@Directive({ selector: 'ng-template[neuSelectEmpty]' })
 export class NeuSelectEmptyDirective {
-  readonly templateRef = inject<TemplateRef<void>>(TemplateRef);
+  constructor(readonly templateRef: TemplateRef<void>) {}
 }
-@Directive({ selector: '[neuSelectGroup]', standalone: true })
-export class NeuSelectGroupDirective {
-  readonly templateRef = inject<TemplateRef<{ $implicit: string }>>(TemplateRef);
+
+@Directive({ selector: 'ng-template[neuSelectEmptyFilter]' })
+export class NeuSelectEmptyFilterDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
+
+@Directive({ selector: 'ng-template[neuSelectDropdownIcon]' })
+export class NeuSelectDropdownIconDirective {
+  constructor(readonly templateRef: TemplateRef<NeuSelectIconContext>) {}
+}
+
+@Directive({ selector: 'ng-template[neuSelectLoadingIcon]' })
+export class NeuSelectLoadingIconDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
+}
+
+@Directive({ selector: 'ng-template[neuSelectClearIcon]' })
+export class NeuSelectClearIconDirective {
+  constructor(readonly templateRef: TemplateRef<NeuSelectIconContext>) {}
+}
+
+@Directive({ selector: 'ng-template[neuSelectFilterIcon]' })
+export class NeuSelectFilterIconDirective {
+  constructor(readonly templateRef: TemplateRef<void>) {}
 }

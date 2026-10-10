@@ -1,4 +1,6 @@
 neu-timeline-grid {
+  display: block;
+  max-inline-size: 100%;
   min-width: 0;
 }
 
@@ -9,15 +11,27 @@ neu-timeline-grid {
   overflow-x: auto;
   color: var(--neu-text);
 
-  &--compact {
+  &--density-compact {
     .neu-timeline-grid__track,
     .neu-timeline-grid__slot {
       min-height: 60px;
     }
 
     .neu-timeline-grid__item {
-      margin: 8px 0;
+      margin: 24px 0;
       padding: 8px 10px;
+    }
+  }
+
+  &--density-relaxed {
+    .neu-timeline-grid__track,
+    .neu-timeline-grid__slot {
+      min-height: 100px;
+    }
+
+    .neu-timeline-grid__item {
+      margin: 24px 0;
+      padding: 14px 16px;
     }
   }
 
@@ -135,8 +149,14 @@ neu-timeline-grid {
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+.neu-timeline-grid__slot-button:focus-visible,
+.neu-timeline-grid__item:focus-visible {
+  outline: 2px solid var(--neu-primary);
+  outline-offset: -2px;
+}
+
 .neu-timeline-grid__slot--selected {
-  border-radius: var(--neu-radius-md);
+  border-radius: var(--neu-radius);
   background: color-mix(in srgb, var(--neu-primary) 10%, var(--neu-surface-2));
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--neu-primary) 42%, var(--neu-border)),
@@ -150,7 +170,8 @@ neu-timeline-grid {
   justify-content: center;
   gap: 4px;
   min-width: 0;
-  margin: 10px 0;
+  /* Leave an accessible 24px slot target above and below occupied columns. */
+  margin: 24px 0;
   padding: 10px 12px;
   border: 1px solid transparent;
   border-radius: var(--neu-radius-lg);
@@ -161,16 +182,18 @@ neu-timeline-grid {
 }
 
 .neu-timeline-grid__item-title {
+  overflow-wrap: anywhere;
   font-size: var(--neu-text-sm);
   font-weight: 700;
 }
 
 .neu-timeline-grid__item--selected {
-  outline: 2px solid color-mix(in srgb, var(--neu-primary) 48%, transparent);
-  outline-offset: 1px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--neu-primary) 48%, transparent),
+    var(--neu-shadow-sm);
 }
 
-.neu-timeline-grid__item--default {
+.neu-timeline-grid__item--neutral {
   border-color: var(--neu-border);
 }
 
@@ -199,5 +222,19 @@ neu-timeline-grid {
   .neu-timeline-grid__row {
     grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
     gap: var(--neu-space-3);
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-timeline-grid__slot--selected,
+  .neu-timeline-grid__item--selected {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+
+  .neu-timeline-grid__slot-button:focus-visible,
+  .neu-timeline-grid__item:focus-visible {
+    outline-color: currentColor;
+    outline-style: dashed;
   }
 }

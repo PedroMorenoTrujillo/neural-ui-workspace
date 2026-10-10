@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuProgressBarComponent } from './neu-progress-bar.component';
 
 @Component({
   template: `<neu-progress-bar
     [value]="value"
-    [variant]="variant"
+    [tone]="tone"
     [label]="label"
     [showValue]="showValue"
     [indeterminate]="indeterminate"
@@ -15,7 +16,7 @@ import { NeuProgressBarComponent } from './neu-progress-bar.component';
 })
 class TestHostComponent {
   value = 50;
-  variant: any = 'primary';
+  tone: any = 'brand';
   label = '';
   showValue = false;
   indeterminate = false;
@@ -60,9 +61,9 @@ describe('NeuProgressBarComponent', () => {
     expect(el).toBeTruthy();
   });
 
-  it('should apply variant class', () => {
+  it('should apply tone class', () => {
     const df = TestBed.createComponent(NeuProgressBarComponent);
-    df.componentRef.setInput('variant', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.detectChanges();
     const el = df.nativeElement.querySelector('[class*="success"]');
     expect(el).toBeTruthy();
@@ -85,22 +86,22 @@ describe('NeuProgressBarComponent', () => {
     expect(bar.getAttribute('aria-valuenow')).toBe('40');
   });
 
-  it('variant=success should add the success CSS class', async () => {
+  it('tone=success should add the success CSS class', async () => {
     const df = TestBed.createComponent(NeuProgressBarComponent);
-    df.componentRef.setInput('variant', 'success');
+    df.componentRef.setInput('tone', 'success');
     df.componentRef.setInput('value', 50);
     df.detectChanges();
     await df.whenStable();
     expect(df.nativeElement.querySelector('.neu-progress--success')).toBeTruthy();
   });
 
-  it('variant=error should add the error CSS class', async () => {
+  it('tone=danger should add the danger CSS class', async () => {
     const df = TestBed.createComponent(NeuProgressBarComponent);
-    df.componentRef.setInput('variant', 'error');
+    df.componentRef.setInput('tone', 'danger');
     df.componentRef.setInput('value', 50);
     df.detectChanges();
     await df.whenStable();
-    expect(df.nativeElement.querySelector('.neu-progress--error')).toBeTruthy();
+    expect(df.nativeElement.querySelector('.neu-progress--danger')).toBeTruthy();
   });
 
   it('size=sm should add the sm CSS class', async () => {
@@ -150,5 +151,32 @@ describe('NeuProgressBarComponent', () => {
     df.componentRef.setInput('value', -10);
     df.detectChanges();
     expect(df.componentInstance.clampedValue()).toBe(0);
+  });
+
+  it('indeterminate omits numeric progress and NaN cannot enter ARIA', () => {
+    const df = TestBed.createComponent(NeuProgressBarComponent);
+    df.componentRef.setInput('value', Number.NaN);
+    df.detectChanges();
+    const bar = df.nativeElement.querySelector('[role="progressbar"]');
+    expect(bar.getAttribute('aria-valuenow')).toBe('0');
+    expect(bar.getAttribute('aria-valuetext')).toBe('0%');
+    df.componentRef.setInput('indeterminate', true);
+    df.detectChanges();
+    expect(bar.hasAttribute('aria-valuenow')).toBe(false);
+    expect(bar.getAttribute('aria-valuetext')).toBe('Loading…');
+  });
+
+  it('uses the optional Spanish locale for default progress and loading names', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [NeuProgressBarComponent],
+      providers: [{ provide: NEURAL_LOCALE, useValue: 'es-ES' }],
+    });
+    const df = TestBed.createComponent(NeuProgressBarComponent);
+    df.componentRef.setInput('indeterminate', true);
+    df.detectChanges();
+    const bar = df.nativeElement.querySelector('[role="progressbar"]');
+    expect(bar.getAttribute('aria-label')).toBe('Progreso');
+    expect(bar.getAttribute('aria-valuetext')).toBe('Cargando…');
   });
 });

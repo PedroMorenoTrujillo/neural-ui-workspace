@@ -5,7 +5,7 @@
   position: fixed;
   inset: 0;
   background: var(--neu-overlay-bg);
-  z-index: 1200;
+  z-index: var(--neu-z-modal, 200);
   animation: neu-cp-fade-in 80ms ease;
 }
 
@@ -22,15 +22,15 @@
 .neu-cmd {
   position: fixed;
   top: 20%;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  inset-inline: 0;
+  margin-inline: auto;
   width: 560px;
   max-width: calc(100vw - 32px);
   background: var(--neu-surface);
   border: 1px solid var(--neu-border);
   border-radius: var(--neu-radius-xl);
   box-shadow: var(--neu-cmd-shadow);
-  z-index: 1201;
+  z-index: calc(var(--neu-z-modal, 200) + 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -40,12 +40,24 @@
 @keyframes neu-cmd-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-8px) scale(0.97);
+    transform: translateY(-8px) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateY(0) scale(1);
   }
+}
+
+.neu-cmd__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ── Search row ───────────────────────────────────────────────── */
@@ -86,12 +98,24 @@
 }
 
 /* ── List ─────────────────────────────────────────────────────── */
+.neu-cmd__results {
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .neu-cmd__list {
   list-style: none;
   margin: 0;
-  padding: 6px;
-  max-height: 320px;
-  overflow-y: auto;
+  padding: 4px 6px;
+}
+
+.neu-cmd__group-label {
+  margin: 0;
+  padding: 10px 16px 2px;
+  color: var(--neu-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .neu-cmd__empty {
@@ -103,17 +127,38 @@
 
 /* ── Item ─────────────────────────────────────────────────────── */
 .neu-cmd__item {
+  margin: 0;
+}
+
+.neu-cmd__action {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   padding: 8px 10px;
+  border: 0;
   border-radius: var(--neu-radius-lg, 12px);
+  background: transparent;
+  color: var(--neu-text);
   cursor: pointer;
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
   transition: background 80ms;
 
   &--active,
   &:hover {
     background: var(--neu-primary-50);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--neu-primary);
+    outline-offset: -2px;
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
@@ -124,15 +169,23 @@
   text-align: center;
 }
 
+.neu-cmd__item-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
 .neu-cmd__item-label {
   flex: 1;
   font-size: 0.9375rem;
   color: var(--neu-text);
 }
 
-.neu-cmd__item-group {
+.neu-cmd__item-description {
   font-size: 0.75rem;
   color: var(--neu-text-muted);
+  overflow-wrap: anywhere;
 }
 
 .neu-cmd__item-shortcut {
@@ -142,6 +195,33 @@
   border: 1px solid var(--neu-border);
   border-radius: 4px;
   color: var(--neu-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neu-cmd__action,
+  .neu-cp-backdrop,
+  .neu-cmd {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .neu-cmd {
+    border: 1px solid CanvasText;
+  }
+
+  .neu-cmd__action--active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
+@media (max-width: 600px) {
+  .neu-cmd {
+    top: 8%;
+    width: calc(100vw - 24px);
+  }
 }
 
 /* ── Footer ───────────────────────────────────────────────────── */

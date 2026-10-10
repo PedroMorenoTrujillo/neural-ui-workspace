@@ -3,53 +3,65 @@ import { Component } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { NeuNavComponent, NeuNavItem } from './neu-nav.component';
-import { provideIcons } from '@ng-icons/core';
-import { lucideChevronRight, lucideExternalLink, lucideChevronLeft } from '@ng-icons/lucide';
+import { provideNeuralIcons } from '@neural-icons/angular';
+import { iconChevronRight } from '@neural-icons/core/icons/chevron-right';
+import { iconExternalLink } from '@neural-icons/core/icons/external-link';
+import { iconChevronLeft } from '@neural-icons/core/icons/chevron-left';
 import { Router } from '@angular/router';
-import { Directionality } from '@angular/cdk/bidi';
 
 @Component({ template: '' })
 class DummyRouteComponent {}
 
+@Component({
+  imports: [NeuNavComponent],
+  template: `
+    <neu-nav [items]="[]">
+      <span neu-nav-brand style="overflow-wrap: anywhere">Neural Studio</span>
+      <span neu-nav-brand-icon aria-hidden="true">N</span>
+    </neu-nav>
+  `,
+})
+class NavBrandFixture {}
+
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const SIMPLE_ITEMS: NeuNavItem[] = [
-  { id: 'home', label: 'Inicio', icon: 'lucideChevronRight', route: '/' },
-  { id: 'comp', label: 'Componentes', icon: 'lucideChevronRight', route: '/components' },
-  { id: 'docs', label: 'Documentación', icon: 'lucideChevronRight', route: '/docs' },
+  { id: 'home', label: 'Inicio', icon: 'chevron-right', route: '/' },
+  { id: 'comp', label: 'Componentes', icon: 'chevron-right', route: '/components' },
+  { id: 'docs', label: 'Documentación', icon: 'chevron-right', route: '/docs' },
 ];
 
 const HREF_ITEMS: NeuNavItem[] = [
-  { id: 'gh', label: 'GitHub', icon: 'lucideExternalLink', href: 'https://github.com' },
+  { id: 'gh', label: 'GitHub', icon: 'external-link', href: 'https://github.com' },
 ];
 
 const BADGE_ITEMS: NeuNavItem[] = [
   {
     id: 'notif',
     label: 'Notificaciones',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     route: '/notifs',
     badge: '9',
-    badgeVariant: 'danger',
+    badgeTone: 'danger',
   },
 ];
 
 const DISABLED_ITEMS: NeuNavItem[] = [
-  { id: 'dis', label: 'Deshabilitado', icon: 'lucideChevronRight', route: '/dis', disabled: true },
+  { id: 'dis', label: 'Deshabilitado', icon: 'chevron-right', route: '/dis', disabled: true },
 ];
 
 const GROUP_ITEMS: NeuNavItem[] = [
   {
     id: 'grp',
     label: 'Grupo',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     children: [
-      { id: 'c1', label: 'Hijo Ruta', icon: 'lucideChevronRight', route: '/child1' },
-      { id: 'c2', label: 'Hijo Externo', icon: 'lucideExternalLink', href: 'https://ext.com' },
+      { id: 'c1', label: 'Hijo Ruta', icon: 'chevron-right', route: '/child1' },
+      { id: 'c2', label: 'Hijo Externo', icon: 'external-link', href: 'https://ext.com' },
       {
         id: 'c3',
         label: 'Hijo Deshabilitado',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         route: '/child3',
         disabled: true,
       },
@@ -61,18 +73,18 @@ const NESTED_GROUP: NeuNavItem[] = [
   {
     id: 'parent',
     label: 'Padre',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     children: [
       {
         id: 'subgrp',
         label: 'Subgrupo',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
-          { id: 'grand1', label: 'Nieto Ruta', icon: 'lucideChevronRight', route: '/grand1' },
+          { id: 'grand1', label: 'Nieto Ruta', icon: 'chevron-right', route: '/grand1' },
           {
             id: 'grand2',
             label: 'Nieto Externo',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://grand.com',
           },
         ],
@@ -86,10 +98,10 @@ const FLYOUT_MIXED: NeuNavItem[] = [
   {
     id: 'fgrp',
     label: 'FlyoutGrupo',
-    icon: 'lucideChevronRight',
+    icon: 'chevron-right',
     children: [
-      { id: 'fl1', label: 'FL Ruta', icon: 'lucideChevronRight', route: '/fl1' },
-      { id: 'fl2', label: 'FL Externo', icon: 'lucideExternalLink', href: 'https://fl.com' },
+      { id: 'fl1', label: 'FL Ruta', icon: 'chevron-right', route: '/fl1' },
+      { id: 'fl2', label: 'FL Externo', icon: 'external-link', href: 'https://fl.com' },
     ],
   },
 ];
@@ -97,7 +109,7 @@ const FLYOUT_MIXED: NeuNavItem[] = [
 function mkProviders() {
   return [
     provideRouter([{ path: '**', component: DummyRouteComponent }]),
-    provideIcons({ lucideChevronRight, lucideExternalLink, lucideChevronLeft }),
+    provideNeuralIcons(iconChevronRight, iconExternalLink, iconChevronLeft),
   ];
 }
 
@@ -169,10 +181,10 @@ describe('NeuNavComponent', () => {
       {
         id: 'group-badge',
         label: 'Grupo con badge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         badge: 'Beta',
-        badgeVariant: 'info',
-        children: [{ id: 'child', label: 'Child', icon: 'lucideChevronRight', route: '/child' }],
+        badgeTone: 'info',
+        children: [{ id: 'child', label: 'Child', icon: 'chevron-right', route: '/child' }],
       },
     ]);
     f.detectChanges();
@@ -182,26 +194,26 @@ describe('NeuNavComponent', () => {
     expect(f.nativeElement.querySelector('.neu-nav__item-badge')).toBeTruthy();
   });
 
-  it('should use default badge variant when badgeVariant is omitted on group and child items', async () => {
+  it('should use the neutral badge tone when badgeTone is omitted on group and child items', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', [
       {
         id: 'group-default-badge',
         label: 'Grupo',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         badge: 'New',
         children: [
           {
             id: 'child-default-badge',
             label: 'Child',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             route: '/child',
             badge: '2',
           },
           {
             id: 'child-href-default-badge',
             label: 'Child href',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://example.com',
             badge: '3',
           },
@@ -210,10 +222,10 @@ describe('NeuNavComponent', () => {
     ]);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('group-default-badge');
+    f.componentInstance['toggleGroup']('group-default-badge');
     f.detectChanges();
 
-    const badges = Array.from(f.nativeElement.querySelectorAll('.neu-nav__item-badge--default'));
+    const badges = Array.from(f.nativeElement.querySelectorAll('.neu-nav__item-badge--neutral'));
     expect(badges.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -223,10 +235,10 @@ describe('NeuNavComponent', () => {
       {
         id: 'gh-badge',
         label: 'GitHub',
-        icon: 'lucideExternalLink',
+        icon: 'external-link',
         href: 'https://github.com',
         badge: 'New',
-        badgeVariant: 'info',
+        badgeTone: 'info',
       },
     ]);
     f.detectChanges();
@@ -242,19 +254,19 @@ describe('NeuNavComponent', () => {
       {
         id: 'disabled-external',
         label: 'Disabled external',
-        icon: 'lucideExternalLink',
+        icon: 'external-link',
         href: 'https://example.com',
         disabled: true,
       },
       {
         id: 'group',
         label: 'Group',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'disabled-child-external',
             label: 'Disabled child external',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://example.com/child',
             disabled: true,
           },
@@ -263,7 +275,7 @@ describe('NeuNavComponent', () => {
     ]);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('group');
+    f.componentInstance['toggleGroup']('group');
     f.detectChanges();
 
     const anchors = Array.from(
@@ -282,10 +294,10 @@ describe('NeuNavComponent', () => {
       {
         id: 'home-badge',
         label: 'Inicio',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         route: '/',
         badge: '4',
-        badgeVariant: 'warning',
+        badgeTone: 'warning',
       },
     ]);
     f.detectChanges();
@@ -307,6 +319,27 @@ describe('NeuNavComponent', () => {
 
   // ── Collapsed / expand ───────────────────────────────────────────────────
 
+  it('removes collapsed brand text from the header height and restores it on expansion', async () => {
+    const f = TestBed.createComponent(NavBrandFixture);
+    f.detectChanges();
+    await f.whenStable();
+    const toggle = f.nativeElement.querySelector('button.neu-nav__toggle-tab') as HTMLButtonElement;
+    const content = f.nativeElement.querySelector('.neu-nav__brand-content') as HTMLElement;
+    expect(content.textContent).toContain('Neural Studio');
+    expect(getComputedStyle(content).whiteSpace).toBe('nowrap');
+    toggle.click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(getComputedStyle(content).blockSize).toBe('0px');
+    expect(f.nativeElement.querySelector('.neu-nav__brand-icon').textContent).toBe('N');
+    toggle.click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(getComputedStyle(content).blockSize).not.toBe('0px');
+    expect(getComputedStyle(content).whiteSpace).toBe('nowrap');
+    expect(content.textContent).toContain('Neural Studio');
+  });
+
   it('should apply collapsed class when collapsed=true', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', SIMPLE_ITEMS);
@@ -323,6 +356,42 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.querySelector('button.neu-nav__toggle-tab')).toBeTruthy();
+  });
+
+  it('keeps root destinations and groups named when their labels are visually hidden', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [...SIMPLE_ITEMS, ...HREF_ITEMS, ...GROUP_ITEMS]);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    await f.whenStable();
+    const items = Array.from(f.nativeElement.querySelectorAll('.neu-nav__items > a, .neu-nav__items > .neu-nav__group > button')) as HTMLElement[];
+    expect(items.map(item => item.getAttribute('aria-label'))).toEqual([
+      'Inicio', 'Componentes', 'Documentación', 'GitHub', 'Grupo',
+    ]);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    expect(items.every(item => item.getAttribute('aria-label') === null)).toBe(true);
+  });
+
+  it('removes disabled and destinationless internal items from the tab sequence', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      ...DISABLED_ITEMS,
+      { id: 'no-route', label: 'No destination', icon: '' },
+      ...GROUP_ITEMS,
+    ]);
+    f.detectChanges();
+    await f.whenStable();
+    (f.nativeElement.querySelector('button.neu-nav__item--parent') as HTMLButtonElement).click();
+    f.detectChanges();
+    await f.whenStable();
+    const disabled = Array.from(f.nativeElement.querySelectorAll('a.neu-nav__item--disabled')) as HTMLAnchorElement[];
+    expect(disabled).toHaveLength(2);
+    expect(disabled.map(item => ({ tabIndex: item.tabIndex, disabled: item.getAttribute('aria-disabled'), href: item.getAttribute('href') }))).toEqual([
+      { tabIndex: -1, disabled: 'true', href: null },
+      { tabIndex: -1, disabled: 'true', href: null },
+    ]);
+    expect((f.nativeElement.querySelectorAll('.neu-nav__items > a')[1] as HTMLAnchorElement).tabIndex).toBe(-1);
   });
 
   it('should NOT show toggle-tab button when collapsible=false', async () => {
@@ -370,7 +439,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
 
     expect(f.componentInstance.isCollapsed()).toBe(true);
-    expect(button.getAttribute('aria-label')).toBe('Expandir menú');
+    expect(button.getAttribute('aria-label')).toBe('Expand navigation');
   });
 
   // ── Group accordion (L1 → L2) ───────────────────────────────────────────
@@ -393,9 +462,9 @@ describe('NeuNavComponent', () => {
     const comp = f.componentInstance;
 
     expect(comp.isGroupOpen('grp')).toBe(false);
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     expect(comp.isGroupOpen('grp')).toBe(true);
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     expect(comp.isGroupOpen('grp')).toBe(false);
   });
 
@@ -406,7 +475,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     f.detectChanges();
     await f.whenStable();
 
@@ -457,7 +526,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     f.detectChanges();
     await f.whenStable();
 
@@ -471,15 +540,15 @@ describe('NeuNavComponent', () => {
       {
         id: 'grp-badge-child',
         label: 'Grupo',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'child-external-badge',
             label: 'Child External',
-            icon: 'lucideExternalLink',
+            icon: 'external-link',
             href: 'https://example.com',
             badge: 'Hot',
-            badgeVariant: 'warning',
+            badgeTone: 'warning',
           },
         ],
       },
@@ -487,7 +556,7 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.toggleGroup('grp-badge-child');
+    f.componentInstance['toggleGroup']('grp-badge-child');
     f.detectChanges();
     await f.whenStable();
 
@@ -504,7 +573,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('grp');
+    comp['toggleGroup']('grp');
     f.detectChanges();
     await f.whenStable();
 
@@ -530,7 +599,7 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('parent');
+    comp['toggleGroup']('parent');
     f.detectChanges();
     await f.whenStable();
 
@@ -544,8 +613,8 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('parent');
-    comp.toggleGroup('subgrp');
+    comp['toggleGroup']('parent');
+    comp['toggleGroup']('subgrp');
     f.detectChanges();
     await f.whenStable();
 
@@ -559,7 +628,7 @@ describe('NeuNavComponent', () => {
     f.detectChanges();
     await f.whenStable();
 
-    f.componentInstance.toggleGroup('parent');
+    f.componentInstance['toggleGroup']('parent');
     f.detectChanges();
     await f.whenStable();
 
@@ -582,8 +651,8 @@ describe('NeuNavComponent', () => {
     await f.whenStable();
     const comp = f.componentInstance;
 
-    comp.toggleGroup('parent');
-    comp.toggleGroup('subgrp');
+    comp['toggleGroup']('parent');
+    comp['toggleGroup']('subgrp');
     f.detectChanges();
     await f.whenStable();
 
@@ -659,61 +728,6 @@ describe('NeuNavComponent', () => {
     expect(flyoutEl.textContent).toContain('FlyoutGrupo');
     expect(flyoutEl.textContent).toContain('FL Ruta');
     expect(flyoutEl.textContent).toContain('FL Externo');
-  });
-
-  it('repositions an open collapsed flyout and its tooltips when direction changes', async () => {
-    const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', FLYOUT_MIXED);
-    f.componentRef.setInput('collapsed', true);
-    f.detectChanges();
-    await f.whenStable();
-
-    f.componentInstance.onGroupMouseEnter(FLYOUT_MIXED[0], {
-      currentTarget: {
-        getBoundingClientRect: () => ({ top: 50, left: 40, right: 100 }),
-      },
-    } as unknown as MouseEvent);
-    f.detectChanges();
-
-    expect(f.componentInstance.flyoutPosition()).toEqual({ left: 100, right: null });
-    expect(f.componentInstance.tooltipPosition()).toBe('right');
-
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-    f.detectChanges();
-
-    expect(f.componentInstance.flyoutPosition()).toEqual({
-      left: null,
-      right: window.innerWidth - 40,
-    });
-    expect(f.componentInstance.tooltipPosition()).toBe('left');
-    expect((f.nativeElement.querySelector('.neu-nav__flyout') as HTMLElement).style.right).toBe(
-      `${window.innerWidth - 40}px`,
-    );
-  });
-
-  it('mirrors group and collapse chevrons when direction changes dynamically', async () => {
-    const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', GROUP_ITEMS);
-    f.detectChanges();
-    await f.whenStable();
-
-    expect(f.componentInstance.groupChevronIcon()).toBe('lucideChevronRight');
-    expect(f.componentInstance.toggleChevronIcon()).toBe('lucideChevronLeft');
-
-    TestBed.inject(Directionality).valueSignal.set('rtl');
-    f.detectChanges();
-
-    expect(f.componentInstance.groupChevronIcon()).toBe('lucideChevronLeft');
-    expect(f.componentInstance.toggleChevronIcon()).toBe('lucideChevronRight');
-    expect(
-      f.nativeElement
-        .querySelector('.neu-nav__group-chevron')
-        .classList.contains('neu-nav__group-chevron--rtl'),
-    ).toBe(true);
-
-    f.componentRef.setInput('collapsed', true);
-    f.detectChanges();
-    expect(f.componentInstance.toggleChevronIcon()).toBe('lucideChevronLeft');
   });
 
   it('should render flyout with nested L3 children', async () => {
@@ -808,20 +822,20 @@ describe('NeuNavComponent', () => {
       {
         id: 'nf',
         label: 'Nested Flyout',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'nf-sub',
             label: 'Subgrupo',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
               {
                 id: 'nf-g1',
                 label: 'Nieto Externo',
-                icon: 'lucideExternalLink',
+                icon: 'external-link',
                 href: 'https://example.com',
               },
-              { id: 'nf-g2', label: 'Nieto Ruta', icon: 'lucideChevronRight', route: '/grand2' },
+              { id: 'nf-g2', label: 'Nieto Ruta', icon: 'chevron-right', route: '/grand2' },
             ],
           },
         ],
@@ -848,17 +862,17 @@ describe('NeuNavComponent', () => {
       {
         id: 'parent-ext',
         label: 'Parent',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'sub-ext',
             label: 'Sub',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
               {
                 id: 'grand-ext',
                 label: 'Grand External',
-                icon: 'lucideExternalLink',
+                icon: 'external-link',
                 href: 'https://example.com',
               },
             ],
@@ -895,10 +909,10 @@ describe('NeuNavComponent', () => {
       {
         id: 'fh',
         label: 'Flyout Href',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
-          { id: 'fh-l', label: 'External', icon: 'lucideExternalLink', href: 'https://ext.com' },
-          { id: 'fh-r', label: 'Route', icon: 'lucideChevronRight', route: '/route' },
+          { id: 'fh-l', label: 'External', icon: 'external-link', href: 'https://ext.com' },
+          { id: 'fh-r', label: 'Route', icon: 'chevron-right', route: '/route' },
         ],
       },
     ];
@@ -916,6 +930,76 @@ describe('NeuNavComponent', () => {
     expect(flyoutItems.length).toBeGreaterThanOrEqual(2);
     // External link should have external link icon
     expect(f.nativeElement.textContent).toContain('External');
+  });
+
+  it('keeps disabled child and grandchild flyout links inert and unfocusable', async () => {
+    const items: NeuNavItem[] = [
+      {
+        id: 'root',
+        label: 'Root',
+        icon: 'chevron-right',
+        children: [
+          {
+            id: 'child-external',
+            label: 'Child external',
+            icon: 'external-link',
+            href: 'https://example.com',
+            disabled: true,
+          },
+          {
+            id: 'child-route',
+            label: 'Child route',
+            icon: 'chevron-right',
+            route: '/child',
+            disabled: true,
+          },
+          {
+            id: 'nested',
+            label: 'Nested',
+            icon: 'chevron-right',
+            children: [
+              {
+                id: 'grand-external',
+                label: 'Grand external',
+                icon: 'external-link',
+                href: 'https://example.com/grand',
+                disabled: true,
+              },
+              {
+                id: 'grand-route',
+                label: 'Grand route',
+                icon: 'chevron-right',
+                route: '/grand',
+                disabled: true,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', items);
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    f.componentInstance.onGroupMouseEnter(items[0], {
+      currentTarget: { getBoundingClientRect: () => ({ top: 30, right: 60 }) },
+    } as unknown as MouseEvent);
+    f.detectChanges();
+    await f.whenStable();
+
+    const disabled = Array.from(
+      f.nativeElement.querySelectorAll('.neu-nav__flyout-item--disabled'),
+    ) as HTMLAnchorElement[];
+    expect(disabled).toHaveLength(4);
+    for (const link of disabled) {
+      expect(link.hasAttribute('href'), `${link.textContent}: ${link.getAttribute('href')}`).toBe(
+        false,
+      );
+      expect(link.getAttribute('aria-disabled')).toBe('true');
+      expect(link.tabIndex).toBe(-1);
+      link.click();
+      expect(f.componentInstance.flyoutState()).not.toBeNull();
+    }
   });
 
   it('clicking a flyout route item should close the flyout from the template', async () => {
@@ -946,9 +1030,9 @@ describe('NeuNavComponent', () => {
       {
         id: 'fh',
         label: 'Flyout Href',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
-          { id: 'fh-l', label: 'External', icon: 'lucideExternalLink', href: 'https://ext.com' },
+          { id: 'fh-l', label: 'External', icon: 'external-link', href: 'https://ext.com' },
         ],
       },
     ];
@@ -977,17 +1061,17 @@ describe('NeuNavComponent', () => {
       {
         id: 'parent',
         label: 'Parent',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'sub',
             label: 'Sub',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
               {
                 id: 'grand-route',
                 label: 'Grand Route',
-                icon: 'lucideChevronRight',
+                icon: 'chevron-right',
                 route: '/grand-route',
               },
             ],
@@ -1033,22 +1117,22 @@ describe('NeuNavComponent', () => {
     expect(f.componentInstance.flyoutState()).toBeNull();
   });
 
-  it('_openActiveGroup should open groups when a grandchild route matches', async () => {
+  it('does not mutate disclosure when a grandchild is applied active', async () => {
     const DEEP_ACTIVE: NeuNavItem[] = [
       {
         id: 'parent',
         label: 'Padre',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'mid',
             label: 'Medio',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             children: [
-              { id: 'grand', label: 'Nieto', icon: 'lucideChevronRight', route: '/grand' },
+              { id: 'grand', label: 'Nieto', icon: 'chevron-right', route: '/grand', active: true },
             ],
           },
-          { id: 'child', label: 'Hijo', icon: 'lucideChevronRight', route: '/child' },
+          { id: 'child', label: 'Hijo', icon: 'chevron-right', route: '/child' },
         ],
       },
     ];
@@ -1056,11 +1140,12 @@ describe('NeuNavComponent', () => {
     f.componentRef.setInput('items', DEEP_ACTIVE);
     f.detectChanges();
     await f.whenStable();
-    // Manually call _openActiveGroup as afterNextRender doesn't run in unit tests
-    // Simulate router url by overriding the private router and calling _openActiveGroup
-    const comp = f.componentInstance as any;
-    comp.router = { url: '/grand', events: { pipe: () => ({ subscribe: () => ({}) }) } };
-    comp._openActiveGroup();
+    const comp = f.componentInstance;
+    expect(comp.isGroupActive(DEEP_ACTIVE[0])).toBe(true);
+    expect(comp.isGroupOpen('parent')).toBe(false);
+    expect(comp.isGroupOpen('mid')).toBe(false);
+    comp.toggleGroup('parent');
+    comp.toggleGroup('mid');
     expect(comp.isGroupOpen('parent')).toBe(true);
     expect(comp.isGroupOpen('mid')).toBe(true);
   });
@@ -1078,48 +1163,35 @@ describe('NeuNavComponent', () => {
     expect(f.componentInstance.isCollapsed()).toBe(true);
   });
 
-  it('isCurrentRoute returns true when router URL matches exactly', () => {
-    // isCurrentRoute debe devolver true cuando la URL del router coincide exactamente
-    // isCurrentRoute must return true when the router URL matches exactly
+  it('isCurrentRoute reads only consumer-applied active state', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', SIMPLE_ITEMS);
+    f.componentRef.setInput(
+      'items',
+      SIMPLE_ITEMS.map((item) => ({ ...item, active: item.route === '/components' })),
+    );
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    // Override router with mock URL
-    comp['router'] = {
-      url: '/components',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
+    const comp = f.componentInstance;
     expect(comp.isCurrentRoute('/components')).toBe(true);
   });
 
-  it('isCurrentRoute returns true when URL starts with route + query string', () => {
-    // isCurrentRoute debe devolver true cuando la URL empieza con ruta + query string
-    // isCurrentRoute must return true when URL starts with route + query string
+  it('does not infer active state from a query-string URL', () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', SIMPLE_ITEMS);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = {
-      url: '/docs?tab=api',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    expect(comp.isCurrentRoute('/docs')).toBe(true);
+    expect(f.componentInstance.isCurrentRoute('/docs')).toBe(false);
   });
 
-  it('isGroupActive returns true when a child route matches current URL', () => {
-    // isGroupActive debe devolver true cuando la ruta de un hijo coincide con la URL actual
-    // isGroupActive must return true when a child route matches the current URL
+  it('isGroupActive reads an applied active child', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', GROUP_ITEMS);
+    const applied = [
+      {
+        ...GROUP_ITEMS[0],
+        children: GROUP_ITEMS[0].children?.map((child, i) => ({ ...child, active: i === 0 })),
+      },
+    ];
+    f.componentRef.setInput('items', applied);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = {
-      url: '/child1',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    // GROUP_ITEMS[0] has a child with route '/child1'
-    const result = comp.isGroupActive(GROUP_ITEMS[0]);
+    const result = f.componentInstance.isGroupActive(applied[0]);
     expect(result).toBe(true);
   });
 
@@ -1132,16 +1204,16 @@ describe('NeuNavComponent', () => {
       {
         id: 'bg',
         label: 'GrupoBadge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'bc1',
             label: 'Con Badge',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             route: '/bc1',
             badge: '5',
           },
-          { id: 'bc2', label: 'Sin Badge', icon: 'lucideChevronRight', route: '/bc2' },
+          { id: 'bc2', label: 'Sin Badge', icon: 'chevron-right', route: '/bc2' },
         ],
       },
     ];
@@ -1149,7 +1221,7 @@ describe('NeuNavComponent', () => {
     f.componentRef.setInput('items', BADGED_GROUP);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('bg');
+    f.componentInstance['toggleGroup']('bg');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.textContent).toContain('5');
@@ -1162,18 +1234,18 @@ describe('NeuNavComponent', () => {
       {
         id: 'bn-parent',
         label: 'PadreBadge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'bn-sub',
             label: 'SubgrupoBadge',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             badge: '7',
             children: [
               {
                 id: 'bn-grand',
                 label: 'NietoBadge',
-                icon: 'lucideChevronRight',
+                icon: 'chevron-right',
                 route: '/grand',
                 badge: '3',
               },
@@ -1186,50 +1258,51 @@ describe('NeuNavComponent', () => {
     f.componentRef.setInput('items', BADGED_NESTED);
     f.detectChanges();
     await f.whenStable();
-    f.componentInstance.toggleGroup('bn-parent');
-    f.componentInstance.toggleGroup('bn-sub');
+    f.componentInstance['toggleGroup']('bn-parent');
+    f.componentInstance['toggleGroup']('bn-sub');
     f.detectChanges();
     await f.whenStable();
     expect(f.nativeElement.textContent).toContain('3');
     expect(f.nativeElement.textContent).toContain('7');
   });
 
-  it('isGroupActive returns true when a grandchild route matches current URL', () => {
-    // isGroupActive debe devolver true cuando la ruta de un nieto coincide con la URL
-    // isGroupActive must return true when a grandchild route matches current URL
+  it('isGroupActive reads an applied active grandchild', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', NESTED_GROUP);
+    const applied = [
+      {
+        ...NESTED_GROUP[0],
+        children: NESTED_GROUP[0].children?.map((child) => ({
+          ...child,
+          children: child.children?.map((grand, i) => ({ ...grand, active: i === 0 })),
+        })),
+      },
+    ];
+    f.componentRef.setInput('items', applied);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    // Override the router URL to match a grandchild route
-    comp['router'] = { url: '/grand1', events: { pipe: () => ({ subscribe: () => ({}) }) } };
-    // NESTED_GROUP[0] (parent) has child[0] (subgrp) which has children with route '/grand1'
-    const result = comp.isGroupActive(NESTED_GROUP[0]);
+    const result = f.componentInstance.isGroupActive(applied[0]);
     expect(result).toBe(true);
   });
 
-  it('isGroupActive should check c.children (grandchild) routes via some()', () => {
-    // isGroupActive debe verificar las rutas de los hijos de segundo nivel (nietos)
-    // isGroupActive must verify grandchild routes via some()
+  it('isGroupActive checks applied grandchild state', () => {
     const DEEP_ITEM: any = {
       id: 'deep',
       label: 'Deep',
-      icon: 'lucideChevronRight',
+      icon: 'chevron-right',
       children: [
         {
           id: 'mid',
           label: 'Mid',
-          icon: 'lucideChevronRight',
-          children: [{ id: 'leaf', label: 'Leaf', icon: 'lucideChevronRight', route: '/target' }],
+          icon: 'chevron-right',
+          children: [
+            { id: 'leaf', label: 'Leaf', icon: 'chevron-right', route: '/target', active: true },
+          ],
         },
       ],
     };
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', [DEEP_ITEM]);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = { url: '/target', events: { pipe: () => ({ subscribe: () => ({}) }) } };
-    expect(comp.isGroupActive(DEEP_ITEM)).toBe(true);
+    expect(f.componentInstance.isGroupActive(DEEP_ITEM)).toBe(true);
   });
 
   it('DOM mouseenter on nav group should trigger onGroupMouseEnter', async () => {
@@ -1256,12 +1329,12 @@ describe('NeuNavComponent', () => {
       {
         id: 'fbg',
         label: 'FlyoutBadge',
-        icon: 'lucideChevronRight',
+        icon: 'chevron-right',
         children: [
           {
             id: 'fbc1',
             label: 'FlyoutItemBadge',
-            icon: 'lucideChevronRight',
+            icon: 'chevron-right',
             route: '/fbc1',
             badge: '8',
           },
@@ -1310,40 +1383,39 @@ describe('NeuNavComponent', () => {
     vi.useRealTimers();
   });
 
-  it('_openActiveGroup direct call opens group for matching child route', () => {
-    // _openActiveGroup directo debe abrir el grupo cuando la ruta del hijo coincide
-    // _openActiveGroup direct call must open the group when child route matches
+  it('does not auto-open a group when its child becomes active', () => {
     const f = TestBed.createComponent(NeuNavComponent);
-    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.componentRef.setInput('items', [
+      {
+        ...GROUP_ITEMS[0],
+        children: GROUP_ITEMS[0].children?.map((child, i) => ({ ...child, active: i === 0 })),
+      },
+    ]);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    // Simulate router URL matching child route
-    comp['router'] = {
-      url: '/child1',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    // Call private method directly (covers line 587)
-    comp['_openActiveGroup']();
-    expect(comp.isGroupOpen('grp')).toBe(true);
+    expect(f.componentInstance.isGroupOpen('grp')).toBe(false);
   });
 
-  it('_openActiveGroup direct call opens parent group for matching grandchild route', () => {
-    // _openActiveGroup debe abrir el grupo padre cuando la ruta del nieto coincide
-    // _openActiveGroup must open the parent group when grandchild route matches
+  it('parent item replacement updates active presentation without route state', () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', NESTED_GROUP);
     f.detectChanges();
-    const comp = f.componentInstance as any;
-    comp['router'] = {
-      url: '/grand1',
-      events: { pipe: () => ({ subscribe: () => ({}) }) },
-    };
-    comp['_openActiveGroup']();
-    expect(comp.isGroupOpen('parent')).toBe(true);
-    expect(comp.isGroupOpen('subgrp')).toBe(true);
+    expect(f.componentInstance.isGroupActive(NESTED_GROUP[0])).toBe(false);
+    const applied = [
+      {
+        ...NESTED_GROUP[0],
+        children: NESTED_GROUP[0].children?.map((child) => ({
+          ...child,
+          children: child.children?.map((grand, i) => ({ ...grand, active: i === 0 })),
+        })),
+      },
+    ];
+    f.componentRef.setInput('items', applied);
+    f.detectChanges();
+    expect(f.componentInstance.isGroupActive(applied[0])).toBe(true);
+    expect(f.componentInstance.isGroupOpen('parent')).toBe(false);
   });
 
-  it('isCurrentRoute should react to a real router navigation event', async () => {
+  it('router navigation alone does not set active state', async () => {
     const f = TestBed.createComponent(NeuNavComponent);
     f.componentRef.setInput('items', SIMPLE_ITEMS);
     f.detectChanges();
@@ -1353,7 +1425,7 @@ describe('NeuNavComponent', () => {
     await router.navigateByUrl('/docs?tab=api');
     f.detectChanges();
 
-    expect(f.componentInstance.isCurrentRoute('/docs')).toBe(true);
+    expect(f.componentInstance.isCurrentRoute('/docs')).toBe(false);
   });
 
   it('DOM mouseleave handlers close collapsed flyouts through their template listeners', async () => {
@@ -1409,6 +1481,62 @@ describe('NeuNavComponent', () => {
     vi.useRealTimers();
   });
 
+  it('controlled collapse emits a proposal without changing applied state', () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('collapsed', false);
+    f.detectChanges();
+    const emitted: boolean[] = [];
+    f.componentInstance.collapsedChange.subscribe((value) => emitted.push(value));
+
+    f.componentInstance.toggleCollapse();
+    f.detectChanges();
+    expect(emitted).toEqual([true]);
+    expect(f.componentInstance.isCollapsed()).toBe(false);
+
+    f.componentRef.setInput('collapsed', true);
+    f.detectChanges();
+    expect(f.componentInstance.isCollapsed()).toBe(true);
+    expect(emitted).toEqual([true]);
+  });
+
+  it('renders consumer-applied active state on an external link without Router state', () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      {
+        id: 'external',
+        label: 'External',
+        icon: 'chevron-right',
+        href: 'https://example.test',
+        active: true,
+      },
+    ]);
+    f.detectChanges();
+    const link = f.nativeElement.querySelector('a.neu-nav__item') as HTMLAnchorElement;
+    expect(link.classList).toContain('neu-nav__item--active');
+    expect(link.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('places a collapsed RTL flyout on the inline end and closes on Escape', () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', GROUP_ITEMS);
+    f.componentRef.setInput('collapsed', true);
+    f.nativeElement.setAttribute('dir', 'rtl');
+    f.detectChanges();
+    const group = f.nativeElement.querySelector('.neu-nav__group') as HTMLElement;
+    group.getBoundingClientRect = () => ({ top: 10, left: 50, right: 100 }) as DOMRect;
+    f.componentInstance.onGroupMouseEnter(GROUP_ITEMS[0], {
+      currentTarget: group,
+    } as unknown as MouseEvent);
+    expect(f.componentInstance.flyoutState()?.left).toBeNull();
+    expect(f.componentInstance.flyoutState()?.right).toBe(window.innerWidth - 240 - 14);
+    f.detectChanges();
+    const panel = f.nativeElement.querySelector('.neu-nav__flyout') as HTMLElement;
+    expect(panel.getAttribute('role')).toBe('navigation');
+    panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    f.detectChanges();
+    expect(f.componentInstance.flyoutState()).toBeNull();
+  });
+
   it('isGroupActive returns false for leaf items and flyout enter clears pending timers', () => {
     vi.useFakeTimers();
     const f = TestBed.createComponent(NeuNavComponent);
@@ -1424,5 +1552,22 @@ describe('NeuNavComponent', () => {
 
     expect((f.componentInstance as any)._flyoutTimer).toBeNull();
     vi.useRealTimers();
+  });
+
+  it('renders top-level route and external badges with the neutral fallback', async () => {
+    const f = TestBed.createComponent(NeuNavComponent);
+    f.componentRef.setInput('items', [
+      { id: 'route-badge', label: 'Updates', icon: 'chevron-right', route: '/updates', badge: '3' },
+      { id: 'external-badge', label: 'Docs', icon: 'external-link', href: 'https://example.com', badge: 'New' },
+      { id: 'disabled-external', label: 'Disabled', icon: 'external-link', href: 'https://example.com', disabled: true },
+    ] satisfies NeuNavItem[]);
+    f.detectChanges();
+    await f.whenStable();
+    const badges = f.nativeElement.querySelectorAll('.neu-nav__item-badge--neutral') as NodeListOf<HTMLElement>;
+    expect([...badges].map((badge) => badge.textContent?.trim())).toEqual(['3', 'New']);
+    const disabled = [...(f.nativeElement.querySelectorAll('a.neu-nav__item') as NodeListOf<HTMLAnchorElement>)]
+      .find((link) => link.textContent?.includes('Disabled'));
+    expect(disabled?.getAttribute('href')).toBe('');
+    expect(disabled?.getAttribute('aria-disabled')).toBe('true');
   });
 });

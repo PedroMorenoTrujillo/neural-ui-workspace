@@ -1,0 +1,43 @@
+{
+  "checkpoint": "N2-011F",
+  "capturedAt": "2026-09-20T11:39:00.106Z",
+  "metrics": {
+    "initialDecision": {
+      "samples": 25,
+      "p50Ms": 0.00019395900000000664,
+      "p95Ms": 0.00046075000000001865
+    },
+    "sameQueryDecision": {
+      "samples": 25,
+      "p50Ms": 0.000353917000000024,
+      "p95Ms": 0.0004521669999999745
+    },
+    "queryChangeRequest": {
+      "samples": 25,
+      "p50Ms": 0.0003623330000000351,
+      "p95Ms": 0.0005788750000000391
+    },
+    "retryDecision": {
+      "samples": 25,
+      "p50Ms": 0.0003575000000000159,
+      "p95Ms": 0.0005343750000000114
+    },
+    "metadataResponse": {
+      "samples": 25,
+      "p50Ms": 0.0002722079999999778,
+      "p95Ms": 0.0003586249999999609
+    },
+    "metadataStorm1000": {
+      "samples": 25,
+      "p50Ms": 0.3155766400000016,
+      "p95Ms": 0.32916832
+    },
+    "semanticEquality": {
+      "samples": 25,
+      "p50Ms": 0.00022287499999998773,
+      "p95Ms": 0.0002791250000000218
+    },
+    "metadataStormRequests": 0,
+    "viewportRequests": 0
+  }
+}

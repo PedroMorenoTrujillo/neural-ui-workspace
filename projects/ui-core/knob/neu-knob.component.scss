@@ -1,3 +1,7 @@
+neu-knob[hidden] {
+  display: none !important;
+}
+
 .neu-knob {
   display: inline-flex;
   flex-direction: column;
@@ -37,12 +41,12 @@
 }
 
 .neu-knob__value-arc {
-  stroke: var(--neu-color-primary, #0ea5e9);
+  stroke: var(--neu-primary, #0ea5e9);
   transition: stroke-dashoffset 40ms linear;
 }
 
 .neu-knob__indicator {
-  fill: var(--neu-color-primary, #0ea5e9);
+  fill: var(--neu-primary, #0ea5e9);
 }
 
 /* ── Value display ────────────────────────────────────────────── */

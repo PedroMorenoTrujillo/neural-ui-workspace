@@ -1,0 +1,29 @@
+[
+  {
+    "browser": "chromium",
+    "status": "PASS",
+    "serverOutputs": 0,
+    "domReused": true,
+    "opened": 1,
+    "hidden": 1,
+    "domainSelect": 1
+  },
+  {
+    "browser": "firefox",
+    "status": "PASS",
+    "serverOutputs": 0,
+    "domReused": true,
+    "opened": 1,
+    "hidden": 1,
+    "domainSelect": 1
+  },
+  {
+    "browser": "webkit",
+    "status": "PASS",
+    "serverOutputs": 0,
+    "domReused": true,
+    "opened": 1,
+    "hidden": 1,
+    "domainSelect": 1
+  }
+]
