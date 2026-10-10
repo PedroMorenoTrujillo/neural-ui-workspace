@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated v1 documentation and package homepage links to `https://ui.neuralui.org/v1/` and the Admin Pro demo to `https://adminpro.neuralui.org/demo/home/`.
-- Maintenance releases from `maintenance/v1` publish under the npm `v1` tag. The v2 `latest` tag is preserved.
+- Maintenance releases from `maintenance/v1` publish under the npm `legacy` tag. The v2 `latest` tag is preserved.
 - README installation examples and version badges follow the v1 maintenance channel. Component behavior and supported Angular versions are unchanged.
 
 ## [1.15.0] - 2026-09-12
