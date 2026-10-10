@@ -1,6 +1,6 @@
 {
   "name": "@neural-ui/core",
-  "version": "1.15.1",
+  "version": "1.15.2",
   "description": "Modern Angular UI component library built with signals, standalone components, and OnPush change detection.",
   "author": "Pedro Moreno Trujillo",
   "keywords": [
@@ -39,7 +39,7 @@
     "url": "git+https://github.com/PedroMorenoTrujillo/neural-ui-workspace.git",
     "directory": "projects/ui-core"
   },
-  "homepage": "https://neural-ui-showcase.vercel.app/es/home",
+  "homepage": "https://ui.neuralui.org/v1/",
   "bugs": {
     "url": "https://github.com/PedroMorenoTrujillo/neural-ui-workspace/issues"
   },
