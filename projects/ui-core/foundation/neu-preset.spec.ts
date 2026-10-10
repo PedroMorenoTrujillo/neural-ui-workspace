@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defineNeuPreset, neuPresetCss, type NeuPreset } from './neu-preset';
+import { defineNeuPreset, neuPresetCss, ɵNEU_PRESET_INSTALL, type NeuPreset } from './neu-preset';
 
 describe('static presets', () => {
   it('emits nothing without overrides', () => {
@@ -50,6 +50,9 @@ describe('static presets', () => {
 
     expect(forest.name).toBe('forest');
     expect(forest.light['--neu-primary']).toBe('#166534');
+    expect(ɵNEU_PRESET_INSTALL).toBe('ɵneuPresetInstall');
+    expect(typeof forest[ɵNEU_PRESET_INSTALL]).toBe('function');
+    expect(Object.getOwnPropertyDescriptor(forest, ɵNEU_PRESET_INSTALL)?.enumerable).toBe(false);
     expect(() => defineNeuPreset({ name: 'bad"]', light: { '--neu-primary': '#166534' } })).toThrow(
       'Preset name',
     );

@@ -118,6 +118,8 @@ try {
       ],
     ],
     ['npm', ['run', 'build']],
+    ['npx', ['ngc', '--project', 'tsconfig.app.json']],
+    ['node', ['src/ssr-presets.mjs']],
     ['node', ['src/ssr-tree-table.mjs']],
     ['node', ['src/ssr-icons.mjs']],
     ['node', ['src/ssr-h9-events.mjs']],

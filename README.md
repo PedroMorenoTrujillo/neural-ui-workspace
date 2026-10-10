@@ -309,6 +309,8 @@ Structural icons have built-in Core fallbacks. An optional application-owned
 resolver is registered with `provideNeuIconResolver` from
 `@neural-ui/core/foundation`; no external icon renderer is mandatory.
 See the [icons guide](https://ui.neuralui.org/v2/en/foundations/icons).
+The optional companion project has its own catalog and documentation:
+[Neural Icons](https://icons.neuralui.org/). It is not required to use Core.
 
 Import public interfaces, event types and models from the owning entry point,
 not internal source paths. For example:

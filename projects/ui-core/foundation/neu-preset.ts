@@ -9,8 +9,8 @@ export interface NeuPreset {
   readonly dark?: NeuPresetTokens;
 }
 
-/** @internal */
-export const ɵNEU_PRESET_INSTALL = Symbol('NEU_PRESET_INSTALL');
+/** @internal Stable across separately compiled root/foundation entry points. */
+export const ɵNEU_PRESET_INSTALL = 'ɵneuPresetInstall' as const;
 
 /** Named preset ready to be registered through provideNeuralUI(). */
 export interface NeuPresetDefinition extends NeuPreset {
