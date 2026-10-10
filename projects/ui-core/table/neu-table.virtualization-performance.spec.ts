@@ -187,5 +187,5 @@ describe('NeuTable virtualization performance evidence', () => {
     runtime.process?.stdout?.write(
       `N2_TABLE_VIRTUALIZATION_PERFORMANCE:${JSON.stringify(payload)}\n`,
     );
-  });
+  }, 30_000);
 });

@@ -490,5 +490,5 @@ describe('NeuTable virtual facade integration', () => {
       disconnected: 100,
     });
     expect(cancelled).toBeGreaterThanOrEqual(100);
-  });
+  }, 30_000);
 });

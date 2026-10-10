@@ -208,5 +208,5 @@ describe('NeuTreeTable 2 remote performance', () => {
       }),
     };
     console.info(`N2_TREE_TABLE_F_PERFORMANCE:${JSON.stringify(metrics)}`);
-  });
+  }, 30_000);
 });

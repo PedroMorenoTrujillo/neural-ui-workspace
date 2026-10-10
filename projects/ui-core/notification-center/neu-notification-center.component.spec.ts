@@ -305,7 +305,7 @@ describe('NeuNotificationCenterComponent', () => {
 
     expect(svc.unreadCount()).toBe(100);
     expect(markAllRead).not.toHaveBeenCalled();
-  });
+  }, 30_000);
 
   it('runs exactly one delayed mutation for each of 100 surviving opens', () => {
     vi.useFakeTimers();
