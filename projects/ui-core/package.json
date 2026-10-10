@@ -38,7 +38,7 @@
     "url": "git+https://github.com/PedroMorenoTrujillo/neural-ui-workspace.git",
     "directory": "projects/ui-core"
   },
-  "homepage": "https://neural-ui-three.vercel.app",
+  "homepage": "https://ui.neuralui.org/v2/",
   "bugs": {
     "url": "https://github.com/PedroMorenoTrujillo/neural-ui-workspace/issues"
   },
