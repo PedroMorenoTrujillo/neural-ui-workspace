@@ -99,3 +99,5 @@ jobs:
         run: |
           PACKAGE_TARBALL=$(node -p "require('./dist/release/release-manifest.json').npm.file")
           npm publish "dist/release/$PACKAGE_TARBALL" --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
