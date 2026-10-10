@@ -1,7 +1,7 @@
 # @neural-ui/core
 
 <p>
-  <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core/v1?color=0ea5e9&label=npm" alt="npm v1 version" /></a>
+  <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core/legacy?color=0ea5e9&label=npm" alt="npm legacy version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
   <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
@@ -11,7 +11,7 @@
 Modern Angular UI component library — **signals-first**, fully **standalone**, with dedicated subpath entry points and no Zone.js requirement.  
 Built for Angular 19–22 with OnPush change detection and no Zone.js requirement.
 
-> This is the v1 maintenance branch. Install `@neural-ui/core@v1`; v2 remains the default npm `latest` release.
+> This is the v1 maintenance branch. Install `@neural-ui/core@legacy`; v2 remains the default npm `latest` release.
 
 > Live documentation and examples → [ui.neuralui.org/v1/](https://ui.neuralui.org/v1/)
 
@@ -51,7 +51,7 @@ For the current quality checklist and accessibility audit snapshot, see [QUALITY
 ## Installation
 
 ```bash
-npm install @neural-ui/core@v1 @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core@legacy @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
 ```
 
 ---
@@ -61,7 +61,7 @@ npm install @neural-ui/core@v1 @angular/cdk @ng-icons/core @ng-icons/lucide apex
 Automated, additive setup / Configuración automática y aditiva:
 
 ```bash
-ng add @neural-ui/core@v1
+ng add @neural-ui/core@legacy
 ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
 ng generate @neural-ui/core:layout app-shell
 ng generate @neural-ui/core:dashboard sales
@@ -72,7 +72,7 @@ Commands are idempotent. Existing providers and styles are preserved, and genera
 
 | Schematic                | Public options / Opciones públicas                                                                          | Result / Resultado                                                                                                                                                     | Revert / Reversión                                                                                                                        |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `ng add @neural-ui/core@v1` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and the global Neural UI stylesheet without deleting existing configuration. / Añade el provider y el estilo global sin borrar configuración. | Remove only the provider and style entry added by the command. / Elimina solo el provider y la entrada de estilo añadidos.                |
+| `ng add @neural-ui/core@legacy` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and the global Neural UI stylesheet without deleting existing configuration. / Añade el provider y el estilo global sin borrar configuración. | Remove only the provider and style entry added by the command. / Elimina solo el provider y la entrada de estilo añadidos.                |
 | `:theme [name]`          | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; default: `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS.                                                                       | Delete the file and any import or `data-neu-*` attributes added by the consumer. / Elimina el archivo y los imports o atributos añadidos. |
 | `:layout NAME`           | `--project`, `--path`, `--force`                                                                            | Generates `.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell. / Genera una base mobile-first con sidebar y toolbar.                                  | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                 |
 | `:dashboard NAME`        | `--project`, `--path`, `--force`                                                                            | Generates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas.                                      | Delete the directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                 |

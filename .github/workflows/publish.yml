@@ -102,4 +102,4 @@ jobs:
       - name: Publish to npm
         run: |
           PACKAGE_TARBALL=$(node -p "require('./dist/release/release-manifest.json').npm.file")
-          npm publish "dist/release/$PACKAGE_TARBALL" --access public --tag v1
+          npm publish "dist/release/$PACKAGE_TARBALL" --access public --tag legacy
