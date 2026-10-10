@@ -18,7 +18,6 @@ import {
   type CdkDragDrop,
 } from '@angular/cdk/drag-drop';
 import { DOCUMENT } from '@angular/common';
-import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import {
@@ -46,7 +45,7 @@ interface NeuKanbanKeyboardMove {
 
 @Component({
   selector: 'neu-kanban',
-  imports: [NeuButtonComponent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle],
   encapsulation: ViewEncapsulation.None,
   host: {
     '[style.--neu-kanban-column-width]': 'columnWidth()',
@@ -176,13 +175,14 @@ interface NeuKanbanKeyboardMove {
                   (keydown)="onMoveMenuKeydown(card.id, $event)"
                 >
                   <button
-                    neu-button variant="ghost" tone="neutral" size="sm"
                     type="button"
                     class="neu-kanban__move-trigger"
                     [disabled]="card.disabled === true"
                     [attr.aria-expanded]="isMoveMenuOpen(card.id)"
                     [attr.aria-controls]="moveActionsId(card.id)"
-                    [ariaLabel]="resolvedMoveButtonLabel() + ': ' + card.title"
+                    [attr.aria-label]="resolvedMoveButtonLabel() + ': ' + card.title"
+                    [attr.aria-disabled]="card.disabled === true"
+                    aria-busy="false"
                     [attr.data-neu-kanban-move-trigger-card-id]="card.id"
                     (click)="toggleMoveMenu(card.id, $event)"
                   >
@@ -196,42 +196,16 @@ interface NeuKanbanKeyboardMove {
                       [id]="moveActionsId(card.id)"
                       [attr.aria-label]="moveGroupLabel(card.title)"
                     >
-                      <button
-                        neu-button variant="ghost" tone="neutral" size="sm"
-                        type="button"
-                        [disabled]="!canMove(card.id, 'left')"
-                        [ariaLabel]="moveDirectionLabel(card.title, 'left')"
-                        (click)="moveByAction(card.id, 'left')"
-                      >
-                        ←
-                      </button>
-                      <button
-                        neu-button variant="ghost" tone="neutral" size="sm"
-                        type="button"
-                        [disabled]="!canMove(card.id, 'up')"
-                        [ariaLabel]="moveDirectionLabel(card.title, 'up')"
-                        (click)="moveByAction(card.id, 'up')"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        neu-button variant="ghost" tone="neutral" size="sm"
-                        type="button"
-                        [disabled]="!canMove(card.id, 'down')"
-                        [ariaLabel]="moveDirectionLabel(card.title, 'down')"
-                        (click)="moveByAction(card.id, 'down')"
-                      >
-                        ↓
-                      </button>
-                      <button
-                        neu-button variant="ghost" tone="neutral" size="sm"
-                        type="button"
-                        [disabled]="!canMove(card.id, 'right')"
-                        [ariaLabel]="moveDirectionLabel(card.title, 'right')"
-                        (click)="moveByAction(card.id, 'right')"
-                      >
-                        →
-                      </button>
+                      @for (action of moveActions; track action.direction) {
+                        <button
+                          type="button"
+                          [disabled]="!canMove(card.id, action.direction)"
+                          [attr.aria-disabled]="!canMove(card.id, action.direction)"
+                          aria-busy="false"
+                          [attr.aria-label]="moveDirectionLabel(card.title, action.direction)"
+                          (click)="moveByAction(card.id, action.direction)"
+                        >{{ action.glyph }}</button>
+                      }
                     </div>
                   }
                 </div>
@@ -246,6 +220,12 @@ interface NeuKanbanKeyboardMove {
   styleUrl: './neu-kanban.component.scss',
 })
 export class NeuKanbanComponent {
+  protected readonly moveActions = [
+    { direction: 'left', glyph: '←' },
+    { direction: 'up', glyph: '↑' },
+    { direction: 'down', glyph: '↓' },
+    { direction: 'right', glyph: '→' },
+  ] as const;
   private readonly doc = inject(DOCUMENT);
   private readonly defaultLocale = inject(NEURAL_LOCALE);
   readonly columns = input<readonly NeuKanbanColumn[]>([]);

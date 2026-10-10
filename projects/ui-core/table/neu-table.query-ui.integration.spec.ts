@@ -247,10 +247,17 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(native.querySelector('[aria-current="page"]')?.textContent?.trim()).toBe('2');
     const sort = native.querySelector<HTMLButtonElement>('button[aria-label^="Sort Name"]')!;
     expect(sort.querySelector('svg')?.getAttribute('data-direction')).toBe('none');
-    for (const direction of ['ascending', 'descending', 'none']) {
+    const paths = [
+      'M12 19V5m-5 5 5-5 5 5',
+      'M12 5v14m-5-5 5 5 5-5',
+      'M8 19V5m-4 4 4-4 4 4m4-4v14m-4-4 4 4 4-4',
+    ];
+    for (const [index, direction] of ['ascending', 'descending', 'none'].entries()) {
       sort.click();
       await fixture.whenStable();
       expect(sort.querySelector('svg')?.getAttribute('data-direction')).toBe(direction);
+      expect(sort.querySelectorAll('svg path')).toHaveLength(1);
+      expect(sort.querySelector('svg path')?.getAttribute('d')).toBe(paths[index]);
     }
   });
   beforeEach(async () => {

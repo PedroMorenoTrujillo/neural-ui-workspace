@@ -1,5 +1,7 @@
 # @neural-ui/core
 
+**Built for Angular. Designed for developers. Open to everyone.**
+
 <p>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
@@ -31,6 +33,12 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 - **Themeable** — full design token system via CSS custom properties
 
 ---
+
+## Architecture
+
+A modern, open-source Angular component library. Not a fork. Not a wrapper. Built with its own architecture.
+
+Neural UI implements its own components, state contracts and design tokens. Its signals-first, standalone architecture uses dedicated entry points so applications import only what they need. Angular CDK provides supporting infrastructure for capabilities such as overlays and accessibility; it does not replace Neural UI's component implementation.
 
 ## Quality Snapshot
 

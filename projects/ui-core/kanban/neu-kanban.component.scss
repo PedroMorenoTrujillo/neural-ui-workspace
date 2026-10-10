@@ -1,3 +1,5 @@
+@use '../styles/button-interaction' as *;
+
 neu-kanban {
   display: block;
   min-inline-size: 0;
@@ -33,11 +35,19 @@ neu-kanban {
   border-bottom: 1px solid var(--neu-border);
 }
 
-.neu-kanban__column-title {
+.neu-kanban__column-title,
+.neu-kanban__assignee {
   display: flex;
   align-items: center;
   gap: var(--neu-space-2);
+}
+
+.neu-kanban__column-title {
   min-width: 0;
+}
+
+.neu-kanban__assignee {
+  display: inline-flex;
 }
 
 .neu-kanban__column-accent {
@@ -48,7 +58,8 @@ neu-kanban {
   background: var(--neu-primary);
 }
 
-.neu-kanban__column-name {
+.neu-kanban__column-name,
+.neu-kanban__title {
   margin: 0;
   font-size: var(--neu-text-sm);
   font-weight: 700;
@@ -198,12 +209,7 @@ neu-kanban {
 }
 
 .neu-kanban__title {
-  margin: 0;
-  font-size: var(--neu-text-sm);
-  font-weight: 700;
-  color: var(--neu-text);
   line-height: 1.5;
-  overflow-wrap: break-word;
 }
 
 .neu-kanban__description {
@@ -245,12 +251,6 @@ neu-kanban {
   color: var(--neu-text-muted);
 }
 
-.neu-kanban__assignee {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--neu-space-2);
-}
-
 .neu-kanban__avatar,
 .neu-kanban__avatar img {
   width: 28px;
@@ -279,6 +279,21 @@ neu-kanban {
   justify-items: end;
   gap: var(--neu-space-2);
   padding: 0 var(--neu-space-3) var(--neu-space-3);
+}
+
+.neu-kanban__move-controls button {
+  @include neu-button-interaction;
+  font-family: var(--neu-font-sans);
+  font-size: var(--neu-text-sm);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: var(--neu-surface-2);
+    color: var(--neu-text);
+  }
 }
 
 .neu-kanban__move-trigger {

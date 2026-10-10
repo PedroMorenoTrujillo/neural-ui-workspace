@@ -92,6 +92,8 @@ describe('NeuButtonComponent', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain('neu-button--loading');
+    expect(fixture.nativeElement.querySelector('.neu-button__spinner svg')?.namespaceURI)
+      .toBe('http://www.w3.org/2000/svg');
   });
 
   it('should apply full-width class when fullWidth=true', () => {

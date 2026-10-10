@@ -36,6 +36,8 @@
     "prepare:release-artifacts": "node scripts/prepare-release-artifacts.mjs",
     "verify:release-artifacts": "node scripts/verify-release-artifacts.mjs",
     "test:release-artifacts": "node --test scripts/release-artifacts.spec.mjs",
+    "test:bundle-optimizers": "node --test scripts/group-angular-class-metadata.spec.mjs scripts/consolidate-ui-core-table.spec.mjs scripts/compact-angular-template.spec.mjs",
+    "test:package-linker": "node scripts/test-ui-core-linker.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "test:compat": "node scripts/test-ui-core-compatibility.mjs",
     "test:angular-22-consumer": "node scripts/test-ui-core-compatibility.mjs",
@@ -292,6 +294,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@ampproject/remapping": "2.3.0",
     "@angular-devkit/schematics": "22.2.2",
     "@angular/build": "22.2.2",
     "@angular/cli": "22.2.2",
@@ -299,14 +302,17 @@
     "@angular/platform-server": "22.2.2",
     "@angular/ssr": "22.2.2",
     "@arethetypeswrong/cli": "^0.18.2",
+    "@babel/core": "8.0.5",
     "@playwright/test": "1.63.0",
     "@schematics/angular": "22.2.2",
     "@types/node": "22.19.0",
     "@vitest/coverage-v8": "4.1.11",
     "jsdom": "^28.0.0",
+    "magic-string": "1.4.1",
     "ng-packagr": "22.2.4",
     "prettier": "^3.8.1",
     "publint": "^0.3.16",
+    "rolldown": "1.2.8",
     "typescript": "~6.0.3",
     "vitest": "4.1.11"
   }

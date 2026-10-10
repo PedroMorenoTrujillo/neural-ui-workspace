@@ -1,15 +1,21 @@
 /** Original Core control strokes; imported only by components that need them. */
+export const neuCloseIconPath = 'M5 5l14 14M19 5L5 19';
+export const neuMoveLeftIconPath = 'M19 12H5m6-6-6 6 6 6';
+export const neuMoveRightIconPath = 'M5 12h14m-6-6 6 6-6 6';
+export const neuMoveUpIconPath = 'M12 19V5m-6 6 6-6 6 6';
+export const neuMoveDownIconPath = 'M12 5v14m-6-6 6 6 6-6';
+
 export function neuStructuralIconPath(key: string): string | null {
   switch (key) {
-    case 'close': return 'M5 5l14 14M19 5L5 19';
+    case 'close': return neuCloseIconPath;
     case 'previous': return 'M15 5l-7 7 7 7';
     case 'next': return 'M9 5l7 7-7 7';
     case 'disclosure-up': return 'M5 15l7-7 7 7';
     case 'disclosure-down': return 'M5 9l7 7 7-7';
-    case 'move-left': return 'M19 12H5m6-6-6 6 6 6';
-    case 'move-right': return 'M5 12h14m-6-6 6 6-6 6';
-    case 'move-up': return 'M12 19V5m-6 6 6-6 6 6';
-    case 'move-down': return 'M12 5v14m-6-6 6 6 6-6';
+    case 'move-left': return neuMoveLeftIconPath;
+    case 'move-right': return neuMoveRightIconPath;
+    case 'move-up': return neuMoveUpIconPath;
+    case 'move-down': return neuMoveDownIconPath;
     case 'confirm': return 'M4 12l5 5L20 6';
     case 'add': return 'M12 4v16M4 12h16';
     case 'notifications': return 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4';

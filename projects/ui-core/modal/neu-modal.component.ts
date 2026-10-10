@@ -18,7 +18,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
-import { InternalNeuIconOutletComponent, neuStructuralIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { InternalNeuIconOutletComponent, neuCloseIconPath } from '@neural-ui/core/icon-outlet-internal';
 import { neuIconX as iconX } from '@neural-ui/core/internal';
 import { InternalNeuOverlayStack, NeuIdGenerator } from '@neural-ui/core/internal';
 import {
@@ -120,7 +120,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
                   aria-label="Close dialog"
                   (click)="requestClose('action', $event)"
                 >
-                  <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" size="1.125rem" />
+                  <neu-icon-outlet [icon]="iconX" [fallbackPath]="closeIconPath" size="1.125rem" />
                 </button>
               }
             </div>
@@ -149,7 +149,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
   styleUrl: './neu-modal.component.scss',
 })
 export class NeuDialogComponent {
-  protected readonly iconFallbackPath = neuStructuralIconPath;
+  protected readonly closeIconPath = neuCloseIconPath;
   protected readonly iconX = iconX;
   /** Controla la visibilidad del diálogo. / Controls dialog visibility. */
   open = input<boolean>(false);

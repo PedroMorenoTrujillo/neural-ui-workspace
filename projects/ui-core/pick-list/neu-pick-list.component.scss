@@ -56,7 +56,21 @@
   min-height: 2.5rem;
   box-sizing: border-box;
   border: 1px solid var(--neu-border, #d1d5db);
+  border-radius: var(--neu-radius-md, 0.5rem);
+  background: var(--neu-surface, #fff);
+  color: var(--neu-text, #111827);
+  font: inherit;
   padding-inline: 0.625rem;
+
+  &::placeholder {
+    color: var(--neu-text-muted, #64748b);
+  }
+
+  &:focus-visible {
+    border-color: var(--neu-primary, #3b82f6);
+    outline: 2px solid var(--neu-primary, #3b82f6);
+    outline-offset: 2px;
+  }
 }
 
 .neu-pick-list__toolbar,

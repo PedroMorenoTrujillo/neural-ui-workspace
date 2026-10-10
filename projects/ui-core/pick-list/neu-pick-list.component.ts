@@ -1,10 +1,14 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { InternalNeuIconOutletComponent, neuStructuralIconPath, neuSemanticIconText } from '@neural-ui/core/icon-outlet-internal';
+import {
+  InternalNeuIconOutletComponent,
+  neuMoveLeftIconPath, neuMoveRightIconPath, neuMoveUpIconPath, neuMoveDownIconPath,
+} from '@neural-ui/core/icon-outlet-internal';
 import { neuIconArrowDown as iconArrowDown } from '@neural-ui/core/internal';
 import { neuIconArrowLeft as iconArrowLeft } from '@neural-ui/core/internal';
 import { neuIconArrowRight as iconArrowRight } from '@neural-ui/core/internal';
 import { neuIconArrowUp as iconArrowUp } from '@neural-ui/core/internal';
 import { neuIconDrag as iconDrag } from '@neural-ui/core/internal';
+
 import {
   Component,
   DestroyRef,
@@ -51,6 +55,21 @@ import {
   resolveNeuOptionLabel,
   resolveNeuOptionValue,
 } from '@neural-ui/core/option-api';
+
+// Fixed list affordances must not retain the fallback catalog for other controls.
+function listIconPath(key: string): string | null {
+  switch (key) {
+    case iconArrowLeft: return neuMoveLeftIconPath;
+    case iconArrowRight: return neuMoveRightIconPath;
+    case iconArrowUp: return neuMoveUpIconPath;
+    case iconArrowDown: return neuMoveDownIconPath;
+    default: return null;
+  }
+}
+
+function listIconText(key: string): string | null {
+  return key === iconDrag ? '⋮⋮' : null;
+}
 
 export interface NeuTransferItem {
   value: string;
@@ -258,8 +277,8 @@ export class NeuOrderListItemDirective<T = NeuTransferItem> {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
-  protected readonly iconFallbackPath = neuStructuralIconPath;
-  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconFallbackPath = listIconPath;
+  protected readonly iconFallbackText = listIconText;
   protected readonly iconDrag = iconDrag;
   protected readonly listLocations = NEU_LIST_LOCATIONS;
   protected readonly directions = [-1, 1] as const;
@@ -873,8 +892,8 @@ export class NeuPickListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
   styleUrl: './neu-pick-list.component.scss',
 })
 export class NeuOrderListComponent<T = NeuTransferItem, V = NeuOptionValue<T>> {
-  protected readonly iconFallbackPath = neuStructuralIconPath;
-  protected readonly iconFallbackText = neuSemanticIconText;
+  protected readonly iconFallbackPath = listIconPath;
+  protected readonly iconFallbackText = listIconText;
   protected readonly iconArrowUp = iconArrowUp;
   protected readonly iconArrowDown = iconArrowDown;
   protected readonly iconDrag = iconDrag;

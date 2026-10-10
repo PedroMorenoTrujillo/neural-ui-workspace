@@ -85,9 +85,11 @@ describe('NeuKanbanComponent controlled board', () => {
     await fixture.whenStable();
     const actions = [...host.querySelectorAll<HTMLButtonElement>('.neu-kanban__move-actions button')];
     expect(actions).toHaveLength(4);
+    expect(actions.map(button => button.textContent?.trim())).toEqual(['←', '↑', '↓', '→']);
     for (const button of actions) {
       expect(button.getAttribute('aria-label')).toContain('Alpha');
       expect(button.getAttribute('aria-label')).toMatch(/left|right|up|down/i);
+      expect(button.getAttribute('aria-disabled')).toBe(String(button.disabled));
     }
     fixture.destroy();
   });

@@ -1,5 +1,8 @@
 # Local pre-publication review — 2026-10-10
 
+Bundle-size follow-up: [optimization and final verification](BUNDLE-OPTIMIZATION-2026-10-10.md).
+The later report supersedes the size failures below; the original findings remain as history.
+
 No package was published, pushed, or deployed. This is a reviewed working-tree
 preview, not certification of a V2 release. Package metadata remains 1.15.0;
 the final V2 release version still needs selection.

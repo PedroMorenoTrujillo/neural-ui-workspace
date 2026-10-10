@@ -3,6 +3,7 @@
 // ViewEncapsulation.None — usa prefijo BEM .neu-button
 // ============================================================
 @use '../styles/breakpoints' as *;
+@use '../styles/button-interaction' as *;
 
 // ---- Base ----
 .neu-button {
@@ -18,19 +19,8 @@
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  user-select: none;
-  transition:
-    box-shadow var(--neu-transition),
-    opacity var(--neu-transition);
+  @include neu-button-interaction;
   outline: none;
-
-  &:active:not(:disabled):not(.neu-button--disabled) {
-    transform: translateY(1px);
-  }
-
-  &:focus-visible {
-    box-shadow: var(--neu-focus-ring-strong);
-  }
 
   // ---- Tamaños / Sizes ----
   &--sm {
@@ -59,131 +49,101 @@
   }
 
   // ---- Tonos + tratamientos / Tones + treatments ----
-  &--solid.neu-button--brand {
-    background: var(--neu-button-background, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
-    color: var(--neu-button-foreground, var(--neu-primary-solid-fg, var(--neu-primary-fg)));
-    border-color: var(--neu-button-border, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-button-background-hover, var(--neu-primary-solid-hover, var(--neu-primary-dark)));
-      border-color: var(--neu-button-background-hover, var(--neu-primary-solid-hover, var(--neu-primary-dark)));
-      box-shadow: var(--neu-shadow-glow);
-    }
-
-    &:active:not(:disabled) {
-      background: var(--neu-button-background-hover, var(--neu-primary-solid-hover, var(--neu-primary-dark)));
-      transform: translateY(1px);
-    }
-  }
-
-  &--solid.neu-button--neutral {
-    background: var(--neu-text);
-    color: var(--neu-surface);
-    border-color: var(--neu-text);
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: color-mix(in srgb, var(--neu-text) 84%, black 16%);
-      border-color: color-mix(in srgb, var(--neu-text) 84%, black 16%);
-    }
-  }
-
-  &--outline {
-    background: transparent;
-    color: var(--neu-text);
-    border-color: currentColor;
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-surface-2);
-    }
-  }
-
-  &--outline.neu-button--brand {
-    color: var(--neu-primary-dark, var(--neu-primary));
+  // Tone tokens are resolved once; treatments share the same state selectors.
+  &--brand {
+    --_nb-fill: var(--neu-button-background, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
+    --_nb-fg: var(--neu-button-foreground, var(--neu-primary-solid-fg, var(--neu-primary-fg)));
+    --_nb-border: var(--neu-button-border, var(--neu-primary-solid, var(--neu-primary-dark, var(--neu-primary))));
+    --_nb-hover: var(--neu-button-background-hover, var(--neu-primary-solid-hover, var(--neu-primary-dark)));
+    --_nb-hover-border: var(--_nb-hover);
+    --_nb-text: var(--neu-primary-dark, var(--neu-primary));
+    --_nb-surface: var(--neu-primary-50);
 
     [data-theme='dark'] & {
-      color: var(--neu-primary-light, var(--neu-primary));
-    }
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-primary-50);
+      --_nb-text: var(--neu-primary-light, var(--neu-primary));
     }
   }
 
-  &--outline.neu-button--danger {
-    color: var(--neu-error-text, var(--neu-error));
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-error-bg);
-    }
+  &--neutral {
+    --_nb-fill: var(--neu-text);
+    --_nb-fg: var(--neu-surface);
+    --_nb-border: var(--neu-text);
+    --_nb-hover: color-mix(in srgb, var(--neu-text) 84%, black 16%);
+    --_nb-hover-border: var(--_nb-hover);
+    --_nb-text: var(--neu-text);
+    --_nb-surface: var(--neu-surface-2);
   }
 
-  &--ghost {
-    background: transparent;
-    color: var(--neu-text);
-    border-color: transparent;
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-surface-2);
-      color: var(--neu-text);
-    }
+  &--danger {
+    --_nb-fill: var(--neu-error);
+    --_nb-fg: var(--neu-primary-fg);
+    --_nb-border: var(--neu-error);
+    --_nb-hover: color-mix(in srgb, var(--neu-error) 82%, #000000 18%);
+    --_nb-hover-border: var(--_nb-hover);
+    --_nb-text: var(--neu-error-text, var(--neu-error));
+    --_nb-surface: var(--neu-error-bg);
   }
 
-  &--ghost.neu-button--brand {
-    color: var(--neu-primary-dark, var(--neu-primary));
-
-    [data-theme='dark'] & {
-      color: var(--neu-primary-light, var(--neu-primary));
-    }
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-primary-50);
-    }
-  }
-
-  &--ghost.neu-button--danger {
-    color: var(--neu-error-text, var(--neu-error));
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: var(--neu-error-bg);
-    }
-  }
-
-  &--solid.neu-button--danger {
-    background: var(--neu-error);
-    color: var(--neu-primary-fg);
-    border-color: var(--neu-error);
-
-    &:hover:not(:disabled):not(.neu-button--disabled) {
-      background: color-mix(in srgb, var(--neu-error) 82%, #000000 18%);
-      border-color: color-mix(in srgb, var(--neu-error) 82%, #000000 18%);
-    }
-  }
-
-  // Semantic tones share the existing theme tokens; amber uses a dark foreground.
+  // Semantic tones retain their existing public overrides and contrast tokens.
   @each $tone, $fill, $foreground in (
     (success, var(--neu-success), #fff),
     (info, color-mix(in srgb, var(--neu-info) 82%, black), #fff),
     (warning, var(--neu-warning), #111827)
   ) {
-    &--solid.neu-button--#{$tone} {
-      background: var(--neu-button-solid-bg, #{$fill});
-      border-color: var(--neu-button-solid-border, #{$fill});
-      color: var(--neu-button-solid-fg, #{$foreground});
-
-      &:hover:not(:disabled):not(.neu-button--disabled) {
-        background: var(--neu-button-solid-hover-bg, color-mix(in srgb, #{$fill} 88%, black));
-      }
-    }
-
-    &--outline.neu-button--#{$tone},
-    &--ghost.neu-button--#{$tone} {
-      color: var(--neu-#{$tone}-text);
-
-      &:hover:not(:disabled):not(.neu-button--disabled) {
-        background: var(--neu-#{$tone}-bg);
-      }
+    &--#{$tone} {
+      --_nb-fill: var(--neu-button-solid-bg, #{$fill});
+      --_nb-fg: var(--neu-button-solid-fg, #{$foreground});
+      --_nb-border: var(--neu-button-solid-border, #{$fill});
+      --_nb-hover: var(--neu-button-solid-hover-bg, color-mix(in srgb, #{$fill} 88%, black));
+      --_nb-hover-border: var(--_nb-border);
+      --_nb-text: var(--neu-#{$tone}-text);
+      --_nb-surface: var(--neu-#{$tone}-bg);
     }
   }
+
+  &--solid {
+    background: var(--_nb-fill);
+    color: var(--_nb-fg);
+    border-color: var(--_nb-border);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--_nb-hover);
+      border-color: var(--_nb-hover-border);
+    }
+  }
+
+  &--solid.neu-button--brand {
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      box-shadow: var(--neu-shadow-glow);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--_nb-hover);
+    }
+  }
+
+  &--outline,
+  &--ghost {
+    background: transparent;
+    color: var(--_nb-text);
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      background: var(--_nb-surface);
+    }
+  }
+
+  &--outline {
+    border-color: currentColor;
+  }
+
+  &--ghost {
+    border-color: transparent;
+
+    &:hover:not(:disabled):not(.neu-button--disabled) {
+      color: var(--neu-text);
+    }
+  }
+
 
   // ---- Estado deshabilitado / Disabled state ----
   &--disabled,

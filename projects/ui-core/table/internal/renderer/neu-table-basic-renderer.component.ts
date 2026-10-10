@@ -620,6 +620,14 @@ export class NeuTableBasicRendererComponent<
         ? 'descending'
         : null;
   };
+  protected readonly sortIconPath = (column: NeuTableColumn<T, F>) => {
+    const direction = this.ariaSort(column);
+    return direction === 'ascending'
+      ? 'M12 19V5m-5 5 5-5 5 5'
+      : direction === 'descending'
+        ? 'M12 5v14m-5-5 5 5 5-5'
+        : 'M8 19V5m-4 4 4-4 4 4m4-4v14m-4-4 4 4 4-4';
+  };
   protected readonly sortPriority = (column: NeuTableColumn<T, F>) => {
     if (column.sort === undefined) return null;
     const index = this.sort().findIndex((entry) => entry.field === column.sort?.field);

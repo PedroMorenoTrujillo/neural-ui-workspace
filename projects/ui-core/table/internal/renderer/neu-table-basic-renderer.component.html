@@ -176,13 +176,7 @@
                   <svg class="neu-table2__sort-icon" [attr.data-direction]="ariaSort(column) ?? 'none'"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    @if (ariaSort(column) === 'ascending') {
-                      <path d="M12 19V5m-5 5 5-5 5 5" />
-                    } @else if (ariaSort(column) === 'descending') {
-                      <path d="M12 5v14m-5-5 5 5 5-5" />
-                    } @else {
-                      <path d="M8 19V5m-4 4 4-4 4 4m4-4v14m-4-4 4 4 4-4" />
-                    }
+                    <path [attr.d]="sortIconPath(column)" />
                   </svg>
                   @if (sortOptions().mode === 'multiple' && sortPriority(column); as priority) {
                     <span

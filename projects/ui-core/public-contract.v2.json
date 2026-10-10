@@ -480,6 +480,11 @@
       "types": "./types/neural-ui-core-icon-outlet-internal.d.ts",
       "exports": [
         "./icon-outlet-internal#InternalNeuIconOutletComponent",
+        "./icon-outlet-internal#neuCloseIconPath",
+        "./icon-outlet-internal#neuMoveDownIconPath",
+        "./icon-outlet-internal#neuMoveLeftIconPath",
+        "./icon-outlet-internal#neuMoveRightIconPath",
+        "./icon-outlet-internal#neuMoveUpIconPath",
         "./icon-outlet-internal#neuSemanticIconText",
         "./icon-outlet-internal#neuStructuralIconPath"
       ]
@@ -14505,6 +14510,51 @@
           "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<InternalNeuIconOutletComponent, never>;"
         }
       ]
+    },
+    {
+      "id": "./icon-outlet-internal#neuCloseIconPath",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuCloseIconPath",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuCloseIconPath = \"M5 5l14 14M19 5L5 19\";",
+      "members": []
+    },
+    {
+      "id": "./icon-outlet-internal#neuMoveDownIconPath",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuMoveDownIconPath",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuMoveDownIconPath = \"M12 5v14m-6-6 6 6 6-6\";",
+      "members": []
+    },
+    {
+      "id": "./icon-outlet-internal#neuMoveLeftIconPath",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuMoveLeftIconPath",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuMoveLeftIconPath = \"M19 12H5m6-6-6 6 6 6\";",
+      "members": []
+    },
+    {
+      "id": "./icon-outlet-internal#neuMoveRightIconPath",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuMoveRightIconPath",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuMoveRightIconPath = \"M5 12h14m-6-6 6 6-6 6\";",
+      "members": []
+    },
+    {
+      "id": "./icon-outlet-internal#neuMoveUpIconPath",
+      "entrypoint": "./icon-outlet-internal",
+      "name": "neuMoveUpIconPath",
+      "kind": "variable",
+      "status": "INTERNAL/UNSUPPORTED",
+      "signature": "const neuMoveUpIconPath = \"M12 19V5m-6 6 6-6 6 6\";",
+      "members": []
     },
     {
       "id": "./icon-outlet-internal#neuSemanticIconText",
@@ -66803,7 +66853,7 @@
   ],
   "summary": {
     "entrypoints": 101,
-    "exportedDeclarations": 872,
+    "exportedDeclarations": 877,
     "declarationKinds": {
       "class": 15,
       "component": 96,
@@ -66814,14 +66864,14 @@
       "service": 12,
       "token": 5,
       "type": 199,
-      "variable": 42
+      "variable": 47
     },
-    "publicSymbols": 5327,
+    "publicSymbols": 5332,
     "statuses": {
       "SUPPORTED": 3356,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1971,
+      "INTERNAL/UNSUPPORTED": 1976,
       "REVIEW": 0
     },
     "bindings": {
