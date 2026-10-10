@@ -33,6 +33,8 @@
   }
 
   // Severities — stroke del arco
+  &--neutral &__arc { stroke: var(--neu-text-muted); }
+
   &--brand &__arc {
     stroke: var(--neu-primary);
   }

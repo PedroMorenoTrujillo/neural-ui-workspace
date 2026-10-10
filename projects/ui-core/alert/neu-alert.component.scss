@@ -13,6 +13,12 @@
     display: none;
   }
 
+  &--neutral {
+    background: var(--neu-surface-2);
+    border-color: var(--neu-border);
+    color: var(--neu-text);
+  }
+
   &--info {
     background: var(--neu-alert-info-bg, #eff6ff);
     border-color: var(--neu-alert-info-border, #bfdbfe);

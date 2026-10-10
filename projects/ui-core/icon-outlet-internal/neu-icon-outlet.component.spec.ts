@@ -29,6 +29,8 @@ describe('Core icon outlet without an icon provider', () => {
   it.each([
     'close', 'previous', 'next', 'disclosure-up', 'disclosure-down',
     'move-left', 'move-right', 'move-up', 'move-down', 'confirm', 'add', 'neutral-trend',
+    'zoom-in', 'zoom-out', 'rotate-clockwise', 'rotate-counterclockwise',
+    'flip-horizontal', 'flip-vertical', 'download', 'reset-transform',
   ])('renders the %s structural intent without a provider', (key) => {
     const fixture = TestBed.createComponent(InternalNeuIconOutletComponent);
     fixture.componentRef.setInput('icon', key);

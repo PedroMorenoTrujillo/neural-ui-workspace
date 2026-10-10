@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import {
-  NeuTableBodySectionDirective,
+  NeuTableCellDirective,
   NeuTableComponent,
-  NeuTableManagedRowDirective,
+  NeuTableLoadingDirective,
   type NeuTableColumn,
 } from '@neural-ui/core/table';
 
@@ -11,40 +11,38 @@ interface FixtureRow {
   readonly profile: { readonly name: string };
 }
 
+// Projection alone does not infer the parent row type for a cell directive.
+// Exercise the public generic context guard explicitly.
+export function readCell(context: unknown): string | null {
+  if (
+    NeuTableCellDirective.ngTemplateContextGuard<FixtureRow, number, 'profile'>(
+      {} as NeuTableCellDirective<FixtureRow, number, 'profile'>,
+      context,
+    )
+  ) {
+    return context.$implicit.profile.name;
+  }
+  return null;
+}
+
 @Component({
-  selector: 'neu-table-body-section-valid-fixture',
-  imports: [NeuTableComponent, NeuTableBodySectionDirective, NeuTableManagedRowDirective],
+  selector: 'neu-table-public-template-valid-fixture',
+  imports: [NeuTableComponent, NeuTableCellDirective, NeuTableLoadingDirective],
   template: `
-    <neu-table [columns]="columns" [data]="rows">
-      <ng-template
-        neuTableBodySection
-        [neuTableBodySectionOf]="rows"
-        let-entries
-        let-colspan="colspan"
-      >
-        @for (entry of entries; track entry.key) {
-          @if (entry.kind === 'data') {
-            <tr [neuTableManagedRow]="entry">
-              <td>{{ entry.row.profile.name }}</td>
-              <td>{{ entry.logicalIndex }} / {{ entry.selected }}</td>
-            </tr>
-          } @else if (entry.kind === 'placeholder') {
-            <tr aria-hidden="true">
-              <td [attr.colspan]="entry.colspan">Placeholder {{ entry.logicalIndex }}</td>
-            </tr>
-          } @else if (entry.kind === 'empty') {
-            <tr>
-              <td [attr.colspan]="colspan">{{ entry.message }}</td>
-            </tr>
-          }
+    <neu-table [columns]="columns" [data]="rows" [rowKey]="rowKey">
+      <ng-template neuTableCell="profile" let-row>{{ row.profile.name }}</ng-template>
+      <ng-template neuTableLoading let-loading="loading" let-retry="retry">
+        @if (loading) {
+          <button (click)="retry()">Retry</button>
         }
       </ng-template>
     </neu-table>
   `,
 })
-export class ValidTableBodySectionFixtureComponent {
-  readonly columns: readonly NeuTableColumn<FixtureRow>[] = [
-    { key: 'profile', header: 'Name' },
+export class ValidTablePublicTemplateFixtureComponent {
+  readonly columns: readonly NeuTableColumn<FixtureRow, 'profile'>[] = [
+    { id: 'profile', header: 'Name', value: (row) => row.profile.name },
   ];
   readonly rows: readonly FixtureRow[] = [{ id: 1, profile: { name: 'Ada' } }];
+  readonly rowKey = (row: FixtureRow) => row.id;
 }

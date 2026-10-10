@@ -1,5 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { NeuUploaderComponent } from './neu-uploader.component';
 
@@ -19,6 +20,24 @@ function select(component: NeuUploaderComponent, files: readonly File[]): void {
   component['consumeFiles'](files as unknown as FileList);
 }
 
+@Component({
+  imports: [NeuUploaderComponent],
+  template: `<neu-uploader [dropzone]="dropzone()" [disabled]="disabled()" />`,
+})
+class UploaderFocusHost {
+  readonly dropzone = signal(true);
+  readonly disabled = signal(false);
+}
+
+@Component({
+  imports: [NeuUploaderComponent],
+  template: `
+    <ng-template #preview let-item><strong class="custom-preview">{{ item.name }} · {{ item.status }}</strong></ng-template>
+    <neu-uploader [value]="files()" [previewTemplate]="preview" />
+  `,
+})
+class UploaderPreviewHost { readonly files = signal<readonly File[]>([file('report.txt')]); }
+
 describe('NeuUploaderComponent N2-009', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
@@ -30,6 +49,69 @@ describe('NeuUploaderComponent N2-009', () => {
     const fixture = await setup();
     expect(fixture.componentInstance.value()).toEqual([]);
     expect(Array.isArray(fixture.componentInstance.value())).toBe(true);
+  });
+
+  it.each([true, false])('focuses its visible trigger with dropzone=%s', async (dropzone) => {
+    const fixture = TestBed.createComponent(UploaderFocusHost);
+    fixture.componentInstance.dropzone.set(dropzone);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const uploader = fixture.debugElement.query(By.directive(NeuUploaderComponent)).componentInstance as NeuUploaderComponent;
+    uploader.focus();
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector(dropzone ? '.neu-uploader__dropzone' : '.neu-uploader__picker-trigger'));
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    try {
+      outside.focus();
+      fixture.componentInstance.disabled.set(true);
+      fixture.detectChanges();
+      uploader.focus();
+      expect(document.activeElement).toBe(outside);
+    } finally { outside.remove(); }
+  });
+
+  it('ignores a drop without a file transfer and still clears drag feedback', async () => {
+    const fixture = await setup({ dropzone: true });
+    const component = fixture.componentInstance;
+    const changed = vi.fn();
+    component.value.subscribe(changed);
+    component.onDragOver(new Event('dragover', { cancelable: true }) as DragEvent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-uploader--drag-over')).not.toBeNull();
+    const event = new Event('drop', { cancelable: true }) as DragEvent;
+    component.onDrop(event);
+    expect(event.defaultPrevented).toBe(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.neu-uploader--drag-over')).toBeNull();
+    expect(component.value()).toEqual([]);
+    expect(changed).not.toHaveBeenCalled();
+  });
+
+  it.each(['disabled', 'readonly'])('does not remove a file while %s', async (state) => {
+    const attachment = file('report.txt');
+    const fixture = await setup({ value: [attachment] });
+    const component = fixture.componentInstance;
+    const removed = vi.fn();
+    component.fileRemoved.subscribe(removed);
+    const id = component['fileItems']()[0].id;
+    fixture.componentRef.setInput(state, true);
+    fixture.detectChanges();
+    const event = new Event('click', { bubbles: true });
+    const stopped = vi.spyOn(event, 'stopPropagation');
+    component.removeFile(id, event);
+    expect(component.value()).toEqual([attachment]);
+    expect(removed).not.toHaveBeenCalled();
+    expect(stopped).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a projected file preview and removes it on an owner write', async () => {
+    const fixture = TestBed.createComponent(UploaderPreviewHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.custom-preview')?.textContent).toContain('report.txt');
+    fixture.componentInstance.files.set([]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.custom-preview')).toBeNull();
   });
 
   it('gives the icon-only Neural picker button its accessible choose label', async () => {

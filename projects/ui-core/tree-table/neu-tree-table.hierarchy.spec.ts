@@ -39,6 +39,22 @@ function deepFreeze<T>(value: T): T {
 }
 
 describe('NeuTreeTable 2 pure hierarchy engine', () => {
+
+  it('diagnoses and bounds a disconnected cycle even when no root reaches it', () => {
+    const rows: readonly Row[] = [{ id: 'a', name: 'A' }, { id: 'b', name: 'B' }];
+    const state = deepFreeze(hierarchy<string>([], [
+      { parentKey: 'a', relation: loaded(['b']) },
+      { parentKey: 'b', relation: loaded(['a']) },
+    ]));
+    const normalized = normalizeNeuTreeTableHierarchy(rows, keyOf, state);
+    expect(normalized.blockedEdges.size).toBe(1);
+    expect(normalized.reachable.size).toBe(0);
+    expect(normalized.diagnostics).toContainEqual(expect.objectContaining({ code: 'cycle' }));
+    expect(normalized.diagnostics.filter((entry) => entry.code === 'orphan').map((entry) => entry.key).sort()).toEqual(['a', 'b']);
+    const projected = projectNormalizedNeuTreeTableHierarchy(normalized, ['a', 'b']);
+    expect(projected.visible).toEqual([]);
+    expect(projected.diagnostics).toEqual(normalized.diagnostics);
+  });
   it('projects empty, single and multiple roots with exact identity and known sibling metadata', () => {
     expect(
       projectNeuTreeTableHierarchy<Row, string | number>([], keyOf, hierarchy([]), []).visible,

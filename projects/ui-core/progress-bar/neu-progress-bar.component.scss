@@ -40,6 +40,9 @@
     }
   }
 
+  &--neutral .neu-progress__fill { background: var(--neu-text-muted); }
+  &--info .neu-progress__fill { background: var(--neu-info); }
+
   &--brand {
     .neu-progress__fill {
       background: var(--neu-primary);

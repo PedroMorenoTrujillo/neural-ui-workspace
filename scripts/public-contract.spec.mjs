@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -54,6 +55,31 @@ test('declaration inventory sees multiline input, output, model, and aliases', (
   assert.equal(outputAlias.publicName, 'publicOutput');
   const modelBinding = contract.bindings.find((binding) => binding.kind === 'model');
   assert.equal(modelBinding.changePublicName, 'multilineModelChange');
+});
+
+test('inline import types preserve Models instead of inventing input/output bindings', () => {
+  const temporary = mkdtempSync(join(tmpdir(), 'neural-contract-inline-model-'));
+  try {
+    cpSync(fixtureRoot, temporary, { recursive: true });
+    const declaration = join(temporary, 'dist/synthetic.d.ts');
+    const source = readFileSync(declaration, 'utf8');
+    assert.match(source, /i0\.ModelSignal<boolean>/);
+    writeFileSync(
+      declaration,
+      source.replace('i0.ModelSignal<boolean>', 'import("@angular/core").ModelSignal<boolean>'),
+    );
+    const contract = generateContract({
+      distRoot: join(temporary, 'dist'),
+      sourceRoot: join(temporary, 'source'),
+      policy,
+    });
+    assert.deepEqual(contract.summary.bindings, { input: 3, output: 2, model: 1, total: 6 });
+    const model = contract.bindings.find((binding) => binding.kind === 'model');
+    assert.equal(model.propertyName, 'multilineModel');
+    assert.equal(model.changePublicName, 'multilineModelChange');
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
 });
 
 test('compound declarations cover components, template directives, services, types, functions, and tokens', () => {

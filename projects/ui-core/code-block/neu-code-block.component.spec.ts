@@ -122,7 +122,8 @@ describe('NeuCodeBlockComponent', () => {
     f.detectChanges();
     const pre = f.nativeElement.querySelector('pre') as HTMLPreElement;
     expect(pre.getAttribute('dir')).toBe('ltr');
-    expect(getComputedStyle(pre).textAlign).toBe('left');
+    expect(getComputedStyle(pre).direction).toBe('ltr');
+    expect(getComputedStyle(pre).textAlign).toBe('start');
     expect(pre.textContent).toBe(source);
   });
 

@@ -174,7 +174,8 @@ neu-code-block {
 
 .neu-code-block__pre {
   margin: 0;
-  text-align: left;
+  direction: ltr;
+  text-align: start;
   unicode-bidi: isolate;
   padding: 20px 24px;
   background: $cb-bg;

@@ -188,7 +188,9 @@ describe('NeuTreeTable 2 expansion and focus performance', () => {
       projectNeuTreeTableHierarchy(branchRows, (row) => row.id, branchHierarchy, [0]).visible,
     ).toHaveLength(101);
     console.info(`N2_TREE_TABLE_C_PERFORMANCE:${JSON.stringify(metrics)}`);
-  });
+    // Keep all algorithm samples and 700 mount/destroy operations. V8 coverage
+    // adds instrumentation cost beyond the ordinary five-second unit timeout.
+  }, 20_000);
 });
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';

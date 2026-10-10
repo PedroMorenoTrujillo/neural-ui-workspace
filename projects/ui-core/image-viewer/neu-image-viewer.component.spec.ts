@@ -359,7 +359,7 @@ describe('NeuImageViewerDirective', () => {
     expect(
       controls.every(
         (control) =>
-          (control.querySelector('neu-icon-outlet') as HTMLElement | null)?.style.width === '1.25rem',
+          (control.querySelector('neu-icon-outlet') as HTMLElement | null)?.style.width === '1.5rem',
       ),
     ).toBe(true);
   });

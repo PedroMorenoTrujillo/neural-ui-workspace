@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   NeuInputTagsComponent,
   NeuInputTagsFooterDirective,
@@ -22,6 +23,51 @@ const skills: readonly Skill[] = [
   { label: 'React', id: 2, disabled: true },
   { label: 'Vue', id: 3 },
 ];
+
+describe('NeuInputTagsComponent Spanish interaction announcements', () => {
+  beforeEach(() => TestBed.configureTestingModule({
+    imports: [NeuInputTagsComponent],
+    providers: [{ provide: NEURAL_LOCALE, useValue: 'es' }],
+  }).compileComponents());
+
+  function localized() {
+    const fixture = TestBed.createComponent(NeuInputTagsComponent<Skill, number>);
+    fixture.componentRef.setInput('options', skills);
+    fixture.componentRef.setInput('optionLabel', 'label');
+    fixture.componentRef.setInput('optionValue', 'id');
+    fixture.componentRef.setInput('optionDisabled', 'disabled');
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it.each([
+    ['Vue', [3], '1 etiquetas añadidas'],
+    ['React', [], '1 etiquetas rechazadas'],
+    ['Vue,React', [3], '1 etiquetas añadidas, 1 rechazadas'],
+  ] as const)('announces the actual result of pasting %s', (text, expected, announcement) => {
+    const fixture = localized();
+    const event = new Event('paste', { cancelable: true }) as ClipboardEvent;
+    Object.defineProperty(event, 'clipboardData', { value: { getData: () => text } });
+    fixture.componentInstance.onPaste(event);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual(expected);
+    expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent.trim()).toBe(announcement);
+  });
+
+  it('announces reordering and clearing without leaving stale chips', () => {
+    const fixture = localized();
+    fixture.componentRef.setInput('value', [1, 3]);
+    fixture.detectChanges();
+    fixture.componentInstance.reorder(0, 1);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual([3, 1]);
+    expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent).toContain('Angular movido a la posición 2');
+    fixture.componentInstance.clear();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual([]);
+    expect(fixture.nativeElement.querySelector('[role="status"]')?.textContent.trim()).toBe('Todas las etiquetas eliminadas');
+  });
+});
 
 describe('NeuInputTagsComponent', () => {
   let fixture: ComponentFixture<NeuInputTagsComponent<Skill, number>>;

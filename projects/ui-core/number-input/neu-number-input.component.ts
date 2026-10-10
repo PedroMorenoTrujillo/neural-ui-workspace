@@ -381,9 +381,13 @@ export class NeuNumberInputComponent implements FormValueControl<number | null> 
   }
 
   onFocus(): void {
+    const input = this.nativeInput().nativeElement;
     this._focused.set(true);
     const committed = this.committedValue();
-    this.draft.set({ rawText: this.editableText(committed), baseValue: committed });
+    // Native select() may focus before setting its selection. Rewriting value here
+    // cancels that selection; a deferred rewrite can cancel a later select-all too.
+    // Keep the visible text until the user edits; parsing accepts locale grouping.
+    this.draft.set({ rawText: input.value, baseValue: committed });
   }
 
   onFocusOut(event: FocusEvent): void {

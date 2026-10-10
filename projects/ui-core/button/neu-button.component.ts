@@ -8,7 +8,7 @@ import {
 import { InternalNeuIconOutletComponent } from '@neural-ui/core/icon-outlet-internal';
 import type { NeuIconKey } from '@neural-ui/core/foundation';
 
-export type NeuButtonTone = 'neutral' | 'brand' | 'danger';
+export type NeuButtonTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 export type NeuButtonVariant = 'solid' | 'outline' | 'ghost';
 export type NeuButtonSize = 'sm' | 'md' | 'lg';
 export type NeuButtonIconPosition = 'start' | 'end';

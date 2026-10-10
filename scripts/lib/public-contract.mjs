@@ -137,6 +137,7 @@ function publicMember(node) {
 }
 
 function typeReferenceName(node, sourceFile) {
+  if (node && ts.isImportTypeNode(node)) return node.qualifier?.getText(sourceFile) ?? '';
   return node && ts.isTypeReferenceNode(node) ? node.typeName.getText(sourceFile) : '';
 }
 
@@ -554,8 +555,9 @@ export function generateContract({ distRoot, sourceRoot, policy }) {
         : [];
       let declarationSource = parsed.sourceFile;
       const targetEntrypoint = resolveEntrypoint(exportedSymbol.moduleName, packageName);
-      const declarationBoundary = (entrypoint === './internal' && targetEntrypoint === '/internal-state')
-        || (entrypoint === './menu' && ['/menu-shared', '/menu-tiered'].includes(targetEntrypoint));
+      const declarationBoundary =
+        (entrypoint === './internal' && targetEntrypoint === '/internal-state') ||
+        (entrypoint === './menu' && ['/menu-shared', '/menu-tiered'].includes(targetEntrypoint));
       if (!declarations.length && declarationBoundary) {
         const target = parsedByEntrypoint.get(
           targetEntrypoint.startsWith('/') ? `.${targetEntrypoint}` : targetEntrypoint,

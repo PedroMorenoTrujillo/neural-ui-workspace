@@ -14,6 +14,24 @@ const TABS: readonly NeuTab[] = [
   { id: 'api', label: 'API', disabled: true },
 ];
 
+describe('NeuTabPanelComponent without a parent context', () => {
+  it('stays inactive and assigns unique fallback accessibility IDs', () => {
+    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+    const first = TestBed.createComponent(NeuTabPanelComponent);
+    const second = TestBed.createComponent(NeuTabPanelComponent);
+    for (const fixture of [first, second]) {
+      fixture.componentRef.setInput('tabId', 'preview');
+      fixture.detectChanges();
+      expect(fixture.componentInstance.isActive()).toBe(false);
+      expect(fixture.nativeElement.querySelector('[role="tabpanel"]')).toBeNull();
+      expect(fixture.componentInstance.panelId()).toMatch(/^neu-tab-panel-.+-panel$/);
+      expect(fixture.componentInstance.buttonId()).toMatch(/^neu-tab-panel-.+-tab$/);
+    }
+    expect(first.componentInstance.panelId()).not.toBe(second.componentInstance.panelId());
+    expect(first.componentInstance.buttonId()).not.toBe(second.componentInstance.buttonId());
+  });
+});
+
 @Component({
   imports: [NeuTabsComponent, NeuTabPanelComponent],
   template: `

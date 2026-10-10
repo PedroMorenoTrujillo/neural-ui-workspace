@@ -24,6 +24,50 @@ describe('NeuNumberInputComponent', () => {
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] }),
   );
 
+  it.each([
+    ['en-US', '1,,234'],
+    ['en-US', '1,2a3,456'],
+    ['en-US', '1,23,456,789'],
+    ['hi-IN', '1,234,56,789'],
+  ])('rejects malformed %s grouping %s without changing the committed value', (locale, text) => {
+    const fixture = create();
+    fixture.componentRef.setInput('formatOptions', { locale });
+    fixture.componentRef.setInput('value', 42);
+    fixture.detectChanges();
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    edit(fixture, text);
+    expect(fixture.componentInstance.value()).toBe(42);
+    native(fixture).dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    fixture.detectChanges();
+    expect(native(fixture).value).toBe('42');
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('steps decimal values represented with a negative scientific exponent precisely', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('step', 1e-7);
+    fixture.componentRef.setInput('value', 2e-7);
+    fixture.componentRef.setInput('formatOptions', { locale: 'en-US', maximumFractionDigits: 8 });
+    fixture.detectChanges();
+    fixture.componentInstance.increment();
+    expect(fixture.componentInstance.value()).toBe(3e-7);
+    fixture.componentInstance.decrement();
+    expect(fixture.componentInstance.value()).toBe(2e-7);
+  });
+
+  it('does not publish infinity when a finite step overflows', () => {
+    const fixture = create();
+    fixture.componentRef.setInput('value', Number.MAX_VALUE);
+    fixture.componentRef.setInput('step', Number.MAX_VALUE);
+    fixture.detectChanges();
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    fixture.componentInstance.increment();
+    expect(fixture.componentInstance.value()).toBe(Number.MAX_VALUE);
+    expect(changes).not.toHaveBeenCalled();
+  });
+
   it('uses null as its empty value and model emits exactly once for a valid edit', () => {
     const fixture = create();
     const changes = vi.fn();
@@ -31,6 +75,38 @@ describe('NeuNumberInputComponent', () => {
     edit(fixture, '12.5');
     expect(fixture.componentInstance.value()).toBe(12.5);
     expect(changes).toHaveBeenCalledExactlyOnceWith(12.5);
+  });
+
+  it.each([
+    ['en-US', '1,048,576', false],
+    ['de-DE', '1.048.576', false],
+    ['en-US', '1,048,576', true],
+    ['de-DE', '1.048.576', true],
+  ] as const)('preserves replacement of grouped %s %s (selected before focus: %s)', (locale, formatted, preselected) => {
+    const fixture = create();
+    fixture.componentRef.setInput('formatOptions', { locale, style: 'decimal', useGrouping: true });
+    fixture.componentInstance.value.set(1_048_576);
+    fixture.detectChanges();
+    const input = native(fixture);
+    const changes = vi.fn();
+    fixture.componentInstance.value.subscribe(changes);
+    expect(input.value).toBe(formatted);
+    if (preselected) input.select();
+    input.dispatchEvent(new FocusEvent('focus'));
+    expect(input.value).toBe(formatted);
+    if (!preselected) input.select();
+    fixture.detectChanges();
+    expect(input.value).toBe(formatted);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([0, formatted.length]);
+    input.setRangeText('1048575', input.selectionStart!, input.selectionEnd!, 'end');
+    input.dispatchEvent(new InputEvent('input', {
+      bubbles: true,
+      data: '1048575',
+      inputType: 'insertReplacementText',
+    }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBe(1_048_575);
+    expect(changes).toHaveBeenCalledExactlyOnceWith(1_048_575);
   });
 
   it('removes an invalid native edit on blur before the next render', () => {

@@ -379,6 +379,10 @@ html[data-theme='dark'] {
   font-size: 10px;
 }
 
+.neu-calendar__event--neutral {
+  border-inline-start-color: var(--neu-text-muted);
+}
+
 .neu-calendar__event--brand {
   border-inline-start-color: var(--neu-primary);
 }
@@ -396,7 +400,7 @@ html[data-theme='dark'] {
 }
 
 .neu-calendar__event--info {
-  border-inline-start-color: #0ea5e9;
+  border-inline-start-color: var(--neu-info);
 }
 
 .neu-calendar__event-title {

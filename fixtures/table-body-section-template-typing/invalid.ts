@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import {
-  NeuTableBodySectionDirective,
+  NeuTableCellDirective,
   NeuTableComponent,
-  NeuTableManagedRowDirective,
+  NeuTableLoadingDirective,
   type NeuTableColumn,
 } from '@neural-ui/core/table';
 
@@ -11,28 +11,31 @@ interface FixtureRow {
   readonly name: string;
 }
 
+export function readInvalidCell(context: unknown): unknown {
+  if (
+    NeuTableCellDirective.ngTemplateContextGuard<FixtureRow, number, 'name'>(
+      {} as NeuTableCellDirective<FixtureRow, number, 'name'>,
+      context,
+    )
+  ) {
+    return context.$implicit.missing;
+  }
+  return null;
+}
+
 @Component({
-  selector: 'neu-table-body-section-invalid-fixture',
-  imports: [NeuTableComponent, NeuTableBodySectionDirective, NeuTableManagedRowDirective],
+  selector: 'neu-table-public-template-invalid-fixture',
+  imports: [NeuTableComponent, NeuTableLoadingDirective],
   template: `
-    <neu-table [columns]="columns" [data]="rows">
-      <ng-template neuTableBodySection [neuTableBodySectionOf]="rows" let-entries>
-        @for (entry of entries; track entry.key) {
-          @if (entry.kind === 'data') {
-            <tr [neuTableManagedRow]="entry">
-              <td>{{ entry.row.missing }}</td>
-            </tr>
-          } @else if (entry.kind === 'placeholder') {
-            <tr>
-              <td>{{ entry.row.name }}</td>
-            </tr>
-          }
-        }
-      </ng-template>
+    <neu-table [columns]="columns" [data]="rows" [rowKey]="rowKey">
+      <ng-template neuTableLoading let-loading="loading">{{ loading }}</ng-template>
     </neu-table>
   `,
 })
-export class InvalidTableBodySectionFixtureComponent {
-  readonly columns: readonly NeuTableColumn<FixtureRow>[] = [{ key: 'name', header: 'Name' }];
+export class InvalidTablePublicTemplateFixtureComponent {
+  readonly columns: readonly NeuTableColumn<FixtureRow, 'name'>[] = [
+    { id: 'name', header: 'Name', value: (row) => row.name },
+  ];
   readonly rows: readonly FixtureRow[] = [{ id: 1, name: 'Ada' }];
+  readonly rowKey = (row: FixtureRow) => row.id;
 }

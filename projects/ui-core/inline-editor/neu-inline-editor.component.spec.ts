@@ -30,6 +30,107 @@ describe('NeuInlineEditorComponent N2-009', () => {
     fixture.destroy();
   });
 
+  it('does not handle an Enter already consumed by an owned control', async () => {
+    const fixture = await setup({ value: 'Atlas' });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    const event = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    event.preventDefault();
+    component.onEditKeydown(event);
+    expect(component.editing()).toBe(true);
+    expect(component.value()).toBe('Atlas');
+  });
+
+  it('treats clearing a selection as an empty draft, not a null string', async () => {
+    const fixture = await setup({ type: 'select', value: 'EU', options: [{ value: 'EU', label: 'Europe' }] });
+    const component = fixture.componentInstance;
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    component.onSelectionDraft(null);
+    expect(component.draft()).toBe('');
+    expect(component.value()).toBe('EU');
+    component.commit();
+    expect(component.value()).toBe('');
+  });
+
+  it('renders an empty civil-date draft without inventing a date', async () => {
+    const fixture = await setup({ type: 'date', value: null });
+    fixture.componentInstance.beginEdit();
+    await detectStableChanges(fixture);
+    const date = fixture.debugElement.query(By.directive(NeuDateInputComponent)).componentInstance as NeuDateInputComponent;
+    expect(date.value()).toBeNull();
+    fixture.componentInstance.cancel();
+    expect(fixture.componentInstance.value()).toBeNull();
+  });
+
+  it('does not restore display focus over a deliberate move before the next render', async () => {
+    const fixture = await setup({ value: 'Atlas' });
+    fixture.componentInstance.beginEdit();
+    await detectStableChanges(fixture);
+    fixture.componentInstance.focus();
+    fixture.componentInstance.cancel();
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    try {
+      outside.focus();
+      await detectStableChanges(fixture);
+      expect(document.activeElement).toBe(outside);
+      expect(fixture.componentInstance.editing()).toBe(false);
+    } finally { outside.remove(); }
+  });
+
+  it.each([true, false])('handles an overlay boundary exit with saveOnBlur=%s', async (saveOnBlur) => {
+    const fixture = await setup({ value: 'Atlas', saveOnBlur });
+    const component = fixture.componentInstance;
+    const touched = vi.fn();
+    component.touch.subscribe(touched);
+    component.beginEdit();
+    await detectStableChanges(fixture);
+    component.onDraftInput('Birch');
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+    let frame: FrameRequestCallback | undefined;
+    const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => { frame = callback; return 1; });
+    try {
+      component.onEditorOverlayClosed();
+      await Promise.resolve();
+      expect(frame).toBeDefined();
+      frame!(0);
+      await detectStableChanges(fixture);
+      expect(component.value()).toBe(saveOnBlur ? 'Birch' : 'Atlas');
+      expect(component.editing()).toBe(!saveOnBlur);
+      expect(touched).toHaveBeenCalledTimes(1);
+      expect(document.activeElement).toBe(outside);
+    } finally { raf.mockRestore(); outside.remove(); }
+  });
+
+  it.each(['destroy-before-queue', 'destroy-before-frame', 'cancel-before-frame'] as const)(
+    'ignores an overlay close after %s', async (action) => {
+      const fixture = await setup({ value: 'Atlas', saveOnBlur: true });
+      const component = fixture.componentInstance;
+      const committed = vi.fn();
+      component.valueCommitted.subscribe(committed);
+      component.beginEdit();
+      await detectStableChanges(fixture);
+      let frame: FrameRequestCallback | undefined;
+      const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => { frame = callback; return 1; });
+      try {
+        component.onEditorOverlayClosed();
+        if (action === 'destroy-before-queue') fixture.destroy();
+        await Promise.resolve();
+        if (action === 'destroy-before-queue') expect(frame).toBeUndefined();
+        else {
+          expect(frame).toBeDefined();
+          if (action === 'destroy-before-frame') fixture.destroy();
+          else component.cancel();
+          frame!(0);
+        }
+        expect(committed).not.toHaveBeenCalled();
+      } finally { raf.mockRestore(); }
+    },
+  );
+
   it('keeps the canonical text value unchanged until commit and emits exactly once', async () => {
     const fixture = await setup({ value: 'Draft' });
     const component = fixture.componentInstance;

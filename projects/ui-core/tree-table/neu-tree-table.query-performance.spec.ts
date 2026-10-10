@@ -273,8 +273,8 @@ describe('NeuTreeTable 2 query performance', () => {
     ).toBe(1_001);
   });
 
-  // Lifecycle rendering is independent of query projection. Keep the original
-  // sample counts and per-test timeout, including under coverage instrumentation.
+  // Keep every lifecycle sample. V8 instrumentation needs additional capture
+  // time; this timeout does not change a query/performance budget.
   it('captures the create/render/destroy lifecycle baseline', () => {
     metrics['destroy50'] = samples(() => {
       for (let index = 0; index < 50; index += 1) {
@@ -283,5 +283,5 @@ describe('NeuTreeTable 2 query performance', () => {
         fixture.destroy();
       }
     }, 7);
-  });
+  }, 20_000);
 });

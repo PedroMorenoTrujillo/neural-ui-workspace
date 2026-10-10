@@ -7,7 +7,7 @@ import {
 import type { NeuDensity } from '@neural-ui/core';
 
 export type NeuToolbarSize = 'sm' | 'md' | 'lg';
-export type NeuToolbarTone = 'neutral' | 'brand';
+export type NeuToolbarTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 export type NeuToolbarVariant = 'solid' | 'soft' | 'ghost';
 export type NeuToolbarWrap = 'nowrap' | 'wrap';
 

@@ -238,5 +238,8 @@ describe('NeuTreeTable 2 selection performance', () => {
     expect(model10k.loadedOrder).toHaveLength(10_000);
     expect(deepModel.loadedOrder).toHaveLength(1_001);
     console.info(`N2_TREE_TABLE_D_PERFORMANCE:${JSON.stringify(metrics)}`);
-  });
+    // This capture includes 14 batches of 50 Angular create/destroy cycles
+    // plus computation samples. Its wall-clock deadline is not an interaction
+    // latency budget; keep all samples and allow for V8 coverage instrumentation.
+  }, 20_000);
 });

@@ -159,6 +159,32 @@
     }
   }
 
+  // Semantic tones share the existing theme tokens; amber uses a dark foreground.
+  @each $tone, $fill, $foreground in (
+    (success, var(--neu-success), #fff),
+    (info, color-mix(in srgb, var(--neu-info) 82%, black), #fff),
+    (warning, var(--neu-warning), #111827)
+  ) {
+    &--solid.neu-button--#{$tone} {
+      background: var(--neu-button-solid-bg, #{$fill});
+      border-color: var(--neu-button-solid-border, #{$fill});
+      color: var(--neu-button-solid-fg, #{$foreground});
+
+      &:hover:not(:disabled):not(.neu-button--disabled) {
+        background: var(--neu-button-solid-hover-bg, color-mix(in srgb, #{$fill} 88%, black));
+      }
+    }
+
+    &--outline.neu-button--#{$tone},
+    &--ghost.neu-button--#{$tone} {
+      color: var(--neu-#{$tone}-text);
+
+      &:hover:not(:disabled):not(.neu-button--disabled) {
+        background: var(--neu-#{$tone}-bg);
+      }
+    }
+  }
+
   // ---- Estado deshabilitado / Disabled state ----
   &--disabled,
   &:disabled {

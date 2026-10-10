@@ -16,7 +16,7 @@ import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuInitialTemporalState } from '@neural-ui/core/internal';
 
 export type NeuCalendarView = 'month' | 'week';
-export type NeuCalendarEventTone = 'brand' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuCalendarEventTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 
 export interface NeuCalendarEvent {
   /** Stable event identifier. / Identificador estable del evento. */

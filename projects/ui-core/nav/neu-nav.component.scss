@@ -48,6 +48,7 @@ neu-nav {
     .neu-nav__brand-content {
       flex: 0 0 0;
       width: 0;
+      block-size: 0;
       opacity: 0;
       overflow: hidden;
       pointer-events: none;
@@ -107,6 +108,7 @@ neu-nav {
   &__brand-content {
     flex: 1;
     min-width: 0;
+    white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 10px;

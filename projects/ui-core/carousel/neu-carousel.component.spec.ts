@@ -34,6 +34,55 @@ describe('NeuCarouselComponent', () => {
     expect(paths()).toEqual(['m6 15 6-6 6 6', 'm6 9 6 6 6-6']);
   });
 
+  it('updates autoplay action names on locale and pause changes without changing its page', async () => {
+    const originalLang = document.documentElement.lang;
+    document.documentElement.lang = 'es';
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    try {
+      fixture.componentRef.setInput('items', [1, 2]);
+      fixture.componentRef.setInput('autoplayInterval', 60_000);
+      fixture.componentRef.setInput('ariaLabel', 'Colección');
+      fixture.detectChanges();
+      const button = () => fixture.nativeElement.querySelector('.neu-carousel__autoplay') as HTMLButtonElement;
+      expect(button().getAttribute('aria-label')).toBe('Pausar Colección');
+      button().click();
+      fixture.detectChanges();
+      expect(button().getAttribute('aria-label')).toBe('Reanudar Colección');
+      expect(button().getAttribute('aria-pressed')).toBe('true');
+      document.documentElement.lang = 'en';
+      await Promise.resolve();
+      fixture.detectChanges();
+      expect(button().getAttribute('aria-label')).toBe('Resume Colección');
+      button().click();
+      fixture.detectChanges();
+      expect(button().getAttribute('aria-label')).toBe('Pause Colección');
+      expect(fixture.componentInstance.page()).toBe(0);
+      fixture.componentRef.setInput('items', [1]);
+      fixture.detectChanges();
+      expect(button()).toBeNull();
+    } finally { fixture.destroy(); document.documentElement.lang = originalLang; }
+  });
+
+  it('uses the injected locale when the document has no language', async () => {
+    const originalLang = document.documentElement.lang;
+    document.documentElement.lang = '';
+    const fixture = TestBed.createComponent(NeuCarouselComponent<number>);
+    try {
+      fixture.componentRef.setInput('items', [1, 2]);
+      fixture.componentRef.setInput('autoplayInterval', 60_000);
+      fixture.detectChanges();
+      const label = () => fixture.nativeElement.querySelector('.neu-carousel__autoplay')?.getAttribute('aria-label');
+      expect(label()).toContain('Pause');
+      document.documentElement.lang = 'es';
+      await Promise.resolve();
+      fixture.detectChanges();
+      document.documentElement.lang = '';
+      await Promise.resolve();
+      fixture.detectChanges();
+      expect(label()).toContain('Pause');
+    } finally { fixture.destroy(); document.documentElement.lang = originalLang; }
+  });
+
   it('localizes item and page names from the document language', () => {
     const original = document.documentElement.lang;
     document.documentElement.lang = 'es';

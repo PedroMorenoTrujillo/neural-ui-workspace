@@ -227,8 +227,8 @@ describe('NeuGalleryComponent', () => {
     component.flip('y');
     component.resetTransform();
     component.onImageError();
-    expect(zoom).toEqual([0.25, 1.25]);
-    expect(rotate).toEqual([270]);
+    expect(zoom).toEqual([0.25, 1.25, 1]);
+    expect(rotate).toEqual([270, 0]);
     expect(flips[0].y).toBe(-1);
     expect(errors).toEqual([0]);
     component['onKeydown'](new KeyboardEvent('keydown', { key: 'ArrowRight' }));
@@ -256,6 +256,40 @@ describe('NeuGalleryComponent', () => {
     component.closePreview();
   });
 
+  it('reports actual reset transforms and avoids duplicate or initialization events', async () => {
+    const fixture = TestBed.createComponent(NeuGalleryComponent);
+    fixture.componentRef.setInput('items', ITEMS);
+    fixture.detectChanges();
+    const gallery = fixture.componentInstance;
+    const zoom: number[] = [];
+    const rotations: number[] = [];
+    const flips: Array<{ x: number; y: number }> = [];
+    gallery.zoomChange.subscribe(value => zoom.push(value));
+    gallery.rotationChange.subscribe(value => rotations.push(value));
+    gallery.flipChange.subscribe(value => flips.push(value));
+    gallery.openPreview();
+    fixture.detectChanges(); await fixture.whenStable();
+    gallery.resetTransform();
+    expect(zoom).toEqual([]);
+    expect(rotations).toEqual([]);
+    expect(flips).toEqual([]);
+    gallery.zoom(0.5);
+    gallery.rotate(90);
+    gallery.flip('x');
+    gallery.resetTransform();
+    gallery.resetTransform();
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(zoom).toEqual([1.5, 1]);
+    expect(rotations).toEqual([90, 0]);
+    expect(flips).toEqual([{ x: -1, y: 1 }, { x: 1, y: 1 }]);
+    gallery.rotate(90);
+    gallery.next();
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(rotations).toEqual([90, 0, 90, 0]);
+    expect(gallery.transform()).toContain('rotate(0deg) scale(1, 1)');
+    gallery.closePreview();
+    fixture.destroy();
+  });
   it('wires every rendered gallery control', () => {
     const fixture = TestBed.createComponent(NeuGalleryComponent);
     fixture.componentRef.setInput('items', ITEMS);
@@ -342,6 +376,21 @@ describe('NeuGalleryComponent', () => {
     );
     expect(controls.every((control) => control.querySelector('neu-icon-outlet'))).toBe(true);
     expect(controls.every((control) => !!control.getAttribute('aria-label'))).toBe(true);
+    const paths = controls.map((control) => control.querySelector('svg path')?.getAttribute('d'));
+    expect(paths.every(Boolean)).toBe(true);
+    expect(new Set(paths).size).toBe(controls.length);
+    expect(controls.every((control) => !control.querySelector('neu-icon-outlet > span'))).toBe(true);
+    expect(controls.every((control) =>
+      (control.querySelector('neu-icon-outlet') as HTMLElement).style.width === '1.5rem',
+    )).toBe(true);
+    fixture.componentInstance.zoom(0.5);
+    fixture.componentInstance.rotate(90);
+    fixture.componentInstance.flip('x');
+    (controls[7] as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.zoomLevel()).toBe(1);
+    expect(fixture.componentInstance.transform()).toContain('rotate(0deg) scale(1, 1)');
+    fixture.componentInstance.closePreview();
   });
 
   it('renders strict projected item and caption templates', () => {

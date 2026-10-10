@@ -4,7 +4,7 @@ import {
   input,
 } from '@angular/core';
 
-export type NeuSpinnerTone = 'brand' | 'success' | 'warning' | 'danger' | 'info';
+export type NeuSpinnerTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 
 /**
  * NeuralUI Spinner Component

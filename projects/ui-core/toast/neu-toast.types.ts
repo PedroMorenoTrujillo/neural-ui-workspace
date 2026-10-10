@@ -1,4 +1,4 @@
-export type NeuToastTone = 'success' | 'danger' | 'info' | 'warning';
+export type NeuToastTone = 'neutral' | 'success' | 'info' | 'warning' | 'danger';
 
 export type NeuToastPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 

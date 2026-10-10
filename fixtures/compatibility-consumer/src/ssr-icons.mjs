@@ -5,7 +5,8 @@ const { bootstrapApplication } = await import('@angular/platform-browser');
 const { provideServerRendering, renderApplication } = await import('@angular/platform-server');
 const { NeuButtonComponent } = await import('@neural-ui/core/button');
 const { NeuAlertComponent } = await import('@neural-ui/core/alert');
-const { provideNeuralIcons } = await import('@neural-icons/angular');
+const { NeuralIcon } = await import('@neural-icons/angular');
+const { provideNeuIconResolver } = await import('@neural-ui/core/foundation');
 const { iconSave } = await import('@neural-icons/core/icons/save');
 const { iconDownload } = await import('@neural-icons/core/icons/download');
 
@@ -24,7 +25,10 @@ Component({
 const html = await renderApplication(
   (context) => bootstrapApplication(IconSsrApp, {
     providers: [provideServerRendering(), provideZonelessChangeDetection(),
-      provideNeuralIcons(iconSave, iconDownload)],
+      provideNeuIconResolver(({ key, size, strokeWidth }) => {
+        const icon = { save: iconSave, download: iconDownload }[key];
+        return icon ? { component: NeuralIcon, inputs: { icon, size, strokeWidth } } : null;
+      })],
   }, context),
   { document: '<!doctype html><html><body><app-root></app-root></body></html>', url: '/' },
 );
@@ -32,6 +36,6 @@ if (!html.includes('Ready') || !html.includes('Save item') || !html.includes('Do
   throw new Error('A0.2 SSR content missing.');
 }
 const svgCount = (html.match(/<svg\b/g) ?? []).length;
-if (svgCount !== 4) throw new Error(`A0.2 expected four registered/static SVGs, got ${svgCount}.`);
+if (svgCount !== 3) throw new Error(`A0.2 expected three application-resolved SVGs, got ${svgCount}.`);
 if (html.includes('ng050')) throw new Error('A0.2 SSR contains a hydration mismatch marker.');
 console.log(`A0.2 Angular 22 zoneless SSR PASS: ${svgCount} SVGs; missing name has no geometry.`);

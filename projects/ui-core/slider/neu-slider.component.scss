@@ -8,6 +8,7 @@ neu-slider[hidden] {
 // ============================================================
 
 $thumb-size: 18px;
+$hit-size: 24px;
 $track-height: 4px;
 
 .neu-slider {
@@ -38,7 +39,7 @@ $track-height: 4px;
 
   &--vertical {
     .neu-slider__track-wrap {
-      inline-size: $thumb-size;
+      inline-size: $hit-size;
       block-size: 200px;
       align-self: flex-start;
     }
@@ -48,7 +49,7 @@ $track-height: 4px;
       inset-block: 0;
       inline-size: $track-height;
       block-size: 100%;
-      left: calc(($thumb-size - $track-height) / 2);
+      inset-inline-start: calc(($hit-size - $track-height) / 2);
     }
 
     .neu-slider__fill {
@@ -56,8 +57,9 @@ $track-height: 4px;
     }
 
     .neu-slider__input {
-      inline-size: $thumb-size;
-      block-size: 200px;
+      // Its writing mode rotates logical axes: inline is the physical height.
+      inline-size: 200px;
+      block-size: $hit-size;
       writing-mode: vertical-lr;
       direction: rtl;
     }
@@ -99,7 +101,7 @@ html[data-theme='dark'] {
 // ---- Track wrapper (posicionamiento relativo input + fill) ----
 .neu-slider__track-wrap {
   position: relative;
-  height: $thumb-size;
+  height: $hit-size;
   display: flex;
   align-items: center;
   touch-action: none;
@@ -126,17 +128,29 @@ html[data-theme='dark'] {
 .neu-slider__range-thumb {
   position: absolute;
   top: 50%;
-  inline-size: $thumb-size;
-  block-size: $thumb-size;
+  inline-size: $hit-size;
+  block-size: $hit-size;
   padding: 0;
-  border: 2.5px solid var(--neu-primary);
+  border: 0;
   border-radius: 50%;
-  background: var(--neu-surface);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  background: transparent;
   transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 1;
   touch-action: none;
+
+  // Keep the visual thumb compact without shrinking its interactive target.
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: calc(($hit-size - $thumb-size) / 2);
+    inset-inline: calc(($hit-size - $thumb-size) / 2);
+    border: 2.5px solid var(--neu-primary);
+    border-radius: 50%;
+    background: var(--neu-surface);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+  }
 
   &:focus-visible {
     outline: 2px solid var(--neu-primary);
@@ -150,15 +164,18 @@ html[data-theme='dark'] {
 
 .neu-slider--vertical .neu-slider__range-thumb {
   top: auto;
-  left: 50%;
-  transform: translate(-50%, 50%);
+  inset-inline-start: calc(50% - ($hit-size / 2));
+  transform: translateY(50%);
 }
 
 // ---- Input range (resets necesarios) ----
 .neu-slider__input {
   position: relative;
+  // The numeric axis matches the range controls and keyboard contract even
+  // when surrounding labels use RTL. The vertical orientation rule overrides it.
+  direction: ltr;
   width: 100%;
-  height: $thumb-size;
+  height: $hit-size;
   margin: 0;
   background: transparent;
   cursor: pointer;

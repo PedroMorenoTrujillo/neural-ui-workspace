@@ -160,6 +160,12 @@
   }
 }
 
+@each $tone, $token in (neutral: text-muted, success: success-text, info: info-text, warning: warning-text, danger: error-text) {
+  .neu-nc__item--#{$tone} .neu-nc__item-icon {
+    color: var(--neu-#{$token});
+  }
+}
+
 .neu-nc__item-icon {
   font-size: 1.1rem;
   flex-shrink: 0;

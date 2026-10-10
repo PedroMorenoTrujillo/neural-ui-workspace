@@ -41,10 +41,10 @@ test('workspace and published package target Angular 22 only', async () => {
   ];
 
   for (const packageName of angularRuntimePackages) {
-    assert.match(workspacePackage.dependencies[packageName], /^22\.1\.\d+$/, packageName);
+    assert.match(workspacePackage.dependencies[packageName], /^22\.2\.\d+$/, packageName);
   }
   for (const packageName of angularToolingPackages) {
-    assert.match(workspacePackage.devDependencies[packageName], /^22\.1\.\d+$/, packageName);
+    assert.match(workspacePackage.devDependencies[packageName], /^22\.2\.\d+$/, packageName);
   }
   assert.match(workspacePackage.devDependencies.typescript, /^~6\.0\.\d+$/);
   assert.equal(workspacePackage.dependencies.rxjs, '~7.8.0');

@@ -515,6 +515,26 @@ describe('NeuMenubarComponent and NeuTieredMenuComponent', () => {
     { key: 'disabled', label: 'Disabled', disabled: true },
   ];
 
+  it('renders and removes optional icon, badge and shortcut visuals on branch and leaf actions', async () => {
+    await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
+    const fixture = TestBed.createComponent(NeuMenubarComponent);
+    fixture.componentRef.setInput('items', [
+      { key: 'file', label: 'File', icon: 'file', badge: 0, shortcut: 'Ctrl+F', children: [{ key: 'new', label: 'New' }] },
+      { key: 'help', label: 'Help', icon: 'help', badge: 'New', shortcut: 'F1' },
+    ]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('neu-icon-outlet')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('neu-badge')).toHaveLength(2);
+    expect([...fixture.nativeElement.querySelectorAll('kbd')].map((element: HTMLElement) => element.textContent)).toEqual(['Ctrl+F', 'F1']);
+    expect(fixture.nativeElement.querySelector('neu-badge')?.textContent.trim()).toBe('0');
+    fixture.componentRef.setInput('items', [
+      { key: 'file', label: 'File', children: [{ key: 'new', label: 'New' }] },
+      { key: 'help', label: 'Help' },
+    ]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('neu-icon-outlet, neu-badge, kbd')).toHaveLength(0);
+  });
+
   it('renders and emits direct menubar actions while forwarding child menus', async () => {
     await TestBed.configureTestingModule({ imports: [NeuMenubarComponent] }).compileComponents();
     const fixture = TestBed.createComponent(NeuMenubarComponent);

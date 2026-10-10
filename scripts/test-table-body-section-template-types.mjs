@@ -28,24 +28,29 @@ if (valid.status !== 0) {
 const invalid = compile('tsconfig.invalid.json');
 const diagnostics = `${invalid.stdout}\n${invalid.stderr}`;
 if (invalid.status === 0) {
-  console.error('Invalid body-section Angular template fixture unexpectedly compiled.');
+  console.error('Invalid public Table template fixture unexpectedly compiled.');
   process.exit(1);
 }
 
 if (!diagnostics.includes("Property 'missing' does not exist on type 'FixtureRow'")) {
-  console.error('Data-entry row type diagnostic was not produced.');
+  console.error('Public typed cell guard row diagnostic was not produced.');
   console.error(diagnostics);
   process.exit(1);
 }
 
+// A TypeScript error can short-circuit Angular template checking. Compile
+// the row-free state context independently to require both diagnostics.
+const invalidLoading = compile('tsconfig.invalid-loading.json');
+const loadingDiagnostics = `${invalidLoading.stdout}\n${invalidLoading.stderr}`;
 if (
-  !diagnostics.includes("Property 'row' does not exist on type 'NeuTableBodyPlaceholderRenderEntry")
+  invalidLoading.status === 0 ||
+  !loadingDiagnostics.includes(
+    "Property 'row' does not exist on type 'NeuTableStateTemplateContext'",
+  )
 ) {
-  console.error('Placeholder no-fake-row diagnostic was not produced.');
-  console.error(diagnostics);
+  console.error('Row-free loading context diagnostic was not produced.');
+  console.error(loadingDiagnostics);
   process.exit(1);
 }
 
-console.log(
-  'Table body-section strict Angular template typing passed (valid accepted, invalid rejected).',
-);
+console.log('Table public template typing passed (typed cell guard and row-free loading context).');

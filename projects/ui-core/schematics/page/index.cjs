@@ -19,24 +19,24 @@ function sources(kind, name) {
   const suffix = kind === 'layout' ? 'Layout' : kind === 'dashboard' ? 'Dashboard' : 'CrudPage';
   const className = `${classify(name)}${suffix}Component`;
   const imports = kind === 'crud'
-    ? "import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';\nimport { signal } from '@angular/core';\nimport { NeuButtonComponent } from '@neural-ui/core/button';\nimport { NeuInputComponent } from '@neural-ui/core/input';\nimport { NeuTableComponent } from '@neural-ui/core/table';\n"
+    ? "import { FormField, form } from '@angular/forms/signals';\nimport { signal } from '@angular/core';\nimport { NeuButtonComponent } from '@neural-ui/core/button';\nimport { NeuInputComponent } from '@neural-ui/core/input';\nimport { NeuTableComponent } from '@neural-ui/core/table';\n"
     : kind === 'dashboard'
       ? "import { NeuCardComponent } from '@neural-ui/core/card';\nimport { NeuStatsCardComponent } from '@neural-ui/core/stats-card';\n"
       : "import { RouterOutlet } from '@angular/router';\nimport { NeuSidebarComponent } from '@neural-ui/core/sidebar';\nimport { NeuToolbarComponent } from '@neural-ui/core/toolbar';\n";
   const angularImports = kind === 'crud'
-    ? '[ReactiveFormsModule, NeuButtonComponent, NeuInputComponent, NeuTableComponent]'
+    ? '[FormField, NeuButtonComponent, NeuInputComponent, NeuTableComponent]'
     : kind === 'dashboard'
       ? '[NeuCardComponent, NeuStatsCardComponent]'
       : '[RouterOutlet, NeuSidebarComponent, NeuToolbarComponent]';
   const state = kind === 'crud'
-    ? "\n  readonly form = new FormGroup({ search: new FormControl('', { nonNullable: true }) });\n  readonly rows = signal<readonly { id: string }[]>([]);\n  readonly rowKey = (row: { id: string }): string => row.id;"
+    ? "\n  readonly searchData = signal({ search: '' });\n  readonly fields = form(this.searchData);\n  readonly rows = signal<readonly { id: string }[]>([]);\n  readonly rowKey = (row: { id: string }): string => row.id;"
     : '';
   const ts = `import { ChangeDetectionStrategy, Component } from '@angular/core';\n${imports}\n@Component({\n  selector: '${selector}',\n  standalone: true,\n  imports: ${angularImports},\n  templateUrl: './${name}.component.html',\n  styleUrl: './${name}.component.scss',\n  changeDetection: ChangeDetectionStrategy.OnPush,\n})\nexport class ${className} {${state}\n}\n`;
   const html = kind === 'layout'
     ? `<div class="page-shell">\n  <neu-sidebar aria-label="Primary navigation" />\n  <main>\n    <neu-toolbar />\n    <router-outlet />\n  </main>\n</div>\n`
     : kind === 'dashboard'
       ? `<main class="page" aria-labelledby="page-title">\n  <h1 id="page-title">Dashboard</h1>\n  <section class="stats" aria-label="Key metrics">\n    <neu-stats-card title="Metric" value="0" />\n  </section>\n  <neu-card>Dashboard content</neu-card>\n</main>\n`
-      : `<main class="page" aria-labelledby="page-title">\n  <header><h1 id="page-title">Items</h1><button neu-button type="button">Create</button></header>\n  <form [formGroup]="form" role="search"><neu-input formControlName="search" label="Search" /></form>\n  <neu-table [data]="rows()" [rowKey]="rowKey" />\n</main>\n`;
+      : `<main class="page" aria-labelledby="page-title">\n  <header><h1 id="page-title">Items</h1><button neu-button type="button">Create</button></header>\n  <form role="search"><neu-input [formField]="fields.search" label="Search" /></form>\n  <neu-table [data]="rows()" [rowKey]="rowKey" />\n</main>\n`;
   const scss = `:host { display: block; min-inline-size: 0; }\n.page, .page-shell { display: grid; gap: var(--neu-space-4, 1rem); min-inline-size: 0; padding: var(--neu-space-4, 1rem); }\n.stats { display: grid; gap: var(--neu-space-3, .75rem); grid-template-columns: 1fr; }\nheader { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }\n@media (min-width: 48rem) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .page-shell { grid-template-columns: auto minmax(0, 1fr); } }\n@media (min-width: 75rem) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }\n`;
   return { ts, html, scss };
 }

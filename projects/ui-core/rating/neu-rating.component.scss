@@ -81,11 +81,11 @@ neu-rating[hidden] {
   }
 
   &--first-half .neu-rating__icon {
-    left: 2px;
+    inset-inline-start: 2px;
   }
 
   &--second-half .neu-rating__icon {
-    right: 2px;
+    inset-inline-end: 2px;
   }
 }
 

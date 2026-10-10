@@ -23,7 +23,7 @@ import { neuIconWarning as iconWarning } from '@neural-ui/core/internal';
 import { neuIconX as iconX } from '@neural-ui/core/internal';
 import { NeuIdGenerator, NeuInitialTemporalState } from '@neural-ui/core/internal';
 
-export type NeuNotificationTone = 'info' | 'success' | 'warning' | 'danger';
+export type NeuNotificationTone = 'neutral' | 'success' | 'info' | 'warning' | 'danger';
 
 export interface NeuNotification {
   id: string;
@@ -44,6 +44,7 @@ export interface NeuNotificationOptions extends Omit<
 > {}
 
 const DEFAULT_ICONS: Record<NeuNotificationTone, NeuIconKey> = {
+  neutral: iconInfo,
   info: iconInfo,
   success: iconCircleCheck,
   warning: iconWarning,

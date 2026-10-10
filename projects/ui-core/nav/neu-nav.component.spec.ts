@@ -12,6 +12,17 @@ import { Router } from '@angular/router';
 @Component({ template: '' })
 class DummyRouteComponent {}
 
+@Component({
+  imports: [NeuNavComponent],
+  template: `
+    <neu-nav [items]="[]">
+      <span neu-nav-brand style="overflow-wrap: anywhere">Neural Studio</span>
+      <span neu-nav-brand-icon aria-hidden="true">N</span>
+    </neu-nav>
+  `,
+})
+class NavBrandFixture {}
+
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const SIMPLE_ITEMS: NeuNavItem[] = [
@@ -307,6 +318,27 @@ describe('NeuNavComponent', () => {
   });
 
   // ── Collapsed / expand ───────────────────────────────────────────────────
+
+  it('removes collapsed brand text from the header height and restores it on expansion', async () => {
+    const f = TestBed.createComponent(NavBrandFixture);
+    f.detectChanges();
+    await f.whenStable();
+    const toggle = f.nativeElement.querySelector('button.neu-nav__toggle-tab') as HTMLButtonElement;
+    const content = f.nativeElement.querySelector('.neu-nav__brand-content') as HTMLElement;
+    expect(content.textContent).toContain('Neural Studio');
+    expect(getComputedStyle(content).whiteSpace).toBe('nowrap');
+    toggle.click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(getComputedStyle(content).blockSize).toBe('0px');
+    expect(f.nativeElement.querySelector('.neu-nav__brand-icon').textContent).toBe('N');
+    toggle.click();
+    f.detectChanges();
+    await f.whenStable();
+    expect(getComputedStyle(content).blockSize).not.toBe('0px');
+    expect(getComputedStyle(content).whiteSpace).toBe('nowrap');
+    expect(content.textContent).toContain('Neural Studio');
+  });
 
   it('should apply collapsed class when collapsed=true', async () => {
     const f = TestBed.createComponent(NeuNavComponent);

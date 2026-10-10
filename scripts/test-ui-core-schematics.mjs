@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
 const { HostTree } = require('@angular-devkit/schematics');
@@ -52,4 +55,43 @@ for (const schematic of ['layout', 'dashboard', 'crud-page']) {
 assert(generated.exists('/src/app/pages/account-layout/account-layout.component.ts'));
 assert(generated.exists('/src/app/pages/account-dashboard/account-dashboard.component.scss'));
 assert(generated.exists('/src/app/pages/account-crud-page/account-crud-page.component.html'));
+const crudTs = generated.readContent('/src/app/pages/account-crud-page/account-crud-page.component.ts');
+const crudHtml = generated.readContent('/src/app/pages/account-crud-page/account-crud-page.component.html');
+assert.match(crudTs, /import \{ FormField, form \} from '@angular\/forms\/signals'/);
+assert.match(crudTs, /readonly fields = form\(this.searchData\)/);
+assert.match(crudHtml, /\[formField\]="fields.search"/);
+assert.doesNotMatch(crudTs + crudHtml, /ReactiveFormsModule|formControlName|FormControl|formGroup/);
+
+// Compile the actual generated templates against the packaged public API.
+// File-existence checks alone miss removed inputs and invalid component imports.
+const compileRoot = mkdtempSync(join(tmpdir(), 'neural-schematic-consumer-'));
+try {
+  symlinkSync(join(workspaceRoot, 'node_modules'), join(compileRoot, 'node_modules'), 'dir');
+  const files = [];
+  for (const file of generated.files.filter(path => /\/pages\/.*\.component\.(ts|html|scss)$/.test(path))) {
+    const target = join(compileRoot, file.slice(1));
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, generated.readContent(file));
+    if (file.endsWith('.ts')) files.push(file.slice(1));
+  }
+  writeFileSync(join(compileRoot, 'tsconfig.json'), JSON.stringify({
+    compilerOptions: {
+      target: 'ES2022', module: 'ES2022', moduleResolution: 'bundler',
+      strict: true, skipLibCheck: true, experimentalDecorators: true,
+      lib: ['ES2022', 'DOM'], outDir: './out', rootDir: compileRoot,
+      paths: {
+        '@neural-ui/core': [join(workspaceRoot, 'dist/neural-ui/core')],
+        '@neural-ui/core/*': [join(workspaceRoot, 'dist/neural-ui/core/*')],
+      },
+    },
+    angularCompilerOptions: { strictTemplates: true },
+    files,
+  }));
+  execFileSync(process.execPath, [
+    join(workspaceRoot, 'node_modules/@angular/compiler-cli/bundles/src/bin/ngc.js'),
+    '-p', join(compileRoot, 'tsconfig.json'),
+  ], { cwd: compileRoot, stdio: 'pipe' });
+} finally {
+  rmSync(compileRoot, { recursive: true, force: true });
+}
 console.log('Schematics package and idempotence checks passed');

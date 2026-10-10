@@ -317,8 +317,14 @@ function architecturalChecks(root, measured, packageMetrics) {
   if (tableUnexpected.length) {
     errors.push(`Table final boundary leaked: ${[...new Set(tableUnexpected)].join(', ')}`);
   }
-  if (!files.some((file) => file.startsWith('neural-ui-core-table-neural-ui-core-table-'))) {
-    errors.push('Table advanced lazy chunk is missing');
+  const tableSource = readFileSync(resolve(root, 'fesm2022/neural-ui-core-table.mjs'), 'utf8');
+  const tableDynamicImports = [...tableSource.matchAll(/import\(['"](\.\/[^'"]+\.mjs)['"]\)/g)]
+    .map((match) => basename(match[1]));
+  // ng-packagr names split chunks after their actual component/module now.
+  // Validate real import targets; assertTableInitialBoundary separately proves
+  // optional implementations are lazy and absent from the initial closure.
+  if (!tableDynamicImports.length || tableDynamicImports.some((file) => !files.includes(file))) {
+    errors.push('Table dynamic import targets are missing');
   }
 
   const graph = new Map();

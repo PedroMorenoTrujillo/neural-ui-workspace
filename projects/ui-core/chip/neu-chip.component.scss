@@ -88,6 +88,17 @@
     }
   }
 
+  &--info {
+    background: var(--neu-info-bg);
+    color: var(--neu-info-text);
+    border-color: transparent;
+
+    &.neu-chip--selected {
+      background: var(--neu-info-text);
+      color: var(--neu-surface);
+    }
+  }
+
   &--warning {
     background: var(--neu-warning-bg);
     color: var(--neu-warning-text);

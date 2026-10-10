@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 
-export type NeuProgressTone = 'brand' | 'success' | 'warning' | 'danger';
+export type NeuProgressTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 
 /**
  * NeuralUI ProgressBar Component

@@ -28,10 +28,10 @@ try {
   const consumerPackage = JSON.parse(readFileSync(packagePath, 'utf8'));
   consumerPackage.dependencies = {
     '@angular/cdk': workspacePackage.dependencies['@angular/cdk'],
-    '@angular/common': '22.1.6', '@angular/compiler': '22.1.6',
-    '@angular/core': '22.1.6', '@angular/forms': '22.1.6',
-    '@angular/platform-browser': '22.1.6', '@angular/platform-server': '22.1.6',
-    '@angular/router': '22.1.6', '@angular/ssr': '22.1.8',
+    ...Object.fromEntries([
+      '@angular/common', '@angular/compiler', '@angular/core', '@angular/forms',
+      '@angular/platform-browser', '@angular/platform-server', '@angular/router', '@angular/ssr',
+    ].map(name => [name, workspacePackage.dependencies[name] ?? workspacePackage.devDependencies[name]])),
     '@neural-icons/angular': '0.0.1-next.1', '@neural-icons/core': '0.0.1-next.0',
     '@neural-ui/core': `file:${join(fixture, tarball)}`,
     rxjs: workspacePackage.dependencies.rxjs, tslib: workspacePackage.dependencies.tslib,
@@ -47,21 +47,25 @@ try {
   writeFileSync(join(fixture, 'src/main.ts'), `
 import {provideZonelessChangeDetection} from '@angular/core';
 import {bootstrapApplication,provideClientHydration} from '@angular/platform-browser';
-import {provideNeuralIcons} from '@neural-icons/angular';
+import {NeuralIcon} from '@neural-icons/angular';
+import {provideNeuIconResolver} from '@neural-ui/core/foundation';
 import {iconSave} from '@neural-icons/core/icons/save';
 import {iconDownload} from '@neural-icons/core/icons/download';
 import {IconsApp} from './n2-icons.component';
-bootstrapApplication(IconsApp,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideNeuralIcons(iconSave,iconDownload)]});
+const icons:Record<string,typeof iconSave|typeof iconDownload>={save:iconSave,download:iconDownload};
+bootstrapApplication(IconsApp,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideNeuIconResolver(({key,size,strokeWidth})=>icons[key]?{component:NeuralIcon,inputs:{icon:icons[key],size,strokeWidth}}:null)]});
 `);
   writeFileSync(join(fixture, 'src/main.server.ts'), `
 import {provideZonelessChangeDetection} from '@angular/core';
 import {bootstrapApplication,provideClientHydration,BootstrapContext} from '@angular/platform-browser';
 import {provideServerRendering} from '@angular/platform-server';
-import {provideNeuralIcons} from '@neural-icons/angular';
+import {NeuralIcon} from '@neural-icons/angular';
+import {provideNeuIconResolver} from '@neural-ui/core/foundation';
 import {iconSave} from '@neural-icons/core/icons/save';
 import {iconDownload} from '@neural-icons/core/icons/download';
 import {IconsApp} from './n2-icons.component';
-export default (context:BootstrapContext) => bootstrapApplication(IconsApp,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideNeuralIcons(iconSave,iconDownload)]},context);
+const icons:Record<string,typeof iconSave|typeof iconDownload>={save:iconSave,download:iconDownload};
+export default (context:BootstrapContext) => bootstrapApplication(IconsApp,{providers:[provideZonelessChangeDetection(),provideClientHydration(),provideServerRendering(),provideNeuIconResolver(({key,size,strokeWidth})=>icons[key]?{component:NeuralIcon,inputs:{icon:icons[key],size,strokeWidth}}:null)]},context);
 `);
   writeFileSync(join(fixture, 'src/server.ts'), `
 import {renderApplication} from '@angular/platform-server';

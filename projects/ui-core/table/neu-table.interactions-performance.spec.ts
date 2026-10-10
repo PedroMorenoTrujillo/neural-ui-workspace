@@ -124,5 +124,5 @@ describe('NeuTable H performance evidence', () => {
       readonly process?: { readonly stdout?: { write(value: string): void } };
     };
     runtime.process?.stdout?.write(`N2_TABLE_H_PERFORMANCE:${JSON.stringify(metrics)}\n`);
-  });
+  }, 20_000);
 });

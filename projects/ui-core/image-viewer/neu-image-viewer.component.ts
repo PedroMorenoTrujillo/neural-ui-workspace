@@ -81,7 +81,7 @@ interface _NeuIvData {
             [attr.title]="_label('zoomIn')"
             (click)="_zoom(0.25)"
           >
-            <neu-icon-outlet [icon]="iconZoomIn" [fallbackPath]="iconFallbackPath(iconZoomIn)" [fallbackText]="iconFallbackText(iconZoomIn)" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconZoomIn" [fallbackPath]="iconFallbackPath(iconZoomIn)" [fallbackText]="iconFallbackText(iconZoomIn)" size="1.5rem" />
           </button>
           <button
             type="button"
@@ -90,7 +90,7 @@ interface _NeuIvData {
             [attr.title]="_label('zoomOut')"
             (click)="_zoom(-0.25)"
           >
-            <neu-icon-outlet [icon]="iconZoomOut" [fallbackPath]="iconFallbackPath(iconZoomOut)" [fallbackText]="iconFallbackText(iconZoomOut)" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconZoomOut" [fallbackPath]="iconFallbackPath(iconZoomOut)" [fallbackText]="iconFallbackText(iconZoomOut)" size="1.5rem" />
           </button>
           @if (_galleryHost) {
             <button
@@ -100,7 +100,7 @@ interface _NeuIvData {
               [attr.title]="_label('rotateLeft')"
               (click)="_rotate(-90)"
             >
-              <neu-icon-outlet [icon]="iconRotateCcw" [fallbackPath]="iconFallbackPath(iconRotateCcw)" [fallbackText]="iconFallbackText(iconRotateCcw)" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconRotateCcw" [fallbackPath]="iconFallbackPath(iconRotateCcw)" [fallbackText]="iconFallbackText(iconRotateCcw)" size="1.5rem" />
             </button>
             <button
               type="button"
@@ -109,7 +109,7 @@ interface _NeuIvData {
               [attr.title]="_label('rotateRight')"
               (click)="_rotate(90)"
             >
-              <neu-icon-outlet [icon]="iconRotateCw" [fallbackPath]="iconFallbackPath(iconRotateCw)" [fallbackText]="iconFallbackText(iconRotateCw)" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconRotateCw" [fallbackPath]="iconFallbackPath(iconRotateCw)" [fallbackText]="iconFallbackText(iconRotateCw)" size="1.5rem" />
             </button>
             <button
               type="button"
@@ -118,7 +118,7 @@ interface _NeuIvData {
               [attr.title]="_label('flipHorizontal')"
               (click)="_flipAxis('x')"
             >
-              <neu-icon-outlet [icon]="iconFlipHorizontal" [fallbackPath]="iconFallbackPath(iconFlipHorizontal)" [fallbackText]="iconFallbackText(iconFlipHorizontal)" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconFlipHorizontal" [fallbackPath]="iconFallbackPath(iconFlipHorizontal)" [fallbackText]="iconFallbackText(iconFlipHorizontal)" size="1.5rem" />
             </button>
             <button
               type="button"
@@ -127,7 +127,7 @@ interface _NeuIvData {
               [attr.title]="_label('flipVertical')"
               (click)="_flipAxis('y')"
             >
-              <neu-icon-outlet [icon]="iconFlipVertical" [fallbackPath]="iconFallbackPath(iconFlipVertical)" [fallbackText]="iconFallbackText(iconFlipVertical)" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconFlipVertical" [fallbackPath]="iconFallbackPath(iconFlipVertical)" [fallbackText]="iconFallbackText(iconFlipVertical)" size="1.5rem" />
             </button>
             <a
               class="neu-iv__btn"
@@ -136,7 +136,7 @@ interface _NeuIvData {
               [attr.aria-label]="_label('download')"
               [attr.title]="_label('download')"
             >
-              <neu-icon-outlet [icon]="iconDownload" [fallbackPath]="iconFallbackPath(iconDownload)" [fallbackText]="iconFallbackText(iconDownload)" size="1.25rem" />
+              <neu-icon-outlet [icon]="iconDownload" [fallbackPath]="iconFallbackPath(iconDownload)" [fallbackText]="iconFallbackText(iconDownload)" size="1.5rem" />
             </a>
           }
           <button
@@ -146,7 +146,7 @@ interface _NeuIvData {
             [attr.title]="_label('reset')"
             (click)="_resetTransform()"
           >
-            <neu-icon-outlet [icon]="iconRotateCcw" [fallbackPath]="iconFallbackPath(iconRotateCcw)" [fallbackText]="iconFallbackText(iconRotateCcw)" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconResetTransform" [fallbackPath]="iconFallbackPath(iconResetTransform)" [fallbackText]="iconFallbackText(iconResetTransform)" size="1.5rem" />
           </button>
           <button
             type="button"
@@ -155,7 +155,7 @@ interface _NeuIvData {
             [attr.title]="_label('close')"
             (click)="_data.close()"
           >
-            <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1.25rem" />
+            <neu-icon-outlet [icon]="iconX" [fallbackPath]="iconFallbackPath(iconX)" [fallbackText]="iconFallbackText(iconX)" size="1.5rem" />
           </button>
         </div>
       </div>
@@ -200,7 +200,7 @@ interface _NeuIvData {
           [disabled]="!_canNavigate(-1)"
           (click)="_navigate(-1)"
         >
-          <neu-icon-outlet [icon]="iconChevronLeft" [fallbackPath]="iconFallbackPath(iconChevronLeft)" [fallbackText]="iconFallbackText(iconChevronLeft)" size="1.25rem" />
+          <neu-icon-outlet [icon]="iconChevronLeft" [fallbackPath]="iconFallbackPath(iconChevronLeft)" [fallbackText]="iconFallbackText(iconChevronLeft)" size="1.5rem" />
         </button>
         <button
           type="button"
@@ -209,7 +209,7 @@ interface _NeuIvData {
           [disabled]="!_canNavigate(1)"
           (click)="_navigate(1)"
         >
-          <neu-icon-outlet [icon]="iconChevronRight" [fallbackPath]="iconFallbackPath(iconChevronRight)" [fallbackText]="iconFallbackText(iconChevronRight)" size="1.25rem" />
+          <neu-icon-outlet [icon]="iconChevronRight" [fallbackPath]="iconFallbackPath(iconChevronRight)" [fallbackText]="iconFallbackText(iconChevronRight)" size="1.5rem" />
         </button>
       }
     </div>
@@ -224,6 +224,7 @@ export class NeuImageViewerOverlayComponent {
   protected readonly iconDownload = iconDownload;
   protected readonly iconFlipHorizontal = iconFlipHorizontal;
   protected readonly iconFlipVertical = iconFlipVertical;
+  protected readonly iconResetTransform = 'reset-transform';
   protected readonly iconRotateCcw = iconRotateCcw;
   protected readonly iconRotateCw = iconRotateCw;
   protected readonly iconX = iconX;
@@ -293,10 +294,18 @@ export class NeuImageViewerOverlayComponent {
   }
 
   _resetTransform(): void {
+    const previousScale = this._scale();
+    const previousRotation = this._rotation();
+    const previousFlips = this._flips();
     this._resetZoom();
     this._rotation.set(0);
     this._flips.set({ x: 1, y: 1 });
     this._pointerStart = null;
+    if (previousScale !== 1) this._galleryHost?.onZoom(1);
+    if (previousRotation !== 0) this._galleryHost?.onRotation(0);
+    if (previousFlips.x !== 1 || previousFlips.y !== 1) {
+      this._galleryHost?.onFlip({ x: 1, y: 1 });
+    }
   }
 
   _rotate(delta: number): void {

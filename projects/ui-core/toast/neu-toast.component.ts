@@ -12,6 +12,7 @@ import { neuIconX as iconX } from '@neural-ui/core/internal';
 
 /** Static internal icons are definitions, not global registrations. */
 const TOAST_ICONS: Record<NeuToastTone, NeuIconKey> = {
+  neutral: iconInfo,
   success: iconCircleCheck,
   danger: iconCircleX,
   warning: iconWarning,

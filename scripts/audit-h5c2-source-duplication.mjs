@@ -48,6 +48,7 @@ const implementationMarkers = [
   'class InternalNeuConnectedOverlaySession',
 ];
 const errors = [];
+const stateMarkers = new Set(['class NeuInitialTemporalState', 'class NeuResponsiveState']);
 
 for (const source of internalSources) {
   const owners = maps.filter((file) => readFileSync(join(mapRoot, file), 'utf8').includes(source));
@@ -58,13 +59,23 @@ for (const source of internalSources) {
   }
 }
 for (const marker of implementationMarkers) {
-  const owners = bundles.filter((file) =>
-    readFileSync(join(fesmRoot, file), 'utf8').includes(marker),
+  const className = marker.slice('class '.length);
+  // APF bundlers may emit a named class declaration or a class expression
+  // assigned to its public implementation name. Count implementations, not imports.
+  const implementation = new RegExp(
+    `\\b(?:class\\s+${className}\\b|(?:var|let|const)\\s+${className}\\s*=\\s*class\\b)`,
+    'g',
   );
-  if (owners.length !== 1 || owners[0] !== 'neural-ui-core-internal.mjs') {
-    errors.push(
-      `${marker}: expected one internal implementation, found ${owners.join(', ') || 'none'}`,
-    );
+  const occurrences = bundles.flatMap((file) => {
+    const matches = readFileSync(join(fesmRoot, file), 'utf8').match(implementation) ?? [];
+    return matches.map(() => file);
+  });
+  const owners = [...new Set(occurrences)];
+  const expectedOwner = stateMarkers.has(marker)
+    ? 'neural-ui-core-internal-state.mjs'
+    : 'neural-ui-core-internal.mjs';
+  if (occurrences.length !== 1 || owners[0] !== expectedOwner) {
+    errors.push(`${marker}: expected only ${expectedOwner}, found ${owners.join(', ') || 'none'}`);
   }
 }
 if (errors.length) {
@@ -75,5 +86,5 @@ if (errors.length) {
 if (extractedDebugRoot) rmSync(extractedDebugRoot, { recursive: true, force: true });
 console.log(
   `H5-C2 source duplication passed: ${internalSources.length} shared sources and ` +
-    `${implementationMarkers.length} runtime markers are emitted only once in the internal FESM (0 duplicated implementation bytes).`,
+    `${implementationMarkers.length} runtime markers are emitted only once in their owning internal FESMs (0 duplicated implementation bytes).`,
 );

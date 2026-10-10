@@ -15,11 +15,12 @@ import { neuIconInfo as iconInfo } from '@neural-ui/core/internal';
 import { neuIconWarning as iconWarning } from '@neural-ui/core/internal';
 import { neuIconX as iconX } from '@neural-ui/core/internal';
 
-export type NeuAlertTone = 'info' | 'success' | 'warning' | 'danger';
+export type NeuAlertTone = 'neutral' | 'success' | 'info' | 'warning' | 'danger';
 export type NeuAlertVariant = 'soft' | 'outline';
 
 /** Icono por defecto para cada tipo */
 const DEFAULT_ICON_NAMES: Record<NeuAlertTone, NeuIconKey> = {
+  neutral: iconInfo,
   info: iconInfo,
   success: iconCircleCheck,
   warning: iconWarning,

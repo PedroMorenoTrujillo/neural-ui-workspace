@@ -6,7 +6,7 @@ import {
   output,
 } from '@angular/core';
 
-export type NeuChipTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
+export type NeuChipTone = 'neutral' | 'brand' | 'success' | 'info' | 'warning' | 'danger';
 export type NeuChipSize = 'sm' | 'md';
 
 /**

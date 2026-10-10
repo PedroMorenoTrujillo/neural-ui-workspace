@@ -8,6 +8,7 @@ const nonVisualEntryPoints = new Set([
   'focus-trap',
   'foundation',
   'internal',
+  'internal-state',
   'option-api',
   'url-state',
   'testing',
@@ -53,7 +54,13 @@ const exported = new Set();
 
 if (packageJson) {
   for (const key of Object.keys(packageJson.exports ?? {})) {
-    if (key === '.' || key === './package.json' || key === './token-manifest.json' || key.startsWith('./styles')) continue;
+    if (
+      key === '.' ||
+      key === './package.json' ||
+      key === './token-manifest.json' ||
+      key.startsWith('./styles')
+    )
+      continue;
     exported.add(key.replace(/^\.\//, ''));
   }
 }
@@ -80,9 +87,10 @@ for (const entry of entryPoints) {
   }
 
   if (!nonVisualEntryPoints.has(entry)) {
-    const componentFiles = filesRecursive(dir, '.component.ts');
-    const directiveFiles = filesRecursive(dir, '.directive.ts');
-    if (componentFiles.length === 0 && directiveFiles.length === 0) {
+    const visualFiles = filesRecursive(dir, '.ts').filter(
+      (file) => !file.endsWith('.spec.ts') && /@(?:Component|Directive)\s*\(/.test(read(file)),
+    );
+    if (visualFiles.length === 0) {
       violations.push(`${rel}: missing standalone component or directive file`);
     }
   }
