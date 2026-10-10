@@ -359,6 +359,24 @@ Neural UI 2.x supports Angular 22 only. Follow the V2 migration guidance before
 upgrading an existing 1.x application; the V1 documentation has its own
 compatibility requirements. Do not mix V1 components or examples with V2 imports.
 
+### Migrating from 1.x
+
+Neural UI 2 is a major release, not a drop-in upgrade. Update component
+imports, templates, value/event bindings and forms together. Do not import
+components from the package root or from private implementation paths.
+
+| V1 entry point | V2 direction |
+| --- | --- |
+| `@neural-ui/core/multiselect` | `NeuSelectComponent` from `@neural-ui/core/select`, with `mode="multiple"` |
+| `@neural-ui/core/image-gallery` | Review the new `@neural-ui/core/gallery` API |
+| `@neural-ui/core/image-compare` | Review the new `@neural-ui/core/compare` API |
+| `@neural-ui/core/tags` | Review the new `@neural-ui/core/input-tags` API |
+| `@neural-ui/core/icon` | Application-owned icons and the optional foundation icon resolver |
+| `@neural-ui/core/panel-menu`, `@neural-ui/core/org-chart`, `@neural-ui/core/scheduler-gantt` | These legacy entry points are not exported by Core 2.0.0; there is no drop-in replacement |
+
+These are migration directions, not automatic renames: compare each V2 API
+and its examples before replacing a V1 component.
+
 ### Charts in Neural UI 2
 
 Neural UI 1.x included the `@neural-ui/core/chart` entry point backed by ApexCharts.

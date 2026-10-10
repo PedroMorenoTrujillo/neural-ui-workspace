@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24.15.0
           cache: npm
@@ -31,14 +31,14 @@ jobs:
           NEURAL_UI_BUNDLE_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'main' }}
 
       - name: Upload compiled package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: neural-ui-core-dist
           path: dist/neural-ui/core
           if-no-files-found: error
 
       - name: Upload npm artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: neural-ui-core-npm
           path: |
@@ -48,7 +48,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload source-map artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: neural-ui-core-sourcemaps
           path: dist/release/*-sourcemaps.tgz
