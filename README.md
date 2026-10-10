@@ -1,7 +1,7 @@
 # @neural-ui/core
 
 <p>
-  <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core?color=0ea5e9&label=npm" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/v/@neural-ui/core/v1?color=0ea5e9&label=npm" alt="npm v1 version" /></a>
   <a href="https://www.npmjs.com/package/@neural-ui/core"><img src="https://img.shields.io/npm/dm/@neural-ui/core?color=6366f1" alt="npm downloads" /></a>
   <img src="https://img.shields.io/badge/Angular-19--22-dd0031?logo=angular" alt="Angular 19-22" />
   <img src="https://img.shields.io/badge/quality-release%20gated-22c55e" alt="Release gated quality" />
@@ -10,9 +10,11 @@
 
 Modern Angular UI component library — **signals-first**, fully **standalone**, with dedicated subpath entry points and no Zone.js requirement.
 
-> Live documentation and examples → [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app/es/home)
+> This is the v1 maintenance branch. Install `@neural-ui/core@v1`; v2 remains the default npm `latest` release.
 
-> Building a full admin product? Try [Neural Admin Pro](https://neural-ui-admin-pro.vercel.app/login), a premium Angular dashboard template built with Neural UI and ready to connect to your own backend.
+> Live documentation and examples → [ui.neuralui.org/v1/](https://ui.neuralui.org/v1/)
+
+> Building a full admin product? Try [Neural Admin Pro](https://adminpro.neuralui.org/demo/home/), a premium Angular dashboard template built with Neural UI and ready to connect to your own backend.
 
 <p align="center">
   <img src=".github/assets/lighthouse.png" alt="Lighthouse scores: Performance 98, Accessibility 96, Best Practices 100, SEO 91" width="480" />
@@ -35,7 +37,7 @@ Modern Angular UI component library — **signals-first**, fully **standalone**,
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 1.15.1
+- **Version:** 1.15.2
 - **Entry points:** 104
 - **Automated tests:** 3324
 - **Coverage:** 98.13% statements · 96.44% branches · 98.61% functions · 98.91% lines
@@ -55,7 +57,7 @@ For the current quality checklist and accessibility audit snapshot, see [project
 ## Installation
 
 ```bash
-npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core@v1 @angular/cdk @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
 ```
 
 ---
@@ -65,7 +67,7 @@ npm install @neural-ui/core @angular/cdk @ng-icons/core @ng-icons/lucide apexcha
 Automated setup is additive and idempotent:
 
 ```bash
-ng add @neural-ui/core
+ng add @neural-ui/core@v1
 ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
 ng generate @neural-ui/core:layout app-shell
 ng generate @neural-ui/core:dashboard sales
@@ -78,7 +80,7 @@ La configuración automática es aditiva e idempotente: conserva providers y est
 
 | Schematic                | Public options / Opciones públicas                                                                          | Result / Resultado                                                                                                                                                                           | Revert / Reversión                                                                                                                                                                 |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ng add @neural-ui/core` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos.                                                   |
+| `ng add @neural-ui/core@v1` | `--project`, `--skip-styles`                                                                                | Adds `provideNeuralUI()` and `node_modules/@neural-ui/core/styles.scss` without removing existing providers or styles. / Añade el provider y el estilo sin eliminar configuración existente. | Remove only the provider and style entry added by the command. / Elimina únicamente el provider y la entrada de estilo añadidos.                                                   |
 | `:theme [name]`          | `--name`, `--path`, `--density=compact\|comfortable\|spacious`, `--theme=default\|high-contrast`, `--force` | Creates `[path]/[name].scss`; defaults to `src/styles/neural-ui-theme.scss`. / Crea el preset SCSS en la ruta elegida.                                                                       | Delete the generated file and any import or `data-neu-*` attributes you added. / Elimina el archivo y los imports o atributos añadidos.                                            |
 | `:layout NAME`           | `--project`, `--path`, `--force`                                                                            | Creates `NAME.component.ts`, `.html` and `.scss` with a mobile-first sidebar/toolbar shell.                                                                                                  | Delete the generated directory and any route you added; existing routes are not modified automatically. / Elimina el directorio y la ruta añadida; no se alteran rutas existentes. |
 | `:dashboard NAME`        | `--project`, `--path`, `--force`                                                                            | Creates the three component files with responsive metric/card foundations. / Genera una base responsive de métricas y tarjetas.                                                              | Delete the generated directory and its manually added route. / Elimina el directorio y su ruta añadida manualmente.                                                                |
@@ -220,7 +222,7 @@ Representative entry points:
 - **Feedback and utilities**: `@neural-ui/core/alert`, `@neural-ui/core/toast`, `@neural-ui/core/tooltip`, `@neural-ui/core/block-ui`, `@neural-ui/core/url-state`
 - **Visualization and display**: `@neural-ui/core/chart`, `@neural-ui/core/compare`, `@neural-ui/core/stats-card`, `@neural-ui/core/timeline`, `@neural-ui/core/timeline-grid`, `@neural-ui/core/scheduler-gantt`, `@neural-ui/core/meter-group`, `@neural-ui/core/knob`
 
-For the complete catalog, examples, and API tables, use the live docs at [neural-ui-showcase.vercel.app](https://neural-ui-showcase.vercel.app/es/home).
+For the complete catalog, examples, and API tables, use the live docs at [ui.neuralui.org/v1/](https://ui.neuralui.org/v1/).
 
 ---
 
@@ -230,7 +232,7 @@ Build production-ready SaaS dashboards, CRM tools, internal business apps and cl
 
 Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, authentication, roles, workspaces and a public static demo. Its source can also be adapted to another backend when required.
 
-- [Live demo](https://neural-ui-admin-pro.vercel.app/login)
+- [Live demo](https://adminpro.neuralui.org/demo/home/)
 - [Buy on Gumroad](https://trujillopete.gumroad.com/l/epbrur)
 - [Buy on Payhip](https://payhip.com/b/0apB6)
 - [Buy on Lemon Squeezy](https://pedromorenostordeve.lemonsqueezy.com/checkout/buy/52e743fd-bb93-4ce7-ae17-c8bf2718de3c)
@@ -278,7 +280,7 @@ Make sure all Angular packages, especially `@angular/cdk`, use the same 20.x min
 
 ```bash
 npm install @angular/core@20.x @angular/common@20.x @angular/forms@20.x @angular/router@20.x @angular/cdk@20.x
-npm install @neural-ui/core @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
+npm install @neural-ui/core@v1 @ng-icons/core @ng-icons/lucide apexcharts ng-apexcharts
 ```
 
 ### Angular 21.2.x — NG3004 with `FormsModule`
