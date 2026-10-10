@@ -53,6 +53,15 @@ describe('static presets', () => {
     expect(ɵNEU_PRESET_INSTALL).toBe('ɵneuPresetInstall');
     expect(typeof forest[ɵNEU_PRESET_INSTALL]).toBe('function');
     expect(Object.getOwnPropertyDescriptor(forest, ɵNEU_PRESET_INSTALL)?.enumerable).toBe(false);
+    const target = document.implementation.createHTMLDocument('Preset');
+    // Angular's server DOM implements appendChild, but not Element.append.
+    Object.defineProperty(target.head, 'append', { value: undefined });
+    forest[ɵNEU_PRESET_INSTALL](target, 'preset-nonce');
+    forest[ɵNEU_PRESET_INSTALL](target, 'preset-nonce');
+    const styles = target.head.querySelectorAll('style[data-neu-preset-style="forest"]');
+    expect(styles).toHaveLength(1);
+    expect(styles[0].getAttribute('nonce')).toBe('preset-nonce');
+    expect(styles[0].textContent).toContain('--neu-primary: #166534;');
     expect(() => defineNeuPreset({ name: 'bad"]', light: { '--neu-primary': '#166534' } })).toThrow(
       'Preset name',
     );

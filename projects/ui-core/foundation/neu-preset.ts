@@ -35,7 +35,7 @@ export function defineNeuPreset<const T extends NeuPreset & { readonly name: str
     style.setAttribute('data-neu-preset-style', preset.name);
     if (nonce) style.setAttribute('nonce', nonce);
     style.textContent = css;
-    if (!existing) document.head.append(style);
+    if (!existing) document.head.appendChild(style);
     root.setAttribute('data-neu-preset', preset.name);
   };
 
