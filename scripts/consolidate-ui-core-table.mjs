@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, unlinkSync, writeFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import ts from 'typescript';
 import { rolldown } from 'rolldown';
@@ -11,7 +11,7 @@ import { rolldown } from 'rolldown';
  * features and external secondary entrypoints are never followed.
  */
 export async function consolidateUiCoreTable(packageRoot) {
-  const entry = resolve(packageRoot, 'fesm2022/neural-ui-core-table.mjs');
+  const entry = realpathSync(resolve(packageRoot, 'fesm2022/neural-ui-core-table.mjs'));
   const directory = dirname(entry);
   const manifestPath = resolve(packageRoot, 'package.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
