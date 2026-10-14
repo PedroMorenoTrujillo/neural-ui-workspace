@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.1] - 2026-10-14
+
+### Fixed
+
+- Tabs no longer discards the first activation after a touch pan, cancelled pointer gesture or mouse drag. Click suppression is scoped to the completed gesture; a new pointer or keyboard action starts fresh.
+- Select multiple-value chips stay compact on touch screens. Inline remove buttons retain a 24px target instead of inheriting the global 44px minimum, labels truncate independently, and chip shapes remain rounded.
+
 ## [1.15.0] - 2026-09-12
 
 ### Added

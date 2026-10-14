@@ -206,6 +206,7 @@ export class NeuTabsComponent<
 
   protected onTabKeydown(event: KeyboardEvent, id: K): void {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
+    this.suppressNextClick = false;
     const enabled = this.tabs()
       .map((tab, index) => ({ tab, index }))
       .filter(({ tab }) => !tab.disabled);
@@ -230,6 +231,8 @@ export class NeuTabsComponent<
 
   startNavDrag(event: PointerEvent): void {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    // Suppression belongs to the completed drag, never to a new user gesture.
+    this.suppressNextClick = false;
     const target = event.target as HTMLElement | null;
     if (!target?.closest('.neu-tabs__nav') || target.closest('.neu-tabs__tab')) return;
     const nav = event.currentTarget as HTMLElement;
@@ -255,6 +258,7 @@ export class NeuTabsComponent<
 
   endNavDrag(event: PointerEvent): void {
     if (this.dragPointerId !== event.pointerId) return;
+    if (event.type === 'pointercancel') this.suppressNextClick = false;
     const nav = event.currentTarget as HTMLElement;
     if (nav.hasPointerCapture(event.pointerId)) nav.releasePointerCapture(event.pointerId);
     this.dragPointerId = null;

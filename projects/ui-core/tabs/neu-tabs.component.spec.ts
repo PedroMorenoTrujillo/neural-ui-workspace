@@ -497,6 +497,51 @@ describe('NeuTabsComponent N2-021', () => {
     expect(host.proposals).toEqual([]);
   });
 
+  it('accepts the first tab click of a new gesture after dragging the strip', () => {
+    const { fixture, host, component } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    const tab = fixture.nativeElement.querySelectorAll('.neu-tabs__tab')[1] as HTMLElement;
+    Object.assign(nav, { setPointerCapture: vi.fn(), hasPointerCapture: () => false });
+    component.startNavDrag({ pointerType: 'touch', pointerId: 1, clientX: 100,
+      currentTarget: nav, target: nav } as unknown as PointerEvent);
+    component.moveNavDrag({ pointerId: 1, clientX: 70, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
+    component.endNavDrag({ type: 'pointerup', pointerId: 1, currentTarget: nav } as unknown as PointerEvent);
+    // Browsers need not synthesize a click at the end of a touch pan.
+    component.startNavDrag({ pointerType: 'touch', pointerId: 2, clientX: 100,
+      currentTarget: nav, target: tab } as unknown as PointerEvent);
+    component.handleTabClick(new MouseEvent('click', { detail: 1 }), TABS[1]);
+    expect(host.proposals).toEqual(['code']);
+  });
+
+  it('does not carry click suppression out of a cancelled pointer gesture', () => {
+    const { fixture, host, component } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    Object.assign(nav, { setPointerCapture: vi.fn(), hasPointerCapture: () => false });
+    component.startNavDrag({ pointerType: 'touch', pointerId: 1, clientX: 100,
+      currentTarget: nav, target: nav } as unknown as PointerEvent);
+    component.moveNavDrag({ pointerId: 1, clientX: 70, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
+    component.endNavDrag({ type: 'pointercancel', pointerId: 1, currentTarget: nav } as unknown as PointerEvent);
+    component.handleTabClick(new MouseEvent('click'), TABS[1]);
+    expect(host.proposals).toEqual(['code']);
+  });
+
+  it('accepts keyboard activation after a pointer pan without a synthesized click', () => {
+    const { fixture, host, component } = controlledFixture();
+    const nav = fixture.nativeElement.querySelector('.neu-tabs__nav') as HTMLElement;
+    Object.assign(nav, { setPointerCapture: vi.fn(), hasPointerCapture: () => false });
+    component.startNavDrag({ pointerType: 'mouse', button: 0, pointerId: 1, clientX: 100,
+      currentTarget: nav, target: nav } as unknown as PointerEvent);
+    component.moveNavDrag({ pointerId: 1, clientX: 70, currentTarget: nav,
+      preventDefault: vi.fn() } as unknown as PointerEvent);
+    component.endNavDrag({ type: 'pointerup', pointerId: 1, currentTarget: nav } as unknown as PointerEvent);
+    const tab = fixture.nativeElement.querySelectorAll('.neu-tabs__tab')[1] as HTMLButtonElement;
+    tab.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    component.handleTabClick(new MouseEvent('click', { detail: 0 }), TABS[1]);
+    expect(host.proposals).toEqual(['code']);
+  });
+
   it('applies flush styling', () => {
     const fixture = TestBed.createComponent(NeuTabsComponent);
     fixture.componentRef.setInput('flush', true);

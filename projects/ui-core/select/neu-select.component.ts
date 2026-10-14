@@ -177,7 +177,7 @@ export type { NeuSelectOption } from './neu-select.types';
             <span class="neu-select__chips" role="list" aria-label="Selected options">
               @for (option of visibleSelectedOptions(); track optionDomId(option)) {
                 <span class="neu-select__chip" role="listitem" tabindex="-1">
-                  {{ optionLabelOf(option) }}
+                  <span class="neu-select__chip-label">{{ optionLabelOf(option) }}</span>
                   @if (!disabled() && !readonly()) {
                     <button
                       type="button"
