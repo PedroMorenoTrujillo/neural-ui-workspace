@@ -117,7 +117,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
                 <button
                   class="neu-dialog__action neu-dialog__close"
                   type="button"
-                  aria-label="Close dialog"
+                  [attr.aria-label]="closeLabel()"
                   (click)="requestClose('action', $event)"
                 >
                   <neu-icon-outlet [icon]="iconX" [fallbackPath]="closeIconPath" size="1.125rem" />
@@ -172,6 +172,8 @@ export class NeuDialogComponent {
   maximizable = input(false);
   /** Presence makes maximize state consumer-authoritative. */
   maximized = input<boolean | undefined>(undefined);
+  /** Accessible name of the close action; consumers can provide their locale. */
+  closeLabel = input('Close dialog');
   maximizeLabel = input('Maximize dialog');
   restoreLabel = input('Restore dialog');
   resizeLabel = input('Resize dialog');

@@ -115,6 +115,17 @@ describe('NeuDialogComponent', () => {
   it('should show close button when disableClose=false', async () => {
     const { f } = await mkDialog({ title: 'Test' });
     expect(f.nativeElement.querySelector('.neu-dialog__close')).toBeTruthy();
+    expect(f.nativeElement.querySelector('.neu-dialog__close').getAttribute('aria-label')).toBe('Close dialog');
+  });
+
+  it('should update the accessible close label when the consumer locale changes', async () => {
+    const { f } = await mkDialog({ closeLabel: 'Cerrar diálogo' });
+    expect(f.nativeElement.querySelector('.neu-dialog__close').getAttribute('aria-label')).toBe('Cerrar diálogo');
+    f.componentRef.setInput('closeLabel', 'Fermer la boîte de dialogue');
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.nativeElement.querySelector('.neu-dialog__close').getAttribute('aria-label')).toBe('Fermer la boîte de dialogue');
+    expect(f.componentInstance.open()).toBe(true);
   });
 
   // ── disableClose ───────────────────────────────────────────────────────────
