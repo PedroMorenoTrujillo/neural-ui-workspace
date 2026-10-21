@@ -528,7 +528,6 @@ Neural Admin Pro is a full-stack Angular and NestJS product with PostgreSQL, aut
 - [Live demo](https://neural-ui-admin-pro.vercel.app/login)
 - [Buy on Gumroad](https://trujillopete.gumroad.com/l/epbrur)
 - [Buy on Payhip](https://payhip.com/b/0apB6)
-- [Buy on Lemon Squeezy](https://pedromorenostordeve.lemonsqueezy.com/checkout/buy/52e743fd-bb93-4ce7-ae17-c8bf2718de3c)
 
 ## Peer dependencies
 
