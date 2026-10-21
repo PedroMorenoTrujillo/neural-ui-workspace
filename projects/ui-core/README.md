@@ -52,8 +52,8 @@ Neural UI implements its own components, state contracts and design tokens. Its 
 - Neural UI 2 release coverage passes the exact 95.01% floor on statements, branches, functions and lines in the full canonical run
 - Strong accessibility baseline validated in showcase and reinforced in core components
 
-For the current quality checklist and accessibility audit snapshot, see
-[the repository quality status](https://github.com/PedroMorenoTrujillo/neural-ui-workspace/blob/main/projects/ui-core/QUALITY_STATUS.md).
+The [quality snapshot above](#quality-snapshot) is generated from the canonical
+release coverage run; historical audit documents are not current compatibility guidance.
 The exact-count coverage gate is enforced by `npm run test:coverage` and the release verifier.
 
 ---
@@ -120,33 +120,164 @@ import { NeuTableComponent } from '@neural-ui/core/table';
 import { NeuToastService } from '@neural-ui/core/toast';
 ```
 
-### Table server query contract
+### Table query, remote data and controlled selection
 
-Import `NeuTableQueryState` from `@neural-ui/core/table` for server-backed
-tables. Its canonical query includes 1-based `page`, `pageSize`, global
-`search`, sorting and complete typed column-filter constraints.
-Supplying `[query]` controls the query: `queryChange` proposes an immutable
-replacement and the application echoes the accepted state. The existing
-`serverStateChange` output remains a compatibility projection.
+Import `NeuTableQuery` from `@neural-ui/core/table`. Its `page` is
+**zero-based**; `sort` is an ordered array and `filters` is a typed expression.
+Bind `[query]` and accept or reject each `queryChange` proposal explicitly.
+Table does not mutate the parent-owned query.
 
-With `serverSide=true`, `lazyLoadOnInit=true` opts into one initial load after
-initial state is resolved; it defaults to `false`. Server serialization is
-explicit: custom predicates need `serverSerializer`, and values that cannot
-be transported safely are marked `local-only` or `requires-consumer` instead
-of silently losing information. The query's `serialization` summary reports
-these cases. See the [Table API and examples](https://ui.neuralui.org/v2/en/components/table).
+Use `dataMode="remote"` and `dataRequest` for server-backed rows. Each request
+carries its query, `requestId`, `queryRevision` and optional virtual `range`.
+Return those IDs in `metadata` with the data they describe; handle loading,
+errors and cancellation in the application. The backend owns filtering,
+sorting and totals in remote mode. Register `provideHttpClient()` alongside
+`provideNeuralUI()` in the application configuration for this example.
+The example endpoint `/api/users` must return `{ items: User[], totalItems: number }`.
 
-### Table selection / Selección de Table
+```typescript
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+import {
+  NeuTableComponent,
+  NeuTableCellDirective,
+  NeuTableErrorDirective,
+  NeuTableRowDetailDirective,
+  type NeuTableColumn,
+  type NeuTableDataRequest,
+  type NeuTableMetadata,
+  type NeuTableQuery,
+  type NeuTableSelection,
+  type NeuTableSelectionOptions,
+} from '@neural-ui/core/table';
 
-Use `selectionMode="single"` for radio selection or `selectionMode="multiple"` for checkbox selection. `[selectable]="true"` remains the legacy uncontrolled-multiple alias. Passing `[selection]` makes only that slice controlled and supports preselection by `rowKey`; `selectionChange` emits the proposed `T[]` once, then the consumer echoes the authoritative replacement. / Usa `selectionMode="single"` para radio o `selectionMode="multiple"` para checkbox. `[selectable]="true"` conserva la compatibilidad múltiple no controlada. `[selection]` controla solo esa parte y permite preselección por `rowKey`.
+interface User {
+  id: string;
+  name: string;
+  active: boolean;
+}
+type Field = 'name';
+interface UserPage {
+  items: readonly User[];
+  totalItems: number;
+}
 
-`rowSelectable` disables interaction without deleting an existing controlled selection. `selectAllScope="page"` affects the current page and `"filtered"` affects filtered client rows; the default accessible label follows that scope and `selectAllAriaLabel` remains an override. In server mode both are truthful loaded-row scopes, never all server records. If canonical keys cannot resolve to loaded rows, the bar reports resolved/canonical counts and hides row-dependent actions at zero resolved rows without deleting unknown keys. / `rowSelectable` deshabilita la interacción sin borrar una selección controlada. La etiqueta accesible predeterminada distingue “todas las filas filtradas” de “todas las filas de esta página”. En servidor se muestran los recuentos resuelto/canónico y se ocultan las acciones que necesitan filas cuando no hay ninguna resuelta, sin borrar claves desconocidas.
+@Component({
+  selector: 'app-remote-users',
+  imports: [
+    NeuTableComponent,
+    NeuTableCellDirective,
+    NeuTableErrorDirective,
+    NeuTableRowDetailDirective,
+  ],
+  template: `
+    <neu-table
+      dataMode="remote"
+      [data]="rows()"
+      [metadata]="metadata()"
+      [columns]="columns"
+      [rowKey]="keyOf"
+      [query]="query()"
+      [selection]="selection()"
+      [selectionOptions]="selectionOptions"
+      [expandedKeys]="expanded()"
+      [expansionOptions]="{ enabled: true, toggleOnRowClick: false }"
+      (queryChange)="query.set($event)"
+      (selectionChange)="selection.set($event.next)"
+      (expandedKeysChange)="expanded.set($event.next)"
+      (dataRequest)="load($event)"
+    >
+      <ng-template neuTableCell="name" let-value="value">
+        <strong>{{ value }}</strong>
+      </ng-template>
+      <ng-template neuTableRowDetail let-key="key">
+        <p>Details for user {{ key }}</p>
+      </ng-template>
+      <ng-template neuTableError let-retry="retry">
+        <p role="alert">Unable to load users.</p>
+        <button type="button" (click)="retry()">Retry</button>
+      </ng-template>
+    </neu-table>
+  `,
+})
+export class RemoteUsersComponent {
+  private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
+  private pending: Subscription | undefined;
+  readonly keyOf = (row: User): string => row.id;
+  readonly rows = signal<readonly User[]>([]);
+  readonly columns: readonly NeuTableColumn<User, Field>[] = [
+    { id: 'name', field: 'name', header: 'Name', sort: { field: 'name' } },
+  ];
+  readonly query = signal<NeuTableQuery<Field>>({
+    page: 0, pageSize: 25, search: '', sort: [], filters: null,
+  });
+  readonly metadata = signal<NeuTableMetadata>({
+    totalItems: null, loading: false, error: null,
+    queryRevision: 0, appliedRequestId: null,
+  });
+  readonly selection = signal<NeuTableSelection<string, Field>>({
+    kind: 'keys', keys: [],
+  });
+  readonly selectionOptions: NeuTableSelectionOptions<User> = {
+    mode: 'multiple', indicator: 'checkbox', selectOnRowClick: false,
+    modifier: 'platform', range: true, toggleAllScope: 'loaded',
+    isRowDisabled: (row) => !row.active,
+  };
+  readonly expanded = signal<readonly string[]>([]);
 
-`rowSelect`/`rowUnselect` are row deltas and `selectAllChange` is aggregate. Single replacement order is `selectionChange`, `rowUnselect(previous)`, `rowSelect(next)`; a controlled echo is silent. Event arrays are isolated and `selectedRows()` is shallow-frozen while preserving `T` identity. `rowKey` values should be unique; with duplicates all matching rows render selected and the first current-data occurrence wins resolution. Selection persists across filtering, sorting, pagination, virtual scrolling and immutable row replacement. / Los arrays de eventos están aislados, la proyección conserva la identidad de `T` y la primera fila actual gana si hay claves duplicadas.
+  load(request: NeuTableDataRequest<Field>): void {
+    this.pending?.unsubscribe();
+    this.rows.set([]);
+    const applied = {
+      queryRevision: request.queryRevision,
+      appliedRequestId: request.requestId,
+    };
+    this.metadata.set({
+      ...applied, totalItems: null, loading: true, error: null,
+    });
+    this.pending = this.http.get<UserPage>('/api/users', {
+      params: {
+        page: request.query.page,
+        pageSize: request.query.pageSize,
+        search: request.query.search,
+        sort: JSON.stringify(request.query.sort),
+        filters: JSON.stringify(request.query.filters),
+      },
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (page) => {
+        this.rows.set(page.items);
+        this.metadata.set({
+          ...applied, totalItems: page.totalItems, loading: false, error: null,
+        });
+      },
+      error: (error: unknown) => this.metadata.set({
+        ...applied, totalItems: null, loading: false, error,
+      }),
+    });
+  }
+}
+```
 
-### Table body composition / Composición del cuerpo de Table
+Selection is key-based: `selectionChange.next` is a `NeuTableSelection`,
+not a row array. Configure its mode, indicator, disabled-row predicate and
+toggle-all scope through `selectionOptions`. The example uses the loaded
+rows only. The separate `all-matching` selection kind records a frozen query
+scope and excluded keys for remote datasets; it does not invent unloaded rows.
 
-Use `neuTableBody` when Neural should own each primary `<tr>` and your template should own its cells. Use `neuTableBodySection` for full `<tbody>` composition, including multiple sibling rows per record. The section outlet takes precedence if both templates are present. Apply `[neuTableManagedRow]="entry"` to the primary data row to retain selection, keyboard focus, ARIA, context-menu and reorder behavior; extra sibling rows remain consumer-owned. `[neuTableBodySectionOf]="rows"` optionally anchors exact row typing under `strictTemplates`. Unlimited sibling rows are supported outside virtualization; virtual contexts expose `siblingRowsSupported=false` because variable-height extra rows are not virtual records. / Usa `neuTableBody` para personalizar celdas y `neuTableBodySection` para controlar filas completas dentro de `<tbody>`.
+### Table templates and row composition
+
+Use the public `neuTableCell`, `neuTableHeader`, `neuTableFooter`,
+`neuTableRowDetail`, `neuTableEditor`, `neuTableFilter` and
+`neuTablePaginator` directives. Import each directive used by a standalone
+template from `@neural-ui/core/table`; the example imports its cell, detail
+and error directives explicitly. Table owns the primary row, focus and ARIA.
+A cell template receives its row/key and `value`; row-detail templates are
+controlled through `expandedKeys` and `expandedKeysChange.next`.
+See the [Table API and runnable recipes](https://ui.neuralui.org/v2/en/components/table)
+for grouping, export, remote virtualization and the full template contracts.
 
 ### Presets and testing / Presets y testing
 
@@ -209,10 +340,13 @@ export class LoginComponent {
 
 ## Signal Forms and state ownership
 
-Editable controls expose their documented value/model and change events. The
-application owns authoritative state; controlled outputs propose a change and
-the application echoes the accepted value. Use Angular 22 Signal Forms through
-`FormField` when building a form:
+Writable component models such as `NeuInputComponent.value` are shared state:
+`[(value)]` connects the component and application value. A model's
+`valueChange` reports the change; it is not a vetoable proposal. Table's
+`queryChange` and `selectionChange.next` are controlled proposals: the parent
+supplies the accepted replacement. Follow each component's own contract.
+
+Use Angular 22 Signal Forms through `FormField`:
 
 ```typescript
 import { Component, signal } from '@angular/core';
@@ -232,9 +366,39 @@ export class EmailFieldComponent {
 }
 ```
 
-V1 `[formControl]`/`ngModel` examples are not interchangeable with V2
-`[formField]`. Migrate to Signal Forms or connect the documented value/change
-bindings to your application-owned form state explicitly.
+Angular 22 also provides reactive and template-driven forms interop for
+compatible model controls. For example, `NeuInputComponent` supports
+`[formControl]`, `formControlName` and `ngModel`:
+
+```typescript
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NeuInputComponent } from '@neural-ui/core/input';
+
+@Component({
+  selector: 'app-compatible-fields',
+  imports: [NeuInputComponent, FormsModule, ReactiveFormsModule],
+  template: `
+    <neu-input label="Reactive control" [formControl]="control" />
+    <form [formGroup]="group">
+      <neu-input label="Named reactive control" formControlName="email" />
+    </form>
+    <neu-input label="Template-driven control" [(ngModel)]="email" />
+  `,
+})
+export class CompatibleFieldsComponent {
+  readonly control = new FormControl('', { nonNullable: true });
+  readonly group = new FormGroup({
+    email: new FormControl('', { nonNullable: true }),
+  });
+  email = '';
+}
+```
+
+This uses Angular's model-control compatibility, not a parallel Neural CVA.
+The form directives are not interchangeable bindings on the same field.
+Check the selected component's value type and supported integration; V1
+component imports and APIs still require migration.
 
 See [Signal Forms](https://ui.neuralui.org/v2/en/foundations/signal-forms) and
 [state ownership](https://ui.neuralui.org/v2/en/foundations/state-ownership).
@@ -312,7 +476,7 @@ Outputs, Models, Public Types and Templates, including the public imports.
 ### Highlights
 
 - `NeuAutocompleteComponent` supports virtual scroll for large result sets.
-- `@neural-ui/core/modal` now includes `NeuDialogService` for programmatic dialogs.
+- `@neural-ui/core/modal` exports `NeuDialogService` for programmatic dialogs.
 - Select (single and multiple), tabs, table, modal and URL-state flows were hardened with focused regression coverage.
 
 ---
@@ -341,7 +505,8 @@ All visual properties are controlled via CSS custom properties. Override them in
 }
 ```
 
-For the full token list, see `styles/_tokens.scss` in the published package source.
+For the public token inventory, use `@neural-ui/core/token-manifest.json` and
+the [theming guide](https://ui.neuralui.org/v2/en/foundations/theming).
 
 ---
 
@@ -374,7 +539,7 @@ components from the package root or from private implementation paths.
 | `@neural-ui/core/image-compare` | Review the new `@neural-ui/core/compare` API |
 | `@neural-ui/core/tags` | Review the new `@neural-ui/core/input-tags` API |
 | `@neural-ui/core/icon` | Application-owned icons and the optional foundation icon resolver |
-| `@neural-ui/core/panel-menu`, `@neural-ui/core/org-chart`, `@neural-ui/core/scheduler-gantt` | These legacy entry points are not exported by Core 2.0.0; there is no drop-in replacement |
+| `@neural-ui/core/panel-menu`, `@neural-ui/core/org-chart`, `@neural-ui/core/scheduler-gantt` | These legacy entry points are not exported by Core 2; there is no drop-in replacement |
 
 These are migration directions, not automatic renames: compare each V2 API
 and its examples before replacing a V1 component.
@@ -382,9 +547,9 @@ and its examples before replacing a V1 component.
 ### Charts in Neural UI 2
 
 Neural UI 1.x included the `@neural-ui/core/chart` entry point backed by ApexCharts.
-That entry point is **removed in Neural UI 2.0**. Charts are not replaced by another
-library inside Neural UI; Neural Charts is planned as a separate future product, with
-no package name or release date announced.
+That entry point is **not part of Core 2**. Core does not bundle ApexCharts or
+replace that V1 API with another chart library. Choose and integrate a chart
+package separately in the application.
 
 ---
 
