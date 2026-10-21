@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertPackageContents } from './lib/package-contents-policy.mjs';
 import {
   fileRecords,
   findSourceMapReferences,
@@ -62,6 +63,7 @@ try {
 
   const publishedRoot = join(npmRoot, 'package');
   const publishedFiles = walkFiles(publishedRoot);
+  assertPackageContents(publishedFiles.map((path) => relative(publishedRoot, path).replaceAll('\\', '/')));
   const publishedMaps = publishedFiles.filter((path) => path.endsWith('.map'));
   const publishedReferences = publishedFiles
     .filter(isSourceMapCarrier)

@@ -582,7 +582,7 @@ $drum-item-h: 36px;
   }
 
   &--today {
-    color: var(--neu-primary);
+    color: var(--neu-text);
     font-weight: 700;
   }
 
@@ -664,11 +664,11 @@ $drum-item-h: 36px;
   }
 
   &--today {
-    color: var(--neu-primary);
+    color: var(--neu-text);
     font-weight: 500;
 
     &:hover {
-      color: var(--neu-primary);
+      color: var(--neu-text);
     }
   }
 }

@@ -40,10 +40,10 @@ Neural UI implements its own components, state contracts and design tokens. Its 
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 2.0.1
+- **Version:** 2.0.2
 - **Entry points:** 100
-- **Automated tests:** 3233
-- **Coverage:** 96.9% statements · 95.08% branches · 95.94% functions · 98.14% lines
+- **Automated tests:** 3235
+- **Coverage:** 96.9% statements · 95.07% branches · 95.93% functions · 98.14% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
@@ -61,7 +61,7 @@ The exact-count coverage gate is enforced by `npm run test:coverage` and the rel
 ## Installation
 
 ```bash
-npm install @neural-ui/core@2.0.0 @angular/cdk@22
+npm install @neural-ui/core@2.0.2 @angular/cdk@22
 ```
 
 ---
@@ -75,7 +75,7 @@ External icon packages are optional, not peer dependencies of Core.
 Automated, additive setup / Configuración automática y aditiva:
 
 ```bash
-ng add @neural-ui/core@2.0.0
+ng add @neural-ui/core@2.0.2
 ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
 ng generate @neural-ui/core:layout app-shell
 ng generate @neural-ui/core:dashboard sales
@@ -398,4 +398,4 @@ Copyright © 2026 Pedro Moreno Trujillo. Released under the MIT License.
 
 Maintaining a Neural UI 1.x application? Use the separate
 [Neural UI v1 showcase and documentation](https://ui.neuralui.org/v1/).
-Its examples and compatibility requirements apply to V1, not this 2.0.0 package.
+Its examples and compatibility requirements apply to V1, not this V2 package.

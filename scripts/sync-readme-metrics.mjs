@@ -31,7 +31,9 @@ const files = [join(root, 'README.md'), join(root, 'projects/ui-core/README.md')
 let changed = false;
 for (const path of files) {
   const source = readFileSync(path, 'utf8');
-  const next = source.replace(/<!-- neural-ui-metrics:start -->[\s\S]*?<!-- neural-ui-metrics:end -->/, block);
+  const next = source
+    .replace(/<!-- neural-ui-metrics:start -->[\s\S]*?<!-- neural-ui-metrics:end -->/, block)
+    .replace(/((?:npm install|ng add) @neural-ui\/core@)\d+\.\d+\.\d+(?:-[\w.-]+)?/g, `$1${packageJson.version}`);
   if (next === source) continue;
   changed = true;
   if (update) writeFileSync(path, next);

@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { assertPackageContents } from './lib/package-contents-policy.mjs';
 
 const workspaceRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const packageRoot = join(workspaceRoot, 'dist', 'neural-ui', 'core');
@@ -57,6 +58,8 @@ try {
 }
 
 const packedFiles = new Set((packed[0]?.files ?? []).map((file) => file.path));
+// A full build retains maps until prepare-release-artifacts creates the separate debug archive.
+assertPackageContents([...packedFiles], { allowDebug: true });
 const missingPackedFiles = requiredFiles.filter((file) => !packedFiles.has(file));
 if (missingPackedFiles.length) {
   console.error(`npm pack would omit required files: ${missingPackedFiles.join(', ')}`);

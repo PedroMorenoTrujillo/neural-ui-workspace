@@ -35,7 +35,7 @@
     "verify:package": "node scripts/verify-ui-core-package.mjs",
     "prepare:release-artifacts": "node scripts/prepare-release-artifacts.mjs",
     "verify:release-artifacts": "node scripts/verify-release-artifacts.mjs",
-    "test:release-artifacts": "node --test scripts/release-artifacts.spec.mjs",
+    "test:release-artifacts": "node --test scripts/release-artifacts.spec.mjs scripts/package-contents-policy.spec.mjs",
     "test:bundle-optimizers": "node --test scripts/group-angular-class-metadata.spec.mjs scripts/consolidate-ui-core-table.spec.mjs scripts/compact-angular-template.spec.mjs",
     "test:package-linker": "node scripts/test-ui-core-linker.mjs",
     "verify:release": "node scripts/verify-release.mjs",
@@ -278,7 +278,8 @@
   },
   "packageManager": "npm@10.9.7",
   "overrides": {
-    "undici": "7.30.0"
+    "undici": "7.30.0",
+    "vite": "8.3.4"
   },
   "dependencies": {
     "@angular/cdk": "22.2.2",

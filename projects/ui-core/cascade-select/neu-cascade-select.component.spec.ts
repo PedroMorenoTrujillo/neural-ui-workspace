@@ -456,6 +456,54 @@ describe('NeuCascadeSelectComponent', () => {
     expect(() => fixture.componentInstance.close()).not.toThrow();
   });
 
+  it('cancels superseded focus frames and releases pending work on destroy', () => {
+    let frameId = 0;
+    const frames = new Map<number, FrameRequestCallback>();
+    const request = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++frameId, callback);
+      return frameId;
+    });
+    const cancel = vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation((id) => {
+      frames.delete(id);
+    });
+    try {
+      fixture.componentInstance.openPanel();
+      const optionFocusFrame = frameId;
+      fixture.componentInstance.close();
+      const triggerFocusFrame = frameId;
+      expect(cancel).toHaveBeenCalledWith(optionFocusFrame);
+      expect(frames.has(optionFocusFrame)).toBe(false);
+      expect(frames.has(triggerFocusFrame)).toBe(true);
+      fixture.destroy();
+      expect(cancel).toHaveBeenCalledWith(triggerFocusFrame);
+      expect(frames.has(triggerFocusFrame)).toBe(false);
+    } finally {
+      request.mockRestore();
+      cancel.mockRestore();
+    }
+  });
+
+  it('does not focus a detached trigger if a queued callback arrives after destroy', () => {
+    let callback: FrameRequestCallback | undefined;
+    const request = vi.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((next) => {
+      callback = next;
+      return 1;
+    });
+    const cancel = vi.spyOn(globalThis, 'cancelAnimationFrame').mockImplementation(() => undefined);
+    const trigger = fixture.nativeElement.querySelector('.neu-cascade-select__trigger') as HTMLElement;
+    const focus = vi.spyOn(trigger, 'focus');
+    try {
+      fixture.componentInstance.openPanel();
+      fixture.componentInstance.close();
+      fixture.destroy();
+      callback?.(0);
+      expect(focus).not.toHaveBeenCalled();
+    } finally {
+      request.mockRestore();
+      cancel.mockRestore();
+    }
+  });
+
   it('ignores a permitted dismissal request after the panel is already closed', () => {
     const component = fixture.componentInstance;
     const closed = vi.spyOn(component.optionActivated, 'emit');

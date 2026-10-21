@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.2] - Unreleased
+
+### Fixed
+
+- CascadeSelect cancels superseded animation frames and pending focus work when destroyed, preventing detached controls from receiving deferred focus calls.
+- DateInput's unselected current-day number and Today action use the theme's semantic text foreground, meeting text contrast requirements across light and dark themes.
+- Installation and `ng add` commands in both Core READMEs now follow the package version through the existing documentation synchronization gate.
+
+### Security
+
+- Development tooling overrides Vite to 8.3.4, fixing the launch-editor command execution advisories inherited through Angular's build tooling. This tooling is absent from the consumer npm package.
+- Release verification checks the exact npm tarball against a reviewed, explicit consumer file allowlist. Internal reports, tests, backups, environment files and unreviewed artifacts fail independently of size budgets. Source maps remain in their separate, checksum-linked debug artifact.
+- Negative release tests exercise forbidden file categories and missing package files. Consumer APIs remain compatible with 2.0.1.
+
 ## [2.0.1] - 2026-10-14
 
 ### Fixed

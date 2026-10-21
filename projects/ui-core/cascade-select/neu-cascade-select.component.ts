@@ -311,6 +311,11 @@ export class NeuCascadeSelectComponent<
   private readonly eventDestroyRef = inject(DestroyRef);
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private panelAttached = false;
+  private focusFrame: number | null = null;
+
+  constructor() {
+    this.eventDestroyRef.onDestroy(() => this.cancelFocusFrame());
+  }
 
   protected onPanelAttached(): void {
     if (this.eventDestroyRef.destroyed || this.panelAttached) return;
@@ -633,15 +638,28 @@ export class NeuCascadeSelectComponent<
   }
 
   private focusCurrentOption(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    requestAnimationFrame(() => this.document.getElementById(this.activeOptionId() ?? '')?.focus());
+    this.scheduleFocus(() => this.document.getElementById(this.activeOptionId() ?? '')?.focus());
   }
 
   private focusTrigger(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    requestAnimationFrame(() =>
+    this.scheduleFocus(() =>
       this.elementRef.nativeElement.querySelector<HTMLElement>(`#${this.triggerId}`)?.focus(),
     );
+  }
+
+  private scheduleFocus(focus: () => void): void {
+    if (!isPlatformBrowser(this.platformId) || this.eventDestroyRef.destroyed) return;
+    this.cancelFocusFrame();
+    this.focusFrame = requestAnimationFrame(() => {
+      this.focusFrame = null;
+      if (!this.eventDestroyRef.destroyed) focus();
+    });
+  }
+
+  private cancelFocusFrame(): void {
+    if (this.focusFrame === null) return;
+    cancelAnimationFrame(this.focusFrame);
+    this.focusFrame = null;
   }
 
   private syncPanelPosition(): void {
