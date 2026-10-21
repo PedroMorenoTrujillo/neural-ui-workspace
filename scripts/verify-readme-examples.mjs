@@ -31,6 +31,8 @@ if (errors.length) {
   console.error(errors.join('\n'));
 }
 if (!existsSync(join(packageRoot, 'package.json'))) throw new Error('Build Core before verifying README examples.');
+const compiledVersion = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')).version;
+if (compiledVersion !== version) throw new Error(`Compiled package ${compiledVersion} differs from README source version ${version}; rebuild Core first.`);
 if (snippets.length === 0) throw new Error('No README TypeScript examples found.');
 
 const temporary = mkdtempSync(join(tmpdir(), 'neural-readme-examples-'));
