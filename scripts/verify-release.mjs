@@ -13,6 +13,7 @@ const commands = [
   ['npm', ['run', 'test:release-artifacts']],
   ['npm', ['run', 'test:bundle-optimizers']],
   ['npm', ['run', 'build']],
+  ['node', ['scripts/verify-readme-examples.mjs']],
   ['npm', ['run', 'test:package-linker']],
   ['npm', ['run', 'prepare:release-artifacts']],
   ['npm', ['run', 'audit:entrypoints']],
