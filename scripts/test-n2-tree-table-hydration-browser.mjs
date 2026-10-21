@@ -45,7 +45,17 @@ try {
   );
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
   assert.equal(await page.locator('#n2-tree-primary tr[data-node-key]').count(), 3);
-  assert.equal(await page.locator('#n2-tree-virtual tr[data-node-key]').count(), 200);
+  // SSR and the first client render share a384px bootstrap; this fixture uses32px rows and overscan2.
+  const expectedBootstrapCount = Math.min(200, Math.ceil(384 / 32) + 2);
+  const serverBootstrapKeys = await page.locator('#n2-tree-virtual tr[data-node-key]')
+    .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-node-key')));
+  assert.equal(serverBootstrapKeys.length, expectedBootstrapCount);
+  assert.equal(await page.locator('#n2-tree-virtual tr[data-node-key]').first().getAttribute('aria-rowindex'), '1');
+  assert.equal(await page.locator('#n2-tree-virtual tr[data-node-key]').last().getAttribute('aria-rowindex'), String(expectedBootstrapCount));
+  assert.equal(await page.locator('#n2-tree-virtual [data-virtual-spacer="after"] td').evaluate((cell) => cell.style.blockSize), ((200 - expectedBootstrapCount) * 32) + 'px');
+  await page.evaluate(() => {
+    window.__n2TreeBootstrapRows = [...document.querySelectorAll('#n2-tree-virtual tr[data-node-key]')];
+  });
   assert.equal(await page.locator('#n2-tree-virtual table').getAttribute('aria-rowcount'), '200');
   assert.equal(await page.locator('#n2-tree-primary input[type="search"]').count(), 1);
   assert.equal(
@@ -74,7 +84,7 @@ try {
   );
   assert.equal(
     await page
-      .locator('#n2-tree-primary tr[data-node-key="string:a"] input[data-selection-indicator]')
+      .locator('#n2-tree-primary tr[data-node-key="string:a"] [data-selection-indicator] input')
       .getAttribute('aria-checked'),
     'mixed',
   );
@@ -101,6 +111,8 @@ try {
   await page.waitForFunction(
     () => document.querySelector('#n2-tree-ready')?.textContent === 'true',
   );
+  assert.deepEqual(await page.locator('#n2-tree-virtual tr[data-node-key]').evaluateAll((rows) => rows.map((row) => row.getAttribute('data-node-key'))), serverBootstrapKeys);
+  assert.ok(await page.evaluate(() => window.__n2TreeBootstrapRows.every((node, index) => node === document.querySelectorAll('#n2-tree-virtual tr[data-node-key]')[index])));
   await page.waitForFunction(
     () =>
       document.querySelector('#n2-tree-diagnostic-events')?.textContent ===
@@ -290,9 +302,9 @@ try {
   assert.equal(await page.locator('#n2-tree-primary table').getAttribute('tabindex'), '-1');
 
   const childSelection = page.locator(
-    '#n2-tree-primary tr[data-node-key="string:b"] input[data-selection-indicator]',
+    '#n2-tree-primary tr[data-node-key="string:b"] [data-selection-indicator] input',
   );
-  await childSelection.click();
+  await childSelection.locator('..').click();
   await page.waitForTimeout(20);
   assert.equal(
     await page.locator('#n2-tree-events').textContent(),
@@ -306,7 +318,7 @@ try {
   );
   assert.equal(await childSelection.isChecked(), false);
   await page.locator('#n2-tree-accept-selection').click();
-  await childSelection.click();
+  await childSelection.locator('..').click();
   await page.waitForTimeout(20);
   assert.equal(
     await page.locator('#n2-tree-events').textContent(),
@@ -321,7 +333,7 @@ try {
   assert.equal(await childSelection.isChecked(), true);
   assert.equal(
     await page
-      .locator('#n2-tree-primary tr[data-node-key="string:a"] input[data-selection-indicator]')
+      .locator('#n2-tree-primary tr[data-node-key="string:a"] [data-selection-indicator] input')
       .getAttribute('aria-checked'),
     'true',
   );
