@@ -25,7 +25,7 @@ const run = (command, args, cwd) => {
   return result.stdout;
 };
 
-run(node, [join(root, 'scripts/build-ui-core.mjs')], root);
+// Verification-only worktree: use package extracted from the immutable release tarball.
 const prepared = run(
   node,
   [join(root, 'scripts/prepare-h9-browser-consumer.mjs'), '--hydrate'],

@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +10,8 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 }
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-tree-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+mkdirSync(join(fixture, 'node_modules/@neural-ui'), { recursive: true });
+cpSync(join(root, 'dist/neural-ui/core'), join(fixture, 'node_modules/@neural-ui/core'), { recursive: true });
 cpSync(join(root, 'projects/ui-core/styles'), join(fixture, 'src/ui-core/styles'), { recursive: true });
 const trackedTreeTableFiles = new Set(
   execFileSync('git', ['ls-files', '--', 'projects/ui-core/tree-table'], {
@@ -94,7 +96,6 @@ ts.include = [
   'src/main.server.ts',
   'src/server.ts',
   'src/n2-tree-table-hydration.component.ts',
-  'src/ui-core/**/*.ts',
 ];
 ts.exclude = ['src/ui-core/**/*.spec.ts'];
 writeFileSync(tsPath, `${JSON.stringify(ts, null, 2)}\n`);

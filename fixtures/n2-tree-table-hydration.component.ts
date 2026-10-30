@@ -21,7 +21,7 @@ import {
   type NeuTreeTableSelection,
   type NeuTreeTableSelectionChange,
   type NeuTreeTableSelectionOptions,
-} from './ui-core/tree-table/public/public-api';
+} from '@neural-ui/core/tree-table';
 
 interface Row {
   readonly id: string;

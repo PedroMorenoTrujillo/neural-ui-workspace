@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,13 +9,12 @@ if (!existsSync(join(dependencies, '@angular/ssr/package.json'))) {
 }
 const fixture = mkdtempSync(join(dirname(dependencies), '.n2-table-hydration-'));
 cpSync(join(root, 'fixtures/compatibility-consumer'), fixture, { recursive: true });
+mkdirSync(join(fixture, 'node_modules/@neural-ui'), { recursive: true });
+cpSync(join(root, 'dist/neural-ui/core'), join(fixture, 'node_modules/@neural-ui/core'), { recursive: true });
 cpSync(join(root, 'projects/ui-core/styles'), join(fixture, 'src/styles'), { recursive: true });
 const resolutionPath = join(fixture, 'tsconfig.json');
 const resolution = JSON.parse(readFileSync(resolutionPath, 'utf8'));
-resolution.compilerOptions.paths = {
-  '@neural-ui/core': [join(root, 'dist/neural-ui/core')],
-  '@neural-ui/core/*': [join(root, 'dist/neural-ui/core/*')],
-};
+delete resolution.compilerOptions.paths;
 writeFileSync(resolutionPath, `${JSON.stringify(resolution, null, 2)}\n`);
 cpSync(join(root, 'projects/ui-core/table'), join(fixture, 'src/neu-table'), {
   recursive: true,
@@ -92,7 +91,6 @@ ts.include = [
   'src/main.server.ts',
   'src/server.ts',
   'src/n2-table-hydration.component.ts',
-  'src/neu-table/**/*.ts',
 ];
 ts.exclude = ['src/neu-table/**/*.spec.ts'];
 writeFileSync(tsPath, `${JSON.stringify(ts, null, 2)}\n`);

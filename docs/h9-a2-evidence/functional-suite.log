@@ -1,8 +1,0 @@
-npm run test:coverage:components
- Test Files  149 passed (149)
-      Tests  3218 passed (3218)
-Statements   : 98.16% ( 23871/24317 )
-Branches     : 96.51% ( 15971/16547 )
-Functions    : 98.6% ( 5007/5078 )
-Lines        : 98.87% ( 18682/18895 )
-Component coverage gate passed: 98 components are at least 95% for statements, branches, functions, lines.

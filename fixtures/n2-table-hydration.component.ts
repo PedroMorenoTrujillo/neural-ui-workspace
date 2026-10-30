@@ -29,7 +29,7 @@ import {
   type NeuTableSelectionChange,
   type NeuTableSelectionOptions,
   type NeuTableSortOptions,
-} from './neu-table/public/public-api';
+} from '@neural-ui/core/table';
 
 interface HydrationRow {
   readonly id: number;
