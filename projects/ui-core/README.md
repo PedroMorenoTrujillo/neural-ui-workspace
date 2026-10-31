@@ -43,7 +43,7 @@ Neural UI implements its own components, state contracts and design tokens. Its 
 - **Version:** 2.0.4
 - **Entry points:** 100
 - **Automated tests:** 3241
-- **Coverage:** 97.03% statements · 95.19% branches · 96.08% functions · 98.27% lines
+- **Coverage:** 96.9% statements · 95.08% branches · 95.93% functions · 98.14% lines
 <!-- neural-ui-metrics:end -->
 
 - Signals-first architecture across `ui-core`
