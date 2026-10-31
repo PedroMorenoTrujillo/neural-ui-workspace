@@ -91,7 +91,7 @@ describe('NeuDialogComponent', () => {
       f.detectChanges();
       await f.whenStable();
       expect(frame.style.height).toBe('350px');
-      expect(frame.style.top).toBe('160px');
+      expect(frame.style.inset).toBe('160px auto auto 0px');
       expect(frame.style.width).toBe('390px');
       viewport.height = 180;
       viewport.dispatchEvent(new Event('resize'));
