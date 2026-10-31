@@ -4,18 +4,18 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1481,
-    "bindingDelta": 314,
+    "declarationBindings": 1482,
+    "bindingDelta": 315,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 857,
+    "newlyDiscovered": 858,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
       "declaration-or-selector-was-not-recorded": 432,
       "model-binding-was-not-supported": 24,
-      "multiline-annotated-or-compound-declaration-was-missed": 395
+      "multiline-annotated-or-compound-declaration-was-missed": 396
     }
   },
   "mappings": [
@@ -4736,6 +4736,10 @@
     {
       "id": "./menu#NeuTieredMenuComponent.output:itemClick",
       "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./modal#NeuDialogComponent.input:closeLabel",
+      "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
       "id": "./modal#NeuDialogComponent.input:draggable",

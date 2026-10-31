@@ -24489,6 +24489,16 @@
       "signature": "export declare class NeuDialogComponent {\n}",
       "members": [
         {
+          "id": "./modal#NeuDialogComponent.input:closeLabel",
+          "name": "closeLabel",
+          "kind": "input",
+          "publicName": "closeLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "closeLabel: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
           "id": "./modal#NeuDialogComponent.input:disableClose",
           "name": "disableClose",
           "kind": "input",
@@ -24754,7 +24764,7 @@
           "kind": "property",
           "static": true,
           "status": "INTERNAL/UNSUPPORTED",
-          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuDialogComponent, \"neu-dialog\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"responsive\": {\n        \"alias\": \"responsive\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreFocus\": {\n        \"alias\": \"restoreFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"draggable\": {\n        \"alias\": \"draggable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximizable\": {\n        \"alias\": \"maximizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximized\": {\n        \"alias\": \"maximized\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximizeLabel\": {\n        \"alias\": \"maximizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreLabel\": {\n        \"alias\": \"restoreLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizeLabel\": {\n        \"alias\": \"resizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closeRequested\": \"closeRequested\";\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"maximizedChange\": \"maximizedChange\";\n}, never, [\n    \"*\",\n    \"[neu-dialog-footer]\"\n], true, never>;"
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuDialogComponent, \"neu-dialog\", never, {\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"title\": {\n        \"alias\": \"title\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"size\": {\n        \"alias\": \"size\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"layout\": {\n        \"alias\": \"layout\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disableClose\": {\n        \"alias\": \"disableClose\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"responsive\": {\n        \"alias\": \"responsive\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreFocus\": {\n        \"alias\": \"restoreFocus\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"draggable\": {\n        \"alias\": \"draggable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizable\": {\n        \"alias\": \"resizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximizable\": {\n        \"alias\": \"maximizable\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximized\": {\n        \"alias\": \"maximized\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"maximizeLabel\": {\n        \"alias\": \"maximizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"restoreLabel\": {\n        \"alias\": \"restoreLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"resizeLabel\": {\n        \"alias\": \"resizeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"closeLabel\": {\n        \"alias\": \"closeLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"closeRequested\": \"closeRequested\";\n    \"opened\": \"opened\";\n    \"closed\": \"closed\";\n    \"maximizedChange\": \"maximizedChange\";\n}, never, [\n    \"*\",\n    \"[neu-dialog-footer]\"\n], true, never>;"
         },
         {
           "id": "./modal#NeuDialogComponent.property:ɵfac",
@@ -58078,6 +58088,18 @@
       "signature": "readonly total: import(\"@angular/core\").InputSignal<number>;"
     },
     {
+      "id": "./modal#NeuDialogComponent.input:closeLabel",
+      "entrypoint": "./modal",
+      "declaration": "NeuDialogComponent",
+      "selector": "neu-dialog",
+      "propertyName": "closeLabel",
+      "publicName": "closeLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "closeLabel: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
       "id": "./modal#NeuDialogComponent.input:disableClose",
       "entrypoint": "./modal",
       "declaration": "NeuDialogComponent",
@@ -66866,19 +66888,19 @@
       "type": 199,
       "variable": 47
     },
-    "publicSymbols": 5332,
+    "publicSymbols": 5333,
     "statuses": {
-      "SUPPORTED": 3356,
+      "SUPPORTED": 3357,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
       "INTERNAL/UNSUPPORTED": 1976,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1229,
+      "input": 1230,
       "output": 228,
       "model": 24,
-      "total": 1481
+      "total": 1482
     },
     "designTokens": 251
   }

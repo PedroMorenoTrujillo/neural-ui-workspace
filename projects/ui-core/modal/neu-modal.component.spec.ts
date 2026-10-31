@@ -66,6 +66,50 @@ async function mkDialog(inputs: Record<string, unknown> = {}) {
 // ── NeuDialogComponent ────────────────────────────────────────────────────────
 
 describe('NeuDialogComponent', () => {
+  it('uses the consuming application close label without changing the default', async () => {
+    const { f } = await mkDialog({ closeLabel: 'Cerrar diálogo' });
+    expect(f.nativeElement.querySelector('.neu-dialog__close').getAttribute('aria-label')).toBe(
+      'Cerrar diálogo',
+    );
+  });
+  it('keeps the dialog frame aligned with a keyboard-sized visual viewport', async () => {
+    const original = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+    const viewport = Object.assign(new EventTarget(), {
+      width: 390,
+      height: 844,
+      offsetTop: 0,
+      offsetLeft: 0,
+    });
+    Object.defineProperty(window, 'visualViewport', { configurable: true, value: viewport });
+    try {
+      const { f } = await mkDialog();
+      const frame = f.nativeElement.querySelector('.neu-dialog__visual-viewport') as HTMLElement;
+      expect(frame.style.height).toBe('844px');
+      viewport.height = 350;
+      viewport.offsetTop = 160;
+      viewport.dispatchEvent(new Event('resize'));
+      f.detectChanges();
+      await f.whenStable();
+      expect(frame.style.height).toBe('350px');
+      expect(frame.style.top).toBe('160px');
+      expect(frame.style.width).toBe('390px');
+      const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
+      expect(panel.classList.contains('neu-dialog__panel--compact-height')).toBe(false);
+      viewport.height = 180;
+      viewport.dispatchEvent(new Event('resize'));
+      f.detectChanges();
+      await f.whenStable();
+      expect(panel.classList.contains('neu-dialog__panel--compact-height')).toBe(true);
+      viewport.height = 844;
+      viewport.dispatchEvent(new Event('resize'));
+      f.detectChanges();
+      await f.whenStable();
+      expect(panel.classList.contains('neu-dialog__panel--compact-height')).toBe(false);
+    } finally {
+      if (original) Object.defineProperty(window, 'visualViewport', original);
+      else Reflect.deleteProperty(window, 'visualViewport');
+    }
+  });
   // ── Rendering básico ───────────────────────────────────────────────────────
 
   it('should not render panel when open=false', async () => {
@@ -225,7 +269,7 @@ describe('NeuDialogComponent', () => {
     const viewport = f.nativeElement.querySelector('.neu-dialog__viewport') as HTMLElement;
     expect(viewport).toBeTruthy();
     expect(panel.parentElement).toBe(viewport);
-    expect(viewport.parentElement).toBe(f.nativeElement);
+    expect(viewport.closest('[style*="--neu-dialog-height"]')).toBe(f.nativeElement);
   });
 
   it('should center declarative panels through a viewport wrapper without stretching auto layout', async () => {
@@ -233,7 +277,11 @@ describe('NeuDialogComponent', () => {
     const viewport = f.nativeElement.querySelector('.neu-dialog__viewport') as HTMLElement;
     const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
 
-    expect(getComputedStyle(viewport).position).toBe('fixed');
+    const visualViewport = f.nativeElement.querySelector(
+      '.neu-dialog__visual-viewport',
+    ) as HTMLElement;
+    expect(getComputedStyle(visualViewport).position).toBe('fixed');
+    expect(getComputedStyle(viewport).position).toBe('absolute');
     expect(getComputedStyle(viewport).display).toBe('flex');
     expect(getComputedStyle(panel).position).toBe('relative');
     expect(getComputedStyle(panel).height).toBe('var(--neu-dialog-height, auto)');

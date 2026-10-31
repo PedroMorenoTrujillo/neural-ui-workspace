@@ -18,7 +18,11 @@ import {
   viewChild,
 } from '@angular/core';
 import { NeuFocusTrapDirective } from '@neural-ui/core/focus-trap';
-import { InternalNeuIconOutletComponent, neuCloseIconPath } from '@neural-ui/core/icon-outlet-internal';
+import { observeDialogViewport } from './neu-dialog-viewport';
+import {
+  InternalNeuIconOutletComponent,
+  neuCloseIconPath,
+} from '@neural-ui/core/icon-outlet-internal';
 import { neuIconX as iconX } from '@neural-ui/core/internal';
 import { InternalNeuOverlayStack, NeuIdGenerator } from '@neural-ui/core/internal';
 import {
@@ -68,80 +72,96 @@ export type NeuDialogLayout = 'auto' | 'viewport';
         aria-hidden="true"
       ></div>
 
-      <div class="neu-dialog__viewport">
-        <!-- Panel -->
-        <div
-          #panel
-          class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
-          [class.neu-dialog__panel--responsive]="responsive()"
-          [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
-          [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
-          [class.neu-dialog__panel--maximized]="effectiveMaximized()"
-          role="dialog"
-          tabindex="-1"
-          [neuFocusTrap]="isTopOverlay()"
-          [id]="'neu-dialog-' + _uid"
-          [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
-          [attr.aria-modal]="true"
-          (keydown)="onPanelKeydown($event)"
-          (pointermove)="onPointerMove($event)"
-          (pointerup)="onPointerEnd($event)"
-          (pointercancel)="onPointerEnd($event)"
-        >
-          <!-- Header -->
-          <div class="neu-dialog__header" (pointerdown)="onDragStart($event)">
-            <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
-            <div class="neu-dialog__actions">
-              @if (maximizable()) {
-                <button
-                  class="neu-dialog__action neu-dialog__maximize"
-                  type="button"
-                  [attr.aria-label]="effectiveMaximized() ? restoreLabel() : maximizeLabel()"
-                  [attr.aria-pressed]="effectiveMaximized()"
-                  (click)="toggleMaximize()"
-                >
-                  <span class="neu-dialog__maximize-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none">
-                      @if (effectiveMaximized()) {
-                        <path d="m14 10 7-7m0 0v6m0-6h-6M10 14l-7 7m0 0v-6m0 6h6" />
-                      } @else {
-                        <path
-                          d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"
-                        />
-                      }
-                    </svg>
-                  </span>
-                </button>
-              }
-              @if (!disableClose()) {
-                <button
-                  class="neu-dialog__action neu-dialog__close"
-                  type="button"
-                  aria-label="Close dialog"
-                  (click)="requestClose('action', $event)"
-                >
-                  <neu-icon-outlet [icon]="iconX" [fallbackPath]="closeIconPath" size="1.125rem" />
-                </button>
-              }
+      <div
+        class="neu-dialog__visual-viewport"
+        [style.inset]="visualViewport() ? 'auto' : null"
+        [style.top.px]="visualViewport()?.top"
+        [style.left.px]="visualViewport()?.left"
+        [style.width.px]="visualViewport()?.width"
+        [style.height.px]="visualViewport()?.height"
+      >
+        <div class="neu-dialog__viewport">
+          <!-- Panel -->
+          <div
+            #panel
+            class="neu-dialog__panel neu-dialog__panel--{{ size() }}"
+            [class.neu-dialog__panel--responsive]="responsive()"
+            [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
+            [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
+            [class.neu-dialog__panel--maximized]="effectiveMaximized()"
+            [class.neu-dialog__panel--compact-height]="(visualViewport()?.height ?? 999) < 240"
+            role="dialog"
+            tabindex="-1"
+            [neuFocusTrap]="isTopOverlay()"
+            [id]="'neu-dialog-' + _uid"
+            [attr.aria-labelledby]="'neu-dialog-title-' + _uid"
+            [attr.aria-modal]="true"
+            (keydown)="onPanelKeydown($event)"
+            (pointermove)="onPointerMove($event)"
+            (pointerup)="onPointerEnd($event)"
+            (pointercancel)="onPointerEnd($event)"
+          >
+            <!-- Header -->
+            <div class="neu-dialog__header" (pointerdown)="onDragStart($event)">
+              <h2 class="neu-dialog__title" [id]="'neu-dialog-title-' + _uid">{{ title() }}</h2>
+              <div class="neu-dialog__actions">
+                @if (maximizable()) {
+                  <button
+                    class="neu-dialog__action neu-dialog__maximize"
+                    type="button"
+                    [attr.aria-label]="effectiveMaximized() ? restoreLabel() : maximizeLabel()"
+                    [attr.aria-pressed]="effectiveMaximized()"
+                    (click)="toggleMaximize()"
+                  >
+                    <span class="neu-dialog__maximize-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        @if (effectiveMaximized()) {
+                          <path d="m14 10 7-7m0 0v6m0-6h-6M10 14l-7 7m0 0v-6m0 6h6" />
+                        } @else {
+                          <path
+                            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"
+                          />
+                        }
+                      </svg>
+                    </span>
+                  </button>
+                }
+                @if (!disableClose()) {
+                  <button
+                    class="neu-dialog__action neu-dialog__close"
+                    type="button"
+                    [attr.aria-label]="closeLabel()"
+                    (click)="requestClose('action', $event)"
+                  >
+                    <neu-icon-outlet
+                      [icon]="iconX"
+                      [fallbackPath]="closeIconPath"
+                      size="1.125rem"
+                    />
+                  </button>
+                }
+              </div>
             </div>
-          </div>
 
-          <!-- Body -->
-          <div class="neu-dialog__body">
-            <ng-content />
-          </div>
+            <!-- Body -->
+            <div class="neu-dialog__body">
+              <div class="neu-dialog__content">
+                <ng-content />
+              </div>
+            </div>
 
-          <!-- Footer (opcional via slot) -->
-          <ng-content select="[neu-dialog-footer]" />
-          @if (resizable() && !effectiveMaximized()) {
-            <button
-              class="neu-dialog__resize-handle"
-              type="button"
-              [attr.aria-label]="resizeLabel()"
-              (pointerdown)="onResizeStart($event)"
-              (keydown)="onResizeKeydown($event)"
-            ></button>
-          }
+            <!-- Footer (opcional via slot) -->
+            <ng-content select="[neu-dialog-footer]" />
+            @if (resizable() && !effectiveMaximized()) {
+              <button
+                class="neu-dialog__resize-handle"
+                type="button"
+                [attr.aria-label]="resizeLabel()"
+                (pointerdown)="onResizeStart($event)"
+                (keydown)="onResizeKeydown($event)"
+              ></button>
+            }
+          </div>
         </div>
       </div>
     }
@@ -175,6 +195,8 @@ export class NeuDialogComponent {
   maximizeLabel = input('Maximize dialog');
   restoreLabel = input('Restore dialog');
   resizeLabel = input('Resize dialog');
+  /** Accessible label of the close action, owned by the consuming locale. */
+  closeLabel = input('Close dialog');
 
   /** Consumer-owned close intent. Applied `open` remains unchanged. */
   readonly closeRequested = output<NeuCloseRequest>();
@@ -184,6 +206,7 @@ export class NeuDialogComponent {
   private readonly focusTrapRef = viewChild(NeuFocusTrapDirective);
   /* v8 ignore stop */
   private readonly document = inject(DOCUMENT);
+  protected readonly visualViewport = observeDialogViewport(this.open, this.document);
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
@@ -253,7 +276,8 @@ export class NeuDialogComponent {
         return;
       }
 
-      this.previousActiveElement ??= this.activationOrigin ?? this.document.activeElement as HTMLElement | null;
+      this.previousActiveElement ??=
+        this.activationOrigin ?? (this.document.activeElement as HTMLElement | null);
       queueMicrotask(() => {
         if (
           epoch === this.focusEpoch &&
@@ -277,10 +301,7 @@ export class NeuDialogComponent {
       this.focusEpoch += 1;
       const target = this.previousActiveElement;
       this.previousActiveElement = null;
-      if (
-        this.restoreFocus() &&
-        wasTop
-      ) {
+      if (this.restoreFocus() && wasTop) {
         this.restoreFocusTarget(target);
       }
       this.lowerOverlayOwner = null;
@@ -302,10 +323,13 @@ export class NeuDialogComponent {
     this.activationOrigin = this.isValidFocusTarget(target) ? target : null;
     // Some browsers activate a button without focusing it. Keep the actual
     // click origin only until that interaction's Angular render has applied.
-    this.activationOriginCleanup = afterNextRender(() => {
-      this.activationOrigin = null;
-      this.activationOriginCleanup = null;
-    }, { injector: this.injector });
+    this.activationOriginCleanup = afterNextRender(
+      () => {
+        this.activationOrigin = null;
+        this.activationOriginCleanup = null;
+      },
+      { injector: this.injector },
+    );
   }
 
   requestClose(reason: 'escape' | 'backdrop' | 'action', event: Event): void {
@@ -531,11 +555,7 @@ export class NeuDialogComponent {
     }
 
     queueMicrotask(() => {
-      if (
-        epoch === this.focusEpoch &&
-        !this.open() &&
-        !this.destroyRef.destroyed
-      ) {
+      if (epoch === this.focusEpoch && !this.open() && !this.destroyRef.destroyed) {
         this.restoreFocusTarget(target, lowerOwner);
         if (this.previousActiveElement === target) this.previousActiveElement = null;
       }
@@ -547,19 +567,30 @@ export class NeuDialogComponent {
       !target?.isConnected ||
       target.ownerDocument !== this.document ||
       target.matches(':disabled, [aria-disabled="true"]')
-    ) return false;
+    )
+      return false;
 
     for (let element: HTMLElement | null = target; element; element = element.parentElement) {
-      if (element.hidden || element.hasAttribute('inert') || element.getAttribute('aria-hidden') === 'true') return false;
+      if (
+        element.hidden ||
+        element.hasAttribute('inert') ||
+        element.getAttribute('aria-hidden') === 'true'
+      )
+        return false;
       const style = this.document.defaultView?.getComputedStyle(element);
-      if (style?.display === 'none' || style?.visibility === 'hidden' || style?.visibility === 'collapse') return false;
+      if (
+        style?.display === 'none' ||
+        style?.visibility === 'hidden' ||
+        style?.visibility === 'collapse'
+      )
+        return false;
     }
     return true;
   }
 
   private onNeuOverlayDeactivated(nextOwner: object | undefined): void {
-    this.lowerOverlayOwner = this.restoreFocus() && nextOwner instanceof NeuDialogComponent
-      ? nextOwner : null;
+    this.lowerOverlayOwner =
+      this.restoreFocus() && nextOwner instanceof NeuDialogComponent ? nextOwner : null;
   }
 
   private restoreFocusTarget(

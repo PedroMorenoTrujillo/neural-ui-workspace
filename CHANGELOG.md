@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.4] - 2026-10-31
+
+### Fixed
+
+- Password controls can shrink inside narrow grid layouts without overflowing in Firefox and WebKit.
+- Declarative dialogs follow the browser's visual viewport when a mobile keyboard opens, scrolls or changes orientation. Viewport listeners are removed when the dialog closes or is destroyed.
+- Dialog content keeps its trailing padding in WebKit after focus and scrolling, and compact headers preserve room for actions with short landscape keyboard viewports.
+
+### Added
+
+- Declarative dialogs accept a `closeLabel` input for an accessible, localized close button label.
+
 ## [2.0.3] - 2026-10-21
 
 ### Fixed
