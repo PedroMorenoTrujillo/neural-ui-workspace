@@ -72,14 +72,7 @@ export type NeuDialogLayout = 'auto' | 'viewport';
         aria-hidden="true"
       ></div>
 
-      <div
-        class="neu-dialog__visual-viewport"
-        [style.inset]="visualViewport() ? 'auto' : null"
-        [style.top.px]="visualViewport()?.top"
-        [style.left.px]="visualViewport()?.left"
-        [style.width.px]="visualViewport()?.width"
-        [style.height.px]="visualViewport()?.height"
-      >
+      <div class="neu-dialog__visual-viewport" [style]="visualViewport()">
         <div class="neu-dialog__viewport">
           <!-- Panel -->
           <div
@@ -89,7 +82,6 @@ export type NeuDialogLayout = 'auto' | 'viewport';
             [class.neu-dialog__panel--layout-auto]="layout() === 'auto'"
             [class.neu-dialog__panel--layout-viewport]="layout() === 'viewport'"
             [class.neu-dialog__panel--maximized]="effectiveMaximized()"
-            [class.neu-dialog__panel--compact-height]="(visualViewport()?.height ?? 999) < 240"
             role="dialog"
             tabindex="-1"
             [neuFocusTrap]="isTopOverlay()"
