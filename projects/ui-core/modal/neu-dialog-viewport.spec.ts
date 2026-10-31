@@ -23,18 +23,24 @@ describe('dialog visual viewport', () => {
     const open = signal(false);
     const bounds = TestBed.runInInjectionContext(() => observeDialogViewport(open, document));
     TestBed.tick();
-    expect(bounds()).toBeNull();
+    expect(bounds()).toEqual('');
     open.set(true);
     TestBed.tick();
-    expect(bounds()).toEqual({ top: 0, left: 0, width: 390, height: 844 });
+    expect(bounds()).toEqual('inset:0px auto auto 0px;width:390px;height:844px');
+    const unchanged = bounds();
+    viewport.dispatchEvent(new Event('resize'));
+    expect(bounds()).toBe(unchanged);
     viewport.height = 390;
     viewport.offsetTop = 120;
     viewport.dispatchEvent(new Event('resize'));
-    expect(bounds()).toEqual({ top: 120, left: 0, width: 390, height: 390 });
+    expect(bounds()).toEqual('inset:120px auto auto 0px;width:390px;height:390px');
     viewport.offsetTop = 160;
     viewport.offsetLeft = 12;
     viewport.dispatchEvent(new Event('scroll'));
-    expect(bounds()).toEqual({ top: 160, left: 12, width: 390, height: 390 });
+    expect(bounds()).toEqual('inset:160px auto auto 12px;width:390px;height:390px');
+    viewport.height = 180;
+    viewport.dispatchEvent(new Event('resize'));
+    expect(bounds()).toContain('height:180px');
   });
 
   it('removes listeners on close and destroy and reads fresh geometry on reopen', () => {
@@ -49,10 +55,10 @@ describe('dialog visual viewport', () => {
     expect(remove).toHaveBeenCalledTimes(2);
     viewport.height = 375;
     viewport.dispatchEvent(new Event('resize'));
-    expect(bounds()).toBeNull();
+    expect(bounds()).toEqual('');
     open.set(true);
     TestBed.tick();
-    expect(bounds()?.height).toBe(375);
+    expect(bounds()).toContain('height:375px');
     TestBed.resetTestingModule();
     expect(remove).toHaveBeenCalledTimes(4);
   });
@@ -65,8 +71,8 @@ describe('dialog visual viewport', () => {
       observeDialogViewport(open, { defaultView: null }),
     );
     TestBed.tick();
-    expect(browser()).toBeNull();
-    expect(server()).toBeNull();
+    expect(browser()).toEqual('');
+    expect(server()).toEqual('');
   });
 
   it('discards invalid geometry and clamps overscroll offsets', () => {
@@ -77,14 +83,14 @@ describe('dialog visual viewport', () => {
       observeDialogViewport(signal(true), document),
     );
     TestBed.tick();
-    expect(bounds()).toBeNull();
+    expect(bounds()).toEqual('');
     viewport.width = 390;
     viewport.offsetTop = -8;
     viewport.offsetLeft = -4;
     viewport.dispatchEvent(new Event('resize'));
-    expect(bounds()).toEqual({ top: 0, left: 0, width: 390, height: 844 });
+    expect(bounds()).toEqual('inset:0px auto auto 0px;width:390px;height:844px');
     viewport.height = Number.NaN;
     viewport.dispatchEvent(new Event('resize'));
-    expect(bounds()).toBeNull();
+    expect(bounds()).toEqual('');
   });
 });

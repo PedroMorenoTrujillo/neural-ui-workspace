@@ -91,20 +91,18 @@ describe('NeuDialogComponent', () => {
       f.detectChanges();
       await f.whenStable();
       expect(frame.style.height).toBe('350px');
-      expect(frame.style.top).toBe('160px');
+      expect(frame.style.inset).toBe('160px auto auto 0px');
       expect(frame.style.width).toBe('390px');
-      const panel = f.nativeElement.querySelector('.neu-dialog__panel') as HTMLElement;
-      expect(panel.classList.contains('neu-dialog__panel--compact-height')).toBe(false);
       viewport.height = 180;
       viewport.dispatchEvent(new Event('resize'));
       f.detectChanges();
       await f.whenStable();
-      expect(panel.classList.contains('neu-dialog__panel--compact-height')).toBe(true);
+      expect(frame.style.height).toBe('180px');
       viewport.height = 844;
       viewport.dispatchEvent(new Event('resize'));
       f.detectChanges();
       await f.whenStable();
-      expect(panel.classList.contains('neu-dialog__panel--compact-height')).toBe(false);
+      expect(frame.style.height).toBe('844px');
     } finally {
       if (original) Object.defineProperty(window, 'visualViewport', original);
       else Reflect.deleteProperty(window, 'visualViewport');

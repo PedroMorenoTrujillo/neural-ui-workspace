@@ -1,28 +1,15 @@
 import { effect, Signal, signal } from '@angular/core';
 
-export interface DialogViewport {
-  readonly top: number;
-  readonly left: number;
-  readonly width: number;
-  readonly height: number;
-}
-
 /** A soft keyboard can shrink the visual viewport without changing dvh. */
 export function observeDialogViewport(
   open: Signal<boolean>,
   document: Pick<Document, 'defaultView'>,
-): Signal<DialogViewport | null> {
-  const bounds = signal<DialogViewport | null>(null, {
-    equal: (previous, next) =>
-      previous?.top === next?.top &&
-      previous?.left === next?.left &&
-      previous?.width === next?.width &&
-      previous?.height === next?.height,
-  });
+): Signal<string> {
+  const bounds = signal('');
 
   effect((onCleanup) => {
     if (!open()) {
-      bounds.set(null);
+      bounds.set('');
       return;
     }
     const viewport = document.defaultView?.visualViewport;
@@ -34,10 +21,12 @@ export function observeDialogViewport(
         width <= 0 ||
         height <= 0
       ) {
-        bounds.set(null);
+        bounds.set('');
         return;
       }
-      bounds.set({ top: Math.max(0, offsetTop), left: Math.max(0, offsetLeft), width, height });
+      bounds.set(
+        `inset:${Math.max(0, offsetTop)}px auto auto ${Math.max(0, offsetLeft)}px;width:${width}px;height:${height}px`,
+      );
     };
     update();
     viewport.addEventListener('resize', update);

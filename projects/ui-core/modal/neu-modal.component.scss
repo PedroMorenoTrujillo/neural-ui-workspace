@@ -104,6 +104,7 @@ neu-dialog {
 .neu-dialog__visual-viewport {
   position: fixed;
   inset: 0;
+  container: neu-dialog / size;
   z-index: var(--neu-z-modal, 200);
   pointer-events: none;
 }
@@ -111,11 +112,9 @@ neu-dialog {
 .neu-dialog__viewport {
   position: absolute;
   inset: var(--neu-dialog-inset, 0);
-  z-index: var(--neu-z-modal, 200);
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
   min-width: 0;
   min-height: 0;
 }
@@ -358,7 +357,7 @@ neu-dialog {
   padding: var(--neu-dialog-body-padding, var(--neu-space-5, 1.25rem));
 }
 
-.neu-dialog__panel--compact-height {
+@container neu-dialog (height < 240px) {
   .neu-dialog__header {
     padding-block: var(--neu-space-1, 0.25rem);
   }
