@@ -1044,8 +1044,12 @@ describe('NeuDateInputComponent', () => {
     expect(views).toHaveLength(0);
     fixture.componentInstance.open();
     fixture.componentInstance.navigateMonth(1);
-    fixture.componentInstance.onMonthSelect({ target: { value: '11' } } as unknown as Event);
-    fixture.componentInstance.onYearSelect({ target: { value: '2030' } } as unknown as Event);
+    const monthEvent = { target: { value: String((fixture.componentInstance.viewMonth() + 1) % 12) } } as unknown as Event;
+    const yearEvent = { target: { value: String(fixture.componentInstance.viewYear() + 1) } } as unknown as Event;
+    fixture.componentInstance.onMonthSelect(monthEvent);
+    fixture.componentInstance.onMonthSelect(monthEvent);
+    fixture.componentInstance.onYearSelect(yearEvent);
+    fixture.componentInstance.onYearSelect(yearEvent);
     expect(views.length).toBe(3);
     for (const event of views) {
       expect(isCivilDate(event.start)).toBe(true);

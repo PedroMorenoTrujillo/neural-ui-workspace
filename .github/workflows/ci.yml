@@ -6,10 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   verify-release:
     name: Verify release gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v7
@@ -26,7 +29,9 @@ jobs:
         run: npm ci
 
       - name: Run release verification
-        run: npm run verify:release
+        run: |
+          node --test scripts/npm-release-channel.spec.mjs
+          npm run verify:release
         env:
           NEURAL_UI_BUNDLE_PROFILE: ${{ github.event_name == 'pull_request' && 'pr' || 'main' }}
 
