@@ -108,8 +108,17 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
     <neu-number-input
       id="n2-number"
       label="Hydrated amount"
+      size="sm"
+      [floatingLabel]="true"
       [formatOptions]="numberFormat"
       [formControl]="numberControl"
+    />
+    <neu-number-input
+      id="n2-number-horizontal"
+      label="Compact amount"
+      size="sm"
+      layout="horizontal"
+      [invalid]="true"
     />
     <neu-knob id="n2-knob" label="Hydrated knob" [step]="5" [formControl]="knobControl" />
     <neu-date-input

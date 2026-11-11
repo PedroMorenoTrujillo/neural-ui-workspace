@@ -78,7 +78,7 @@
   color: var(--neu-text-muted);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
-  .neu-accordion__item--expanded & {
+  .neu-accordion__item--expanded > .neu-accordion__header > & {
     transform: rotate(180deg);
   }
 }
@@ -89,7 +89,7 @@
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-  .neu-accordion__item--expanded & {
+  .neu-accordion__item--expanded > & {
     grid-template-rows: 1fr;
   }
 }
@@ -102,7 +102,7 @@
   padding: 0;
   transition: padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-  .neu-accordion__item--expanded & {
+  .neu-accordion__item--expanded > .neu-accordion__panel > & {
     padding: var(--neu-space-4) var(--neu-space-5);
     padding-top: 0;
   }
