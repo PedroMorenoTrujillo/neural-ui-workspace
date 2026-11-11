@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.6] - 2026-11-11
+
+### Fixed
+
+- Stacked number inputs with size small show a 36px field and outline while preserving 24px hit targets for both steppers. The compact control retains focus, validation and floating label styling.
+
 ## [2.0.5] - 2026-11-11
 
 ### Fixed

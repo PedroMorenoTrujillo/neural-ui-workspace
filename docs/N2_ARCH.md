@@ -297,7 +297,7 @@ Angular indica que un custom Signal Form Control funciona con Signal, Reactive y
 
 Resultado: **22 `FormValueControl` + 2 `FormCheckboxControl`**.
 
-Con el tamaño `sm` del campo numérico, el control horizontal mide 36 px de alto. El apilado conserva un mínimo de 50 px para alojar dos botones de 24 px y el marco exterior. Al enfocar el campo apilado, el indicador rodea el conjunto. Cada botón mantiene su propio indicador de foco de teclado.
+Con el tamaño `sm` del campo numérico, el campo mide 36 px de alto en horizontal y en apilado. El apilado reserva un mínimo de 50 px para dos zonas de pulsación de 24 px. Su contorno visible de 36 px queda centrado y recibe el indicador de foco al editar. Cada botón conserva su propio indicador de foco de teclado.
 
 ##### Reglas obligatorias de implementación
 
