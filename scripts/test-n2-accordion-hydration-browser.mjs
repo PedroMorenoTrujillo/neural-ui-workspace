@@ -19,7 +19,6 @@ await page.route('**/*.js', async (route) => {
 });
 
 async function assertNestedAccordion() {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
   const outer = page.locator('#n2-accordion-outer');
   const inner = page.locator('#n2-accordion-inner');
   const outerHeader = outer.getByRole('button', { name: 'Outer accordion', exact: true });
@@ -36,10 +35,14 @@ async function assertNestedAccordion() {
     (element) => getComputedStyle(element).transform,
   );
   const expectState = async (expanded) => {
-    await page.waitForFunction(({ id, expanded }) => {
-      const panel = document.getElementById(id);
-      return panel?.getAttribute('aria-hidden') === String(!expanded);
-    }, { id: panelId, expanded });
+    await page.waitForFunction(({ panelId, headerId, expanded }) => {
+      const panel = document.getElementById(panelId);
+      const chevron = document.getElementById(headerId)?.querySelector('.neu-accordion__chevron');
+      if (!panel || !chevron || panel.getAttribute('aria-hidden') !== String(!expanded)) return false;
+      const height = panel.getBoundingClientRect().height;
+      const animations = [...panel.getAnimations({ subtree: true }), ...chevron.getAnimations()];
+      return (expanded ? height > 0 : height === 0) && animations.every((animation) => animation.playState !== 'running');
+    }, { panelId, headerId, expanded }, { timeout: 5000 });
     assert.equal(await innerHeader.getAttribute('aria-expanded'), String(expanded));
     assert.equal(await innerPanel.getAttribute('inert'), expanded ? null : '');
     assert.equal(await outerHeader.getAttribute('aria-expanded'), 'true');
@@ -98,6 +101,7 @@ try {
   assert.equal(errors.some((error) => /NG050\d/.test(error)), false, errors.join('\n'));
   assert.deepEqual(errors, []);
   console.log('N2 Accordion SSR/hydration passed (DOM reused; first proposal and typed body action exactly once).');
+  console.log('Nested Accordion geometry passed (closed, opened by keyboard, closed by pointer).');
 } finally {
   release();
   await browser.close();
