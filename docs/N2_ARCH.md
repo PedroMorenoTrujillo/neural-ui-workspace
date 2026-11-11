@@ -297,6 +297,8 @@ Angular indica que un custom Signal Form Control funciona con Signal, Reactive y
 
 Resultado: **22 `FormValueControl` + 2 `FormCheckboxControl`**.
 
+Con el tamaño `sm` del campo numérico, el control horizontal mide 36 px de alto. El apilado conserva un mínimo de 50 px para alojar dos botones de 24 px y el marco exterior. Al enfocar el campo apilado, el indicador rodea el conjunto. Cada botón mantiene su propio indicador de foco de teclado.
+
 ##### Reglas obligatorias de implementación
 
 **REQUIRED N2-SF01:** migrar los 24 controles por familias; cada componente deja de implementar CVA y deja de registrar `NG_VALUE_ACCESSOR` en el mismo cambio en el que adopta el contrato Signal oficial.

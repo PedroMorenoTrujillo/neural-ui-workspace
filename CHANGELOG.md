@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.5] - 2026-11-11
+
+### Fixed
+
+- Stacked number inputs show a continuous focus indicator around the field and steppers while the input has focus. Input sizes are consistent across consumers and retain accessible stepper targets.
+- Nested accordions keep their own open and closed styling when a parent panel is expanded.
+
 ## [2.0.4] - 2026-10-31
 
 ### Fixed

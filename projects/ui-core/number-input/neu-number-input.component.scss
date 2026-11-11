@@ -48,6 +48,22 @@ neu-number-input[hidden] {
     .neu-number-input__control {
       align-items: stretch;
       gap: 0;
+      border-radius: var(--neu-radius, 8px);
+
+      &:has(> .neu-number-input__field:focus) {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        box-shadow: var(--neu-focus-ring);
+
+        > .neu-number-input__field {
+          box-shadow: none;
+        }
+
+        > .neu-number-input__stack {
+          border-block-color: var(--neu-primary);
+          border-inline-end-color: var(--neu-primary);
+        }
+      }
     }
 
     .neu-number-input__field {
@@ -57,7 +73,8 @@ neu-number-input[hidden] {
       width: auto;
       min-width: 0;
       flex-basis: var(--neu-number-input-stacked-min-width, 120px);
-      border-radius: var(--neu-radius, 8px) 0 0 var(--neu-radius, 8px);
+      border-start-end-radius: 0;
+      border-end-end-radius: 0;
       border-inline-end: none;
       text-align: start;
       padding: 0 10px;
@@ -113,6 +130,7 @@ neu-number-input[hidden] {
 
 /* ── Field ────────────────────────────────────────────────────── */
 .neu-number-input__field {
+  box-sizing: border-box;
   min-inline-size: 0;
   flex: 1 1 auto;
   width: var(--neu-number-input-width, 80px);
@@ -181,7 +199,9 @@ neu-number-input[hidden] {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--neu-border);
-  border-radius: 0 var(--neu-radius, 8px) var(--neu-radius, 8px) 0;
+  border-radius: var(--neu-radius, 8px);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
   overflow: hidden;
   flex-shrink: 0;
 

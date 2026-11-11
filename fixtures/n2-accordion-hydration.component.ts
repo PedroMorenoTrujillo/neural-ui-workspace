@@ -28,6 +28,11 @@ interface Item extends NeuAccordionItem<string> {
         </button>
       </ng-template>
     </neu-accordion>
+    <neu-accordion id="n2-accordion-outer" [items]="outerItems" [initialExpandedKeys]="outerExpandedKeys">
+      <ng-template neuAccordionBody>
+        <neu-accordion id="n2-accordion-inner" [items]="innerItems" />
+      </ng-template>
+    </neu-accordion>
   `,
 })
 export class N2AccordionHydrationComponent {
@@ -35,6 +40,9 @@ export class N2AccordionHydrationComponent {
     { id: 'billing', title: 'Billing', summary: 'Invoices' },
     { id: 'security', title: 'Security', summary: 'Keys' },
   ];
+  readonly outerItems = [{ id: 'nested', title: 'Outer accordion' }];
+  readonly outerExpandedKeys = ['nested'];
+  readonly innerItems = [{ id: 'nested', title: 'Inner accordion', content: '<p>Inner content</p>' }];
   readonly expandedKeys = signal<readonly string[]>(['billing']);
   readonly ready = signal(false);
   readonly events = signal(0);

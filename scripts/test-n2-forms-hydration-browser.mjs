@@ -19,6 +19,70 @@ await page.route('**/*.js', async (route) => {
   await route.continue();
 });
 
+async function assertNumberInputFocus() {
+  const number = page.locator('#n2-number');
+  const field = number.getByRole('spinbutton', { name: 'Hydrated amount' });
+  const control = number.locator('.neu-number-input__control');
+  const stack = number.locator('.neu-number-input__stack');
+  const [increase, decrease] = await stack.getByRole('button').all();
+  const shadow = (target) => target.evaluate((element) => getComputedStyle(element).boxShadow);
+
+  assert.equal((await field.boundingBox()).height, 50);
+  for (const button of [increase, decrease]) {
+    const target = await button.boundingBox();
+    assert.ok(target.height >= 24 && target.width >= 24);
+  }
+
+  await field.click();
+  assert.notEqual(await shadow(control), 'none');
+  assert.equal(await shadow(field), 'none');
+  assert.equal(await field.getAttribute('aria-valuenow'), '1234.5');
+
+  for (const button of [increase, decrease]) {
+    await page.keyboard.press('Tab');
+    assert.equal(await button.evaluate((element) => element === document.activeElement), true);
+    assert.equal(await shadow(control), 'none');
+    assert.ok(await button.evaluate((element) => element.matches(':focus-visible') && getComputedStyle(element).outlineStyle === 'solid'));
+  }
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Shift+Tab');
+  assert.notEqual(await shadow(control), 'none');
+
+  await page.emulateMedia({ forcedColors: 'active' });
+  const forcedColorOutline = await control.evaluate((element) => {
+    const css = getComputedStyle(element);
+    return { style: css.outlineStyle, color: css.outlineColor };
+  });
+  assert.equal(forcedColorOutline.style, 'solid');
+  assert.notEqual(forcedColorOutline.color, 'rgba(0, 0, 0, 0)');
+  await page.emulateMedia({ forcedColors: null });
+
+  await number.evaluate((element) => element.setAttribute('dir', 'rtl'));
+  const corners = await control.evaluate((element) => {
+    const input = element.querySelector('input');
+    const stepper = element.querySelector('.neu-number-input__stack');
+    const inputStyle = getComputedStyle(input);
+    const stepperStyle = getComputedStyle(stepper);
+    return {
+      gap: input.getBoundingClientRect().left - stepper.getBoundingClientRect().right,
+      inner: [inputStyle.borderTopLeftRadius, stepperStyle.borderTopRightRadius],
+      outer: [inputStyle.borderTopRightRadius, stepperStyle.borderTopLeftRadius],
+    };
+  });
+  assert.ok(Math.abs(corners.gap) < 1);
+  assert.deepEqual(corners.inner, ['0px', '0px']);
+  assert.ok(corners.outer.every((radius) => Number.parseFloat(radius) > 0));
+  await number.evaluate((element) => element.removeAttribute('dir'));
+
+  const horizontal = page.locator('#n2-number-horizontal');
+  const compactField = horizontal.getByRole('spinbutton', { name: 'Compact amount' });
+  assert.equal((await compactField.boundingBox()).height, 36);
+  await compactField.click();
+  assert.notEqual(await shadow(compactField), 'none');
+  assert.equal(await shadow(horizontal.locator('.neu-number-input__control')), 'none');
+  assert.equal(await compactField.getAttribute('aria-invalid'), 'true');
+}
+
 try {
   await page.goto(process.env.NEU_N2_HYDRATION_URL ?? 'http://127.0.0.1:4392', {
     waitUntil: 'commit',
@@ -157,6 +221,7 @@ try {
   assert.equal(await page.locator('#n2-radio input').first().isChecked(), true);
   assert.match(await page.locator('#n2-number input').inputValue(), /1\.234,50/);
   assert.equal(await page.locator('#n2-number input').getAttribute('aria-valuenow'), '1234.5');
+  await assertNumberInputFocus();
   assert.equal(
     await page.locator('#n2-knob [role="spinbutton"]').getAttribute('aria-valuenow'),
     '25',
