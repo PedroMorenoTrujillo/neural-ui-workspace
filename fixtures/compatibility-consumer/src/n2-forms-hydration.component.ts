@@ -153,6 +153,11 @@ import { NeuRatingComponent } from '@neural-ui/core/rating';
     <neu-slider id="n2-b7-range" label="Hydrated range" [minValue]="0" [maxValue]="100" [step]="5" [minStepsBetweenThumbs]="2" [formControl]="rangeSliderControl" />
     <neu-slider id="n2-b7-vertical" label="Hydrated vertical range" orientation="vertical" [minValue]="0" [maxValue]="100" [formControl]="verticalSliderControl" />
     <neu-rating id="n2-b7-half" label="Hydrated half rating" [step]="0.5" [formControl]="halfRatingControl" />
+    <section aria-label="NumberInput sizes">
+      <neu-number-input id="n2-number-invalid" label="Invalid amount" size="sm" [value]="5" [invalid]="true" />
+      <neu-number-input id="n2-number-md" label="Medium amount" />
+      <neu-number-input id="n2-number-lg" label="Large amount" size="lg" />
+    </section>
   `,
 })
 export class N2FormsHydrationComponent {

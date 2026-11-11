@@ -19,38 +19,66 @@ await page.route('**/*.js', async (route) => {
   await route.continue();
 });
 
+const shadow = (target, pseudo = null) => target.evaluate(
+  (element, pseudoElement) => getComputedStyle(element, pseudoElement).boxShadow,
+  pseudo,
+);
+
 async function assertNumberInputFocus() {
   const number = page.locator('#n2-number');
   const field = number.getByRole('spinbutton', { name: 'Hydrated amount' });
   const control = number.locator('.neu-number-input__control');
   const stack = number.locator('.neu-number-input__stack');
   const [increase, decrease] = await stack.getByRole('button').all();
-  const shadow = (target) => target.evaluate((element) => getComputedStyle(element).boxShadow);
 
-  assert.equal((await field.boundingBox()).height, 50);
+  const geometry = await control.evaluate((element) => {
+    const control = element.getBoundingClientRect();
+    const field = element.querySelector('input').getBoundingClientRect();
+    const label = element.querySelector('label').getBoundingClientRect();
+    const frame = getComputedStyle(element, '::before');
+    const topInset = Number.parseFloat(frame.top);
+    const bottomInset = Number.parseFloat(frame.bottom);
+    return {
+      controlHeight: control.height,
+      fieldHeight: field.height,
+      frameHeight: control.height - topInset - bottomInset,
+      topInset,
+      bottomInset,
+      fieldInset: field.top - control.top,
+      labelOffset: label.top + label.height / 2 - field.top,
+    };
+  });
+  assert.equal(geometry.controlHeight, 50);
+  assert.equal(geometry.fieldHeight, 36);
+  assert.equal(geometry.frameHeight, 36);
+  assert.equal(geometry.topInset, 7);
+  assert.equal(geometry.bottomInset, geometry.topInset);
+  assert.equal(geometry.fieldInset, geometry.topInset);
+  assert.ok(Math.abs(geometry.labelOffset) < 1);
   for (const button of [increase, decrease]) {
     const target = await button.boundingBox();
     assert.ok(target.height >= 24 && target.width >= 24);
   }
 
   await field.click();
-  assert.notEqual(await shadow(control), 'none');
+  assert.notEqual(await shadow(control, '::before'), 'none');
+  assert.equal(await shadow(control), 'none');
   assert.equal(await shadow(field), 'none');
   assert.equal(await field.getAttribute('aria-valuenow'), '1234.5');
 
   for (const button of [increase, decrease]) {
     await page.keyboard.press('Tab');
     assert.equal(await button.evaluate((element) => element === document.activeElement), true);
-    assert.equal(await shadow(control), 'none');
+    assert.equal(await shadow(control, '::before'), 'none');
     assert.ok(await button.evaluate((element) => element.matches(':focus-visible') && getComputedStyle(element).outlineStyle === 'solid'));
   }
   await page.keyboard.press('Shift+Tab');
   await page.keyboard.press('Shift+Tab');
-  assert.notEqual(await shadow(control), 'none');
+  assert.notEqual(await shadow(control, '::before'), 'none');
 
   await page.emulateMedia({ forcedColors: 'active' });
   const forcedColorOutline = await control.evaluate((element) => {
-    const css = getComputedStyle(element);
+    const css = getComputedStyle(element, '::before');
     return { style: css.outlineStyle, color: css.outlineColor };
   });
   assert.equal(forcedColorOutline.style, 'solid');
@@ -81,6 +109,49 @@ async function assertNumberInputFocus() {
   assert.notEqual(await shadow(compactField), 'none');
   assert.equal(await shadow(horizontal.locator('.neu-number-input__control')), 'none');
   assert.equal(await compactField.getAttribute('aria-invalid'), 'true');
+}
+
+async function assertLargerNumberInputSizes() {
+  for (const [size, height, label] of [['md', 50, 'Medium amount'], ['lg', 56, 'Large amount']]) {
+    const host = page.locator(`#n2-number-${size}`);
+    const input = host.getByRole('spinbutton', { name: label });
+    assert.equal((await input.boundingBox()).height, height);
+    await input.click();
+    const control = host.locator('.neu-number-input__control');
+    assert.notEqual(await shadow(control), 'none');
+    assert.equal(await shadow(control, '::before'), 'none');
+  }
+}
+
+async function assertCompactNumberInputTargets() {
+  const number = page.locator('#n2-number-invalid');
+  const field = number.getByRole('spinbutton', { name: 'Invalid amount' });
+  const control = number.locator('.neu-number-input__control');
+  const [increase, decrease] = await number.getByRole('button').all();
+  const frameBorder = (target) => target.evaluate(
+    (element) => getComputedStyle(element, '::before').borderTopColor,
+  );
+  const invalidBorder = await frameBorder(control);
+  const normalBorder = await frameBorder(page.locator('#n2-number .neu-number-input__control'));
+  assert.notEqual(invalidBorder, normalBorder);
+  await field.click();
+  assert.equal(await field.getAttribute('aria-invalid'), 'true');
+  assert.equal(await frameBorder(control), invalidBorder);
+  await control.scrollIntoViewIfNeeded();
+
+  const upper = await increase.boundingBox();
+  const lower = await decrease.boundingBox();
+  const input = await field.boundingBox();
+  assert.ok(upper.height >= 24 && lower.height >= 24);
+  assert.ok(upper.y + upper.height <= lower.y);
+  const aboveFrame = upper.y + 1;
+  const belowFrame = lower.y + lower.height - 1;
+  assert.ok(aboveFrame < input.y && belowFrame > input.y + input.height);
+
+  await page.mouse.click(upper.x + upper.width / 2, aboveFrame);
+  await page.waitForFunction(() => document.querySelector('#n2-number-invalid input')?.getAttribute('aria-valuenow') === '6');
+  await page.mouse.click(lower.x + lower.width / 2, belowFrame);
+  await page.waitForFunction(() => document.querySelector('#n2-number-invalid input')?.getAttribute('aria-valuenow') === '5');
 }
 
 try {
@@ -416,6 +487,8 @@ try {
     'hydrated-edit',
   ]);
   assert.deepEqual(JSON.parse(await page.locator('#n2-checkbox-events').textContent()), [false]);
+  await assertLargerNumberInputSizes();
+  await assertCompactNumberInputTargets();
   assert.deepEqual(errors, []);
   console.log(
     'N2 Forms real zoneless hydration passed for all 27 controls: DOM reused, explicit locale stable, zero hydration errors, first edits exactly once',

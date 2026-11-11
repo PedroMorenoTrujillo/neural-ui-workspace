@@ -1,6 +1,11 @@
 /* ── Host: flex-column para acomodar label + control ──────────── */
 @use '../styles/floating-label' as floating;
 
+$small-height: 36px;
+$stacked-target-min-size: 24px;
+$stacked-border-width: 1px;
+$stacked-min-height: 2 * ($stacked-target-min-size + $stacked-border-width);
+
 neu-number-input[hidden] {
   display: none !important;
 }
@@ -68,8 +73,7 @@ neu-number-input[hidden] {
 
     .neu-number-input__field {
       flex: 1 1 auto;
-      // Keep both stacked targets at least 24px tall, including borders.
-      min-block-size: 50px;
+      min-block-size: $stacked-min-height;
       width: auto;
       min-width: 0;
       flex-basis: var(--neu-number-input-stacked-min-width, 120px);
@@ -89,7 +93,7 @@ neu-number-input[hidden] {
   }
 
   &--sm {
-    --neu-number-input-height: 36px;
+    --neu-number-input-height: #{$small-height};
     --neu-number-input-btn-size: 36px;
 
     .neu-number-input__field {
@@ -198,7 +202,7 @@ neu-number-input[hidden] {
 .neu-number-input__stack {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--neu-border);
+  border: $stacked-border-width solid var(--neu-border);
   border-radius: var(--neu-radius, 8px);
   border-start-start-radius: 0;
   border-end-start-radius: 0;
@@ -213,7 +217,7 @@ neu-number-input[hidden] {
     align-items: center;
     justify-content: center;
     flex: 1;
-    min-block-size: 24px;
+    min-block-size: $stacked-target-min-size;
     width: var(--neu-number-input-btn-size, 26px);
     border: none;
     border-radius: 0;
@@ -244,6 +248,94 @@ neu-number-input[hidden] {
     &--inc {
       border-bottom: 1px solid var(--neu-border);
     }
+  }
+}
+
+// Paint a compact frame inside the full-height stacked hit area.
+.neu-number-input--stacked.neu-number-input--sm .neu-number-input__control {
+  --_neu-number-input-compact-border: var(--neu-border);
+  --_neu-number-input-compact-inset: max(
+    0px,
+    calc((#{$stacked-min-height} - var(--neu-number-input-height)) / 2)
+  );
+  align-items: center;
+  min-block-size: $stacked-min-height;
+  isolation: isolate;
+
+  &::before {
+    position: absolute;
+    inset-block: calc(50% - var(--neu-number-input-height) / 2);
+    inset-inline: 0;
+    z-index: -1;
+    border: $stacked-border-width solid var(--_neu-number-input-compact-border);
+    border-radius: var(--neu-radius-sm, var(--neu-radius, 8px));
+    background: var(--neu-surface);
+    pointer-events: none;
+    content: '';
+  }
+
+  &:has(> .neu-number-input__field:focus) {
+    --_neu-number-input-compact-border: var(--neu-primary);
+    outline: none;
+    box-shadow: none;
+
+    &::before {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      box-shadow: var(--neu-focus-ring);
+    }
+  }
+
+  &:has(> .neu-number-input__field[aria-invalid='true']) {
+    --_neu-number-input-compact-border: var(--neu-error);
+  }
+
+  > .neu-number-input__field {
+    min-block-size: 0;
+    border: none;
+    background: transparent;
+  }
+
+  > .neu-number-input__stack {
+    position: relative;
+    align-self: stretch;
+    border: none;
+    padding: $stacked-border-width;
+
+    &::before {
+      position: absolute;
+      inset-block: calc(50% - var(--neu-number-input-height) / 2 + #{$stacked-border-width});
+      inset-inline-start: 0;
+      border-inline-start: $stacked-border-width solid var(--neu-border);
+      pointer-events: none;
+      content: '';
+    }
+  }
+
+  .neu-number-input__btn {
+    background: transparent;
+
+    &:not(:disabled):hover {
+      background: var(--neu-surface-2) content-box;
+    }
+
+    &--inc {
+      padding-block-start: var(--_neu-number-input-compact-inset);
+    }
+
+    &--dec {
+      padding-block-end: var(--_neu-number-input-compact-inset);
+    }
+  }
+
+  .neu-number-input__chevron {
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+  }
+
+  &.neu-number-input__control--focused > .neu-number-input__floating-label,
+  &.neu-number-input__control--has-value > .neu-number-input__floating-label {
+    top: calc(50% - var(--neu-number-input-height) / 2);
   }
 }
 
