@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.7] - 2026-11-12
+
+### Fixed
+
+- Table pagination retains focus while the total page count changes during remote queries.
+
 ## [2.0.6] - 2026-11-11
 
 ### Fixed

@@ -242,6 +242,40 @@ describe('NeuTable remote request integration', () => {
     ).toBe(false);
   });
 
+  it('keeps the lone page control focused when a remote query invalidates its total', async () => {
+    const fixture = TestBed.createComponent(RemoteHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const host = fixture.componentInstance;
+    const native = fixture.nativeElement as HTMLElement;
+    const page = native.querySelector<HTMLButtonElement>('.neu-table2__page-number')!;
+    expect(page.textContent).toBe('1');
+    page.focus();
+
+    host.correlateResponses = false;
+    host.query.update((query) => ({ ...query, page: 1 }));
+    await fixture.whenStable();
+
+    expect(native.querySelector('.neu-table2__page-number')).toBe(page);
+    expect(page.textContent).toBe('2');
+    expect(page.getAttribute('aria-current')).toBe('page');
+    expect(document.activeElement).toBe(page);
+
+    const request = host.requests.at(-1)!;
+    host.metadata.update((metadata) => ({
+      ...metadata,
+      totalItems: 4,
+      queryRevision: request.queryRevision,
+      appliedRequestId: request.requestId,
+    }));
+    await fixture.whenStable();
+
+    const buttons = native.querySelectorAll('.neu-table2__page-number');
+    expect(Array.from(buttons, (button) => button.textContent)).toEqual(['1', '2']);
+    expect(buttons[1]).toBe(page);
+    expect(document.activeElement).toBe(page);
+  });
+
   it('keeps selection/layout/appearance independent and supports all-matching without transport', async () => {
     const fixture = TestBed.createComponent(RemoteHostComponent);
     fixture.detectChanges();

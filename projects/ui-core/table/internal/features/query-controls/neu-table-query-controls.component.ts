@@ -1,4 +1,4 @@
-import { afterNextRender, Component, ElementRef, inject, input, type TemplateRef } from '@angular/core';
+import { afterNextRender, Component, ElementRef, inject, input, linkedSignal, type TemplateRef } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
@@ -241,11 +241,11 @@ export interface TableQueryControls {
           {{ text('of') }} {{ state.pageCount || 1 }}
         }
       </span>
-      @for (page of pages(state); track page) {
+      @for (entry of pageButtons(); track entry.key) {
         <button neu-button variant="ghost" size="sm" type="button" class="neu-table2__page-number"
-          [ariaLabel]="text('page') + ' ' + (page + 1)"
-          [attr.aria-current]="page === state.page ? 'page' : null"
-          (click)="state.changePage(page)">{{ page + 1 }}</button>
+          [ariaLabel]="text('page') + ' ' + (entry.page + 1)"
+          [attr.aria-current]="entry.page === state.page ? 'page' : null"
+          (click)="state.changePage(entry.page)">{{ entry.page + 1 }}</button>
       }
       <button
         neu-button variant="ghost" size="sm" class="neu-table2__page-control"
@@ -469,12 +469,6 @@ export class NeuTableQueryControlsComponent {
     const input = this.element.querySelector<HTMLInputElement>('neu-input input');
     if (input) { input.value = value; state.setValue({ currentTarget: input } as unknown as Event); }
   };
-  protected readonly pages = (state: NeuTablePaginatorContext) => {
-    if (state.pageCount === null) return [state.page];
-    const count = Math.max(1, state.pageCount);
-    const start = Math.max(0, Math.min(state.page - 2, count - 5));
-    return Array.from({ length: Math.min(5, count) }, (_, i) => start + i);
-  };
   protected readonly ruleLabel = (rule: NeuFilterConstraint<string>['rule']) => this.text(rule);
   protected readonly sizes = (state: NeuTablePaginatorContext) => state.pageSizeOptions.includes(state.pageSize)
     ? state.pageSizeOptions : [state.pageSize, ...state.pageSizeOptions];
@@ -504,6 +498,29 @@ export class NeuTableQueryControlsComponent {
     });
   }
   readonly controls = input<TableQueryControls>({});
+  protected readonly pageButtons = linkedSignal<
+    NeuTablePaginatorContext | undefined,
+    readonly { page: number; key: symbol }[]
+  >({
+    source: () => this.controls().pagination,
+    computation: (state, previous) => {
+      if (!state) return [];
+      const count = state.pageCount === null ? 1 : Math.max(1, state.pageCount);
+      const start = state.pageCount === null
+        ? state.page
+        : Math.max(0, Math.min(state.page - 2, count - 5));
+      const length = Math.min(5, count);
+      const oldButtons = previous?.value ?? [];
+      return Array.from({ length }, (_, offset) => {
+        const page = start + offset;
+        // Reuse the lone control while remote metadata is stale, and match page numbers in a window.
+        const old = length === 1 && oldButtons.length === 1
+          ? oldButtons[0]
+          : oldButtons.find((button) => button.page === page);
+        return { page, key: old?.key ?? Symbol() };
+      });
+    },
+  });
   protected readonly text = (key: NeuTableMessage, column = '') =>
     tableMessage(this.controls().messages, key, { column });
   protected readonly jump = (event: Event) =>
