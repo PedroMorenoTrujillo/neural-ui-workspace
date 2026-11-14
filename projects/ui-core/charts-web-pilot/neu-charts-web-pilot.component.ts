@@ -143,10 +143,11 @@ export class NeuChartsWebPilotComponent {
 
   protected readonly arcs = computed(() => {
     const points = this.points().filter((point) => (point.value ?? 0) > 0);
-    const total = points.reduce((sum, point) => sum + point.value!, 0);
+    const scale = points.reduce((max, point) => Math.max(max, point.value!), 1);
+    const total = points.reduce((sum, point) => sum + point.value! / scale, 0);
     let offset = 0;
     return points.map((point) => {
-      const length = 100 * (point.value! / total);
+      const length = 100 * (point.value! / scale / total);
       const arc = { ...point, length, offset };
       offset += length;
       return arc;

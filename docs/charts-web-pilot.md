@@ -4,7 +4,7 @@ The pilot covers one analytics screen with a trend, category comparison and a di
 
 | Chart | Scenario | Data |
 | --- | --- | --- |
-| Line | Trend in closed cases | Daily ISO dates, two selected periods |
+| Line | Trend in closed cases | Day labels for one selected period |
 | Bar | Compare work across teams | Discrete team labels and counts |
 | Donut | Explain distribution by status | Named nonnegative counts and their total |
 
