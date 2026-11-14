@@ -124,15 +124,18 @@ $label-font-floating: 12px;
 
 // ---- Floating Label — estilo "outlined" / "outlined" style (floats to top border) ----
 .neu-input__label {
-  @include floating.two-line;
+  --_neu-input-label-start: var(--neu-space-3);
+  --_neu-input-label-end: var(--neu-space-3);
+
+  @include floating.single-line;
   position: absolute;
-  inset-inline-start: var(--neu-space-3);
+  inset-inline-start: var(--_neu-input-label-start);
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--neu-text-base);
   color: var(--neu-text-muted);
   pointer-events: none;
-  max-width: calc(100% - var(--neu-space-6));
+  max-inline-size: calc(100% - var(--_neu-input-label-start) - var(--_neu-input-label-end));
   transition:
     top var(--neu-transition),
     font-size var(--neu-transition),
@@ -140,6 +143,14 @@ $label-font-floating: 12px;
     transform var(--neu-transition),
     padding var(--neu-transition),
     background var(--neu-transition);
+
+  .neu-input__wrapper--has-start-icon & {
+    --_neu-input-label-start: 40px;
+  }
+
+  .neu-input__wrapper--has-end-icon & {
+    --_neu-input-label-end: 40px;
+  }
 
   // Cuando el input tiene valor o está enfocado → sube al borde
   .neu-input__wrapper--focused &,
@@ -152,7 +163,8 @@ $label-font-floating: 12px;
     letter-spacing: 0.01em;
     background: var(--neu-input-background, var(--neu-surface));
     padding: 0 4px;
-    inset-inline-start: calc(var(--neu-space-3) - 4px);
+    --_neu-input-label-start: calc(var(--neu-space-3) - 4px);
+    --_neu-input-label-end: var(--neu-space-3);
   }
 
   .neu-input__wrapper--focused & {
@@ -167,18 +179,6 @@ $label-font-floating: 12px;
   .neu-input__wrapper--disabled & {
     background: var(--neu-surface-2);
   }
-}
-
-// Ajuste cuando hay start icon
-.neu-input__wrapper--has-start-icon .neu-input__label {
-  inset-inline-start: 40px;
-}
-
-// Once the label floats, it aligns with the field border rather than the icon.
-.neu-input__wrapper--has-start-icon.neu-input__wrapper--focused .neu-input__label,
-.neu-input__wrapper--has-start-icon.neu-input__wrapper--has-value .neu-input__label,
-.neu-input__wrapper--has-start-icon:has(.neu-input__field:-webkit-autofill) .neu-input__label {
-  inset-inline-start: calc(var(--neu-space-3) - 4px);
 }
 
 // ---- Iconos / Icons ----

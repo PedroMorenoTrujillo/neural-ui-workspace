@@ -1,15 +1,11 @@
-// Shared behaviour for floating labels that need to remain readable in narrow fields.
-@mixin two-line {
-  display: -webkit-box;
+@use 'text-overflow' as text;
+
+// Keep the label on one line without changing its full text in the DOM.
+@mixin single-line {
+  @include text.ellipsis;
+  display: block;
+  box-sizing: border-box;
   inline-size: max-content;
-  min-inline-size: 0;
   max-inline-size: 100%;
-  max-block-size: 2.4em;
-  overflow: hidden;
-  overflow-wrap: anywhere;
   line-height: 1.2;
-  text-overflow: clip;
-  white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
