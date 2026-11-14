@@ -1248,10 +1248,14 @@
         "./testing#NeuHydrationElementSnapshot",
         "./testing#NeuHydrationSnapshot",
         "./testing#NeuInputHarness",
+        "./testing#NeuMenuHarness",
         "./testing#NeuSelectHarness",
         "./testing#NeuSwitchHarness",
         "./testing#NeuTableHarness",
-        "./testing#NeuTextHarnessFilters"
+        "./testing#NeuTabsHarness",
+        "./testing#NeuTextHarnessFilters",
+        "./testing#NeuTreeSelectHarness",
+        "./testing#NeuTreeTableHarness"
       ]
     },
     {
@@ -40508,6 +40512,40 @@
       ]
     },
     {
+      "id": "./testing#NeuMenuHarness",
+      "entrypoint": "./testing",
+      "name": "NeuMenuHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuMenuHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuMenuHarness.method:clickItem",
+          "name": "clickItem",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "clickItem(text: string | RegExp): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuMenuHarness.method:getItemTexts",
+          "name": "getItemTexts",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getItemTexts(): Promise<string[]>;"
+        },
+        {
+          "id": "./testing#NeuMenuHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
+        }
+      ]
+    },
+    {
       "id": "./testing#NeuSelectHarness",
       "entrypoint": "./testing",
       "name": "NeuSelectHarness",
@@ -40666,6 +40704,48 @@
       ]
     },
     {
+      "id": "./testing#NeuTabsHarness",
+      "entrypoint": "./testing",
+      "name": "NeuTabsHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuTabsHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuTabsHarness.method:getActiveTabText",
+          "name": "getActiveTabText",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getActiveTabText(): Promise<string | null>;"
+        },
+        {
+          "id": "./testing#NeuTabsHarness.method:getTabTexts",
+          "name": "getTabTexts",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getTabTexts(): Promise<string[]>;"
+        },
+        {
+          "id": "./testing#NeuTabsHarness.method:selectTab",
+          "name": "selectTab",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "selectTab(text: string | RegExp): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTabsHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
+        }
+      ]
+    },
+    {
       "id": "./testing#NeuTextHarnessFilters",
       "entrypoint": "./testing",
       "name": "NeuTextHarnessFilters",
@@ -40680,6 +40760,122 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "text?: string | RegExp;"
+        }
+      ]
+    },
+    {
+      "id": "./testing#NeuTreeSelectHarness",
+      "entrypoint": "./testing",
+      "name": "NeuTreeSelectHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuTreeSelectHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:close",
+          "name": "close",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "close(): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:getNodeTexts",
+          "name": "getNodeTexts",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getNodeTexts(): Promise<string[]>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:getValueText",
+          "name": "getValueText",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getValueText(): Promise<string>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:isOpen",
+          "name": "isOpen",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "isOpen(): Promise<boolean>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:open",
+          "name": "open",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "open(): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:selectNode",
+          "name": "selectNode",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "selectNode(text: string | RegExp): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:setNodeExpanded",
+          "name": "setNodeExpanded",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "setNodeExpanded(text: string | RegExp, expanded: boolean): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
+        }
+      ]
+    },
+    {
+      "id": "./testing#NeuTreeTableHarness",
+      "entrypoint": "./testing",
+      "name": "NeuTreeTableHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuTreeTableHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuTreeTableHarness.method:getCellText",
+          "name": "getCellText",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getCellText(row: number, column: number): Promise<string>;"
+        },
+        {
+          "id": "./testing#NeuTreeTableHarness.method:getRowCount",
+          "name": "getRowCount",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getRowCount(): Promise<number>;"
+        },
+        {
+          "id": "./testing#NeuTreeTableHarness.method:setRowExpanded",
+          "name": "setRowExpanded",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "setRowExpanded(row: number, expanded: boolean): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeTableHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
         }
       ]
     },
@@ -66875,9 +67071,9 @@
   ],
   "summary": {
     "entrypoints": 101,
-    "exportedDeclarations": 877,
+    "exportedDeclarations": 881,
     "declarationKinds": {
-      "class": 15,
+      "class": 19,
       "component": 96,
       "directive": 119,
       "function": 56,
@@ -66888,13 +67084,13 @@
       "type": 199,
       "variable": 47
     },
-    "publicSymbols": 5333,
+    "publicSymbols": 5356,
     "statuses": {
-      "SUPPORTED": 3357,
+      "SUPPORTED": 3361,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
       "INTERNAL/UNSUPPORTED": 1976,
-      "REVIEW": 0
+      "REVIEW": 19
     },
     "bindings": {
       "input": 1230,
