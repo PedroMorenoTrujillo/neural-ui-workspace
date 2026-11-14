@@ -61,6 +61,10 @@ const expectedSignalControls = new Map([
     'projects/ui-core/number-input/neu-number-input.component.ts',
     /readonly\s+value\s*=\s*model<number\s*\|\s*null>\(null\)/,
   ],
+  [
+    'projects/ui-core/phone-input/neu-phone-input.component.ts',
+    /readonly\s+value\s*=\s*model<NeuPhoneInputValue\s*\|\s*null>\(null\)/,
+  ],
   ['projects/ui-core/knob/neu-knob.component.ts', /readonly\s+value\s*=\s*model<number>\(0\)/],
   ['projects/ui-core/date-input/neu-date-input.component.ts', /readonly\s+value\s*=\s*model<V>\(/],
   [
@@ -221,8 +225,8 @@ if (cvaComponents.length !== 0) {
   );
 }
 
-if (signalComponents.length !== 24) {
-  violations.push(`expected 24 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== expectedSignalControls.size) {
+  violations.push(`expected ${expectedSignalControls.size} SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {
