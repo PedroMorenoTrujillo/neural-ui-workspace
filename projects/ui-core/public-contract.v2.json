@@ -13235,6 +13235,14 @@
           "signature": "readonly group: string;"
         },
         {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:invalidValue",
+          "name": "invalidValue",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalidValue: string;"
+        },
+        {
           "id": "./filter-builder#NeuFilterBuilderLabels.property:operator",
           "name": "operator",
           "kind": "property",
@@ -67263,9 +67271,9 @@
       "type": 199,
       "variable": 47
     },
-    "publicSymbols": 5367,
+    "publicSymbols": 5368,
     "statuses": {
-      "SUPPORTED": 3389,
+      "SUPPORTED": 3390,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
       "INTERNAL/UNSUPPORTED": 1978,

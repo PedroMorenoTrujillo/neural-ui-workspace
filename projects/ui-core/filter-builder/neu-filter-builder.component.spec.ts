@@ -35,7 +35,7 @@ describe('NeuFilterBuilderComponent', () => {
     operator.dispatchEvent(new Event('change'));
     const input = nested.querySelector('input')!;
     input.value = '2.5';
-    input.dispatchEvent(new Event('change'));
+    input.dispatchEvent(new Event('input'));
     expect(proposals).toEqual([]);
     expect(fixture.componentInstance.value()).toBeNull();
 
@@ -50,6 +50,29 @@ describe('NeuFilterBuilderComponent', () => {
     expect(fixture.componentInstance.value()).toBeNull();
     click('Reset draft');
     expect(host.querySelector('fieldset fieldset')).toBeNull();
+  });
+
+  it('blocks an incomplete numeric range and preserves a valid typed range', () => {
+    const { fixture, host, click } = create({
+      kind: 'condition', field: 'priority', rule: 'between', value: [1, 3],
+    });
+    const proposals: (NeuFilterExpression<'priority'> | null)[] = [];
+    fixture.componentInstance.valueChange.subscribe((value) => proposals.push(value));
+    const input = host.querySelector('input')!;
+    input.value = '2, letters';
+    input.dispatchEvent(new Event('input'));
+    click('Apply filters');
+    expect(host.querySelector('[role=status]')?.textContent).toContain('Complete the comparison');
+    expect(proposals).toEqual([]);
+
+    input.value = '2, 4.5';
+    input.dispatchEvent(new Event('input'));
+    click('Apply filters');
+    expect(proposals).toEqual([{
+      kind: 'group', operator: 'and', children: [
+        { kind: 'condition', field: 'priority', rule: 'between', value: [2, 4.5] },
+      ],
+    }]);
   });
 
   it('renders an applied expression in readonly mode and reflects later inputs', () => {

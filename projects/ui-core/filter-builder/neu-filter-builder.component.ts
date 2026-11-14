@@ -40,6 +40,7 @@ export interface NeuFilterBuilderLabels {
   readonly remove: string;
   readonly reset: string;
   readonly apply: string;
+  readonly invalidValue: string;
   readonly rules: Record<NeuFilterConstraint<string>['rule'], string>;
 }
 
@@ -48,6 +49,7 @@ const en: NeuFilterBuilderLabels = {
   all: 'All conditions', any: 'Any condition', field: 'Field', rule: 'Comparison',
   value: 'Value', addCondition: 'Add condition', addGroup: 'Add group',
   remove: 'Remove', reset: 'Reset draft', apply: 'Apply filters',
+  invalidValue: 'Complete the comparison values before applying the filters.',
   rules: {
     equals: 'Equals', notEquals: 'Does not equal', contains: 'Contains',
     notContains: 'Does not contain', startsWith: 'Starts with', endsWith: 'Ends with',
@@ -63,6 +65,7 @@ const es: NeuFilterBuilderLabels = {
   all: 'Todas las condiciones', any: 'Cualquier condición', field: 'Campo', rule: 'Comparación',
   value: 'Valor', addCondition: 'Añadir condición', addGroup: 'Añadir grupo',
   remove: 'Quitar', reset: 'Restablecer borrador', apply: 'Aplicar filtros',
+  invalidValue: 'Completa los valores de comparación antes de aplicar los filtros.',
   rules: {
     equals: 'Igual a', notEquals: 'Distinto de', contains: 'Contiene',
     notContains: 'No contiene', startsWith: 'Empieza por', endsWith: 'Termina en',
@@ -121,8 +124,11 @@ function prune<F extends string>(group: NeuFilterGroup<F>): NeuFilterGroup<F> {
     @if (!readonly()) {
       <div class="neu-filter-builder__actions">
         <button type="button" (click)="reset()">{{ text().reset }}</button>
-        <button type="button" (click)="apply()">{{ text().apply }}</button>
+        <button type="button" [attr.aria-disabled]="invalidDraft() || null" (click)="apply()">{{ text().apply }}</button>
       </div>
+      @if (invalidDraft()) {
+        <p role="status">{{ text().invalidValue }}</p>
+      }
     }
 
     <ng-template #groupView let-group let-path="path">
@@ -172,7 +178,7 @@ function prune<F extends string>(group: NeuFilterGroup<F>): NeuFilterGroup<F> {
                     {{ text().value }}
                     <input [value]="displayValue(entry.value)" [disabled]="readonly()"
                       [type]="inputType(entry)" [attr.step]="inputType(entry) === 'number' ? 'any' : null"
-                      (change)="setInputValue(path, i, entry, $event)" />
+                      (input)="setInputValue(path, i, $event)" />
                   </label>
                 }
               }
@@ -181,7 +187,7 @@ function prune<F extends string>(group: NeuFilterGroup<F>): NeuFilterGroup<F> {
           @if (!readonly()) {
             <button type="button"
               [attr.aria-label]="text().remove + ' ' + (entry.kind === 'group' ? text().group : text().field) + ' ' + (i + 1)"
-              (click)="remove(path, i)">{{ text().remove }}</button>
+              (click)="remove(path, i, $event)">{{ text().remove }}</button>
           }
         }
         @if (!readonly()) {
@@ -217,6 +223,7 @@ export class NeuFilterBuilderComponent<F extends string> {
   private readonly locale = inject(NEURAL_LOCALE);
   protected readonly rootPath: FilterPath = [];
   protected readonly draft = linkedSignal(() => asGroup(this.value()));
+  protected readonly invalidDraft = computed(() => this.hasInvalidCondition(this.draft()));
   protected readonly text = computed(() => {
     const defaults = /^es(?:-|$)/i.test(this.locale) ? es : en;
     return { ...defaults, ...this.labels() };
@@ -279,7 +286,10 @@ export class NeuFilterBuilderComponent<F extends string> {
     }));
   }
 
-  protected remove(path: FilterPath, index: number): void {
+  protected remove(path: FilterPath, index: number, event: Event): void {
+    const button = event.currentTarget as HTMLButtonElement;
+    const actions = button.parentElement?.querySelector(':scope > .neu-filter-builder__actions');
+    actions?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
     this.edit(path, (group) => ({
       ...group, children: group.children.filter((_, i) => i !== index),
     }));
@@ -301,14 +311,10 @@ export class NeuFilterBuilderComponent<F extends string> {
     if (rule) this.replace(path, index, (current) => ({ ...current, rule, value: this.initialValue(rule) }));
   }
 
-  protected setInputValue(path: FilterPath, index: number, condition: NeuFilterConstraint<F>, event: Event): void {
+  protected setInputValue(path: FilterPath, index: number, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     let value: unknown = inputElement.value;
-    if (this.structured(condition.rule)) {
-      const values = inputElement.value.split(',').map((entry) => entry.trim());
-      const numeric = this.fieldFor(condition.field)?.type === 'number';
-      value = values.filter(Boolean).map((entry) => numeric ? Number(entry) : entry);
-    } else if (inputElement.type === 'number') {
+    if (inputElement.type === 'number') {
       value = Number.isFinite(inputElement.valueAsNumber) ? inputElement.valueAsNumber : null;
     }
     this.replace(path, index, (current) => ({ ...current, value }));
@@ -319,8 +325,8 @@ export class NeuFilterBuilderComponent<F extends string> {
   }
 
   protected apply(): void {
-    if (this.readonly()) return;
-    const value = prune(this.draft());
+    if (this.readonly() || this.invalidDraft()) return;
+    const value = prune(this.normalized(this.draft()));
     this.valueChange.emit(value.children.length ? value : null);
   }
 
@@ -331,6 +337,36 @@ export class NeuFilterBuilderComponent<F extends string> {
 
   private initialValue(rule: NeuFilterConstraint<F>['rule']): unknown {
     return this.structured(rule) ? [] : null;
+  }
+
+  private normalized(group: NeuFilterGroup<F>): NeuFilterGroup<F> {
+    return {
+      ...group,
+      children: group.children.map((node) => {
+        if (node.kind === 'group') return this.normalized(node);
+        return { ...node, value: this.normalizedValue(node) };
+      }),
+    };
+  }
+
+  private normalizedValue(condition: NeuFilterConstraint<F>): unknown {
+    if (!this.structured(condition.rule) || typeof condition.value !== 'string' || this.editor()) {
+      return condition.value;
+    }
+    const values = condition.value.split(',').map((entry) => entry.trim()).filter(Boolean);
+    return this.fieldFor(condition.field)?.type === 'number' ? values.map(Number) : values;
+  }
+
+  private hasInvalidCondition(group: NeuFilterGroup<F>): boolean {
+    return group.children.some((node) => {
+      if (node.kind === 'group') return this.hasInvalidCondition(node);
+      if (!this.structured(node.rule)) return false;
+      const value = this.normalizedValue(node);
+      const numeric = this.fieldFor(node.field)?.type === 'number';
+      return !Array.isArray(value) ||
+        (node.rule === 'between' ? value.length !== 2 : !value.length) ||
+        (numeric && value.some((entry) => typeof entry !== 'number' || !Number.isFinite(entry)));
+    });
   }
 
   private edit(path: FilterPath, edit: (group: NeuFilterGroup<F>) => NeuFilterGroup<F>): void {
