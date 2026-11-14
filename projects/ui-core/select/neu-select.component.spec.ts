@@ -11,6 +11,7 @@ import {
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuSelectComponent, NeuSelectOption } from './neu-select.component';
 import {
   NeuSelectClearIconDirective,
@@ -168,9 +169,12 @@ class FakeSelectCdkVirtualForDirective<T> {
   }
 }
 
-async function setup(extraInputs: Record<string, unknown> = {}) {
+async function setup(extraInputs: Record<string, unknown> = {}, locale?: string) {
   await TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection()],
+    providers: [
+      provideZonelessChangeDetection(),
+      ...(locale ? [{ provide: NEURAL_LOCALE, useValue: locale }] : []),
+    ],
   }).compileComponents();
   const f = TestBed.createComponent(NeuSelectComponent);
   f.componentRef.setInput('options', OPTIONS);
@@ -256,6 +260,36 @@ describe('NeuSelectComponent', () => {
     expect(select.selectedLabel()).toBeNull();
     expect(select.selectedOptionId()).toBeNull();
   });
+
+  it.each([
+    ['en-US', 'Selected options', 'Remove España', '2 selected', '1 selected'],
+    [
+      'es-MX',
+      'Opciones seleccionadas',
+      'Quitar España',
+      '2 opciones seleccionadas',
+      '1 opción seleccionada',
+    ],
+  ])(
+    'localizes chip names and the selection count for %s',
+    async (locale, list, remove, plural, singular) => {
+      const { f } = await setup(
+        { multiple: true, value: ['es', 'mx'], selectionOptions: { chips: true } },
+        locale,
+      );
+      const host: HTMLElement = f.nativeElement;
+      expect(host.querySelector('.neu-select__chips')?.getAttribute('aria-label')).toBe(list);
+      expect(host.querySelector('.neu-select__chip-remove')?.getAttribute('aria-label')).toBe(remove);
+
+      f.componentRef.setInput('selectionOptions', { maxSelectedLabels: 1 });
+      f.detectChanges();
+      expect(host.querySelector('.neu-select__value')?.textContent?.trim()).toBe(plural);
+
+      f.componentRef.setInput('value', ['not-loaded']);
+      f.detectChanges();
+      expect(host.querySelector('.neu-select__value')?.textContent?.trim()).toBe(singular);
+    },
+  );
 
   it('derives lazy option count and clamps explicit virtual item size', async () => {
     const { f } = await setup({ lazy: true, virtualScroll: true });

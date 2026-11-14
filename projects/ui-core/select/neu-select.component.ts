@@ -85,7 +85,11 @@ import {
   NeuSelectLoadingIconDirective,
   NeuSelectSelectedDirective,
 } from './neu-select.directives';
-import { NEU_OVERLAY_DISMISS_GUARD, allowsNeuOverlayDismissal } from '@neural-ui/core/foundation';
+import {
+  NEURAL_LOCALE,
+  NEU_OVERLAY_DISMISS_GUARD,
+  allowsNeuOverlayDismissal,
+} from '@neural-ui/core/foundation';
 
 export type { NeuSelectOption } from './neu-select.types';
 
@@ -174,7 +178,7 @@ export type { NeuSelectOption } from './neu-select.types';
 
         <span class="neu-select__value">
           @if (multiple() && selectionOptions().chips && selectedOptions().length) {
-            <span class="neu-select__chips" role="list" aria-label="Selected options">
+            <span class="neu-select__chips" role="list" [attr.aria-label]="selectedOptionsLabel">
               @for (option of visibleSelectedOptions(); track optionDomId(option)) {
                 <span class="neu-select__chip" role="listitem" tabindex="-1">
                   <span class="neu-select__chip-label">{{ optionLabelOf(option) }}</span>
@@ -182,7 +186,7 @@ export type { NeuSelectOption } from './neu-select.types';
                     <button
                       type="button"
                       class="neu-select__chip-remove"
-                      [attr.aria-label]="'Remove ' + optionLabelOf(option)"
+                      [attr.aria-label]="removeOptionLabel(option)"
                       (click)="removeSelectedOption(option, $event)"
                     >
                       ×
@@ -510,6 +514,10 @@ export class NeuSelectComponent<
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _overlay = inject(Overlay);
   private readonly dismissGuard = inject(NEU_OVERLAY_DISMISS_GUARD, { optional: true });
+  private readonly spanish = inject(NEURAL_LOCALE).toLowerCase().startsWith('es');
+  protected readonly selectedOptionsLabel = this.spanish
+    ? 'Opciones seleccionadas'
+    : 'Selected options';
   protected readonly _viewportMargin = 0;
   private readonly _panelMaxHeight = 240;
   private _viewport: () =>
@@ -846,12 +854,11 @@ export class NeuSelectComponent<
     if (this.multiple()) {
       const labels = this.selectedOptions().map((option) => this.optionLabelOf(option));
       const max = this.selectionOptions().maxSelectedLabels;
-      if (max != null && labels.length > max) return `${this.currentValues().length} selected`;
-      return labels.length
-        ? labels.join(', ')
-        : this.currentValues().length
-          ? `${this.currentValues().length} selected`
-          : null;
+      if (labels.length && (max == null || labels.length <= max)) return labels.join(', ');
+      const count = this.currentValues().length;
+      if (!count) return null;
+      if (!this.spanish) return `${count} selected`;
+      return count === 1 ? '1 opción seleccionada' : `${count} opciones seleccionadas`;
     }
     const selected = this._selectedOption();
     if (selected !== null) return this.optionLabelOf(selected);
@@ -1403,6 +1410,10 @@ export class NeuSelectComponent<
     const value = this.optionValueOf(option);
     const next = this.currentValues().filter((candidate) => !this.valuesEqual(candidate, value));
     this.commitValue(this.asModelValue(next), option, event, false);
+  }
+
+  protected removeOptionLabel(option: T): string {
+    return `${this.spanish ? 'Quitar' : 'Remove'} ${this.optionLabelOf(option)}`;
   }
 
   toggleAll(event: Event): void {
