@@ -206,6 +206,7 @@ function prune<F extends string>(group: NeuFilterGroup<F>): NeuFilterGroup<F> {
     fieldset { display: grid; min-inline-size: 0; gap: .75rem; padding: .75rem; }
     fieldset, select, input, button { border: 1px solid var(--neu-border, #9a9a9a); border-radius: .375rem; }
     select, input, button { margin: 0; padding: .35rem .5rem; color: inherit; background: transparent; font: inherit; }
+    label, select, input, button { box-sizing: border-box; min-inline-size: 0; max-inline-size: 100%; }
     label { display: grid; gap: .25rem; }
     .neu-filter-builder__actions, .neu-filter-builder__condition { display: flex; flex-wrap: wrap; gap: .5rem; }
     :host > .neu-filter-builder__actions { margin-block-start: .75rem; }
