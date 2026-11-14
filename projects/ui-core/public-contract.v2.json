@@ -1333,6 +1333,14 @@
       ]
     },
     {
+      "entrypoint": "./tour",
+      "types": "./types/neural-ui-core-tour.d.ts",
+      "exports": [
+        "./tour#NeuTourComponent",
+        "./tour#NeuTourStep"
+      ]
+    },
+    {
       "entrypoint": "./tree",
       "types": "./types/neural-ui-core-tree.d.ts",
       "exports": [
@@ -42666,6 +42674,137 @@
       "members": []
     },
     {
+      "id": "./tour#NeuTourComponent",
+      "entrypoint": "./tour",
+      "name": "NeuTourComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-tour",
+      "signature": "export declare class NeuTourComponent {\n}",
+      "members": [
+        {
+          "id": "./tour#NeuTourComponent.input:index",
+          "name": "index",
+          "kind": "input",
+          "publicName": "index",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: import(\"@angular/core\").InputSignal<number>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.input:open",
+          "name": "open",
+          "kind": "input",
+          "publicName": "open",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly open: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.input:steps",
+          "name": "steps",
+          "kind": "input",
+          "publicName": "steps",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly steps: import(\"@angular/core\").InputSignal<readonly NeuTourStep[]>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:completed",
+          "name": "completed",
+          "kind": "output",
+          "publicName": "completed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly completed: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:dismissed",
+          "name": "dismissed",
+          "kind": "output",
+          "publicName": "dismissed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dismissed: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:indexChange",
+          "name": "indexChange",
+          "kind": "output",
+          "publicName": "indexChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly indexChange: import(\"@angular/core\").OutputEmitterRef<number>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:targetMissing",
+          "name": "targetMissing",
+          "kind": "output",
+          "publicName": "targetMissing",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetMissing: import(\"@angular/core\").OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuTourComponent, \"neu-tour\", never, {\n    \"steps\": {\n        \"alias\": \"steps\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"index\": {\n        \"alias\": \"index\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"indexChange\": \"indexChange\";\n    \"dismissed\": \"dismissed\";\n    \"completed\": \"completed\";\n    \"targetMissing\": \"targetMissing\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuTourComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./tour#NeuTourStep",
+      "entrypoint": "./tour",
+      "name": "NeuTourStep",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTourStep {\n}",
+      "members": [
+        {
+          "id": "./tour#NeuTourStep.property:description",
+          "name": "description",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly description: string;"
+        },
+        {
+          "id": "./tour#NeuTourStep.property:targetId",
+          "name": "targetId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetId: string;"
+        },
+        {
+          "id": "./tour#NeuTourStep.property:title",
+          "name": "title",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly title: string;"
+        }
+      ]
+    },
+    {
       "id": "./tree-select#NeuOptionAccessor",
       "entrypoint": "./tree-select",
       "name": "NeuOptionAccessor",
@@ -64866,6 +65005,90 @@
       "signature": "readonly neuTooltipPosition: import(\"@angular/core\").InputSignal<NeuTooltipPosition>;"
     },
     {
+      "id": "./tour#NeuTourComponent.input:index",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "index",
+      "publicName": "index",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly index: import(\"@angular/core\").InputSignal<number>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:open",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "open",
+      "publicName": "open",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly open: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:steps",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "steps",
+      "publicName": "steps",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly steps: import(\"@angular/core\").InputSignal<readonly NeuTourStep[]>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:completed",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "completed",
+      "publicName": "completed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly completed: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:dismissed",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "dismissed",
+      "publicName": "dismissed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dismissed: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:indexChange",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "indexChange",
+      "publicName": "indexChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly indexChange: import(\"@angular/core\").OutputEmitterRef<number>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:targetMissing",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "targetMissing",
+      "publicName": "targetMissing",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetMissing: import(\"@angular/core\").OutputEmitterRef<string>;"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.input:clearable",
       "entrypoint": "./tree-select",
       "declaration": "NeuTreeSelectComponent",
@@ -66874,33 +67097,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 101,
-    "exportedDeclarations": 877,
+    "entrypoints": 102,
+    "exportedDeclarations": 879,
     "declarationKinds": {
       "class": 15,
-      "component": 96,
+      "component": 97,
       "directive": 119,
       "function": 56,
-      "interface": 280,
+      "interface": 281,
       "reexport": 48,
       "service": 12,
       "token": 5,
       "type": 199,
       "variable": 47
     },
-    "publicSymbols": 5333,
+    "publicSymbols": 5347,
     "statuses": {
-      "SUPPORTED": 3357,
+      "SUPPORTED": 3369,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1976,
+      "INTERNAL/UNSUPPORTED": 1978,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1230,
-      "output": 228,
+      "input": 1233,
+      "output": 232,
       "model": 24,
-      "total": 1482
+      "total": 1489
     },
     "designTokens": 251
   }

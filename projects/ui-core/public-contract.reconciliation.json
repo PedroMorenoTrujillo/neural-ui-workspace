@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
+    "declarationBindings": 1489,
+    "bindingDelta": 322,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 858,
+    "newlyDiscovered": 865,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 432,
+      "declaration-or-selector-was-not-recorded": 439,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 396
     }
@@ -6072,6 +6072,34 @@
     {
       "id": "./toolbar#NeuToolbarComponent.input:variant",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:index",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:open",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:steps",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:completed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:dismissed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:indexChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:targetMissing",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./tree-select#NeuTreeSelectComponent.input:clearable",
