@@ -12,6 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuIdGenerator } from '@neural-ui/core/internal';
 import { isMentionValue, mentionToken } from './neu-mention-token';
 
@@ -27,10 +28,11 @@ export interface NeuMentionSuggestion {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NeuMentionComponent implements FormValueControl<string> {
-  readonly value = model('');
+  readonly value = model<string>('');
   readonly label = input.required<string>();
   readonly suggestions = input<readonly NeuMentionSuggestion[]>([]);
-  readonly suggestionsLabel = input('Mention suggestions');
+  readonly suggestionsLabel = input(inject(NEURAL_LOCALE).toLowerCase().startsWith('es')
+    ? 'Sugerencias de menciones' : 'Mention suggestions');
   readonly disabled = input(false);
   readonly readonly = input(false);
   readonly required = input(false);
@@ -66,6 +68,15 @@ export class NeuMentionComponent implements FormValueControl<string> {
       const blocked = this.disabled() || this.readonly();
       if (blocked && this.token()) this.dismiss();
     });
+  }
+
+  focus(options?: FocusOptions): void {
+    this.field().nativeElement.focus(options);
+  }
+
+  reset(): void {
+    this.composing = false;
+    this.dismiss();
   }
 
   protected handleInput(event: Event): void {

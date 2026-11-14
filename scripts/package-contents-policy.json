@@ -8,6 +8,7 @@
       "files": [
         "LICENSE",
         "README.md",
+        "mention/README.md",
         "package.json"
       ]
     },

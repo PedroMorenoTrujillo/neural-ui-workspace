@@ -28,6 +28,7 @@ function componentFiles(dir) {
 
 const requiredMethods = ['writeValue', 'registerOnChange', 'registerOnTouched', 'setDisabledState'];
 const expectedSignalControls = new Map([
+  ['projects/ui-core/mention/neu-mention.component.ts', /readonly\s+value\s*=\s*model<string>\(''\)/],
   ['projects/ui-core/input/neu-input.component.ts', /readonly\s+value\s*=\s*model<string>\(''\)/],
   [
     'projects/ui-core/textarea/neu-textarea.component.ts',
@@ -221,8 +222,8 @@ if (cvaComponents.length !== 0) {
   );
 }
 
-if (signalComponents.length !== 24) {
-  violations.push(`expected 24 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
+if (signalComponents.length !== 25) {
+  violations.push(`expected 25 SIGNAL-FORM-CONTROL components, found ${signalComponents.length}`);
 }
 
 for (const expected of expectedSignalControls.keys()) {

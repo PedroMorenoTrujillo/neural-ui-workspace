@@ -29,6 +29,7 @@
         role="option"
         [id]="listId + '-' + index"
         [attr.aria-selected]="index === activeOption()"
+        (pointerdown)="$event.preventDefault()"
         (mousedown)="$event.preventDefault()"
         (click)="choose(item)"
       >{{ item.label }}</li>

@@ -31,3 +31,5 @@ A suggestion's `value` is the handle inserted after `@`. The value supports lett
 For remote suggestions, listen to `queryChange`, cancel or ignore older requests when the query changes and bind the current results back to `suggestions`. The empty query `''` means the user entered `@` without text. `null` means they left or dismissed the query. The component filters supplied results by the current token, and the application owns request timing, errors and result limits.
 
 While the list is visible, Up and Down move through suggestions, Enter selects the active suggestion and Escape dismisses the list. Tab retains native focus navigation. The textarea keeps focus while navigating suggestions and waits until composition finishes before opening a query.
+
+The suggestion list's default accessible name follows `NEURAL_LOCALE` for Spanish and English. Set `suggestionsLabel` to provide an application-specific name or another language. Pointer and touch selection keep focus in the textarea.

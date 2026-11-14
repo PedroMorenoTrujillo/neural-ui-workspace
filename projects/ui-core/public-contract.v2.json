@@ -23514,6 +23514,22 @@
           "signature": "readonly suggestionsLabel: import(\"@angular/core\").InputSignal<string>;"
         },
         {
+          "id": "./mention#NeuMentionComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
           "id": "./mention#NeuMentionComponent.model:value",
           "name": "value",
           "kind": "model",
@@ -67193,12 +67209,12 @@
       "type": 199,
       "variable": 47
     },
-    "publicSymbols": 5350,
+    "publicSymbols": 5352,
     "statuses": {
       "SUPPORTED": 3372,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1978,
+      "INTERNAL/UNSUPPORTED": 1980,
       "REVIEW": 0
     },
     "bindings": {

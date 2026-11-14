@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuMentionComponent, type NeuMentionSuggestion } from './neu-mention.component';
 
 @Component({
@@ -117,6 +118,7 @@ describe('NeuMentionComponent', () => {
     type('@');
     expect(root.querySelector('label')?.textContent?.trim()).toBe('Comment');
     expect(options()).toHaveLength(1);
+    expect(options()[0].dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', cancelable: true }))).toBe(false);
     expect(options()[0].dispatchEvent(new MouseEvent('mousedown', { cancelable: true }))).toBe(false);
     options()[0].click();
     fixture.detectChanges();
@@ -138,5 +140,42 @@ describe('NeuMentionComponent', () => {
     fixture.detectChanges();
     type('@');
     expect(host.value).toBe('@al');
+  });
+
+  it.each([
+    ['es-ES', 'Sugerencias de menciones'],
+    ['en-US', 'Mention suggestions'],
+  ])('localizes the suggestion list for %s and respects an explicit label', (locale, label) => {
+    TestBed.configureTestingModule({ providers: [{ provide: NEURAL_LOCALE, useValue: locale }] });
+    const fixture = TestBed.createComponent(NeuMentionComponent);
+    fixture.componentRef.setInput('label', 'Comment');
+    fixture.componentRef.setInput('suggestions', [{ value: 'ana', label: 'Ana' }]);
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+    input.value = '@';
+    input.setSelectionRange(1, 1);
+    input.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="listbox"]').getAttribute('aria-label')).toBe(label);
+    fixture.componentRef.setInput('suggestionsLabel', 'Equipo');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="listbox"]').getAttribute('aria-label')).toBe('Equipo');
+  });
+
+  it('supports Signal Forms focus and resets transient query/composition state without changing the model', () => {
+    const { fixture, host, input, options, type } = setup();
+    const component = fixture.debugElement.children[0].componentInstance as NeuMentionComponent;
+    component.focus();
+    expect(input.ownerDocument.activeElement).toBe(input);
+    type('@al');
+    component.reset();
+    fixture.detectChanges();
+    expect(options()).toHaveLength(0);
+    expect(host.value).toBe('@al');
+    expect(host.queries).toEqual(['al', null]);
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+    component.reset();
+    type('@alice');
+    expect(host.value).toBe('@alice');
   });
 });
