@@ -279,7 +279,9 @@ describe('NeuSelectComponent', () => {
       );
       const host: HTMLElement = f.nativeElement;
       expect(host.querySelector('.neu-select__chips')?.getAttribute('aria-label')).toBe(list);
-      expect(host.querySelector('.neu-select__chip-remove')?.getAttribute('aria-label')).toBe(remove);
+      expect(host.querySelector('.neu-select__chip-remove')?.getAttribute('aria-label')).toBe(
+        remove,
+      );
 
       f.componentRef.setInput('selectionOptions', { maxSelectedLabels: 1 });
       f.detectChanges();
@@ -290,6 +292,110 @@ describe('NeuSelectComponent', () => {
       expect(host.querySelector('.neu-select__value')?.textContent?.trim()).toBe(singular);
     },
   );
+
+  it.each([
+    [
+      'en-US',
+      [
+        'Select...',
+        'Search...',
+        'Filter options',
+        'Loading...',
+        'No results',
+        'No options available',
+        'Clear selection',
+        'Select all',
+        'Clear all',
+      ],
+      'España selected',
+      'España deselected',
+      'Selection cleared',
+    ],
+    [
+      'es-ES',
+      [
+        'Seleccionar...',
+        'Buscar...',
+        'Filtrar opciones',
+        'Cargando...',
+        'Sin resultados',
+        'No hay opciones disponibles',
+        'Limpiar selección',
+        'Seleccionar todo',
+        'Limpiar todo',
+      ],
+      'España opción seleccionada',
+      'España opción deseleccionada',
+      'Selección borrada',
+    ],
+  ])(
+    'localizes default controls and user selection announcements for %s',
+    async (locale, defaults, selected, deselected, cleared) => {
+      const { comp } = await setup({ multiple: true }, locale);
+      expect([
+        comp.placeholder(),
+        comp.searchPlaceholder(),
+        comp.ariaFilterLabel(),
+        comp.loadingLabel(),
+        comp.noResultsMessage(),
+        comp.emptyMessage(),
+        comp.clearAriaLabel(),
+        comp.selectAllLabel(),
+        comp.clearAllLabel(),
+      ]).toEqual(defaults);
+      comp.selectOption(OPTIONS[0]);
+      expect(comp.liveMessage()).toBe(selected);
+      comp.selectOption(OPTIONS[1]);
+      comp.selectOption(OPTIONS[0]);
+      expect(comp.liveMessage()).toBe(deselected);
+      comp.clear();
+      expect(comp.liveMessage()).toBe(cleared);
+    },
+  );
+
+  it.each([
+    ['en-US', '3 options available', '1 option available', '0 options available'],
+    ['es-ES', '3 opciones disponibles', '1 opción disponible', '0 opciones disponibles'],
+  ])('localizes open and filter result announcements for %s', async (locale, all, one, zero) => {
+    const { f, comp } = await setup({ searchable: true }, locale);
+    comp.open();
+    f.detectChanges();
+    expect(comp.resultsAnnouncement()).toBe(all);
+    comp.setFilter('España');
+    expect(comp.liveMessage()).toBe(one);
+    comp.setFilter('not a country');
+    expect(comp.liveMessage()).toBe(zero);
+  });
+
+  it.each(['Escape', 'Tab'])('closes the portaled panel on %s from an option', async (key) => {
+    const { f, comp } = await setup({ multiple: true });
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const option = document.querySelector<HTMLElement>('.neu-select__option')!;
+    option.focus();
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    option.dispatchEvent(event);
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+    expect(event.defaultPrevented).toBe(key === 'Escape');
+  });
+
+  it('keeps explicitly provided control translations with a Spanish locale', async () => {
+    const inputs = {
+      placeholder: 'Choose a country',
+      searchPlaceholder: 'Find a country',
+      ariaFilterLabel: 'Filter countries',
+      loadingLabel: 'Please wait',
+      noResultsMessage: 'Nothing found',
+      emptyMessage: 'Nothing available',
+      clearAriaLabel: 'Reset country',
+      selectAllLabel: 'Choose every country',
+      clearAllLabel: 'Reset all countries',
+    };
+    const { comp } = await setup(inputs, 'es-ES');
+    for (const [key, value] of Object.entries(inputs)) expect(comp[key]()).toBe(value);
+  });
 
   it('derives lazy option count and clamps explicit virtual item size', async () => {
     const { f } = await setup({ lazy: true, virtualScroll: true });
@@ -320,8 +426,8 @@ describe('NeuSelectComponent', () => {
       comp.open();
       f.detectChanges();
       const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
-      const boxes = options.map(
-        (option) => option.querySelector<HTMLElement>('.neu-select__option-checkbox')!,
+      const boxes = options.map((option) =>
+        option.querySelector<HTMLElement>('.neu-select__option-checkbox')!,
       );
       const checked = (box: HTMLElement) =>
         box.classList.contains('neu-select__option-checkbox--checked');
@@ -587,7 +693,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
 
     const liveRegion = f.nativeElement.querySelector('.neu-select__sr-status');
-    expect(liveRegion.textContent.trim()).toBe('1 opción disponible');
+    expect(liveRegion.textContent.trim()).toBe('1 option available');
   });
 
   // ── Clearable ──────────────────────────────────────────────────────────────

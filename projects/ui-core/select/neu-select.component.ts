@@ -281,6 +281,7 @@ export type { NeuSelectOption } from './neu-select.types';
       >
         <div
           class="neu-select__panel"
+          (keydown)="onPanelDismissKey($event)"
           [class.neu-select__panel--above]="isPanelAbove()"
           [class.neu-select__panel--virtual]="virtualScroll()"
           [id]="_panelId"
@@ -597,7 +598,7 @@ export class NeuSelectComponent<
   label = input<string>('');
 
   /** Placeholder cuando no hay selección / Placeholder when there is no selection */
-  placeholder = input<string>('Select...');
+  placeholder = input<string>(this.spanish ? 'Seleccionar...' : 'Select...');
 
   /** Mensaje de error / Error message */
   errorMessage = input<string>('');
@@ -625,7 +626,7 @@ export class NeuSelectComponent<
   ariaLabel = input<string | null>(null);
   ariaLabelledBy = input<string | null>(null);
   ariaDescribedBy = input<string | null>(null);
-  ariaFilterLabel = input('Filter options');
+  ariaFilterLabel = input(this.spanish ? 'Filtrar opciones' : 'Filter options');
   fluid = input(false);
   variant = input<NeuSelectVariant>('outline');
 
@@ -641,13 +642,13 @@ export class NeuSelectComponent<
   autofocusFilter = input(false);
 
   /** Placeholder del input de búsqueda / Search input placeholder */
-  searchPlaceholder = input<string>('Search...');
+  searchPlaceholder = input<string>(this.spanish ? 'Buscar...' : 'Search...');
 
   /** Muestra estado de carga dentro del panel / Shows a loading state inside the panel */
   loading = input<boolean>(false);
 
   /** Texto del estado de carga / Loading state text */
-  loadingLabel = input<string>('Loading...');
+  loadingLabel = input<string>(this.spanish ? 'Cargando...' : 'Loading...');
 
   /** Muestra un botón para limpiar la selección / Shows a button to clear the selection */
   clearable = input<boolean>(false);
@@ -675,17 +676,19 @@ export class NeuSelectComponent<
   autoOptionFocus = input(true);
 
   /** Texto cuando no hay opciones tras filtrar / Text when no options remain after filtering */
-  noResultsMessage = input<string>('No results');
-  emptyMessage = input<string>('No options available');
+  noResultsMessage = input<string>(this.spanish ? 'Sin resultados' : 'No results');
+  emptyMessage = input<string>(
+    this.spanish ? 'No hay opciones disponibles' : 'No options available',
+  );
 
   /** Aria-label del botón de limpiar / Aria-label for the clear button */
-  clearAriaLabel = input<string>('Clear selection');
+  clearAriaLabel = input<string>(this.spanish ? 'Limpiar selección' : 'Clear selection');
 
   /** Texto para seleccionar todas las opciones del ámbito / Label to select all scoped options. */
-  selectAllLabel = input<string>('Select all');
+  selectAllLabel = input<string>(this.spanish ? 'Seleccionar todo' : 'Select all');
 
   /** Texto para limpiar las opciones seleccionadas del ámbito / Label to clear all scoped selections. */
-  clearAllLabel = input<string>('Clear all');
+  clearAllLabel = input<string>(this.spanish ? 'Limpiar todo' : 'Clear all');
 
   readonly openChange = output<boolean>();
   readonly filterChange = output<string>();
@@ -906,7 +909,7 @@ export class NeuSelectComponent<
       return this.noResultsMessage();
     }
 
-    return total === 1 ? '1 opción disponible' : `${total} opciones disponibles`;
+    return this.availableOptionsLabel(total);
   });
 
   readonly effectiveVirtualScrollItemSize = computed(() => {
@@ -1244,12 +1247,18 @@ export class NeuSelectComponent<
     this.applyActiveRow(this.activeRowController.clear());
     const visibleOptions = this.previewFilteredOptions(value);
     if (emit) this.filterChange.emit(value);
-    this.liveMessage.set(`${visibleOptions.length} options available`);
+    this.liveMessage.set(this.availableOptionsLabel(visibleOptions.length));
     if (this.lazy()) this.emitLazyRequest(value ? 'filter' : 'reset', 0, value);
   }
 
   resetFilter(emit = true): void {
     this.setFilter('', null, emit);
+  }
+
+  protected onPanelDismissKey(event: KeyboardEvent): void {
+    if (event.key === 'Escape' || event.key === 'Tab') {
+      this.handleOverlayKey(event, event.key === 'Escape' ? 'escape' : 'tab');
+    }
   }
 
   onFilterKeyDown(event: KeyboardEvent): void {
@@ -1410,6 +1419,11 @@ export class NeuSelectComponent<
     const value = this.optionValueOf(option);
     const next = this.currentValues().filter((candidate) => !this.valuesEqual(candidate, value));
     this.commitValue(this.asModelValue(next), option, event, false);
+  }
+
+  private availableOptionsLabel(count: number): string {
+    if (!this.spanish) return count === 1 ? '1 option available' : `${count} options available`;
+    return count === 1 ? '1 opción disponible' : `${count} opciones disponibles`;
   }
 
   protected removeOptionLabel(option: T): string {
@@ -1692,12 +1706,20 @@ export class NeuSelectComponent<
         source: originalEvent.type.startsWith('key') ? 'keyboard' : 'pointer',
         originalEvent,
       });
+    const selectionState =
+      option && !this.isOptionSelected(option)
+        ? this.spanish
+          ? 'opción deseleccionada'
+          : 'deselected'
+        : this.spanish
+          ? 'opción seleccionada'
+          : 'selected';
     this.liveMessage.set(
       !this.hasValue()
-        ? 'Selection cleared'
-        : option
-          ? `${this.optionLabelOf(option)} ${this.isOptionSelected(option) ? 'selected' : 'deselected'}`
-          : `${String(value)} selected`,
+        ? this.spanish
+          ? 'Selección borrada'
+          : 'Selection cleared'
+        : `${option ? this.optionLabelOf(option) : String(value)} ${selectionState}`,
     );
   }
 
