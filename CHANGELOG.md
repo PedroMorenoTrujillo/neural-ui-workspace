@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.8] - 2026-11-14
+
+### Fixed
+
+- Floating labels stay on one line and show an ellipsis when the field is too narrow, while keeping the full accessible label.
+
 ## [2.0.7] - 2026-11-12
 
 ### Fixed

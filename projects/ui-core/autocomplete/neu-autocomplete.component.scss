@@ -111,7 +111,7 @@
 
 /* ── Floating Label ───────────────────────────────────────────── */
 .neu-autocomplete__floating-label {
-  @include floating.two-line;
+  @include floating.single-line;
   position: absolute;
   inset-inline-start: var(--neu-space-3, 12px);
   top: 50%;
@@ -119,7 +119,7 @@
   font-size: var(--neu-text-base, 0.875rem);
   color: var(--neu-text-muted, #6b7280);
   pointer-events: none;
-  max-width: calc(100% - var(--neu-space-6, 24px));
+  max-inline-size: calc(100% - var(--neu-space-6, 24px));
   transition:
     top var(--neu-transition, 120ms),
     font-size var(--neu-transition, 120ms),
@@ -127,6 +127,14 @@
     transform var(--neu-transition, 120ms),
     padding var(--neu-transition, 120ms),
     background var(--neu-transition, 120ms);
+
+  .neu-autocomplete:where(:has(.neu-autocomplete__dropdown, .neu-autocomplete__loading-icon)) & {
+    max-inline-size: calc(100% - var(--neu-space-3, 12px) - 36px);
+  }
+
+  .neu-autocomplete:where(:has(.neu-autocomplete__dropdown):has(.neu-autocomplete__loading-icon)) & {
+    max-inline-size: calc(100% - var(--neu-space-3, 12px) - 68px);
+  }
 
   // Sube al borde cuando hay valor o foco
   .neu-autocomplete--focused &,
@@ -139,6 +147,7 @@
     background: var(--neu-surface, #fff);
     padding: 0 4px;
     inset-inline-start: calc(var(--neu-space-3, 12px) - 4px);
+    max-inline-size: calc(100% - var(--neu-space-6, 24px));
   }
 
   .neu-autocomplete--focused & {
