@@ -4,17 +4,17 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
+    "declarationBindings": 1493,
+    "bindingDelta": 326,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 858,
+    "newlyDiscovered": 869,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 432,
-      "model-binding-was-not-supported": 24,
+      "declaration-or-selector-was-not-recorded": 442,
+      "model-binding-was-not-supported": 25,
       "multiline-annotated-or-compound-declaration-was-missed": 396
     }
   },
@@ -4639,6 +4639,50 @@
     },
     {
       "id": "./mega-menu#NeuMegaMenuComponent.output:mobileActiveChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:disabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:invalid",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:label",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:required",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestions",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestionsLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:queryChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:suggestionSelected",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:touch",
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {

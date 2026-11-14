@@ -750,6 +750,14 @@
       ]
     },
     {
+      "entrypoint": "./mention",
+      "types": "./types/neural-ui-core-mention.d.ts",
+      "exports": [
+        "./mention#NeuMentionComponent",
+        "./mention#NeuMentionSuggestion"
+      ]
+    },
+    {
       "entrypoint": "./menu",
       "types": "./types/neural-ui-core-menu.d.ts",
       "exports": [
@@ -23423,6 +23431,170 @@
           "static": false,
           "status": "INTERNAL/UNSUPPORTED",
           "signature": "readonly templateRef: TemplateRef<void>;"
+        }
+      ]
+    },
+    {
+      "id": "./mention#NeuMentionComponent",
+      "entrypoint": "./mention",
+      "name": "NeuMentionComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-mention",
+      "signature": "export declare class NeuMentionComponent implements FormValueControl<string> {\n}",
+      "members": [
+        {
+          "id": "./mention#NeuMentionComponent.input:disabled",
+          "name": "disabled",
+          "kind": "input",
+          "publicName": "disabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:label",
+          "name": "label",
+          "kind": "input",
+          "publicName": "label",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly required: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:suggestions",
+          "name": "suggestions",
+          "kind": "input",
+          "publicName": "suggestions",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestions: import(\"@angular/core\").InputSignal<readonly NeuMentionSuggestion[]>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:suggestionsLabel",
+          "name": "suggestionsLabel",
+          "kind": "input",
+          "publicName": "suggestionsLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestionsLabel: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: import(\"@angular/core\").ModelSignal<string>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.output:queryChange",
+          "name": "queryChange",
+          "kind": "output",
+          "publicName": "queryChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly queryChange: import(\"@angular/core\").OutputEmitterRef<string | null>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.output:suggestionSelected",
+          "name": "suggestionSelected",
+          "kind": "output",
+          "publicName": "suggestionSelected",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestionSelected: import(\"@angular/core\").OutputEmitterRef<NeuMentionSuggestion>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuMentionComponent, \"neu-mention\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"suggestions\": {\n        \"alias\": \"suggestions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"suggestionsLabel\": {\n        \"alias\": \"suggestionsLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"queryChange\": \"queryChange\";\n    \"suggestionSelected\": \"suggestionSelected\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuMentionComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./mention#NeuMentionSuggestion",
+      "entrypoint": "./mention",
+      "name": "NeuMentionSuggestion",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuMentionSuggestion {\n}",
+      "members": [
+        {
+          "id": "./mention#NeuMentionSuggestion.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: string;"
+        },
+        {
+          "id": "./mention#NeuMentionSuggestion.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: string;"
         }
       ]
     },
@@ -57728,6 +57900,139 @@
       "signature": "readonly mobileActiveChange: import(\"@angular/core\").OutputEmitterRef<boolean>;"
     },
     {
+      "id": "./mention#NeuMentionComponent.input:disabled",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "disabled",
+      "publicName": "disabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly disabled: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:invalid",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:label",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "label",
+      "publicName": "label",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly label: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:readonly",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:required",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly required: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestions",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "suggestions",
+      "publicName": "suggestions",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestions: import(\"@angular/core\").InputSignal<readonly NeuMentionSuggestion[]>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestionsLabel",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "suggestionsLabel",
+      "publicName": "suggestionsLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestionsLabel: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.model:value",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: import(\"@angular/core\").ModelSignal<string>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:queryChange",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "queryChange",
+      "publicName": "queryChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly queryChange: import(\"@angular/core\").OutputEmitterRef<string | null>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:suggestionSelected",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "suggestionSelected",
+      "publicName": "suggestionSelected",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestionSelected: import(\"@angular/core\").OutputEmitterRef<NeuMentionSuggestion>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:touch",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "touch",
+      "publicName": "touch",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
       "id": "./menu-tiered#NeuTieredMenuComponent.input:ariaLabel",
       "entrypoint": "./menu-tiered",
       "declaration": "NeuTieredMenuComponent",
@@ -66874,33 +67179,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 101,
-    "exportedDeclarations": 877,
+    "entrypoints": 102,
+    "exportedDeclarations": 879,
     "declarationKinds": {
       "class": 15,
-      "component": 96,
+      "component": 97,
       "directive": 119,
       "function": 56,
-      "interface": 280,
+      "interface": 281,
       "reexport": 48,
       "service": 12,
       "token": 5,
       "type": 199,
       "variable": 47
     },
-    "publicSymbols": 5333,
+    "publicSymbols": 5350,
     "statuses": {
-      "SUPPORTED": 3357,
+      "SUPPORTED": 3372,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1976,
+      "INTERNAL/UNSUPPORTED": 1978,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1230,
-      "output": 228,
-      "model": 24,
-      "total": 1482
+      "input": 1237,
+      "output": 231,
+      "model": 25,
+      "total": 1493
     },
     "designTokens": 251
   }
