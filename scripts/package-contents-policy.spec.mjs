@@ -12,8 +12,8 @@ const policy = JSON.parse(readFileSync(new URL('./package-contents-policy.json',
 const consumerFiles = policy.categories.flatMap((category) => category.files);
 
 test('the reviewed consumer inventory includes declarations, schematics and styles', () => {
-  assert.deepEqual(assertPackageContents(consumerFiles), { publicFiles: 346, debugFiles: 0 });
-  for (const path of ['types/neural-ui-core.d.ts', 'schematics/ng-add/schema.json', 'styles/_tokens.scss']) {
+  assert.deepEqual(assertPackageContents(consumerFiles), { publicFiles: 349, debugFiles: 0 });
+  for (const path of ['types/neural-ui-core.d.ts', 'types/neural-ui-core-mention.d.ts', 'schematics/ng-add/schema.json', 'styles/_tokens.scss']) {
     assert.equal(classifyPackageFile(path), 'PUBLIC NECESSARY');
   }
 });
