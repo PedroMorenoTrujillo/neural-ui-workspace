@@ -134,18 +134,21 @@ export class NeuTourComponent {
         this.marker.set(null);
         return;
       }
+      const win = this.document.defaultView;
+      const resizeObserver = win?.ResizeObserver ? new win.ResizeObserver(this.updateMarker) : null;
       let last: HTMLElement | null | undefined;
       const resolve = () => {
         const candidate = this.document.getElementById(step.targetId);
         if (candidate === last) return;
+        resizeObserver?.disconnect();
         last = candidate;
+        if (candidate) resizeObserver?.observe(candidate);
         this.target.set(candidate);
         if (candidate) candidate.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
         else untracked(() => this.targetMissing.emit(step.targetId));
         this.updateMarker();
       };
       resolve();
-      const win = this.document.defaultView;
       if (!win) return;
       const observer = new win.MutationObserver(resolve);
       observer.observe(this.document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['id'] });
@@ -153,6 +156,7 @@ export class NeuTourComponent {
       win.addEventListener('resize', this.updateMarker, { passive: true });
       onCleanup(() => {
         observer.disconnect();
+        resizeObserver?.disconnect();
         win.removeEventListener('scroll', this.updateMarker, true);
         win.removeEventListener('resize', this.updateMarker);
       });
