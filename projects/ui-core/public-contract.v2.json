@@ -965,6 +965,16 @@
       ]
     },
     {
+      "entrypoint": "./scheduler",
+      "types": "./types/neural-ui-core-scheduler.d.ts",
+      "exports": [
+        "./scheduler#NeuSchedulerComponent",
+        "./scheduler#NeuSchedulerEvent",
+        "./scheduler#NeuSchedulerEventProposal",
+        "./scheduler#NeuSchedulerView"
+      ]
+    },
+    {
       "entrypoint": "./scroll-top",
       "types": "./types/neural-ui-core-scroll-top.d.ts",
       "exports": [
@@ -30653,6 +30663,173 @@
           "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuRippleDirective, never>;"
         }
       ]
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-scheduler",
+      "signature": "export declare class NeuSchedulerComponent {\n}",
+      "members": [
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:date",
+          "name": "date",
+          "kind": "input",
+          "publicName": "date",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly date: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:events",
+          "name": "events",
+          "kind": "input",
+          "publicName": "events",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly events: import(\"@angular/core\").InputSignal<readonly NeuSchedulerEvent[]>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:timeZone",
+          "name": "timeZone",
+          "kind": "input",
+          "publicName": "timeZone",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly timeZone: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:view",
+          "name": "view",
+          "kind": "input",
+          "publicName": "view",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly view: import(\"@angular/core\").InputSignal<NeuSchedulerView>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.output:dateChange",
+          "name": "dateChange",
+          "kind": "output",
+          "publicName": "dateChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dateChange: import(\"@angular/core\").OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.output:eventChange",
+          "name": "eventChange",
+          "kind": "output",
+          "publicName": "eventChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly eventChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerEventProposal>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.output:viewChange",
+          "name": "viewChange",
+          "kind": "output",
+          "publicName": "viewChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly viewChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerView>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuSchedulerComponent, \"neu-scheduler\", never, {\n    \"date\": {\n        \"alias\": \"date\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"timeZone\": {\n        \"alias\": \"timeZone\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"view\": {\n        \"alias\": \"view\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"events\": {\n        \"alias\": \"events\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dateChange\": \"dateChange\";\n    \"viewChange\": \"viewChange\";\n    \"eventChange\": \"eventChange\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuSchedulerComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./scheduler#NeuSchedulerEvent",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "export interface NeuSchedulerEvent {\n}",
+      "members": [
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:end",
+          "name": "end",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly end: number;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:id",
+          "name": "id",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly id: string;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:start",
+          "name": "start",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly start: number;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:title",
+          "name": "title",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly title: string;"
+        }
+      ]
+    },
+    {
+      "id": "./scheduler#NeuSchedulerEventProposal",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerEventProposal",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "export type NeuSchedulerEventProposal = {\n    readonly kind: 'create';\n    readonly event: Omit<NeuSchedulerEvent, 'id'>;\n} | {\n    readonly kind: 'update';\n    readonly id: string;\n    readonly event: Omit<NeuSchedulerEvent, 'id'>;\n};",
+      "members": []
+    },
+    {
+      "id": "./scheduler#NeuSchedulerView",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerView",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "export type NeuSchedulerView = 'day' | 'week';",
+      "members": []
     },
     {
       "id": "./scroll-top#NeuScrollTopBehavior",
@@ -60889,6 +61066,102 @@
       "signature": "readonly neuRippleDuration: import(\"@angular/core\").InputSignalWithTransform<number, unknown>;"
     },
     {
+      "id": "./scheduler#NeuSchedulerComponent.input:date",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "date",
+      "publicName": "date",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly date: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:events",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "events",
+      "publicName": "events",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly events: import(\"@angular/core\").InputSignal<readonly NeuSchedulerEvent[]>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:readonly",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:timeZone",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "timeZone",
+      "publicName": "timeZone",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly timeZone: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:view",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "view",
+      "publicName": "view",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly view: import(\"@angular/core\").InputSignal<NeuSchedulerView>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:dateChange",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "dateChange",
+      "publicName": "dateChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dateChange: import(\"@angular/core\").OutputEmitterRef<string>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:eventChange",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "eventChange",
+      "publicName": "eventChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly eventChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerEventProposal>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:viewChange",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "viewChange",
+      "publicName": "viewChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly viewChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerView>;"
+    },
+    {
       "id": "./scroll-top#NeuScrollTopComponent.input:behavior",
       "entrypoint": "./scroll-top",
       "declaration": "NeuScrollTopComponent",
@@ -66874,33 +67147,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 101,
-    "exportedDeclarations": 877,
+    "entrypoints": 102,
+    "exportedDeclarations": 881,
     "declarationKinds": {
       "class": 15,
-      "component": 96,
+      "component": 97,
       "directive": 119,
       "function": 56,
-      "interface": 280,
+      "interface": 281,
       "reexport": 48,
       "service": 12,
       "token": 5,
-      "type": 199,
+      "type": 201,
       "variable": 47
     },
-    "publicSymbols": 5333,
+    "publicSymbols": 5351,
     "statuses": {
-      "SUPPORTED": 3357,
+      "SUPPORTED": 3373,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1976,
+      "INTERNAL/UNSUPPORTED": 1978,
       "REVIEW": 0
     },
     "bindings": {
-      "input": 1230,
-      "output": 228,
+      "input": 1235,
+      "output": 231,
       "model": 24,
-      "total": 1482
+      "total": 1490
     },
     "designTokens": 251
   }

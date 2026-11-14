@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
+    "declarationBindings": 1490,
+    "bindingDelta": 323,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 858,
+    "newlyDiscovered": 866,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 432,
+      "declaration-or-selector-was-not-recorded": 440,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 396
     }
@@ -5292,6 +5292,38 @@
     {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueCommitted",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:date",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:events",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:timeZone",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:view",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:dateChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:eventChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:viewChange",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./scroll-top#NeuScrollTopComponent.input:behavior",
