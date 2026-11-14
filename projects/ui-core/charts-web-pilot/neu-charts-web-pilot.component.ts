@@ -81,7 +81,7 @@ const palette = [
     figcaption { font-weight: 700; margin-block-end: .5rem; }
     svg { display: block; inline-size: 100%; max-inline-size: 32rem; color: var(--neu-primary, #2459ca); }
     table { inline-size: 100%; border-collapse: collapse; }
-    caption, th, td { padding: .35rem .5rem; text-align: start; }
+    caption, th, td { padding: .35rem .5rem; text-align: start; overflow-wrap: anywhere; }
     td, tbody th { border-block-start: 1px solid var(--neu-border, currentColor); }
     button { color: inherit; font: inherit; background: transparent; border: 1px solid transparent; }
     button[aria-pressed=true] { border-color: currentColor; font-weight: 700; }
