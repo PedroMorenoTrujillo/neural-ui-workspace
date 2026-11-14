@@ -4,16 +4,16 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
+    "declarationBindings": 1488,
+    "bindingDelta": 321,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 858,
+    "newlyDiscovered": 864,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 432,
+      "declaration-or-selector-was-not-recorded": 438,
       "model-binding-was-not-supported": 24,
       "multiline-annotated-or-compound-declaration-was-missed": 396
     }
@@ -3812,6 +3812,30 @@
     {
       "id": "./empty-state#NeuEmptyStateComponent.input:density",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:editor",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:fields",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:labels",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:value",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.output:valueChange",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./form-field#NeuInputGroupComponent.input:size",
