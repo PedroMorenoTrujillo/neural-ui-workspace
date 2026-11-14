@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+legend {
+  font-weight: 600;
+  padding: 0;
+}
+
+.neu-phone-input__controls {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+}
+
+label {
+  display: block;
+  margin-block: 0.375rem 0.25rem;
+}
+
+input,
+select {
+  background: var(--neu-surface, Canvas);
+  border: 1px solid var(--neu-border, GrayText);
+  border-radius: 0.375rem;
+  box-sizing: border-box;
+  color: var(--neu-text, CanvasText);
+  font: inherit;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding: 0.375rem 0.625rem;
+}
+
+input[type='tel'] {
+  direction: ltr;
+  text-align: start;
+}

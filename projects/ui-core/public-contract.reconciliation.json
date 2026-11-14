@@ -4,17 +4,17 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
+    "declarationBindings": 1495,
+    "bindingDelta": 328,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 858,
+    "newlyDiscovered": 871,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 432,
-      "model-binding-was-not-supported": 24,
+      "declaration-or-selector-was-not-recorded": 444,
+      "model-binding-was-not-supported": 25,
       "multiline-annotated-or-compound-declaration-was-missed": 396
     }
   },
@@ -4948,6 +4948,58 @@
     {
       "id": "./password#NeuPasswordComponent.output:touch",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:defaultRegion",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:disabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:errorMessage",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:errors",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:hidden",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:hint",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:invalid",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:label",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:name",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:required",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.output:touch",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./pick-list#NeuOrderListComponent.input:ariaLabel",

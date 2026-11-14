@@ -526,6 +526,40 @@ Neural UI 2.x supports Angular 22 only. Follow the V2 migration guidance before
 upgrading an existing 1.x application; the V1 documentation has its own
 compatibility requirements. Do not mix V1 components or examples with V2 imports.
 
+### PhoneInput
+
+Install the optional `libphonenumber-js` peer when importing `@neural-ui/core/phone-input`.
+It supplies international numbering metadata for the country picker and E.164 validation.
+
+```bash
+npm install 'libphonenumber-js@^1.13.16'
+```
+
+Add `NeuPhoneInputComponent` and Angular's `FormField` to the standalone component imports.
+
+```typescript
+import { signal } from '@angular/core';
+import { form, required, validate } from '@angular/forms/signals';
+import type { NeuPhoneInputValue } from '@neural-ui/core/phone-input';
+
+const data = signal<{ phone: NeuPhoneInputValue | null }>({ phone: null });
+const fields = form(data, (path) => {
+  required(path.phone);
+  validate(path.phone, ({ value }) =>
+    value() && !value()?.e164 ? { kind: 'phone', message: 'Enter a valid phone number.' } : null,
+  );
+});
+```
+
+```html
+<neu-phone-input [formField]="fields.phone" defaultRegion="ES" label="Contact phone" />
+```
+
+An empty field has a `null` value. During an incomplete or invalid edit it keeps the
+user's `raw` text and selected `region`, with `e164` set to `null`. Store `e164` after
+validation. Collect extensions in a separate field. Numbering metadata checks the
+format and numbering plan. Ownership or reachability requires a verification flow.
+
 ### Migrating from 1.x
 
 Neural UI 2 is a major release, not a drop-in upgrade. Update component
