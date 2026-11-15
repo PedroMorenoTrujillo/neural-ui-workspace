@@ -60,4 +60,124 @@ describe('NeuPhoneInputComponent', () => {
     expect(region.value).toBe('ES');
     expect(number.value).toBe('');
   });
+
+  it('reparses national numbers when the country changes and retains an empty country choice', () => {
+    const fixture = TestBed.createComponent(NeuPhoneInputComponent);
+    fixture.componentRef.setInput('defaultRegion', 'ES');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    const country = host.querySelector('select')!;
+    const number = host.querySelector('input')!;
+    country.value = 'GB';
+    country.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBeNull();
+    expect(country.value).toBe('GB');
+
+    number.value = '07400 123456';
+    number.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()?.e164).toBe('+447400123456');
+    country.value = 'ES';
+    country.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toEqual({ region: 'ES', raw: '07400 123456', e164: null });
+
+    // A stale or unrecognized selection must not replace the existing phone value.
+    country.value = '';
+    country.dispatchEvent(new Event('change'));
+    expect(fixture.componentInstance.value()?.region).toBe('ES');
+    country.value = 'ES';
+    number.value = '';
+    number.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.value()).toBeNull();
+    expect(country.value).toBe('ES');
+  });
+
+  it('rejects synthetic edits in disabled and readonly states', () => {
+    const fixture = TestBed.createComponent(NeuPhoneInputComponent);
+    const original = createNeuPhoneInputValue('612 34 56 78', 'ES');
+    fixture.componentRef.setInput('value', original);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    const number = host.querySelector('input')!;
+    const country = host.querySelector('select')!;
+    const proposals: (NeuPhoneInputValue | null)[] = [];
+    fixture.componentInstance.value.subscribe(value => proposals.push(value));
+    for (const state of ['disabled', 'readonly']) {
+      fixture.componentRef.setInput(state, true);
+      fixture.detectChanges();
+      number.value = '+1 213 373 4253';
+      number.dispatchEvent(new Event('input'));
+      country.value = 'US';
+      country.dispatchEvent(new Event('change'));
+      expect(fixture.componentInstance.value()).toEqual(original);
+      expect(proposals).toEqual([]);
+      fixture.componentRef.setInput(state, false);
+    }
+  });
+
+  it('marks touch only when focus leaves the composite control and tolerates a hidden focus target', () => {
+    const fixture = TestBed.createComponent(NeuPhoneInputComponent);
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    const number = host.querySelector('input')!;
+    const country = host.querySelector('select')!;
+    const focus = vi.spyOn(number, 'focus');
+    const touched = vi.fn();
+    fixture.componentInstance.touch.subscribe(touched);
+    fixture.componentInstance.focus({ preventScroll: true });
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    number.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: country }));
+    expect(touched).not.toHaveBeenCalled();
+    number.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: document.body }));
+    number.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    expect(touched).toHaveBeenCalledTimes(2);
+    fixture.componentRef.setInput('hidden', true);
+    fixture.detectChanges();
+    expect(host.querySelector('fieldset')).toBeNull();
+    expect(() => fixture.componentInstance.focus()).not.toThrow();
+  });
+
+  it('uses English labels and resolves explicit errors, validation messages and hints in order', () => {
+    const fixture = TestBed.createComponent(NeuPhoneInputComponent);
+    fixture.componentRef.setInput('hint', 'Include the country code');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    const number = host.querySelector('input')!;
+    expect(host.querySelector('legend')?.textContent).toBe('Phone');
+    expect(number.labels?.[0].textContent).toBe('Number');
+    const descriptionId = number.getAttribute('aria-describedby');
+    expect(descriptionId).toBeTruthy();
+    expect(host.textContent).toContain('Include the country code');
+    fixture.componentRef.setInput('invalid', true);
+    fixture.componentRef.setInput('errors', [{ kind: 'phone', message: 'Incomplete phone' }]);
+    fixture.detectChanges();
+    expect(host.textContent).toContain('Incomplete phone');
+    fixture.componentRef.setInput('errorMessage', 'Use a valid contact number');
+    fixture.detectChanges();
+    expect(host.textContent).toContain('Use a valid contact number');
+    fixture.componentRef.setInput('errorMessage', '');
+    fixture.componentRef.setInput('errors', []);
+    fixture.detectChanges();
+    expect(host.textContent).toContain('Include the country code');
+    fixture.componentRef.setInput('hint', '');
+    fixture.detectChanges();
+    expect(number.getAttribute('aria-describedby')).toBeNull();
+  });
+
+  it('restores the supplied value region on reset and retains the selected region for global numbers', () => {
+    const fixture = TestBed.createComponent(NeuPhoneInputComponent);
+    const value = createNeuPhoneInputValue('+1 213 373 4253', 'ES');
+    fixture.componentRef.setInput('value', value);
+    fixture.componentRef.setInput('defaultRegion', 'ES');
+    fixture.detectChanges();
+    fixture.componentInstance.reset();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('select').value).toBe('US');
+    expect(createNeuPhoneInputValue('+800 1234 5678', 'ES')).toEqual({
+      region: 'ES', raw: '+800 1234 5678', e164: '+80012345678',
+    });
+  });
 });
