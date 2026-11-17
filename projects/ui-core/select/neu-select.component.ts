@@ -1,5 +1,6 @@
 import {
   Component,
+  afterRenderEffect,
   DestroyRef,
   ElementRef,
   PLATFORM_ID,
@@ -179,8 +180,13 @@ export type { NeuSelectOption } from './neu-select.types';
         <span class="neu-select__value">
           @if (multiple() && selectionOptions().chips && selectedOptions().length) {
             <span class="neu-select__chips" role="list" [attr.aria-label]="selectedOptionsLabel">
-              @for (option of visibleSelectedOptions(); track optionDomId(option)) {
-                <span class="neu-select__chip" role="listitem" tabindex="-1">
+              @for (option of fittedSelectedOptions(); track optionDomId(option)) {
+                <span
+                  class="neu-select__chip"
+                  role="listitem"
+                  tabindex="-1"
+                  [style.max-inline-size.px]="chipMaxInlineSize()"
+                >
                   <span class="neu-select__chip-label">{{ optionLabelOf(option) }}</span>
                   @if (!disabled() && !readonly()) {
                     <button
@@ -188,12 +194,43 @@ export type { NeuSelectOption } from './neu-select.types';
                       class="neu-select__chip-remove"
                       [attr.aria-label]="removeOptionLabel(option)"
                       (click)="removeSelectedOption(option, $event)"
+                      (keydown.enter)="$event.stopPropagation()"
+                      (keydown.space)="$event.stopPropagation()"
                     >
                       ×
                     </button>
                   }
                 </span>
               }
+              @if (hiddenSelectedCount() > 0) {
+                <span role="listitem" class="neu-select__chip-overflow-item">
+                  <button
+                    type="button"
+                    class="neu-select__chip-overflow"
+                    [attr.aria-label]="hiddenSelectedLabel()"
+                    aria-haspopup="listbox"
+                    [attr.aria-expanded]="isOpen()"
+                    [attr.aria-controls]="_panelId"
+                    [disabled]="isDisabledFinal()"
+                    (click)="openHiddenSelections($event)"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()"
+                  >
+                    +{{ hiddenSelectedCount() }}
+                  </button>
+                </span>
+              }
+            </span>
+            <span class="neu-select__chip-measurements" aria-hidden="true">
+              @for (option of visibleSelectedOptions(); track optionDomId(option)) {
+                <span class="neu-select__chip-measure-item">
+                  <span class="neu-select__chip-measure-label">{{ optionLabelOf(option) }}</span>
+                  @if (!isDisabledFinal() && !readonly()) {
+                    <span class="neu-select__chip-measure-remove">×</span>
+                  }
+                </span>
+              }
+              <span class="neu-select__chip-measure-overflow">+{{ selectedValueCount() }}</span>
             </span>
           } @else if (selectedLabel()) {
             @if (selectedItemTpl()) {
@@ -319,15 +356,23 @@ export type { NeuSelectOption } from './neu-select.types';
             </div>
           }
           @if (multiple() && selectionOptions().toggleAll) {
-            <button
-              type="button"
+            <label
               class="neu-select__toggle-all"
-              [disabled]="isDisabledFinal() || readonly()"
-              [attr.aria-pressed]="allScopedSelected()"
-              (click)="toggleAll($event)"
+              [class.neu-select__toggle-all--disabled]="toggleAllDisabled()"
             >
-              {{ allScopedSelected() ? clearAllLabel() : selectAllLabel() }}
-            </button>
+              <input
+                type="checkbox"
+                class="neu-select__toggle-all-input"
+                [checked]="allScopedSelected()"
+                [indeterminate]="partiallyScopedSelected()"
+                [attr.aria-checked]="
+                  partiallyScopedSelected() ? 'mixed' : allScopedSelected() ? 'true' : 'false'
+                "
+                [disabled]="toggleAllDisabled()"
+                (change)="toggleAll($event)"
+              />
+              <span>{{ selectAllLabel() }}</span>
+            </label>
           }
           @if (loading() && !lazy()) {
             <div class="neu-select__empty" role="status">{{ loadingLabel() }}</div>
@@ -522,8 +567,7 @@ export class NeuSelectComponent<
   protected readonly _viewportMargin = 0;
   private readonly _panelMaxHeight = 240;
   private _viewport: () =>
-    | Pick<CdkVirtualScrollViewport, 'checkViewportSize' | 'scrollToIndex'>
-    | undefined = () => {
+    Pick<CdkVirtualScrollViewport, 'checkViewportSize' | 'scrollToIndex'> | undefined = () => {
     const element =
       this.elementRef.nativeElement.querySelector<HTMLElement>('.neu-select__viewport') ??
       this._document.querySelector<HTMLElement>('.neu-select__viewport');
@@ -547,7 +591,22 @@ export class NeuSelectComponent<
         this.applyActiveRow(this.activeRowController.setRows(rows));
       });
     });
+    afterRenderEffect(() => {
+      this.visibleSelectedOptions();
+      this.selectionOptions();
+      this.multiple();
+      this.disabled();
+      this.readonly();
+      untracked(() => {
+        this.observeChipLayout();
+        this.measureChipLayout();
+      });
+    });
     this._destroyRef.onDestroy(() => {
+      this.chipResizeObserver?.disconnect();
+      if (this.chipLayoutFrame != null)
+        this._document.defaultView?.cancelAnimationFrame(this.chipLayoutFrame);
+
       this.pendingOverlayFrameActions = [];
       this.cancelFocusRestorationFrame();
       this.activeRowController.dispose();
@@ -879,6 +938,94 @@ export class NeuSelectComponent<
     const max = this.selectionOptions().maxSelectedLabels;
     return max == null ? this.selectedOptions() : this.selectedOptions().slice(0, Math.max(0, max));
   });
+  private readonly chipFitCount = signal(Number.POSITIVE_INFINITY);
+  protected readonly chipMaxInlineSize = signal(160);
+  protected readonly selectedValueCount = computed(() => this.currentValues().length);
+  protected readonly fittedSelectedOptions = computed(() =>
+    this.visibleSelectedOptions().slice(0, this.chipFitCount()),
+  );
+  protected readonly hiddenSelectedCount = computed(() =>
+    Math.max(0, this.selectedValueCount() - this.fittedSelectedOptions().length),
+  );
+  protected readonly hiddenSelectedLabel = computed(() =>
+    this.spanish
+      ? `Mostrar ${this.hiddenSelectedCount()} opciones seleccionadas más`
+      : `Show ${this.hiddenSelectedCount()} more selected options`,
+  );
+  private chipResizeObserver: ResizeObserver | null = null;
+  private chipLayoutFrame: number | null = null;
+
+  private observeChipLayout(): void {
+    const view = this._document.defaultView;
+    if (!view?.ResizeObserver) return;
+    this.chipResizeObserver ??= new view.ResizeObserver(() => {
+      if (this.chipLayoutFrame != null || this._destroyRef.destroyed) return;
+      this.chipLayoutFrame = view.requestAnimationFrame(() => {
+        this.chipLayoutFrame = null;
+        if (!this._destroyRef.destroyed) this.measureChipLayout();
+      });
+    });
+    this.chipResizeObserver.disconnect();
+    const host = this.elementRef.nativeElement;
+    const value = host.querySelector<HTMLElement>('.neu-select__chips');
+    if (value) this.chipResizeObserver.observe(value);
+    for (const element of host.querySelectorAll<HTMLElement>(
+      '.neu-select__chip-measure-item, .neu-select__chip-measure-overflow',
+    ))
+      this.chipResizeObserver.observe(element);
+  }
+
+  private measureChipLayout(): void {
+    const host = this.elementRef.nativeElement;
+    const chips = host.querySelector<HTMLElement>('.neu-select__chips');
+    if (!chips || !this._document.defaultView) return;
+    const available = chips.clientWidth;
+    // No layout in SSR/test DOMs or hidden containers; the observer retries on reveal.
+    if (!available) return;
+    const widths = Array.from(
+      host.querySelectorAll<HTMLElement>('.neu-select__chip-measure-item'),
+      (element) => element.getBoundingClientRect().width,
+    );
+    const summaryWidth =
+      host.querySelector<HTMLElement>('.neu-select__chip-measure-overflow')?.getBoundingClientRect()
+        .width ?? 0;
+    const gap =
+      Number.parseFloat(this._document.defaultView.getComputedStyle(chips).columnGap) || 0;
+    const total = this.selectedValueCount();
+    const fullWidth =
+      widths.reduce((sum, width) => sum + width, 0) + Math.max(0, widths.length - 1) * gap;
+    let fit = widths.length;
+    let maxWidth = 160;
+    if (widths.length < total || fullWidth > available - 1) {
+      fit = 0;
+      maxWidth = Math.min(160, Math.max(0, available - summaryWidth - gap - 1));
+      const readableMinimum = this.isDisabledFinal() || this.readonly() ? 48 : 64;
+      if (maxWidth >= readableMinimum) {
+        let used = summaryWidth;
+        for (const width of widths) {
+          const next = Math.min(width, maxWidth) + gap;
+          if (used + next > available - 1) break;
+          used += next;
+          fit++;
+        }
+      }
+    }
+    const activeChip = this._document.activeElement?.closest('.neu-select__chip');
+    if (
+      activeChip &&
+      Array.from(chips.querySelectorAll('.neu-select__chip')).indexOf(activeChip) >= fit
+    ) {
+      this.focusTrigger();
+    }
+    if (untracked(this.chipFitCount) !== fit) this.chipFitCount.set(fit);
+    if (untracked(this.chipMaxInlineSize) !== maxWidth) this.chipMaxInlineSize.set(maxWidth);
+  }
+
+  protected openHiddenSelections(event: Event): void {
+    event.stopPropagation();
+    this.requestOpen(event);
+  }
+
   readonly scopedOptions = computed(() =>
     (this.selectionOptions().toggleAllScope ?? 'filtered') === 'filtered'
       ? this.filteredOptions().filter((option) => !this.isOptionDisabled(option))
@@ -889,6 +1036,24 @@ export class NeuSelectComponent<
       this.scopedOptions().length > 0 &&
       this.scopedOptions().every((option) => this.isOptionSelected(option)),
   );
+
+  protected readonly partiallyScopedSelected = computed(
+    () =>
+      !this.allScopedSelected() &&
+      this.scopedOptions().some((option) => this.isOptionSelected(option)),
+  );
+  protected readonly toggleAllDisabled = computed(() => {
+    const limit = this.selectionOptions().selectionLimit;
+    return (
+      this.isDisabledFinal() ||
+      this.readonly() ||
+      this.loading() ||
+      !this.scopedOptions().length ||
+      (limit != null &&
+        this.currentValues().length >= Math.max(0, limit) &&
+        !this.scopedOptions().some((option) => this.isOptionSelected(option)))
+    );
+  });
 
   readonly selectedOptionId = computed(() => {
     const selected = this._selectedOption();
@@ -1415,10 +1580,19 @@ export class NeuSelectComponent<
 
   removeSelectedOption(option: T, event: Event): void {
     event.stopPropagation();
-    if (!this.multiple() || this.disabled() || this.readonly()) return;
+    if (!this.multiple() || this.isDisabledFinal() || this.readonly()) return;
+    const removers = Array.from(
+      this.elementRef.nativeElement.querySelectorAll<HTMLButtonElement>('.neu-select__chip-remove'),
+    );
+    const focused = removers.indexOf(this._document.activeElement as HTMLButtonElement);
+    const nextFocus = focused < 0 ? null : (removers[focused + 1] ?? removers[focused - 1]);
     const value = this.optionValueOf(option);
     const next = this.currentValues().filter((candidate) => !this.valuesEqual(candidate, value));
     this.commitValue(this.asModelValue(next), option, event, false);
+    if (focused >= 0) {
+      if (nextFocus) nextFocus.focus();
+      else this.focusTrigger();
+    }
   }
 
   private availableOptionsLabel(count: number): string {
@@ -1431,26 +1605,34 @@ export class NeuSelectComponent<
   }
 
   toggleAll(event: Event): void {
-    if (!this.multiple() || this.disabled() || this.readonly()) return;
-    const scopedValues = this.scopedOptions().map((option) => this.optionValueOf(option));
-    const next = this.allScopedSelected()
-      ? this.currentValues().filter(
+    if (!this.multiple() || this.toggleAllDisabled()) return;
+    const scopedValues: V[] = [];
+    for (const option of this.scopedOptions()) {
+      const value = this.optionValueOf(option);
+      if (!scopedValues.some((candidate) => this.valuesEqual(candidate, value)))
+        scopedValues.push(value);
+    }
+    const current = this.currentValues();
+    const limit = this.selectionOptions().selectionLimit;
+    const remaining = limit == null ? scopedValues.length : Math.max(0, limit - current.length);
+    // A capped partial selection must still be removable through this control.
+    const clear = this.allScopedSelected() || (this.partiallyScopedSelected() && remaining === 0);
+    const additions = scopedValues.filter(
+      (value) => !current.some((candidate) => this.valuesEqual(candidate, value)),
+    );
+    const next = clear
+      ? current.filter(
           (value) => !scopedValues.some((candidate) => this.valuesEqual(candidate, value)),
         )
-      : [
-          ...this.currentValues(),
-          ...scopedValues.filter(
-            (value) =>
-              !this.currentValues().some((candidate) => this.valuesEqual(candidate, value)),
-          ),
-        ];
-    const limit = this.selectionOptions().selectionLimit;
-    this.commitValue(
-      this.asModelValue(limit == null ? next : next.slice(0, Math.max(0, limit))),
-      null,
-      event,
-      false,
-    );
+      : [...current, ...additions.slice(0, remaining)];
+    this.commitValue(this.asModelValue(next), null, event, false);
+    // Native checkboxes toggle before change; reconcile even when a limit keeps
+    // the model/checked binding unchanged after an indeterminate activation.
+    const checkbox = event.target as HTMLInputElement | null;
+    if (checkbox?.type === 'checkbox') {
+      checkbox.checked = this.allScopedSelected();
+      checkbox.indeterminate = this.partiallyScopedSelected();
+    }
   }
 
   optionLabelOf(option: T): string {
