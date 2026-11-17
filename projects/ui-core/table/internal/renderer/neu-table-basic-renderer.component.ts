@@ -924,16 +924,6 @@ export class NeuTableBasicRendererComponent<
     this.filterDraftRule.set(this.filterRule(column));
     this.filterDraftValue.set(this.filterValue(column));
     this.openFilterColumnId.set(column.id);
-    afterNextRender(
-      () => {
-        const scope = this.#filterTrigger()?.closest('neu-table-basic-renderer');
-        const editor = [
-          ...(scope?.querySelectorAll<HTMLElement>('[data-filter-editor]') ?? []),
-        ].find((candidate) => candidate.dataset['filterEditor'] === column.id);
-        editor?.querySelector<HTMLElement>('input,select,button')?.focus();
-      },
-      { injector: this.#injector },
-    );
   };
   readonly #menuColumn = () =>
     this.allColumns().find((column) => column.id === this.openFilterColumnId()) ?? null;
@@ -973,7 +963,7 @@ export class NeuTableBasicRendererComponent<
     const trigger = this.#filterTrigger();
     this.openFilterColumnId.set(null);
     this.#filterTrigger.set(null);
-    afterNextRender(() => trigger?.focus(), { injector: this.#injector });
+    afterNextRender(() => trigger?.focus({ preventScroll: true }), { injector: this.#injector });
   };
   protected readonly openBuilder = (event: MouseEvent) => {
     this.#builderTrigger.set(event.currentTarget as HTMLElement);

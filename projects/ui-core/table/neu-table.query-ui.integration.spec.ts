@@ -1065,6 +1065,51 @@ describe('NeuTable 2 controlled query UI integration', () => {
     expect(fixture.componentInstance.queryEvents.at(-1)?.search).toBe('next');
   });
 
+  it('captures filter focus once without scrolling, cancels external scroll, and restores its trigger', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const menu = document.querySelector<HTMLElement>('.neu-table2__filter-menu')!;
+    expect(menu).not.toBeNull();
+    expect(document.activeElement).toBe(menu);
+    expect(focus.mock.calls).toEqual([[{ preventScroll: true }]]);
+    // Both panel scrolling and sibling overlays (a nested Select listbox) stay open.
+    menu.dispatchEvent(new Event('scroll'));
+    const nested = document.createElement('div');
+    document.querySelector('.cdk-overlay-container')!.append(nested);
+    nested.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBe(menu);
+    nested.remove();
+    const viewport = (fixture.nativeElement as HTMLElement).querySelector('.neu-table2__viewport')!;
+    viewport.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    expect(focus.mock.calls.at(-1)).toEqual([{ preventScroll: true }]);
+    expect(fixture.componentInstance.query().filters).toBeNull();
+    focus.mockRestore();
+  });
+
+  it('dismisses a filter on viewport resize and allows reopening after detachment', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges(); await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).not.toBeNull();
+    window.dispatchEvent(new Event('resize'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).not.toBeNull();
+  });
+
   it('hides value inputs for unary filters and respects a non-expandable row', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     const host = fixture.componentInstance;

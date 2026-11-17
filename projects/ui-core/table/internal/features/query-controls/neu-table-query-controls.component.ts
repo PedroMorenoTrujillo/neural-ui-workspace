@@ -1,4 +1,4 @@
-import { afterNextRender, Component, ElementRef, inject, input, linkedSignal, type TemplateRef } from '@angular/core';
+import { afterNextRender, Component, ElementRef, inject, Injector, input, linkedSignal, type TemplateRef } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
@@ -13,6 +13,7 @@ import type {
   NeuTablePaginationOptions,
   NeuTablePaginatorContext,
 } from '../../../public/neu-table.types';
+import { TableFilterScrollStrategy } from './neu-table-filter-scroll-strategy';
 import { tableMessage } from '../../semantics/neu-table-labels';
 
 export interface TableFilterControls {
@@ -185,10 +186,13 @@ export interface TableQueryControls {
         [cdkConnectedOverlayOpen]="state.open" [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
         [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="8"
+        [cdkConnectedOverlayLockPosition]="true" [cdkConnectedOverlayScrollStrategy]="filterScrollStrategy"
+        (attach)="focusFilterMenu(filterOverlay)" (detach)="state.menu?.filter?.cancel()"
+        #filterOverlay="cdkConnectedOverlay"
         (backdropClick)="state.menu?.filter?.cancel()"
         (overlayKeydown)="$event.key === 'Escape' && state.menu?.filter?.cancel()">
         @if (state.menu; as menu) {
-          <form class="neu-table2__filter-menu" role="dialog" cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+          <form class="neu-table2__filter-menu" role="dialog" tabindex="-1" cdkTrapFocus
             [attr.aria-label]="text('filterColumn', state.name)" [attr.data-filter-editor]="state.id"
             (submit)="menu.template ? $event.preventDefault() : menu.filter.apply($event)">
             @if (menu.template; as template) {
@@ -490,13 +494,16 @@ export class NeuTableQueryControlsComponent {
     if (size !== null) state.changePageSize(size);
     this.restoreControl(() => control.value.set(state.pageSize));
   };
-  constructor() {
-    const element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  protected readonly filterScrollStrategy = new TableFilterScrollStrategy();
+  private readonly injector = inject(Injector);
+  protected readonly focusFilterMenu = (overlay: CdkConnectedOverlay): void => {
     afterNextRender(() => {
-      if (this.controls().filter?.menu)
-        element.querySelector<HTMLElement>('input,select,button')?.focus();
-    });
-  }
+      const panel = overlay.overlayRef?.overlayElement;
+      // One focus owner for both built-in and projected editors. Avoid opening
+      // a mobile keyboard until the user explicitly chooses a text field.
+      panel?.querySelector<HTMLElement>('[role="dialog"]')?.focus({ preventScroll: true });
+    }, { injector: this.injector });
+  };
   readonly controls = input<TableQueryControls>({});
   protected readonly pageButtons = linkedSignal<
     NeuTablePaginatorContext | undefined,
