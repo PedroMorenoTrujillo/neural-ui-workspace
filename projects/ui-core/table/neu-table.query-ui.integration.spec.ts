@@ -1081,6 +1081,7 @@ describe('NeuTable 2 controlled query UI integration', () => {
     // Both panel scrolling and sibling overlays (a nested Select listbox) stay open.
     menu.dispatchEvent(new Event('scroll'));
     const nested = document.createElement('div');
+    nested.className = 'cdk-overlay-pane';
     document.querySelector('.cdk-overlay-container')!.append(nested);
     nested.dispatchEvent(new Event('scroll'));
     fixture.detectChanges();
@@ -1114,7 +1115,13 @@ describe('NeuTable 2 controlled query UI integration', () => {
     input.value = 'typed'; input.dispatchEvent(new Event('input', { bubbles: true }));
     fixture.detectChanges(); await fixture.whenStable();
     expect(input.value).toBe('typed');
-    document.body.dispatchEvent(new Event('touchmove'));
+    const backdrop = document.querySelector('.cdk-overlay-backdrop')!;
+    backdrop.dispatchEvent(new Event('wheel'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    document.querySelector<HTMLInputElement>('.neu-table2__filter-menu input')!.focus();
+    document.querySelector('.cdk-overlay-backdrop')!.dispatchEvent(new Event('touchmove'));
     fixture.detectChanges(); await fixture.whenStable();
     expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
     vi.unstubAllGlobals();

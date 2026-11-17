@@ -36,7 +36,7 @@ export class TableFilterScrollStrategy implements ScrollStrategy {
     // itself must remain scrollable without dismissing the owning editor.
     const container = this.overlay?.overlayElement.closest('.cdk-overlay-container');
     const target = event.target;
-    if (target && 'nodeType' in target && container?.contains(target as Node)) return;
+    if ((target as Element | null)?.closest?.('.cdk-overlay-pane')) return;
     const document = this.overlay?.overlayElement.ownerDocument;
     const active = document?.activeElement;
     // Mobile keyboards can pan the document after focusing an editor. External
@@ -48,8 +48,7 @@ export class TableFilterScrollStrategy implements ScrollStrategy {
   };
 
   private readonly onOutsideGesture = (event: Event): void => {
-    const container = this.overlay?.overlayElement.closest('.cdk-overlay-container');
-    if (!event.target || !('nodeType' in event.target) || !container?.contains(event.target as Node)) this.close();
+    if (!(event.target as Element | null)?.closest?.('.cdk-overlay-pane')) this.close();
   };
 
   private readonly onResize = (): void => {
