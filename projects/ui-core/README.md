@@ -40,7 +40,7 @@ Neural UI implements its own components, state contracts and design tokens. Its 
 ## Quality Snapshot
 
 <!-- neural-ui-metrics:start -->
-- **Version:** 2.0.8
+- **Version:** 2.0.9
 - **Entry points:** 100
 - **Automated tests:** 3265
 - **Coverage:** 96.94% statements · 95.12% branches · 95.91% functions · 98.17% lines
@@ -61,7 +61,7 @@ The exact-count coverage gate is enforced by `npm run test:coverage` and the rel
 ## Installation
 
 ```bash
-npm install @neural-ui/core@2.0.8 @angular/cdk@22
+npm install @neural-ui/core@2.0.9 @angular/cdk@22
 ```
 
 ---
@@ -75,7 +75,7 @@ External icon packages are optional, not peer dependencies of Core.
 Automated, additive setup / Configuración automática y aditiva:
 
 ```bash
-ng add @neural-ui/core@2.0.8
+ng add @neural-ui/core@2.0.9
 ng generate @neural-ui/core:theme --density=comfortable --theme=high-contrast
 ng generate @neural-ui/core:layout app-shell
 ng generate @neural-ui/core:dashboard sales

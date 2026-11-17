@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.9] - 2026-11-17
+
+### Fixed
+
+- Select defaults, selection summaries and live announcements consistently follow Spanish or English while preserving application-provided labels.
+- Multiple selections keep readable chips on narrow screens and expose hidden selections through a responsive overflow count. Select all uses the same visual indicator and row layout as selectable options, with checked, unchecked and indeterminate states.
+- Select panels use the available space above or below their trigger without covering it, and scroll their options within that space. Escape and Tab dismiss portaled panels correctly; Escape restores focus without scrolling the page.
+
+### Performance
+
+- Compact Select templates only when Angular proves their semantics unchanged, preserving the existing package size budgets.
+
 ## [2.0.8] - 2026-11-14
 
 ### Fixed
