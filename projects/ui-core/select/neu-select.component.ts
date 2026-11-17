@@ -304,12 +304,12 @@ export type { NeuSelectOption } from './neu-select.types';
         cdkConnectedOverlay
         [cdkConnectedOverlayOrigin]="selectOrigin"
         [cdkConnectedOverlayOpen]="isOpen()"
-        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayPositions]="connectedOverlayPositions()"
         [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
         [cdkConnectedOverlayHasBackdrop]="true"
         [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
         [cdkConnectedOverlayWidth]="panelPosition().width ?? ''"
-        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayPush]="false"
         [cdkConnectedOverlayViewportMargin]="_viewportMargin"
         (backdropClick)="requestClose($event)"
         (attach)="onOverlayAttach()"
@@ -358,6 +358,8 @@ export type { NeuSelectOption } from './neu-select.types';
           @if (multiple() && selectionOptions().toggleAll) {
             <label
               class="neu-select__toggle-all"
+              [class.neu-select__option--selected]="allScopedSelected()"
+              [class.neu-select__option--disabled]="toggleAllDisabled()"
               [class.neu-select__toggle-all--disabled]="toggleAllDisabled()"
             >
               <input
@@ -371,6 +373,32 @@ export type { NeuSelectOption } from './neu-select.types';
                 [disabled]="toggleAllDisabled()"
                 (change)="toggleAll($event)"
               />
+              <span
+                class="neu-select__option-checkbox"
+                [class.neu-select__option-checkbox--checked]="allScopedSelected()"
+                [class.neu-select__option-checkbox--mixed]="partiallyScopedSelected()"
+                aria-hidden="true"
+              >
+                <svg class="neu-select__option-checkbox-check" viewBox="0 0 12 10" fill="none">
+                  <path
+                    class="neu-select__option-checkbox-mark"
+                    [class.neu-select__option-checkbox-mark--visible]="allScopedSelected()"
+                    d="M1 5L4.5 8.5L11 1"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    class="neu-select__option-checkbox-mark"
+                    [class.neu-select__option-checkbox-mark--visible]="partiallyScopedSelected()"
+                    d="M2 5H10"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
               <span>{{ selectAllLabel() }}</span>
             </label>
           }
@@ -815,6 +843,14 @@ export class NeuSelectComponent<
     maxHeight: null,
   });
   readonly isPanelAbove = signal(false);
+  // Keep CDK placement and the available-height calculation on the same side.
+  // Pushing a panel that does not fit would otherwise cover its own trigger.
+  protected readonly connectedOverlayPositions = computed(() => {
+    const above = this.panelPosition().top === 'auto';
+    return this.overlayPositions.filter((position) =>
+      above ? position.overlayY === 'bottom' : position.overlayY === 'top',
+    );
+  });
 
   readonly hasError = computed(
     () => this.invalid() || this.errors().length > 0 || !!this.errorMessage(),
@@ -1204,7 +1240,11 @@ export class NeuSelectComponent<
     this.resetPanelPosition();
     this.typeaheadController.reset();
     this.closed.emit();
-    this.requestFocusRestoration(intent.focusRestoration);
+    // Escape closes the session before CDK detaches; consume the stored origin
+    // rather than losing it when the already-closed session returns no intent.
+    this.requestFocusRestoration(
+      this.overlaySession.consumeFocusRestorationIntent() ?? intent.focusRestoration,
+    );
   }
 
   onTriggerClick(event: MouseEvent): void {
@@ -1720,9 +1760,8 @@ export class NeuSelectComponent<
       { width: viewportWidth, height: viewportHeight },
       { viewportMargin: this._viewportMargin, gap },
     );
-    const openAbove =
-      geometry.availableAbove > geometry.availableBelow && geometry.availableAbove >= 140;
-    const maxHeight = Math.max(140, openAbove ? geometry.availableAbove : geometry.availableBelow);
+    const openAbove = geometry.availableAbove > geometry.availableBelow;
+    const maxHeight = Math.max(0, openAbove ? geometry.availableAbove : geometry.availableBelow);
 
     this.panelPosition.set({
       position: 'fixed',
@@ -2094,7 +2133,7 @@ export class NeuSelectComponent<
     const frameId = view.requestAnimationFrame(() => {
       completedSynchronously = true;
       this.focusRestorationFrameId = null;
-      if (origin.isConnected) origin.focus();
+      if (origin.isConnected) origin.focus({ preventScroll: true });
     });
     this.focusRestorationFrameId = completedSynchronously ? null : frameId;
   }

@@ -381,6 +381,24 @@ describe('NeuSelectComponent', () => {
     expect(event.defaultPrevented).toBe(key === 'Escape');
   });
 
+  it('restores trigger focus after Escape closes the session before CDK detaches', async () => {
+    const { f, comp } = await setup({ multiple: true });
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const option = document.querySelector<HTMLElement>('.neu-select__option')!;
+    const restore = vi.spyOn(comp as any, 'requestFocusRestoration');
+    option.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+    expect(restore).toHaveBeenLastCalledWith(trigger);
+    comp.onOverlayDetach();
+    expect(restore).toHaveBeenLastCalledWith(null);
+  });
+
   it('keeps explicitly provided control translations with a Spanish locale', async () => {
     const inputs = {
       placeholder: 'Choose a country',
@@ -1243,6 +1261,41 @@ describe('NeuSelectComponent', () => {
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
   });
+
+  it.each([
+    [100, 148, 844, 'top', 696],
+    [450, 498, 844, 'bottom', 450],
+    [100, 148, 200, 'bottom', 100],
+  ])(
+    'keeps placement and available height together at trigger %s..%s in viewport %s',
+    async (top, bottom, height, overlayY, maxHeight) => {
+      const { f, comp } = await setup({ multiple: true, searchable: true });
+      const origin = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+      vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue({
+        top,
+        bottom,
+        left: 39,
+        width: 312,
+      } as DOMRect);
+      const originalHeight = window.innerHeight;
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: height });
+      try {
+        (comp as any).syncPanelPosition(false);
+        const positions = (comp as any).connectedOverlayPositions();
+        expect(positions).toHaveLength(2);
+        expect(
+          positions.every((position: { overlayY: string }) => position.overlayY === overlayY),
+        ).toBe(true);
+        expect(comp.panelPosition().maxHeight).toBe(`${maxHeight}px`);
+        comp.setFilter('no matching country');
+        (comp as any).syncPanelPosition(false);
+        expect((comp as any).connectedOverlayPositions()).toEqual(positions);
+        expect(comp.panelPosition().maxHeight).toBe(`${maxHeight}px`);
+      } finally {
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalHeight });
+      }
+    },
+  );
 
   it('syncPanelPosition should notify the virtual viewport when virtualScroll=true', async () => {
     const { f, comp } = await setup({ virtualScroll: true });

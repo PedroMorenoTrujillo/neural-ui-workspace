@@ -273,24 +273,21 @@ $select-height: 48px;
 }
 
 .neu-select__toggle-all {
-  display: flex;
-  align-items: center;
-  gap: var(--neu-space-2);
-  box-sizing: border-box;
-  min-block-size: 40px;
-  width: calc(100% - 16px);
-  margin: 8px;
-  padding: 8px 10px;
-  border: 1px solid var(--neu-border);
-  border-radius: var(--neu-radius);
-  background: var(--neu-surface-2);
-  color: var(--neu-text);
-  text-align: start;
-  cursor: pointer;
+  position: relative;
+  inline-size: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
 
-  &:focus-visible {
+  &:has(.neu-select__toggle-all-input:focus-visible) {
     outline: 2px solid var(--neu-primary);
-    outline-offset: 2px;
+    outline-offset: -2px;
+  }
+
+  @media (forced-colors: active) {
+    &:has(.neu-select__toggle-all-input:focus-visible) {
+      outline-color: Highlight;
+    }
   }
 }
 
@@ -299,18 +296,20 @@ $select-height: 48px;
   opacity: 0.5;
 }
 
-.neu-select__toggle-all-input {
-  flex: 0 0 auto;
-  inline-size: 20px;
-  block-size: 20px;
+.neu-select__toggle-all .neu-select__toggle-all-input {
+  // Keep the native checkbox as the full-row interactive target. Its visual
+  // indicator is the same shared 18px box used by every selectable option.
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
   margin: 0;
-  accent-color: var(--neu-primary);
+  padding: 0;
+  border: 0;
+  opacity: 0;
   cursor: inherit;
-
-  &:focus-visible {
-    outline: 2px solid var(--neu-primary);
-    outline-offset: 2px;
-  }
 }
 
 .neu-select__placeholder {
@@ -376,6 +375,8 @@ $select-height: 48px;
 
 // ---- Panel ----
 .neu-select__panel {
+  display: flex;
+  flex-direction: column;
   position: relative;
   z-index: var(--neu-z-dropdown);
   box-sizing: border-box;
@@ -420,6 +421,8 @@ $select-height: 48px;
 }
 
 .neu-select__list {
+  min-height: 0;
+  flex: 0 1 auto;
   outline: none;
 
   &:focus-visible {
@@ -430,6 +433,13 @@ $select-height: 48px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--neu-surface-3) transparent;
+}
+
+.neu-select__search,
+.neu-select__toggle-all,
+.neu-select__header,
+.neu-select__footer {
+  flex-shrink: 0;
 }
 
 .neu-select__header,
@@ -490,7 +500,8 @@ $select-height: 48px;
 }
 
 // ---- Opciones / Options ----
-.neu-select__option {
+.neu-select__option,
+.neu-select__toggle-all {
   display: flex;
   align-items: center;
   gap: var(--neu-space-2);
