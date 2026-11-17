@@ -1350,10 +1350,10 @@ export class NeuSelectComponent<
         }
         return;
       case 'Escape':
-        this.handleOverlayKey(event, 'escape');
+        this.handleOverlayKey(event);
         return;
       case 'Tab':
-        this.handleOverlayKey(event, 'tab');
+        this.handleOverlayKey(event);
         return;
     }
     if (!false && !event.metaKey && !event.ctrlKey && !event.altKey && event.key.length === 1) {
@@ -1421,7 +1421,7 @@ export class NeuSelectComponent<
     this.applyActiveRow(this.activeRowController.activate(rowIndex));
     const value = this.optionValueOf(row.option);
     if (this.multiple()) this.toggleMultipleValue(value, row.option, originalEvent);
-    else this.commitValue(this.asModelValue(value), row.option, originalEvent, false);
+    else this.commitValue(value as NeuSelectionValue<V, M>, row.option, originalEvent);
     if (closePanel && !this.multiple()) this.requestClose(originalEvent ?? undefined);
   }
 
@@ -1462,13 +1462,13 @@ export class NeuSelectComponent<
 
   protected onPanelDismissKey(event: KeyboardEvent): void {
     if (event.key === 'Escape' || event.key === 'Tab') {
-      this.handleOverlayKey(event, event.key === 'Escape' ? 'escape' : 'tab');
+      this.handleOverlayKey(event);
     }
   }
 
   onFilterKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
-      this.handleOverlayKey(event, 'escape');
+      this.handleOverlayKey(event);
       return;
     }
     if (event.key === 'Enter') {
@@ -1591,7 +1591,7 @@ export class NeuSelectComponent<
   clearValue(event: Event): void {
     event.stopPropagation?.();
     if (this.isDisabledFinal() || this.readonly() || !this.hasValue()) return;
-    this.commitValue(this.emptyModelValue(), null, event, false);
+    this.commitValue(this.emptyModelValue(), null, event);
     this.cleared.emit({
       source: event.type === 'keydown' ? 'keyboard' : 'pointer',
       originalEvent: event,
@@ -1614,7 +1614,7 @@ export class NeuSelectComponent<
       return;
     const value = this.optionValueOf(option);
     if (this.multiple()) this.toggleMultipleValue(value, option, null);
-    else this.commitValue(this.asModelValue(value), option, null, false);
+    else this.commitValue(value as NeuSelectionValue<V, M>, option, null);
     if (!this.multiple()) this.requestClose();
   }
 
@@ -1628,7 +1628,7 @@ export class NeuSelectComponent<
     const nextFocus = focused < 0 ? null : (removers[focused + 1] ?? removers[focused - 1]);
     const value = this.optionValueOf(option);
     const next = this.currentValues().filter((candidate) => !this.valuesEqual(candidate, value));
-    this.commitValue(this.asModelValue(next), option, event, false);
+    this.commitValue(next as NeuSelectionValue<V, M>, option, event);
     if (focused >= 0) {
       if (nextFocus) nextFocus.focus();
       else this.focusTrigger();
@@ -1665,7 +1665,7 @@ export class NeuSelectComponent<
           (value) => !scopedValues.some((candidate) => this.valuesEqual(candidate, value)),
         )
       : [...current, ...additions.slice(0, remaining)];
-    this.commitValue(this.asModelValue(next), null, event, false);
+    this.commitValue(next as NeuSelectionValue<V, M>, null, event);
     // Native checkboxes toggle before change; reconcile even when a limit keeps
     // the model/checked binding unchanged after an indeterminate activation.
     const checkbox = event.target as HTMLInputElement | null;
@@ -1780,15 +1780,6 @@ export class NeuSelectComponent<
     this.isPanelAbove.set(event.connectionPair.overlayY === 'bottom');
   }
 
-  private focusFirstOption(): void {
-    const firstEnabled = this.filteredOptions().find((option) => !this.isOptionDisabled(option));
-    if (!firstEnabled) {
-      return;
-    }
-
-    this.focusOption(firstEnabled);
-  }
-
   private focusOption(optionOrValue: T | V): void {
     const option = this.allOptions().find(
       (candidate) =>
@@ -1864,22 +1855,14 @@ export class NeuSelectComponent<
     return this.compareWith()(left, right);
   }
 
-  private asModelValue(value: V | readonly V[] | null): NeuSelectionValue<V, M> {
-    return value as NeuSelectionValue<V, M>;
-  }
-
   private emptyModelValue(): NeuSelectionValue<V, M> {
-    return this.asModelValue(this.multiple() ? [] : null);
+    return (this.multiple() ? [] : null) as NeuSelectionValue<V, M>;
   }
 
   private currentValues(): readonly V[] {
     const current = this.value();
     if (this.multiple()) return Array.isArray(current) ? (current as readonly V[]) : [];
     return current == null ? [] : [current as V];
-  }
-
-  private singleValue(): V | null {
-    return this.multiple() ? null : ((this.value() ?? null) as V | null);
   }
 
   private modelValuesEqual(left: NeuSelectionValue<V, M>, right: NeuSelectionValue<V, M>): boolean {
@@ -1915,7 +1898,6 @@ export class NeuSelectComponent<
     value: NeuSelectionValue<V, M>,
     option: T | null,
     originalEvent: Event | null,
-    _custom: boolean,
   ): void {
     const current = this.value();
     if (this.modelValuesEqual(current, value)) return;
@@ -1952,7 +1934,7 @@ export class NeuSelectComponent<
     const next = selected
       ? current.filter((candidate) => !this.valuesEqual(candidate, value))
       : [...current, value];
-    this.commitValue(this.asModelValue(next), option, originalEvent, false);
+    this.commitValue(next as NeuSelectionValue<V, M>, option, originalEvent);
   }
 
   private initializeActiveRow(): void {
@@ -2117,7 +2099,7 @@ export class NeuSelectComponent<
     return this.overlaySession.open(this.effectiveTriggerElement());
   }
 
-  private handleOverlayKey(event: KeyboardEvent, reason: 'escape' | 'tab'): void {
+  private handleOverlayKey(event: KeyboardEvent): void {
     const keyIntent = this.overlaySession.handleKey(event.key);
     if (!keyIntent.handled) return;
     if (keyIntent.preventDefault) event.preventDefault();

@@ -930,20 +930,6 @@ describe('NeuSelectComponent', () => {
     }
   });
 
-  it('focusFirstOption should do nothing when all options are disabled', async () => {
-    const { comp } = await setup({
-      options: [{ value: 'x', label: 'Disabled', disabled: true }],
-    });
-    const focusOptionSpy = vi.spyOn(
-      comp as object as { focusOption: (value: string) => void },
-      'focusOption',
-    );
-
-    comp.focusFirstOption();
-
-    expect(focusOptionSpy).not.toHaveBeenCalled();
-  });
-
   it('focusOptionByIndex should focus the next enabled option when it exists', async () => {
     const { f, comp } = await setup();
     comp.open();
@@ -2617,7 +2603,6 @@ describe('NeuSelectComponent', () => {
       expect(comp.modelValuesEqual('es', 'es')).toBe(true);
       comp.value.set('es');
       expect(comp.currentValues()).toEqual(['es']);
-      expect(comp.singleValue()).toBe('es');
 
       const clearKeyboard = new KeyboardEvent('keydown');
       comp.clearValue(clearKeyboard);
@@ -2637,7 +2622,6 @@ describe('NeuSelectComponent', () => {
       f.componentRef.setInput('mode', 'multiple');
       comp.value.set(null);
       expect(comp.currentValues()).toEqual([]);
-      expect(comp.singleValue()).toBeNull();
       expect(comp.modelValuesEqual([], [])).toBe(true);
       expect(comp.modelValuesEqual([], ['es'])).toBe(false);
       comp.toggleAll(new MouseEvent('click'));
@@ -2909,7 +2893,7 @@ describe('NeuSelectComponent', () => {
       const { comp } = await setup({
         options: [{ value: 'x', label: 'Unavailable', disabled: true }],
       });
-      comp.focusFirstOption();
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
       expect(comp.activeIndex()).toBe(-1);
     });
 
