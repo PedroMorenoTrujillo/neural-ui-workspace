@@ -1097,14 +1097,39 @@ describe('NeuTable 2 controlled query UI integration', () => {
     focus.mockRestore();
   });
 
+  it('keeps the mobile editor open through keyboard resize and automatic page panning but closes external gestures', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges(); await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    const menu = document.querySelector<HTMLElement>('.neu-table2__filter-menu')!;
+    const input = menu.querySelector<HTMLInputElement>('input')!;
+    input.focus();
+    vi.stubGlobal('innerHeight', window.innerHeight - 250);
+    window.dispatchEvent(new Event('resize'));
+    document.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBe(menu);
+    expect(document.activeElement).toBe(input);
+    input.value = 'typed'; input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(input.value).toBe('typed');
+    document.body.dispatchEvent(new Event('touchmove'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
   it('dismisses a filter on viewport resize and allows reopening after detachment', async () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges(); await fixture.whenStable();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
     trigger.click(); fixture.detectChanges(); await fixture.whenStable();
     expect(document.querySelector('.neu-table2__filter-menu')).not.toBeNull();
+    vi.stubGlobal('innerWidth', window.innerWidth + 20);
     window.dispatchEvent(new Event('resize'));
     fixture.detectChanges(); await fixture.whenStable();
+    vi.unstubAllGlobals();
     expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
     trigger.click(); fixture.detectChanges(); await fixture.whenStable();
     expect(document.querySelector('.neu-table2__filter-menu')).not.toBeNull();

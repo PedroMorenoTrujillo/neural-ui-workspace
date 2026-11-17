@@ -4,14 +4,18 @@ import type { OverlayRef, ScrollStrategy } from '@angular/cdk/overlay';
 export class TableFilterScrollStrategy implements ScrollStrategy {
   private overlay: OverlayRef | null = null;
   private listening = false;
+  private viewportWidth = 0;
 
   attach(overlay: OverlayRef): void { this.overlay = overlay; }
 
   enable(): void {
     if (this.listening || !this.overlay) return;
     const document = this.overlay.overlayElement.ownerDocument;
+    this.viewportWidth = document.defaultView?.innerWidth ?? 0;
     document.addEventListener('scroll', this.onScroll, true);
-    document.defaultView?.addEventListener('resize', this.close);
+    document.addEventListener('wheel', this.onOutsideGesture, { capture: true, passive: true });
+    document.addEventListener('touchmove', this.onOutsideGesture, { capture: true, passive: true });
+    document.defaultView?.addEventListener('resize', this.onResize);
     this.listening = true;
   }
 
@@ -19,7 +23,9 @@ export class TableFilterScrollStrategy implements ScrollStrategy {
     if (!this.listening || !this.overlay) return;
     const document = this.overlay.overlayElement.ownerDocument;
     document.removeEventListener('scroll', this.onScroll, true);
-    document.defaultView?.removeEventListener('resize', this.close);
+    document.removeEventListener('wheel', this.onOutsideGesture, true);
+    document.removeEventListener('touchmove', this.onOutsideGesture, true);
+    document.defaultView?.removeEventListener('resize', this.onResize);
     this.listening = false;
   }
 
@@ -30,8 +36,26 @@ export class TableFilterScrollStrategy implements ScrollStrategy {
     // itself must remain scrollable without dismissing the owning editor.
     const container = this.overlay?.overlayElement.closest('.cdk-overlay-container');
     const target = event.target;
-    if (target && container?.contains(target as Node)) return;
+    if (target && 'nodeType' in target && container?.contains(target as Node)) return;
+    const document = this.overlay?.overlayElement.ownerDocument;
+    const active = document?.activeElement;
+    // Mobile keyboards can pan the document after focusing an editor. External
+    // wheel/touch gestures still dismiss immediately; native table scrolling
+    // remains a real anchor movement and is never ignored.
+    const rootScroll = target === document || target === document?.documentElement || target === document?.body;
+    if (rootScroll && active && container?.contains(active) && active.matches('input,textarea,[contenteditable="true"]')) return;
     this.close();
+  };
+
+  private readonly onOutsideGesture = (event: Event): void => {
+    const container = this.overlay?.overlayElement.closest('.cdk-overlay-container');
+    if (!event.target || !('nodeType' in event.target) || !container?.contains(event.target as Node)) this.close();
+  };
+
+  private readonly onResize = (): void => {
+    const width = this.overlay?.overlayElement.ownerDocument.defaultView?.innerWidth;
+    // Height-only changes include the on-screen keyboard. Keep typing possible.
+    if (width !== this.viewportWidth) this.close();
   };
 
   private readonly close = (): void => {
