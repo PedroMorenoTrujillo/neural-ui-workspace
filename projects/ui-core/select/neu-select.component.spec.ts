@@ -11,6 +11,7 @@ import {
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import { NeuSelectComponent, NeuSelectOption } from './neu-select.component';
 import {
   NeuSelectClearIconDirective,
@@ -168,9 +169,12 @@ class FakeSelectCdkVirtualForDirective<T> {
   }
 }
 
-async function setup(extraInputs: Record<string, unknown> = {}) {
+async function setup(extraInputs: Record<string, unknown> = {}, locale?: string) {
   await TestBed.configureTestingModule({
-    providers: [provideZonelessChangeDetection()],
+    providers: [
+      provideZonelessChangeDetection(),
+      ...(locale ? [{ provide: NEURAL_LOCALE, useValue: locale }] : []),
+    ],
   }).compileComponents();
   const f = TestBed.createComponent(NeuSelectComponent);
   f.componentRef.setInput('options', OPTIONS);
@@ -257,6 +261,160 @@ describe('NeuSelectComponent', () => {
     expect(select.selectedOptionId()).toBeNull();
   });
 
+  it.each([
+    ['en-US', 'Selected options', 'Remove España', '2 selected', '1 selected'],
+    [
+      'es-MX',
+      'Opciones seleccionadas',
+      'Quitar España',
+      '2 opciones seleccionadas',
+      '1 opción seleccionada',
+    ],
+  ])(
+    'localizes chip names and the selection count for %s',
+    async (locale, list, remove, plural, singular) => {
+      const { f } = await setup(
+        { multiple: true, value: ['es', 'mx'], selectionOptions: { chips: true } },
+        locale,
+      );
+      const host: HTMLElement = f.nativeElement;
+      expect(host.querySelector('.neu-select__chips')?.getAttribute('aria-label')).toBe(list);
+      expect(host.querySelector('.neu-select__chip-remove')?.getAttribute('aria-label')).toBe(
+        remove,
+      );
+
+      f.componentRef.setInput('selectionOptions', { maxSelectedLabels: 1 });
+      f.detectChanges();
+      expect(host.querySelector('.neu-select__value')?.textContent?.trim()).toBe(plural);
+
+      f.componentRef.setInput('value', ['not-loaded']);
+      f.detectChanges();
+      expect(host.querySelector('.neu-select__value')?.textContent?.trim()).toBe(singular);
+    },
+  );
+
+  it.each([
+    [
+      'en-US',
+      [
+        'Select...',
+        'Search...',
+        'Filter options',
+        'Loading...',
+        'No results',
+        'No options available',
+        'Clear selection',
+        'Select all',
+        'Clear all',
+      ],
+      'España selected',
+      'España deselected',
+      'Selection cleared',
+    ],
+    [
+      'es-ES',
+      [
+        'Seleccionar...',
+        'Buscar...',
+        'Filtrar opciones',
+        'Cargando...',
+        'Sin resultados',
+        'No hay opciones disponibles',
+        'Limpiar selección',
+        'Seleccionar todo',
+        'Limpiar todo',
+      ],
+      'España opción seleccionada',
+      'España opción deseleccionada',
+      'Selección borrada',
+    ],
+  ])(
+    'localizes default controls and user selection announcements for %s',
+    async (locale, defaults, selected, deselected, cleared) => {
+      const { comp } = await setup({ multiple: true }, locale);
+      expect([
+        comp.placeholder(),
+        comp.searchPlaceholder(),
+        comp.ariaFilterLabel(),
+        comp.loadingLabel(),
+        comp.noResultsMessage(),
+        comp.emptyMessage(),
+        comp.clearAriaLabel(),
+        comp.selectAllLabel(),
+        comp.clearAllLabel(),
+      ]).toEqual(defaults);
+      comp.selectOption(OPTIONS[0]);
+      expect(comp.liveMessage()).toBe(selected);
+      comp.selectOption(OPTIONS[1]);
+      comp.selectOption(OPTIONS[0]);
+      expect(comp.liveMessage()).toBe(deselected);
+      comp.clear();
+      expect(comp.liveMessage()).toBe(cleared);
+    },
+  );
+
+  it.each([
+    ['en-US', '3 options available', '1 option available', '0 options available'],
+    ['es-ES', '3 opciones disponibles', '1 opción disponible', '0 opciones disponibles'],
+  ])('localizes open and filter result announcements for %s', async (locale, all, one, zero) => {
+    const { f, comp } = await setup({ searchable: true }, locale);
+    comp.open();
+    f.detectChanges();
+    expect(comp.resultsAnnouncement()).toBe(all);
+    comp.setFilter('España');
+    expect(comp.liveMessage()).toBe(one);
+    comp.setFilter('not a country');
+    expect(comp.liveMessage()).toBe(zero);
+  });
+
+  it.each(['Escape', 'Tab'])('closes the portaled panel on %s from an option', async (key) => {
+    const { f, comp } = await setup({ multiple: true });
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const option = document.querySelector<HTMLElement>('.neu-select__option')!;
+    option.focus();
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    option.dispatchEvent(event);
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+    expect(event.defaultPrevented).toBe(key === 'Escape');
+  });
+
+  it('restores trigger focus after Escape closes the session before CDK detaches', async () => {
+    const { f, comp } = await setup({ multiple: true });
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const trigger = f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement;
+    const option = document.querySelector<HTMLElement>('.neu-select__option')!;
+    const restore = vi.spyOn(comp as any, 'requestFocusRestoration');
+    option.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    f.detectChanges();
+    expect(comp.isOpen()).toBe(false);
+    expect(restore).toHaveBeenLastCalledWith(trigger);
+    comp.onOverlayDetach();
+    expect(restore).toHaveBeenLastCalledWith(null);
+  });
+
+  it('keeps explicitly provided control translations with a Spanish locale', async () => {
+    const inputs = {
+      placeholder: 'Choose a country',
+      searchPlaceholder: 'Find a country',
+      ariaFilterLabel: 'Filter countries',
+      loadingLabel: 'Please wait',
+      noResultsMessage: 'Nothing found',
+      emptyMessage: 'Nothing available',
+      clearAriaLabel: 'Reset country',
+      selectAllLabel: 'Choose every country',
+      clearAllLabel: 'Reset all countries',
+    };
+    const { comp } = await setup(inputs, 'es-ES');
+    for (const [key, value] of Object.entries(inputs)) expect(comp[key]()).toBe(value);
+  });
+
   it('derives lazy option count and clamps explicit virtual item size', async () => {
     const { f } = await setup({ lazy: true, virtualScroll: true });
     const select = f.componentInstance;
@@ -286,8 +444,8 @@ describe('NeuSelectComponent', () => {
       comp.open();
       f.detectChanges();
       const options = Array.from(document.querySelectorAll<HTMLElement>('.neu-select__option'));
-      const boxes = options.map(
-        (option) => option.querySelector<HTMLElement>('.neu-select__option-checkbox')!,
+      const boxes = options.map((option) =>
+        option.querySelector<HTMLElement>('.neu-select__option-checkbox')!,
       );
       const checked = (box: HTMLElement) =>
         box.classList.contains('neu-select__option-checkbox--checked');
@@ -553,7 +711,7 @@ describe('NeuSelectComponent', () => {
     f.detectChanges();
 
     const liveRegion = f.nativeElement.querySelector('.neu-select__sr-status');
-    expect(liveRegion.textContent.trim()).toBe('1 opción disponible');
+    expect(liveRegion.textContent.trim()).toBe('1 option available');
   });
 
   // ── Clearable ──────────────────────────────────────────────────────────────
@@ -770,20 +928,6 @@ describe('NeuSelectComponent', () => {
       querySpy.mockRestore();
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
-  });
-
-  it('focusFirstOption should do nothing when all options are disabled', async () => {
-    const { comp } = await setup({
-      options: [{ value: 'x', label: 'Disabled', disabled: true }],
-    });
-    const focusOptionSpy = vi.spyOn(
-      comp as object as { focusOption: (value: string) => void },
-      'focusOption',
-    );
-
-    comp.focusFirstOption();
-
-    expect(focusOptionSpy).not.toHaveBeenCalled();
   });
 
   it('focusOptionByIndex should focus the next enabled option when it exists', async () => {
@@ -1103,6 +1247,41 @@ describe('NeuSelectComponent', () => {
       window.requestAnimationFrame = originalRequestAnimationFrame;
     }
   });
+
+  it.each([
+    [100, 148, 844, 'top', 696],
+    [450, 498, 844, 'bottom', 450],
+    [100, 148, 200, 'bottom', 100],
+  ])(
+    'keeps placement and available height together at trigger %s..%s in viewport %s',
+    async (top, bottom, height, overlayY, maxHeight) => {
+      const { f, comp } = await setup({ multiple: true, searchable: true });
+      const origin = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+      vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue({
+        top,
+        bottom,
+        left: 39,
+        width: 312,
+      } as DOMRect);
+      const originalHeight = window.innerHeight;
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: height });
+      try {
+        (comp as any).syncPanelPosition(false);
+        const positions = (comp as any).connectedOverlayPositions();
+        expect(positions).toHaveLength(2);
+        expect(
+          positions.every((position: { overlayY: string }) => position.overlayY === overlayY),
+        ).toBe(true);
+        expect(comp.panelPosition().maxHeight).toBe(`${maxHeight}px`);
+        comp.setFilter('no matching country');
+        (comp as any).syncPanelPosition(false);
+        expect((comp as any).connectedOverlayPositions()).toEqual(positions);
+        expect(comp.panelPosition().maxHeight).toBe(`${maxHeight}px`);
+      } finally {
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalHeight });
+      }
+    },
+  );
 
   it('syncPanelPosition should notify the virtual viewport when virtualScroll=true', async () => {
     const { f, comp } = await setup({ virtualScroll: true });
@@ -1711,17 +1890,17 @@ describe('NeuSelectComponent', () => {
     });
     (f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement).click();
     await f.whenStable();
-    const toggle = document.querySelector('.neu-select__toggle-all') as HTMLButtonElement;
-    expect(toggle.textContent).toContain('Select all');
+    const toggle = document.querySelector('.neu-select__toggle-all-input') as HTMLInputElement;
+    expect(toggle.closest('label')?.textContent).toContain('Select all');
     toggle.click();
     f.detectChanges();
     expect(comp.value()).toEqual(['es', 'mx']);
-    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.checked).toBe(true);
     const remove = f.nativeElement.querySelector('.neu-select__chip-remove') as HTMLButtonElement;
     remove.click();
     f.detectChanges();
     expect(comp.value()).toHaveLength(1);
-    expect(toggle.textContent).toContain('Select all');
+    expect(toggle.closest('label')?.textContent).toContain('Select all');
     toggle.click();
     f.detectChanges();
     expect(comp.value()).toEqual(['mx', 'es']);
@@ -1736,23 +1915,271 @@ describe('NeuSelectComponent', () => {
     });
     (f.nativeElement.querySelector('.neu-select__trigger') as HTMLElement).click();
     await f.whenStable();
-    const toggle = document.querySelector('.neu-select__toggle-all') as HTMLButtonElement;
-    expect(toggle.textContent?.trim()).toBe('Seleccionar todo');
+    const toggle = document.querySelector('.neu-select__toggle-all-input') as HTMLInputElement;
+    expect(toggle.closest('label')?.textContent?.trim()).toBe('Seleccionar todo');
     toggle.click();
     await f.whenStable();
     expect(comp.value()).toEqual(['es', 'mx']);
-    expect(toggle.textContent?.trim()).toBe('Limpiar selección');
-    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(toggle.closest('label')?.textContent?.trim()).toBe('Seleccionar todo');
+    expect(toggle.checked).toBe(true);
     f.componentRef.setInput('selectAllLabel', 'Select all');
     f.componentRef.setInput('clearAllLabel', 'Clear all');
     await f.whenStable();
-    expect(toggle.textContent?.trim()).toBe('Clear all');
+    expect(toggle.closest('label')?.textContent?.trim()).toBe('Select all');
+    expect(comp.clearAllLabel()).toBe('Clear all');
     expect(comp.value()).toEqual(['es', 'mx']);
     toggle.click();
     await f.whenStable();
     expect(comp.value()).toEqual([]);
-    expect(toggle.textContent?.trim()).toBe('Select all');
-    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    expect(toggle.closest('label')?.textContent?.trim()).toBe('Select all');
+    expect(toggle.checked).toBe(false);
+  });
+
+  it('uses a native tri-state checkbox outside the listbox and preserves its label', async () => {
+    const { f, comp } = await setup(
+      { multiple: true, selectionOptions: { toggleAll: true }, value: ['es'] },
+      'es-ES',
+    );
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const checkbox = document.querySelector<HTMLInputElement>('.neu-select__toggle-all-input')!;
+    expect(checkbox.type).toBe('checkbox');
+    expect(checkbox.closest('[role="listbox"]')).toBeNull();
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox.indeterminate).toBe(true);
+    expect(checkbox.getAttribute('aria-checked')).toBe('mixed');
+    expect(checkbox.closest('label')?.textContent?.trim()).toBe('Seleccionar todo');
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['es', 'mx']);
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.indeterminate).toBe(false);
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual([]);
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox.indeterminate).toBe(false);
+    expect(checkbox.closest('label')?.textContent?.trim()).toBe('Seleccionar todo');
+  });
+
+  it.each(['disabled', 'readonly', 'loading'])('blocks bulk selection while %s', async (state) => {
+    const { f, comp } = await setup({
+      multiple: true,
+      selectionOptions: { toggleAll: true },
+      open: true,
+    });
+    f.componentRef.setInput(state, true);
+    f.detectChanges();
+    await f.whenStable();
+    const checkbox = document.querySelector<HTMLInputElement>('.neu-select__toggle-all-input');
+    if (checkbox) expect(checkbox.disabled).toBe(true);
+    comp.toggleAll(new Event('change'));
+    expect(comp.value()).toBeNull();
+  });
+
+  it('disables the checkbox for an empty filter and selects loaded scope independently', async () => {
+    const { f, comp } = await setup({
+      multiple: true,
+      searchable: true,
+      selectionOptions: { toggleAll: true },
+      value: ['mx'],
+    });
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const checkbox = document.querySelector<HTMLInputElement>('.neu-select__toggle-all-input')!;
+    comp.setFilter('España');
+    f.detectChanges();
+    await f.whenStable();
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['mx', 'es']);
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['mx']);
+    comp.setFilter('absent');
+    f.detectChanges();
+    await f.whenStable();
+    expect(checkbox.disabled).toBe(true);
+    f.componentRef.setInput('selectionOptions', { toggleAll: true, toggleAllScope: 'loaded' });
+    f.detectChanges();
+    await f.whenStable();
+    expect(checkbox.disabled).toBe(false);
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['mx', 'es']);
+  });
+
+  it('clears a capped partial selection and never truncates values outside the filtered scope', async () => {
+    const { f, comp } = await setup({
+      multiple: true,
+      searchable: true,
+      selectionOptions: { toggleAll: true, selectionLimit: 1 },
+    });
+    comp.open();
+    f.detectChanges();
+    await f.whenStable();
+    const checkbox = document.querySelector<HTMLInputElement>('.neu-select__toggle-all-input')!;
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['es']);
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox.indeterminate).toBe(true);
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual([]);
+    expect(checkbox.indeterminate).toBe(false);
+    comp.value.set(['outside', 'es']);
+    comp.setFilter('España');
+    f.detectChanges();
+    await f.whenStable();
+    checkbox.click();
+    await f.whenStable();
+    expect(comp.value()).toEqual(['outside']);
+    expect(checkbox.disabled).toBe(true);
+    f.componentRef.setInput('selectionOptions', { toggleAll: true, selectionLimit: 0 });
+    f.detectChanges();
+    await f.whenStable();
+    expect(checkbox.disabled).toBe(true);
+  });
+
+  it('deduplicates equal option values when bulk selecting', async () => {
+    const { comp } = await setup({
+      multiple: true,
+      options: [...OPTIONS, { ...OPTIONS[0], label: 'Duplicate' }],
+    });
+    comp.toggleAll(new Event('change'));
+    expect(comp.value()).toEqual(['es', 'mx']);
+  });
+
+  it.each(['Enter', ' '])(
+    'keeps chip %s activation native instead of opening the combobox',
+    async (key) => {
+      const { f, comp } = await setup({
+        multiple: true,
+        value: ['es'],
+        selectionOptions: { chips: true },
+      });
+      const remove = f.nativeElement.querySelector('.neu-select__chip-remove') as HTMLButtonElement;
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+      remove.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(false);
+      expect(comp.isOpen()).toBe(false);
+      remove.click();
+      await f.whenStable();
+      expect(comp.value()).toEqual([]);
+    },
+  );
+
+  it('keeps keyboard focus on the next removal action or the trigger after removing a chip', async () => {
+    const { f } = await setup({
+      multiple: true,
+      value: ['es', 'mx'],
+      selectionOptions: { chips: true },
+    });
+    const host = f.nativeElement as HTMLElement;
+    const remove = () => host.querySelector<HTMLButtonElement>('.neu-select__chip-remove')!;
+    remove().focus();
+    remove().click();
+    await f.whenStable();
+    expect(document.activeElement).toBe(remove());
+    remove().click();
+    await f.whenStable();
+    expect(document.activeElement).toBe(host.querySelector('.neu-select__trigger'));
+  });
+
+  it('fits readable chips, exposes remaining selections, and updates after resize and font changes', async () => {
+    let available = 200,
+      labelWidth = 80;
+    const callbacks: ResizeObserverCallback[] = [];
+    const disconnect = vi.fn();
+    class Observer {
+      constructor(callback: ResizeObserverCallback) {
+        callbacks.push(callback);
+      }
+      observe() {}
+      disconnect = disconnect;
+    }
+    vi.stubGlobal('ResizeObserver', Observer);
+    const original = HTMLElement.prototype.getBoundingClientRect;
+    const widths = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains('neu-select__chip-measure-item'))
+          return new DOMRect(0, 0, labelWidth, 28);
+        if (this.classList.contains('neu-select__chip-measure-overflow'))
+          return new DOMRect(0, 0, 30, 28);
+        return original.call(this);
+      });
+    const clients = vi
+      .spyOn(HTMLElement.prototype, 'clientWidth', 'get')
+      .mockImplementation(function (this: HTMLElement) {
+        return this.classList.contains('neu-select__chips') ? available : 0;
+      });
+    const options = Array.from({ length: 10 }, (_, i) => ({
+      value: String(i),
+      label: `Country ${i}`,
+    }));
+    try {
+      const { f, comp } = await setup({
+        multiple: true,
+        options,
+        value: options.map((o) => o.value),
+        selectionOptions: { chips: true },
+      });
+      const host = f.nativeElement as HTMLElement;
+      const chips = () => host.querySelectorAll('.neu-select__chip');
+      const summary = () => host.querySelector<HTMLButtonElement>('.neu-select__chip-overflow')!;
+      expect(chips()).toHaveLength(2);
+      expect(summary().textContent?.trim()).toBe('+8');
+      expect(summary().getAttribute('aria-label')).toBe('Show 8 more selected options');
+      expect(
+        host.querySelector('.neu-select__chip-measurements')?.getAttribute('aria-hidden'),
+      ).toBe('true');
+      const resize = async () => {
+        callbacks[0]([], {} as ResizeObserver);
+        await new Promise(requestAnimationFrame);
+        f.detectChanges();
+        await f.whenStable();
+      };
+      available = 1000;
+      await resize();
+      expect(chips()).toHaveLength(10);
+      expect(summary()).toBeNull();
+      available = 200;
+      labelWidth = 120;
+      await resize();
+      expect(chips()).toHaveLength(1);
+      expect(summary().textContent?.trim()).toBe('+9');
+      host.querySelector<HTMLButtonElement>('.neu-select__chip-remove')!.focus();
+      available = 60;
+      await resize();
+      expect(document.activeElement).toBe(host.querySelector('.neu-select__trigger'));
+      expect(chips()).toHaveLength(0);
+      expect(summary().textContent?.trim()).toBe('+10');
+      available = 1000;
+      f.componentRef.setInput('selectionOptions', { chips: true, maxSelectedLabels: 1 });
+      f.detectChanges();
+      await f.whenStable();
+      expect(chips()).toHaveLength(1);
+      expect(summary().textContent?.trim()).toBe('+9');
+      summary().click();
+      await f.whenStable();
+      expect(comp.isOpen()).toBe(true);
+      f.componentRef.setInput('selectionOptions', { chips: true, maxSelectedLabels: 0 });
+      f.detectChanges();
+      await f.whenStable();
+      expect(chips()).toHaveLength(0);
+      expect(summary().textContent?.trim()).toBe('+10');
+      f.destroy();
+      expect(disconnect).toHaveBeenCalled();
+      expect(() => callbacks[0]([], {} as ResizeObserver)).not.toThrow();
+    } finally {
+      widths.mockRestore();
+      clients.mockRestore();
+      vi.unstubAllGlobals();
+    }
   });
 
   it('uses the rendered filter keyboard path to navigate results and close without selecting', async () => {
@@ -2176,7 +2603,6 @@ describe('NeuSelectComponent', () => {
       expect(comp.modelValuesEqual('es', 'es')).toBe(true);
       comp.value.set('es');
       expect(comp.currentValues()).toEqual(['es']);
-      expect(comp.singleValue()).toBe('es');
 
       const clearKeyboard = new KeyboardEvent('keydown');
       comp.clearValue(clearKeyboard);
@@ -2196,7 +2622,6 @@ describe('NeuSelectComponent', () => {
       f.componentRef.setInput('mode', 'multiple');
       comp.value.set(null);
       expect(comp.currentValues()).toEqual([]);
-      expect(comp.singleValue()).toBeNull();
       expect(comp.modelValuesEqual([], [])).toBe(true);
       expect(comp.modelValuesEqual([], ['es'])).toBe(false);
       comp.toggleAll(new MouseEvent('click'));
@@ -2468,7 +2893,7 @@ describe('NeuSelectComponent', () => {
       const { comp } = await setup({
         options: [{ value: 'x', label: 'Unavailable', disabled: true }],
       });
-      comp.focusFirstOption();
+      comp.onTriggerKeyDown(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }));
       expect(comp.activeIndex()).toBe(-1);
     });
 

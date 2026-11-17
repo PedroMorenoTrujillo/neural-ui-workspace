@@ -12,7 +12,7 @@ export function optimizeUiCoreClasses(packageRoot) {
   for (const name of readdirSync(directory).filter((file) => file.endsWith('.mjs'))) {
     const path = resolve(directory, name);
     const source = readFileSync(path, 'utf8');
-    const compact = ['neural-ui-core-table.mjs', 'neural-ui-core-button.mjs'].includes(name)
+    const compact = ['neural-ui-core-table.mjs', 'neural-ui-core-button.mjs', 'neural-ui-core-select.mjs'].includes(name)
       ? compactAngularTemplates(source, name) : null;
     const grouped = groupAngularClassMetadata(compact?.code ?? source, basename(path));
     const result = grouped ?? compact;

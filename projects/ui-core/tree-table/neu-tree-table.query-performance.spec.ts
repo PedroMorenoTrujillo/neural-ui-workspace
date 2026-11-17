@@ -134,6 +134,8 @@ describe('NeuTreeTable 2 query performance', () => {
     }).compileComponents();
   });
 
+  // Capture all 13 scenarios, including 10k rows and 1,200 repeated transitions.
+  // V8 instrumentation can exceed 5s; keep the samples and performance assertions intact.
   it('captures reproducible E search/filter/sort/combined baselines', () => {
     const rows10k = Array.from({ length: 10_000 }, (_, id) => ({
       id,
@@ -271,7 +273,7 @@ describe('NeuTreeTable 2 query performance', () => {
         dataMode: 'client',
       }).retained.size,
     ).toBe(1_001);
-  });
+  }, 20_000);
 
   // Keep every lifecycle sample. V8 instrumentation needs additional capture
   // time; this timeout does not change a query/performance budget.
