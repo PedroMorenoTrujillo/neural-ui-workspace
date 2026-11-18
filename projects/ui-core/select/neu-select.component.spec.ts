@@ -2277,6 +2277,27 @@ describe('NeuSelectComponent', () => {
     } finally { vi.unstubAllGlobals(); }
   });
 
+  it('uses visible viewport offsets when the layout viewport is inflated on mobile', async () => {
+    const { f, comp } = await setup();
+    const origin = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+    vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue(new DOMRect(380, 300, 420, 40));
+    vi.stubGlobal('innerWidth', 1024);
+    vi.stubGlobal('innerHeight', 844);
+    vi.stubGlobal('visualViewport', { width: 320, height: 300, offsetLeft: 20, offsetTop: 100 });
+    try {
+      (comp as any).syncPanelPosition(false);
+      expect(comp.panelPosition().left).toBe('28px');
+      expect(comp.panelPosition().width).toBe('304px');
+      expect(comp.panelPosition().maxHeight).toBe('192px');
+      const positions = (comp as any).connectedOverlayPositions();
+      expect(positions.every((position: { overlayY: string }) => position.overlayY === 'bottom')).toBe(true);
+      for (const position of positions) {
+        const baseLeft = position.originX === 'end' ? 380 + 420 - 304 : 380;
+        expect(baseLeft + position.offsetX).toBe(28);
+      }
+    } finally { vi.unstubAllGlobals(); }
+  });
+
   it('syncPanelPosition opens above when there is more room above the trigger', async () => {
     const { f, comp } = await setup();
     const originalInnerWidth = window.innerWidth;
