@@ -843,13 +843,15 @@ export class NeuSelectComponent<
     maxHeight: null,
   });
   readonly isPanelAbove = signal(false);
+  private readonly panelHorizontalOffsets = signal({ start: 0, end: 0 });
   // Keep CDK placement and the available-height calculation on the same side.
   // Pushing a panel that does not fit would otherwise cover its own trigger.
   protected readonly connectedOverlayPositions = computed(() => {
     const above = this.panelPosition().top === 'auto';
+    const offsets = this.panelHorizontalOffsets();
     return this.overlayPositions.filter((position) =>
       above ? position.overlayY === 'bottom' : position.overlayY === 'top',
-    );
+    ).map(position => ({ ...position, offsetX: position.originX === 'end' ? offsets.end : offsets.start }));
   });
 
   readonly hasError = computed(
@@ -1752,14 +1754,19 @@ export class NeuSelectComponent<
     if (!origin) return;
 
     const triggerRect = origin.getBoundingClientRect();
-    const viewportWidth = view.innerWidth;
-    const viewportHeight = view.innerHeight;
+    const visualViewport = view.visualViewport;
+    const viewportWidth = visualViewport?.width ?? view.innerWidth;
+    const viewportHeight = visualViewport?.height ?? view.innerHeight;
     const gap = 0;
     const geometry = constrainNeuConnectedOverlayGeometry(
       triggerRect,
       { width: viewportWidth, height: viewportHeight },
       { viewportMargin: this._viewportMargin, gap },
     );
+    const width = Math.min(geometry.width, Math.max(0, viewportWidth - 16));
+    const viewportLeft = visualViewport?.offsetLeft ?? 0;
+    const left = Math.max(viewportLeft + 8, Math.min(triggerRect.left, viewportLeft + viewportWidth - width - 8));
+    this.panelHorizontalOffsets.set({ start: left - triggerRect.left, end: left - (triggerRect.left + triggerRect.width - width) });
     const openAbove = geometry.availableAbove > geometry.availableBelow;
     const maxHeight = Math.max(0, openAbove ? geometry.availableAbove : geometry.availableBelow);
 
@@ -1767,8 +1774,8 @@ export class NeuSelectComponent<
       position: 'fixed',
       top: openAbove ? 'auto' : `${triggerRect.bottom + gap}px`,
       bottom: openAbove ? `${viewportHeight - triggerRect.top + gap}px` : 'auto',
-      left: `${geometry.left}px`,
-      width: `${geometry.width}px`,
+      left: `${left}px`,
+      width: `${width}px`,
       maxHeight: `${maxHeight}px`,
     });
     if (scheduleViewportCheck && this.virtualScroll()) {

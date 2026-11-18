@@ -2252,6 +2252,31 @@ describe('NeuSelectComponent', () => {
     expect(focusSpy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [320, -20, 240, 8],
+    [320, 280, 240, 72],
+    [375, 350, 420, 8],
+    [390, 20, 180, 20],
+  ])('clamps horizontal panel edges at viewport %s without changing above/below placement', async (width, left, triggerWidth, expectedLeft) => {
+    const { f, comp } = await setup();
+    const origin = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+    vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue({ top: 150, bottom: 190, left, width: triggerWidth } as DOMRect);
+    vi.stubGlobal('innerWidth', width);
+    vi.stubGlobal('innerHeight', 220);
+    try {
+      (comp as any).syncPanelPosition(false);
+      const panelWidth = Math.min(triggerWidth, width - 16);
+      expect(comp.panelPosition().left).toBe(`${expectedLeft}px`);
+      expect(comp.panelPosition().width).toBe(`${panelWidth}px`);
+      const positions = (comp as any).connectedOverlayPositions();
+      expect(positions.every((position: { overlayY: string }) => position.overlayY === 'bottom')).toBe(true);
+      for (const position of positions) {
+        const baseLeft = position.originX === 'end' ? left + triggerWidth - panelWidth : left;
+        expect(baseLeft + position.offsetX).toBe(expectedLeft);
+      }
+    } finally { vi.unstubAllGlobals(); }
+  });
+
   it('syncPanelPosition opens above when there is more room above the trigger', async () => {
     const { f, comp } = await setup();
     const originalInnerWidth = window.innerWidth;
@@ -2276,7 +2301,7 @@ describe('NeuSelectComponent', () => {
       expect(comp.isPanelAbove()).toBe(true);
       expect(comp.panelPosition().top).toBe('auto');
       expect(comp.panelPosition().bottom).toBe('100px');
-      expect(comp.panelPosition().left).toBe('764px');
+      expect(comp.panelPosition().left).toBe('756px');
     } finally {
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,

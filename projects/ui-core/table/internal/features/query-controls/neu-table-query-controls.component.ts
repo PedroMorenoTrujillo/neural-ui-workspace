@@ -1,4 +1,4 @@
-import { afterNextRender, Component, ElementRef, inject, Injector, input, linkedSignal, type TemplateRef } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, input, linkedSignal, type TemplateRef } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
@@ -186,8 +186,8 @@ export interface TableQueryControls {
         [cdkConnectedOverlayOpen]="state.open" [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
         [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="8"
-        [cdkConnectedOverlayLockPosition]="true" [cdkConnectedOverlayScrollStrategy]="filterScrollStrategy"
-        (attach)="focusFilterMenu(filterOverlay)" (detach)="state.menu?.filter?.cancel()"
+        [cdkConnectedOverlayScrollStrategy]="filterScrollStrategy"
+        (attach)="focusFilterMenu(filterOverlay)" (detach)="detachFilterMenu(); state.menu?.filter?.cancel()"
         #filterOverlay="cdkConnectedOverlay"
         (backdropClick)="state.menu?.filter?.cancel()"
         (overlayKeydown)="$event.key === 'Escape' && state.menu?.filter?.cancel()">
@@ -432,7 +432,8 @@ export interface TableQueryControls {
       white-space: nowrap;
     }
     .neu-table2__filter-menu {
-      display:grid; gap:.75rem; inline-size:min(18rem, calc(100vw - 1rem));
+      display:grid; gap:.75rem; box-sizing:border-box; inline-size:min(18rem, calc(100vw - 1rem));
+      min-inline-size:0;
       max-block-size:calc(100dvh - 1rem); overflow:auto;
       padding:1rem; border:1px solid var(--neu-border); border-radius:var(--neu-radius-sm, .25rem);
       background:var(--neu-surface); color:var(--neu-text);
@@ -496,9 +497,36 @@ export class NeuTableQueryControlsComponent {
   };
   protected readonly filterScrollStrategy = new TableFilterScrollStrategy();
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private filterResizeObserver: ResizeObserver | null = null;
+  protected readonly detachFilterMenu = (): void => {
+    this.filterResizeObserver?.disconnect();
+    this.filterResizeObserver = null;
+  };
+  constructor() { this.destroyRef.onDestroy(this.detachFilterMenu); }
   protected readonly focusFilterMenu = (overlay: CdkConnectedOverlay): void => {
     afterNextRender(() => {
       const panel = overlay.overlayRef?.overlayElement;
+      const form = panel?.querySelector<HTMLElement>('[role="dialog"]');
+      if (!form?.isConnected) return;
+      const view = form.ownerDocument.defaultView;
+      const refresh = () => {
+        if (!overlay.overlayRef.hasAttached()) return;
+        const viewport = view?.visualViewport;
+        const width = Math.max(0, (viewport?.width ?? view?.innerWidth ?? 0) - 16);
+        const height = Math.max(0, (viewport?.height ?? view?.innerHeight ?? 0) - 16);
+        form.style.maxInlineSize = `${width}px`;
+        form.style.maxBlockSize = `${height}px`;
+        overlay.overlayRef.updateSize({ maxWidth: width, maxHeight: height });
+        overlay.overlayRef.updatePosition();
+      };
+      refresh();
+      this.detachFilterMenu();
+      if (typeof ResizeObserver !== 'undefined') {
+        this.filterResizeObserver = new ResizeObserver(refresh);
+        this.filterResizeObserver.observe(form);
+      }
+
       // One focus owner for both built-in and projected editors. Avoid opening
       // a mobile keyboard until the user explicitly chooses a text field.
       panel?.querySelector<HTMLElement>('[role="dialog"]')?.focus({ preventScroll: true });
