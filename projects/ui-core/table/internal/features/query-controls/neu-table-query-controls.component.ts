@@ -185,7 +185,7 @@ export interface TableQueryControls {
       <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="filterOrigin"
         [cdkConnectedOverlayOpen]="state.open" [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-        [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="8"
+        [cdkConnectedOverlayPush]="false" [cdkConnectedOverlayFlexibleDimensions]="false" [cdkConnectedOverlayViewportMargin]="8"
         [cdkConnectedOverlayScrollStrategy]="filterScrollStrategy"
         (attach)="focusFilterMenu(filterOverlay, filterOrigin)" (detach)="detachFilterMenu(); state.menu?.filter?.cancel()"
         #filterOverlay="cdkConnectedOverlay"
@@ -519,7 +519,9 @@ export class NeuTableQueryControlsComponent {
         form.style.maxBlockSize = `${height}px`;
         overlay.overlayRef.updateSize({ maxWidth: width, maxHeight: height });
         const anchor = origin.elementRef.nativeElement.getBoundingClientRect();
-        const panelWidth = form.getBoundingClientRect().width;
+        const panelRect = form.getBoundingClientRect();
+        const panelWidth = panelRect.width;
+        const viewportTop = viewport?.offsetTop ?? 0;
         const viewportLeft = viewport?.offsetLeft ?? 0;
         const left = Math.max(viewportLeft + 8, Math.min(anchor.left, viewportLeft + width - panelWidth + 8));
         const rtl = overlay.overlayRef.getDirection() === 'rtl';
@@ -528,7 +530,17 @@ export class NeuTableQueryControlsComponent {
           { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
           { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top' },
           { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom' },
-        ].map(position => ({ ...position, offsetX: left - ((position.originX === 'end') !== rtl ? anchor.right - panelWidth : anchor.left) })) as ConnectedPosition[];
+        ].map(position => {
+          const originTop = position.originY === 'bottom' ? anchor.bottom : anchor.top;
+          const preferredTop = position.originY === 'bottom' ? anchor.bottom : anchor.top - panelRect.height;
+          const top = Math.max(viewportTop + 8, Math.min(preferredTop, viewportTop + height - panelRect.height + 8));
+          // Resolve both axes from the pane's physical top/left. CDK popover
+          // wrappers can be wider than the visual viewport on mobile; using a
+          // right/bottom inset would reference that larger containing block.
+          return { ...position, overlayX: rtl ? 'end' : 'start', overlayY: 'top',
+            offsetX: left - ((position.originX === 'end') !== rtl ? anchor.right : anchor.left),
+            offsetY: top - originTop };
+        }) as ConnectedPosition[];
         const strategy = overlay.overlayRef.getConfig().positionStrategy as FlexibleConnectedPositionStrategy;
         strategy.withPositions(positions);
         overlay.overlayRef.updatePosition();
