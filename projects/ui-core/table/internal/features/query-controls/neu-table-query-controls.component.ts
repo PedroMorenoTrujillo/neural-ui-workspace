@@ -1,6 +1,6 @@
 import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, input, linkedSignal, type TemplateRef } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { CdkConnectedOverlay, CdkOverlayOrigin, type ConnectedPosition, type FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuInputComponent } from '@neural-ui/core/input';
@@ -187,7 +187,7 @@ export interface TableQueryControls {
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
         [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="8"
         [cdkConnectedOverlayScrollStrategy]="filterScrollStrategy"
-        (attach)="focusFilterMenu(filterOverlay)" (detach)="detachFilterMenu(); state.menu?.filter?.cancel()"
+        (attach)="focusFilterMenu(filterOverlay, filterOrigin)" (detach)="detachFilterMenu(); state.menu?.filter?.cancel()"
         #filterOverlay="cdkConnectedOverlay"
         (backdropClick)="state.menu?.filter?.cancel()"
         (overlayKeydown)="$event.key === 'Escape' && state.menu?.filter?.cancel()">
@@ -504,7 +504,7 @@ export class NeuTableQueryControlsComponent {
     this.filterResizeObserver = null;
   };
   constructor() { this.destroyRef.onDestroy(this.detachFilterMenu); }
-  protected readonly focusFilterMenu = (overlay: CdkConnectedOverlay): void => {
+  protected readonly focusFilterMenu = (overlay: CdkConnectedOverlay, origin: CdkOverlayOrigin): void => {
     afterNextRender(() => {
       const panel = overlay.overlayRef?.overlayElement;
       const form = panel?.querySelector<HTMLElement>('[role="dialog"]');
@@ -518,6 +518,19 @@ export class NeuTableQueryControlsComponent {
         form.style.maxInlineSize = `${width}px`;
         form.style.maxBlockSize = `${height}px`;
         overlay.overlayRef.updateSize({ maxWidth: width, maxHeight: height });
+        const anchor = origin.elementRef.nativeElement.getBoundingClientRect();
+        const panelWidth = form.getBoundingClientRect().width;
+        const viewportLeft = viewport?.offsetLeft ?? 0;
+        const left = Math.max(viewportLeft + 8, Math.min(anchor.left, viewportLeft + width - panelWidth + 8));
+        const rtl = overlay.overlayRef.getDirection() === 'rtl';
+        const positions: ConnectedPosition[] = [
+          { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' },
+          { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
+          { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top' },
+          { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom' },
+        ].map(position => ({ ...position, offsetX: left - ((position.originX === 'end') !== rtl ? anchor.right - panelWidth : anchor.left) })) as ConnectedPosition[];
+        const strategy = overlay.overlayRef.getConfig().positionStrategy as FlexibleConnectedPositionStrategy;
+        strategy.withPositions(positions);
         overlay.overlayRef.updatePosition();
       };
       refresh();
