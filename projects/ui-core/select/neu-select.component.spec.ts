@@ -1190,7 +1190,7 @@ describe('NeuSelectComponent', () => {
         bottom: 'auto',
         left: '20px',
         width: '180px',
-        maxHeight: '850px',
+        maxHeight: '842px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -1233,7 +1233,7 @@ describe('NeuSelectComponent', () => {
         bottom: 'auto',
         left: '24px',
         width: '220px',
-        maxHeight: '744px',
+        maxHeight: '736px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -1249,9 +1249,9 @@ describe('NeuSelectComponent', () => {
   });
 
   it.each([
-    [100, 148, 844, 'top', 696],
-    [450, 498, 844, 'bottom', 450],
-    [100, 148, 200, 'bottom', 100],
+    [100, 148, 844, 'top', 688],
+    [450, 498, 844, 'bottom', 442],
+    [100, 148, 200, 'bottom', 92],
   ])(
     'keeps placement and available height together at trigger %s..%s in viewport %s',
     async (top, bottom, height, overlayY, maxHeight) => {
@@ -2252,6 +2252,52 @@ describe('NeuSelectComponent', () => {
     expect(focusSpy).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [320, -20, 240, 8],
+    [320, 280, 240, 72],
+    [375, 350, 420, 8],
+    [390, 20, 180, 20],
+  ])('clamps horizontal panel edges at viewport %s without changing above/below placement', async (width, left, triggerWidth, expectedLeft) => {
+    const { f, comp } = await setup();
+    const origin = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+    vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue({ top: 150, bottom: 190, left, width: triggerWidth } as DOMRect);
+    vi.stubGlobal('innerWidth', width);
+    vi.stubGlobal('innerHeight', 220);
+    try {
+      (comp as any).syncPanelPosition(false);
+      const panelWidth = Math.min(triggerWidth, width - 16);
+      expect(comp.panelPosition().left).toBe(`${expectedLeft}px`);
+      expect(comp.panelPosition().width).toBe(`${panelWidth}px`);
+      const positions = (comp as any).connectedOverlayPositions();
+      expect(positions.every((position: { overlayY: string }) => position.overlayY === 'bottom')).toBe(true);
+      for (const position of positions) {
+        const baseLeft = position.originX === 'end' ? left + triggerWidth - panelWidth : left;
+        expect(baseLeft + position.offsetX).toBe(expectedLeft);
+      }
+    } finally { vi.unstubAllGlobals(); }
+  });
+
+  it('uses visible viewport offsets when the layout viewport is inflated on mobile', async () => {
+    const { f, comp } = await setup();
+    const origin = f.nativeElement.querySelector('.neu-select') as HTMLElement;
+    vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue(new DOMRect(380, 300, 420, 40));
+    vi.stubGlobal('innerWidth', 1024);
+    vi.stubGlobal('innerHeight', 844);
+    vi.stubGlobal('visualViewport', { width: 320, height: 300, offsetLeft: 20, offsetTop: 100 });
+    try {
+      (comp as any).syncPanelPosition(false);
+      expect(comp.panelPosition().left).toBe('28px');
+      expect(comp.panelPosition().width).toBe('304px');
+      expect(comp.panelPosition().maxHeight).toBe('192px');
+      const positions = (comp as any).connectedOverlayPositions();
+      expect(positions.every((position: { overlayY: string }) => position.overlayY === 'bottom')).toBe(true);
+      for (const position of positions) {
+        const baseLeft = position.originX === 'end' ? 380 + 420 - 304 : 380;
+        expect(baseLeft + position.offsetX).toBe(28);
+      }
+    } finally { vi.unstubAllGlobals(); }
+  });
+
   it('syncPanelPosition opens above when there is more room above the trigger', async () => {
     const { f, comp } = await setup();
     const originalInnerWidth = window.innerWidth;
@@ -2276,7 +2322,7 @@ describe('NeuSelectComponent', () => {
       expect(comp.isPanelAbove()).toBe(true);
       expect(comp.panelPosition().top).toBe('auto');
       expect(comp.panelPosition().bottom).toBe('100px');
-      expect(comp.panelPosition().left).toBe('764px');
+      expect(comp.panelPosition().left).toBe('756px');
     } finally {
       Object.defineProperty(window, 'innerWidth', {
         configurable: true,

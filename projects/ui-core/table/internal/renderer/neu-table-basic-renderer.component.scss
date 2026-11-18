@@ -48,16 +48,18 @@ th {
 }
 
 .neu-table2__header-label {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .neu-table2__header-content {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .neu-table2__sort-button {
   display: inline-flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  white-space: nowrap;
   align-items: center;
   gap: var(--neu-table-space-xs, 0.25rem);
   min-block-size: 2rem;

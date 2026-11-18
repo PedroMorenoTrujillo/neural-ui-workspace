@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.0.10] - 2026-11-18
+
+### Fixed
+
+- Table headers keep labels and sorting/filter controls together on one line.
+- Table column filter dialogs refit after deferred controls render and stay within the mobile visual viewport, including after horizontal table scrolling.
+- Filter dialogs capture focus once, preserve editing while the mobile keyboard opens, and cancel drafts on external scrolling or backdrop gestures without scrolling the restored trigger into view.
+- Select panels remain within the visible viewport with an eight-pixel inset while preserving their placement above or below the trigger.
+
 ## [2.0.9] - 2026-11-17
 
 ### Fixed

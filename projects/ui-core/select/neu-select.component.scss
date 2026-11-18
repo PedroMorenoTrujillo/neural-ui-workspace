@@ -479,15 +479,6 @@ $select-height: 48px;
   pointer-events: none;
 }
 
-@media (max-width: 600px) {
-  .neu-select__panel {
-    inset-inline-start: auto;
-    inset-inline-end: 0;
-    width: min(max(100%, 220px), calc(100vw - 2rem));
-    max-width: calc(100vw - 2rem);
-  }
-}
-
 @keyframes neu-select-open {
   from {
     opacity: 0;

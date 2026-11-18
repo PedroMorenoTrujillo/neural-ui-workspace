@@ -1,6 +1,6 @@
-import { afterNextRender, Component, ElementRef, inject, input, linkedSignal, type TemplateRef } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, input, linkedSignal, type TemplateRef } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { CdkConnectedOverlay, CdkOverlayOrigin, type ConnectedPosition, type FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuInputComponent } from '@neural-ui/core/input';
@@ -13,6 +13,7 @@ import type {
   NeuTablePaginationOptions,
   NeuTablePaginatorContext,
 } from '../../../public/neu-table.types';
+import { TableFilterScrollStrategy } from './neu-table-filter-scroll-strategy';
 import { tableMessage } from '../../semantics/neu-table-labels';
 
 export interface TableFilterControls {
@@ -184,11 +185,14 @@ export interface TableQueryControls {
       <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="filterOrigin"
         [cdkConnectedOverlayOpen]="state.open" [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-        [cdkConnectedOverlayPush]="true" [cdkConnectedOverlayViewportMargin]="8"
+        [cdkConnectedOverlayPush]="false" [cdkConnectedOverlayFlexibleDimensions]="false" [cdkConnectedOverlayViewportMargin]="8"
+        [cdkConnectedOverlayScrollStrategy]="filterScrollStrategy"
+        (attach)="focusFilterMenu(filterOverlay, filterOrigin)" (detach)="detachFilterMenu(); state.menu?.filter?.cancel()"
+        #filterOverlay="cdkConnectedOverlay"
         (backdropClick)="state.menu?.filter?.cancel()"
         (overlayKeydown)="$event.key === 'Escape' && state.menu?.filter?.cancel()">
         @if (state.menu; as menu) {
-          <form class="neu-table2__filter-menu" role="dialog" cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+          <form class="neu-table2__filter-menu" role="dialog" tabindex="-1" cdkTrapFocus
             [attr.aria-label]="text('filterColumn', state.name)" [attr.data-filter-editor]="state.id"
             (submit)="menu.template ? $event.preventDefault() : menu.filter.apply($event)">
             @if (menu.template; as template) {
@@ -428,7 +432,8 @@ export interface TableQueryControls {
       white-space: nowrap;
     }
     .neu-table2__filter-menu {
-      display:grid; gap:.75rem; inline-size:min(18rem, calc(100vw - 1rem));
+      display:grid; gap:.75rem; box-sizing:border-box; inline-size:min(18rem, calc(100vw - 1rem));
+      min-inline-size:0;
       max-block-size:calc(100dvh - 1rem); overflow:auto;
       padding:1rem; border:1px solid var(--neu-border); border-radius:var(--neu-radius-sm, .25rem);
       background:var(--neu-surface); color:var(--neu-text);
@@ -490,13 +495,68 @@ export class NeuTableQueryControlsComponent {
     if (size !== null) state.changePageSize(size);
     this.restoreControl(() => control.value.set(state.pageSize));
   };
-  constructor() {
-    const element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  protected readonly filterScrollStrategy = new TableFilterScrollStrategy();
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private filterResizeObserver: ResizeObserver | null = null;
+  protected readonly detachFilterMenu = (): void => {
+    this.filterResizeObserver?.disconnect();
+    this.filterResizeObserver = null;
+  };
+  constructor() { this.destroyRef.onDestroy(this.detachFilterMenu); }
+  protected readonly focusFilterMenu = (overlay: CdkConnectedOverlay, origin: CdkOverlayOrigin): void => {
     afterNextRender(() => {
-      if (this.controls().filter?.menu)
-        element.querySelector<HTMLElement>('input,select,button')?.focus();
-    });
-  }
+      const panel = overlay.overlayRef?.overlayElement;
+      const form = panel?.querySelector<HTMLElement>('[role="dialog"]');
+      if (!form?.isConnected) return;
+      const view = form.ownerDocument.defaultView;
+      const refresh = () => {
+        if (!overlay.overlayRef.hasAttached()) return;
+        const viewport = view?.visualViewport;
+        const width = Math.max(0, (viewport?.width ?? view?.innerWidth ?? 0) - 16);
+        const height = Math.max(0, (viewport?.height ?? view?.innerHeight ?? 0) - 16);
+        form.style.maxInlineSize = `${width}px`;
+        form.style.maxBlockSize = `${height}px`;
+        overlay.overlayRef.updateSize({ maxWidth: width, maxHeight: height });
+        const anchor = origin.elementRef.nativeElement.getBoundingClientRect();
+        const panelRect = form.getBoundingClientRect();
+        const panelWidth = panelRect.width;
+        const viewportTop = viewport?.offsetTop ?? 0;
+        const viewportLeft = viewport?.offsetLeft ?? 0;
+        const left = Math.max(viewportLeft + 8, Math.min(anchor.left, viewportLeft + width - panelWidth + 8));
+        const rtl = overlay.overlayRef.getDirection() === 'rtl';
+        const positions: ConnectedPosition[] = [
+          { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' },
+          { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
+          { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top' },
+          { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom' },
+        ].map(position => {
+          const originTop = position.originY === 'bottom' ? anchor.bottom : anchor.top;
+          const preferredTop = position.originY === 'bottom' ? anchor.bottom : anchor.top - panelRect.height;
+          const top = Math.max(viewportTop + 8, Math.min(preferredTop, viewportTop + height - panelRect.height + 8));
+          // Resolve both axes from the pane's physical top/left. CDK popover
+          // wrappers can be wider than the visual viewport on mobile; using a
+          // right/bottom inset would reference that larger containing block.
+          return { ...position, overlayX: rtl ? 'end' : 'start', overlayY: 'top',
+            offsetX: left - ((position.originX === 'end') !== rtl ? anchor.right : anchor.left),
+            offsetY: top - originTop };
+        }) as ConnectedPosition[];
+        const strategy = overlay.overlayRef.getConfig().positionStrategy as FlexibleConnectedPositionStrategy;
+        strategy.withPositions(positions);
+        overlay.overlayRef.updatePosition();
+      };
+      refresh();
+      this.detachFilterMenu();
+      if (typeof ResizeObserver !== 'undefined') {
+        this.filterResizeObserver = new ResizeObserver(refresh);
+        this.filterResizeObserver.observe(form);
+      }
+
+      // One focus owner for both built-in and projected editors. Avoid opening
+      // a mobile keyboard until the user explicitly chooses a text field.
+      panel?.querySelector<HTMLElement>('[role="dialog"]')?.focus({ preventScroll: true });
+    }, { injector: this.injector });
+  };
   readonly controls = input<TableQueryControls>({});
   protected readonly pageButtons = linkedSignal<
     NeuTablePaginatorContext | undefined,

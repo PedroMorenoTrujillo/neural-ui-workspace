@@ -1,3 +1,4 @@
+import { OverlayRef, type FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
 import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { NeuSelectComponent } from '@neural-ui/core/select';
@@ -1063,6 +1064,133 @@ describe('NeuTable 2 controlled query UI integration', () => {
     renderer.commitSearch(submit);
     expect(input.value).toBe('applied');
     expect(fixture.componentInstance.queryEvents.at(-1)?.search).toBe('next');
+  });
+
+  it('refits a deferred filter after its measured content grows beyond the initial CDK placement', async () => {
+    const observers: { targets: Element[]; callback: () => void; disconnect: ReturnType<typeof vi.fn> }[] = [];
+    vi.stubGlobal('ResizeObserver', class {
+      readonly targets: Element[] = [];
+      readonly disconnect = vi.fn();
+      constructor(readonly callback: () => void) { observers.push(this); }
+      observe(target: Element) { this.targets.push(target); }
+      unobserve() {}
+    });
+    vi.stubGlobal('visualViewport', { width: 320, height: 420, offsetLeft: 0, offsetTop: 0 });
+    const overlays: OverlayRef[] = [];
+    const updatePosition = OverlayRef.prototype.updatePosition;
+    const updates = vi.spyOn(OverlayRef.prototype, 'updatePosition').mockImplementation(function (this: OverlayRef) {
+      overlays.push(this); return updatePosition.call(this);
+    });
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges(); await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    const menu = document.querySelector<HTMLElement>('.neu-table2__filter-menu')!;
+    const origin = trigger.closest('.neu-table2__column-actions')!;
+    const originMeasure = vi.spyOn(origin, 'getBoundingClientRect').mockReturnValue({ left: 248, right: 290, top: 350, bottom: 394, width: 42, height: 44 } as DOMRect);
+    const menuMeasure = vi.spyOn(menu, 'getBoundingClientRect').mockReturnValue({ width: 288, height: 182 } as DOMRect);
+    const observer = observers.find(candidate => candidate.targets.includes(menu))!;
+    expect(observer).toBeDefined();
+    observer.callback();
+    const overlay = overlays.find(candidate => candidate.overlayElement.contains(menu))!;
+    const positions = () => (overlay.getConfig().positionStrategy as FlexibleConnectedPositionStrategy).positions;
+    for (const position of positions()) {
+      const x = (position.originX === 'end' ? 290 : 248) + position.offsetX!;
+      const y = (position.originY === 'bottom' ? 394 : 350) + position.offsetY!;
+      expect(x).toBe(24);
+      expect(y).toBeGreaterThanOrEqual(8);
+      expect(y + 182).toBeLessThanOrEqual(412);
+      expect(position.overlayX).toBe('start');
+      expect(position.overlayY).toBe('top');
+    }
+    menuMeasure.mockReturnValue({ width: 304, height: 404 } as DOMRect);
+    observer.callback();
+    for (const position of positions()) {
+      expect((position.originX === 'end' ? 290 : 248) + position.offsetX!).toBe(8);
+      expect((position.originY === 'bottom' ? 394 : 350) + position.offsetY!).toBe(8);
+    }
+    overlay.detach(); fixture.detectChanges(); await fixture.whenStable();
+    expect(observer.disconnect).toHaveBeenCalled();
+    originMeasure.mockRestore(); menuMeasure.mockRestore(); updates.mockRestore(); vi.unstubAllGlobals();
+  });
+
+  it('captures filter focus once without scrolling, cancels external scroll, and restores its trigger', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const menu = document.querySelector<HTMLElement>('.neu-table2__filter-menu')!;
+    expect(menu).not.toBeNull();
+    expect(document.activeElement).toBe(menu);
+    expect(focus.mock.calls).toEqual([[{ preventScroll: true }]]);
+    // Both panel scrolling and sibling overlays (a nested Select listbox) stay open.
+    menu.dispatchEvent(new Event('scroll'));
+    const nested = document.createElement('div');
+    nested.className = 'cdk-overlay-pane';
+    document.querySelector('.cdk-overlay-container')!.append(nested);
+    nested.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBe(menu);
+    nested.remove();
+    const viewport = (fixture.nativeElement as HTMLElement).querySelector('.neu-table2__viewport')!;
+    viewport.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+    expect(focus.mock.calls.at(-1)).toEqual([{ preventScroll: true }]);
+    expect(fixture.componentInstance.query().filters).toBeNull();
+    focus.mockRestore();
+  });
+
+  it('keeps the mobile editor open through keyboard resize and automatic page panning but closes external gestures', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges(); await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    vi.stubGlobal('visualViewport', { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0 });
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    const menu = document.querySelector<HTMLElement>('.neu-table2__filter-menu')!;
+    const input = menu.querySelector<HTMLInputElement>('input')!;
+    input.focus();
+    vi.stubGlobal('innerHeight', window.innerHeight - 250);
+    vi.stubGlobal('innerWidth', window.innerWidth + 92);
+    window.dispatchEvent(new Event('resize'));
+    document.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBe(menu);
+    expect(document.activeElement).toBe(input);
+    input.value = 'typed'; input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(input.value).toBe('typed');
+    const backdrop = document.querySelector('.cdk-overlay-backdrop')!;
+    backdrop.dispatchEvent(new Event('wheel'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    document.querySelector<HTMLInputElement>('.neu-table2__filter-menu input')!.focus();
+    document.querySelector('.cdk-overlay-backdrop')!.dispatchEvent(new Event('touchmove'));
+    fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it('dismisses a filter on viewport resize and allows reopening after detachment', async () => {
+    const fixture = TestBed.createComponent(QueryUiHostComponent);
+    fixture.detectChanges(); await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).not.toBeNull();
+    vi.stubGlobal('innerWidth', window.innerWidth + 20);
+    window.dispatchEvent(new Event('resize'));
+    fixture.detectChanges(); await fixture.whenStable();
+    vi.unstubAllGlobals();
+    expect(document.querySelector('.neu-table2__filter-menu')).toBeNull();
+    trigger.click(); fixture.detectChanges(); await fixture.whenStable();
+    expect(document.querySelector('.neu-table2__filter-menu')).not.toBeNull();
   });
 
   it('hides value inputs for unary filters and respects a non-expandable row', async () => {
