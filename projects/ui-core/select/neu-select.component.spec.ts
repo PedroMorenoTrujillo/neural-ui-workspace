@@ -1190,7 +1190,7 @@ describe('NeuSelectComponent', () => {
         bottom: 'auto',
         left: '20px',
         width: '180px',
-        maxHeight: '850px',
+        maxHeight: '842px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -1233,7 +1233,7 @@ describe('NeuSelectComponent', () => {
         bottom: 'auto',
         left: '24px',
         width: '220px',
-        maxHeight: '744px',
+        maxHeight: '736px',
       });
     } finally {
       Object.defineProperty(window, 'innerWidth', {
@@ -1249,9 +1249,9 @@ describe('NeuSelectComponent', () => {
   });
 
   it.each([
-    [100, 148, 844, 'top', 696],
-    [450, 498, 844, 'bottom', 450],
-    [100, 148, 200, 'bottom', 100],
+    [100, 148, 844, 'top', 688],
+    [450, 498, 844, 'bottom', 442],
+    [100, 148, 200, 'bottom', 92],
   ])(
     'keeps placement and available height together at trigger %s..%s in viewport %s',
     async (top, bottom, height, overlayY, maxHeight) => {

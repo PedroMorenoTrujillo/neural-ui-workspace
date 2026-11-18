@@ -11,7 +11,7 @@ export class TableFilterScrollStrategy implements ScrollStrategy {
   enable(): void {
     if (this.listening || !this.overlay) return;
     const document = this.overlay.overlayElement.ownerDocument;
-    this.viewportWidth = document.defaultView?.innerWidth ?? 0;
+    this.viewportWidth = this.widthOf(document);
     document.addEventListener('scroll', this.onScroll, true);
     document.addEventListener('wheel', this.onOutsideGesture, { capture: true, passive: true });
     document.addEventListener('touchmove', this.onOutsideGesture, { capture: true, passive: true });
@@ -51,8 +51,14 @@ export class TableFilterScrollStrategy implements ScrollStrategy {
     if (!(event.target as Element | null)?.closest?.('.cdk-overlay-pane')) this.close();
   };
 
+  private widthOf(document: Document): number {
+    return document.defaultView?.visualViewport?.width ??
+      (document.documentElement.clientWidth || document.defaultView?.innerWidth || 0);
+  }
+
   private readonly onResize = (): void => {
-    const width = this.overlay?.overlayElement.ownerDocument.defaultView?.innerWidth;
+    const document = this.overlay?.overlayElement.ownerDocument;
+    const width = document ? this.widthOf(document) : this.viewportWidth;
     // Height-only changes include the on-screen keyboard. Keep typing possible.
     if (width !== this.viewportWidth) this.close();
   };

@@ -1102,11 +1102,13 @@ describe('NeuTable 2 controlled query UI integration', () => {
     const fixture = TestBed.createComponent(QueryUiHostComponent);
     fixture.detectChanges(); await fixture.whenStable();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.neu-table2__filter-trigger')!;
+    vi.stubGlobal('visualViewport', { width: window.innerWidth, height: window.innerHeight, offsetLeft: 0, offsetTop: 0 });
     trigger.click(); fixture.detectChanges(); await fixture.whenStable();
     const menu = document.querySelector<HTMLElement>('.neu-table2__filter-menu')!;
     const input = menu.querySelector<HTMLInputElement>('input')!;
     input.focus();
     vi.stubGlobal('innerHeight', window.innerHeight - 250);
+    vi.stubGlobal('innerWidth', window.innerWidth + 92);
     window.dispatchEvent(new Event('resize'));
     document.dispatchEvent(new Event('scroll'));
     fixture.detectChanges(); await fixture.whenStable();

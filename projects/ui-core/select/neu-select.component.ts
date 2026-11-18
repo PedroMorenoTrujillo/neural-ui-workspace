@@ -50,7 +50,6 @@ import {
   InternalNeuOptionActiveRowController,
   type InternalNeuOptionActiveRowResult,
   InternalNeuOptionTypeaheadController,
-  constrainNeuConnectedOverlayGeometry,
   createNeuOptionLazyRequest,
   createNeuOptionLoadingRows,
   deriveNeuOptionActiveDescendant,
@@ -1758,17 +1757,15 @@ export class NeuSelectComponent<
     const viewportWidth = visualViewport?.width ?? view.innerWidth;
     const viewportHeight = visualViewport?.height ?? view.innerHeight;
     const gap = 0;
-    const geometry = constrainNeuConnectedOverlayGeometry(
-      triggerRect,
-      { width: viewportWidth, height: viewportHeight },
-      { viewportMargin: this._viewportMargin, gap },
-    );
-    const width = Math.min(geometry.width, Math.max(0, viewportWidth - 16));
+    const viewportTop = visualViewport?.offsetTop ?? 0;
+    const width = Math.min(triggerRect.width, Math.max(0, viewportWidth - 16));
+    const availableAbove = Math.max(0, triggerRect.top - viewportTop - 8);
+    const availableBelow = Math.max(0, viewportTop + viewportHeight - triggerRect.bottom - 8);
     const viewportLeft = visualViewport?.offsetLeft ?? 0;
     const left = Math.max(viewportLeft + 8, Math.min(triggerRect.left, viewportLeft + viewportWidth - width - 8));
     this.panelHorizontalOffsets.set({ start: left - triggerRect.left, end: left - (triggerRect.left + triggerRect.width - width) });
-    const openAbove = geometry.availableAbove > geometry.availableBelow;
-    const maxHeight = Math.max(0, openAbove ? geometry.availableAbove : geometry.availableBelow);
+    const openAbove = availableAbove > availableBelow;
+    const maxHeight = openAbove ? availableAbove : availableBelow;
 
     this.panelPosition.set({
       position: 'fixed',
