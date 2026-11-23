@@ -3,15 +3,28 @@ import { TestBed } from '@angular/core/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { NeuButtonComponent } from '@neural-ui/core/button';
 import { NeuInputComponent } from '@neural-ui/core/input';
+import { NeuMenuComponent, type NeuMenuItem } from '@neural-ui/core/menu';
+import { NeuTabPanelComponent, NeuTabsComponent } from '@neural-ui/core/tabs';
+import { NeuTreeSelectComponent, type NeuTreeSelectNode } from '@neural-ui/core/tree-select';
+import {
+  NeuTreeTableComponent,
+  type NeuTreeLoadedRelation,
+  type NeuTreeTableColumn,
+  type NeuTreeTableHierarchy,
+} from '@neural-ui/core/tree-table';
 import {
   NeuButtonHarness,
   NeuCheckboxHarness,
   NeuDateInputHarness,
   NeuDialogHarness,
   NeuInputHarness,
+  NeuMenuHarness,
   NeuSelectHarness,
   NeuSwitchHarness,
   NeuTableHarness,
+  NeuTabsHarness,
+  NeuTreeSelectHarness,
+  NeuTreeTableHarness,
 } from './harnesses';
 
 @Component({
@@ -19,6 +32,175 @@ import {
   template: `<button neu-button [loading]="true">Save</button><neu-input label="Name" />`,
 })
 class HarnessHostComponent {}
+
+type ProjectRow = { id: string; name: string };
+
+function loadedRelation(keys: readonly string[]): NeuTreeLoadedRelation<string> {
+  return {
+    status: 'loaded',
+    keys,
+    relationRevision: 1,
+    appliedRequestId: null,
+    total: keys.length,
+    completeness: 'complete',
+  };
+}
+
+@Component({
+  imports: [
+    NeuMenuComponent,
+    NeuTabsComponent,
+    NeuTabPanelComponent,
+    NeuTreeSelectComponent,
+    NeuTreeTableComponent,
+  ],
+  template: `
+    <neu-menu [items]="actions" (itemClick)="lastAction = $event.key" />
+    <neu-tabs [tabs]="tabs" initialActiveId="overview">
+      <neu-tab-panel tabId="overview">
+        <neu-tabs [tabs]="[{ id: 'nested', label: 'Nested' }]" initialActiveId="nested" />
+      </neu-tab-panel>
+    </neu-tabs>
+    <neu-tree-select
+      id="department"
+      [style.direction]="direction"
+      [nodes]="departments"
+      [expandedKeys]="departmentsExpanded"
+      (expandedKeysChange)="departmentsExpanded = $event"
+    />
+    <neu-tree-select id="location" [nodes]="[{ value: 'ny', label: 'New York' }]" />
+    <neu-tree-table
+      [data]="rows"
+      [columns]="columns"
+      [rowKey]="rowKey"
+      [hierarchy]="hierarchy"
+      [hierarchyOptions]="{ treeColumnId: 'name', indentSize: 16 }"
+      [expandedKeys]="rowsExpanded"
+      (expandedKeysChange)="rowsExpanded = $event.next"
+    />
+  `,
+})
+class CompositeHarnessHostComponent {
+  readonly actions: NeuMenuItem[] = [
+    { key: 'create', label: 'Create', badge: 4, shortcut: 'Ctrl+N' },
+    { key: 'files', label: 'Files', children: [{ key: 'import', label: 'Import' }] },
+  ];
+  readonly tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'activity', label: 'Activity', badge: '2' },
+  ];
+  readonly departments: readonly NeuTreeSelectNode[] = [
+    {
+      value: 'engineering',
+      label: 'Engineering',
+      children: [{ value: 'platform', label: 'Platform' }],
+    },
+  ];
+  readonly rows: readonly ProjectRow[] = [
+    { id: 'root', name: 'Portfolio' },
+    { id: 'child', name: 'Project' },
+  ];
+  readonly columns: readonly NeuTreeTableColumn<ProjectRow, 'name'>[] = [
+    { id: 'name', field: 'name', header: 'Name' },
+  ];
+  readonly rowKey = (row: ProjectRow): string => row.id;
+  readonly hierarchy: NeuTreeTableHierarchy<string> = {
+    hierarchyRevision: 1,
+    queryRevision: 0,
+    roots: loadedRelation(['root']),
+    children: [
+      { parentKey: 'root', relation: loadedRelation(['child']) },
+      { parentKey: 'child', relation: loadedRelation([]) },
+    ],
+  };
+  direction = 'ltr';
+  departmentsExpanded: readonly string[] = [];
+  rowsExpanded: readonly string[] = [];
+  lastAction: string | undefined;
+}
+
+describe('Composite Neural UI component harnesses', () => {
+  function createHost() {
+    const fixture = TestBed.createComponent(CompositeHarnessHostComponent);
+    return {
+      loader: TestbedHarnessEnvironment.loader(fixture),
+      instance: fixture.componentInstance,
+    };
+  }
+
+  it('activates menu items by text without decorating the match with shortcuts or badges', async () => {
+    const { loader, instance } = createHost();
+    const menu = await loader.getHarness(NeuMenuHarness);
+    expect(await menu.getItemTexts()).toEqual(['Create', 'Files', 'Import']);
+    await menu.clickItem('Create');
+    expect(instance.lastAction).toBe('create');
+    await menu.clickItem(/Files/);
+    expect(await menu.getItemTexts()).toEqual(['Create', 'Files']);
+    await menu.clickItem('Files');
+    expect(await menu.getItemTexts()).toEqual(['Create', 'Files', 'Import']);
+    await menu.clickItem('Import');
+    expect(instance.lastAction).toBe('import');
+    await expect(menu.clickItem('Missing')).rejects.toThrow(/menu item.*Missing/);
+  });
+
+  it('reads and selects tabs without matching tabs from a nested tablist', async () => {
+    const { loader } = createHost();
+    const tabs = await loader.getHarness(NeuTabsHarness);
+    expect(await tabs.getTabTexts()).toEqual(['Overview', 'Activity']);
+    expect(await tabs.getActiveTabText()).toBe('Overview');
+    await tabs.selectTab('Activity');
+    expect(await tabs.getActiveTabText()).toBe('Activity');
+    await expect(tabs.selectTab('Nested')).rejects.toThrow(/tab.*Nested/);
+  });
+
+  it('operates the TreeSelect instance overlay and expands a branch before selecting its child', async () => {
+    const { loader, instance } = createHost();
+    const [department, location] = await loader.getAllHarnesses(NeuTreeSelectHarness);
+    expect(await department.isOpen()).toBe(false);
+    expect(await department.getNodeTexts()).toEqual([]);
+    await department.close();
+    await location.open();
+    expect(await location.getNodeTexts()).toEqual(['New York']);
+    expect(await department.getNodeTexts()).toEqual([]);
+    await location.close();
+    expect(await location.isOpen()).toBe(false);
+    await department.setNodeExpanded('Engineering', true);
+    await department.setNodeExpanded('Engineering', true);
+    expect(instance.departmentsExpanded).toEqual(['engineering']);
+    expect(await department.getNodeTexts()).toEqual(['Engineering', 'Platform']);
+    await expect(department.setNodeExpanded('Platform', true)).rejects.toThrow(/cannot expand/);
+    await department.selectNode('Platform');
+    expect(await department.getValueText()).toBe('Platform');
+    expect(await department.isOpen()).toBe(false);
+  });
+
+  it('expands and collapses TreeSelect nodes with the keyboard in RTL', async () => {
+    const { loader, instance } = createHost();
+    instance.direction = 'rtl';
+    const department = await loader.getHarness(NeuTreeSelectHarness);
+    await department.setNodeExpanded('Engineering', true);
+    expect(instance.departmentsExpanded).toEqual(['engineering']);
+    await department.setNodeExpanded('Engineering', false);
+    expect(instance.departmentsExpanded).toEqual([]);
+  });
+
+  it('reads only data rows in TreeTable and toggles expansion without selecting a row', async () => {
+    const { loader, instance } = createHost();
+    const table = await loader.getHarness(NeuTreeTableHarness);
+    expect(await table.getRowCount()).toBe(1);
+    expect(await table.getCellText(0, 0)).toBe('Portfolio');
+    await table.setRowExpanded(0, false);
+    await table.setRowExpanded(0, true);
+    expect(instance.rowsExpanded).toEqual(['root']);
+    expect(await table.getRowCount()).toBe(2);
+    expect(await table.getCellText(1, 0)).toBe('Project');
+    await expect(table.setRowExpanded(1, true)).rejects.toThrow(/cannot expand/);
+    await expect(table.getCellText(2, 0)).rejects.toThrow(/row 2/);
+    await expect(table.getCellText(0, 1)).rejects.toThrow(/column 1/);
+    await table.setRowExpanded(0, false);
+    expect(await table.getRowCount()).toBe(1);
+  });
+});
 
 @Component({
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

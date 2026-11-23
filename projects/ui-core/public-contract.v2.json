@@ -415,6 +415,16 @@
       ]
     },
     {
+      "entrypoint": "./filter-builder",
+      "types": "./types/neural-ui-core-filter-builder.d.ts",
+      "exports": [
+        "./filter-builder#NeuFilterBuilderComponent",
+        "./filter-builder#NeuFilterBuilderEditorContext",
+        "./filter-builder#NeuFilterBuilderField",
+        "./filter-builder#NeuFilterBuilderLabels"
+      ]
+    },
+    {
       "entrypoint": "./focus-trap",
       "types": "./types/neural-ui-core-focus-trap.d.ts",
       "exports": [
@@ -750,6 +760,14 @@
       ]
     },
     {
+      "entrypoint": "./mention",
+      "types": "./types/neural-ui-core-mention.d.ts",
+      "exports": [
+        "./mention#NeuMentionComponent",
+        "./mention#NeuMentionSuggestion"
+      ]
+    },
+    {
       "entrypoint": "./menu",
       "types": "./types/neural-ui-core-menu.d.ts",
       "exports": [
@@ -893,6 +911,16 @@
       ]
     },
     {
+      "entrypoint": "./phone-input",
+      "types": "./types/neural-ui-core-phone-input.d.ts",
+      "exports": [
+        "./phone-input#createNeuPhoneInputValue",
+        "./phone-input#NeuPhoneInputComponent",
+        "./phone-input#NeuPhoneInputValue",
+        "./phone-input#NeuPhoneRegion"
+      ]
+    },
+    {
       "entrypoint": "./pick-list",
       "types": "./types/neural-ui-core-pick-list.d.ts",
       "exports": [
@@ -962,6 +990,16 @@
       "types": "./types/neural-ui-core-ripple.d.ts",
       "exports": [
         "./ripple#NeuRippleDirective"
+      ]
+    },
+    {
+      "entrypoint": "./scheduler",
+      "types": "./types/neural-ui-core-scheduler.d.ts",
+      "exports": [
+        "./scheduler#NeuSchedulerComponent",
+        "./scheduler#NeuSchedulerEvent",
+        "./scheduler#NeuSchedulerEventProposal",
+        "./scheduler#NeuSchedulerView"
       ]
     },
     {
@@ -1248,10 +1286,14 @@
         "./testing#NeuHydrationElementSnapshot",
         "./testing#NeuHydrationSnapshot",
         "./testing#NeuInputHarness",
+        "./testing#NeuMenuHarness",
         "./testing#NeuSelectHarness",
         "./testing#NeuSwitchHarness",
         "./testing#NeuTableHarness",
-        "./testing#NeuTextHarnessFilters"
+        "./testing#NeuTabsHarness",
+        "./testing#NeuTextHarnessFilters",
+        "./testing#NeuTreeSelectHarness",
+        "./testing#NeuTreeTableHarness"
       ]
     },
     {
@@ -1330,6 +1372,14 @@
       "exports": [
         "./tooltip#NeuTooltipDirective",
         "./tooltip#NeuTooltipPosition"
+      ]
+    },
+    {
+      "entrypoint": "./tour",
+      "types": "./types/neural-ui-core-tour.d.ts",
+      "exports": [
+        "./tour#NeuTourComponent",
+        "./tour#NeuTourStep"
       ]
     },
     {
@@ -12990,6 +13040,317 @@
       ]
     },
     {
+      "id": "./filter-builder#NeuFilterBuilderComponent",
+      "entrypoint": "./filter-builder",
+      "name": "NeuFilterBuilderComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-filter-builder",
+      "signature": "export declare class NeuFilterBuilderComponent<F extends string> {\n}",
+      "members": [
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.input:commit",
+          "name": "commit",
+          "kind": "input",
+          "publicName": "commit",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly commit: import(\"@angular/core\").InputSignal<\"explicit\" | \"immediate\">;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.input:editor",
+          "name": "editor",
+          "kind": "input",
+          "publicName": "editor",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly editor: import(\"@angular/core\").InputSignal<TemplateRef<NeuFilterBuilderEditorContext<F>> | null>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.input:fields",
+          "name": "fields",
+          "kind": "input",
+          "publicName": "fields",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly fields: import(\"@angular/core\").InputSignal<readonly NeuFilterBuilderField<F>[]>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.input:labels",
+          "name": "labels",
+          "kind": "input",
+          "publicName": "labels",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly labels: import(\"@angular/core\").InputSignal<Partial<NeuFilterBuilderLabels>>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.input:value",
+          "name": "value",
+          "kind": "input",
+          "publicName": "value",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: import(\"@angular/core\").InputSignal<NeuFilterExpression<F> | null>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.output:valueChange",
+          "name": "valueChange",
+          "kind": "output",
+          "publicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly valueChange: import(\"@angular/core\").OutputEmitterRef<NeuFilterExpression<F> | null>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuFilterBuilderComponent<any>, \"neu-filter-builder\", never, {\n    \"fields\": {\n        \"alias\": \"fields\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"commit\": {\n        \"alias\": \"commit\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"labels\": {\n        \"alias\": \"labels\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"editor\": {\n        \"alias\": \"editor\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"valueChange\": \"valueChange\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuFilterBuilderComponent<any>, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderEditorContext",
+      "entrypoint": "./filter-builder",
+      "name": "NeuFilterBuilderEditorContext",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuFilterBuilderEditorContext<F extends string> {\n}",
+      "members": [
+        {
+          "id": "./filter-builder#NeuFilterBuilderEditorContext.property:$implicit",
+          "name": "$implicit",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly $implicit: NeuFilterConstraint<F>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderEditorContext.property:field",
+          "name": "field",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly field: NeuFilterBuilderField<F> | undefined;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderEditorContext.property:readonly",
+          "name": "readonly",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: boolean;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderEditorContext.property:setValue",
+          "name": "setValue",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly setValue: (value: unknown) => void;"
+        }
+      ]
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderField",
+      "entrypoint": "./filter-builder",
+      "name": "NeuFilterBuilderField",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuFilterBuilderField<F extends string> {\n}",
+      "members": [
+        {
+          "id": "./filter-builder#NeuFilterBuilderField.property:field",
+          "name": "field",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly field: F;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderField.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderField.property:rules",
+          "name": "rules",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rules?: readonly NeuFilterConstraint<F>['rule'][];"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderField.property:type",
+          "name": "type",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly type?: 'text' | 'number';"
+        }
+      ]
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderLabels",
+      "entrypoint": "./filter-builder",
+      "name": "NeuFilterBuilderLabels",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuFilterBuilderLabels {\n}",
+      "members": [
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:addCondition",
+          "name": "addCondition",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly addCondition: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:addGroup",
+          "name": "addGroup",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly addGroup: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:all",
+          "name": "all",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly all: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:any",
+          "name": "any",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly any: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:apply",
+          "name": "apply",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly apply: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:field",
+          "name": "field",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly field: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:group",
+          "name": "group",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly group: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:invalidValue",
+          "name": "invalidValue",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalidValue: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:operator",
+          "name": "operator",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly operator: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:remove",
+          "name": "remove",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly remove: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:reset",
+          "name": "reset",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly reset: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:root",
+          "name": "root",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly root: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:rule",
+          "name": "rule",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rule: string;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:rules",
+          "name": "rules",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly rules: Record<NeuFilterConstraint<string>['rule'], string>;"
+        },
+        {
+          "id": "./filter-builder#NeuFilterBuilderLabels.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: string;"
+        }
+      ]
+    },
+    {
       "id": "./focus-trap#NeuFocusTrapDirective",
       "entrypoint": "./focus-trap",
       "name": "NeuFocusTrapDirective",
@@ -23427,6 +23788,186 @@
       ]
     },
     {
+      "id": "./mention#NeuMentionComponent",
+      "entrypoint": "./mention",
+      "name": "NeuMentionComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-mention",
+      "signature": "export declare class NeuMentionComponent implements FormValueControl<string> {\n}",
+      "members": [
+        {
+          "id": "./mention#NeuMentionComponent.input:disabled",
+          "name": "disabled",
+          "kind": "input",
+          "publicName": "disabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:label",
+          "name": "label",
+          "kind": "input",
+          "publicName": "label",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly required: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:suggestions",
+          "name": "suggestions",
+          "kind": "input",
+          "publicName": "suggestions",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestions: import(\"@angular/core\").InputSignal<readonly NeuMentionSuggestion[]>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.input:suggestionsLabel",
+          "name": "suggestionsLabel",
+          "kind": "input",
+          "publicName": "suggestionsLabel",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestionsLabel: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: import(\"@angular/core\").ModelSignal<string>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.output:queryChange",
+          "name": "queryChange",
+          "kind": "output",
+          "publicName": "queryChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly queryChange: import(\"@angular/core\").OutputEmitterRef<string | null>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.output:suggestionSelected",
+          "name": "suggestionSelected",
+          "kind": "output",
+          "publicName": "suggestionSelected",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly suggestionSelected: import(\"@angular/core\").OutputEmitterRef<NeuMentionSuggestion>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuMentionComponent, \"neu-mention\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"suggestions\": {\n        \"alias\": \"suggestions\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"suggestionsLabel\": {\n        \"alias\": \"suggestionsLabel\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"queryChange\": \"queryChange\";\n    \"suggestionSelected\": \"suggestionSelected\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./mention#NeuMentionComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuMentionComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./mention#NeuMentionSuggestion",
+      "entrypoint": "./mention",
+      "name": "NeuMentionSuggestion",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuMentionSuggestion {\n}",
+      "members": [
+        {
+          "id": "./mention#NeuMentionSuggestion.property:label",
+          "name": "label",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: string;"
+        },
+        {
+          "id": "./mention#NeuMentionSuggestion.property:value",
+          "name": "value",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: string;"
+        }
+      ]
+    },
+    {
       "id": "./menu-shared#NeuMenuItem",
       "entrypoint": "./menu-shared",
       "name": "NeuMenuItem",
@@ -27695,6 +28236,232 @@
       ]
     },
     {
+      "id": "./phone-input#createNeuPhoneInputValue",
+      "entrypoint": "./phone-input",
+      "name": "createNeuPhoneInputValue",
+      "kind": "function",
+      "status": "SUPPORTED",
+      "signature": "export declare function createNeuPhoneInputValue(raw: string, region: NeuPhoneRegion): NeuPhoneInputValue | null;",
+      "members": []
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent",
+      "entrypoint": "./phone-input",
+      "name": "NeuPhoneInputComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-phone-input",
+      "signature": "export declare class NeuPhoneInputComponent implements FormValueControl<NeuPhoneInputValue | null> {\n}",
+      "members": [
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:defaultRegion",
+          "name": "defaultRegion",
+          "kind": "input",
+          "publicName": "defaultRegion",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly defaultRegion: import(\"@angular/core\").InputSignal<import(\"libphonenumber-js/max\").CountryCode>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:disabled",
+          "name": "disabled",
+          "kind": "input",
+          "publicName": "disabled",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly disabled: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:errorMessage",
+          "name": "errorMessage",
+          "kind": "input",
+          "publicName": "errorMessage",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errorMessage: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:errors",
+          "name": "errors",
+          "kind": "input",
+          "publicName": "errors",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly errors: import(\"@angular/core\").InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:hidden",
+          "name": "hidden",
+          "kind": "input",
+          "publicName": "hidden",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hidden: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:hint",
+          "name": "hint",
+          "kind": "input",
+          "publicName": "hint",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly hint: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:invalid",
+          "name": "invalid",
+          "kind": "input",
+          "publicName": "invalid",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly invalid: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:label",
+          "name": "label",
+          "kind": "input",
+          "publicName": "label",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly label: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:name",
+          "name": "name",
+          "kind": "input",
+          "publicName": "name",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly name: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.input:required",
+          "name": "required",
+          "kind": "input",
+          "publicName": "required",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly required: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.method:focus",
+          "name": "focus",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "focus(options?: FocusOptions): void;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.method:reset",
+          "name": "reset",
+          "kind": "method",
+          "static": false,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "reset(): void;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.model:value",
+          "name": "value",
+          "kind": "model",
+          "publicName": "value",
+          "changePublicName": "valueChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly value: import(\"@angular/core\").ModelSignal<NeuPhoneInputValue | null>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.output:touch",
+          "name": "touch",
+          "kind": "output",
+          "publicName": "touch",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuPhoneInputComponent, \"neu-phone-input\", never, {\n    \"value\": {\n        \"alias\": \"value\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"defaultRegion\": {\n        \"alias\": \"defaultRegion\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"label\": {\n        \"alias\": \"label\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"name\": {\n        \"alias\": \"name\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hint\": {\n        \"alias\": \"hint\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errorMessage\": {\n        \"alias\": \"errorMessage\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"disabled\": {\n        \"alias\": \"disabled\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"hidden\": {\n        \"alias\": \"hidden\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"invalid\": {\n        \"alias\": \"invalid\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"required\": {\n        \"alias\": \"required\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"errors\": {\n        \"alias\": \"errors\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"value\": \"valueChange\";\n    \"touch\": \"touch\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuPhoneInputComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputValue",
+      "entrypoint": "./phone-input",
+      "name": "NeuPhoneInputValue",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "export interface NeuPhoneInputValue {\n}",
+      "members": [
+        {
+          "id": "./phone-input#NeuPhoneInputValue.property:e164",
+          "name": "e164",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly e164: string | null;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputValue.property:raw",
+          "name": "raw",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly raw: string;"
+        },
+        {
+          "id": "./phone-input#NeuPhoneInputValue.property:region",
+          "name": "region",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly region: NeuPhoneRegion;"
+        }
+      ]
+    },
+    {
+      "id": "./phone-input#NeuPhoneRegion",
+      "entrypoint": "./phone-input",
+      "name": "NeuPhoneRegion",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "export type NeuPhoneRegion = CountryCode;",
+      "members": []
+    },
+    {
       "id": "./pick-list#NeuListLocation",
       "entrypoint": "./pick-list",
       "name": "NeuListLocation",
@@ -30653,6 +31420,173 @@
           "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuRippleDirective, never>;"
         }
       ]
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-scheduler",
+      "signature": "export declare class NeuSchedulerComponent {\n}",
+      "members": [
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:date",
+          "name": "date",
+          "kind": "input",
+          "publicName": "date",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly date: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:events",
+          "name": "events",
+          "kind": "input",
+          "publicName": "events",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly events: import(\"@angular/core\").InputSignal<readonly NeuSchedulerEvent[]>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:readonly",
+          "name": "readonly",
+          "kind": "input",
+          "publicName": "readonly",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:timeZone",
+          "name": "timeZone",
+          "kind": "input",
+          "publicName": "timeZone",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly timeZone: import(\"@angular/core\").InputSignal<string>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.input:view",
+          "name": "view",
+          "kind": "input",
+          "publicName": "view",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly view: import(\"@angular/core\").InputSignal<NeuSchedulerView>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.output:dateChange",
+          "name": "dateChange",
+          "kind": "output",
+          "publicName": "dateChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dateChange: import(\"@angular/core\").OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.output:eventChange",
+          "name": "eventChange",
+          "kind": "output",
+          "publicName": "eventChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly eventChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerEventProposal>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.output:viewChange",
+          "name": "viewChange",
+          "kind": "output",
+          "publicName": "viewChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly viewChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerView>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuSchedulerComponent, \"neu-scheduler\", never, {\n    \"date\": {\n        \"alias\": \"date\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"timeZone\": {\n        \"alias\": \"timeZone\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"view\": {\n        \"alias\": \"view\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"events\": {\n        \"alias\": \"events\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"readonly\": {\n        \"alias\": \"readonly\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"dateChange\": \"dateChange\";\n    \"viewChange\": \"viewChange\";\n    \"eventChange\": \"eventChange\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuSchedulerComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./scheduler#NeuSchedulerEvent",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerEvent",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "export interface NeuSchedulerEvent {\n}",
+      "members": [
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:end",
+          "name": "end",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly end: number;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:id",
+          "name": "id",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly id: string;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:start",
+          "name": "start",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly start: number;"
+        },
+        {
+          "id": "./scheduler#NeuSchedulerEvent.property:title",
+          "name": "title",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly title: string;"
+        }
+      ]
+    },
+    {
+      "id": "./scheduler#NeuSchedulerEventProposal",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerEventProposal",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "export type NeuSchedulerEventProposal = {\n    readonly kind: 'create';\n    readonly event: Omit<NeuSchedulerEvent, 'id'>;\n} | {\n    readonly kind: 'update';\n    readonly id: string;\n    readonly event: Omit<NeuSchedulerEvent, 'id'>;\n};",
+      "members": []
+    },
+    {
+      "id": "./scheduler#NeuSchedulerView",
+      "entrypoint": "./scheduler",
+      "name": "NeuSchedulerView",
+      "kind": "type",
+      "status": "SUPPORTED",
+      "signature": "export type NeuSchedulerView = 'day' | 'week';",
+      "members": []
     },
     {
       "id": "./scroll-top#NeuScrollTopBehavior",
@@ -40508,6 +41442,40 @@
       ]
     },
     {
+      "id": "./testing#NeuMenuHarness",
+      "entrypoint": "./testing",
+      "name": "NeuMenuHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuMenuHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuMenuHarness.method:clickItem",
+          "name": "clickItem",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "clickItem(text: string | RegExp): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuMenuHarness.method:getItemTexts",
+          "name": "getItemTexts",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getItemTexts(): Promise<string[]>;"
+        },
+        {
+          "id": "./testing#NeuMenuHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
+        }
+      ]
+    },
+    {
       "id": "./testing#NeuSelectHarness",
       "entrypoint": "./testing",
       "name": "NeuSelectHarness",
@@ -40666,6 +41634,48 @@
       ]
     },
     {
+      "id": "./testing#NeuTabsHarness",
+      "entrypoint": "./testing",
+      "name": "NeuTabsHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuTabsHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuTabsHarness.method:getActiveTabText",
+          "name": "getActiveTabText",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getActiveTabText(): Promise<string | null>;"
+        },
+        {
+          "id": "./testing#NeuTabsHarness.method:getTabTexts",
+          "name": "getTabTexts",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getTabTexts(): Promise<string[]>;"
+        },
+        {
+          "id": "./testing#NeuTabsHarness.method:selectTab",
+          "name": "selectTab",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "selectTab(text: string | RegExp): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTabsHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
+        }
+      ]
+    },
+    {
       "id": "./testing#NeuTextHarnessFilters",
       "entrypoint": "./testing",
       "name": "NeuTextHarnessFilters",
@@ -40680,6 +41690,122 @@
           "static": false,
           "status": "SUPPORTED",
           "signature": "text?: string | RegExp;"
+        }
+      ]
+    },
+    {
+      "id": "./testing#NeuTreeSelectHarness",
+      "entrypoint": "./testing",
+      "name": "NeuTreeSelectHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuTreeSelectHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:close",
+          "name": "close",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "close(): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:getNodeTexts",
+          "name": "getNodeTexts",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getNodeTexts(): Promise<string[]>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:getValueText",
+          "name": "getValueText",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getValueText(): Promise<string>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:isOpen",
+          "name": "isOpen",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "isOpen(): Promise<boolean>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:open",
+          "name": "open",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "open(): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:selectNode",
+          "name": "selectNode",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "selectNode(text: string | RegExp): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.method:setNodeExpanded",
+          "name": "setNodeExpanded",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "setNodeExpanded(text: string | RegExp, expanded: boolean): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeSelectHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
+        }
+      ]
+    },
+    {
+      "id": "./testing#NeuTreeTableHarness",
+      "entrypoint": "./testing",
+      "name": "NeuTreeTableHarness",
+      "kind": "class",
+      "status": "SUPPORTED",
+      "signature": "export declare class NeuTreeTableHarness extends ComponentHarness {\n}",
+      "members": [
+        {
+          "id": "./testing#NeuTreeTableHarness.method:getCellText",
+          "name": "getCellText",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getCellText(row: number, column: number): Promise<string>;"
+        },
+        {
+          "id": "./testing#NeuTreeTableHarness.method:getRowCount",
+          "name": "getRowCount",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "getRowCount(): Promise<number>;"
+        },
+        {
+          "id": "./testing#NeuTreeTableHarness.method:setRowExpanded",
+          "name": "setRowExpanded",
+          "kind": "method",
+          "static": false,
+          "status": "REVIEW",
+          "signature": "setRowExpanded(row: number, expanded: boolean): Promise<void>;"
+        },
+        {
+          "id": "./testing#NeuTreeTableHarness.property:hostSelector",
+          "name": "hostSelector",
+          "kind": "property",
+          "static": true,
+          "status": "REVIEW",
+          "signature": "static hostSelector: string;"
         }
       ]
     },
@@ -42664,6 +43790,137 @@
       "status": "SUPPORTED",
       "signature": "type NeuTooltipPosition = 'top' | 'bottom' | 'left' | 'right';",
       "members": []
+    },
+    {
+      "id": "./tour#NeuTourComponent",
+      "entrypoint": "./tour",
+      "name": "NeuTourComponent",
+      "kind": "component",
+      "status": "SUPPORTED",
+      "selector": "neu-tour",
+      "signature": "export declare class NeuTourComponent {\n}",
+      "members": [
+        {
+          "id": "./tour#NeuTourComponent.input:index",
+          "name": "index",
+          "kind": "input",
+          "publicName": "index",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly index: import(\"@angular/core\").InputSignal<number>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.input:open",
+          "name": "open",
+          "kind": "input",
+          "publicName": "open",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly open: import(\"@angular/core\").InputSignal<boolean>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.input:steps",
+          "name": "steps",
+          "kind": "input",
+          "publicName": "steps",
+          "required": true,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly steps: import(\"@angular/core\").InputSignal<readonly NeuTourStep[]>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:completed",
+          "name": "completed",
+          "kind": "output",
+          "publicName": "completed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly completed: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:dismissed",
+          "name": "dismissed",
+          "kind": "output",
+          "publicName": "dismissed",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly dismissed: import(\"@angular/core\").OutputEmitterRef<void>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:indexChange",
+          "name": "indexChange",
+          "kind": "output",
+          "publicName": "indexChange",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly indexChange: import(\"@angular/core\").OutputEmitterRef<number>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.output:targetMissing",
+          "name": "targetMissing",
+          "kind": "output",
+          "publicName": "targetMissing",
+          "required": false,
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetMissing: import(\"@angular/core\").OutputEmitterRef<string>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.property:ɵcmp",
+          "name": "ɵcmp",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵcmp: i0.ɵɵComponentDeclaration<NeuTourComponent, \"neu-tour\", never, {\n    \"steps\": {\n        \"alias\": \"steps\";\n        \"required\": true;\n        \"isSignal\": true;\n    };\n    \"index\": {\n        \"alias\": \"index\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n    \"open\": {\n        \"alias\": \"open\";\n        \"required\": false;\n        \"isSignal\": true;\n    };\n}, {\n    \"indexChange\": \"indexChange\";\n    \"dismissed\": \"dismissed\";\n    \"completed\": \"completed\";\n    \"targetMissing\": \"targetMissing\";\n}, never, never, true, never>;"
+        },
+        {
+          "id": "./tour#NeuTourComponent.property:ɵfac",
+          "name": "ɵfac",
+          "kind": "property",
+          "static": true,
+          "status": "INTERNAL/UNSUPPORTED",
+          "signature": "static ɵfac: i0.ɵɵFactoryDeclaration<NeuTourComponent, never>;"
+        }
+      ]
+    },
+    {
+      "id": "./tour#NeuTourStep",
+      "entrypoint": "./tour",
+      "name": "NeuTourStep",
+      "kind": "interface",
+      "status": "SUPPORTED",
+      "signature": "interface NeuTourStep {\n}",
+      "members": [
+        {
+          "id": "./tour#NeuTourStep.property:description",
+          "name": "description",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly description: string;"
+        },
+        {
+          "id": "./tour#NeuTourStep.property:targetId",
+          "name": "targetId",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly targetId: string;"
+        },
+        {
+          "id": "./tour#NeuTourStep.property:title",
+          "name": "title",
+          "kind": "property",
+          "static": false,
+          "status": "SUPPORTED",
+          "signature": "readonly title: string;"
+        }
+      ]
     },
     {
       "id": "./tree-select#NeuOptionAccessor",
@@ -53833,6 +55090,90 @@
       "signature": "readonly filterChange: import(\"@angular/core\").OutputEmitterRef<NeuFilterChip[]>;"
     },
     {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:commit",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "commit",
+      "publicName": "commit",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly commit: import(\"@angular/core\").InputSignal<\"explicit\" | \"immediate\">;"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:editor",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "editor",
+      "publicName": "editor",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly editor: import(\"@angular/core\").InputSignal<TemplateRef<NeuFilterBuilderEditorContext<F>> | null>;"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:fields",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "fields",
+      "publicName": "fields",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly fields: import(\"@angular/core\").InputSignal<readonly NeuFilterBuilderField<F>[]>;"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:labels",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "labels",
+      "publicName": "labels",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly labels: import(\"@angular/core\").InputSignal<Partial<NeuFilterBuilderLabels>>;"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:readonly",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:value",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "value",
+      "publicName": "value",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: import(\"@angular/core\").InputSignal<NeuFilterExpression<F> | null>;"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.output:valueChange",
+      "entrypoint": "./filter-builder",
+      "declaration": "NeuFilterBuilderComponent",
+      "selector": "neu-filter-builder",
+      "propertyName": "valueChange",
+      "publicName": "valueChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly valueChange: import(\"@angular/core\").OutputEmitterRef<NeuFilterExpression<F> | null>;"
+    },
+    {
       "id": "./focus-trap#NeuFocusTrapDirective.input:neuFocusTrap",
       "entrypoint": "./focus-trap",
       "declaration": "NeuFocusTrapDirective",
@@ -57728,6 +59069,139 @@
       "signature": "readonly mobileActiveChange: import(\"@angular/core\").OutputEmitterRef<boolean>;"
     },
     {
+      "id": "./mention#NeuMentionComponent.input:disabled",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "disabled",
+      "publicName": "disabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly disabled: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:invalid",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:label",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "label",
+      "publicName": "label",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly label: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:readonly",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:required",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly required: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestions",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "suggestions",
+      "publicName": "suggestions",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestions: import(\"@angular/core\").InputSignal<readonly NeuMentionSuggestion[]>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestionsLabel",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "suggestionsLabel",
+      "publicName": "suggestionsLabel",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestionsLabel: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.model:value",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: import(\"@angular/core\").ModelSignal<string>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:queryChange",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "queryChange",
+      "publicName": "queryChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly queryChange: import(\"@angular/core\").OutputEmitterRef<string | null>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:suggestionSelected",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "suggestionSelected",
+      "publicName": "suggestionSelected",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly suggestionSelected: import(\"@angular/core\").OutputEmitterRef<NeuMentionSuggestion>;"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:touch",
+      "entrypoint": "./mention",
+      "declaration": "NeuMentionComponent",
+      "selector": "neu-mention",
+      "propertyName": "touch",
+      "publicName": "touch",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
       "id": "./menu-tiered#NeuTieredMenuComponent.input:ariaLabel",
       "entrypoint": "./menu-tiered",
       "declaration": "NeuTieredMenuComponent",
@@ -59362,6 +60836,163 @@
       "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
     },
     {
+      "id": "./phone-input#NeuPhoneInputComponent.input:defaultRegion",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "defaultRegion",
+      "publicName": "defaultRegion",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly defaultRegion: import(\"@angular/core\").InputSignal<import(\"libphonenumber-js/max\").CountryCode>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:disabled",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "disabled",
+      "publicName": "disabled",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly disabled: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:errorMessage",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "errorMessage",
+      "publicName": "errorMessage",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errorMessage: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:errors",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "errors",
+      "publicName": "errors",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly errors: import(\"@angular/core\").InputSignal<readonly ValidationError.WithOptionalFieldTree[]>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:hidden",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "hidden",
+      "publicName": "hidden",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hidden: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:hint",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "hint",
+      "publicName": "hint",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly hint: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:invalid",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "invalid",
+      "publicName": "invalid",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly invalid: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:label",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "label",
+      "publicName": "label",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly label: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:name",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "name",
+      "publicName": "name",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly name: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:readonly",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:required",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "required",
+      "publicName": "required",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly required: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.model:value",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "value",
+      "publicName": "value",
+      "changePublicName": "valueChange",
+      "kind": "model",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly value: import(\"@angular/core\").ModelSignal<NeuPhoneInputValue | null>;"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.output:touch",
+      "entrypoint": "./phone-input",
+      "declaration": "NeuPhoneInputComponent",
+      "selector": "neu-phone-input",
+      "propertyName": "touch",
+      "publicName": "touch",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly touch: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
       "id": "./pick-list#NeuOrderListComponent.input:ariaLabel",
       "entrypoint": "./pick-list",
       "declaration": "NeuOrderListComponent",
@@ -60887,6 +62518,102 @@
       "required": false,
       "status": "SUPPORTED",
       "signature": "readonly neuRippleDuration: import(\"@angular/core\").InputSignalWithTransform<number, unknown>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:date",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "date",
+      "publicName": "date",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly date: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:events",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "events",
+      "publicName": "events",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly events: import(\"@angular/core\").InputSignal<readonly NeuSchedulerEvent[]>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:readonly",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "readonly",
+      "publicName": "readonly",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly readonly: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:timeZone",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "timeZone",
+      "publicName": "timeZone",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly timeZone: import(\"@angular/core\").InputSignal<string>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:view",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "view",
+      "publicName": "view",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly view: import(\"@angular/core\").InputSignal<NeuSchedulerView>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:dateChange",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "dateChange",
+      "publicName": "dateChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dateChange: import(\"@angular/core\").OutputEmitterRef<string>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:eventChange",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "eventChange",
+      "publicName": "eventChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly eventChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerEventProposal>;"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:viewChange",
+      "entrypoint": "./scheduler",
+      "declaration": "NeuSchedulerComponent",
+      "selector": "neu-scheduler",
+      "propertyName": "viewChange",
+      "publicName": "viewChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly viewChange: import(\"@angular/core\").OutputEmitterRef<NeuSchedulerView>;"
     },
     {
       "id": "./scroll-top#NeuScrollTopComponent.input:behavior",
@@ -64866,6 +66593,90 @@
       "signature": "readonly neuTooltipPosition: import(\"@angular/core\").InputSignal<NeuTooltipPosition>;"
     },
     {
+      "id": "./tour#NeuTourComponent.input:index",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "index",
+      "publicName": "index",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly index: import(\"@angular/core\").InputSignal<number>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:open",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "open",
+      "publicName": "open",
+      "kind": "input",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly open: import(\"@angular/core\").InputSignal<boolean>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:steps",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "steps",
+      "publicName": "steps",
+      "kind": "input",
+      "required": true,
+      "status": "SUPPORTED",
+      "signature": "readonly steps: import(\"@angular/core\").InputSignal<readonly NeuTourStep[]>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:completed",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "completed",
+      "publicName": "completed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly completed: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:dismissed",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "dismissed",
+      "publicName": "dismissed",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly dismissed: import(\"@angular/core\").OutputEmitterRef<void>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:indexChange",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "indexChange",
+      "publicName": "indexChange",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly indexChange: import(\"@angular/core\").OutputEmitterRef<number>;"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:targetMissing",
+      "entrypoint": "./tour",
+      "declaration": "NeuTourComponent",
+      "selector": "neu-tour",
+      "propertyName": "targetMissing",
+      "publicName": "targetMissing",
+      "kind": "output",
+      "required": false,
+      "status": "SUPPORTED",
+      "signature": "readonly targetMissing: import(\"@angular/core\").OutputEmitterRef<string>;"
+    },
+    {
       "id": "./tree-select#NeuTreeSelectComponent.input:clearable",
       "entrypoint": "./tree-select",
       "declaration": "NeuTreeSelectComponent",
@@ -66874,33 +68685,33 @@
     "--neu-z-toast"
   ],
   "summary": {
-    "entrypoints": 101,
-    "exportedDeclarations": 877,
+    "entrypoints": 106,
+    "exportedDeclarations": 897,
     "declarationKinds": {
-      "class": 15,
-      "component": 96,
+      "class": 19,
+      "component": 101,
       "directive": 119,
-      "function": 56,
-      "interface": 280,
+      "function": 57,
+      "interface": 287,
       "reexport": 48,
       "service": 12,
       "token": 5,
-      "type": 199,
+      "type": 202,
       "variable": 47
     },
-    "publicSymbols": 5333,
+    "publicSymbols": 5467,
     "statuses": {
-      "SUPPORTED": 3357,
+      "SUPPORTED": 3458,
       "COMPATIBILITY": 0,
       "DEPRECATED": 0,
-      "INTERNAL/UNSUPPORTED": 1976,
-      "REVIEW": 0
+      "INTERNAL/UNSUPPORTED": 1990,
+      "REVIEW": 19
     },
     "bindings": {
-      "input": 1230,
-      "output": 228,
-      "model": 24,
-      "total": 1482
+      "input": 1262,
+      "output": 240,
+      "model": 26,
+      "total": 1528
     },
     "designTokens": 251
   }

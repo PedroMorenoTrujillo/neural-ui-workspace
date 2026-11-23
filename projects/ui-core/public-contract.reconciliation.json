@@ -4,17 +4,17 @@
   "newSchemaVersion": 2,
   "summary": {
     "oldBindings": 1167,
-    "declarationBindings": 1482,
-    "bindingDelta": 315,
+    "declarationBindings": 1528,
+    "bindingDelta": 361,
     "mapped": 618,
     "aliasCorrections": 3,
     "missingOldEntries": 543,
-    "newlyDiscovered": 858,
+    "newlyDiscovered": 904,
     "ambiguities": 6,
     "discoveryReasons": {
       "compound-declaration-collision-hidden-by-file-oriented-snapshot": 6,
-      "declaration-or-selector-was-not-recorded": 432,
-      "model-binding-was-not-supported": 24,
+      "declaration-or-selector-was-not-recorded": 476,
+      "model-binding-was-not-supported": 26,
       "multiline-annotated-or-compound-declaration-was-missed": 396
     }
   },
@@ -3814,6 +3814,34 @@
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
     },
     {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:commit",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:editor",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:fields",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:labels",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.input:value",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./filter-builder#NeuFilterBuilderComponent.output:valueChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./form-field#NeuInputGroupComponent.input:size",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4642,6 +4670,50 @@
       "reason": "declaration-or-selector-was-not-recorded"
     },
     {
+      "id": "./mention#NeuMentionComponent.input:disabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:invalid",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:label",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:required",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestions",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.input:suggestionsLabel",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:queryChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:suggestionSelected",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./mention#NeuMentionComponent.output:touch",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
       "id": "./menu-tiered#NeuTieredMenuComponent.input:ariaLabel",
       "reason": "declaration-or-selector-was-not-recorded"
     },
@@ -4948,6 +5020,58 @@
     {
       "id": "./password#NeuPasswordComponent.output:touch",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:defaultRegion",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:disabled",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:errorMessage",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:errors",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:hidden",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:hint",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:invalid",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:label",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:name",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.input:required",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.model:value",
+      "reason": "model-binding-was-not-supported"
+    },
+    {
+      "id": "./phone-input#NeuPhoneInputComponent.output:touch",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./pick-list#NeuOrderListComponent.input:ariaLabel",
@@ -5292,6 +5416,38 @@
     {
       "id": "./rich-text-editor#NeuRichTextEditorComponent.output:valueCommitted",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:date",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:events",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:readonly",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:timeZone",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.input:view",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:dateChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:eventChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./scheduler#NeuSchedulerComponent.output:viewChange",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./scroll-top#NeuScrollTopComponent.input:behavior",
@@ -6072,6 +6228,34 @@
     {
       "id": "./toolbar#NeuToolbarComponent.input:variant",
       "reason": "multiline-annotated-or-compound-declaration-was-missed"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:index",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:open",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.input:steps",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:completed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:dismissed",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:indexChange",
+      "reason": "declaration-or-selector-was-not-recorded"
+    },
+    {
+      "id": "./tour#NeuTourComponent.output:targetMissing",
+      "reason": "declaration-or-selector-was-not-recorded"
     },
     {
       "id": "./tree-select#NeuTreeSelectComponent.input:clearable",

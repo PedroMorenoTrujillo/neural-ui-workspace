@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  min-inline-size: 0;
+  container-type: inline-size;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+legend {
+  font-weight: 600;
+  padding: 0;
+}
+
+.neu-phone-input__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 0.75rem;
+  margin-block-start: 0.6rem;
+}
+
+.neu-phone-input__controls > * {
+  min-inline-size: 0;
+}
+
+@container (max-width: 32rem) {
+  .neu-phone-input__controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

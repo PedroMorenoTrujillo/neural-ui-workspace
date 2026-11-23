@@ -1,0 +1,38 @@
+<label class="neu-mention__label" [for]="inputId">{{ label() }}</label>
+<textarea
+  #field
+  class="neu-mention__field"
+  rows="4"
+  [id]="inputId"
+  [value]="value()"
+  [disabled]="disabled()"
+  [readOnly]="readonly()"
+  [required]="required()"
+  [attr.aria-invalid]="invalid() ? 'true' : null"
+  [attr.aria-autocomplete]="disabled() || readonly() ? null : 'list'"
+  [attr.aria-controls]="matching().length ? listId : null"
+  [attr.aria-activedescendant]="activeOption() >= 0 ? listId + '-' + activeOption() : null"
+  (input)="handleInput($event)"
+  (click)="readCaret()"
+  (select)="readCaret()"
+  (keydown)="onKeydown($event)"
+  (keyup)="onKeyup($event)"
+  (compositionstart)="startComposition()"
+  (compositionend)="endComposition($event)"
+  (blur)="blur()"
+></textarea>
+@if (matching().length) {
+  <ul class="neu-mention__suggestions" role="listbox" [id]="listId" [attr.aria-label]="suggestionsLabel()">
+    @for (item of matching(); track item.value; let index = $index) {
+      <li
+        class="neu-mention__option"
+        role="option"
+        [id]="listId + '-' + index"
+        [attr.aria-selected]="index === activeOption()"
+        (pointerdown)="$event.preventDefault()"
+        (mousedown)="$event.preventDefault()"
+        (click)="choose(item)"
+      >{{ item.label }}</li>
+    }
+  </ul>
+}
