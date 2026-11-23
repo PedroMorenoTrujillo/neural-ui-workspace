@@ -177,4 +177,47 @@ describe('NeuTourComponent target resizing', () => {
       document.defaultView!.ResizeObserver = original;
     }
   });
+
+  it('scrolls an obscured target back into view when the viewport resizes', async () => {
+    const document = TestBed.inject(DOCUMENT);
+    const window = document.defaultView!;
+    const fixture = TestBed.createComponent(NeuTourComponent);
+    const target = document.createElement('button');
+    target.id = 'tour-viewport-target';
+    document.body.append(target);
+    const scroll = vi.fn();
+    target.scrollIntoView = scroll;
+    const geometry = vi.spyOn(target, 'getBoundingClientRect').mockReturnValue(new DOMRect(20, 30, 40, 40));
+    fixture.componentRef.setInput('steps', [
+      { title: 'Target', description: 'Description', targetId: target.id },
+    ]);
+    fixture.componentRef.setInput('open', true);
+    try {
+      await fixture.whenStable();
+      scroll.mockClear();
+      window.dispatchEvent(new Event('resize'));
+      expect(scroll).not.toHaveBeenCalled();
+
+      for (const position of [
+        new DOMRect(20, -10, 40, 40),
+        new DOMRect(20, window.innerHeight - 20, 40, 40),
+        new DOMRect(-10, 30, 40, 40),
+        new DOMRect(window.innerWidth - 20, 30, 40, 40),
+      ]) {
+        geometry.mockReturnValue(position);
+        window.dispatchEvent(new Event('resize'));
+        expect(scroll).toHaveBeenCalledExactlyOnceWith({ block: 'nearest', inline: 'nearest' });
+        scroll.mockClear();
+      }
+
+      target.remove();
+      await new Promise(resolve => setTimeout(resolve, 0));
+      await fixture.whenStable();
+      window.dispatchEvent(new Event('resize'));
+      expect(scroll).not.toHaveBeenCalled();
+    } finally {
+      fixture.destroy();
+      target.remove();
+    }
+  });
 });

@@ -163,6 +163,65 @@ describe('NeuFilterBuilderComponent', () => {
     }]);
   });
 
+  it('lets a saved filter recover after its field is removed from the schema', async () => {
+    TestBed.configureTestingModule({ providers: [{ provide: NEURAL_LOCALE, useValue: 'es-ES' }] });
+    const fixture = TestBed.createComponent(NeuFilterBuilderComponent<'retired' | 'name'>);
+    fixture.componentRef.setInput('fields', [{ field: 'name', label: 'Nombre', rules: ['in'] }]);
+    fixture.componentRef.setInput('value', {
+      kind: 'condition', field: 'retired', rule: 'in', value: [],
+    });
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    const proposals: unknown[] = [];
+    fixture.componentInstance.valueChange.subscribe(value => proposals.push(value));
+    const selects = await TestbedHarnessEnvironment.loader(fixture).getAllHarnesses(NeuSelectHarness);
+    const apply = () => {
+      [...host.querySelectorAll('button')].find(button => button.textContent?.trim() === 'Aplicar filtros')!.click();
+      fixture.detectChanges();
+    };
+
+    expect(await selects[1]!.getValueText()).toBe('retired');
+    expect(host.textContent).toContain('Valores separados por coma');
+    apply();
+    expect(proposals).toEqual([]);
+
+    await selects[1]!.selectOption('Nombre');
+    const input = host.querySelector('input')!;
+    input.value = 'Ada, , Grace';
+    input.dispatchEvent(new Event('input'));
+    apply();
+    expect(proposals).toEqual([{
+      kind: 'group', operator: 'and', children: [
+        { kind: 'condition', field: 'name', rule: 'in', value: ['Ada', 'Grace'] },
+      ],
+    }]);
+  });
+
+  it('waits for nonblank text before proposing a new immediate condition', () => {
+    const fixture = TestBed.createComponent(NeuFilterBuilderComponent<'name'>);
+    fixture.componentRef.setInput('fields', [{ field: 'name', label: 'Name', rules: ['contains'] }]);
+    fixture.componentRef.setInput('commit', 'immediate');
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    const proposals: unknown[] = [];
+    fixture.componentInstance.valueChange.subscribe(value => proposals.push(value));
+    [...host.querySelectorAll('button')].find(button => button.textContent?.trim() === 'Add condition')!.click();
+    fixture.detectChanges();
+    expect(proposals).toEqual([]);
+
+    const input = host.querySelector('input')!;
+    input.value = '  ';
+    input.dispatchEvent(new Event('input'));
+    expect(proposals).toEqual([]);
+    input.value = 'Ada';
+    input.dispatchEvent(new Event('input'));
+    expect(proposals).toEqual([{
+      kind: 'group', operator: 'and', children: [
+        { kind: 'condition', field: 'name', rule: 'contains', value: 'Ada' },
+      ],
+    }]);
+  });
+
   it('replaces field-specific comparisons and emits text lists and valueless rules', async () => {
     const { fixture, host, click } = create({
       kind: 'condition', field: 'priority', rule: 'equals', value: 5,

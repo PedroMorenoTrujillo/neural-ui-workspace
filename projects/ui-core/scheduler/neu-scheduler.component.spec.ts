@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { NEURAL_LOCALE } from '@neural-ui/core/foundation';
 import {
   NeuSchedulerComponent,
   type NeuSchedulerEventProposal,
@@ -82,5 +83,60 @@ describe('Scheduler agenda candidate', () => {
     expect(button('Add appointment')).toBeUndefined();
     expect(button('Edit')).toBeUndefined();
     expect(element.querySelector('form')).toBeNull();
+  });
+
+  it('moves by one week in Spanish and suppresses navigation for invalid calendar dates', () => {
+    TestBed.configureTestingModule({ providers: [{ provide: NEURAL_LOCALE, useValue: 'es-ES' }] });
+    const { fixture, element, button } = create('2026-11-02', 'Europe/Madrid');
+    const dates: string[] = [];
+    const views: string[] = [];
+    fixture.componentInstance.dateChange.subscribe(date => dates.push(date));
+    fixture.componentInstance.viewChange.subscribe(view => views.push(view));
+
+    button('Semana').click();
+    expect(views).toEqual(['week']);
+    fixture.componentRef.setInput('view', 'week');
+    fixture.detectChanges();
+    button('Anterior').click();
+    expect(dates).toEqual(['2026-10-26']);
+
+    fixture.componentRef.setInput('date', '2026-02-30');
+    fixture.detectChanges();
+    expect(element.querySelectorAll('section')).toHaveLength(0);
+    button('Siguiente').click();
+    expect(dates).toEqual(['2026-10-26']);
+
+    fixture.componentRef.setInput('date', '9999-12-31');
+    fixture.detectChanges();
+    expect(element.querySelectorAll('section')).toHaveLength(1);
+    button('Siguiente').click();
+    expect(dates).toEqual(['2026-10-26']);
+  });
+
+  it('keeps invalid edits from emitting proposals and restores the editor trigger on close', () => {
+    const { fixture, element, button, enter, proposals } = create('2026-11-02', 'Europe/Madrid');
+    const trigger = button('Add appointment');
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+    const form = element.querySelector('form')!;
+    const submit = () => form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    enter('text', '  ');
+    expect(submit()).toBe(false);
+    enter('text', 'Handoff');
+    enter('number', '');
+    submit();
+    enter('number', '0');
+    submit();
+    enter('number', '30');
+    enter('datetime-local', '');
+    submit();
+    expect(proposals).toEqual([]);
+
+    button('Close editor').click();
+    fixture.detectChanges();
+    expect(element.querySelector('form')).toBeNull();
+    expect(element.ownerDocument.activeElement).toBe(trigger);
   });
 });

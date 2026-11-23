@@ -82,6 +82,45 @@ describe('NeuMentionComponent', () => {
     expect(host.queries).toEqual([]);
   });
 
+  it('retargets identical queries when the caret moves and wraps upward through suggestions', () => {
+    const { fixture, host, input, options, type, key } = setup();
+    const comment = '@al @al';
+    input.focus();
+    type(comment, 3);
+    expect(host.queries).toEqual(['al']);
+
+    input.setSelectionRange(comment.length, comment.length);
+    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'End', bubbles: true }));
+    fixture.detectChanges();
+    expect(host.queries).toEqual(['al', 'al']);
+
+    const modifiedArrow = new KeyboardEvent('keydown', { key: 'ArrowUp', shiftKey: true, cancelable: true });
+    input.dispatchEvent(modifiedArrow);
+    expect(modifiedArrow.defaultPrevented).toBe(false);
+    expect(key('ArrowUp').defaultPrevented).toBe(true);
+    expect(input.getAttribute('aria-activedescendant')).toBe(options()[1].id);
+    expect(key('Enter').defaultPrevented).toBe(true);
+    expect(host.value).toBe('@al @alicia ');
+    expect(input.ownerDocument.activeElement).toBe(input);
+  });
+
+  it('ignores an obsolete pointer choice when the caret leaves the active query', () => {
+    const { fixture, host, input, options, type } = setup();
+    type('Hi @al');
+    const suggestion = options()[0];
+
+    input.setSelectionRange(0, 0);
+    suggestion.click();
+    fixture.detectChanges();
+    expect(host.value).toBe('Hi @al');
+    expect(host.selected).toEqual([]);
+
+    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Home', bubbles: true }));
+    fixture.detectChanges();
+    expect(options()).toHaveLength(0);
+    expect(host.queries).toEqual(['al', null]);
+  });
+
   it('opens only after IME commit and accepts late application suggestions', () => {
     const { fixture, host, input, options, key } = setup();
     host.suggestions.set([]);

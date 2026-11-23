@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next release -->
 
+## [2.1.0] - 2026-11-23
+
+### Added
+
+- FilterBuilder for composing nested conditions and applying typed filter expressions.
+- Scheduler for day and week agendas and appointment proposals across time zones.
+- Mention for accepting application-provided suggestions at the message caret.
+- Tour for controlled walkthroughs anchored to page elements.
+- Phone Input for international dialing, formatting and validation.
+- Component harnesses for testing composite controls and overlays.
+
 ## [2.0.10] - 2026-11-18
 
 ### Fixed
