@@ -2,6 +2,7 @@ import {
   BaseHarnessFilters,
   ComponentHarness,
   HarnessPredicate,
+  TestElement,
   TestKey,
 } from '@angular/cdk/testing';
 
@@ -214,4 +215,156 @@ export class NeuDialogHarness extends ComponentHarness {
     const close = await this.locatorForOptional('.neu-dialog__close')();
     if (close) await close.click();
   }
+}
+
+export class NeuMenuHarness extends ComponentHarness {
+  static hostSelector = 'neu-menu';
+  private readonly items = this.locatorForAll('button[role="menuitem"]');
+
+  async getItemTexts(): Promise<string[]> {
+    return Promise.all((await this.items()).map((item) => this.itemText(item)));
+  }
+
+  async clickItem(text: string | RegExp): Promise<void> {
+    const item = await findByText(await this.items(), (item) => this.itemText(item), text, 'menu item');
+    await item.click();
+  }
+
+  private itemText(item: TestElement): Promise<string> {
+    return item.text({ exclude: 'neu-badge, kbd, [aria-hidden="true"]' });
+  }
+}
+
+export class NeuTabsHarness extends ComponentHarness {
+  static hostSelector = 'neu-tabs';
+  private readonly tabs = this.locatorForAll(':scope > .neu-tabs > [role="tablist"] > [role="tab"]');
+
+  async getTabTexts(): Promise<string[]> {
+    return Promise.all((await this.tabs()).map((tab) => this.tabText(tab)));
+  }
+
+  async getActiveTabText(): Promise<string | null> {
+    for (const tab of await this.tabs()) {
+      if ((await tab.getAttribute('aria-selected')) === 'true') return this.tabText(tab);
+    }
+    return null;
+  }
+
+  async selectTab(text: string | RegExp): Promise<void> {
+    const tab = await findByText(await this.tabs(), (tab) => this.tabText(tab), text, 'tab');
+    await tab.click();
+  }
+
+  private tabText(tab: TestElement): Promise<string> {
+    return tab.text({ exclude: '.neu-tabs__tab-badge' });
+  }
+}
+
+export class NeuTreeSelectHarness extends ComponentHarness {
+  static hostSelector = 'neu-tree-select';
+  private readonly trigger = this.locatorFor('[aria-haspopup="tree"]');
+
+  async isOpen(): Promise<boolean> {
+    return (await (await this.trigger()).getAttribute('aria-expanded')) === 'true';
+  }
+
+  async open(): Promise<void> {
+    if (!(await this.isOpen())) await (await this.trigger()).click();
+  }
+
+  async close(): Promise<void> {
+    if (await this.isOpen()) await (await this.trigger()).sendKeys(TestKey.ESCAPE);
+  }
+
+  async getValueText(): Promise<string> {
+    return (await this.locatorFor('.neu-tree-select__value')()).text();
+  }
+
+  /** Gets the labels of the nodes currently rendered in this instance's overlay. */
+  async getNodeTexts(): Promise<string[]> {
+    return Promise.all((await this.nodes()).map((node) => this.nodeText(node)));
+  }
+
+  async selectNode(text: string | RegExp): Promise<void> {
+    await this.open();
+    const node = await findByText(await this.nodes(), (node) => this.nodeText(node), text, 'tree node');
+    await node.click();
+  }
+
+  async setNodeExpanded(text: string | RegExp, expanded: boolean): Promise<void> {
+    await this.open();
+    const node = await findByText(await this.nodes(), (node) => this.nodeText(node), text, 'tree node');
+    const current = await node.getAttribute('aria-expanded');
+    if (current === null) throw new Error(`Neural UI tree node cannot expand: ${String(text)}`);
+    if ((current === 'true') === expanded) return;
+
+    const rtl = (await (await this.host()).getCssValue('direction')) === 'rtl';
+    await node.sendKeys(expanded !== rtl ? TestKey.RIGHT_ARROW : TestKey.LEFT_ARROW);
+  }
+
+  private async nodes(): Promise<TestElement[]> {
+    const treeId = await (await this.trigger()).getAttribute('aria-controls');
+    return treeId
+      ? this.documentRootLocatorFactory().locatorForAll(`#${treeId} [role="treeitem"]`)()
+      : [];
+  }
+
+  private nodeText(node: TestElement): Promise<string> {
+    return node.text({ exclude: '[aria-hidden="true"]' });
+  }
+}
+
+export class NeuTreeTableHarness extends ComponentHarness {
+  static hostSelector = 'neu-tree-table';
+  private readonly rows = this.locatorForAll(TreeTableRowHarness);
+
+  /** Counts currently rendered data rows, excluding structural and state rows. */
+  async getRowCount(): Promise<number> {
+    return (await this.rows()).length;
+  }
+
+  async getCellText(row: number, column: number): Promise<string> {
+    return (await this.getRow(row)).getCellText(column);
+  }
+
+  async setRowExpanded(row: number, expanded: boolean): Promise<void> {
+    await (await this.getRow(row)).setExpanded(expanded);
+  }
+
+  private async getRow(row: number): Promise<TreeTableRowHarness> {
+    const selected = (await this.rows())[row];
+    if (!selected) throw new Error(`Neural UI tree table row ${row} does not exist.`);
+    return selected;
+  }
+}
+
+class TreeTableRowHarness extends ComponentHarness {
+  static hostSelector = '[role="treegrid"] > tbody > [role="row"][aria-level]';
+  private readonly cells = this.locatorForAll('[role="gridcell"]');
+  private readonly expander = this.locatorForOptional('button[aria-expanded]');
+
+  async getCellText(column: number): Promise<string> {
+    const cell = (await this.cells())[column];
+    if (!cell) throw new Error(`Neural UI tree table column ${column} does not exist.`);
+    return cell.text();
+  }
+
+  async setExpanded(expanded: boolean): Promise<void> {
+    const current = await (await this.host()).getAttribute('aria-expanded');
+    const button = await this.expander();
+    if (current === null || !button) throw new Error('Neural UI tree table row cannot expand.');
+    if ((current === 'true') !== expanded) await button.click();
+  }
+}
+
+async function findByText(
+  elements: readonly TestElement[],
+  readText: (element: TestElement) => Promise<string>,
+  text: string | RegExp,
+  kind: string,
+): Promise<TestElement> {
+  for (const element of elements) {
+    if (await HarnessPredicate.stringMatches(await readText(element), text)) return element;
+  }
+  throw new Error(`Neural UI ${kind} was not found: ${String(text)}`);
 }

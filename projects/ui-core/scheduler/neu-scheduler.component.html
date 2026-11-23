@@ -1,0 +1,62 @@
+<div class="neu-scheduler__toolbar">
+  <button neu-button size="sm" variant="outline" type="button" (click)="move(-1)">{{ labels.previous }}</button>
+  <button neu-button size="sm" variant="outline" type="button" (click)="move(1)">{{ labels.next }}</button>
+  <button neu-button size="sm" variant="outline" type="button" [attr.aria-pressed]="view() === 'day'" (click)="viewChange.emit('day')">{{ labels.day }}</button>
+  <button neu-button size="sm" variant="outline" type="button" [attr.aria-pressed]="view() === 'week'" (click)="viewChange.emit('week')">{{ labels.week }}</button>
+</div>
+
+@if (draft(); as form) {
+  @if (!readonly()) {
+    <form class="neu-scheduler__editor" (submit)="save($event)" (keydown.escape)="close()">
+      <label>
+        {{ labels.title }}
+        <input #titleInput type="text" required [value]="form.title" (input)="updateDraft('title', titleInput.value)" />
+      </label>
+      <label>
+        {{ labels.start }} {{ timeZone() }}
+        <input #startInput type="datetime-local" required [value]="form.start" (input)="updateDraft('start', startInput.value)" />
+      </label>
+      <label>
+        {{ labels.duration }}
+        <input #durationInput type="number" min="1" step="any" required [value]="form.duration" (input)="updateDraft('duration', durationInput.valueAsNumber)" />
+      </label>
+      <div class="neu-scheduler__actions">
+        <button neu-button size="sm" type="submit" [disabled]="starts().length === 0">{{ labels.save }}</button>
+        <button neu-button size="sm" variant="outline" type="button" (click)="close()">{{ labels.cancel }}</button>
+      </div>
+      @if (form.start && starts().length === 0) {
+        <div class="neu-scheduler__notice" role="status">{{ labels.gap }}</div>
+      } @else if (starts().length > 1) {
+        <div class="neu-scheduler__notice" role="status">{{ labels.overlap }}</div>
+      }
+    </form>
+  }
+}
+
+@for (day of days(); track day.date) {
+  <section class="neu-scheduler__day" [attr.aria-label]="day.label">
+    <h3>{{ day.label }}</h3>
+    @if (!readonly()) {
+      <button neu-button size="sm" variant="outline" type="button" (click)="open(day.date, null, $event.currentTarget)">
+        {{ labels.add }}
+      </button>
+    }
+    @if (day.events.length) {
+      <ul>
+        @for (entry of day.events; track entry.event.id) {
+          <li>
+            <strong>{{ entry.event.title }}</strong>
+            {{ entry.label }}
+            @if (!readonly()) {
+              <button neu-button size="sm" variant="outline" type="button" [attr.aria-label]="labels.edit + ' ' + entry.event.title" (click)="open(day.date, entry.event, $event.currentTarget)">
+                {{ labels.edit }}
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p>{{ labels.empty }}</p>
+    }
+  </section>
+}
